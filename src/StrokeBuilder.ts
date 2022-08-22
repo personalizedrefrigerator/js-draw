@@ -302,6 +302,10 @@ export default class StrokeBuilder {
 		const prevCurve = this.currentCurve;
 		this.currentCurve = new Bezier(segmentStart.xy, controlPoint.xy, segmentEnd.xy);
 
+		if (isNaN(Vec2.ofXY(this.currentCurve.normal(0)).magnitude())) {
+			console.error('NaN normal at 0. Curve:', this.currentCurve);
+			this.currentCurve = prevCurve;
+		}
 
 		// Should we start making a new curve? Check whether all buffer points are within
 		// ±strokeWidth of the curve.
