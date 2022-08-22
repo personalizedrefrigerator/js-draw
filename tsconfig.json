@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"target": "ES2015",
+		"forceConsistentCasingInFileNames": true,
+		"listEmittedFiles": false,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"strictBindCallApply": true,
+		"strictFunctionTypes": true,
+		"sourceMap": true,
+		"allowUmdGlobalAccess": true,
+		"strictNullChecks": true,
+		"esModuleInterop": true,
+		"moduleResolution": "Node",
+	},
+	"include": [
+		"**/*.ts",
+	],
+	"exclude": [
+		"**/node_modules",
+
+		// Files that don't need transpilation
+		"**/*.test.ts",
+	],
+}

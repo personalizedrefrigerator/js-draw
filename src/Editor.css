@@ -1,0 +1,36 @@
+
+:root {
+	/* Deafult colors for the editor */
+    --primary-background-color: white;
+    --primary-background-color-transparent: rgba(255, 255, 255, 0.5);
+    --secondary-background-color: #faf;
+    --primary-foreground-color: black;
+    --secondary-foreground-color: black;
+}
+
+body {
+	color: var(--primary-foreground-color);
+	font-family: system-ui, -apple-system, sans-serif;
+	background-color: var(--primary-background-color);
+}
+
+canvas {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 100vw;
+	height: 100vh;
+	touch-action: none;
+}
+
+.loadingMessage {
+	position: fixed;
+	text-align: center;
+	font-size: 2em;
+
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
