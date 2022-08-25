@@ -3,6 +3,7 @@ import CanvasRenderer from './rendering/CanvasRenderer';
 import { Editor } from './Editor';
 import { EditorEventType } from './types';
 import DummyRenderer from './rendering/DummyRenderer';
+import { Vec2 } from './geometry/Vec2';
 
 export enum RenderingMode {
 	DummyRenderer,
@@ -76,6 +77,14 @@ export default class Display {
 				dryInkCanvas.height = dryInkCanvas.clientHeight;
 				wetInkCanvas.width = wetInkCanvas.clientWidth;
 				wetInkCanvas.height = wetInkCanvas.clientHeight;
+
+				this.editor.notifier.dispatch(EditorEventType.DisplayResized, {
+					kind: EditorEventType.DisplayResized,
+					newSize: Vec2.of(
+						this.width,
+						this.height,
+					),
+				});
 			}
 		};
 		this.resizeSurfacesCallback();

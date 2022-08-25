@@ -35,7 +35,7 @@ export default class Pointer {
 	}
 
 	public static ofEvent(evt: PointerEvent, isDown: boolean, viewport: Viewport): Pointer {
-		const screenPos = Vec2.of(evt.clientX, evt.clientY);
+		const screenPos = Vec2.of(evt.offsetX, evt.offsetY);
 
 		const pointerTypeToDevice: Record<string, PointerDevice> = {
 			'mouse': PointerDevice.Mouse,

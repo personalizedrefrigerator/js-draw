@@ -214,6 +214,12 @@ export class Editor {
 			return false;
 		});
 
+		this.notifier.on(EditorEventType.DisplayResized, _event => {
+			this.viewport.updateScreenSize(
+				Vec2.of(this.display.width, this.display.height)
+			);
+		});
+
 		window.addEventListener('resize', () => {
 			this.notifier.dispatch(EditorEventType.DisplayResized, {
 				kind: EditorEventType.DisplayResized,
@@ -222,9 +228,6 @@ export class Editor {
 					this.display.height
 				),
 			});
-			this.viewport.updateScreenSize(
-				Vec2.of(this.display.width, this.display.height)
-			);
 			this.queueRerender();
 		});
 	}

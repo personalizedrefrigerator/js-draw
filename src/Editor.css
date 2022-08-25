@@ -1,5 +1,5 @@
 
-:root {
+.imageEditorContainer {
 	/* Deafult colors for the editor */
     --primary-background-color: white;
     --primary-background-color-transparent: rgba(255, 255, 255, 0.5);
@@ -8,24 +8,36 @@
     --secondary-foreground-color: black;
 }
 
-body {
+.imageEditorContainer {
 	color: var(--primary-foreground-color);
 	font-family: system-ui, -apple-system, sans-serif;
 	background-color: var(--primary-background-color);
+
+	display: flex;
+	flex-direction: column-reverse;
 }
 
-canvas {
-	position: fixed;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom: 0;
-	width: 100vw;
-	height: 100vh;
+.imageEditorContainer .imageEditorRenderArea {
+	display: grid;
+	grid-template-columns: 1fr;
+	flex-grow: 2;
+	flex-shrink: 1;
+	min-height: 100px;
+}
+
+.imageEditorContainer .imageEditorRenderArea canvas {
+	/* Stack all canvases on top of each other */
+	grid-row: 1 / 1;
+	grid-column: 1 / 1;
 	touch-action: none;
+
+	/* Fill the container */
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
 }
 
-.loadingMessage {
+.imageEditorContainer .loadingMessage {
 	position: fixed;
 	text-align: center;
 	font-size: 2em;
