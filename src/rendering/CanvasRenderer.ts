@@ -1,11 +1,15 @@
 import Color4 from '../Color4';
+import Rect2 from '../geometry/Rect2';
 import { Point2, Vec2 } from '../geometry/Vec2';
 import Vec3 from '../geometry/Vec3';
 import Viewport from '../Viewport';
-import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
+import AbstractRenderer, { RenderablePathSpec, RenderingStyle } from './AbstractRenderer';
 
 const minSquareCurveApproxDist = 25;
 export default class CanvasRenderer extends AbstractRenderer {
+	private ignoreObjectsAboveLevel: number|null = null;
+	private ignoringObject: boolean = false;
+
 	public constructor(private ctx: CanvasRenderingContext2D, viewport: Viewport) {
 		super(viewport);
 	}
@@ -79,6 +83,35 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.ctx.quadraticCurveTo(
 				controlPoint.x, controlPoint.y, endPoint.x, endPoint.y
 			);
+		}
+	}
+
+	public drawPath(path: RenderablePathSpec) {
+		if (this.ignoringObject) {
+			return;
+		}
+
+		super.drawPath(path);
+	}
+
+	public startObject(boundingBox: Rect2) {
+		// Should we ignore all objects within this object's bbox?
+		const diagonal = this.viewport.canvasToScreenTransform.transformVec3(boundingBox.size);
+		const minRenderSize = 4;
+		if (Math.abs(diagonal.x) < minRenderSize && Math.abs(diagonal.y) < minRenderSize) {
+			this.ignoreObjectsAboveLevel = this.getNestingLevel();
+			this.ignoringObject = true;
+		}
+
+		super.startObject(boundingBox);
+	}
+	public endObject() {
+		super.endObject();
+
+		// If exiting an object with a too-small-to-draw bounding box,
+		if (this.ignoreObjectsAboveLevel !== null && this.getNestingLevel() <= this.ignoreObjectsAboveLevel) {
+			this.ignoreObjectsAboveLevel = null;
+			this.ignoringObject = false;
 		}
 	}
 

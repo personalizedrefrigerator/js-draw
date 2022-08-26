@@ -141,6 +141,7 @@ export default abstract class AbstractRenderer {
 		this.currentPaths = [];
 		this.objectLevel ++;
 	}
+
 	public endObject() {
 		// Render the paths all at once
 		this.flushPath();
@@ -152,6 +153,10 @@ export default abstract class AbstractRenderer {
 				'More objects have ended than have been started (negative object nesting level)!'
 			);
 		}
+	}
+
+	protected getNestingLevel() {
+		return this.objectLevel;
 	}
 
 	// Draw a representation of [points]. Intended for debugging.
