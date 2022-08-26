@@ -138,11 +138,11 @@ export default class SVGLoader implements ImageLoader {
 			break;
 		default:
 			console.warn('Unknown SVG element,', node);
-			if (node instanceof SVGElement) {
-				this.addUnknownNode(node);
-			} else {
-				console.error('Element', node, 'is not an SVGElement!');
+			if (!(node instanceof SVGElement)) {
+				console.warn('Element', node, 'is not an SVGElement! Continuing anyway.');
 			}
+
+			this.addUnknownNode(node as SVGElement);
 			return;
 		}
 
