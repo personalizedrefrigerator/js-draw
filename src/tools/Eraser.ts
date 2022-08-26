@@ -6,6 +6,7 @@ import LineSegment2 from '../geometry/LineSegment2';
 import Erase from '../commands/Erase';
 import { ToolType } from './ToolController';
 import AbstractComponent from '../components/AbstractComponent';
+import { PointerDevice } from '../Pointer';
 
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2;
@@ -18,7 +19,7 @@ export default class Eraser extends BaseTool {
 	}
 
 	public onPointerDown(event: PointerEvt): boolean {
-		if (event.allPointers.length === 1) {
+		if (event.allPointers.length === 1 || event.current.device === PointerDevice.Eraser) {
 			this.lastPoint = event.current.canvasPos;
 			this.toRemove = [];
 			return true;

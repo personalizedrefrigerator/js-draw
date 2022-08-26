@@ -47,6 +47,10 @@ export default class Pen extends BaseTool {
 	}
 
 	public onPointerDown({ current, allPointers }: PointerEvt): boolean {
+		if (current.device === PointerDevice.Eraser) {
+			return false;
+		}
+
 		if (allPointers.length === 1 || current.device === PointerDevice.Pen) {
 			// Don't smooth if input is more than ± 7 pixels from the true curve, do smooth if
 			// less than ± 2 px from the curve.

@@ -3,6 +3,7 @@ import Viewport from './Viewport';
 
 export enum PointerDevice {
 	Pen,
+	Eraser,
 	Touch,
 	Mouse,
 	Other,
@@ -42,7 +43,12 @@ export default class Pointer {
 			'pen': PointerDevice.Pen,
 			'touch': PointerDevice.Touch,
 		};
-		const device = pointerTypeToDevice[evt.pointerType] ?? PointerDevice.Other;
+
+		let device = pointerTypeToDevice[evt.pointerType] ?? PointerDevice.Other;
+		const eraserButtonMask = 0x20;
+		if (device === PointerDevice.Pen && (evt.buttons & eraserButtonMask) !== 0) {
+			device = PointerDevice.Eraser;
+		}
 
 		const timeStamp = (new Date()).getTime();
 		const canvasPos = viewport.screenToCanvas(screenPos);
