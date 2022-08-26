@@ -15,11 +15,13 @@ export interface CommandLocalization {
 	resizeOutputCommand: (newSize: Rect2) => string;
 	addElementAction: (elemDescription: string) => string;
 	eraseAction: (elemDescription: string, numElems: number) => string;
+
+	selectedElements: (count: number)=>string;
 }
 
 export const defaultCommandLocalization: CommandLocalization = {
 	updatedViewport: 'Transformed Viewport',
-	transformedElements: (elemCount) => `Transformed ${elemCount} elements`,
+	transformedElements: (elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`,
 	resizeOutputCommand: (newSize: Rect2) => `Resized image to ${newSize.w}x${newSize.h}`,
 	addElementAction: (componentDescription: string) => `Added ${componentDescription}`,
 	eraseAction: (componentDescription: string, numElems: number) => `Erased ${numElems} ${componentDescription}`,
@@ -32,4 +34,5 @@ export const defaultCommandLocalization: CommandLocalization = {
 	movedRight: 'Moved right',
 	zoomedOut: 'Zoomed out',
 	zoomedIn: 'Zoomed in',
+	selectedElements: (count) => `Selected ${count} element${count === 1 ? '' : 's'}`,
 };

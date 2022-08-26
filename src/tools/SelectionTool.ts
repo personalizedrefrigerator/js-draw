@@ -394,6 +394,10 @@ class Selection {
 		this.boxRotation = this.editor.viewport.getRotationAngle();
 	}
 
+	public getSelectedItemCount() {
+		return this.selectedElems.length;
+	}
+
 	public updateUI() {
 		if (!this.backgroundBox) {
 			return;
@@ -477,6 +481,10 @@ export default class SelectionTool extends BaseTool {
 		if (hasSelection) {
 			const visibleRect = this.editor.viewport.visibleRect;
 			const selectionRect = this.selectionBox.region;
+
+			this.editor.announceForAccessibility(
+				this.editor.localization.selectedElements(this.selectionBox.getSelectedItemCount())
+			);
 
 			// Try to move the selection within the center 2/3rds of the viewport.
 			const targetRect = visibleRect.transformedBoundingBox(
