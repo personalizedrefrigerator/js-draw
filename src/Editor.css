@@ -10,6 +10,17 @@
     --secondary-foreground-color: black;
 }
 
+@media (prefers-color-scheme: dark) {
+	.imageEditorContainer {
+		/* Deafult colors for the editor */
+		--primary-background-color: #151515;
+		--primary-background-color-transparent: rgba(50, 50, 50, 0.5);
+		--secondary-background-color: #607;
+		--primary-foreground-color: white;
+		--secondary-foreground-color: white;
+	}
+}
+
 .imageEditorContainer {
 	color: var(--primary-foreground-color);
 	font-family: system-ui, -apple-system, sans-serif;
