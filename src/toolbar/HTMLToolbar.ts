@@ -2,8 +2,6 @@ import Editor from '../Editor';
 import { ToolType } from '../tools/ToolController';
 import { EditorEventType } from '../types';
 
-import './toolbar.css';
-import '@melloware/coloris/dist/coloris.css';
 import { coloris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
 import Pen from '../tools/Pen';

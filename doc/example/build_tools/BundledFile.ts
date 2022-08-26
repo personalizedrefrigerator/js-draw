@@ -139,7 +139,10 @@ export default class BundledFile {
 	public startWatching() {
 		const compiler = webpack(this.getWebpackOptions('development'));
 		const watchOptions = {
-			ignored: '**/node_modules',
+			ignored: [
+				'**/node_modules',
+				'**/dist',
+			],
 		};
 
 		console.info('Watching bundle: ', this.bundleName);
@@ -157,6 +160,6 @@ const rootDir = dirname(__dirname);
 export const bundledFiles: BundledFile[] = [
 	new BundledFile(
 		'jsdraw',
-		`${rootDir}/src/Editor.ts`
+		`${rootDir}/example.ts`
 	),
 ];

@@ -62,34 +62,39 @@ export default class EditorImage {
 
 	// A Command that can access private [EditorImage] functionality
 	public static AddElementCommand = class implements Command {
+		readonly #element: AbstractComponent;
+		#applyByFlattening: boolean = false;
+
 		// If [applyByFlattening], then the rendered content of this element
 		// is present on the display's wet ink canvas. As such, no re-render is necessary
 		// the first time this command is applied (the surfaces are joined instead).
 		public constructor(
-			private readonly element: AbstractComponent,
-			private applyByFlattening: boolean = false
+			element: AbstractComponent,
+			applyByFlattening: boolean = false
 		) {
+			this.#element = element;
+			this.#applyByFlattening = applyByFlattening;
 		}
 
 		public apply(editor: Editor) {
-			editor.image.addElement(this.element);
+			editor.image.addElement(this.#element);
 
-			if (!this.applyByFlattening) {
+			if (!this.#applyByFlattening) {
 				editor.queueRerender();
 			} else {
-				this.applyByFlattening = false;
+				this.#applyByFlattening = false;
 				editor.display.flatten();
 			}
 		}
 
 		public unapply(editor: Editor) {
-			const container = editor.image.findParent(this.element);
+			const container = editor.image.findParent(this.#element);
 			container?.remove();
 			editor.queueRerender();
 		}
 
 		public description(localization: EditorLocalization) {
-			return localization.addElementAction(this.element.description(localization));
+			return localization.addElementAction(this.#element.description(localization));
 		}
 	};
 }

@@ -14,7 +14,6 @@ import Display, { RenderingMode } from './Display';
 import SVGRenderer from './rendering/SVGRenderer';
 import Color4 from './Color4';
 import SVGLoader from './SVGLoader';
-import './Editor.css';
 import Pointer from './Pointer';
 import Mat33 from './geometry/Mat33';
 import Rect2 from './geometry/Rect2';

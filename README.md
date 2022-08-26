@@ -2,15 +2,23 @@
 
 ![](doc/img/js-draw.jpg)
 
+For example usage, see [doc/example/example.html](doc/example/example.ts).
+
 # API
+
+To use `js-draw`, 
 
 ## Creating an `Editor`
 
 To create a new `Editor` and add it as a child of `document.body`,
 ```ts
-import Editor from '@jsdraw/Editor';
+import Editor from 'js-draw';
+import 'js-draw/styles';
+
 const editor = new Editor(document.body);
 ```
+
+The `import js-draw/styles` step requires a bundler that can import `.css` files. For example, [`webpack` with `css-loader`.](https://webpack.js.org/loaders/css-loader/)
 
 
 ## Adding a toolbar
@@ -63,3 +71,4 @@ but exports to
 ```
 
 which **does** contain the `<circle/>` element.
+

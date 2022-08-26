@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+		<style>
+			#editorOptions {
+				max-width: 400px;
+				margin-left: auto;
+				margin-right: auto;
+				background-color: #ddd;
+				border-radius: 4px;
+				padding: 14px;
+
+				font-family: sans-serif;
+			}
+
+			#editorOptions > ul > li {
+				border-bottom: 1px solid gray;
+			}
+
+			#logOutput {
+				display: none;
+				width: 100vw;
+				height: 100vh;
+
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+			}
+
+			#startButton {
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+
+				width: 100%;
+				font-weight: bold;
+			}
+
+			.imageEditorContainer {
+				width: 100vw;
+				height: 100vh;
+				position: fixed;
+				top: 0;
+				left: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<!--
+				This page is intended for <b>local</b> debugging and development of
+				the image editor.
+
+				To use it, start a server (like `python`'s
+				`http.server` module) and open this page in a
+				browser.
+
+				For example `cd /path/to/ImageEditor/folder ; python3 -m http.server`.
+		-->
+		<div id="editorOptions">
+			<h1>ImageEditor test page</h1>
+			<p>Options for testing the image editor:</p>
+			<noscript>JavaScript has been disabled!</noscript>
+			<ul>
+				<li>
+					<input type="checkbox" id="alertOnError"/><label for="alertOnError">
+						Display error messages (useful for debugging on mobile devices).
+					</label>
+				</li>
+				<li>
+					<label for="initialData">
+						SVG image to load (paste the contents of a saved SVG here).
+						This can be empty.
+					</label><textarea id="initialData"></textarea>
+				</li>
+				<li>
+					<label for="initialFile">Alternatively, select an SVG to upload:</label>
+					<input type="file" id="initialFile" accept='image/svg,image/svg+xml,text/plain'/>
+				</li>
+			</ul>
+			<button id="startButton">Start Editor</button>
+		</div>
+		<textarea id="logOutput">
+		</textarea>
+	</body>
+	<script src='example.bundle.js'></script>
+</html>

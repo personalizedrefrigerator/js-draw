@@ -1,4 +1,6 @@
 
+@import url('./toolbar/toolbar.css');
+
 .imageEditorContainer {
 	/* Deafult colors for the editor */
     --primary-background-color: white;
