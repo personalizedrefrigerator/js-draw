@@ -84,6 +84,11 @@ export default class StrokeBuilder {
 	private finalizeCurrentCurve() {
 		// Case where no points have been added
 		if (!this.currentCurve) {
+			// Don't create a circle around the initial point if the stroke has more than one point.
+			if (this.segments.length > 0) {
+				return;
+			}
+
 			const width = Viewport.roundPoint(this.startPoint.width / 3, this.minFitAllowed);
 			const center = this.roundPoint(this.startPoint.pos);
 
