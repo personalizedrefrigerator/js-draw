@@ -8,7 +8,6 @@ import BaseTool from './tools/BaseTool';
 import AbstractComponent from './components/AbstractComponent';
 import Rect2 from './geometry/Rect2';
 import Pointer from './Pointer';
-import { ToolbarLocalization } from './toolbar/types';
 
 
 export interface PointerEvtListener {
@@ -131,9 +130,4 @@ export interface ImageLoader {
 	start(
 		onAddComponent: ComponentAddedListener, onProgressListener: OnProgressListener
 	): Promise<Rect2>;
-}
-
-export interface EditorLocalization extends ToolbarLocalization {
-	loading: string;
-	imageEditor: string;
 }

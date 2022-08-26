@@ -13,8 +13,8 @@ export default class Eraser extends BaseTool {
 	public kind: ToolType = ToolType.Eraser;
 	private toRemove: AbstractComponent[];
 
-	public constructor(private editor: Editor) {
-		super(editor.notifier);
+	public constructor(private editor: Editor, description: string) {
+		super(editor.notifier, description);
 	}
 
 	public onPointerDown(event: PointerEvt): boolean {

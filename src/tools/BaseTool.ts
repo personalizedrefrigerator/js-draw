@@ -12,7 +12,7 @@ export default abstract class BaseTool implements PointerEvtListener {
 	public abstract onGestureCancel(): void;
 	public abstract readonly kind: ToolType;
 
-	protected constructor(private notifier: EditorNotifier) {
+	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
 	}
 
 	public onWheel(_event: WheelEvt): boolean {

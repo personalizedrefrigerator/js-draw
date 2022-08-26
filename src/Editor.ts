@@ -1,7 +1,7 @@
 
 import EditorImage from './EditorImage';
 import ToolController from './tools/ToolController';
-import { InputEvtType, PointerEvt, EditorNotifier, EditorEventType, ImageLoader, EditorLocalization } from './types';
+import { InputEvtType, PointerEvt, EditorNotifier, EditorEventType, ImageLoader } from './types';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
@@ -18,6 +18,7 @@ import './Editor.css';
 import Pointer from './Pointer';
 import Mat33 from './geometry/Mat33';
 import Rect2 from './geometry/Rect2';
+import { defaultEditorLocalization, EditorLocalization } from './localization';
 
 export class Editor {
 	// Wrapper around the viewport and toolbar
@@ -30,35 +31,41 @@ export class Editor {
 
 	// Viewport for the exported/imported image
 	private importExportViewport: Viewport;
-
-	// Default value for when testing:
-	private localization: EditorLocalization = {
-		...HTMLToolbar.defaultLocalization,
-		loading: 'Loading {}%...',
-		imageEditor: 'Image Editor',
-	};
+	public localization: EditorLocalization = defaultEditorLocalization;
 
 	public viewport: Viewport;
 	public toolController: ToolController;
 	public notifier: EditorNotifier;
 
 	private loadingWarning: HTMLElement;
+	private accessibilityAnnounceArea: HTMLElement;
 
 	public constructor(
 		parent: HTMLElement,
 		renderingMode: RenderingMode = RenderingMode.CanvasRenderer,
-		public readonly lightMode: boolean = true,
-		localization?: EditorLocalization
+
+		// Uses a default English localization if a translation is not given.
+		localization?: Partial<EditorLocalization>,
 	) {
 		this.container = document.createElement('div');
 		this.renderingRegion = document.createElement('div');
 		this.container.appendChild(this.renderingRegion);
 		this.container.className = 'imageEditorContainer';
-		this.localization = localization ?? this.localization;
+
+		this.localization = {
+			...this.localization,
+			...localization,
+		};
 
 		this.loadingWarning = document.createElement('div');
 		this.loadingWarning.classList.add('loadingMessage');
+		this.loadingWarning.ariaLive = 'polite';
 		this.container.appendChild(this.loadingWarning);
+
+		this.accessibilityAnnounceArea = document.createElement('div');
+		this.accessibilityAnnounceArea.ariaLive = 'assertive';
+		this.accessibilityAnnounceArea.className = 'accessibilityAnnouncement';
+		this.container.appendChild(this.accessibilityAnnounceArea);
 
 		this.renderingRegion.style.touchAction = 'none';
 		this.renderingRegion.className = 'imageEditorRenderArea';
@@ -70,8 +77,8 @@ export class Editor {
 		this.viewport = new Viewport(this.notifier);
 		this.display = new Display(this, renderingMode, this.renderingRegion);
 		this.image = new EditorImage();
-		this.history = new UndoRedoHistory(this);
-		this.toolController = new ToolController(this);
+		this.history = new UndoRedoHistory(this, this.announceRedoCallback, this.announceUndoCallback);
+		this.toolController = new ToolController(this, this.localization);
 
 		parent.appendChild(this.container);
 
@@ -87,16 +94,21 @@ export class Editor {
 		this.hideLoadingWarning();
 	}
 
+	// [fractionLoaded] should be a number from 0 to 1, where 1 represents completely loaded.
 	public showLoadingWarning(fractionLoaded: number) {
 		const loadingPercent = Math.round(fractionLoaded * 100);
-		this.loadingWarning.innerText = this.localization.loading.replace(
-			'{}', loadingPercent.toString()
-		);
+		this.loadingWarning.innerText = this.localization.loading(loadingPercent);
 		this.loadingWarning.style.display = 'block';
 	}
 
 	public hideLoadingWarning() {
 		this.loadingWarning.style.display = 'none';
+
+		this.announceForAccessibility(this.localization.doneLoading);
+	}
+
+	public announceForAccessibility(message: string) {
+		this.accessibilityAnnounceArea.innerText = message;
 	}
 
 	public addToolbar(): HTMLToolbar {
@@ -232,9 +244,15 @@ export class Editor {
 		});
 	}
 
-	public dispatch(command: Command) {
-		// .push applies [command] to this
-		this.history.push(command);
+	public dispatch(command: Command, addToHistory: boolean = true) {
+		if (addToHistory) {
+			// .push applies [command] to this
+			this.history.push(command);
+		} else {
+			command.apply(this);
+		}
+
+		this.announceForAccessibility(command.description(this.localization));
 	}
 
 	// Apply a large transformation in chunks.
@@ -275,6 +293,14 @@ export class Editor {
 	public asyncUnapplyCommands(commands: Command[], chunkSize: number) {
 		return this.asyncApplyOrUnapplyCommands(commands, false, chunkSize);
 	}
+
+	private announceUndoCallback = (command: Command) => {
+		this.announceForAccessibility(this.localization.undoAnnouncement(command.description(this.localization)));
+	};
+
+	private announceRedoCallback = (command: Command) => {
+		this.announceForAccessibility(this.localization.redoAnnouncement(command.description(this.localization)));
+	};
 
 	private rerenderQueued: boolean = false;
 	public queueRerender() {
@@ -426,6 +452,9 @@ export class Editor {
 				viewport.updateScreenSize(origSize);
 				viewport.resetTransform(origTransform);
 				editor.queueRerender();
+			},
+			description(localizationTable) {
+				return localizationTable.resizeOutputCommand(imageRect);
 			},
 		};
 	}

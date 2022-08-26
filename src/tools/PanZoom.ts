@@ -35,8 +35,8 @@ export default class PanZoom extends BaseTool {
 	private lastDist: number;
 	private lastScreenCenter: Point2;
 
-	public constructor(private editor: Editor, private mode: PanZoomMode) {
-		super(editor.notifier);
+	public constructor(private editor: Editor, private mode: PanZoomMode, description: string) {
+		super(editor.notifier, description);
 
 		if (mode === PanZoomMode.OneFingerGestures) {
 			this.kind = ToolType.TouchPanZoom;
@@ -131,6 +131,11 @@ export default class PanZoom extends BaseTool {
 	}
 
 	public onPointerUp(_event: PointerEvt): void {
+		if (this.transform) {
+			this.transform.unapply(this.editor);
+			this.editor.dispatch(this.transform, false);
+		}
+
 		this.transform = null;
 	}
 

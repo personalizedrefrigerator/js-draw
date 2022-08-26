@@ -14,10 +14,11 @@ export default class Pen extends BaseTool {
 
 	public constructor(
 		private editor: Editor,
+		description: string,
 		private color: Color4 = Color4.purple,
-		private thickness: number = 16.0
+		private thickness: number = 16.0,
 	) {
-		super(editor.notifier);
+		super(editor.notifier, description);
 	}
 
 	private getPressureMultiplier() {

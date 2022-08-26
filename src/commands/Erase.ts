@@ -1,6 +1,7 @@
 import AbstractComponent from '../components/AbstractComponent';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
+import { EditorLocalization } from '../localization';
 import Command from './Command';
 
 export default class Erase implements Command {
@@ -31,5 +32,21 @@ export default class Erase implements Command {
 		}
 
 		editor.queueRerender();
+	}
+
+	public description(localizationTable: EditorLocalization): string {
+		if (this.toRemove.length === 0) {
+			return localizationTable.erasedNoElements;
+		}
+
+		let description = this.toRemove[0].description(localizationTable);
+		for (const elem of this.toRemove) {
+			if (elem.description(localizationTable) !== description) {
+				description = localizationTable.elements;
+				break;
+			}
+		}
+
+		return localizationTable.eraseAction(description, this.toRemove.length);
 	}
 }

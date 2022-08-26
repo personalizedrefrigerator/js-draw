@@ -73,7 +73,7 @@ export default class StrokeBuilder {
 			this.finalizeCurrentCurve();
 		}
 		return new Stroke(
-			this.segments
+			this.segments,
 		);
 	}
 
@@ -165,7 +165,16 @@ export default class StrokeBuilder {
 		const controlPoint = Vec2.ofXY(this.currentCurve.points[1]);
 
 		// Approximate the normal at the location of the control point
-		const projectionT = this.currentCurve.project(controlPoint.xy).t ?? 0.5;
+		let projectionT = this.currentCurve.project(controlPoint.xy).t;
+
+		if (!projectionT) {
+			if (startPt.minus(controlPoint).magnitudeSquared() < endPt.minus(controlPoint).magnitudeSquared()) {
+				projectionT = 0.1;
+			} else {
+				projectionT = 0.9;
+			}
+		}
+
 		const halfVec = Vec2.ofXY(this.currentCurve.normal(projectionT))
 			.normalized().times(
 				this.curveStartWidth / 2 * projectionT
@@ -213,6 +222,11 @@ export default class StrokeBuilder {
 				return;
 			} else if (isNaN(newPoint.pos.magnitude())) {
 				console.warn('Discarding NaN point.', newPoint);
+				return;
+			}
+			
+			const threshold = Math.min(this.lastPoint.width, newPoint.width) / 4;
+			if (this.lastPoint.pos.minus(newPoint.pos).magnitude() < threshold) {
 				return;
 			}
 

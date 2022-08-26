@@ -4,6 +4,7 @@ import Path from '../geometry/Path';
 import Rect2 from '../geometry/Rect2';
 import AbstractRenderer, { RenderablePathSpec, RenderingStyle } from '../rendering/AbstractRenderer';
 import AbstractComponent from './AbstractComponent';
+import { ImageComponentLocalization } from './localization';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -93,5 +94,9 @@ export default class Stroke extends AbstractComponent {
 				style: part.style,
 			};
 		});
+	}
+
+	public description(localization: ImageComponentLocalization): string {
+		return localization.stroke;
 	}
 }

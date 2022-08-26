@@ -2,12 +2,18 @@ import Editor from './Editor';
 import Command from './commands/Command';
 import { EditorEventType } from './types';
 
+type AnnounceRedoCallback = (command: Command)=>void;
+type AnnounceUndoCallback = (command: Command)=>void;
 
 class UndoRedoHistory {
 	private undoStack: Command[];
 	private redoStack: Command[];
 
-	public constructor(private readonly editor: Editor) {
+	public constructor(
+		private readonly editor: Editor,
+		private announceRedoCallback: AnnounceRedoCallback,
+		private announceUndoCallback: AnnounceUndoCallback,
+	) {
 		this.undoStack = [];
 		this.redoStack = [];
 	}
@@ -36,6 +42,7 @@ class UndoRedoHistory {
 		if (command) {
 			this.redoStack.push(command);
 			command.unapply(this.editor);
+			this.announceUndoCallback(command);
 		}
 		this.fireUpdateEvent();
 	}
@@ -45,6 +52,7 @@ class UndoRedoHistory {
 		if (command) {
 			this.undoStack.push(command);
 			command.apply(this.editor);
+			this.announceRedoCallback(command);
 		}
 		this.fireUpdateEvent();
 	}

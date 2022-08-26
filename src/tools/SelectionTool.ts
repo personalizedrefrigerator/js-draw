@@ -13,9 +13,6 @@ import { ToolType } from './ToolController';
 const handleScreenSize = 30;
 const styles = `
 	.handleOverlay {
-		position: absolute;
-		top: 0;
-		left: 0;
 	}
 
 	.handleOverlay > .selectionBox {
@@ -286,6 +283,10 @@ class Selection {
 				this.recomputeRegion();
 				this.updateUI();
 			},
+
+			description(localizationTable) {
+				return localizationTable.transformedElements(currentTransfmCommands.length);
+			},
 		});
 	}
 
@@ -406,8 +407,8 @@ class Selection {
 		const heightOnScreen = toScreen.transformVec3(rightSideDirection).magnitude();
 		const widthOnScreen = toScreen.transformVec3(topSideDirection).magnitude();
 
-		this.backgroundBox.style.left = `${centerOnScreen.x - widthOnScreen / 2}px`;
-		this.backgroundBox.style.top = `${centerOnScreen.y - heightOnScreen / 2}px`;
+		this.backgroundBox.style.marginLeft = `${centerOnScreen.x - widthOnScreen / 2}px`;
+		this.backgroundBox.style.marginTop = `${centerOnScreen.y - heightOnScreen / 2}px`;
 		this.backgroundBox.style.width = `${widthOnScreen}px`;
 		this.backgroundBox.style.height = `${heightOnScreen}px`;
 
@@ -424,8 +425,8 @@ export default class SelectionTool extends BaseTool {
 	private selectionBox: Selection|null;
 	public readonly kind: ToolType = ToolType.Selection;
 
-	public constructor(private editor: Editor) {
-		super(editor.notifier);
+	public constructor(private editor: Editor, description: string) {
+		super(editor.notifier, description);
 
 		this.handleOverlay = document.createElement('div');
 		editor.createHTMLOverlay(this.handleOverlay);

@@ -1,4 +1,5 @@
 import Command from './commands/Command';
+import { CommandLocalization } from './commands/localization';
 import Editor from './Editor';
 import Mat33 from './geometry/Mat33';
 import Rect2 from './geometry/Rect2';
@@ -29,6 +30,46 @@ export class Viewport {
 			const viewport = editor.viewport;
 			viewport.resetTransform(viewport.transform.rightMul(this.inverseTransform));
 			editor.queueRerender();
+		}
+
+		public description(localizationTable: CommandLocalization): string {
+			const result: string[] = [];
+
+			// Describe the transformation's affect on the viewport (note that transformation transforms
+			// the **elements** within the viewport). Assumes the transformation only does rotation/scale/translation.
+			const origVec = Vec2.unitX;
+			const linearTransformedVec = this.transform.transformVec3(Vec2.unitX);
+			const affineTransformedVec = this.transform.transformVec2(Vec2.unitX);
+
+			const scale = linearTransformedVec.magnitude();
+			const rotation = 180 / Math.PI * linearTransformedVec.angle();
+			const translation = affineTransformedVec.minus(origVec);
+
+			if (scale > 1.2) {
+				result.push(localizationTable.zoomedIn);
+			}
+			else if (scale < 0.8) {
+				result.push(localizationTable.zoomedOut);
+			}
+
+			if (Math.floor(Math.abs(rotation)) > 0) {
+				result.push(localizationTable.rotatedBy(Math.round(rotation)));
+			}
+
+			const minTranslation = 1e-4;
+			if (translation.x > minTranslation) {
+				result.push(localizationTable.movedLeft);
+			} else if (translation.x < -minTranslation) {
+				result.push(localizationTable.movedRight);
+			}
+
+			if (translation.y < minTranslation) {
+				result.push(localizationTable.movedDown);
+			} else if (translation.y > minTranslation) {
+				result.push(localizationTable.movedUp);
+			}
+
+			return result.join('; ');
 		}
 	};
 

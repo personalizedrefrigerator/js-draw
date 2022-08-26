@@ -1,9 +1,11 @@
 import Editor from '../Editor';
-
+import { EditorLocalization } from '../localization';
 
 interface Command {
 	apply(editor: Editor): void;
 	unapply(editor: Editor): void;
+
+	description(localizationTable: EditorLocalization): string;
 }
 
 // eslint-disable-next-line no-redeclare
@@ -22,6 +24,17 @@ namespace Command {
 			unapply(editor: Editor) {
 				b.unapply(editor);
 				a.unapply(editor);
+			},
+
+			description(localizationTable: EditorLocalization) {
+				const aDescription = a.description(localizationTable);
+				const bDescription = b.description(localizationTable);
+
+				if (aDescription === bDescription) {
+					return aDescription;
+				}
+
+				return `${aDescription}, ${bDescription}`;
 			},
 		};
 	};

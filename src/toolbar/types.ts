@@ -14,4 +14,7 @@ export interface ToolbarLocalization {
 	resizeImageToSelection: string;
 	undo: string;
 	redo: string;
+
+	dropdownShown: (toolName: string)=>string;
+	dropdownHidden: (toolName: string)=>string;
 }

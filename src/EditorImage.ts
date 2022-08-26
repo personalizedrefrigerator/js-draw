@@ -4,6 +4,7 @@ import Command from './commands/Command';
 import Viewport from './Viewport';
 import AbstractComponent from './components/AbstractComponent';
 import Rect2 from './geometry/Rect2';
+import { EditorLocalization } from './localization';
 
 // Handles lookup/storage of elements in the image
 export default class EditorImage {
@@ -85,6 +86,10 @@ export default class EditorImage {
 			const container = editor.image.findParent(this.element);
 			container?.remove();
 			editor.queueRerender();
+		}
+
+		public description(localization: EditorLocalization) {
+			return localization.addElementAction(this.element.description(localization));
 		}
 	};
 }

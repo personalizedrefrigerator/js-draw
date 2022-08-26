@@ -32,7 +32,7 @@ abstract class ToolbarWidget {
 	public constructor(
 		protected editor: Editor,
 		protected targetTool: BaseTool,
-		protected localizationTable: ToolbarLocalization
+		protected localizationTable: ToolbarLocalization,
 	) {
 		this.icon = null;
 		this.container = document.createElement('div');
@@ -124,21 +124,39 @@ abstract class ToolbarWidget {
 		this.icon.classList.add(`${toolbarCSSPrefix}icon`);
 	}
 
-	protected updateSelected(active: boolean) {
-		if (active) {
+	protected updateSelected(selected: boolean) {
+		const currentlySelected = this.container.classList.contains('selected');
+		if (currentlySelected === selected) {
+			return;
+		}
+
+		if (selected) {
 			this.container.classList.add('selected');
+			this.button.ariaSelected = 'true';
 		} else {
 			this.container.classList.remove('selected');
+			this.button.ariaSelected = 'false';
 		}
 	}
 
 	protected setDropdownVisible(visible: boolean) {
+		const currentlyVisible = this.container.classList.contains('dropdownVisible');
+		if (currentlyVisible === visible) {
+			return;
+		}
+
 		if (visible) {
 			this.dropdownContainer.classList.remove('hidden');
 			this.container.classList.add('dropdownVisible');
+			this.editor.announceForAccessibility(
+				this.localizationTable.dropdownShown(this.targetTool.description)
+			);
 		} else {
 			this.dropdownContainer.classList.add('hidden');
 			this.container.classList.remove('dropdownVisible');
+			this.editor.announceForAccessibility(
+				this.localizationTable.dropdownHidden(this.targetTool.description)
+			);
 		}
 	}
 
@@ -309,7 +327,7 @@ class PenWidget extends ToolbarWidget {
 	}
 
 	protected getTitle(): string {
-		return this.localizationTable.pen;
+		return this.targetTool.description;
 	}
 
 	protected createIcon(): Element {
@@ -430,14 +448,18 @@ export default class HTMLToolbar {
 		resizeImageToSelection: 'Resize image to selection',
 		undo: 'Undo',
 		redo: 'Redo',
+
+		dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
+		dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
 	};
 
 	public constructor(
 		private editor: Editor, parent: HTMLElement,
-		private localizationTable: ToolbarLocalization = HTMLToolbar.defaultLocalization
+		private localizationTable: ToolbarLocalization = HTMLToolbar.defaultLocalization,
 	) {
 		this.container = document.createElement('div');
 		this.container.classList.add(`${toolbarCSSPrefix}root`);
+		this.container.setAttribute('role', 'toolbar');
 		this.addElements();
 		parent.appendChild(this.container);
 
@@ -448,7 +470,7 @@ export default class HTMLToolbar {
 			format: 'hex',
 			selectInput: false,
 			focusInput: false,
-			themeMode: this.editor.lightMode ? 'light' : 'dark',
+			themeMode: 'auto',
 
 			swatches: [
 				Color4.red.toHexString(),

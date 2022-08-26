@@ -4,6 +4,7 @@ import Rect2 from '../geometry/Rect2';
 import AbstractRenderer from '../rendering/AbstractRenderer';
 import SVGRenderer from '../rendering/SVGRenderer';
 import AbstractComponent from './AbstractComponent';
+import { ImageComponentLocalization } from './localization';
 
 export default class UnknownSVGObject extends AbstractComponent {
 	protected contentBBox: Rect2;
@@ -27,5 +28,9 @@ export default class UnknownSVGObject extends AbstractComponent {
 	}
 
 	protected applyTransformation(_affineTransfm: Mat33): void {
+	}
+
+	public description(localization: ImageComponentLocalization): string {
+		return localization.svgObject;
 	}
 }

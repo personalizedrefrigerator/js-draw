@@ -5,6 +5,7 @@ import LineSegment2 from '../geometry/LineSegment2';
 import Mat33 from '../geometry/Mat33';
 import Rect2 from '../geometry/Rect2';
 import AbstractRenderer from '../rendering/AbstractRenderer';
+import { ImageComponentLocalization } from './localization';
 
 export default abstract class AbstractComponent {
 	protected lastChangedTime: number;
@@ -62,6 +63,11 @@ export default abstract class AbstractComponent {
 				);
 				editor.queueRerender();
 			},
+			description(localizationTable) {
+				return localizationTable.transformedElements(1);
+			},
 		};
 	}
+
+	public abstract description(localizationTable: ImageComponentLocalization): string;
 }

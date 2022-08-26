@@ -1,5 +1,4 @@
-import Command from '../commands/Command';
-import { InputEvtType, InputEvt } from '../types';
+import { InputEvtType, InputEvt, EditorEventType } from '../types';
 import Editor from '../Editor';
 import BaseTool from './BaseTool';
 import PanZoom, { PanZoomMode } from './PanZoom';
@@ -8,8 +7,7 @@ import ToolEnabledGroup from './ToolEnabledGroup';
 import Eraser from './Eraser';
 import SelectionTool from './SelectionTool';
 import Color4 from '../Color4';
-
-
+import { ToolLocalization } from './localization';
 
 export enum ToolType {
 	TouchPanZoom,
@@ -23,29 +21,40 @@ export default class ToolController {
 	private tools: BaseTool[];
 	private activeTool: BaseTool|null;
 
-	public constructor(editor: Editor) {
+	public constructor(editor: Editor, localization: ToolLocalization) {
 		const primaryToolEnabledGroup = new ToolEnabledGroup();
-		const touchPanZoom = new PanZoom(editor, PanZoomMode.OneFingerGestures);
-		const primaryPenTool = new Pen(editor);
+		const touchPanZoom = new PanZoom(editor, PanZoomMode.OneFingerGestures, localization.touchPanTool);
+		const primaryPenTool = new Pen(editor, localization.penTool(1));
 		const primaryTools = [
-			new SelectionTool(editor),
-			new Eraser(editor),
+			new SelectionTool(editor, localization.selectionTool),
+			new Eraser(editor, localization.eraserTool),
 
 			// Three pens
 			primaryPenTool,
-			new Pen(editor, Color4.clay, 8),
+			new Pen(editor, localization.penTool(2), Color4.clay, 8),
 
 			// Highlighter-like pen with width=64
-			new Pen(editor, Color4.ofRGBA(1, 1, 0, 0.5), 64),
+			new Pen(editor, localization.penTool(3), Color4.ofRGBA(1, 1, 0, 0.5), 64),
 		];
 		this.tools = [
 			touchPanZoom,
 			...primaryTools,
-			new PanZoom(editor, PanZoomMode.TwoFingerGestures | PanZoomMode.AnyDevice),
+			new PanZoom(editor, PanZoomMode.TwoFingerGestures | PanZoomMode.AnyDevice, localization.twoFingerPanZoomTool),
 		];
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolEnabledGroup));
 		touchPanZoom.setEnabled(false);
 		primaryPenTool.setEnabled(true);
+
+		editor.notifier.on(EditorEventType.ToolEnabled, event => {
+			if (event.kind === EditorEventType.ToolEnabled) {
+				editor.announceForAccessibility(localization.toolEnabledAnnouncement(event.tool.description));
+			}
+		});
+		editor.notifier.on(EditorEventType.ToolDisabled, event => {
+			if (event.kind === EditorEventType.ToolDisabled) {
+				editor.announceForAccessibility(localization.toolDisabledAnnouncement(event.tool.description));
+			}
+		});
 
 		this.activeTool = null;
 	}
@@ -112,38 +121,6 @@ export default class ToolController {
 
 	public getMatchingTools(kind: ToolType): BaseTool[] {
 		return this.tools.filter(tool => tool.kind === kind);
-	}
-
-	// Private helper
-	#setToolEnabled(kind: ToolType, enabled: boolean) {
-		const matchingTools = this.tools.filter(tool => tool.kind === kind);
-		for (const tool of matchingTools) {
-			tool.setEnabled(enabled);
-			console.log('Set', tool, '', enabled);
-		}
-	}
-
-	// Returns A `Command` that, when applied, enables/disables all matching tools.
-	public static setToolEnabled(kind: ToolType, enabled: boolean): Command {
-		return new class implements Command {
-			private wasEnabled: boolean|null = null;
-			public apply(editor: Editor): void {
-				this.wasEnabled = editor.toolController.isToolEnabled(kind);
-				editor.toolController.#setToolEnabled(kind, enabled);
-			}
-			public unapply(editor: Editor): void {
-				// Can't unapply if not applied before
-				if (this.wasEnabled !== null) {
-					editor.toolController.#setToolEnabled(kind, this.wasEnabled);
-				}
-			}
-		};
-	}
-
-	// Returns true iff any tools of the given kind are enabled.
-	public isToolEnabled(kind: ToolType): boolean {
-		const matchingTools = this.tools.filter(tool => tool.kind === kind);
-		return matchingTools.some((tool: BaseTool) => tool.isEnabled());
 	}
 }
 
