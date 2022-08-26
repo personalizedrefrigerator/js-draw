@@ -2,7 +2,7 @@
 
 ![](doc/img/js-draw.jpg)
 
-For example usage, see [doc/example/example.html](doc/example/example.ts).
+For example usage, see [doc/example/example.ts](doc/example/example.ts).
 
 # API
 
