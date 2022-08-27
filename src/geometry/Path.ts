@@ -223,6 +223,49 @@ export default class Path {
 		]);
 	}
 
+	// Returns a path that outlines [rect]. If [lineWidth] is not given, the resultant path is
+	// the outline of [rect]. Otherwise, the resultant path represents a line of width [lineWidth]
+	// that traces [rect].
+	public static fromRect(rect: Rect2, lineWidth: number|null = null): Path {
+		const commands: PathCommand[] = [];
+
+		let corners;
+		let startPoint;
+
+		if (lineWidth !== null) {
+			// Vector from the top left corner or bottom right corner to the edge of the
+			// stroked region.
+			const cornerToEdge = Vec2.of(lineWidth, lineWidth).times(0.5);
+			const innerRect = Rect2.fromCorners(
+				rect.topLeft.plus(cornerToEdge),
+				rect.bottomRight.minus(cornerToEdge)
+			);
+			const outerRect = Rect2.fromCorners(
+				rect.topLeft.minus(cornerToEdge),
+				rect.bottomRight.plus(cornerToEdge)
+			);
+
+			corners = [
+				innerRect.corners[3],
+				...innerRect.corners,
+				...outerRect.corners.reverse(),
+			];
+			startPoint = outerRect.corners[3];
+		} else {
+			corners = rect.corners.slice(1);
+			startPoint = rect.corners[0];
+		}
+
+		for (const corner of corners) {
+			commands.push({
+				kind: PathCommandType.LineTo,
+				point: corner,
+			});
+		}
+
+		return new Path(startPoint, commands);
+	}
+
 	public static fromRenderable(renderable: RenderablePathSpec): Path {
 		return new Path(renderable.startPoint, renderable.commands);
 	}

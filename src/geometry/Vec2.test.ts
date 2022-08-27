@@ -28,5 +28,6 @@ describe('Vec2', () => {
 	it('Perpindicular', () => {
 		const fuzz = 0.001;
 		expect(Vec2.unitX.cross(Vec3.unitZ)).objEq(Vec2.unitY.times(-1), fuzz);
+		expect(Vec2.unitX.orthog()).objEq(Vec2.unitY, fuzz);
 	});
 });

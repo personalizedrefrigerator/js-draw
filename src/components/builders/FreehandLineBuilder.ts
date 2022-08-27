@@ -1,22 +1,28 @@
-import Color4 from './Color4';
 import { Bezier } from 'bezier-js';
-import { RenderingStyle, RenderablePathSpec } from './rendering/AbstractRenderer';
-import { Point2, Vec2 } from './geometry/Vec2';
-import Rect2 from './geometry/Rect2';
-import { PathCommand, PathCommandType } from './geometry/Path';
-import LineSegment2 from './geometry/LineSegment2';
-import Stroke from './components/Stroke';
-import Viewport from './Viewport';
+import AbstractRenderer, { RenderingStyle, RenderablePathSpec } from '../../rendering/AbstractRenderer';
+import { Point2, Vec2 } from '../../geometry/Vec2';
+import Rect2 from '../../geometry/Rect2';
+import { PathCommand, PathCommandType } from '../../geometry/Path';
+import LineSegment2 from '../../geometry/LineSegment2';
+import Stroke from '../Stroke';
+import Viewport from '../../Viewport';
+import { StrokeDataPoint } from '../../types';
+import { ComponentBuilder, ComponentBuilderFactory } from './types';
 
-export interface StrokeDataPoint {
-	pos: Point2;
-	width: number;
-	time: number;
-	color: Color4;
-}
+export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
+	// Don't smooth if input is more than ± 7 pixels from the true curve, do smooth if
+	// less than ± 2 px from the curve.
+	const canvasTransform = viewport.screenToCanvasTransform;
+	const maxSmoothingDist = canvasTransform.transformVec3(Vec2.unitX).magnitude() * 7;
+	const minSmoothingDist = canvasTransform.transformVec3(Vec2.unitX).magnitude() * 2;
+
+	return new FreehandLineBuilder(
+		initialPoint, minSmoothingDist, maxSmoothingDist
+	);
+};
 
 // Handles stroke smoothing and creates Strokes from user/stylus input.
-export default class StrokeBuilder {
+export default class FreehandLineBuilder implements ComponentBuilder {
 	private segments: RenderablePathSpec[];
 	private buffer: Point2[];
 	private lastPoint: StrokeDataPoint;
@@ -59,13 +65,19 @@ export default class StrokeBuilder {
 	}
 
 	// Get the segments that make up this' path. Can be called after calling build()
-	public preview(): RenderablePathSpec[] {
+	private getPreview(): RenderablePathSpec[] {
 		if (this.currentCurve && this.lastPoint) {
 			const currentPath = this.currentSegmentToPath();
 			return this.segments.concat(currentPath);
 		}
 
 		return this.segments;
+	}
+
+	public preview(renderer: AbstractRenderer) {
+		for (const part of this.getPreview()) {
+			renderer.drawPath(part);
+		}
 	}
 
 	public build(): Stroke {

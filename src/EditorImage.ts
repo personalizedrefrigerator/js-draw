@@ -107,6 +107,8 @@ export class ImageNode {
 	private bbox: Rect2;
 	private children: ImageNode[];
 	private targetChildCount: number = 30;
+	private minZIndex: number|null;
+	private maxZIndex: number|null;
 
 	public constructor(
 		private parent: ImageNode|null = null
@@ -114,6 +116,9 @@ export class ImageNode {
 		this.children = [];
 		this.bbox = Rect2.empty;
 		this.content = null;
+
+		this.minZIndex = null;
+		this.maxZIndex = null;
 	}
 
 	public getContent(): AbstractComponent|null {
@@ -130,7 +135,7 @@ export class ImageNode {
 		});
 	}
 
-	// / Returns a list of `ImageNode`s with content (and thus no children).
+	// Returns a list of `ImageNode`s with content (and thus no children).
 	public getLeavesInRegion(region: Rect2, minFractionOfRegion: number = 0): ImageNode[] {
 		const result: ImageNode[] = [];
 
@@ -228,16 +233,36 @@ export class ImageNode {
 	}
 
 	// Recomputes this' bounding box. If [bubbleUp], also recompute
-	// this' ancestors bounding boxes
+	// this' ancestors bounding boxes. This also re-computes this' bounding box
+	// in the z-direction (z-indicies).
 	public recomputeBBox(bubbleUp: boolean) {
 		const oldBBox = this.bbox;
 		if (this.content !== null) {
 			this.bbox = this.content.getBBox();
+			this.minZIndex = this.content.zIndex;
+			this.maxZIndex = this.content.zIndex;
 		} else {
 			this.bbox = Rect2.empty;
+			this.minZIndex = null;
+			this.maxZIndex = null;
+			let isFirst = true;
 
 			for (const child of this.children) {
-				this.bbox = this.bbox.union(child.getBBox());
+				if (isFirst) {
+					this.bbox = child.getBBox();
+					isFirst = false;
+				} else {
+					this.bbox = this.bbox.union(child.getBBox());
+				}
+
+				this.minZIndex ??= child.minZIndex;
+				this.maxZIndex ??= child.maxZIndex;
+				if (child.minZIndex !== null && this.minZIndex !== null) {
+					this.minZIndex = Math.min(child.minZIndex, this.minZIndex);
+				}
+				if (child.maxZIndex !== null && this.maxZIndex !== null) {
+					this.maxZIndex = Math.max(child.maxZIndex, this.maxZIndex);
+				}
 			}
 		}
 
@@ -270,6 +295,9 @@ export class ImageNode {
 
 	// Remove this node and all of its children
 	public remove() {
+		this.minZIndex = null;
+		this.maxZIndex = null;
+
 		if (!this.parent) {
 			this.content = null;
 			this.children = [];

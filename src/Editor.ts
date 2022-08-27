@@ -110,8 +110,15 @@ export class Editor {
 		this.accessibilityAnnounceArea.innerText = message;
 	}
 
-	public addToolbar(): HTMLToolbar {
-		return new HTMLToolbar(this, this.container, this.localization);
+	public addToolbar(defaultLayout: boolean = true): HTMLToolbar {
+		const toolbar = new HTMLToolbar(this, this.container, this.localization);
+
+		if (defaultLayout) {
+			toolbar.addDefaultToolWidgets();
+			toolbar.addDefaultActionButtons();
+		}
+
+		return toolbar;
 	}
 
 	private registerListeners() {

@@ -23,7 +23,7 @@ export default abstract class AbstractComponent {
 	public getBBox(): Rect2 {
 		return this.contentBBox;
 	}
-	public abstract render(canvas: AbstractRenderer, visibleRect: Rect2): void;
+	public abstract render(canvas: AbstractRenderer, visibleRect?: Rect2): void;
 	public abstract intersects(lineSegment: LineSegment2): boolean;
 
 	// Private helper for transformBy: Apply the given transformation to all points of this.

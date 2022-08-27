@@ -26,4 +26,18 @@ describe('Vec3', () => {
 		expect(vec1.cross(vec2)).objEq(Vec3.unitZ);
 		expect(vec2.cross(vec1)).objEq(Vec3.unitZ.times(-1));
 	});
+
+	it('.orthog should return an orthogonal vector', () => {
+		expect(Vec3.unitZ.orthog().dot(Vec3.unitZ)).toBe(0);
+
+		// Should return some orthogonal vector, even if given the zero vector
+		expect(Vec3.zero.orthog().dot(Vec3.zero)).toBe(0);
+	});
+
+	it('.orthog should return a unit vector', () => {
+		expect(Vec3.zero.orthog().magnitude()).toBe(1);
+		expect(Vec3.unitZ.orthog().magnitude()).toBe(1);
+		expect(Vec3.unitX.orthog().magnitude()).toBe(1);
+		expect(Vec3.unitY.orthog().magnitude()).toBe(1);
+	});
 });

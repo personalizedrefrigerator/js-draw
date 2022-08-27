@@ -51,7 +51,7 @@ export default class Pointer {
 		}
 
 		const timeStamp = (new Date()).getTime();
-		const canvasPos = viewport.screenToCanvas(screenPos);
+		const canvasPos = viewport.roundPoint(viewport.screenToCanvas(screenPos));
 
 		return new Pointer(
 			screenPos,

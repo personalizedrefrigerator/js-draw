@@ -8,6 +8,7 @@ import BaseTool from './tools/BaseTool';
 import AbstractComponent from './components/AbstractComponent';
 import Rect2 from './geometry/Rect2';
 import Pointer from './Pointer';
+import Color4 from './Color4';
 
 
 export interface PointerEvtListener {
@@ -137,4 +138,11 @@ export interface ImageLoader {
 	start(
 		onAddComponent: ComponentAddedListener, onProgressListener: OnProgressListener
 	): Promise<Rect2>;
+}
+
+export interface StrokeDataPoint {
+	pos: Point2;
+	width: number;
+	time: number;
+	color: Color4;
 }

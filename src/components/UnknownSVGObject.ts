@@ -14,7 +14,7 @@ export default class UnknownSVGObject extends AbstractComponent {
 		this.contentBBox = Rect2.of(svgObject.getBoundingClientRect());
 	}
 
-	public render(canvas: AbstractRenderer, _visibleRect: Rect2): void {
+	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
 		if (!(canvas instanceof SVGRenderer)) {
 			// Don't draw unrenderable objects if we can't
 			return;

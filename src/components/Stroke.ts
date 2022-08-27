@@ -50,11 +50,11 @@ export default class Stroke extends AbstractComponent {
 		return false;
 	}
 
-	public render(canvas: AbstractRenderer, visibleRect: Rect2): void {
+	public render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.getBBox());
 		for (const part of this.parts) {
 			const bbox = part.bbox;
-			if (bbox.intersects(visibleRect)) {
+			if (!visibleRect || bbox.intersects(visibleRect)) {
 				canvas.drawPath(part);
 			}
 		}

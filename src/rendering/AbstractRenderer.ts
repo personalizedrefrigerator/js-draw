@@ -1,5 +1,5 @@
 import Color4 from '../Color4';
-import { PathCommand, PathCommandType } from '../geometry/Path';
+import Path, { PathCommand, PathCommandType } from '../geometry/Path';
 import Rect2 from '../geometry/Rect2';
 import { Point2, Vec2 } from '../geometry/Vec2';
 import Viewport from '../Viewport';
@@ -103,37 +103,8 @@ export default abstract class AbstractRenderer {
 
 	// Draw a rectangle. Boundary lines have width [lineWidth] and are filled with [lineFill]
 	public drawRect(rect: Rect2, lineWidth: number, lineFill: RenderingStyle): void {
-		const commands: PathCommand[] = [];
-
-		// Vector from the top left corner or bottom right corner to the edge of the
-		// stroked region.
-		const cornerToEdge = Vec2.of(lineWidth, lineWidth).times(0.5);
-		const innerRect = Rect2.fromCorners(
-			rect.topLeft.plus(cornerToEdge),
-			rect.bottomRight.minus(cornerToEdge)
-		);
-		const outerRect = Rect2.fromCorners(
-			rect.topLeft.minus(cornerToEdge),
-			rect.bottomRight.plus(cornerToEdge)
-		);
-
-		const corners = [
-			innerRect.corners[3],
-			...innerRect.corners,
-			...outerRect.corners.reverse(),
-		];
-		for (const corner of corners) {
-			commands.push({
-				kind: PathCommandType.LineTo,
-				point: corner,
-			});
-		}
-
-		this.drawPath({
-			startPoint: outerRect.corners[3],
-			commands,
-			style: lineFill,
-		});
+		const path = Path.fromRect(rect, lineWidth);
+		this.drawPath(path.toRenderable(lineFill));
 	}
 
 	// Note the start/end of an object with the given bounding box.

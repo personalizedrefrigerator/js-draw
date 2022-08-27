@@ -5,6 +5,12 @@ export enum ToolbarButtonType {
 
 
 export interface ToolbarLocalization {
+	outlinedRectanglePen: string;
+	filledRectanglePen: string;
+	linePen: string;
+	arrowPen: string;
+	freehandPen: string;
+	selectObjectType: string;
 	colorLabel: string;
 	pen: string;
 	eraser: string;

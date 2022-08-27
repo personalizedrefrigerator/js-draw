@@ -5,7 +5,7 @@ import Mat33 from './geometry/Mat33';
 import Rect2 from './geometry/Rect2';
 import { Point2, Vec2 } from './geometry/Vec2';
 import Vec3 from './geometry/Vec3';
-import { StrokeDataPoint } from './StrokeBuilder';
+import { StrokeDataPoint } from './types';
 import { EditorEventType, EditorNotifier } from './types';
 
 // Returns the base type of some type of point/number

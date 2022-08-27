@@ -31,6 +31,11 @@ export default class Vec3 {
 		throw new Error(`${idx} out of bounds!`);
 	}
 
+	// Alias for this.magnitude
+	public length(): number {
+		return this.magnitude();
+	}
+
 	public magnitude(): number {
 		return Math.sqrt(this.dot(this));
 	}
@@ -74,6 +79,17 @@ export default class Vec3 {
 			other.x * this.z - this.x * other.z,
 			this.x * other.y - other.x * this.y
 		);
+	}
+
+	// Returns a vector orthogonal to this. If this is a Vec2, returns [this] rotated
+	// 90 degrees counter-clockwise.
+	public orthog(): Vec3 {
+		// If parallel to the z-axis
+		if (this.dot(Vec3.unitX) === 0 && this.dot(Vec3.unitY) === 0) {
+			return this.dot(Vec3.unitX) === 0 ? Vec3.unitX : this.cross(Vec3.unitX).normalized();
+		}
+
+		return this.cross(Vec3.unitZ.times(-1)).normalized();
 	}
 
 	// Returns this plus a vector of length [distance] in [direction]

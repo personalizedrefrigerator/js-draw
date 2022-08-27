@@ -24,17 +24,17 @@ export default class ToolController {
 	public constructor(editor: Editor, localization: ToolLocalization) {
 		const primaryToolEnabledGroup = new ToolEnabledGroup();
 		const touchPanZoom = new PanZoom(editor, PanZoomMode.OneFingerGestures, localization.touchPanTool);
-		const primaryPenTool = new Pen(editor, localization.penTool(1));
+		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 16 });
 		const primaryTools = [
 			new SelectionTool(editor, localization.selectionTool),
 			new Eraser(editor, localization.eraserTool),
 
 			// Three pens
 			primaryPenTool,
-			new Pen(editor, localization.penTool(2), Color4.clay, 8),
+			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 8 }),
 
 			// Highlighter-like pen with width=64
-			new Pen(editor, localization.penTool(3), Color4.ofRGBA(1, 1, 0, 0.5), 64),
+			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }),
 		];
 		this.tools = [
 			touchPanZoom,
