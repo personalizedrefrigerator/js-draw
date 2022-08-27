@@ -231,7 +231,13 @@ export default class StrokeBuilder {
 			}
 			
 			const threshold = Math.min(this.lastPoint.width, newPoint.width) / 4;
-			if (this.lastPoint.pos.minus(newPoint.pos).magnitude() < threshold) {
+			const shouldSnapToInitial = this.startPoint.pos.minus(newPoint.pos).magnitude() < threshold
+				&& this.segments.length === 0;
+			
+			// Snap to the starting point if the stroke is contained within a small ball centered
+			// at the starting point.
+			// This allows us to create a circle/dot at the start of the stroke.
+			if (shouldSnapToInitial) {
 				return;
 			}
 
