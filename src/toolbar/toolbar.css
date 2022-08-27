@@ -100,6 +100,18 @@
     flex-direction: row;
 }
 
+.toolbar-closeColorPickerOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+
+    background-color: var(--primary-background-color);
+    opacity: 0.3;
+}
+
 /* Make color selection buttons fill their containing label */
 .toolbar-dropdown .clr-field button {
     width: 100%;

@@ -417,6 +417,18 @@ class PenWidget extends ToolbarWidget {
 		colorInput.oninput = () => {
 			this.tool.setColor(Color4.fromHex(colorInput.value));
 		};
+		colorInput.addEventListener('open', () => {
+			this.editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
+				kind: EditorEventType.ColorPickerToggled,
+				open: true,
+			});
+		});
+		colorInput.addEventListener('close', () => {
+			this.editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
+				kind: EditorEventType.ColorPickerToggled,
+				open: false,
+			});
+		});
 
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInput);
@@ -461,7 +473,14 @@ export default class HTMLToolbar {
 		this.addElements();
 		parent.appendChild(this.container);
 
-		// Initialize color choosers
+		this.initColorPickers();
+	}
+
+	private initColorPickers() {
+		const closePickerOverlay = document.createElement('div');
+		closePickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;
+		this.editor.createHTMLOverlay(closePickerOverlay);
+
 		colorisInit();
 		coloris({
 			el: '.coloris_input',
@@ -478,6 +497,16 @@ export default class HTMLToolbar {
 				Color4.black.toHexString(),
 				Color4.white.toHexString(),
 			],
+		});
+
+		this.editor.notifier.on(EditorEventType.ColorPickerToggled, event => {
+			if (event.kind !== EditorEventType.ColorPickerToggled) {
+				return;
+			}
+
+			// Show/hide the overlay. Making the overlay visible gives users a surface to click
+			// on that shows/hides the color picker.
+			closePickerOverlay.style.display = event.open ? 'block' : 'none';
 		});
 	}
 
