@@ -12,7 +12,6 @@
 
 @media (prefers-color-scheme: dark) {
 	.imageEditorContainer {
-		/* Deafult colors for the editor */
 		--primary-background-color: #151515;
 		--primary-background-color-transparent: rgba(50, 50, 50, 0.5);
 		--secondary-background-color: #607;

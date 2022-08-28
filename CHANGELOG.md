@@ -1,4 +1,10 @@
 
+# 0.0.5
+ * Configuration options:
+   - Ability to disable touch panning
+   - The `new Editor(container, ...)` constructor now takes a configuration object as its second argument.
+ * A pre-bundled version of `js-draw` is now distributed.
+
 # 0.0.4
  * Preset shapes
    * Arrow

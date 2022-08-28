@@ -10,6 +10,8 @@ import { RenderingMode } from './Display';
 import DummyRenderer from './rendering/DummyRenderer';
 import { RenderingStyle } from './rendering/AbstractRenderer';
 
+const createEditor = () => new Editor(document.body, { renderingMode: RenderingMode.DummyRenderer });
+
 describe('EditorImage', () => {
 	const testStroke = new Stroke([
 		{
@@ -29,7 +31,7 @@ describe('EditorImage', () => {
 	const addTestStrokeCommand = new EditorImage.AddElementCommand(testStroke);
 
 	it('elements added to the image should be findable', () => {
-		const editor = new Editor(document.body, RenderingMode.DummyRenderer);
+		const editor = createEditor();
 		const image = editor.image;
 
 		// We haven't activated the command, so testStroke's parent should be null.
@@ -39,7 +41,7 @@ describe('EditorImage', () => {
 	});
 
 	it('should render an element added to the image', () => {
-		const editor = new Editor(document.body, RenderingMode.DummyRenderer);
+		const editor = createEditor();
 		const renderer = editor.display.getDryInkRenderer();
 		if (!(renderer instanceof DummyRenderer)) {
 			throw new Error('Wrong display type!');
@@ -56,7 +58,7 @@ describe('EditorImage', () => {
 	});
 
 	it('should have a 1-deep tree if two non-overlapping strokes are added', () => {
-		const editor = new Editor(document.body, RenderingMode.DummyRenderer);
+		const editor = createEditor();
 		const image = editor.image;
 
 		const leftmostStroke = new Stroke([

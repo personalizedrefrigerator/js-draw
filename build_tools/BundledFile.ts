@@ -10,13 +10,24 @@ import webpack from 'webpack';
 export default class BundledFile {
 	private readonly bundleBaseName: string;
 	private readonly rootFileDirectory: string;
+	private readonly outputDirectory: string;
+	private readonly outputFilename: string;
 
 	public constructor(
 		public readonly bundleName: string,
-		private readonly sourceFilePath: string
+		private readonly sourceFilePath: string,
+		outputFilepath?: string,
 	) {
 		this.rootFileDirectory = dirname(sourceFilePath);
 		this.bundleBaseName = basename(sourceFilePath, extname(sourceFilePath));
+
+		if (outputFilepath) {
+			this.outputDirectory = dirname(outputFilepath);
+			this.outputFilename = basename(outputFilepath);
+		} else {
+			this.outputDirectory = this.rootFileDirectory;
+			this.outputFilename = `${this.bundleBaseName}.bundle.js`;
+		}
 	}
 
 	private getWebpackOptions(mode: 'production' | 'development'): webpack.Configuration {
@@ -24,8 +35,8 @@ export default class BundledFile {
 			mode,
 			entry: this.sourceFilePath,
 			output: {
-				path: this.rootFileDirectory,
-				filename: `${this.bundleBaseName}.bundle.js`,
+				path: this.outputDirectory,
+				filename: this.outputFilename,
 
 				library: {
 					type: 'window',
@@ -154,12 +165,3 @@ export default class BundledFile {
 		});
 	}
 }
-
-
-const rootDir = dirname(__dirname);
-export const bundledFiles: BundledFile[] = [
-	new BundledFile(
-		'jsdraw',
-		`${rootDir}/example.ts`
-	),
-];

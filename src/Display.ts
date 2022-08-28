@@ -22,9 +22,11 @@ export default class Display {
 	) {
 		if (mode === RenderingMode.CanvasRenderer) {
 			this.initializeCanvasRendering();
-		} else {
+		} else if (mode === RenderingMode.DummyRenderer) {
 			this.dryInkRenderer = new DummyRenderer(editor.viewport);
 			this.wetInkRenderer = new DummyRenderer(editor.viewport);
+		} else {
+			throw new Error(`Unknown rendering mode, ${mode}!`);
 		}
 
 

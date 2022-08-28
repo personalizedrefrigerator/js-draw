@@ -19,6 +19,19 @@ import Mat33 from './geometry/Mat33';
 import Rect2 from './geometry/Rect2';
 import { defaultEditorLocalization, EditorLocalization } from './localization';
 
+export interface EditorSettings {
+	// Defaults to RenderingMode.CanvasRenderer
+	renderingMode: RenderingMode,
+
+	// Uses a default English localization if a translation is not given.
+	localization: Partial<EditorLocalization>,
+
+	// True if touchpad/mousewheel scrolling should scroll the editor instead of the document.
+	// This does not include pinch-zoom events.
+	// Defaults to true.
+	wheelEventsEnabled: boolean;
+}
+
 export class Editor {
 	// Wrapper around the viewport and toolbar
 	private container: HTMLElement;
@@ -39,22 +52,28 @@ export class Editor {
 	private loadingWarning: HTMLElement;
 	private accessibilityAnnounceArea: HTMLElement;
 
+	private settings: EditorSettings;
+
 	public constructor(
 		parent: HTMLElement,
-		renderingMode: RenderingMode = RenderingMode.CanvasRenderer,
-
-		// Uses a default English localization if a translation is not given.
-		localization?: Partial<EditorLocalization>,
+		settings: Partial<EditorSettings> = {},
 	) {
+		this.localization = {
+			...this.localization,
+			...settings.localization,
+		};
+
+		// Fill default settings.
+		this.settings = {
+			wheelEventsEnabled: settings.wheelEventsEnabled ?? true,
+			renderingMode: settings.renderingMode ?? RenderingMode.CanvasRenderer,
+			localization: this.localization,
+		};
+
 		this.container = document.createElement('div');
 		this.renderingRegion = document.createElement('div');
 		this.container.appendChild(this.renderingRegion);
 		this.container.className = 'imageEditorContainer';
-
-		this.localization = {
-			...this.localization,
-			...localization,
-		};
 
 		this.loadingWarning = document.createElement('div');
 		this.loadingWarning.classList.add('loadingMessage');
@@ -74,7 +93,7 @@ export class Editor {
 		this.notifier = new EventDispatcher();
 		this.importExportViewport = new Viewport(this.notifier);
 		this.viewport = new Viewport(this.notifier);
-		this.display = new Display(this, renderingMode, this.renderingRegion);
+		this.display = new Display(this, this.settings.renderingMode, this.renderingRegion);
 		this.image = new EditorImage();
 		this.history = new UndoRedoHistory(this, this.announceRedoCallback, this.announceUndoCallback);
 		this.toolController = new ToolController(this, this.localization);
@@ -91,6 +110,13 @@ export class Editor {
 		this.registerListeners();
 		this.rerender();
 		this.hideLoadingWarning();
+	}
+
+	// Returns a reference to this' container.
+	// Example usage:
+	//   editor.getRootElement().style.height = '500px';
+	public getRootElement(): HTMLElement {
+		return this.container;
 	}
 
 	// [fractionLoaded] should be a number from 0 to 1, where 1 represents completely loaded.
@@ -209,6 +235,12 @@ export class Editor {
 
 		this.container.addEventListener('wheel', evt => {
 			let delta = Vec3.of(evt.deltaX, evt.deltaY, evt.deltaZ);
+
+			// Process wheel events if the ctrl key is down -- we do want to handle
+			// pinch-zooming.
+			if (!this.settings.wheelEventsEnabled && !evt.ctrlKey) {
+				return;
+			}
 
 			if (evt.deltaMode === WheelEvent.DOM_DELTA_LINE) {
 				delta = delta.times(15);

@@ -1,5 +1,5 @@
 
-import { bundledFiles } from '../build_tools/BundledFile';
+import bundledFiles from './bundledFiles';
 
 async function build() {
 	// Build all in parallel

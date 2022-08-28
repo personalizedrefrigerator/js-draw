@@ -15,7 +15,7 @@ const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(ToolType.Selection)[0] as SelectionTool;
 };
 
-const createEditor = () => new Editor(document.body, RenderingMode.DummyRenderer);
+const createEditor = () => new Editor(document.body, { renderingMode: RenderingMode.DummyRenderer });
 
 const createSquareStroke = () => {
 	const testStroke = new Stroke([

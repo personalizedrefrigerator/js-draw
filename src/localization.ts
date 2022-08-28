@@ -1,7 +1,6 @@
 import { CommandLocalization, defaultCommandLocalization } from './commands/localization';
 import { defaultComponentLocalization, ImageComponentLocalization } from './components/localization';
-import HTMLToolbar from './toolbar/HTMLToolbar';
-import { ToolbarLocalization } from './toolbar/types';
+import { defaultToolbarLocalization, ToolbarLocalization } from './toolbar/localization';
 import { defaultToolLocalization, ToolLocalization } from './tools/localization';
 
 
@@ -14,7 +13,7 @@ export interface EditorLocalization extends ToolbarLocalization, ToolLocalizatio
 }
 
 export const defaultEditorLocalization: EditorLocalization = {
-	...HTMLToolbar.defaultLocalization,
+	...defaultToolbarLocalization,
 	...defaultToolLocalization,
 	...defaultCommandLocalization,
 	...defaultComponentLocalization,

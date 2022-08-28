@@ -1,6 +1,4 @@
-
-import { bundledFiles } from '../build_tools/BundledFile';
-console.log('Watching for changes...');
+import bundledFiles from './bundledFiles';
 
 function watch() {
 	// Watch for changes
@@ -9,4 +7,5 @@ function watch() {
 	}
 }
 
+console.log('Watching for changes...');
 watch();

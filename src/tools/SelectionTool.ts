@@ -16,7 +16,7 @@ const styles = `
 	}
 
 	.handleOverlay > .selectionBox {
-		position: fixed;
+		position: absolute;
 		z-index: 0;
 		transform-origin: center;
 	}

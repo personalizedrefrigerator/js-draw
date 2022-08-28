@@ -8,7 +8,6 @@ import Pen from '../tools/Pen';
 import Eraser from '../tools/Eraser';
 import BaseTool from '../tools/BaseTool';
 import SelectionTool from '../tools/SelectionTool';
-import { ToolbarLocalization } from './types';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import { Vec2 } from '../geometry/Vec2';
 import SVGRenderer from '../rendering/SVGRenderer';
@@ -18,6 +17,7 @@ import { ComponentBuilderFactory } from '../components/builders/types';
 import { makeArrowBuilder } from '../components/builders/ArrowBuilder';
 import { makeLineBuilder } from '../components/builders/LineBuilder';
 import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../components/builders/RectangleBuilder';
+import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 
 const primaryForegroundFill = `
 	style='fill: var(--primary-foreground-color);'
@@ -533,31 +533,9 @@ export default class HTMLToolbar {
 	private container: HTMLElement;
 	private penTypes: PenTypeRecord[];
 
-	public static defaultLocalization: ToolbarLocalization = {
-		pen: 'Pen',
-		eraser: 'Eraser',
-		select: 'Select',
-		touchDrawing: 'Touch Drawing',
-		thicknessLabel: 'Thickness: ',
-		colorLabel: 'Color: ',
-		resizeImageToSelection: 'Resize image to selection',
-		undo: 'Undo',
-		redo: 'Redo',
-		selectObjectType: 'Object type: ',
-
-		freehandPen: 'Freehand',
-		arrowPen: 'Arrow',
-		linePen: 'Line',
-		outlinedRectanglePen: 'Outlined rectangle',
-		filledRectanglePen: 'Filled rectangle',
-
-		dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
-		dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
-	};
-
 	public constructor(
 		private editor: Editor, parent: HTMLElement,
-		private localizationTable: ToolbarLocalization = HTMLToolbar.defaultLocalization,
+		private localizationTable: ToolbarLocalization = defaultToolbarLocalization,
 	) {
 		this.container = document.createElement('div');
 		this.container.classList.add(`${toolbarCSSPrefix}root`);

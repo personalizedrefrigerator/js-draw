@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+		<meta charset="utf-8"/>
+		<title>Editor from a bundle</title>
+		<style>
+			body .imageEditorContainer {
+				height: 800px;
+
+				--primary-background-color: green;
+				--primary-background-color-transparent: rgba(255, 240, 200, 0.5);
+				--secondary-background-color: yellow;
+				--primary-foreground-color: black;
+				--secondary-foreground-color: black;
+			}
+		</style>
+	</head>
+	<body>
+		<p>
+			This file tests the bundled version of <code>js-draw</code>.
+			Be sure to run <code>yarn build</code> before opening this!
+		</p>
+		<script src="../dist/bundle.js"></script>
+		<script>
+			const editor1 = new jsdraw.Editor(document.body, {
+				wheelEventsEnabled: false,
+			});
+			editor1.addToolbar();
+
+			const editor2 = new jsdraw.Editor(document.body);
+			editor2.addToolbar();
+		</script>
+	</body>
+</html>

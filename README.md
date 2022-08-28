@@ -23,6 +23,18 @@ const editor = new Editor(document.body);
 The `import js-draw/styles` step requires a bundler that can import `.css` files. For example, [`webpack` with `css-loader`.](https://webpack.js.org/loaders/css-loader/)
 
 
+If you're not using a bundler, consider using the pre-bundled editor:
+```html
+<!-- Replace 0.0.5 with the latest version of js-draw -->
+<script src="https://cdn.jsdelivr.net/npm/js-draw@0.0.5/dist/bundle.js"></script>
+<script>
+    const editor = new jsdraw.Editor(document.body);
+    editor.addToolbar();
+    editor.getRootElement().style.height = '600px';
+</script>
+```
+
+
 ## Adding a toolbar
 
 To create a toolbar with the default tools:
@@ -74,3 +86,86 @@ but exports to
 
 which **does** contain the `<circle/>` element.
 
+## Settings/configuration
+### Disabling touchpad panning
+
+Touchpad/mousewheel pan gestures can conflict with gestures used to scroll the document. To turn off touchpad pan gestures (and scrolling the editor with the mousewheel),
+```ts
+const editor = new Editor(document.body, {
+    wheelEventsEnabled: false,
+});
+```
+
+### Localization
+
+See [src/localization.ts](src/localization.ts) for a list of strings.
+
+Some of the default strings in the editor might be overridden like this:
+```ts
+const editor = new Editor(document.body, {
+    // Example partial Spanish localization
+    localization: {
+        // Not all translated strings need to be specified. If a string isn't given,
+        // the English (default) localization will be used
+
+        // Strings for the main editor interface
+        // (see src/localization.ts)
+        loading: (percentage: number) => `Cargando: ${percentage}%...`,
+        imageEditor: 'Editor de dibujos',
+
+        undoAnnouncement: (commandDescription: string) => `${commandDescription} fue deshecho`,
+        redoAnnouncement: (commandDescription: string) => `${commandDescription} fue rehecho`,
+
+        // Strings for the toolbar
+        // (see src/toolbar/localization.ts)
+        pen: 'Lapiz',
+        eraser: 'Borrador',
+        select: 'Selecciona',
+        touchDrawing: 'Dibuja con un dedo',
+        thicknessLabel: 'Tamaño: ',
+        colorLabel: 'Color: ',
+        
+        ...
+    },
+});
+```
+
+
+## Changing the editor's color theme
+
+The editor's color theme is specified using CSS. Its default theme looks like this:
+```css
+.imageEditorContainer {
+	/* Deafult colors for the editor -- light mode */
+
+    --primary-background-color: white;
+    --primary-background-color-transparent: rgba(255, 255, 255, 0.5);
+    --secondary-background-color: #faf;
+    --primary-foreground-color: black;
+    --secondary-foreground-color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+	.imageEditorContainer {
+		/* Deafult colors for the editor -- dark mode */
+
+		--primary-background-color: #151515;
+		--primary-background-color-transparent: rgba(50, 50, 50, 0.5);
+		--secondary-background-color: #607;
+		--primary-foreground-color: white;
+		--secondary-foreground-color: white;
+	}
+}
+```
+
+To override it, use a more specific CSS selector to set the theme variables. For example,
+```css
+body .imageEditorContainer {
+    --primary-background-color: green;
+    --primary-background-color-transparent: rgba(255, 240, 200, 0.5);
+    --secondary-background-color: yellow;
+    --primary-foreground-color: black;
+    --secondary-foreground-color: black;
+}
+```
+disables the dark theme and creates a theme that primarially uses yellow/green colors.
