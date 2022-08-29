@@ -45,7 +45,7 @@ If you're not using a bundler, consider using the pre-bundled editor:
 </script>
 ```
 
-**Note**: To ensure the CDN-hosted version of `js-draw` hasn't been tampered with, consider [including an `integrity="..."` attribute](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity). [JSDelivr can help compute a hash of the library.](https://www.jsdelivr.com/package/npm/js-draw?path=dist&tab=collection).
+**Note**: To ensure the CDN-hosted version of `js-draw` hasn't been tampered with, consider [including an `integrity="..."` attribute](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity). [Read more about using SRI with JSDelivr](https://www.jsdelivr.com/using-sri-with-dynamic-files).
 
 
 ## Adding a toolbar
