@@ -12,6 +12,7 @@ To use `js-draw`,
 
 ## Creating an `Editor`
 
+### With a bundler that supports importing `.css` files
 To create a new `Editor` and add it as a child of `document.body`,
 ```ts
 import Editor from 'js-draw';
@@ -22,7 +23,17 @@ const editor = new Editor(document.body);
 
 The `import js-draw/styles` step requires a bundler that can import `.css` files. For example, [`webpack` with `css-loader`.](https://webpack.js.org/loaders/css-loader/)
 
+### With a bundler that doesn't support importing `.css` files
+Import the pre-bundled version of the editor to apply CSS after loading the page.
+```ts
+import Editor from 'js-draw';
+import 'js-draw/bundle';
 
+const editor = new Editor(document.body);
+```
+`js-draw/bundle` is a version of the editor pre-processed by `Webpack`. As such, `import`ing it applies editor-specific CSS to the document.
+
+### Without a bundler
 If you're not using a bundler, consider using the pre-bundled editor:
 ```html
 <!-- Replace 0.0.5 with the latest version of js-draw -->
@@ -33,6 +44,8 @@ If you're not using a bundler, consider using the pre-bundled editor:
     editor.getRootElement().style.height = '600px';
 </script>
 ```
+
+**Note**: To ensure the CDN-hosted version of `js-draw` hasn't been tampered with, consider [including an `integrity="..."` attribute](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity). [JSDelivr can help compute a hash of the library.](https://www.jsdelivr.com/package/npm/js-draw?path=dist&tab=collection).
 
 
 ## Adding a toolbar
