@@ -1,4 +1,7 @@
 
+# 0.0.6
+ * Fixes a bug that caused saved images to grow in size after loading them, then re-saving.
+
 # 0.0.5
  * Configuration options:
    - Ability to disable touch panning

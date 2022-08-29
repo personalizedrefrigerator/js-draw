@@ -14,17 +14,13 @@ describe('Path.fromString', () => {
 		const path2 = Path.fromString('M 0 0');
 		const path3 = Path.fromString('M 1,1M 2,2 M 3,3');
 
-		expect(path1.parts[0]).toMatchObject({
-			kind: PathCommandType.MoveTo,
-			point: Vec2.zero,
-		});
-		expect(path2.parts).toMatchObject(path1.parts);
+		expect(path1.parts.length).toBe(0);
+		expect(path1.startPoint).toMatchObject(Vec2.zero);
+
+		expect(path2.parts.length).toBe(0);
+		expect(path2.startPoint).toMatchObject(Vec2.zero);
 
 		expect(path3.parts).toMatchObject([
-			{
-				kind: PathCommandType.MoveTo,
-				point: Vec2.of(1, 1),
-			},
 			{
 				kind: PathCommandType.MoveTo,
 				point: Vec2.of(2, 2),
@@ -46,25 +42,20 @@ describe('Path.fromString', () => {
 			},
 			{
 				kind: PathCommandType.MoveTo,
-				point: Vec2.of(1, 1),
-			},
-			{
-				kind: PathCommandType.MoveTo,
 				point: Vec2.of(4, 4),
 			},
 		]);
+		expect(path.startPoint).toMatchObject(Vec2.of(1, 1));
 	});
 
 	it('should handle lineTo commands', () => {
 		const path = Path.fromString('l1,2L-1,0l0.1,-1.0');
+		// l is a relative lineTo, but because there
+		// is no previous command, it should act like an
+		// absolute moveTo.
+		expect(path.startPoint).toMatchObject(Vec2.of(1, 2));
+
 		expect(path.parts).toMatchObject([
-			{
-				kind: PathCommandType.LineTo,
-				// l is a relative lineTo, but because there
-				// is no previous command, it should act like an
-				// absolute moveTo.
-				point: Vec2.of(1, 2),
-			},
 			{
 				kind: PathCommandType.LineTo,
 				point: Vec2.of(-1, 0),
@@ -84,10 +75,6 @@ describe('Path.fromString', () => {
 		expect(path2.startPoint).toMatchObject(path1.startPoint);
 		expect(path1.parts).toMatchObject(path2.parts);
 		expect(path1.parts).toMatchObject([
-			{
-				kind: PathCommandType.MoveTo,
-				point: Vec2.of(3, 3),
-			},
 			{
 				kind: PathCommandType.LineTo,
 				point: Vec2.of(4, 5),

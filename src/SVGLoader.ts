@@ -66,10 +66,14 @@ export default class SVGLoader implements ImageLoader {
 		const parts = pathData.split('M');
 		let isFirst = true;
 		for (const part of parts) {
-			if (part !== '') {
+			// Skip effective no-ops -- moveTos without additional commands.
+			const isNoOpMoveTo = /^[0-9., \t\n]+$/.exec(part);
+
+			if (part !== '' && !isNoOpMoveTo) {
 				// We split the path by moveTo commands, so add the 'M' back in
 				// if it was present.
 				const current = !isFirst ? `M${part}` : part;
+
 				const path = Path.fromString(current);
 				const spec = path.toRenderable(style);
 				result.push(spec);

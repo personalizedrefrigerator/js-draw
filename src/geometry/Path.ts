@@ -367,16 +367,28 @@ export default class Path {
 
 		let lastPos: Point2 = Vec2.zero;
 		let firstPos: Point2|null = null;
+		let isFirstCommand: boolean = true;
 		const commands: PathCommand[] = [];
 
 
 		const moveTo = (point: Point2) => {
+			// The first moveTo/lineTo is already handled by the [startPoint] parameter of the Path constructor.
+			if (isFirstCommand) {
+				isFirstCommand = false;
+				return;
+			}
+
 			commands.push({
 				kind: PathCommandType.MoveTo,
 				point,
 			});
 		};
 		const lineTo = (point: Point2) => {
+			if (isFirstCommand) {
+				isFirstCommand = false;
+				return;
+			}
+
 			commands.push({
 				kind: PathCommandType.LineTo,
 				point,
@@ -492,6 +504,7 @@ export default class Path {
 			if (args.length > 0) {
 				firstPos ??= args[0];
 			}
+			isFirstCommand = false;
 		}
 
 		return new Path(firstPos ?? Vec2.zero, commands);
