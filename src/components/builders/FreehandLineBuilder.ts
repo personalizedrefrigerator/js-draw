@@ -183,7 +183,6 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 		// Approximate the normal at the location of the control point
 		let projectionT = this.currentCurve.project(controlPoint.xy).t;
-
 		if (!projectionT) {
 			if (startPt.minus(controlPoint).magnitudeSquared() < endPt.minus(controlPoint).magnitudeSquared()) {
 				projectionT = 0.1;
@@ -192,11 +191,31 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			}
 		}
 
-		const halfVec = Vec2.ofXY(this.currentCurve.normal(projectionT))
+		const halfVecT = projectionT;
+		let halfVec = Vec2.ofXY(this.currentCurve.normal(halfVecT))
 			.normalized().times(
-				this.curveStartWidth / 2 * projectionT
-				+ this.curveEndWidth / 2 * (1 - projectionT)
+				this.curveStartWidth / 2 * halfVecT
+				+ this.curveEndWidth / 2 * (1 - halfVecT)
 			);
+
+		// Computes a boundary curve. [direction] should be either +1 or -1 (determines the side
+		// of the center curve to place the boundary).
+		const computeBoundaryCurve = (direction: number, halfVec: Vec2) => {
+			return new Bezier(
+				startPt.plus(startVec.times(direction)),
+				controlPoint.plus(halfVec.times(direction)),
+				endPt.plus(endVec.times(direction)),
+			);
+		};
+
+		const upperBoundary = computeBoundaryCurve(1, halfVec);
+		const lowerBoundary = computeBoundaryCurve(-1, halfVec);
+
+		// If the boundaries have two intersections, increasing the half vector's length could fix this.
+		if (upperBoundary.intersects(lowerBoundary).length === 2) {
+			halfVec = halfVec.times(2);
+		}
+
 
 		const pathCommands: PathCommand[] = [
 			{

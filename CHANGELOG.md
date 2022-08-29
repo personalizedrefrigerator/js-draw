@@ -1,6 +1,7 @@
 
 # 0.0.6
  * Fixes a bug that caused saved images to grow in size after loading them, then re-saving.
+ * Stops the pressure decrease on pen-up events from preventing line/arrow objects from having variable width.
 
 # 0.0.5
  * Configuration options:

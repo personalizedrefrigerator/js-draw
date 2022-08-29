@@ -186,8 +186,18 @@ export class Editor {
 				evt, pointers[evt.pointerId]?.down ?? false, this.viewport
 			);
 			if (pointer.down) {
-				pointers[pointer.id] = pointer;
+				const prevData = pointers[pointer.id];
 
+				if (prevData) {
+					const distanceMoved = pointer.screenPos.minus(prevData.screenPos).magnitude();
+
+					// If the pointer moved less than two pixels, don't send a new event.
+					if (distanceMoved < 2) {
+						return;
+					}
+				}
+
+				pointers[pointer.id] = pointer;
 				if (this.toolController.dispatchInputEvent({
 					kind: InputEvtType.PointerMoveEvt,
 					current: pointer,
