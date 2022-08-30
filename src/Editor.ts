@@ -447,7 +447,6 @@ export class Editor {
 		result.setAttribute('viewBox', `${rect.x} ${rect.y} ${rect.w} ${rect.h}`);
 		result.setAttribute('width', `${rect.w}`);
 		result.setAttribute('height', `${rect.h}`);
-		console.log('res', result);
 
 		// Ensure the image can be identified as an SVG if downloaded.
 		// See https://jwatt.org/svg/authoring/

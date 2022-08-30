@@ -139,35 +139,7 @@ const showSavePopup = (editor: Editor) => {
 	);
 };
 
-
-const startVisualErrorLog = () => {
-	const logArea: HTMLTextAreaElement = document.querySelector('#logOutput')!;
-	logArea.style.display = 'block';
-	logArea.value = `
-
-If enabled, errors will be logged to this textarea.
-
-
-	`;
-
-	const scrollLogToEnd = () => {
-		logArea.scrollTop = logArea.scrollHeight;
-	};
-
-	window.onerror = (evt) => {
-		logArea.value += '\nError thrown: ' + evt + '\n';
-		scrollLogToEnd();
-	};
-	const originalErrFn = console.error;
-	console.error = (...data) => {
-		originalErrFn.apply(console, data);
-		logArea.value += '\nError logged: ' + data.join(', ') + '\n';
-		scrollLogToEnd();
-	};
-};
-
 (() => {
-	const showErrorsCheckbox: HTMLInputElement = document.querySelector('#alertOnError')!;
 	const loadFromTextarea: HTMLTextAreaElement = document.querySelector('#initialData')!;
 	const fileInput: HTMLInputElement = document.querySelector('#initialFile')!;
 	const startButton: HTMLButtonElement = document.querySelector('#startButton')!;
@@ -211,12 +183,7 @@ If enabled, errors will be logged to this textarea.
 
 	startButton.onclick = () => {
 		const textareaData = loadFromTextarea.value;
-		const showErrors = showErrorsCheckbox.checked;
 		optionsScreen.remove();
-
-		if (showErrors) {
-			startVisualErrorLog();
-		}
 
 		const editor = createEditor(() => showSavePopup(editor));
 
