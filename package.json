@@ -1,6 +1,6 @@
 {
   "name": "js-draw",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
   "main": "dist/src/Editor.js",
   "types": "dist/src/Editor.d.ts",
@@ -48,7 +48,7 @@
     "linter-precommit": "eslint --fix --ext .js --ext .ts",
     "lint-staged": "lint-staged",
     "postinstall": "husky install",
-    "prepack": "pinst --disable",
+    "prepack": "yarn build && pinst --disable",
     "postpack": "pinst --enable"
   },
   "dependencies": {
