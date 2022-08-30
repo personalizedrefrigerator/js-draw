@@ -1,4 +1,8 @@
 
+# 0.0.10
+ * Prefer higher quality rendering except during touchscreen gestures and large groups of commands.
+ * Add a "delete selection" button.
+
 # 0.0.8
  * Map `ctrl+z` to undo, `ctrl+shift+Z` to redo.
 

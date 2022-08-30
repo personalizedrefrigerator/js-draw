@@ -14,6 +14,7 @@ export interface ToolbarLocalization {
 	touchDrawing: string;
 	thicknessLabel: string;
 	resizeImageToSelection: string;
+	deleteSelection: string;
 	undo: string;
 	redo: string;
 
@@ -29,6 +30,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	thicknessLabel: 'Thickness: ',
 	colorLabel: 'Color: ',
 	resizeImageToSelection: 'Resize image to selection',
+	deleteSelection: 'Delete selection',
 	undo: 'Undo',
 	redo: 'Redo',
 	selectObjectType: 'Object type: ',

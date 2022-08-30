@@ -1,4 +1,5 @@
 import Command from '../commands/Command';
+import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import Editor from '../Editor';
 import Mat33 from '../geometry/Mat33';
@@ -421,6 +422,10 @@ class Selection {
 		this.backgroundBox.style.transform = `rotate(${rotationDeg}deg)`;
 		this.rotateCircle.style.transform = `rotate(${-rotationDeg}deg)`;
 	}
+
+	public deleteSelectedObjects(): Command {
+		return new Erase(this.selectedElems);
+	}
 }
 
 export default class SelectionTool extends BaseTool {
@@ -541,5 +546,16 @@ export default class SelectionTool extends BaseTool {
 	// Get the object responsible for displaying this' selection.
 	public getSelection(): Selection|null {
 		return this.selectionBox;
+	}
+
+	public clearSelection() {
+		this.handleOverlay.replaceChildren();
+		this.prevSelectionBox = this.selectionBox;
+		this.selectionBox = null;
+
+		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+			kind: EditorEventType.ToolUpdated,
+			tool: this,
+		});
 	}
 }

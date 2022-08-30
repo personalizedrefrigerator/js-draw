@@ -245,13 +245,22 @@ class SelectionWidget extends ToolbarWidget {
 	protected fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		const resizeButton = document.createElement('button');
+		const deleteButton = document.createElement('button');
 
 		resizeButton.innerText = this.localizationTable.resizeImageToSelection;
 		resizeButton.disabled = true;
+		deleteButton.innerText = this.localizationTable.deleteSelection;
+		deleteButton.disabled = true;
 
 		resizeButton.onclick = () => {
 			const selection = this.tool.getSelection();
 			this.editor.dispatch(this.editor.setImportExportRect(selection!.region));
+		};
+
+		deleteButton.onclick = () => {
+			const selection = this.tool.getSelection();
+			this.editor.dispatch(selection!.deleteSelectedObjects());
+			this.tool.clearSelection();
 		};
 
 		// Enable/disable actions based on whether items are selected
@@ -263,11 +272,13 @@ class SelectionWidget extends ToolbarWidget {
 			if (toolEvt.tool === this.tool) {
 				const selection = this.tool.getSelection();
 				const hasSelection = selection && selection.region.area > 0;
+
 				resizeButton.disabled = !hasSelection;
+				deleteButton.disabled = resizeButton.disabled;
 			}
 		});
 
-		container.replaceChildren(resizeButton);
+		container.replaceChildren(resizeButton, deleteButton);
 		dropdown.appendChild(container);
 		return true;
 	}
