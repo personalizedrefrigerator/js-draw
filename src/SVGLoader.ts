@@ -1,6 +1,7 @@
 import Color4 from './Color4';
 import AbstractComponent from './components/AbstractComponent';
 import Stroke from './components/Stroke';
+import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
 import UnknownSVGObject from './components/UnknownSVGObject';
 import Path from './geometry/Path';
 import Rect2 from './geometry/Rect2';
@@ -127,6 +128,10 @@ export default class SVGLoader implements ImageLoader {
 		this.rootViewBox = new Rect2(x, y, width, height);
 	}
 
+	private updateSVGAttrs(node: SVGSVGElement) {
+		this.onAddComponent?.(new SVGGlobalAttributesObject(this.getSourceAttrs(node)));
+	}
+
 	private async visit(node: Element) {
 		this.totalToProcess += node.childElementCount;
 
@@ -139,6 +144,7 @@ export default class SVGLoader implements ImageLoader {
 			break;
 		case 'svg':
 			this.updateViewBox(node as SVGSVGElement);
+			this.updateSVGAttrs(node as SVGSVGElement);
 			break;
 		default:
 			console.warn('Unknown SVG element,', node);
@@ -156,6 +162,13 @@ export default class SVGLoader implements ImageLoader {
 
 		this.processedCount ++;
 		await this.onProgress?.(this.processedCount, this.totalToProcess);
+	}
+
+	// Get SVG element attributes (e.g. xlink=...)
+	private getSourceAttrs(node: SVGSVGElement): Array<[string, string|null]> {
+		return node.getAttributeNames().map(attr => {
+			return [ attr, node.getAttribute(attr) ];
+		});
 	}
 
 	public async start(

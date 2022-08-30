@@ -15,10 +15,25 @@ export default class SVGRenderer extends AbstractRenderer {
 	private lastPathStart: Point2|null;
 
 	private mainGroup: SVGGElement;
+	private overwrittenAttrs: Record<string, string|null> = {};
 
 	public constructor(private elem: SVGSVGElement, viewport: Viewport) {
 		super(viewport);
 		this.clear();
+	}
+
+	// Sets an attribute on the root SVG element.
+	public setRootSVGAttribute(name: string, value: string|null) {
+		// Make the original value of the attribute restorable on clear
+		if (!(name in this.overwrittenAttrs)) {
+			this.overwrittenAttrs[name] = this.elem.getAttribute(name);
+		}
+
+		if (value !== null) {
+			this.elem.setAttribute(name, value);
+		} else {
+			this.elem.removeAttribute(name);
+		}
 	}
 
 	public displaySize(): Vec2 {
@@ -27,6 +42,18 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	public clear() {
 		this.mainGroup = document.createElementNS(svgNameSpace, 'g');
+
+		// Restore all alltributes
+		for (const attrName in this.overwrittenAttrs) {
+			const value = this.overwrittenAttrs[attrName];
+
+			if (value) {
+				this.elem.setAttribute(attrName, value);
+			} else {
+				this.elem.removeAttribute(attrName);
+			}
+		}
+		this.overwrittenAttrs = {};
 
 		// Remove all children
 		this.elem.replaceChildren(this.mainGroup);
