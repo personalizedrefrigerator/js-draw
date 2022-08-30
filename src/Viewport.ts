@@ -158,6 +158,54 @@ export class Viewport {
 	public roundPoint(point: Point2): Point2 {
 		return Viewport.roundPoint(point, 1 / this.getScaleFactor());
 	}
+
+	// Returns a Command that transforms the view such that [rect] is visible, and perhaps
+	// centered in the viewport.
+	// Returns null if no transformation is necessary
+	public zoomTo(toMakeVisible: Rect2): Command {
+		let transform = Mat33.identity;
+
+		// Try to move the selection within the center 2/3rds of the viewport.
+		const recomputeTargetRect = () => {
+			// transform transforms objects on the canvas. As such, we need to invert it
+			// to transform the viewport.
+			const visibleRect = this.visibleRect.transformedBoundingBox(transform.inverse());
+			return visibleRect.transformedBoundingBox(Mat33.scaling2D(2 / 3, visibleRect.center));
+		};
+
+		let targetRect = recomputeTargetRect();
+		const largerThanTarget = targetRect.w < toMakeVisible.w || targetRect.h < toMakeVisible.h;
+
+		// Ensure that toMakeVisible is at least 1/8th of the visible region.
+		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 0.125;
+
+		if (largerThanTarget || muchSmallerThanTarget) {
+			// If larger than the target, ensure that the longest axis is visible.
+			// If smaller, shrink the visible rectangle as much as possible
+			const multiplier = (largerThanTarget ? Math.max : Math.min)(
+				toMakeVisible.w / targetRect.w, toMakeVisible.h / targetRect.h
+			);
+			const visibleRectTransform = Mat33.scaling2D(multiplier, targetRect.topLeft);
+			const viewportContentTransform = visibleRectTransform.inverse();
+
+			transform = transform.rightMul(viewportContentTransform);
+		}
+
+		targetRect = recomputeTargetRect();
+
+		// Ensure that the center of the region is visible
+		if (!targetRect.containsRect(toMakeVisible)) {
+			// target position - current position
+			const translation = toMakeVisible.center.minus(targetRect.center);
+			const visibleRectTransform = Mat33.translation(translation);
+			const viewportContentTransform = visibleRectTransform.inverse();
+
+			transform = transform.rightMul(viewportContentTransform);
+		}
+		
+
+		return new Viewport.ViewportTransform(transform);
+	}
 }
 
 export namespace Viewport { // eslint-disable-line

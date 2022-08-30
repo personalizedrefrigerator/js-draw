@@ -479,6 +479,7 @@ export class Editor {
 		this.hideLoadingWarning();
 
 		this.setImportExportRect(imageRect).apply(this);
+		this.viewport.zoomTo(imageRect).apply(this);
 	}
 
 	// Returns the size of the visible region of the output SVG

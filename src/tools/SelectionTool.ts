@@ -7,7 +7,6 @@ import Mat33 from '../geometry/Mat33';
 import Rect2 from '../geometry/Rect2';
 import { Point2, Vec2 } from '../geometry/Vec2';
 import { EditorEventType, PointerEvt } from '../types';
-import Viewport from '../Viewport';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
 
@@ -484,38 +483,12 @@ export default class SelectionTool extends BaseTool {
 		});
 
 		if (hasSelection) {
-			const visibleRect = this.editor.viewport.visibleRect;
-			const selectionRect = this.selectionBox.region;
-
 			this.editor.announceForAccessibility(
 				this.editor.localization.selectedElements(this.selectionBox.getSelectedItemCount())
 			);
 
-			// Try to move the selection within the center 2/3rds of the viewport.
-			const targetRect = visibleRect.transformedBoundingBox(
-				Mat33.scaling2D(2 / 3, visibleRect.center)
-			);
-
-			// Ensure that the selection fits within the target
-			if (targetRect.w < selectionRect.w || targetRect.h < selectionRect.h) {
-				const multiplier = Math.max(
-					selectionRect.w / targetRect.w, selectionRect.h / targetRect.h
-				);
-				const visibleRectTransform = Mat33.scaling2D(multiplier, targetRect.topLeft);
-				const viewportContentTransform = visibleRectTransform.inverse();
-
-				(new Viewport.ViewportTransform(viewportContentTransform)).apply(this.editor);
-			}
-
-			// Ensure that the top left is visible
-			if (!targetRect.containsRect(selectionRect)) {
-				// target position - current position
-				const translation = selectionRect.center.minus(targetRect.center);
-				const visibleRectTransform = Mat33.translation(translation);
-				const viewportContentTransform = visibleRectTransform.inverse();
-
-				(new Viewport.ViewportTransform(viewportContentTransform)).apply(this.editor);
-			}
+			const selectionRect = this.selectionBox.region;
+			this.editor.viewport.zoomTo(selectionRect).apply(this.editor);
 		}
 	}
 
