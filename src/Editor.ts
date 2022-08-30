@@ -311,6 +311,7 @@ export class Editor {
 	private async asyncApplyOrUnapplyCommands(
 		commands: Command[], apply: boolean, updateChunkSize: number
 	) {
+		this.display.setDraftMode(true);
 		for (let i = 0; i < commands.length; i += updateChunkSize) {
 			this.showLoadingWarning(i / commands.length);
 
@@ -332,6 +333,7 @@ export class Editor {
 				});
 			}
 		}
+		this.display.setDraftMode(false);
 		this.hideLoadingWarning();
 	}
 

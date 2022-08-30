@@ -105,6 +105,10 @@ export default class Display {
 		return this.dryInkRenderer;
 	}
 
+	public setDraftMode(draftMode: boolean) {
+		this.dryInkRenderer.setDraftMode(draftMode);
+	}
+
 	public getDryInkRenderer(): AbstractRenderer {
 		return this.dryInkRenderer;
 	}

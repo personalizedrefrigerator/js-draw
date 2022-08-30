@@ -78,6 +78,7 @@ export default class PanZoom extends BaseTool {
 
 		if (handlingGesture) {
 			this.transform ??= new Viewport.ViewportTransform(Mat33.identity);
+			this.editor.display.setDraftMode(true);
 		}
 
 		return handlingGesture;
@@ -136,11 +137,13 @@ export default class PanZoom extends BaseTool {
 			this.editor.dispatch(this.transform, false);
 		}
 
+		this.editor.display.setDraftMode(false);
 		this.transform = null;
 	}
 
 	public onGestureCancel(): void {
 		this.transform?.unapply(this.editor);
+		this.editor.display.setDraftMode(false);
 		this.transform = null;
 	}
 

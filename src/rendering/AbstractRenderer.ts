@@ -43,6 +43,8 @@ export default abstract class AbstractRenderer {
 		controlPoint: Point2, endPoint: Point2,
 	): void;
 
+	public setDraftMode(_draftMode: boolean) { }
+
 	private objectLevel: number = 0;
 	private currentPaths: RenderablePathSpec[]|null = null;
 	private flushPath() {
