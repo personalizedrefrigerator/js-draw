@@ -8,7 +8,6 @@ import AbstractRenderer, { RenderablePathSpec, RenderingStyle } from './Abstract
 export default class CanvasRenderer extends AbstractRenderer {
 	private ignoreObjectsAboveLevel: number|null = null;
 	private ignoringObject: boolean = false;
-	private prevPoint: Vec2|null = null;
 
 	// Minimum square distance of a control point from the line between the end points
 	// for the curve not to be drawn as a line.
@@ -55,13 +54,11 @@ export default class CanvasRenderer extends AbstractRenderer {
 
 		this.ctx.beginPath();
 		this.ctx.moveTo(startPoint.x, startPoint.y);
-		this.prevPoint = startPoint;
 	}
 
 	protected endPath(style: RenderingStyle) {
 		this.ctx.fillStyle = style.fill.toHexString();
 		this.ctx.fill();
-		this.prevPoint = null;
 
 		if (style.stroke) {
 			this.ctx.strokeStyle = style.stroke.color.toHexString();
@@ -75,13 +72,11 @@ export default class CanvasRenderer extends AbstractRenderer {
 	protected lineTo(point: Point2) {
 		point = this.viewport.canvasToScreen(point);
 		this.ctx.lineTo(point.x, point.y);
-		this.prevPoint = point;
 	}
 
 	protected moveTo(point: Point2) {
 		point = this.viewport.canvasToScreen(point);
 		this.ctx.moveTo(point.x, point.y);
-		this.prevPoint = point;
 	}
 
 	protected traceCubicBezierCurve(p1: Point2, p2: Point2, p3: Point2) {
@@ -89,8 +84,15 @@ export default class CanvasRenderer extends AbstractRenderer {
 		p2 = this.viewport.canvasToScreen(p2);
 		p3 = this.viewport.canvasToScreen(p3);
 
-		this.ctx.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
-		this.prevPoint = p3;
+		// Approximate the curve if small enough.
+		const delta1 = p2.minus(p1);
+		const delta2 = p3.minus(p2);
+		if (delta1.magnitudeSquared() < this.minSquareCurveApproxDist
+			&& delta2.magnitudeSquared() < this.minSquareCurveApproxDist) {
+			this.ctx.lineTo(p3.x, p3.y);
+		} else {
+			this.ctx.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+		}
 	}
 
 	protected traceQuadraticBezierCurve(controlPoint: Vec3, endPoint: Vec3) {
@@ -98,21 +100,14 @@ export default class CanvasRenderer extends AbstractRenderer {
 		endPoint = this.viewport.canvasToScreen(endPoint);
 
 		// Approximate the curve with a line if small enough
-		const endStartVec = this.prevPoint!.minus(endPoint).normalized();
-		const toCtrlPoint = controlPoint.minus(endPoint);
-
-		// Project [toCtrlPoint] onto [endStartVec]
-		const projection = endStartVec.times(toCtrlPoint.dot(endStartVec));
-		const toLine = toCtrlPoint.minus(projection);
-
-		if (toLine.magnitudeSquared() < this.minSquareCurveApproxDist) {
+		const delta = controlPoint.minus(endPoint);
+		if (delta.magnitudeSquared() < this.minSquareCurveApproxDist) {
 			this.ctx.lineTo(endPoint.x, endPoint.y);
 		} else {
 			this.ctx.quadraticCurveTo(
 				controlPoint.x, controlPoint.y, endPoint.x, endPoint.y
 			);
 		}
-		this.prevPoint = endPoint;
 	}
 
 	public drawPath(path: RenderablePathSpec) {
