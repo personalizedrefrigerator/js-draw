@@ -8,6 +8,7 @@ import Eraser from './Eraser';
 import SelectionTool from './SelectionTool';
 import Color4 from '../Color4';
 import { ToolLocalization } from './localization';
+import UndoRedoShortcut from './UndoRedoShortcut';
 
 export enum ToolType {
 	TouchPanZoom,
@@ -15,6 +16,7 @@ export enum ToolType {
 	Selection,
 	Eraser,
 	PanZoom,
+	UndoRedoShortcut,
 }
 
 export default class ToolController {
@@ -40,6 +42,7 @@ export default class ToolController {
 			touchPanZoom,
 			...primaryTools,
 			new PanZoom(editor, PanZoomMode.TwoFingerGestures | PanZoomMode.AnyDevice, localization.twoFingerPanZoomTool),
+			new UndoRedoShortcut(editor),
 		];
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolEnabledGroup));
 		touchPanZoom.setEnabled(false);

@@ -5,6 +5,7 @@ export interface ToolLocalization {
     eraserTool: string;
     touchPanTool: string;
     twoFingerPanZoomTool: string;
+    undoRedoTool: string;
 
     toolEnabledAnnouncement: (toolName: string) => string;
     toolDisabledAnnouncement: (toolName: string) => string;
@@ -16,6 +17,7 @@ export const defaultToolLocalization: ToolLocalization = {
 	eraserTool: 'Eraser',
 	touchPanTool: 'Touch Panning',
 	twoFingerPanZoomTool: 'Panning and Zooming',
+	undoRedoTool: 'Undo/Redo',
 
 	toolEnabledAnnouncement: (toolName) => `${toolName} enabled`,
 	toolDisabledAnnouncement: (toolName) => `${toolName} disabled`,

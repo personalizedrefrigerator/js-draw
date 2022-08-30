@@ -1,4 +1,7 @@
 
+# 0.0.8
+ * Map `ctrl+z` to undo, `ctrl+shift+Z` to redo.
+
 # 0.0.7
  * Preserve SVG global attributes when loading/saving images.
     * This fixes a bug where lost information (e.g. a missing namespace) broke SVGs on export.

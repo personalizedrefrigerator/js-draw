@@ -46,6 +46,7 @@ export interface WheelEvt {
 export interface KeyPressEvent {
 	readonly kind: InputEvtType.KeyPressEvent;
 	readonly key: string;
+	readonly ctrlKey: boolean;
 }
 
 // Event triggered when pointer capture is taken by a different [PointerEvtListener].

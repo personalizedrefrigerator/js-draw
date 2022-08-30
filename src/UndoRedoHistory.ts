@@ -56,6 +56,14 @@ class UndoRedoHistory {
 		}
 		this.fireUpdateEvent();
 	}
+
+	public get undoStackSize(): number {
+		return this.undoStack.length;
+	}
+
+	public get redoStackSize(): number {
+		return this.redoStack.length;
+	}
 }
 
 export default UndoRedoHistory;

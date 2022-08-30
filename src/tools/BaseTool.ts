@@ -6,10 +6,11 @@ export default abstract class BaseTool implements PointerEvtListener {
 	private enabled: boolean = true;
 	private group: ToolEnabledGroup|null = null;
 
-	public abstract onPointerDown(event: PointerEvt): boolean;
-	public abstract onPointerMove(event: PointerEvt): void;
-	public abstract onPointerUp(event: PointerEvt): void;
-	public abstract onGestureCancel(): void;
+	public onPointerDown(_event: PointerEvt): boolean { return false; }
+	public onPointerMove(_event: PointerEvt) { }
+	public onPointerUp(_event: PointerEvt) { }
+	public onGestureCancel() { }
+
 	public abstract readonly kind: ToolType;
 
 	protected constructor(private notifier: EditorNotifier, public readonly description: string) {

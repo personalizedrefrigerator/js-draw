@@ -5,12 +5,9 @@ import Stroke from './components/Stroke';
 import { Vec2 } from './geometry/Vec2';
 import Path, { PathCommandType } from './geometry/Path';
 import Color4 from './Color4';
-import Editor from './Editor';
-import { RenderingMode } from './Display';
 import DummyRenderer from './rendering/DummyRenderer';
 import { RenderingStyle } from './rendering/AbstractRenderer';
-
-const createEditor = () => new Editor(document.body, { renderingMode: RenderingMode.DummyRenderer });
+import createEditor from './testing/createEditor';
 
 describe('EditorImage', () => {
 	const testStroke = new Stroke([

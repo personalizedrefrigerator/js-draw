@@ -238,6 +238,7 @@ export class Editor {
 			if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.KeyPressEvent,
 				key: evt.key,
+				ctrlKey: evt.ctrlKey,
 			})) {
 				evt.preventDefault();
 			}
