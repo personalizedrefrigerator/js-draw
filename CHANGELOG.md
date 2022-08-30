@@ -1,4 +1,7 @@
 
+# 0.0.11
+ * Zoom to import/export region just after importing.
+
 # 0.0.10
  * Prefer higher quality rendering except during touchscreen gestures and large groups of commands.
  * Add a "delete selection" button.

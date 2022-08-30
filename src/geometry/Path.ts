@@ -288,8 +288,8 @@ export default class Path {
 		const toRoundedString = (num: number): string => {
 			// Try to remove rounding errors. If the number ends in at least three/four zeroes
 			// (or nines) just one or two digits, it's probably a rounding error.
-			const fixRoundingUpExp = /^([-]?\d*\.?\d*[1-9.])0{4,}\d$/;
-			const hasRoundingDownExp = /^([-]?)(\d*)\.(\d*9{4,}\d)$/;
+			const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d$/;
+			const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,}\d)$/;
 
 			let text = num.toString();
 			if (text.indexOf('.') === -1) {
@@ -314,7 +314,11 @@ export default class Path {
 			}
 
 			text = text.replace(fixRoundingUpExp, '$1');
-			// Remove trailing period (if it exists)
+
+			// Remove trailing zeroes
+			text = text.replace(/([.][^0]*)0+$/, '$1');
+
+			// Remove trailing period
 			return text.replace(/[.]$/, '');
 		};
 
