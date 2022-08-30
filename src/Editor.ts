@@ -463,23 +463,28 @@ export class Editor {
 
 	public async loadFrom(loader: ImageLoader) {
 		this.showLoadingWarning(0);
-		const imageRect = await loader.start((component) => {
+		this.display.setDraftMode(true);
+
+		await loader.start((component) => {
 			(new EditorImage.AddElementCommand(component)).apply(this);
 		}, (countProcessed: number, totalToProcess: number) => {
 			if (countProcessed % 100 === 0) {
 				this.showLoadingWarning(countProcessed / totalToProcess);
-				this.rerender(false);
+				this.rerender();
 				return new Promise(resolve => {
 					requestAnimationFrame(() => resolve());
 				});
 			}
 
 			return null;
+		}, (importExportRect: Rect2) => {
+			this.setImportExportRect(importExportRect).apply(this);
+			this.viewport.zoomTo(importExportRect).apply(this);
 		});
 		this.hideLoadingWarning();
 
-		this.setImportExportRect(imageRect).apply(this);
-		this.viewport.zoomTo(imageRect).apply(this);
+		this.display.setDraftMode(false);
+		this.queueRerender();
 	}
 
 	// Returns the size of the visible region of the output SVG

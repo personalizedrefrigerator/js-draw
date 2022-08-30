@@ -6,7 +6,7 @@ import UnknownSVGObject from './components/UnknownSVGObject';
 import Path from './geometry/Path';
 import Rect2 from './geometry/Rect2';
 import { RenderablePathSpec, RenderingStyle } from './rendering/AbstractRenderer';
-import { ComponentAddedListener, ImageLoader, OnProgressListener } from './types';
+import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 
 type OnFinishListener = ()=> void;
 
@@ -16,6 +16,8 @@ export const defaultSVGViewRect = new Rect2(0, 0, 500, 500);
 export default class SVGLoader implements ImageLoader {
 	private onAddComponent: ComponentAddedListener|null = null;
 	private onProgress: OnProgressListener|null = null;
+	private onDetermineExportRect: OnDetermineExportRectListener|null = null;
+
 	private processedCount: number = 0;
 	private totalToProcess: number = 0;
 	private rootViewBox: Rect2|null;
@@ -126,6 +128,7 @@ export default class SVGLoader implements ImageLoader {
 		}
 
 		this.rootViewBox = new Rect2(x, y, width, height);
+		this.onDetermineExportRect?.(this.rootViewBox);
 	}
 
 	private updateSVGAttrs(node: SVGSVGElement) {
@@ -172,10 +175,12 @@ export default class SVGLoader implements ImageLoader {
 	}
 
 	public async start(
-		onAddComponent: ComponentAddedListener, onProgress: OnProgressListener
-	): Promise<Rect2> {
+		onAddComponent: ComponentAddedListener, onProgress: OnProgressListener,
+		onDetermineExportRect: OnDetermineExportRectListener|null = null
+	): Promise<void> {
 		this.onAddComponent = onAddComponent;
 		this.onProgress = onProgress;
+		this.onDetermineExportRect = onDetermineExportRect;
 
 		// Estimate the number of tags to process.
 		this.totalToProcess = this.source.childElementCount;
@@ -185,14 +190,12 @@ export default class SVGLoader implements ImageLoader {
 		await this.visit(this.source);
 
 		const viewBox = this.rootViewBox;
-		let result = defaultSVGViewRect;
 
-		if (viewBox) {
-			result = Rect2.of(viewBox);
+		if (!viewBox) {
+			this.onDetermineExportRect?.(defaultSVGViewRect);
 		}
 
 		this.onFinish?.();
-		return result;
 	}
 
 	// TODO: Handling unsafe data! Tripple-check that this is secure!

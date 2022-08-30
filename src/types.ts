@@ -134,11 +134,18 @@ export type OnProgressListener =
 	(amountProcessed: number, totalToProcess: number)=> Promise<void>|null;
 
 export type ComponentAddedListener = (component: AbstractComponent)=> void;
+
+// Called when a new estimate for the import/export rect has been generated. This can be called multiple times.
+// Only the last call to this listener must be accurate.
+// The import/export rect is also returned by [start].
+export type OnDetermineExportRectListener = (exportRect: Rect2)=> void;
+
 export interface ImageLoader {
-	// Returns the main region of the loaded image
 	start(
-		onAddComponent: ComponentAddedListener, onProgressListener: OnProgressListener
-	): Promise<Rect2>;
+		onAddComponent: ComponentAddedListener,
+		onProgressListener: OnProgressListener,
+		onDetermineExportRect?: OnDetermineExportRectListener,
+	): Promise<void>;
 }
 
 export interface StrokeDataPoint {
