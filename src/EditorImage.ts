@@ -137,7 +137,7 @@ export class ImageNode {
 		return this.parent;
 	}
 
-	public getChildrenInRegion(region: Rect2): ImageNode[] {
+	private getChildrenIntersectingRegion(region: Rect2): ImageNode[] {
 		return this.children.filter(child => {
 			return child.getBBox().intersects(region);
 		});
@@ -147,7 +147,7 @@ export class ImageNode {
 		if (this.content) {
 			return [this];
 		}
-		return this.getChildrenInRegion(region);
+		return this.getChildrenIntersectingRegion(region);
 	}
 
 	// Returns a list of `ImageNode`s with content (and thus no children).
@@ -163,7 +163,7 @@ export class ImageNode {
 			result.push(this);
 		}
 
-		const children = this.getChildrenInRegion(region);
+		const children = this.getChildrenIntersectingRegion(region);
 		for (const child of children) {
 			result.push(...child.getLeavesIntersectingRegion(region, isTooSmall));
 		}

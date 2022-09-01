@@ -21,6 +21,10 @@ export interface CacheProps {
 
     // Minimum component count to cache, rather than just re-render each time.
     minComponentsPerCache: number;
+
+    // Minimum number of strokes/etc. to use the cache to render, isntead of
+    // rendering directly.
+    minComponentsToUseCache: number;
 }
 
 // CacheRecordManager relies on a partial copy of the shared state. Thus,

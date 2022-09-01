@@ -24,6 +24,7 @@ export const createCache = (onRenderAlloc?: RenderAllocCallback, cacheOptions?: 
 		cacheSize: 500 * 10 * 4,
 		maxScale: 2,
 		minComponentsPerCache: 0,
+		minComponentsToUseCache: 0,
 		...cacheOptions
 	});
 

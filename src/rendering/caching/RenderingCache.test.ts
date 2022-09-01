@@ -10,7 +10,7 @@ import Viewport from '../../Viewport';
 import Mat33 from '../../geometry/Mat33';
 
 describe('RenderingCache', () => {
-	const testPath = Path.fromString('M0,0 l100,500 l-20,20');
+	const testPath = Path.fromString('M0,0 l100,500 l-20,20 L-100,-100');
 	const testStroke = new Stroke([ testPath.toRenderable({ fill: Color4.purple }) ]);
 
 	it('should create a root node large enough to contain the viewport', () => {

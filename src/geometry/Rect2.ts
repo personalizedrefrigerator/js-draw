@@ -67,21 +67,38 @@ export default class Rect2 {
 	}
 
 	public intersects(other: Rect2): boolean {
-		return this.intersection(other) !== null;
+		// Project along x/y axes.
+		const thisMinX = this.x;
+		const thisMaxX = thisMinX + this.w;
+		const otherMinX = other.x;
+		const otherMaxX = other.x + other.w;
+
+		if (thisMaxX < otherMinX || thisMinX > otherMaxX) {
+			return false;
+		}
+
+
+		const thisMinY = this.y;
+		const thisMaxY = thisMinY + this.h;
+		const otherMinY = other.y;
+		const otherMaxY = other.y + other.h;
+
+		if (thisMaxY < otherMinY || thisMinY > otherMaxY) {
+			return false;
+		}
+
+		return true;
 	}
 
 	// Returns the overlap of this and [other], or null, if no such
 	//          overlap exists
 	public intersection(other: Rect2): Rect2|null {
-		const topLeft = this.topLeft.zip(other.topLeft, Math.max);
-		const bottomRight = this.bottomRight.zip(other.bottomRight, Math.min);
-
-		// The intersection can't be outside of this rectangle
-		if (!this.containsPoint(topLeft) || !this.containsPoint(bottomRight)) {
-			return null;
-		} else if (!other.containsPoint(topLeft) || !other.containsPoint(bottomRight)) {
+		if (!this.intersects(other)) {
 			return null;
 		}
+
+		const topLeft = this.topLeft.zip(other.topLeft, Math.max);
+		const bottomRight = this.bottomRight.zip(other.bottomRight, Math.min);
 
 		return Rect2.fromCorners(topLeft, bottomRight);
 	}

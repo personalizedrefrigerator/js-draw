@@ -191,6 +191,10 @@ export default class RenderingCacheNode {
 			return;
 		}
 
+		if (debugMode) {
+			screenRenderer.drawRect(this.region, 0.5 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.yellow });
+		}
+
 		// Could we render direclty from [this] or do we need to recurse?
 		const couldRender = this.renderingWouldBeHighEnoughResolution(viewport);
 		if (!couldRender) {
@@ -203,7 +207,11 @@ export default class RenderingCacheNode {
 			// Determine whether we already have rendered the items
 			const leaves = [];
 			for (const item of items) {
-				leaves.push(...item.getLeavesIntersectingRegion(this.region));
+				leaves.push(
+					...item.getLeavesIntersectingRegion(
+						this.region, rect => rect.w / this.region.w < 2 / this.cacheState.props.blockResolution.x,
+					)
+				);
 			}
 			sortLeavesByZIndex(leaves);
 			const leavesByIds = this.computeSortedByLeafIds(leaves);
@@ -271,7 +279,7 @@ export default class RenderingCacheNode {
 							}
 
 							if (debugMode) {
-								screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.yellow });
+								screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
 							}
 						}
 					}

@@ -31,7 +31,7 @@ export default class Display {
 			throw new Error(`Unknown rendering mode, ${mode}!`);
 		}
 
-		const cacheBlockResolution = Vec2.of(500, 500);
+		const cacheBlockResolution = Vec2.of(600, 600);
 		this.cache = new RenderingCache({
 			createRenderer: () => {
 				if (mode === RenderingMode.DummyRenderer) {
@@ -54,8 +54,9 @@ export default class Display {
 			},
 			blockResolution: cacheBlockResolution,
 			cacheSize: 500 * 500 * 4 * 200,
-			maxScale: 1.4,
-			minComponentsPerCache: 10,
+			maxScale: 1.5,
+			minComponentsPerCache: 50,
+			minComponentsToUseCache: 120,
 		});
 
 		this.editor.notifier.on(EditorEventType.DisplayResized, event => {

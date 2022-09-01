@@ -148,4 +148,13 @@ describe('Rect2', () => {
 			expect(Rect2.empty.divideIntoGrid(1000, 10000).length).toBe(1);
 		});
 	});
+
+	it('division of rectangle', () => {
+		expect(new Rect2(0, 0, 2, 1).divideIntoGrid(2, 2)).toMatchObject(
+			[
+				new Rect2(0, 0, 1, 0.5), new Rect2(1, 0, 1, 0.5),
+				new Rect2(0, 0.5, 1, 0.5), new Rect2(1, 0.5, 1, 0.5),
+			]
+		);
+	});
 });

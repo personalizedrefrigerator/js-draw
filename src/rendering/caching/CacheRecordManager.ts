@@ -39,17 +39,7 @@ export class CacheRecordManager {
 
 	// Returns null if there are no cache records. Returns an unalloc'd record if one exists.
 	private getLeastRecentlyUsedRecord(): CacheRecord|null {
-		let lruSoFar: CacheRecord|null = null;
-		for (const rec of this.cacheRecords) {
-			if (!rec.isAllocd()) {
-				return rec;
-			}
-
-			if (!lruSoFar || rec.getLastUsedCycle() < lruSoFar.getLastUsedCycle()) {
-				lruSoFar = rec;
-			}
-		}
-
-		return lruSoFar;
+		this.cacheRecords.sort((a, b) => a.getLastUsedCycle() - b.getLastUsedCycle());
+		return this.cacheRecords[0];
 	}
 }

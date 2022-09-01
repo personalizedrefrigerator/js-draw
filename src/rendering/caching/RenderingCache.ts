@@ -37,11 +37,12 @@ export default class RenderingCache {
 		}
 
 		if (!this.rootNode) {
-			// Ensure that the node is just big enough to contain the entire viewport.
-			const rootNodeSize = visibleRect.maxDimension;
+			// Adjust the node so that it has the correct aspect ratio
+			const res = this.partialSharedState.props.blockResolution;
+
 			const topLeft = visibleRect.topLeft;
 			this.rootNode = new RenderingCacheNode(
-				new Rect2(topLeft.x, topLeft.y, rootNodeSize, rootNodeSize),
+				new Rect2(topLeft.x, topLeft.y, res.x, res.y),
 				this.getSharedState()
 			);
 		}
@@ -52,10 +53,11 @@ export default class RenderingCache {
 
 		this.rootNode = this.rootNode!.smallestChildContaining(visibleRect) ?? this.rootNode;
 
-		const visibleNodes = image.getLeavesIntersectingRegion(
-			visibleRect,
-			(rect) => screenRenderer.isTooSmallToRender(rect)
-		);
-        this.rootNode!.renderItems(screenRenderer, visibleNodes, viewport);
+		const visibleLeaves = image.getLeavesIntersectingRegion(viewport.visibleRect, rect => screenRenderer.isTooSmallToRender(rect));
+		if (visibleLeaves.length > this.partialSharedState.props.minComponentsToUseCache) {
+			this.rootNode!.renderItems(screenRenderer, [ image ], viewport);
+		} else {
+			image.render(screenRenderer, visibleRect);
+		}
 	}
 }

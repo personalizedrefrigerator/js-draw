@@ -21,7 +21,7 @@ export default class CacheRecord {
 	}
 
 	public startRender(): AbstractRenderer {
-		this.lastUsedCycle = this.cacheState.currentRenderingCycle++;
+		this.lastUsedCycle = this.cacheState.currentRenderingCycle;
 		if (!this.allocd) {
 			throw new Error('Only alloc\'d canvases can be rendered to');
 		}
@@ -45,6 +45,7 @@ export default class CacheRecord {
 		}
 		this.allocd = true;
 		this.onBeforeDeallocCallback = newDeallocCallback;
+		this.lastUsedCycle = this.cacheState.currentRenderingCycle;
 	}
 
 	public getLastUsedCycle(): number {
