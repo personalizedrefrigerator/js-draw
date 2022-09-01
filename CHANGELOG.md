@@ -1,4 +1,8 @@
 
+# 0.1.1
+ * Avoid using the cache if working with smaller numbers of strokes.
+ * Attempt to prevent stroke width being zero at some locations in thin strokes.
+
 # 0.1.0
  * Zoom to import/export region just after importing.
  * Rendered strokes are cached if possible for better performance.
