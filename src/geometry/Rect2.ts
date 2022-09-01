@@ -71,7 +71,7 @@ export default class Rect2 {
 	}
 
 	// Returns the overlap of this and [other], or null, if no such
-	// /         overlap exists
+	//          overlap exists
 	public intersection(other: Rect2): Rect2|null {
 		const topLeft = this.topLeft.zip(other.topLeft, Math.max);
 		const bottomRight = this.bottomRight.zip(other.bottomRight, Math.min);
@@ -95,6 +95,37 @@ export default class Rect2 {
 			topLeft,
 			bottomRight
 		);
+	}
+
+	// Returns a the subdivision of this into [columns] columns
+	// and [rows] rows. For example,
+	//	 Rect2.unitSquare.divideIntoGrid(2, 2)
+	//		-> [ Rect2(0, 0, 0.5, 0.5), Rect2(0.5, 0, 0.5, 0.5), Rect2(0, 0.5, 0.5, 0.5), Rect2(0.5, 0.5, 0.5, 0.5) ]
+	// The rectangles are ordered in row-major order.
+	public divideIntoGrid(columns: number, rows: number): Rect2[] {
+		const result: Rect2[] = [];
+		if (columns <= 0 || rows <= 0) {
+			return result;
+		}
+
+		const eachRectWidth = this.w / columns;
+		const eachRectHeight = this.h / rows;
+
+		if (eachRectWidth === 0) {
+			columns = 1;
+		}
+		if (eachRectHeight === 0) {
+			rows = 1;
+		}
+
+		for (let j = 0; j < rows; j++) {
+			for (let i = 0; i < columns; i++) {
+				const x = eachRectWidth * i + this.x;
+				const y = eachRectHeight * j + this.y;
+				result.push(new Rect2(x, y, eachRectWidth, eachRectHeight));
+			}
+		}
+		return result;
 	}
 
 	// Returns a rectangle containing this and [point].

@@ -9,9 +9,9 @@ import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2 } from './geometry/Vec2';
 import Vec3 from './geometry/Vec3';
 import HTMLToolbar from './toolbar/HTMLToolbar';
-import { RenderablePathSpec } from './rendering/AbstractRenderer';
-import Display, { RenderingMode } from './Display';
-import SVGRenderer from './rendering/SVGRenderer';
+import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
+import Display, { RenderingMode } from './rendering/Display';
+import SVGRenderer from './rendering/renderers/SVGRenderer';
 import Color4 from './Color4';
 import SVGLoader from './SVGLoader';
 import Pointer from './Pointer';
@@ -380,7 +380,8 @@ export class Editor {
 			);
 		}
 
-		this.image.render(renderer, this.viewport);
+		//this.image.render(renderer, this.viewport);
+		this.image.renderWithCache(renderer, this.display.getCache(), this.viewport);
 		this.rerenderQueued = false;
 	}
 
@@ -468,7 +469,7 @@ export class Editor {
 		await loader.start((component) => {
 			(new EditorImage.AddElementCommand(component)).apply(this);
 		}, (countProcessed: number, totalToProcess: number) => {
-			if (countProcessed % 100 === 0) {
+			if (countProcessed % 500 === 0) {
 				this.showLoadingWarning(countProcessed / totalToProcess);
 				this.rerender();
 				return new Promise(resolve => {

@@ -118,10 +118,18 @@ export class Viewport {
 		return this.transform;
 	}
 
+	public getResolution(): Vec2 {
+		return this.screenRect.size;
+	}
+
 	// Returns the amount a vector on the canvas is scaled to become a vector on the screen.
 	public getScaleFactor(): number {
 		// Use transformVec3 to avoid translating the vector
 		return this.transform.transformVec3(Vec3.unitX).magnitude();
+	}
+
+	public getSizeOfPixelOnCanvas(): number {
+		return 1/this.getScaleFactor();
 	}
 
 	// Returns the angle of the canvas in radians

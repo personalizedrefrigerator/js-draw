@@ -1,10 +1,15 @@
 import Editor from './Editor';
-import AbstractRenderer from './rendering/AbstractRenderer';
+import AbstractRenderer from './rendering/renderers/AbstractRenderer';
 import Command from './commands/Command';
 import Viewport from './Viewport';
 import AbstractComponent from './components/AbstractComponent';
 import Rect2 from './geometry/Rect2';
 import { EditorLocalization } from './localization';
+import RenderingCache from './rendering/caching/RenderingCache';
+
+export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
+	leaves.sort((a, b) => a.getContent()!.getZIndex() - b.getContent()!.getZIndex());
+};
 
 // Handles lookup/storage of elements in the image
 export default class EditorImage {
@@ -20,7 +25,7 @@ export default class EditorImage {
 
 	// Returns the parent of the given element, if it exists.
 	public findParent(elem: AbstractComponent): ImageNode|null {
-		const candidates = this.root.getLeavesInRegion(elem.getBBox());
+		const candidates = this.root.getLeavesIntersectingRegion(elem.getBBox());
 		for (const candidate of candidates) {
 			if (candidate.getContent() === elem) {
 				return candidate;
@@ -29,25 +34,18 @@ export default class EditorImage {
 		return null;
 	}
 
-	private sortLeaves(leaves: ImageNode[]) {
-		leaves.sort((a, b) => a.getContent()!.zIndex - b.getContent()!.zIndex);
+	public renderWithCache(screenRenderer: AbstractRenderer, cache: RenderingCache, viewport: Viewport) {
+		cache.render(screenRenderer, this.root, viewport);
 	}
 
-	public render(renderer: AbstractRenderer, viewport: Viewport, minFraction: number = 0.001) {
-		// Don't render components that are < 0.1% of the viewport.
-		const leaves = this.root.getLeavesInRegion(viewport.visibleRect, minFraction);
-		this.sortLeaves(leaves);
-
-		for (const leaf of leaves) {
-			// Leaves by definition have content
-			leaf.getContent()!.render(renderer, viewport.visibleRect);
-		}
+	public render(renderer: AbstractRenderer, viewport: Viewport) {
+		this.root.render(renderer, viewport.visibleRect);
 	}
 
 	// Renders all nodes, even ones not within the viewport
 	public renderAll(renderer: AbstractRenderer) {
 		const leaves = this.root.getLeaves();
-		this.sortLeaves(leaves);
+		sortLeavesByZIndex(leaves);
 
 		for (const leaf of leaves) {
 			leaf.getContent()!.render(renderer, leaf.getBBox());
@@ -55,8 +53,9 @@ export default class EditorImage {
 	}
 
 	public getElementsIntersectingRegion(region: Rect2): AbstractComponent[] {
-		const leaves = this.root.getLeavesInRegion(region);
-		this.sortLeaves(leaves);
+		const leaves = this.root.getLeavesIntersectingRegion(region);
+		sortLeavesByZIndex(leaves);
+
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
@@ -100,15 +99,17 @@ export default class EditorImage {
 }
 
 export type AddElementCommand = typeof EditorImage.AddElementCommand.prototype;
+type TooSmallToRenderCheck = (rect: Rect2)=> boolean;
 
-
+// TODO: Assign leaf nodes to CacheNodes. When leaf nodes are modified, the corresponding CacheNodes can be updated.
 export class ImageNode {
 	private content: AbstractComponent|null;
 	private bbox: Rect2;
 	private children: ImageNode[];
 	private targetChildCount: number = 30;
-	private minZIndex: number|null;
-	private maxZIndex: number|null;
+
+	private id: number;
+	private static idCounter: number = 0;
 
 	public constructor(
 		private parent: ImageNode|null = null
@@ -117,8 +118,15 @@ export class ImageNode {
 		this.bbox = Rect2.empty;
 		this.content = null;
 
-		this.minZIndex = null;
-		this.maxZIndex = null;
+		this.id = ImageNode.idCounter++;
+	}
+
+	public getId() {
+		return this.id;
+	}
+
+	public onContentChange() {
+		this.id = ImageNode.idCounter++;
 	}
 
 	public getContent(): AbstractComponent|null {
@@ -129,18 +137,25 @@ export class ImageNode {
 		return this.parent;
 	}
 
-	private getChildrenInRegion(region: Rect2): ImageNode[] {
+	public getChildrenInRegion(region: Rect2): ImageNode[] {
 		return this.children.filter(child => {
 			return child.getBBox().intersects(region);
 		});
 	}
 
+	public getChildrenOrSelfIntersectingRegion(region: Rect2): ImageNode[] {
+		if (this.content) {
+			return [this];
+		}
+		return this.getChildrenInRegion(region);
+	}
+
 	// Returns a list of `ImageNode`s with content (and thus no children).
-	public getLeavesInRegion(region: Rect2, minFractionOfRegion: number = 0): ImageNode[] {
+	public getLeavesIntersectingRegion(region: Rect2, isTooSmall?: TooSmallToRenderCheck): ImageNode[] {
 		const result: ImageNode[] = [];
 
 		// Don't render if too small
-		if (this.bbox.maxDimension / region.maxDimension <= minFractionOfRegion) {
+		if (isTooSmall?.(this.bbox)) {
 			return [];
 		}
 
@@ -150,7 +165,7 @@ export class ImageNode {
 
 		const children = this.getChildrenInRegion(region);
 		for (const child of children) {
-			result.push(...child.getLeavesInRegion(region, minFractionOfRegion));
+			result.push(...child.getLeavesIntersectingRegion(region, isTooSmall));
 		}
 
 		return result;
@@ -172,6 +187,8 @@ export class ImageNode {
 	}
 
 	public addLeaf(leaf: AbstractComponent): ImageNode {
+		this.onContentChange();
+
 		if (this.content === null && this.children.length === 0) {
 			this.content = leaf;
 			this.recomputeBBox(true);
@@ -239,12 +256,8 @@ export class ImageNode {
 		const oldBBox = this.bbox;
 		if (this.content !== null) {
 			this.bbox = this.content.getBBox();
-			this.minZIndex = this.content.zIndex;
-			this.maxZIndex = this.content.zIndex;
 		} else {
 			this.bbox = Rect2.empty;
-			this.minZIndex = null;
-			this.maxZIndex = null;
 			let isFirst = true;
 
 			for (const child of this.children) {
@@ -253,15 +266,6 @@ export class ImageNode {
 					isFirst = false;
 				} else {
 					this.bbox = this.bbox.union(child.getBBox());
-				}
-
-				this.minZIndex ??= child.minZIndex;
-				this.maxZIndex ??= child.maxZIndex;
-				if (child.minZIndex !== null && this.minZIndex !== null) {
-					this.minZIndex = Math.min(child.minZIndex, this.minZIndex);
-				}
-				if (child.maxZIndex !== null && this.maxZIndex !== null) {
-					this.maxZIndex = Math.max(child.maxZIndex, this.maxZIndex);
 				}
 			}
 		}
@@ -295,9 +299,6 @@ export class ImageNode {
 
 	// Remove this node and all of its children
 	public remove() {
-		this.minZIndex = null;
-		this.maxZIndex = null;
-
 		if (!this.parent) {
 			this.content = null;
 			this.children = [];
@@ -321,5 +322,16 @@ export class ImageNode {
 		this.content = null;
 		this.parent = null;
 		this.children = [];
+	}
+
+	public render(renderer: AbstractRenderer, visibleRect: Rect2) {
+		// Don't render components that are < 0.1% of the viewport.
+		const leaves = this.getLeavesIntersectingRegion(visibleRect, rect => renderer.isTooSmallToRender(rect));
+		sortLeavesByZIndex(leaves);
+
+		for (const leaf of leaves) {
+			// Leaves by definition have content
+			leaf.getContent()!.render(renderer, visibleRect);
+		}
 	}
 }

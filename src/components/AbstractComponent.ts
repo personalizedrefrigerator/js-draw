@@ -4,13 +4,13 @@ import EditorImage from '../EditorImage';
 import LineSegment2 from '../geometry/LineSegment2';
 import Mat33 from '../geometry/Mat33';
 import Rect2 from '../geometry/Rect2';
-import AbstractRenderer from '../rendering/AbstractRenderer';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 
 export default abstract class AbstractComponent {
 	protected lastChangedTime: number;
 	protected abstract contentBBox: Rect2;
-	public zIndex: number;
+	private zIndex: number;
 
 	// Topmost z-index
 	private static zIndexCounter: number = 0;
@@ -18,6 +18,10 @@ export default abstract class AbstractComponent {
 	protected constructor() {
 		this.lastChangedTime = (new Date()).getTime();
 		this.zIndex = AbstractComponent.zIndexCounter++;
+	}
+
+	public getZIndex(): number {
+		return this.zIndex;
 	}
 
 	public getBBox(): Rect2 {

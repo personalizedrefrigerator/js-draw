@@ -10,7 +10,7 @@ import BaseTool from '../tools/BaseTool';
 import SelectionTool from '../tools/SelectionTool';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import { Vec2 } from '../geometry/Vec2';
-import SVGRenderer from '../rendering/SVGRenderer';
+import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import Viewport from '../Viewport';
 import EventDispatcher from '../EventDispatcher';
 import { ComponentBuilderFactory } from '../components/builders/types';

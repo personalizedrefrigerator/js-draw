@@ -5,8 +5,8 @@ import Stroke from './components/Stroke';
 import { Vec2 } from './geometry/Vec2';
 import Path, { PathCommandType } from './geometry/Path';
 import Color4 from './Color4';
-import DummyRenderer from './rendering/DummyRenderer';
-import { RenderingStyle } from './rendering/AbstractRenderer';
+import DummyRenderer from './rendering/renderers/DummyRenderer';
+import { RenderingStyle } from './rendering/renderers/AbstractRenderer';
 import createEditor from './testing/createEditor';
 
 describe('EditorImage', () => {

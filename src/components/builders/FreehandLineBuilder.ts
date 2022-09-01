@@ -1,5 +1,5 @@
 import { Bezier } from 'bezier-js';
-import AbstractRenderer, { RenderingStyle, RenderablePathSpec } from '../../rendering/AbstractRenderer';
+import AbstractRenderer, { RenderingStyle, RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
 import { Point2, Vec2 } from '../../geometry/Vec2';
 import Rect2 from '../../geometry/Rect2';
 import { PathCommand, PathCommandType } from '../../geometry/Path';

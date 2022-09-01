@@ -119,7 +119,7 @@ const makeDraggable = (element: HTMLElement, onDrag: DragCallback, onDragEnd: Dr
 };
 
 // Maximum number of strokes to transform without a re-render.
-const updateChunkSize = 50;
+const updateChunkSize = 100;
 
 class Selection {
 	public region: Rect2;

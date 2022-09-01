@@ -1,8 +1,8 @@
 
-import Path, { PathCommand, PathCommandType } from '../geometry/Path';
-import Rect2 from '../geometry/Rect2';
-import { Point2, Vec2 } from '../geometry/Vec2';
-import Viewport from '../Viewport';
+import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
+import Rect2 from '../../geometry/Rect2';
+import { Point2, Vec2 } from '../../geometry/Vec2';
+import Viewport from '../../Viewport';
 import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
 
 const svgNameSpace = 'http://www.w3.org/2000/svg';
@@ -61,7 +61,7 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	protected beginPath(startPoint: Point2) {
 		this.currentPath = [];
-		this.pathStart = this.viewport.canvasToScreen(startPoint);
+		this.pathStart = this.canvasToScreen(startPoint);
 		this.lastPathStart ??= this.pathStart;
 	}
 
@@ -126,7 +126,7 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	protected lineTo(point: Point2) {
-		point = this.viewport.canvasToScreen(point);
+		point = this.canvasToScreen(point);
 
 		this.currentPath!.push({
 			kind: PathCommandType.LineTo,
@@ -135,7 +135,7 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	protected moveTo(point: Point2) {
-		point = this.viewport.canvasToScreen(point);
+		point = this.canvasToScreen(point);
 
 		this.currentPath!.push({
 			kind: PathCommandType.MoveTo,
@@ -146,9 +146,9 @@ export default class SVGRenderer extends AbstractRenderer {
 	protected traceCubicBezierCurve(
 		controlPoint1: Point2, controlPoint2: Point2, endPoint: Point2
 	) {
-		controlPoint1 = this.viewport.canvasToScreen(controlPoint1);
-		controlPoint2 = this.viewport.canvasToScreen(controlPoint2);
-		endPoint = this.viewport.canvasToScreen(endPoint);
+		controlPoint1 = this.canvasToScreen(controlPoint1);
+		controlPoint2 = this.canvasToScreen(controlPoint2);
+		endPoint = this.canvasToScreen(endPoint);
 
 		this.currentPath!.push({
 			kind: PathCommandType.CubicBezierTo,
@@ -159,8 +159,8 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	protected traceQuadraticBezierCurve(controlPoint: Point2, endPoint: Point2) {
-		controlPoint = this.viewport.canvasToScreen(controlPoint);
-		endPoint = this.viewport.canvasToScreen(endPoint);
+		controlPoint = this.canvasToScreen(controlPoint);
+		endPoint = this.canvasToScreen(endPoint);
 
 		this.currentPath!.push({
 			kind: PathCommandType.QuadraticBezierTo,
@@ -179,8 +179,12 @@ export default class SVGRenderer extends AbstractRenderer {
 		});
 	}
 
-	// Renders a copy of the given element.
+	// Renders a **copy** of the given element.
 	public drawSVGElem(elem: SVGElement) {
 		this.elem.appendChild(elem.cloneNode(true));
+	}
+
+	public isTooSmallToRender(_rect: Rect2): boolean {
+		return false;
 	}
 }

@@ -1,8 +1,9 @@
-import Color4 from '../Color4';
-import Path, { PathCommand, PathCommandType } from '../geometry/Path';
-import Rect2 from '../geometry/Rect2';
-import { Point2, Vec2 } from '../geometry/Vec2';
-import Viewport from '../Viewport';
+import Color4 from '../../Color4';
+import Mat33 from '../../geometry/Mat33';
+import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
+import Rect2 from '../../geometry/Rect2';
+import { Point2, Vec2 } from '../../geometry/Vec2';
+import Viewport from '../../Viewport';
 
 export interface RenderingStyle {
 	fill: Color4;
@@ -25,7 +26,14 @@ const stylesEqual = (a: RenderingStyle, b: RenderingStyle) => {
 };
 
 export default abstract class AbstractRenderer {
-	protected constructor(protected viewport: Viewport) { }
+	// If null, this' transformation is linked to the Viewport
+	private selfTransform: Mat33|null = null;
+
+	protected constructor(private viewport: Viewport) { }
+
+	// this.canvasToScreen, etc. should be used instead of the corresponding
+	// methods on Viewport.
+	protected getViewport(): Viewport { return this.viewport; }
 
 	// Returns the size of the rendered region of this on
 	// the display (in pixels).
@@ -43,9 +51,13 @@ export default abstract class AbstractRenderer {
 		controlPoint: Point2, endPoint: Point2,
 	): void;
 
+	// Returns true iff the given rectangle is so small, rendering anything within
+	// it has no effect on the image.
+	public abstract isTooSmallToRender(rect: Rect2): boolean;
+
 	public setDraftMode(_draftMode: boolean) { }
 
-	private objectLevel: number = 0;
+	protected objectLevel: number = 0;
 	private currentPaths: RenderablePathSpec[]|null = null;
 	private flushPath() {
 		if (!this.currentPaths) {
@@ -110,7 +122,8 @@ export default abstract class AbstractRenderer {
 	}
 
 	// Note the start/end of an object with the given bounding box.
-	public startObject(_boundingBox: Rect2) {
+	// Renderers are not required to support [clip]
+	public startObject(_boundingBox: Rect2, _clip?: boolean) {
 		this.currentPaths = [];
 		this.objectLevel ++;
 	}
@@ -134,4 +147,38 @@ export default abstract class AbstractRenderer {
 
 	// Draw a representation of [points]. Intended for debugging.
 	public abstract drawPoints(...points: Point2[]): void;
+
+
+	// Returns true iff other can be rendered onto this without data loss.
+	public canRenderFromWithoutDataLoss(_other: AbstractRenderer): boolean {
+		return false;
+	}
+
+	// MUST throw if other and this are not of the same base class.
+	public renderFromOtherOfSameType(_renderTo: Mat33, other: AbstractRenderer) {
+		throw new Error(`Unable to render from ${other}: Not implemented`);
+	}
+
+	// Set a transformation to apply to things before rendering,
+	// replacing the viewport's transform.
+	public setTransform(transform: Mat33|null) {
+		this.selfTransform = transform;
+	}
+
+	// Get the matrix that transforms a vector on the canvas to a vector on this'
+	// rendering target.
+	public getCanvasToScreenTransform(): Mat33 {
+		if (this.selfTransform) {
+			return this.selfTransform;
+		}
+		return this.viewport.canvasToScreenTransform;
+	}
+
+	public canvasToScreen(vec: Vec2): Vec2 {
+		return this.getCanvasToScreenTransform().transformVec2(vec);
+	}
+
+	public getSizeOfCanvasPixelOnScreen(): number {
+		return this.getCanvasToScreenTransform().transformVec3(Vec2.unitX).length();
+	}
 }

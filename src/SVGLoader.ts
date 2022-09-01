@@ -5,7 +5,7 @@ import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
 import UnknownSVGObject from './components/UnknownSVGObject';
 import Path from './geometry/Path';
 import Rect2 from './geometry/Rect2';
-import { RenderablePathSpec, RenderingStyle } from './rendering/AbstractRenderer';
+import { RenderablePathSpec, RenderingStyle } from './rendering/renderers/AbstractRenderer';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 
 type OnFinishListener = ()=> void;

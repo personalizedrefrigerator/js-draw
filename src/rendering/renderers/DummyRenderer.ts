@@ -1,9 +1,10 @@
 // Renderer that outputs nothing. Useful for automated tests.
 
-import Rect2 from '../geometry/Rect2';
-import { Point2, Vec2 } from '../geometry/Vec2';
-import Vec3 from '../geometry/Vec3';
-import Viewport from '../Viewport';
+import Mat33 from '../../geometry/Mat33';
+import Rect2 from '../../geometry/Rect2';
+import { Point2, Vec2 } from '../../geometry/Vec2';
+import Vec3 from '../../geometry/Vec3';
+import Viewport from '../../Viewport';
 import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
 
 export default class DummyRenderer extends AbstractRenderer {
@@ -22,8 +23,17 @@ export default class DummyRenderer extends AbstractRenderer {
 	}
 
 	public displaySize(): Vec2 {
-		// Return a dummy
-		return Vec2.of(640, 480);
+		// Do we have a stored viewport size?
+		const viewportSize = this.getViewport().getResolution();
+
+		// Don't use a 0x0 viewport — DummyRenderer is often used
+		// for tests that run without a display, so pretend we have a
+		// reasonable-sized display.
+		if (viewportSize.x === 0 || viewportSize.y === 0) {
+			return Vec2.of(640, 480);
+		}
+
+		return viewportSize;
 	}
 
 	public clear() {
@@ -47,18 +57,29 @@ export default class DummyRenderer extends AbstractRenderer {
 		this.lastFillStyle = style;
 	}
 	protected lineTo(point: Vec3) {
+		point = this.canvasToScreen(point);
+
 		this.lastPoint = point;
 		this.pointBuffer.push(point);
 	}
 	protected moveTo(point: Point2) {
+		point = this.canvasToScreen(point);
+
 		this.lastPoint = point;
 		this.pointBuffer.push(point);
 	}
 	protected traceCubicBezierCurve(p1: Vec3, p2: Vec3, p3: Vec3) {
+		p1 = this.canvasToScreen(p1);
+		p2 = this.canvasToScreen(p2);
+		p3 = this.canvasToScreen(p3);
+
 		this.lastPoint = p3;
 		this.pointBuffer.push(p1, p2, p3);
 	}
 	protected traceQuadraticBezierCurve(controlPoint: Vec3, endPoint: Vec3) {
+		controlPoint = this.canvasToScreen(controlPoint);
+		endPoint = this.canvasToScreen(endPoint);
+
 		this.lastPoint = endPoint;
 		this.pointBuffer.push(controlPoint, endPoint);
 	}
@@ -67,7 +88,7 @@ export default class DummyRenderer extends AbstractRenderer {
 		// As such, it is unlikely to be the target of automated tests.
 	}
 
-	public startObject(boundingBox: Rect2) {
+	public startObject(boundingBox: Rect2, _clip: boolean) {
 		super.startObject(boundingBox);
 
 		this.objectNestingLevel += 1;
@@ -76,5 +97,27 @@ export default class DummyRenderer extends AbstractRenderer {
 		super.endObject();
 
 		this.objectNestingLevel -= 1;
+	}
+
+	public isTooSmallToRender(_rect: Rect2): boolean {
+		return false;
+	}
+
+
+	public canRenderFromWithoutDataLoss(other: AbstractRenderer) {
+		return other instanceof DummyRenderer;
+	}
+
+	public renderFromOtherOfSameType(transform: Mat33, other: AbstractRenderer): void {
+		if (!(other instanceof DummyRenderer)) {
+			throw new Error(`${other} cannot be rendered onto ${this}`);
+		}
+
+		this.renderedPathCount += other.renderedPathCount;
+		this.lastFillStyle = other.lastFillStyle;
+		this.lastPoint = other.lastPoint;
+		this.pointBuffer.push(...other.pointBuffer.map(point => {
+			return transform.transformVec2(point);
+		}));
 	}
 }

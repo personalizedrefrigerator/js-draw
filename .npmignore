@@ -1,2 +1,6 @@
 *.bundle.js
 docs/
+.vscode/
+*.swp
+*.swo
+yarn-error.log

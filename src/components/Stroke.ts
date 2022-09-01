@@ -2,7 +2,7 @@ import LineSegment2 from '../geometry/LineSegment2';
 import Mat33 from '../geometry/Mat33';
 import Path from '../geometry/Path';
 import Rect2 from '../geometry/Rect2';
-import AbstractRenderer, { RenderablePathSpec, RenderingStyle } from '../rendering/AbstractRenderer';
+import AbstractRenderer, { RenderablePathSpec, RenderingStyle } from '../rendering/renderers/AbstractRenderer';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 

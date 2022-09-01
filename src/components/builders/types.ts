@@ -1,5 +1,5 @@
 import Rect2 from '../../geometry/Rect2';
-import AbstractRenderer from '../../rendering/AbstractRenderer';
+import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';

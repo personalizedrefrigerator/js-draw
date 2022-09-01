@@ -2,7 +2,7 @@
 
 import Color4 from '../Color4';
 import Stroke from '../components/Stroke';
-import { RenderingMode } from '../Display';
+import { RenderingMode } from '../rendering/Display';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Path from '../geometry/Path';

@@ -1,5 +1,5 @@
 import { Bezier } from 'bezier-js';
-import { RenderingStyle, RenderablePathSpec } from '../rendering/AbstractRenderer';
+import { RenderingStyle, RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
 import LineSegment2 from './LineSegment2';
 import Mat33 from './Mat33';
 import Rect2 from './Rect2';

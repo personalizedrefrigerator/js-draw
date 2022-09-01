@@ -1,6 +1,7 @@
 
-# 0.0.11
+# 0.1.0
  * Zoom to import/export region just after importing.
+ * Rendered strokes are cached if possible for better performance.
 
 # 0.0.10
  * Prefer higher quality rendering except during touchscreen gestures and large groups of commands.

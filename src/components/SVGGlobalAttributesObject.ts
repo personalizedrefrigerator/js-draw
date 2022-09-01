@@ -1,8 +1,8 @@
 import LineSegment2 from '../geometry/LineSegment2';
 import Mat33 from '../geometry/Mat33';
 import Rect2 from '../geometry/Rect2';
-import AbstractRenderer from '../rendering/AbstractRenderer';
-import SVGRenderer from '../rendering/SVGRenderer';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
+import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 

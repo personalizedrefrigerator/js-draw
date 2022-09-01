@@ -1,8 +1,9 @@
-import Color4 from '../Color4';
-import Rect2 from '../geometry/Rect2';
-import { Point2, Vec2 } from '../geometry/Vec2';
-import Vec3 from '../geometry/Vec3';
-import Viewport from '../Viewport';
+import Color4 from '../../Color4';
+import Mat33 from '../../geometry/Mat33';
+import Rect2 from '../../geometry/Rect2';
+import { Point2, Vec2 } from '../../geometry/Vec2';
+import Vec3 from '../../geometry/Vec3';
+import Viewport from '../../Viewport';
 import AbstractRenderer, { RenderablePathSpec, RenderingStyle } from './AbstractRenderer';
 
 export default class CanvasRenderer extends AbstractRenderer {
@@ -23,6 +24,30 @@ export default class CanvasRenderer extends AbstractRenderer {
 	public constructor(private ctx: CanvasRenderingContext2D, viewport: Viewport) {
 		super(viewport);
 		this.setDraftMode(false);
+	}
+
+	public canRenderFromWithoutDataLoss(other: AbstractRenderer) {
+		return other instanceof CanvasRenderer;
+	}
+
+	public renderFromOtherOfSameType(transformBy: Mat33, other: AbstractRenderer): void {
+		if (!(other instanceof CanvasRenderer)) {
+			throw new Error(`${other} cannot be rendered onto ${this}`);
+		}
+		transformBy = this.getCanvasToScreenTransform().rightMul(transformBy);
+		this.ctx.save();
+		// From MDN, transform(a,b,c,d,e,f)
+		// takes input such that
+		// ⎡ a c e ⎤
+		// ⎢ b d f ⎥ transforms content drawn to [ctx].
+		// ⎣ 0 0 1 ⎦
+		this.ctx.transform(
+			transformBy.a1, transformBy.b1, // a, b
+			transformBy.a2, transformBy.b2, // c, d
+			transformBy.a3, transformBy.b3, // e, f 
+		);
+		this.ctx.drawImage(other.ctx.canvas, 0, 0);
+		this.ctx.restore();
 	}
 
 	// Set parameters for lower/higher quality rendering
@@ -50,7 +75,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	protected beginPath(startPoint: Point2) {
-		startPoint = this.viewport.canvasToScreen(startPoint);
+		startPoint = this.canvasToScreen(startPoint);
 
 		this.ctx.beginPath();
 		this.ctx.moveTo(startPoint.x, startPoint.y);
@@ -62,7 +87,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 
 		if (style.stroke) {
 			this.ctx.strokeStyle = style.stroke.color.toHexString();
-			this.ctx.lineWidth = this.viewport.getScaleFactor() * style.stroke.width;
+			this.ctx.lineWidth = this.getSizeOfCanvasPixelOnScreen() * style.stroke.width;
 			this.ctx.stroke();
 		}
 
@@ -70,19 +95,19 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	protected lineTo(point: Point2) {
-		point = this.viewport.canvasToScreen(point);
+		point = this.canvasToScreen(point);
 		this.ctx.lineTo(point.x, point.y);
 	}
 
 	protected moveTo(point: Point2) {
-		point = this.viewport.canvasToScreen(point);
+		point = this.canvasToScreen(point);
 		this.ctx.moveTo(point.x, point.y);
 	}
 
 	protected traceCubicBezierCurve(p1: Point2, p2: Point2, p3: Point2) {
-		p1 = this.viewport.canvasToScreen(p1);
-		p2 = this.viewport.canvasToScreen(p2);
-		p3 = this.viewport.canvasToScreen(p3);
+		p1 = this.canvasToScreen(p1);
+		p2 = this.canvasToScreen(p2);
+		p3 = this.canvasToScreen(p3);
 
 		// Approximate the curve if small enough.
 		const delta1 = p2.minus(p1);
@@ -96,8 +121,8 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	protected traceQuadraticBezierCurve(controlPoint: Vec3, endPoint: Vec3) {
-		controlPoint = this.viewport.canvasToScreen(controlPoint);
-		endPoint = this.viewport.canvasToScreen(endPoint);
+		controlPoint = this.canvasToScreen(controlPoint);
+		endPoint = this.canvasToScreen(endPoint);
 
 		// Approximate the curve with a line if small enough
 		const delta = controlPoint.minus(endPoint);
@@ -118,23 +143,35 @@ export default class CanvasRenderer extends AbstractRenderer {
 		super.drawPath(path);
 	}
 
-	public startObject(boundingBox: Rect2) {
-		// Should we ignore all objects within this object's bbox?
-		const diagonal = this.viewport.canvasToScreenTransform.transformVec3(boundingBox.size);
-
-		const bothDimenMinSize = this.minRenderSizeBothDimens;
-		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;
-		const anyDimenMinSize = this.minRenderSizeAnyDimen;
-		const anyTooSmall = Math.abs(diagonal.x) < anyDimenMinSize || Math.abs(diagonal.y) < anyDimenMinSize;
-
-		if (bothTooSmall || anyTooSmall) {
+	private clipLevels: number[] = [];
+	public startObject(boundingBox: Rect2, clip: boolean) {
+		if (this.isTooSmallToRender(boundingBox)) {
 			this.ignoreObjectsAboveLevel = this.getNestingLevel();
 			this.ignoringObject = true;
 		}
 
 		super.startObject(boundingBox);
+
+		if (!this.ignoringObject && clip) {
+			this.clipLevels.push(this.objectLevel);
+			this.ctx.save();
+			this.ctx.beginPath();
+			for (const corner of boundingBox.corners) {
+				const screenCorner = this.canvasToScreen(corner);
+				this.ctx.lineTo(screenCorner.x, screenCorner.y);
+			}
+			this.ctx.clip();
+		}
 	}
+
 	public endObject() {
+		if (!this.ignoringObject && this.clipLevels.length > 0) {
+			if (this.clipLevels[this.clipLevels.length - 1] === this.objectLevel) {
+				this.ctx.restore();
+				this.clipLevels.pop();
+			}
+		}
+
 		super.endObject();
 
 		// If exiting an object with a too-small-to-draw bounding box,
@@ -148,7 +185,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		const pointRadius = 10;
 
 		for (let i = 0; i < points.length; i++) {
-			const point = this.viewport.canvasToScreen(points[i]);
+			const point = this.canvasToScreen(points[i]);
 
 			this.ctx.beginPath();
 			this.ctx.arc(point.x, point.y, pointRadius, 0, Math.PI * 2);
@@ -166,5 +203,17 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.ctx.fillStyle = 'black';
 			this.ctx.fillText(`${i}`, point.x, point.y, pointRadius * 2);
 		}
+	}
+
+	public isTooSmallToRender(rect: Rect2): boolean {
+		// Should we ignore all objects within this object's bbox?
+		const diagonal = this.getCanvasToScreenTransform().transformVec3(rect.size);
+
+		const bothDimenMinSize = this.minRenderSizeBothDimens;
+		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;
+		const anyDimenMinSize = this.minRenderSizeAnyDimen;
+		const anyTooSmall = Math.abs(diagonal.x) < anyDimenMinSize || Math.abs(diagonal.y) < anyDimenMinSize;
+		
+		return bothTooSmall || anyTooSmall;
 	}
 }

@@ -24,5 +24,6 @@
 
 		// Files that don't need transpilation
 		"**/*.test.ts",
+		"__mocks__/*"
 	],
 }

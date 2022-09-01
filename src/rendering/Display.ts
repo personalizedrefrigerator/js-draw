@@ -1,9 +1,10 @@
-import AbstractRenderer from './rendering/AbstractRenderer';
-import CanvasRenderer from './rendering/CanvasRenderer';
-import { Editor } from './Editor';
-import { EditorEventType } from './types';
-import DummyRenderer from './rendering/DummyRenderer';
-import { Vec2 } from './geometry/Vec2';
+import AbstractRenderer from './renderers/AbstractRenderer';
+import CanvasRenderer from './renderers/CanvasRenderer';
+import { Editor } from '../Editor';
+import { EditorEventType } from '../types';
+import DummyRenderer from './renderers/DummyRenderer';
+import { Vec2 } from '../geometry/Vec2';
+import RenderingCache from './caching/RenderingCache';
 
 export enum RenderingMode {
 	DummyRenderer,
@@ -14,6 +15,7 @@ export enum RenderingMode {
 export default class Display {
 	private dryInkRenderer: AbstractRenderer;
 	private wetInkRenderer: AbstractRenderer;
+	private cache: RenderingCache;
 	private resizeSurfacesCallback?: ()=> void;
 	private flattenCallback?: ()=> void;
 
@@ -29,6 +31,32 @@ export default class Display {
 			throw new Error(`Unknown rendering mode, ${mode}!`);
 		}
 
+		const cacheBlockResolution = Vec2.of(500, 500);
+		this.cache = new RenderingCache({
+			createRenderer: () => {
+				if (mode === RenderingMode.DummyRenderer) {
+					return new DummyRenderer(editor.viewport);
+				} else if (mode !== RenderingMode.CanvasRenderer) {
+					throw new Error('Unspported rendering mode');
+				}
+
+				// Make the canvas slightly larger than each cache block to prevent
+				// seams.
+				const canvas = document.createElement('canvas');
+				canvas.width = cacheBlockResolution.x + 1;
+				canvas.height = cacheBlockResolution.y + 1;
+				const ctx = canvas.getContext('2d');
+
+				return new CanvasRenderer(ctx!, editor.viewport);
+			},
+			isOfCorrectType: (renderer) => {
+				return this.dryInkRenderer.canRenderFromWithoutDataLoss(renderer);
+			},
+			blockResolution: cacheBlockResolution,
+			cacheSize: 500 * 500 * 4 * 200,
+			maxScale: 1.4,
+			minComponentsPerCache: 10,
+		});
 
 		this.editor.notifier.on(EditorEventType.DisplayResized, event => {
 			if (event.kind !== EditorEventType.DisplayResized) {
@@ -48,6 +76,10 @@ export default class Display {
 
 	public get height(): number {
 		return this.dryInkRenderer.displaySize().y;
+	}
+
+	public getCache() {
+		return this.cache;
 	}
 
 	private initializeCanvasRendering() {
