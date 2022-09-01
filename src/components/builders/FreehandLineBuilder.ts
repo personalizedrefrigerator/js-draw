@@ -212,7 +212,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		const lowerBoundary = computeBoundaryCurve(-1, halfVec);
 
 		// If the boundaries have two intersections, increasing the half vector's length could fix this.
-		if (upperBoundary.intersects(lowerBoundary).length === 2) {
+		if (upperBoundary.intersects(lowerBoundary).length > 0) {
 			halfVec = halfVec.times(2);
 		}
 
