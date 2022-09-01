@@ -173,6 +173,14 @@ export class Viewport {
 	public zoomTo(toMakeVisible: Rect2): Command {
 		let transform = Mat33.identity;
 
+		if (toMakeVisible.w === 0 || toMakeVisible.h === 0) {
+			throw new Error(`${toMakeVisible.toString()} rectangle is empty! Cannot zoom to!`);
+		}
+
+		if (isNaN(toMakeVisible.size.magnitude())) {
+			throw new Error(`${toMakeVisible.toString()} rectangle has NaN size! Cannot zoom to!`);
+		}
+
 		// Try to move the selection within the center 2/3rds of the viewport.
 		const recomputeTargetRect = () => {
 			// transform transforms objects on the canvas. As such, we need to invert it
@@ -210,7 +218,11 @@ export class Viewport {
 
 			transform = transform.rightMul(viewportContentTransform);
 		}
-		
+
+		if (!transform.invertable()) {
+			console.warn('Unable to zoom to ', toMakeVisible, '! Computed transform', transform, 'is singular.');
+			transform = Mat33.identity;
+		}
 
 		return new Viewport.ViewportTransform(transform);
 	}

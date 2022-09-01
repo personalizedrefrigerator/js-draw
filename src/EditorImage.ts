@@ -73,6 +73,10 @@ export default class EditorImage {
 		) {
 			this.#element = element;
 			this.#applyByFlattening = applyByFlattening;
+
+			if (isNaN(this.#element.getBBox().area)) {
+				throw new Error('Elements in the image cannot have NaN bounding boxes');
+			}
 		}
 
 		public apply(editor: Editor) {
