@@ -172,7 +172,12 @@ export default class RenderingCacheNode {
 		const newItems = [];
 		// Divide [items] until nodes are leaves or smaller than this
 		for (const item of items) {
-			if (item.getBBox().maxDimension >= this.region.maxDimension) {
+			const bbox = item.getBBox();
+			if (!bbox.intersects(this.region)) {
+				continue;
+			}
+
+			if (bbox.maxDimension >= this.region.maxDimension) {
 				newItems.push(...item.getChildrenOrSelfIntersectingRegion(this.region));
 			} else {
 				newItems.push(item);

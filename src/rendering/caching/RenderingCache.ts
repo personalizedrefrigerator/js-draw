@@ -51,6 +51,11 @@ export default class RenderingCache {
 		}
 
 		this.rootNode = this.rootNode!.smallestChildContaining(visibleRect) ?? this.rootNode;
-        this.rootNode!.renderItems(screenRenderer, [ image ], viewport);
+
+		const visibleNodes = image.getLeavesIntersectingRegion(
+			visibleRect,
+			(rect) => screenRenderer.isTooSmallToRender(rect)
+		);
+        this.rootNode!.renderItems(screenRenderer, visibleNodes, viewport);
 	}
 }
