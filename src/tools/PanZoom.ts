@@ -23,8 +23,10 @@ export enum PanZoomMode {
 	// Handle two-pointer gestures (touchscreen only unless AnyDevice is set)
 	TwoFingerGestures = 0x1 << 1,
 
-	// / Handle gestures from any device, rather than just touch
-	AnyDevice = 0x1 << 2,
+	RightClickDrags = 0x1 << 2,
+
+	// Handle gestures from any device, rather than just touch
+	AnyDevice = 0x1 << 3,
 }
 
 export default class PanZoom extends BaseTool {
@@ -54,10 +56,26 @@ export default class PanZoom extends BaseTool {
 		return { canvasCenter, screenCenter, angle, dist };
 	}
 
+	private allPointersAreOfType(pointers: Pointer[], kind: PointerDevice) {
+		return pointers.every(pointer => pointer.device === kind);
+	}
+
 	private pointersHaveCorrectDeviceType(pointers: Pointer[]) {
-		return this.mode & PanZoomMode.AnyDevice || pointers.every(
-			pointer => pointer.device === PointerDevice.Touch
-		);
+		if (this.mode & PanZoomMode.AnyDevice) {
+			return true;
+		}
+
+		if (this.allPointersAreOfType(pointers, PointerDevice.Touch)) {
+			return true;
+		}
+
+		if (this.mode & PanZoomMode.RightClickDrags) {
+			if (this.allPointersAreOfType(pointers, PointerDevice.RightButtonMouse)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public onPointerDown({ allPointers }: PointerEvt): boolean {
@@ -71,7 +89,12 @@ export default class PanZoom extends BaseTool {
 			this.lastDist = dist;
 			this.lastScreenCenter = screenCenter;
 			handlingGesture = true;
-		} else if (allPointers.length === 1 && this.mode & PanZoomMode.OneFingerGestures) {
+		} else if ((
+			allPointers.length === 1 && this.mode & PanZoomMode.OneFingerGestures
+		) || (
+			this.allPointersAreOfType(allPointers, PointerDevice.RightButtonMouse) && this.mode & PanZoomMode.RightClickDrags
+		)
+		) {
 			this.lastScreenCenter = allPointers[0].screenPos;
 			handlingGesture = true;
 		}
@@ -122,9 +145,9 @@ export default class PanZoom extends BaseTool {
 		this.transform ??= new Viewport.ViewportTransform(Mat33.identity);
 
 		const lastTransform = this.transform;
-		if (allPointers.length === 2 && this.mode & PanZoomMode.TwoFingerGestures) {
+		if (allPointers.length === 2) {
 			this.handleTwoFingerMove(allPointers);
-		} else if (allPointers.length === 1 && this.mode & PanZoomMode.OneFingerGestures) {
+		} else if (allPointers.length === 1) {
 			this.handleOneFingerMove(allPointers[0]);
 		}
 		lastTransform.unapply(this.editor);

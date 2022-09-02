@@ -40,6 +40,7 @@ export default class ToolController {
 		];
 		this.tools = [
 			touchPanZoom,
+			new PanZoom(editor, PanZoomMode.RightClickDrags, localization.RightClickDragPanTool),
 			...primaryTools,
 			new PanZoom(editor, PanZoomMode.TwoFingerGestures | PanZoomMode.AnyDevice, localization.twoFingerPanZoomTool),
 			new UndoRedoShortcut(editor),

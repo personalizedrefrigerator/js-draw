@@ -5,7 +5,8 @@ export enum PointerDevice {
 	Pen,
 	Eraser,
 	Touch,
-	Mouse,
+	PrimaryButtonMouse,
+	RightButtonMouse,
 	Other,
 }
 
@@ -31,7 +32,7 @@ export default class Pointer {
         public readonly id: number,
 
         // Numeric timestamp (milliseconds, as from (new Date).getTime())
-        public readonly timeStamp: number
+        public readonly timeStamp: number,
 	) {
 	}
 
@@ -39,7 +40,7 @@ export default class Pointer {
 		const screenPos = Vec2.of(evt.offsetX, evt.offsetY);
 
 		const pointerTypeToDevice: Record<string, PointerDevice> = {
-			'mouse': PointerDevice.Mouse,
+			'mouse': PointerDevice.PrimaryButtonMouse,
 			'pen': PointerDevice.Pen,
 			'touch': PointerDevice.Touch,
 		};
@@ -53,6 +54,14 @@ export default class Pointer {
 		const timeStamp = (new Date()).getTime();
 		const canvasPos = viewport.roundPoint(viewport.screenToCanvas(screenPos));
 
+		if (device === PointerDevice.PrimaryButtonMouse) {
+			if (evt.buttons & 0x2) {
+				device = PointerDevice.RightButtonMouse;
+			} else if (!(evt.buttons & 0x1)) {
+				device = PointerDevice.Other;
+			}
+		} 
+
 		return new Pointer(
 			screenPos,
 			canvasPos,
@@ -61,7 +70,7 @@ export default class Pointer {
 			isDown,
 			device,
 			evt.pointerId,
-			timeStamp
+			timeStamp,
 		);
 	}
 

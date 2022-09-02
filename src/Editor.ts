@@ -165,6 +165,10 @@ export class Editor {
 		// May be required to prevent text selection on iOS/Safari:
 		// See https://stackoverflow.com/a/70992717/17055750
 		this.renderingRegion.addEventListener('touchstart', evt => evt.preventDefault());
+		this.renderingRegion.addEventListener('contextmenu', evt => {
+			// Don't show a context menu
+			evt.preventDefault();
+		});
 
 		this.renderingRegion.addEventListener('pointerdown', evt => {
 			const pointer = Pointer.ofEvent(evt, true, this.viewport);
