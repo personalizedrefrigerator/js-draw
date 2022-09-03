@@ -431,7 +431,13 @@ export default class Path {
 			const argParts = current[2].trim().split(/[^0-9Ee.-]/).filter(
 				part => part.length > 0
 			).reduce((accumualtor: string[], current: string): string[] => {
-				const parts = current.split(/(?<![eE])[-]/);
+				// As of 09/2022, iOS Safari doesn't support support lookbehind in regular
+				// expressions. As such, we need an alternative.
+				// Because '-' can be used as a path separator, unless preceeded by an 'e' (as in 1e-5),
+				// we need special cases:
+
+				current = current.replace(/([^eE])[-]/g, '$1 -');
+				const parts = current.split(' -');
 				if (parts[0] !== '') {
 					accumualtor.push(parts[0]);
 				}
