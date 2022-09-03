@@ -32,6 +32,7 @@
 
     min-width: 40px;
     max-width: 70px;
+    width: min-content;
     font-size: 11pt;
 
     cursor: pointer;
@@ -49,16 +50,12 @@
     box-shadow: 0px 2px 4px var(--primary-foreground-color);
 }
 
-.toolbar-root button {
-    height: auto;
-}
-
 .toolbar-root button:disabled {
     cursor: inherit;
     filter: opacity(0.5);
 }
 
-.toolbar-button .toolbar-icon {
+.toolbar-root .toolbar-icon {
     flex-shrink: 1;
     min-width: 30px;
 }
@@ -98,6 +95,7 @@
 .toolbar-buttonGroup {
     display: flex;
     flex-direction: row;
+    justify-content: center;
 }
 
 .toolbar-closeColorPickerOverlay {

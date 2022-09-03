@@ -1,6 +1,6 @@
 import Editor from '../Editor';
 import { ToolType } from '../tools/ToolController';
-import { EditorEventType, StrokeDataPoint } from '../types';
+import { EditorEventType } from '../types';
 
 import { coloris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
@@ -9,25 +9,16 @@ import Eraser from '../tools/Eraser';
 import BaseTool from '../tools/BaseTool';
 import SelectionTool from '../tools/SelectionTool';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
-import { Vec2 } from '../geometry/Vec2';
-import SVGRenderer from '../rendering/renderers/SVGRenderer';
-import Viewport from '../Viewport';
-import EventDispatcher from '../EventDispatcher';
 import { ComponentBuilderFactory } from '../components/builders/types';
 import { makeArrowBuilder } from '../components/builders/ArrowBuilder';
 import { makeLineBuilder } from '../components/builders/LineBuilder';
 import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../components/builders/RectangleBuilder';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
+import { ActionButtonIcon } from './types';
+import { makeDropdownIcon, makeEraserIcon, makeIconFromFactory, makePenIcon, makeRedoIcon, makeSelectionIcon, makeTouchDrawingIcon, makeUndoIcon } from './icons';
 
-const primaryForegroundFill = `
-	style='fill: var(--primary-foreground-color);'
-`;
-const primaryForegroundStrokeFill = `
-	style='fill: var(--primary-foreground-color); stroke: var(--primary-foreground-color);'
-`;
 
 const toolbarCSSPrefix = 'toolbar-';
-const svgNamespace = 'http://www.w3.org/2000/svg';
 
 abstract class ToolbarWidget {
 	protected readonly container: HTMLElement;
@@ -174,17 +165,8 @@ abstract class ToolbarWidget {
 	}
 
 	private createDropdownIcon(): Element {
-		const icon = document.createElementNS(svgNamespace, 'svg');
-		icon.innerHTML = `
-		<g>
-			<path
-				d='M5,10 L50,90 L95,10 Z'
-				${primaryForegroundFill}
-			/>
-		</g>
-		`;
+		const icon = makeDropdownIcon();
 		icon.classList.add(`${toolbarCSSPrefix}showHideDropdownIcon`);
-		icon.setAttribute('viewBox', '0 0 100 100');
 		return icon;
 	}
 }
@@ -194,21 +176,7 @@ class EraserWidget extends ToolbarWidget {
 		return this.localizationTable.eraser;
 	}
 	protected createIcon(): Element {
-		const icon = document.createElementNS(svgNamespace, 'svg');
-
-		// Draw an eraser-like shape
-		icon.innerHTML = `
-		<g>
-			<rect x=10 y=50 width=80 height=30 rx=10 fill='pink' />
-			<rect
-				x=10 y=10 width=80 height=50
-				${primaryForegroundFill}
-			/>
-		</g>
-		`;
-		icon.setAttribute('viewBox', '0 0 100 100');
-
-		return icon;
+		return makeEraserIcon();
 	}
 
 	protected fillDropdown(_dropdown: HTMLElement): boolean {
@@ -229,19 +197,9 @@ class SelectionWidget extends ToolbarWidget {
 	}
 
 	protected createIcon(): Element {
-		const icon = document.createElementNS(svgNamespace, 'svg');
-
-		// Draw a cursor-like shape
-		icon.innerHTML = `
-		<g>
-			<rect x=10 y=10 width=70 height=70 fill='pink' stroke='black'/>
-			<rect x=75 y=75 width=10 height=10 fill='white' stroke='black'/>
-		</g>
-		`;
-		icon.setAttribute('viewBox', '0 0 100 100');
-
-		return icon;
+		return makeSelectionIcon();
 	}
+
 	protected fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		const resizeButton = document.createElement('button');
@@ -290,25 +248,7 @@ class TouchDrawingWidget extends ToolbarWidget {
 	}
 
 	protected createIcon(): Element {
-		const icon = document.createElementNS(svgNamespace, 'svg');
-
-		// Draw a cursor-like shape
-		icon.innerHTML = `
-		<g>
-			<path d='M11,-30 Q0,10 20,20 Q40,20 40,-30 Z' fill='blue' stroke='black'/>
-			<path d='
-				M0,90 L0,50 Q5,40 10,50
-				L10,20 Q20,15 30,20
-				L30,50 Q50,40 80,50
-				L80,90 L10,90 Z'
-				
-				${primaryForegroundStrokeFill}
-			/>
-		</g>
-		`;
-		icon.setAttribute('viewBox', '-10 -30 100 100');
-
-		return icon;
+		return makeTouchDrawingIcon();
 	}
 	protected fillDropdown(_dropdown: HTMLElement): boolean {
 		// No dropdown
@@ -348,92 +288,17 @@ class PenWidget extends ToolbarWidget {
 		return this.targetTool.description;
 	}
 
-	private makePenIcon(elem: SVGSVGElement) {
-		// Use a square-root scale to prevent the pen's tip from overflowing.
-		const scale = Math.round(Math.sqrt(this.tool.getThickness()) * 2);
-		const color = this.tool.getColor();
-
-		// Draw a pen-like shape
-		const primaryStrokeTipPath = `M14,63 L${50 - scale},95 L${50 + scale},90 L88,60 Z`;
-		const backgroundStrokeTipPath = `M14,63 L${50 - scale},85 L${50 + scale},83 L88,60 Z`;
-		elem.innerHTML = `
-		<defs>
-			<pattern
-				id='checkerboard'
-				viewBox='0,0,10,10'
-				width='20%'
-				height='20%'
-				patternUnits='userSpaceOnUse'
-			>
-				<rect x=0 y=0 width=10 height=10 fill='white'/>
-				<rect x=0 y=0 width=5 height=5 fill='gray'/>
-				<rect x=5 y=5 width=5 height=5 fill='gray'/>
-			</pattern>
-		</defs>
-		<g>
-			<!-- Pen grip -->
-			<path
-				d='M10,10 L90,10 L90,60 L${50 + scale},80 L${50 - scale},80 L10,60 Z'
-				${primaryForegroundStrokeFill}
-			/>
-		</g>
-		<g>
-			<!-- Checkerboard background for slightly transparent pens -->
-			<path d='${backgroundStrokeTipPath}' fill='url(#checkerboard)'/>
-
-			<!-- Actual pen tip -->
-			<path
-				d='${primaryStrokeTipPath}'
-				fill='${color.toHexString()}'
-				stroke='${color.toHexString()}'
-			/>
-		</g>
-		`;
-	}
-
-	// Draws an icon with the pen.
-	private makeDrawnIcon(icon: SVGSVGElement) {
-		const strokeFactory = this.tool.getStrokeFactory();
-
-		const toolThickness = this.tool.getThickness();
-
-		const nowTime = (new Date()).getTime();
-		const startPoint: StrokeDataPoint = {
-			pos: Vec2.of(10, 10),
-			width: toolThickness / 5,
-			color: this.tool.getColor(),
-			time: nowTime - 100,
-		};
-		const endPoint: StrokeDataPoint = {
-			pos: Vec2.of(90, 90),
-			width: toolThickness / 5,
-			color: this.tool.getColor(),
-			time: nowTime,
-		};
-
-		const builder = strokeFactory(startPoint, this.editor.viewport);
-		builder.addPoint(endPoint);
-
-		const viewport = new Viewport(new EventDispatcher());
-		viewport.updateScreenSize(Vec2.of(100, 100));
-		const renderer = new SVGRenderer(icon, viewport);
-		builder.preview(renderer);
-	}
-
 	protected createIcon(): Element {
-		// We need to use createElementNS to embed an SVG element in HTML.
-		// See http://zhangwenli.com/blog/2017/07/26/createelementns/
-		const icon = document.createElementNS(svgNamespace, 'svg');
-		icon.setAttribute('viewBox', '0 0 100 100');
-
 		const strokeFactory = this.tool.getStrokeFactory();
 		if (strokeFactory === makeFreehandLineBuilder) {
-			this.makePenIcon(icon);
+			// Use a square-root scale to prevent the pen's tip from overflowing.
+			const scale = Math.round(Math.sqrt(this.tool.getThickness()) * 4);
+			const color = this.tool.getColor();
+			return makePenIcon(scale, color.toHexString());
 		} else {
-			this.makeDrawnIcon(icon);
+			const strokeFactory = this.tool.getStrokeFactory();
+			return makeIconFromFactory(this.tool, strokeFactory);
 		}
-
-		return icon;
 	}
 
 	private static idCounter: number = 0;
@@ -614,10 +479,24 @@ export default class HTMLToolbar {
 		});
 	}
 
-	public addActionButton(text: string, command: ()=> void, parent?: Element) {
+	public addActionButton(title: string|ActionButtonIcon, command: ()=> void, parent?: Element) {
 		const button = document.createElement('button');
-		button.innerText = text;
 		button.classList.add(`${toolbarCSSPrefix}toolButton`);
+
+		if (typeof title === 'string') {
+			button.innerText = title;
+		} else {
+			const iconElem = title.icon.cloneNode(true) as HTMLElement;
+			const labelElem = document.createElement('label');
+
+			// Use the label to describe the icon -- no additional description should be necessary.
+			iconElem.setAttribute('alt', '');
+			labelElem.innerText = title.label;
+			iconElem.classList.add('toolbar-icon');
+
+			button.replaceChildren(iconElem, labelElem);
+		}
+
 		button.onclick = command;
 		(parent ?? this.container).appendChild(button);
 
@@ -628,10 +507,16 @@ export default class HTMLToolbar {
 		const undoRedoGroup = document.createElement('div');
 		undoRedoGroup.classList.add(`${toolbarCSSPrefix}buttonGroup`);
 
-		const undoButton = this.addActionButton('Undo', () => {
+		const undoButton = this.addActionButton({
+			label: 'Undo',
+			icon: makeUndoIcon()
+		}, () => {
 			this.editor.history.undo();
 		}, undoRedoGroup);
-		const redoButton = this.addActionButton('Redo', () => {
+		const redoButton = this.addActionButton({
+			label: 'Redo',
+			icon: makeRedoIcon(),
+		}, () => {
 			this.editor.history.redo();
 		}, undoRedoGroup);
 		this.container.appendChild(undoRedoGroup);
