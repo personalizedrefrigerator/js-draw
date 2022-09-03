@@ -90,15 +90,38 @@ describe('Path.fromString', () => {
 		]);
 	});
 
+	it('should break compoents at -s', () => {
+		const path = Path.fromString('m1-1 L-1-1-3-4-5-6,5-1');
+		expect(path.parts.length).toBe(4);
+		expect(path.parts).toMatchObject([
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-1, -1),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-3, -4),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-5, -6),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(5, -1),
+			},
+		]);
+	});
+
 	it('should properly handle cubic Bézier curves', () => {
-		const path = Path.fromString('c1,1 0,-3 4 5 C1,1 0.1, 0.1 0, 0');
+		const path = Path.fromString('m1,1 c1,1 0-3 4 5 C1,1 0.1, 0.1 0, 0');
 		expect(path.parts.length).toBe(2);
 		expect(path.parts).toMatchObject([
 			{
 				kind: PathCommandType.CubicBezierTo,
-				controlPoint1: Vec2.of(1, 1),
+				controlPoint1: Vec2.of(2, 2),
 				controlPoint2: Vec2.of(1, -2),
-				endPoint: Vec2.of(5, 3),
+				endPoint: Vec2.of(5, 6),
 			},
 			{
 				kind: PathCommandType.CubicBezierTo,
@@ -120,7 +143,7 @@ describe('Path.fromString', () => {
 			{
 				kind: PathCommandType.QuadraticBezierTo,
 				controlPoint: Vec2.of(1, 1),
-				endPoint: Vec2.of(-2, -3),
+				endPoint: Vec2.of(-1, -1),
 			},
 			{
 				kind: PathCommandType.QuadraticBezierTo,
@@ -129,5 +152,72 @@ describe('Path.fromString', () => {
 			},
 		]);
 		expect(path.startPoint).toMatchObject(Vec2.of(1, 1));
+	});
+
+	it('should correctly handle a command followed by multiple sets of arguments', () => {
+		// Commands followed by multiple sets of arguments, for example,
+		//  l 5,10 5,4 3,2,
+		// should be interpreted as multiple commands. Our example, is therefore equivalent to,
+		//  l 5,10 l 5,4 l 3,2
+		
+		const path = Path.fromString(`
+			L5,10 1,1
+			 2,2 -3,-1
+			q 1,2 1,1
+			  -1,-1 -3,-4
+			h -4 -1
+			V 3 5 1
+		`);
+		expect(path.parts).toMatchObject([
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(1, 1),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(2, 2),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-3, -1),
+			},
+
+			// q 1,2 1,1    -1,-1 -3,-4
+			{
+				kind: PathCommandType.QuadraticBezierTo,
+				controlPoint: Vec2.of(-2, 1),
+				endPoint: Vec2.of(-2, 0),
+			},
+			{
+				kind: PathCommandType.QuadraticBezierTo,
+				controlPoint: Vec2.of(-3, -1),
+				endPoint: Vec2.of(-5, -4),
+			},
+
+			// h -4 -1
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-9, -4),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-10, -4),
+			},
+
+			// V 3 5 1
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-10, 3),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-10, 5),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(-10, 1),
+			},
+		]);
+		expect(path.startPoint).toMatchObject(Vec2.of(5, 10));
 	});
 });

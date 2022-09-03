@@ -371,6 +371,7 @@ export default class Path {
 
 		let lastPos: Point2 = Vec2.zero;
 		let firstPos: Point2|null = null;
+		let startPos: Point2|null = null;
 		let isFirstCommand: boolean = true;
 		const commands: PathCommand[] = [];
 
@@ -413,19 +414,62 @@ export default class Path {
 				endPoint,
 			});
 		};
+		const commandArgCounts: Record<string, number> = {
+			'm': 1,
+			'l': 1,
+			'c': 3,
+			'q': 2,
+			'z': 0,
+			'h': 1,
+			'v': 1,
+		};
 
 		// Each command: Command character followed by anything that isn't a command character
-		const commandExp = /([MmZzLlHhVvCcSsQqTtAa])\s*([^a-zA-Z]*)/g;
+		const commandExp = /([MZLHVCSQTA])\s*([^MZLHVCSQTA]*)/ig;
 		let current;
 		while ((current = commandExp.exec(pathString)) !== null) {
-			const argParts = current[2].trim().split(/[^0-9.-]/).filter(
+			const argParts = current[2].trim().split(/[^0-9Ee.-]/).filter(
 				part => part.length > 0
-			);
-			const numericArgs = argParts.map(arg => parseFloat(arg));
+			).reduce((accumualtor: string[], current: string): string[] => {
+				const parts = current.split(/(?<![eE])[-]/);
+				if (parts[0] !== '') {
+					accumualtor.push(parts[0]);
+				}
+				accumualtor.push(...parts.slice(1).map(part => `-${part}`));
+				return accumualtor;
+			}, []);
 
-			const commandChar = current[1];
-			const uppercaseCommand = commandChar !== commandChar.toLowerCase();
-			const args = numericArgs.reduce((
+			let numericArgs = argParts.map(arg => parseFloat(arg));
+
+			let commandChar = current[1].toLowerCase();
+			let uppercaseCommand = current[1] !== commandChar;
+
+			// Convert commands that don't take points into commands that do.
+			if (commandChar === 'v' || commandChar === 'h') {
+				numericArgs = numericArgs.reduce((accumulator: number[], current: number): number[] => {
+					if (commandChar === 'v') {
+						return accumulator.concat(uppercaseCommand ? lastPos.x : 0, current);
+					} else {
+						return accumulator.concat(current, uppercaseCommand ? lastPos.y : 0);
+					}
+				}, []);
+				commandChar = 'l';
+			} else if (commandChar === 'z') {
+				if (firstPos) {
+					numericArgs = [ firstPos.x, firstPos.y ];
+					firstPos = lastPos;
+				} else {
+					continue;
+				}
+
+				// 'z' always acts like an uppercase lineTo(startPos)
+				uppercaseCommand = true;
+				commandChar = 'l';
+			}
+
+
+			const commandArgCount: number = commandArgCounts[commandChar] ?? 0;
+			const allArgs = numericArgs.reduce((
 				accumulator: Point2[], current, index, parts
 			): Point2[] => {
 				if (index % 2 !== 0) {
@@ -435,82 +479,65 @@ export default class Path {
 				} else {
 					return accumulator;
 				}
-			}, []).map((coordinate: Vec2): Point2 => {
+			}, []).map((coordinate, index): Point2 => {
 				// Lowercase commands are relative, uppercase commands use absolute
 				// positioning
+				let newPos;
 				if (uppercaseCommand) {
-					lastPos = coordinate;
-					return coordinate;
+					newPos = coordinate;
 				} else {
-					lastPos = lastPos.plus(coordinate);
-					return lastPos;
+					newPos = lastPos.plus(coordinate);
 				}
+
+				if ((index + 1) % commandArgCount === 0) {
+					lastPos = newPos;
+				}
+
+				return newPos;
 			});
-
-			let expectedPointArgCount;
-
-			switch (commandChar.toLowerCase()) {
-			case 'm':
-				expectedPointArgCount = 1;
-				moveTo(args[0]);
-				break;
-			case 'l':
-				expectedPointArgCount = 1;
-				lineTo(args[0]);
-				break;
-			case 'z':
-				expectedPointArgCount = 0;
-				// firstPos can be null if the stroke data is just 'z'.
-				if (firstPos) {
-					lineTo(firstPos);
-				}
-				break;
-			case 'c':
-				expectedPointArgCount = 3;
-				cubicBezierTo(args[0], args[1], args[2]);
-				break;
-			case 'q':
-				expectedPointArgCount = 2;
-				quadraticBeierTo(args[0], args[1]);
-				break;
-
-			// Horizontal line
-			case 'h':
-				expectedPointArgCount = 0;
-
-				if (uppercaseCommand) {
-					lineTo(Vec2.of(numericArgs[0], lastPos.y));
-				} else {
-					lineTo(lastPos.plus(Vec2.of(numericArgs[0], 0)));
-				}
-				break;
-
-			// Vertical line
-			case 'v':
-				expectedPointArgCount = 0;
-
-				if (uppercaseCommand) {
-					lineTo(Vec2.of(lastPos.x, numericArgs[1]));
-				} else {
-					lineTo(lastPos.plus(Vec2.of(0, numericArgs[1])));
-				}
-				break;
-			default:
-				throw new Error(`Unknown path command ${commandChar}`);
+	
+			if (allArgs.length % commandArgCount !== 0) {
+				throw new Error([
+					`Incorrect number of arguments: got ${JSON.stringify(allArgs)} with a length of ${allArgs.length} ≠ ${commandArgCount}k, k ∈ ℤ.`,
+					`The number of arguments to ${commandChar} must be a multiple of ${commandArgCount}!`,
+					`Command: ${current[0]}`,
+				].join('\n'));
 			}
 
-			if (args.length !== expectedPointArgCount) {
-				throw new Error(`
-					Incorrect number of arguments: got ${JSON.stringify(args)} with a length of ${args.length} ≠ ${expectedPointArgCount}.
-				`.trim());
+			for (let argPos = 0; argPos < allArgs.length; argPos += commandArgCount) {
+				const args = allArgs.slice(argPos, argPos + commandArgCount);
+
+				switch (commandChar.toLowerCase()) {
+				case 'm':
+					if (argPos === 0) {
+						moveTo(args[0]);
+					} else {
+						lineTo(args[0]);
+					}
+					break;
+				case 'l':
+					lineTo(args[0]);
+					break;
+				case 'c':
+					cubicBezierTo(args[0], args[1], args[2]);
+					break;
+				case 'q':
+					quadraticBeierTo(args[0], args[1]);
+					break;
+				default:
+					throw new Error(`Unknown path command ${commandChar}`);
+				}
+
+				isFirstCommand = false;
 			}
 
-			if (args.length > 0) {
-				firstPos ??= args[0];
+			if (allArgs.length > 0) {
+				firstPos ??= allArgs[0];
+				startPos ??= firstPos;
+				lastPos = allArgs[allArgs.length - 1];
 			}
-			isFirstCommand = false;
 		}
 
-		return new Path(firstPos ?? Vec2.zero, commands);
+		return new Path(startPos ?? Vec2.zero, commands);
 	}
 }

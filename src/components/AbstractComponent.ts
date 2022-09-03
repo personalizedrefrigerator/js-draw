@@ -7,6 +7,9 @@ import Rect2 from '../geometry/Rect2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 
+type LoadSaveData = unknown;
+export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
+
 export default abstract class AbstractComponent {
 	protected lastChangedTime: number;
 	protected abstract contentBBox: Rect2;
@@ -20,13 +23,25 @@ export default abstract class AbstractComponent {
 		this.zIndex = AbstractComponent.zIndexCounter++;
 	}
 
+	// Get and manage data attached by a loader.
+	private loadSaveData: LoadSaveDataTable = {};
+	public attachLoadSaveData(key: string, data: LoadSaveData) {
+		if (!this.loadSaveData[key]) {
+			this.loadSaveData[key] = [];
+		}
+		this.loadSaveData[key].push(data);
+	}
+	public getLoadSaveData(): LoadSaveDataTable {
+		return this.loadSaveData;
+	}
+
 	public getZIndex(): number {
 		return this.zIndex;
 	}
-
 	public getBBox(): Rect2 {
 		return this.contentBBox;
 	}
+
 	public abstract render(canvas: AbstractRenderer, visibleRect?: Rect2): void;
 	public abstract intersects(lineSegment: LineSegment2): boolean;
 

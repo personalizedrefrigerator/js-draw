@@ -1,7 +1,9 @@
 
+import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
 import Rect2 from '../../geometry/Rect2';
 import { Point2, Vec2 } from '../../geometry/Vec2';
+import { svgAttributesDataKey, SVGLoaderUnknownAttribute } from '../../SVGLoader';
 import Viewport from '../../Viewport';
 import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
 
@@ -13,8 +15,8 @@ export default class SVGRenderer extends AbstractRenderer {
 	private lastPathStyle: RenderingStyle|null;
 	private lastPath: PathCommand[]|null;
 	private lastPathStart: Point2|null;
+	private objectElems: SVGElement[]|null = null;
 
-	private mainGroup: SVGGElement;
 	private overwrittenAttrs: Record<string, string|null> = {};
 
 	public constructor(private elem: SVGSVGElement, viewport: Viewport) {
@@ -41,8 +43,6 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	public clear() {
-		this.mainGroup = document.createElementNS(svgNameSpace, 'g');
-
 		// Restore all alltributes
 		for (const attrName in this.overwrittenAttrs) {
 			const value = this.overwrittenAttrs[attrName];
@@ -54,9 +54,6 @@ export default class SVGRenderer extends AbstractRenderer {
 			}
 		}
 		this.overwrittenAttrs = {};
-
-		// Remove all children
-		this.elem.replaceChildren(this.mainGroup);
 	}
 
 	protected beginPath(startPoint: Point2) {
@@ -106,7 +103,8 @@ export default class SVGRenderer extends AbstractRenderer {
 			pathElem.setAttribute('stroke-width', style.stroke.width.toString());
 		}
 
-		this.mainGroup.appendChild(pathElem);
+		this.elem.appendChild(pathElem);
+		this.objectElems?.push(pathElem);
 	}
 
 	public startObject(boundingBox: Rect2) {
@@ -116,13 +114,27 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.lastPath = null;
 		this.lastPathStart = null;
 		this.lastPathStyle = null;
+		this.objectElems = [];
 	}
 
-	public endObject() {
-		super.endObject();
+	public endObject(loaderData?: LoadSaveDataTable) {
+		super.endObject(loaderData);
 
 		// Don't extend paths across objects
 		this.addPathToSVG();
+
+		if (loaderData) {
+			// Restore any attributes unsupported by the app.
+			for (const elem of this.objectElems ?? []) {
+				const attrs = loaderData[svgAttributesDataKey] as SVGLoaderUnknownAttribute[]|undefined;
+
+				if (attrs) {
+					for (const [ attr, value ] of attrs) {
+						elem.setAttribute(attr, value);
+					}
+				}
+			}
+		}
 	}
 
 	protected lineTo(point: Point2) {
@@ -175,7 +187,7 @@ export default class SVGRenderer extends AbstractRenderer {
 			elem.setAttribute('cx', `${point.x}`);
 			elem.setAttribute('cy', `${point.y}`);
 			elem.setAttribute('r', '15');
-			this.mainGroup.appendChild(elem);
+			this.elem.appendChild(elem);
 		});
 	}
 

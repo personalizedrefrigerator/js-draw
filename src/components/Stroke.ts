@@ -58,7 +58,7 @@ export default class Stroke extends AbstractComponent {
 				canvas.drawPath(part);
 			}
 		}
-		canvas.endObject();
+		canvas.endObject(this.getLoadSaveData());
 	}
 
 	// Grows the bounding box for a given stroke part based on that part's style.

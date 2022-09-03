@@ -1,4 +1,5 @@
 import Color4 from '../../Color4';
+import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Mat33 from '../../geometry/Mat33';
 import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
 import Rect2 from '../../geometry/Rect2';
@@ -128,7 +129,7 @@ export default abstract class AbstractRenderer {
 		this.objectLevel ++;
 	}
 
-	public endObject() {
+	public endObject(_loaderData?: LoadSaveDataTable) {
 		// Render the paths all at once
 		this.flushPath();
 		this.currentPaths = null;

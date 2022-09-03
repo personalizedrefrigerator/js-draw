@@ -13,6 +13,12 @@ type OnFinishListener = ()=> void;
 // Size of a loaded image if no size is specified.
 export const defaultSVGViewRect = new Rect2(0, 0, 500, 500);
 
+// Key to retrieve unrecognised attributes from an AbstractComponent
+export const svgAttributesDataKey = 'svgAttrs';
+
+// [key, value]
+export type SVGLoaderUnknownAttribute = [ string, string ];
+
 export default class SVGLoader implements ImageLoader {
 	private onAddComponent: ComponentAddedListener|null = null;
 	private onProgress: OnProgressListener|null = null;
@@ -88,12 +94,31 @@ export default class SVGLoader implements ImageLoader {
 		return result;
 	}
 
+	private attachUnrecognisedAttrs(
+		elem: AbstractComponent,
+		node: SVGElement,
+		supportedAttrs: Set<string>
+	) {
+		for (const attr of node.getAttributeNames()) {
+			if (supportedAttrs.has(attr)) {
+				continue;
+			}
+
+			elem.attachLoadSaveData(svgAttributesDataKey,
+				[ attr, node.getAttribute(attr) ] as SVGLoaderUnknownAttribute,
+			);
+		}
+	}
+
 	// Adds a stroke with a single path
 	private addPath(node: SVGPathElement) {
 		let elem: AbstractComponent;
 		try {
 			const strokeData = this.strokeDataFromElem(node);
 			elem = new Stroke(strokeData);
+			this.attachUnrecognisedAttrs(
+				elem, node, new Set([ 'stroke', 'fill', 'stroke-width', 'd' ]),
+			);
 		} catch (e) {
 			console.error(
 				'Invalid path in node', node,
@@ -214,9 +239,7 @@ export default class SVGLoader implements ImageLoader {
 			throw new Error('SVG loading iframe is not sandboxed.');
 		}
 
-		// Try running JavaScript within the iframe
 		const sandboxDoc = sandbox.contentWindow?.document ?? sandbox.contentDocument;
-
 		if (sandboxDoc == null) throw new Error('Unable to open a sandboxed iframe!');
 
 		sandboxDoc.open();
