@@ -1,6 +1,8 @@
 
 
 export interface ToolbarLocalization {
+	anyDevicePanning: string;
+	touchPanning: string;
 	outlinedRectanglePen: string;
 	filledRectanglePen: string;
 	linePen: string;
@@ -11,7 +13,7 @@ export interface ToolbarLocalization {
 	pen: string;
 	eraser: string;
 	select: string;
-	touchDrawing: string;
+	handTool: string;
 	thicknessLabel: string;
 	resizeImageToSelection: string;
 	deleteSelection: string;
@@ -20,13 +22,14 @@ export interface ToolbarLocalization {
 
 	dropdownShown: (toolName: string)=>string;
 	dropdownHidden: (toolName: string)=>string;
+	zoomLevel: (zoomPercentage: number)=> string;
 }
 
 export const defaultToolbarLocalization: ToolbarLocalization = {
 	pen: 'Pen',
 	eraser: 'Eraser',
 	select: 'Select',
-	touchDrawing: 'Touch Drawing',
+	handTool: 'Pan',
 	thicknessLabel: 'Thickness: ',
 	colorLabel: 'Color: ',
 	resizeImageToSelection: 'Resize image to selection',
@@ -34,6 +37,9 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	undo: 'Undo',
 	redo: 'Redo',
 	selectObjectType: 'Object type: ',
+
+	touchPanning: 'Touchscreen panning',
+	anyDevicePanning: 'Any device panning',
 
 	freehandPen: 'Freehand',
 	arrowPen: 'Arrow',
@@ -43,4 +49,5 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
 	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
+	zoomLevel: (zoomPercent: number) => `Zoom: ${zoomPercent}%`,
 };

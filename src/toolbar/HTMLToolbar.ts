@@ -15,7 +15,10 @@ import { makeLineBuilder } from '../components/builders/LineBuilder';
 import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../components/builders/RectangleBuilder';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
-import { makeDropdownIcon, makeEraserIcon, makeIconFromFactory, makePenIcon, makeRedoIcon, makeSelectionIcon, makeTouchDrawingIcon, makeUndoIcon } from './icons';
+import { makeDropdownIcon, makeEraserIcon, makeIconFromFactory, makePenIcon, makeRedoIcon, makeSelectionIcon, makeHandToolIcon, makeUndoIcon } from './icons';
+import PanZoom, { PanZoomMode } from '../tools/PanZoom';
+import Mat33 from '../geometry/Mat33';
+import Viewport from '../Viewport';
 
 
 const toolbarCSSPrefix = 'toolbar-';
@@ -48,11 +51,6 @@ abstract class ToolbarWidget {
 		this.button.setAttribute('role', 'button');
 		this.button.tabIndex = 0;
 
-		this.button.onclick = () => {
-			this.handleClick();
-		};
-
-
 		editor.notifier.on(EditorEventType.ToolEnabled, toolEvt => {
 			if (toolEvt.kind !== EditorEventType.ToolEnabled) {
 				throw new Error('Incorrect event type! (Expected ToolEnabled)');
@@ -82,6 +80,12 @@ abstract class ToolbarWidget {
 	// Returns true if such a menu should be created, false otherwise.
 	protected abstract fillDropdown(dropdown: HTMLElement): boolean;
 
+	protected setupActionBtnClickListener(button: HTMLElement) {
+		button.onclick = () => {
+			this.handleClick();
+		};
+	}
+
 	protected handleClick() {
 		if (this.hasDropdown) {
 			if (!this.targetTool.isEnabled()) {
@@ -97,6 +101,8 @@ abstract class ToolbarWidget {
 	// Adds this to [parent]. This can only be called once for each ToolbarWidget.
 	public addTo(parent: HTMLElement) {
 		this.label.innerText = this.getTitle();
+
+		this.setupActionBtnClickListener(this.button);
 
 		this.icon = null;
 		this.updateIcon();
@@ -157,6 +163,21 @@ abstract class ToolbarWidget {
 			this.editor.announceForAccessibility(
 				this.localizationTable.dropdownHidden(this.targetTool.description)
 			);
+		}
+
+		this.repositionDropdown();
+	}
+
+	protected repositionDropdown() {
+		const dropdownBBox = this.dropdownContainer.getBoundingClientRect();
+		const screenWidth = document.body.clientWidth;
+
+		if (dropdownBBox.left > screenWidth / 2) {
+			this.dropdownContainer.style.marginLeft = this.button.clientWidth + 'px';
+			this.dropdownContainer.style.transform = 'translate(-100%, 0)';
+		} else {
+			this.dropdownContainer.style.marginLeft = '';
+			this.dropdownContainer.style.transform = '';
 		}
 	}
 
@@ -242,24 +263,143 @@ class SelectionWidget extends ToolbarWidget {
 	}
 }
 
-class TouchDrawingWidget extends ToolbarWidget {
+const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
+	const zoomLevelRow = document.createElement('div');
+
+	const increaseButton = document.createElement('button');
+	const decreaseButton = document.createElement('button');
+	const zoomLevelDisplay = document.createElement('span');
+	increaseButton.innerText = '+';
+	decreaseButton.innerText = '-';
+	zoomLevelRow.replaceChildren(zoomLevelDisplay, increaseButton, decreaseButton);
+
+	zoomLevelRow.classList.add(`${toolbarCSSPrefix}zoomLevelEditor`);
+	zoomLevelDisplay.classList.add('zoomDisplay');
+
+	let lastZoom: number|undefined;
+	const updateZoomDisplay = () => {
+		let zoomLevel = editor.viewport.getScaleFactor() * 100;
+
+		if (zoomLevel > 0.1) {
+			zoomLevel = Math.round(zoomLevel * 10) / 10;
+		} else {
+			zoomLevel = Math.round(zoomLevel * 1000) / 1000;
+		}
+
+		if (zoomLevel !== lastZoom) {
+			zoomLevelDisplay.innerText = localizationTable.zoomLevel(zoomLevel);
+			lastZoom = zoomLevel;
+		}
+	};
+	updateZoomDisplay();
+
+	editor.notifier.on(EditorEventType.ViewportChanged, (event) => {
+		if (event.kind === EditorEventType.ViewportChanged) {
+			updateZoomDisplay();
+		}
+	});
+
+	const zoomBy = (factor: number) => {
+		const screenCenter = editor.viewport.visibleRect.center;
+		const transformUpdate = Mat33.scaling2D(factor, screenCenter);
+		editor.dispatch(new Viewport.ViewportTransform(transformUpdate), false);
+	};
+
+	increaseButton.onclick = () => {
+		zoomBy(5.0/4);
+	};
+
+	decreaseButton.onclick = () => {
+		zoomBy(4.0/5);
+	};
+
+	return zoomLevelRow;
+};
+
+class HandToolWidget extends ToolbarWidget {
+	public constructor(
+		editor: Editor, protected tool: PanZoom, localizationTable: ToolbarLocalization
+	) {
+		super(editor, tool, localizationTable);
+		this.container.classList.add('dropdownShowable');
+	}
 	protected getTitle(): string {
-		return this.localizationTable.touchDrawing;
+		return this.localizationTable.handTool;
 	}
 
 	protected createIcon(): Element {
-		return makeTouchDrawingIcon();
+		return makeHandToolIcon();
 	}
-	protected fillDropdown(_dropdown: HTMLElement): boolean {
-		// No dropdown
-		return false;
+
+	protected fillDropdown(dropdown: HTMLElement): boolean {
+		type OnToggle = (checked: boolean)=>void;
+		let idCounter = 0;
+		const addCheckbox = (label: string, onToggle: OnToggle) => {
+			const rowContainer = document.createElement('div');
+			const labelElem = document.createElement('label');
+			const checkboxElem = document.createElement('input');
+
+			checkboxElem.type = 'checkbox';
+			checkboxElem.id = `${toolbarCSSPrefix}hand-tool-option-${idCounter++}`;
+			labelElem.setAttribute('for', checkboxElem.id);
+
+			checkboxElem.oninput = () => {
+				onToggle(checkboxElem.checked);
+			};
+			labelElem.innerText = label;
+
+			rowContainer.replaceChildren(checkboxElem, labelElem);
+			dropdown.appendChild(rowContainer);
+
+			return checkboxElem;
+		};
+
+		const setModeFlag = (enabled: boolean, flag: PanZoomMode) => {
+			const mode = this.tool.getMode();
+			if (enabled) {
+				this.tool.setMode(mode | flag);
+			} else {
+				this.tool.setMode(mode & ~flag);
+			}
+		};
+
+		const touchPanningCheckbox = addCheckbox(this.localizationTable.touchPanning, checked => {
+			setModeFlag(checked, PanZoomMode.OneFingerTouchGestures);
+		});
+
+		const anyDevicePanningCheckbox = addCheckbox(this.localizationTable.anyDevicePanning, checked => {
+			setModeFlag(checked, PanZoomMode.SinglePointerGestures);
+		});
+
+		dropdown.appendChild(makeZoomControl(this.localizationTable, this.editor));
+
+		const updateInputs = () => {
+			const mode = this.tool.getMode();
+			anyDevicePanningCheckbox.checked = !!(mode & PanZoomMode.SinglePointerGestures);
+			if (anyDevicePanningCheckbox.checked) {
+				touchPanningCheckbox.checked = true;
+				touchPanningCheckbox.disabled = true;
+			} else {
+				touchPanningCheckbox.checked = !!(mode & PanZoomMode.OneFingerTouchGestures);
+				touchPanningCheckbox.disabled = false;
+			}
+		};
+
+		updateInputs();
+		this.editor.notifier.on(EditorEventType.ToolUpdated, event => {
+			if (event.kind === EditorEventType.ToolUpdated && event.tool === this.tool) {
+				updateInputs();
+			}
+		});
+
+		return true;
 	}
-	protected updateSelected(active: boolean) {
-		if (active) {
-			this.container.classList.remove('selected');
-		} else {
-			this.container.classList.add('selected');
-		}
+
+	protected updateSelected(_active: boolean) {
+	}
+
+	protected handleClick() {
+		this.setDropdownVisible(!this.isDropdownVisible());
 	}
 }
 
@@ -562,8 +702,12 @@ export default class HTMLToolbar {
 			(new SelectionWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
 		}
 
-		for (const tool of toolController.getMatchingTools(ToolType.TouchPanZoom)) {
-			(new TouchDrawingWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
+		for (const tool of toolController.getMatchingTools(ToolType.PanZoom)) {
+			if (!(tool instanceof PanZoom)) {
+				throw new Error('All SelectionTools must have kind === ToolType.PanZoom');
+			}
+	
+			(new HandToolWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
 		}
 
 		this.setupColorPickers();

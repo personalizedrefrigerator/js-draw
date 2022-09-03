@@ -4,7 +4,7 @@ import Mat33 from '../geometry/Mat33';
 import { Point2, Vec2 } from '../geometry/Vec2';
 import Vec3 from '../geometry/Vec3';
 import Pointer, { PointerDevice } from '../Pointer';
-import { KeyPressEvent, PointerEvt, WheelEvt } from '../types';
+import { EditorEventType, KeyPressEvent, PointerEvt, WheelEvt } from '../types';
 import { Viewport } from '../Viewport';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
@@ -17,20 +17,14 @@ interface PinchData {
 }
 
 export enum PanZoomMode {
-	// Handle one-pointer gestures (touchscreen only unless AnyDevice is set)
-	OneFingerGestures = 0x1,
-
-	// Handle two-pointer gestures (touchscreen only unless AnyDevice is set)
-	TwoFingerGestures = 0x1 << 1,
-
+	OneFingerTouchGestures = 0x1,
+	TwoFingerTouchGestures = 0x1 << 1,
 	RightClickDrags = 0x1 << 2,
-
-	// Handle gestures from any device, rather than just touch
-	AnyDevice = 0x1 << 3,
+	SinglePointerGestures = 0x1 << 3,
 }
 
 export default class PanZoom extends BaseTool {
-	public readonly kind: ToolType.PanZoom|ToolType.TouchPanZoom = ToolType.PanZoom;
+	public readonly kind: ToolType.PanZoom = ToolType.PanZoom;
 	private transform: Viewport.ViewportTransform|null = null;
 
 	private lastAngle: number;
@@ -39,10 +33,6 @@ export default class PanZoom extends BaseTool {
 
 	public constructor(private editor: Editor, private mode: PanZoomMode, description: string) {
 		super(editor.notifier, description);
-
-		if (mode === PanZoomMode.OneFingerGestures) {
-			this.kind = ToolType.TouchPanZoom;
-		}
 	}
 
 	// Returns information about the pointers in a gesture
@@ -60,42 +50,24 @@ export default class PanZoom extends BaseTool {
 		return pointers.every(pointer => pointer.device === kind);
 	}
 
-	private pointersHaveCorrectDeviceType(pointers: Pointer[]) {
-		if (this.mode & PanZoomMode.AnyDevice) {
-			return true;
-		}
-
-		if (this.allPointersAreOfType(pointers, PointerDevice.Touch)) {
-			return true;
-		}
-
-		if (this.mode & PanZoomMode.RightClickDrags) {
-			if (this.allPointersAreOfType(pointers, PointerDevice.RightButtonMouse)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public onPointerDown({ allPointers }: PointerEvt): boolean {
+	public onPointerDown({ allPointers: pointers }: PointerEvt): boolean {
 		let handlingGesture = false;
 
-		if (!this.pointersHaveCorrectDeviceType(allPointers)) {
-			handlingGesture = false;
-		} else if (allPointers.length === 2 && this.mode & PanZoomMode.TwoFingerGestures) {
-			const { screenCenter, angle, dist } = this.computePinchData(allPointers[0], allPointers[1]);
+		const allAreTouch = this.allPointersAreOfType(pointers, PointerDevice.Touch);
+		const isRightClick = this.allPointersAreOfType(pointers, PointerDevice.RightButtonMouse);
+
+		if (allAreTouch && pointers.length === 2 && this.mode & PanZoomMode.TwoFingerTouchGestures) {
+			const { screenCenter, angle, dist } = this.computePinchData(pointers[0], pointers[1]);
 			this.lastAngle = angle;
 			this.lastDist = dist;
 			this.lastScreenCenter = screenCenter;
 			handlingGesture = true;
-		} else if ((
-			allPointers.length === 1 && this.mode & PanZoomMode.OneFingerGestures
-		) || (
-			this.allPointersAreOfType(allPointers, PointerDevice.RightButtonMouse) && this.mode & PanZoomMode.RightClickDrags
-		)
-		) {
-			this.lastScreenCenter = allPointers[0].screenPos;
+		} else if (pointers.length === 1 && (
+			(this.mode & PanZoomMode.OneFingerTouchGestures && allAreTouch)
+			|| (isRightClick && this.mode & PanZoomMode.RightClickDrags)
+			|| (this.mode & PanZoomMode.SinglePointerGestures)
+		)) {
+			this.lastScreenCenter = pointers[0].screenPos;
 			handlingGesture = true;
 		}
 
@@ -275,5 +247,20 @@ export default class PanZoom extends BaseTool {
 		this.updateTransform(transformUpdate);
 
 		return true;
+	}
+
+	public setMode(mode: PanZoomMode) {
+		if (mode !== this.mode) {
+			this.mode = mode;
+
+			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+				kind: EditorEventType.ToolUpdated,
+				tool: this,
+			});
+		}
+	}
+
+	public getMode(): PanZoomMode {
+		return this.mode;
 	}
 }

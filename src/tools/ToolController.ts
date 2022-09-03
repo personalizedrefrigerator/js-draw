@@ -11,7 +11,6 @@ import { ToolLocalization } from './localization';
 import UndoRedoShortcut from './UndoRedoShortcut';
 
 export enum ToolType {
-	TouchPanZoom,
 	Pen,
 	Selection,
 	Eraser,
@@ -25,7 +24,7 @@ export default class ToolController {
 
 	public constructor(editor: Editor, localization: ToolLocalization) {
 		const primaryToolEnabledGroup = new ToolEnabledGroup();
-		const touchPanZoom = new PanZoom(editor, PanZoomMode.OneFingerGestures, localization.touchPanTool);
+		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 16 });
 		const primaryTools = [
 			new SelectionTool(editor, localization.selectionTool),
@@ -39,14 +38,12 @@ export default class ToolController {
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }),
 		];
 		this.tools = [
-			touchPanZoom,
-			new PanZoom(editor, PanZoomMode.RightClickDrags, localization.RightClickDragPanTool),
+			panZoomTool,
 			...primaryTools,
-			new PanZoom(editor, PanZoomMode.TwoFingerGestures | PanZoomMode.AnyDevice, localization.twoFingerPanZoomTool),
 			new UndoRedoShortcut(editor),
 		];
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolEnabledGroup));
-		touchPanZoom.setEnabled(false);
+		panZoomTool.setEnabled(true);
 		primaryPenTool.setEnabled(true);
 
 		editor.notifier.on(EditorEventType.ToolEnabled, event => {
