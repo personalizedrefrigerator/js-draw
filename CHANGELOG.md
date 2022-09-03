@@ -1,3 +1,6 @@
+# 0.1.2
+ * Replace 'touch drawing' with a hand tool.
+ * Bug fixes related to importing SVGs from other applications.
 
 # 0.1.1
  * Avoid using the cache if working with smaller numbers of strokes.

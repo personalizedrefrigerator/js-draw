@@ -435,7 +435,6 @@ export default class Path {
 				// expressions. As such, we need an alternative.
 				// Because '-' can be used as a path separator, unless preceeded by an 'e' (as in 1e-5),
 				// we need special cases:
-
 				current = current.replace(/([^eE])[-]/g, '$1 -');
 				const parts = current.split(' -');
 				if (parts[0] !== '') {
