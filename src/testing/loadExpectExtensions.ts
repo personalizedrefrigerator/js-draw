@@ -15,10 +15,7 @@ export const loadExpectExtensions = () => {
 			return {
 				pass,
 				message: () => {
-					if (pass) {
-						return `Expected ${expected} not to .eq ${actual}. Options(${eqArgs})`;
-					}
-					return `Expected ${expected} to .eq ${actual}. Options(${eqArgs})`;
+					return `Expected ${pass ? '!' : ''}(${actual}).eq(${expected}). Options(${eqArgs})`;
 				},
 			};
 		},

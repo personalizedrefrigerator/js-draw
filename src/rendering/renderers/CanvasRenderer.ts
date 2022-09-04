@@ -1,4 +1,5 @@
 import Color4 from '../../Color4';
+import { TextStyle } from '../../components/Text';
 import Mat33 from '../../geometry/Mat33';
 import Rect2 from '../../geometry/Rect2';
 import { Point2, Vec2 } from '../../geometry/Vec2';
@@ -26,16 +27,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		this.setDraftMode(false);
 	}
 
-	public canRenderFromWithoutDataLoss(other: AbstractRenderer) {
-		return other instanceof CanvasRenderer;
-	}
-
-	public renderFromOtherOfSameType(transformBy: Mat33, other: AbstractRenderer): void {
-		if (!(other instanceof CanvasRenderer)) {
-			throw new Error(`${other} cannot be rendered onto ${this}`);
-		}
-		transformBy = this.getCanvasToScreenTransform().rightMul(transformBy);
-		this.ctx.save();
+	private transformBy(transformBy: Mat33) {
 		// From MDN, transform(a,b,c,d,e,f)
 		// takes input such that
 		// ⎡ a c e ⎤
@@ -46,6 +38,19 @@ export default class CanvasRenderer extends AbstractRenderer {
 			transformBy.a2, transformBy.b2, // c, d
 			transformBy.a3, transformBy.b3, // e, f 
 		);
+	}
+
+	public canRenderFromWithoutDataLoss(other: AbstractRenderer) {
+		return other instanceof CanvasRenderer;
+	}
+
+	public renderFromOtherOfSameType(transformBy: Mat33, other: AbstractRenderer): void {
+		if (!(other instanceof CanvasRenderer)) {
+			throw new Error(`${other} cannot be rendered onto ${this}`);
+		}
+		transformBy = this.getCanvasToScreenTransform().rightMul(transformBy);
+		this.ctx.save();
+		this.transformBy(transformBy);
 		this.ctx.drawImage(other.ctx.canvas, 0, 0);
 		this.ctx.restore();
 	}
@@ -141,6 +146,31 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 
 		super.drawPath(path);
+	}
+
+	public drawText(text: string, transform: Mat33, style: TextStyle): void {
+		this.ctx.save();
+		transform = this.getCanvasToScreenTransform().rightMul(transform);
+		this.transformBy(transform);
+		this.ctx.font =	[
+			(style.size ?? 12) + 'px',
+			style.fontWeight ?? '',
+			`"${style.fontFamily.replace(/["]/g, '\\"')}"`,
+			style.fontWeight
+		].join(' ');
+		this.ctx.textAlign = 'left';
+
+		if (style.style.fill.a !== 0) {
+			this.ctx.fillStyle = style.style.fill.toHexString();
+			this.ctx.fillText(text, 0, 0);
+		}
+		if (style.style.stroke) {
+			this.ctx.strokeStyle = style.style.stroke.color.toHexString();
+			this.ctx.lineWidth = style.style.stroke.width;
+			this.ctx.strokeText(text, 0, 0);
+		}
+
+		this.ctx.restore();
 	}
 
 	private clipLevels: number[] = [];

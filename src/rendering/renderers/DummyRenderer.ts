@@ -1,5 +1,6 @@
 // Renderer that outputs nothing. Useful for automated tests.
 
+import { TextStyle } from '../../components/Text';
 import Mat33 from '../../geometry/Mat33';
 import Rect2 from '../../geometry/Rect2';
 import { Point2, Vec2 } from '../../geometry/Vec2';
@@ -14,6 +15,7 @@ export default class DummyRenderer extends AbstractRenderer {
 	public lastFillStyle: RenderingStyle|null = null;
 	public lastPoint: Point2|null = null;
 	public objectNestingLevel: number = 0;
+	public lastText: string|null = null;
 
 	// List of points drawn since the last clear.
 	public pointBuffer: Point2[] = [];
@@ -40,6 +42,7 @@ export default class DummyRenderer extends AbstractRenderer {
 		this.clearedCount ++;
 		this.renderedPathCount = 0;
 		this.pointBuffer = [];
+		this.lastText = null;
 
 		// Ensure all objects finished rendering
 		if (this.objectNestingLevel > 0) {
@@ -86,6 +89,11 @@ export default class DummyRenderer extends AbstractRenderer {
 	public drawPoints(..._points: Vec3[]) {
 		// drawPoints is intended for debugging.
 		// As such, it is unlikely to be the target of automated tests.
+	}
+
+
+	public drawText(text: string, _transform: Mat33, _style: TextStyle): void {
+		this.lastText = text;
 	}
 
 	public startObject(boundingBox: Rect2, _clip: boolean) {

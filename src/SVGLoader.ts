@@ -2,9 +2,12 @@ import Color4 from './Color4';
 import AbstractComponent from './components/AbstractComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
+import Text, { TextStyle } from './components/Text';
 import UnknownSVGObject from './components/UnknownSVGObject';
+import Mat33 from './geometry/Mat33';
 import Path from './geometry/Path';
 import Rect2 from './geometry/Rect2';
+import { Vec2 } from './geometry/Vec2';
 import { RenderablePathSpec, RenderingStyle } from './rendering/renderers/AbstractRenderer';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 
@@ -15,9 +18,13 @@ export const defaultSVGViewRect = new Rect2(0, 0, 500, 500);
 
 // Key to retrieve unrecognised attributes from an AbstractComponent
 export const svgAttributesDataKey = 'svgAttrs';
+export const svgStyleAttributesDataKey = 'svgStyleAttrs';
 
 // [key, value]
 export type SVGLoaderUnknownAttribute = [ string, string ];
+
+// [key, value, priority]
+export type SVGLoaderUnknownStyleAttribute = { key: string, value: string, priority?: string };
 
 export default class SVGLoader implements ImageLoader {
 	private onAddComponent: ComponentAddedListener|null = null;
@@ -97,16 +104,38 @@ export default class SVGLoader implements ImageLoader {
 	private attachUnrecognisedAttrs(
 		elem: AbstractComponent,
 		node: SVGElement,
-		supportedAttrs: Set<string>
+		supportedAttrs: Set<string>,
+		supportedStyleAttrs?: Set<string>
 	) {
 		for (const attr of node.getAttributeNames()) {
-			if (supportedAttrs.has(attr)) {
+			if (supportedAttrs.has(attr) || (attr === 'style' && supportedStyleAttrs)) {
 				continue;
 			}
 
 			elem.attachLoadSaveData(svgAttributesDataKey,
 				[ attr, node.getAttribute(attr) ] as SVGLoaderUnknownAttribute,
 			);
+		}
+
+		if (supportedStyleAttrs) {
+			for (const attr of node.style) {
+				if (attr === '' || !attr) {
+					continue;
+				}
+
+				if (supportedStyleAttrs.has(attr)) {
+					continue;
+				}
+
+				// TODO: Do we need special logic for !important properties?
+				elem.attachLoadSaveData(svgStyleAttributesDataKey, 
+					{
+						key: attr,
+						value: node.style.getPropertyValue(attr),
+						priority: node.style.getPropertyPriority(attr)
+					} as SVGLoaderUnknownStyleAttribute
+				);
+			}
 		}
 	}
 
@@ -115,9 +144,14 @@ export default class SVGLoader implements ImageLoader {
 		let elem: AbstractComponent;
 		try {
 			const strokeData = this.strokeDataFromElem(node);
+
 			elem = new Stroke(strokeData);
+
+			const supportedStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
 			this.attachUnrecognisedAttrs(
-				elem, node, new Set([ 'stroke', 'fill', 'stroke-width', 'd' ]),
+				elem, node,
+				new Set([ ...supportedStyleAttrs, 'd' ]),
+				new Set(supportedStyleAttrs)
 			);
 		} catch (e) {
 			console.error(
@@ -131,6 +165,83 @@ export default class SVGLoader implements ImageLoader {
 		this.onAddComponent?.(elem);
 	}
 
+	private makeText(elem: SVGTextElement|SVGTSpanElement): Text {
+		const contentList: Array<Text|string> = [];
+		for (const child of elem.childNodes) {
+			console.log('Handling child: ', child);
+			if (child.nodeType === Node.TEXT_NODE) {
+				contentList.push(child.nodeValue ?? '');
+				console.log('Encountered text node!', child);
+			} else if (child.nodeType === Node.ELEMENT_NODE) {
+				const subElem = child as SVGElement;
+				if (subElem.tagName.toLowerCase() === 'tspan') {
+					contentList.push(this.makeText(subElem as SVGTSpanElement));
+				} else {
+					throw new Error(`Unrecognized text child element: ${subElem}`);
+				}
+			} else {
+				throw new Error(`Unrecognized text child node: ${child}.`);
+			}
+		}
+
+		// Compute styles.
+		const computedStyles = window.getComputedStyle(elem);
+		const fontSizeMatch = /^([-0-9.e]+)px/i.exec(computedStyles.fontSize);
+
+		const supportedStyleAttrs = [
+			'fontFamily',
+			'fill',
+			'transform'
+		];
+		let fontSize = 12;
+		if (fontSizeMatch) {
+			supportedStyleAttrs.push('fontSize');
+			fontSize = parseFloat(fontSizeMatch[1]);
+		}
+		const style: TextStyle = {
+			size: fontSize,
+			fontFamily: computedStyles.fontFamily || 'sans',
+			style: {
+				fill: Color4.fromString(computedStyles.fill)
+			},
+		};
+
+		// Compute transform matrix
+		let transform = Mat33.fromCSSMatrix(computedStyles.transform);
+		console.log('Computed transfm:', transform.toString(), 'from', computedStyles.transform);
+		const supportedAttrs = [];
+		const elemX = elem.getAttribute('x');
+		const elemY = elem.getAttribute('y');
+		if (elemX && elemY) {
+			const x = parseFloat(elemX);
+			const y = parseFloat(elemY);
+			if (!isNaN(x) && !isNaN(y)) {
+				supportedAttrs.push('x', 'y');
+				transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
+			}
+		}
+
+		const result = new Text(contentList, transform, style);
+		this.attachUnrecognisedAttrs(
+			result,
+			elem,
+			new Set(supportedAttrs),
+			new Set(supportedStyleAttrs)
+		);
+
+		return result;
+	}
+
+	private addText(elem: SVGTextElement|SVGTSpanElement) {
+		try {
+			const textElem = this.makeText(elem);
+			this.onAddComponent?.(textElem);
+		} catch (e) {
+			console.error('Invalid text object in node', elem, '. Adding as an unknown object. Error:', e);
+			this.addUnknownNode(elem);
+		}
+	}
+
 	private addUnknownNode(node: SVGElement) {
 		const component = new UnknownSVGObject(node);
 		this.onAddComponent?.(component);
@@ -142,13 +253,14 @@ export default class SVGLoader implements ImageLoader {
 			return;
 		}
 
-		const components = viewBoxAttr.split(/[ \t,]/);
+		const components = viewBoxAttr.split(/[ \t\n,]+/);
 		const x = parseFloat(components[0]);
 		const y = parseFloat(components[1]);
 		const width = parseFloat(components[2]);
 		const height = parseFloat(components[3]);
 
 		if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
+			console.warn(`node ${node} has an unparsable viewbox. Viewbox: ${viewBoxAttr}. Match: ${components}.`);
 			return;
 		}
 
@@ -162,6 +274,7 @@ export default class SVGLoader implements ImageLoader {
 
 	private async visit(node: Element) {
 		this.totalToProcess += node.childElementCount;
+		let visitChildren = true;
 
 		switch (node.tagName.toLowerCase()) {
 		case 'g':
@@ -169,6 +282,10 @@ export default class SVGLoader implements ImageLoader {
 			break;
 		case 'path':
 			this.addPath(node as SVGPathElement);
+			break;
+		case 'text':
+			this.addText(node as SVGTextElement);
+			visitChildren = false;
 			break;
 		case 'svg':
 			this.updateViewBox(node as SVGSVGElement);
@@ -184,8 +301,10 @@ export default class SVGLoader implements ImageLoader {
 			return;
 		}
 
-		for (const child of node.children) {
-			await this.visit(child);
+		if (visitChildren) {
+			for (const child of node.children) {
+				await this.visit(child);
+			}
 		}
 
 		this.processedCount ++;
@@ -265,8 +384,10 @@ export default class SVGLoader implements ImageLoader {
 			'http://www.w3.org/2000/svg', 'svg'
 		);
 		svgElem.innerHTML = text;
+		sandboxDoc.body.appendChild(svgElem);
 
 		return new SVGLoader(svgElem, () => {
+			svgElem.remove();
 			sandbox.remove();
 		});
 	}

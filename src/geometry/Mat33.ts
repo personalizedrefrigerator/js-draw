@@ -268,4 +268,45 @@ export default class Mat33 {
 		// Translate such that [center] goes to (0, 0)
 		return result.rightMul(Mat33.translation(center.times(-1)));
 	}
+
+	// Converts a CSS-form matrix(a, b, c, d, e, f) to a Mat33.
+	public static fromCSSMatrix(cssString: string): Mat33 {
+		if (cssString === '' || cssString === 'none') {
+			return Mat33.identity;
+		}
+
+		const numberExp = '([-]?\\d*(?:\\.\\d*)?(?:[eE][-]?\\d+)?)';
+		const numberSepExp = '[, \\t\\n]';
+		const regExpSource = `^\\s*matrix\\s*\\(${
+			[
+				// According to MDN, matrix(a,b,c,d,e,f) has form:
+				// 		⎡ a c e ⎤
+				// 		⎢ b d f ⎥
+				// 		⎣ 0 0 1 ⎦
+				numberExp, numberExp, numberExp, // a, c, e
+				numberExp, numberExp, numberExp, // b, d, f
+			].join(`${numberSepExp}+`)
+		}${numberSepExp}*\\)\\s*$`;
+		const matrixExp = new RegExp(regExpSource, 'i');
+		const match = matrixExp.exec(cssString);
+
+		if (!match) {
+			throw new Error(`Unsupported transformation: ${cssString}`);
+		}
+
+		const matrixData = match.slice(1).map(entry => parseFloat(entry));
+		const a = matrixData[0];
+		const b = matrixData[1];
+		const c = matrixData[2];
+		const d = matrixData[3];
+		const e = matrixData[4];
+		const f = matrixData[5];
+
+		const transform = new Mat33(
+			a, c, e,
+			b, d, f,
+			0, 0, 1
+		);
+		return transform;
+	}
 }

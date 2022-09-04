@@ -170,7 +170,7 @@ export class Viewport {
 	// Returns a Command that transforms the view such that [rect] is visible, and perhaps
 	// centered in the viewport.
 	// Returns null if no transformation is necessary
-	public zoomTo(toMakeVisible: Rect2): Command {
+	public zoomTo(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Command {
 		let transform = Mat33.identity;
 
 		if (toMakeVisible.w === 0 || toMakeVisible.h === 0) {
@@ -195,7 +195,7 @@ export class Viewport {
 		// Ensure that toMakeVisible is at least 1/8th of the visible region.
 		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 0.125;
 
-		if (largerThanTarget || muchSmallerThanTarget) {
+		if ((largerThanTarget && allowZoomOut) || (muchSmallerThanTarget && allowZoomIn)) {
 			// If larger than the target, ensure that the longest axis is visible.
 			// If smaller, shrink the visible rectangle as much as possible
 			const multiplier = (largerThanTarget ? Math.max : Math.min)(

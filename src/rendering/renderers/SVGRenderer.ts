@@ -1,9 +1,11 @@
 
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
+import { TextStyle } from '../../components/Text';
+import Mat33 from '../../geometry/Mat33';
 import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
 import Rect2 from '../../geometry/Rect2';
 import { Point2, Vec2 } from '../../geometry/Vec2';
-import { svgAttributesDataKey, SVGLoaderUnknownAttribute } from '../../SVGLoader';
+import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
 import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
 
@@ -107,6 +109,25 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.objectElems?.push(pathElem);
 	}
 
+	public drawText(text: string, transform: Mat33, style: TextStyle): void {
+		transform = this.getCanvasToScreenTransform().rightMul(transform);
+
+		const textElem = document.createElementNS(svgNameSpace, 'text');
+		textElem.appendChild(document.createTextNode(text));
+		textElem.style.transform = `matrix(
+			${transform.a1}, ${transform.b1},
+			${transform.a2}, ${transform.b2},
+			${transform.a3}, ${transform.b3}
+		)`;
+		textElem.style.fontFamily = style.fontFamily;
+		textElem.style.fontVariant = style.fontVariant ?? '';
+		textElem.style.fontWeight = style.fontWeight ?? '';
+		textElem.style.fontSize = style.size + 'px';
+
+		this.elem.appendChild(textElem);
+		this.objectElems?.push(textElem);
+	}
+
 	public startObject(boundingBox: Rect2) {
 		super.startObject(boundingBox);
 
@@ -127,10 +148,17 @@ export default class SVGRenderer extends AbstractRenderer {
 			// Restore any attributes unsupported by the app.
 			for (const elem of this.objectElems ?? []) {
 				const attrs = loaderData[svgAttributesDataKey] as SVGLoaderUnknownAttribute[]|undefined;
+				const styleAttrs = loaderData[svgStyleAttributesDataKey] as SVGLoaderUnknownStyleAttribute[]|undefined;
 
 				if (attrs) {
 					for (const [ attr, value ] of attrs) {
 						elem.setAttribute(attr, value);
+					}
+				}
+
+				if (styleAttrs) {
+					for (const attr of styleAttrs) {
+						elem.style.setProperty(attr.key, attr.value, attr.priority);
 					}
 				}
 			}

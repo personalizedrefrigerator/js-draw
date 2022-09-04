@@ -184,6 +184,14 @@ export default class Rect2 {
 		return this.topLeft.plus(Vec2.of(0, this.h));
 	}
 
+	public get width() {
+		return this.w;
+	}
+
+	public get height() {
+		return this.h;
+	}
+
 	// Returns edges in the order
 	// [ rightEdge, topEdge, leftEdge, bottomEdge ]
 	public getEdges(): LineSegment2[] {

@@ -1,5 +1,6 @@
 import Color4 from '../../Color4';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
+import { TextStyle } from '../../components/Text';
 import Mat33 from '../../geometry/Mat33';
 import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
 import Rect2 from '../../geometry/Rect2';
@@ -29,6 +30,7 @@ const stylesEqual = (a: RenderingStyle, b: RenderingStyle) => {
 export default abstract class AbstractRenderer {
 	// If null, this' transformation is linked to the Viewport
 	private selfTransform: Mat33|null = null;
+	private transformStack: Array<Mat33|null> = [];
 
 	protected constructor(private viewport: Viewport) { }
 
@@ -51,6 +53,7 @@ export default abstract class AbstractRenderer {
 	protected abstract traceQuadraticBezierCurve(
 		controlPoint: Point2, endPoint: Point2,
 	): void;
+	public abstract drawText(text: string, transform: Mat33, style: TextStyle): void;
 
 	// Returns true iff the given rectangle is so small, rendering anything within
 	// it has no effect on the image.
@@ -164,6 +167,19 @@ export default abstract class AbstractRenderer {
 	// replacing the viewport's transform.
 	public setTransform(transform: Mat33|null) {
 		this.selfTransform = transform;
+	}
+
+	public pushTransform(transform: Mat33) {
+		this.transformStack.push(this.selfTransform);
+		this.setTransform(this.getCanvasToScreenTransform().rightMul(transform));
+	}
+
+	public popTransform() {
+		if (this.transformStack.length === 0) {
+			throw new Error('Unable to pop more transforms than have been pushed!');
+		}
+
+		this.setTransform(this.transformStack.pop() ?? null);
 	}
 
 	// Get the matrix that transforms a vector on the canvas to a vector on this'
