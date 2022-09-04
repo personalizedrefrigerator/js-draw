@@ -168,10 +168,8 @@ export default class SVGLoader implements ImageLoader {
 	private makeText(elem: SVGTextElement|SVGTSpanElement): Text {
 		const contentList: Array<Text|string> = [];
 		for (const child of elem.childNodes) {
-			console.log('Handling child: ', child);
 			if (child.nodeType === Node.TEXT_NODE) {
 				contentList.push(child.nodeValue ?? '');
-				console.log('Encountered text node!', child);
 			} else if (child.nodeType === Node.ELEMENT_NODE) {
 				const subElem = child as SVGElement;
 				if (subElem.tagName.toLowerCase() === 'tspan') {
@@ -208,7 +206,6 @@ export default class SVGLoader implements ImageLoader {
 
 		// Compute transform matrix
 		let transform = Mat33.fromCSSMatrix(computedStyles.transform);
-		console.log('Computed transfm:', transform.toString(), 'from', computedStyles.transform);
 		const supportedAttrs = [];
 		const elemX = elem.getAttribute('x');
 		const elemY = elem.getAttribute('y');

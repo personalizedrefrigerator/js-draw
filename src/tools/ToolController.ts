@@ -9,12 +9,14 @@ import SelectionTool from './SelectionTool';
 import Color4 from '../Color4';
 import { ToolLocalization } from './localization';
 import UndoRedoShortcut from './UndoRedoShortcut';
+import TextTool from './TextTool';
 
 export enum ToolType {
 	Pen,
 	Selection,
 	Eraser,
 	PanZoom,
+	Text,
 	UndoRedoShortcut,
 }
 
@@ -36,6 +38,8 @@ export default class ToolController {
 
 			// Highlighter-like pen with width=64
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }),
+
+			new TextTool(editor, localization.textTool),
 		];
 		this.tools = [
 			panZoomTool,

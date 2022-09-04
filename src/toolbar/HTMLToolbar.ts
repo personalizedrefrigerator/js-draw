@@ -19,6 +19,7 @@ import { makeDropdownIcon, makeEraserIcon, makeIconFromFactory, makePenIcon, mak
 import PanZoom, { PanZoomMode } from '../tools/PanZoom';
 import Mat33 from '../geometry/Mat33';
 import Viewport from '../Viewport';
+import TextTool from '../tools/TextTool';
 
 
 const toolbarCSSPrefix = 'toolbar-';
@@ -403,6 +404,21 @@ class HandToolWidget extends ToolbarWidget {
 	}
 }
 
+class TextToolWidget extends ToolbarWidget {
+	protected getTitle(): string {
+		return this.targetTool.description;
+	}
+	protected createIcon(): Element {
+		const icon = document.createElement('span');
+		icon.innerText = 'T';
+		icon.style.fontSize = '14pt';
+		return icon;
+	}
+	protected fillDropdown(_dropdown: HTMLElement): boolean {
+		return false;
+	}
+}
+
 class PenWidget extends ToolbarWidget {
 	private updateInputs: ()=> void = () => {};
 
@@ -700,6 +716,14 @@ export default class HTMLToolbar {
 			}
 
 			(new SelectionWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
+		}
+
+		for (const tool of toolController.getMatchingTools(ToolType.Text)) {
+			if (!(tool instanceof TextTool)) {
+				throw new Error('All text tools must have kind === ToolType.Text');
+			}
+	
+			(new TextToolWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
 		}
 
 		for (const tool of toolController.getMatchingTools(ToolType.PanZoom)) {

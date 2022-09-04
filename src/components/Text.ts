@@ -22,16 +22,21 @@ export default class Text extends AbstractComponent {
 		this.recomputeBBox();
 	}
 
-	private static textMeasuringCtx: CanvasRenderingContext2D;
-	private static getTextDimens(style: TextStyle, text: string): Rect2 {
-		Text.textMeasuringCtx ??= document.createElement('canvas').getContext('2d')!;
-		const ctx = Text.textMeasuringCtx;
-		ctx.font = [
-			style.size + 'px',
+	public static applyTextStyles(ctx: CanvasRenderingContext2D, style: TextStyle) {
+		ctx.font =	[
+			(style.size ?? 12) + 'px',
 			style.fontWeight ?? '',
 			`"${style.fontFamily.replace(/["]/g, '\\"')}"`,
-			style.fontVariant ?? '',
+			style.fontWeight
 		].join(' ');
+		ctx.textAlign = 'left';
+	}
+
+	private static textMeasuringCtx: CanvasRenderingContext2D;
+	private static getTextDimens(text: string, style: TextStyle): Rect2 {
+		Text.textMeasuringCtx ??= document.createElement('canvas').getContext('2d')!;
+		const ctx = Text.textMeasuringCtx;
+		Text.applyTextStyles(ctx, style);
 
 		const measure = ctx.measureText(text);
 
@@ -43,7 +48,7 @@ export default class Text extends AbstractComponent {
 
 	private computeBBoxOfPart(part: string|Text) {
 		if (typeof part === 'string') {
-			const textBBox = Text.getTextDimens(this.style, part);
+			const textBBox = Text.getTextDimens(part, this.style);
 			return textBBox.transformedBoundingBox(this.transform);
 		} else {
 			const bbox = part.contentBBox.transformedBoundingBox(this.transform);
@@ -80,9 +85,30 @@ export default class Text extends AbstractComponent {
 	}
 
 	public intersects(lineSegment: LineSegment2): boolean {
-		// TODO: Use a better intersection check. Perhaps draw the text onto a CanvasElement and
-		// use pixel-testing to check for intersection with its contour.
-		return this.contentBBox.getEdges().some(edge => edge.intersection(lineSegment) !== null);
+
+		// Convert canvas space to internal space.
+		const invTransform = this.transform.inverse();
+		const p1InThisSpace = invTransform.transformVec2(lineSegment.p1);
+		const p2InThisSpace = invTransform.transformVec2(lineSegment.p2);
+		lineSegment = new LineSegment2(p1InThisSpace, p2InThisSpace);
+
+		for (const subObject of this.textObjects) {
+			if (typeof subObject === 'string') {
+				const textBBox = Text.getTextDimens(subObject, this.style);
+
+				// TODO: Use a better intersection check. Perhaps draw the text onto a CanvasElement and
+				// use pixel-testing to check for intersection with its contour.
+				if (textBBox.getEdges().some(edge => lineSegment.intersection(edge) !== null)) {
+					return true;
+				}
+			} else {
+				if (subObject.intersects(lineSegment)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	protected applyTransformation(affineTransfm: Mat33): void {

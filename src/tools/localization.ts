@@ -1,12 +1,13 @@
 
 export interface ToolLocalization {
-	RightClickDragPanTool: string;
+	rightClickDragPanTool: string;
     penTool: (penId: number)=>string;
     selectionTool: string;
     eraserTool: string;
     touchPanTool: string;
     twoFingerPanZoomTool: string;
     undoRedoTool: string;
+	textTool: string;
 
     toolEnabledAnnouncement: (toolName: string) => string;
     toolDisabledAnnouncement: (toolName: string) => string;
@@ -19,7 +20,8 @@ export const defaultToolLocalization: ToolLocalization = {
 	touchPanTool: 'Touch Panning',
 	twoFingerPanZoomTool: 'Panning and Zooming',
 	undoRedoTool: 'Undo/Redo',
-	RightClickDragPanTool: 'Right-click drag',
+	rightClickDragPanTool: 'Right-click drag',
+	textTool: 'Text',
 
 	toolEnabledAnnouncement: (toolName) => `${toolName} enabled`,
 	toolDisabledAnnouncement: (toolName) => `${toolName} disabled`,

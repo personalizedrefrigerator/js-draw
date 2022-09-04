@@ -20,7 +20,6 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 			return;
 		}
 
-		console.log('Rendering to SVG.', this.attrs);
 		for (const [ attr, value ] of this.attrs) {
 			canvas.setRootSVGAttribute(attr, value);
 		}
