@@ -19,14 +19,18 @@ describe('Path.toString', () => {
 	});
 
 	it('should fix rounding errors', () => {
-		const path = new Path(Vec2.of(0.10000001, 0.19999999), [
+		const path = new Path(Vec2.of(0.100000001, 0.199999999), [
 			{
 				kind: PathCommandType.QuadraticBezierTo,
 				controlPoint: Vec2.of(9999, -10.999999995),
-				endPoint: Vec2.of(0.000300001, 1.40000002),
+				endPoint: Vec2.of(0.000300001, 1.400000002),
 			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(184.00482359999998, 1)
+			}
 		]);
-		expect(path.toString()).toBe('M0.1,0.2Q9999,-11 0.0003,1.4');
+		expect(path.toString()).toBe('M0.1,0.2Q9999,-11 0.0003,1.4L184.0048236,1');
 	});
 
 	it('should not remove trailing zeroes before decimal points', () => {

@@ -303,6 +303,8 @@ export default class Path {
 				const postDecimal = parseInt(roundingDownMatch[3], 10);
 				const preDecimal = parseInt(roundingDownMatch[2], 10);
 
+				const origPostDecimalString = roundingDownMatch[3];
+
 				let newPostDecimal = (postDecimal + 10 - lastDigit).toString();
 				let carry = 0;
 				if (newPostDecimal.length > postDecimal.toString().length) {
@@ -310,13 +312,21 @@ export default class Path {
 					newPostDecimal = newPostDecimal.substring(1);
 					carry = 1;
 				}
+
+				// parseInt(...).toString() removes leading zeroes. Add them back.
+				while (newPostDecimal.length < origPostDecimalString.length) {
+					newPostDecimal = carry.toString(10) + newPostDecimal;
+					carry = 0;
+				}
+
 				text = `${negativeSign + (preDecimal + carry).toString()}.${newPostDecimal}`;
 			}
 
 			text = text.replace(fixRoundingUpExp, '$1');
 
 			// Remove trailing zeroes
-			text = text.replace(/([.][^0]*)0+$/, '$1');
+			text = text.replace(/([.]\d*[^0]+)0+$/, '$1');
+			text = text.replace(/[.]0+$/, '.');
 
 			// Remove trailing period
 			return text.replace(/[.]$/, '');
