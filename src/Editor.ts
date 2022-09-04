@@ -374,9 +374,11 @@ export class Editor {
 		// Draw a rectangle around the region that will be visible on save
 		const renderer = this.display.getDryInkRenderer();
 
+		this.image.renderWithCache(renderer, this.display.getCache(), this.viewport);
+
 		if (showImageBounds) {
 			const exportRectFill = { fill: Color4.fromHex('#44444455') };
-			const exportRectStrokeWidth = 12;
+			const exportRectStrokeWidth = 5 * this.viewport.getSizeOfPixelOnCanvas();
 			renderer.drawRect(
 				this.importExportViewport.visibleRect,
 				exportRectStrokeWidth,
@@ -384,8 +386,6 @@ export class Editor {
 			);
 		}
 
-		//this.image.render(renderer, this.viewport);
-		this.image.renderWithCache(renderer, this.display.getCache(), this.viewport);
 		this.rerenderQueued = false;
 	}
 
