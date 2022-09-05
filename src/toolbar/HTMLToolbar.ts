@@ -428,16 +428,41 @@ class TextToolWidget extends ToolbarWidget {
 
 	private static idCounter: number = 0;
 	protected fillDropdown(dropdown: HTMLElement): boolean {
+		const fontRow = document.createElement('div');
 		const colorRow = document.createElement('div');
+
+		const fontInput = document.createElement('select');
+		const fontLabel = document.createElement('label');
+
 		const colorInput = document.createElement('input');
 		const colorLabel = document.createElement('label');
 
+		const fontsInInput = new Set();
+		const addFontToInput = (fontName: string) => {
+			const option = document.createElement('option');
+			option.value = fontName;
+			option.textContent = fontName;
+			fontInput.appendChild(option);
+			fontsInInput.add(fontName);
+		};
+
+		fontLabel.innerText = this.localizationTable.fontLabel;
 		colorLabel.innerText = this.localizationTable.colorLabel;
 
 		colorInput.classList.add('coloris_input');
 		colorInput.type = 'button';
 		colorInput.id = `${toolbarCSSPrefix}-text-color-input-${TextToolWidget.idCounter++}`;
 		colorLabel.setAttribute('for', colorInput.id);
+
+		addFontToInput('monospace');
+		addFontToInput('serif');
+		addFontToInput('sans-serif');
+		fontInput.id = `${toolbarCSSPrefix}-text-font-input-${TextToolWidget.idCounter++}`;
+		fontLabel.setAttribute('for', fontInput.id);
+
+		fontInput.onchange = () => {
+			this.tool.setFontFamily(fontInput.value);
+		};
 
 		colorInput.oninput = () => {
 			this.tool.setColor(Color4.fromString(colorInput.value));
@@ -446,14 +471,21 @@ class TextToolWidget extends ToolbarWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInput);
 
+		fontRow.appendChild(fontLabel);
+		fontRow.appendChild(fontInput);
+
 		this.updateDropdownInputs = () => {
 			const style = this.tool.getTextStyle();
 			colorInput.value = style.renderingStyle.fill.toHexString();
+
+			if (!fontsInInput.has(style.fontFamily)) {
+				addFontToInput(style.fontFamily);
+			}
+			fontInput.value = style.fontFamily;
 		};
 		this.updateDropdownInputs();
 
-		dropdown.appendChild(colorRow);
-
+		dropdown.replaceChildren(colorRow, fontRow);
 		return true;
 	}
 }

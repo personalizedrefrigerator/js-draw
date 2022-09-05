@@ -27,9 +27,16 @@
 				wheelEventsEnabled: false,
 			});
 			editor1.addToolbar();
+			editor1.loadFromSVG('<svg><text>Wheel events disabled.</text></svg>');
 
-			const editor2 = new jsdraw.Editor(document.body);
+			const editor2 = new jsdraw.Editor(document.body, {
+				wheelEventsEnabled: 'only-if-focused',
+			});
 			editor2.addToolbar();
+			editor2.loadFromSVG('<svg><text>Wheel events enabled, only if focused.</text></svg>');
+
+			const editor3 = new jsdraw.Editor(document.body);
+			editor3.addToolbar();
 		</script>
 	</body>
 </html>

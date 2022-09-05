@@ -41,13 +41,13 @@
     background-color: var(--primary-background-color);
     color: var(--primary-foreground-color);
     border: none;
-    box-shadow: 0px 0px 2px var(--primary-foreground-color);
+    box-shadow: 0px 0px 2px var(--primary-shadow-color);
 
     transition: background-color 0.25s ease, box-shadow 0.25s ease, opacity 0.3s ease;
 }
 
 .toolbar-button:hover, .toolbar-root button:not(:disabled):hover {
-    box-shadow: 0px 2px 4px var(--primary-foreground-color);
+    box-shadow: 0px 2px 4px var(--primary-shadow-color);
 }
 
 .toolbar-root button:disabled {
@@ -90,7 +90,7 @@
     /* Prevent overlap/being displayed under the undo/redo buttons */
     z-index: 2;
     background-color: var(--primary-background-color);
-    box-shadow: 0px 3px 3px var(--primary-foreground-color);
+    box-shadow: 0px 3px 3px var(--primary-shadow-color);
 }
 
 .toolbar-buttonGroup {

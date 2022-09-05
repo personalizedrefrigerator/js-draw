@@ -198,7 +198,7 @@ export default class SVGLoader implements ImageLoader {
 		}
 		const style: TextStyle = {
 			size: fontSize,
-			fontFamily: computedStyles.fontFamily || 'sans',
+			fontFamily: computedStyles.fontFamily || 'sans-serif',
 			renderingStyle: {
 				fill: Color4.fromString(computedStyles.fill)
 			},

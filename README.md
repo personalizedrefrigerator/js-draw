@@ -109,6 +109,13 @@ const editor = new Editor(document.body, {
 });
 ```
 
+Alternatively, to only enable touchpad panning when the editor has focus,
+```ts
+const editor = new Editor(document.body, {
+    wheelEventsEnabled: 'only-if-focused',
+});
+```
+
 ### Localization
 
 See [src/localization.ts](src/localization.ts) for a list of strings.
@@ -149,25 +156,27 @@ const editor = new Editor(document.body, {
 The editor's color theme is specified using CSS. Its default theme looks like this:
 ```css
 .imageEditorContainer {
-	/* Deafult colors for the editor -- light mode */
+    /* Deafult colors for the editor -- light mode */
 
     --primary-background-color: white;
     --primary-background-color-transparent: rgba(255, 255, 255, 0.5);
     --secondary-background-color: #faf;
     --primary-foreground-color: black;
     --secondary-foreground-color: black;
+    --primary-shadow-color: rgba(0, 0, 0, 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
-	.imageEditorContainer {
-		/* Deafult colors for the editor -- dark mode */
+    .imageEditorContainer {
+        /* Deafult colors for the editor -- dark mode */
 
-		--primary-background-color: #151515;
-		--primary-background-color-transparent: rgba(50, 50, 50, 0.5);
-		--secondary-background-color: #607;
-		--primary-foreground-color: white;
-		--secondary-foreground-color: white;
-	}
+        --primary-background-color: #151515;
+        --primary-background-color-transparent: rgba(50, 50, 50, 0.5);
+        --secondary-background-color: #607;
+        --primary-foreground-color: white;
+        --secondary-foreground-color: white;
+        --primary-shadow-color: rgba(250, 250, 250, 0.5);
+    }
 }
 ```
 

@@ -29,7 +29,7 @@ export interface EditorSettings {
 	// True if touchpad/mousewheel scrolling should scroll the editor instead of the document.
 	// This does not include pinch-zoom events.
 	// Defaults to true.
-	wheelEventsEnabled: boolean;
+	wheelEventsEnabled: boolean|'only-if-focused';
 }
 
 export class Editor {
@@ -251,10 +251,18 @@ export class Editor {
 		this.container.addEventListener('wheel', evt => {
 			let delta = Vec3.of(evt.deltaX, evt.deltaY, evt.deltaZ);
 
-			// Process wheel events if the ctrl key is down -- we do want to handle
+			// Process wheel events if the ctrl key is down, even if disabled -- we do want to handle
 			// pinch-zooming.
-			if (!this.settings.wheelEventsEnabled && !evt.ctrlKey) {
-				return;
+			if (!evt.ctrlKey) {
+				if (!this.settings.wheelEventsEnabled) {
+					return;
+				} else if (this.settings.wheelEventsEnabled === 'only-if-focused') {
+					const focusedChild = this.container.querySelector(':focus');
+
+					if (!focusedChild) {
+						return;
+					}
+				}
 			}
 
 			if (evt.deltaMode === WheelEvent.DOM_DELTA_LINE) {
@@ -397,6 +405,11 @@ export class Editor {
 
 	public clearWetInk() {
 		this.display.getWetInkRenderer().clear();
+	}
+
+	// Focuses the region used for text input
+	public focus() {
+		this.renderingRegion.focus();
 	}
 
 	public createHTMLOverlay(overlay: HTMLElement) {

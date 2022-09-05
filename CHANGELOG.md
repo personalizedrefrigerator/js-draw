@@ -1,3 +1,7 @@
+# 0.1.4
+ * Option to enable pan gestures only if the editor has focus
+ * Text tool bug fixes and improvements.
+
 # 0.1.3
  * Very minimalistic text tool.
  * Ability to load and save text.

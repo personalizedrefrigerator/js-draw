@@ -1,6 +1,7 @@
 
 
 export interface ToolbarLocalization {
+	fontLabel: string;
 	anyDevicePanning: string;
 	touchPanning: string;
 	outlinedRectanglePen: string;
@@ -32,6 +33,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	handTool: 'Pan',
 	thicknessLabel: 'Thickness: ',
 	colorLabel: 'Color: ',
+	fontLabel: 'Font: ',
 	resizeImageToSelection: 'Resize image to selection',
 	deleteSelection: 'Delete selection',
 	undo: 'Undo',

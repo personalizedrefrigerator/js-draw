@@ -143,6 +143,7 @@ export const makeTextIcon = (textStyle: TextStyle) => {
 	textNode.setAttribute('x', '50');
 	textNode.setAttribute('y', '75');
 	textNode.style.fontSize = '65px';
+	textNode.style.filter = 'drop-shadow(0px 0px 10px var(--primary-shadow-color))';
 
 	icon.appendChild(textNode);
 

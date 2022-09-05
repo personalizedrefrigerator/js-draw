@@ -92,6 +92,7 @@ export default class TextTool extends BaseTool {
 			return;
 		}
 
+		const viewport = this.editor.viewport;
 		const textScreenPos = this.editor.viewport.canvasToScreen(this.textTargetPosition);
 		this.textInputElem.type = 'text';
 		this.textInputElem.placeholder = this.localizationTable.enterTextToInsert;
@@ -103,8 +104,13 @@ export default class TextTool extends BaseTool {
 
 		this.textInputElem.style.position = 'relative';
 		this.textInputElem.style.left = `${textScreenPos.x}px`;
+		this.textInputElem.style.top = `${textScreenPos.y}px`;
+		this.textInputElem.style.margin = '0';
+
+		const rotation = viewport.getRotationAngle();
 		const ascent = this.getTextAscent(this.textInputElem.value || 'W', this.textStyle);
-		this.textInputElem.style.top = `${textScreenPos.y - ascent}px`;
+		this.textInputElem.style.transform = `rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-ascent}px)`;
+		this.textInputElem.style.transformOrigin = 'top left';
 	}
 
 	private startTextInput(textCanvasPos: Vec2, initialText: string) {
@@ -128,6 +134,7 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.onkeyup = (evt) => {
 			if (evt.key === 'Enter') {
 				this.flushInput();
+				this.editor.focus();
 			}
 		};
 
@@ -156,6 +163,11 @@ export default class TextTool extends BaseTool {
 		}
 
 		return false;
+	}
+
+	public onGestureCancel(): void {
+		this.flushInput();
+		this.editor.focus();
 	}
 
 	private dispatchUpdateEvent() {
