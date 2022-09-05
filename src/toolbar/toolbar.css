@@ -12,6 +12,9 @@
     flex-direction: row;
     justify-content: center;
 
+    /* Display above selection dialogs, etc. */
+    z-index: 1000;
+
     font-family: system-ui, -apple-system, sans-serif;
 }
 
