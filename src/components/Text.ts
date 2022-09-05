@@ -10,7 +10,7 @@ export interface TextStyle {
 	fontFamily: string;
 	fontWeight?: string;
 	fontVariant?: string;
-	style: RenderingStyle;
+	renderingStyle: RenderingStyle;
 }
 
 

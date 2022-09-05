@@ -8,6 +8,7 @@ export interface ToolLocalization {
     twoFingerPanZoomTool: string;
     undoRedoTool: string;
 	textTool: string;
+	enterTextToInsert: string;
 
     toolEnabledAnnouncement: (toolName: string) => string;
     toolDisabledAnnouncement: (toolName: string) => string;
@@ -21,7 +22,9 @@ export const defaultToolLocalization: ToolLocalization = {
 	twoFingerPanZoomTool: 'Panning and Zooming',
 	undoRedoTool: 'Undo/Redo',
 	rightClickDragPanTool: 'Right-click drag',
+
 	textTool: 'Text',
+	enterTextToInsert: 'Text to insert',
 
 	toolEnabledAnnouncement: (toolName) => `${toolName} enabled`,
 	toolDisabledAnnouncement: (toolName) => `${toolName} disabled`,

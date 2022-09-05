@@ -154,13 +154,13 @@ export default class CanvasRenderer extends AbstractRenderer {
 		this.transformBy(transform);
 		Text.applyTextStyles(this.ctx, style);
 
-		if (style.style.fill.a !== 0) {
-			this.ctx.fillStyle = style.style.fill.toHexString();
+		if (style.renderingStyle.fill.a !== 0) {
+			this.ctx.fillStyle = style.renderingStyle.fill.toHexString();
 			this.ctx.fillText(text, 0, 0);
 		}
-		if (style.style.stroke) {
-			this.ctx.strokeStyle = style.style.stroke.color.toHexString();
-			this.ctx.lineWidth = style.style.stroke.width;
+		if (style.renderingStyle.stroke) {
+			this.ctx.strokeStyle = style.renderingStyle.stroke.color.toHexString();
+			this.ctx.lineWidth = style.renderingStyle.stroke.width;
 			this.ctx.strokeText(text, 0, 0);
 		}
 

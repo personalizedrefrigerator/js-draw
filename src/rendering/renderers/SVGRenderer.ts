@@ -123,6 +123,13 @@ export default class SVGRenderer extends AbstractRenderer {
 		textElem.style.fontVariant = style.fontVariant ?? '';
 		textElem.style.fontWeight = style.fontWeight ?? '';
 		textElem.style.fontSize = style.size + 'px';
+		textElem.style.fill = style.renderingStyle.fill.toHexString();
+
+		if (style.renderingStyle.stroke) {
+			const strokeStyle = style.renderingStyle.stroke;
+			textElem.style.stroke = strokeStyle.color.toHexString();
+			textElem.style.strokeWidth = strokeStyle.width + 'px';
+		}
 
 		this.elem.appendChild(textElem);
 		this.objectElems?.push(textElem);

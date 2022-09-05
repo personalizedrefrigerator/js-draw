@@ -1,4 +1,5 @@
 import { ComponentBuilderFactory } from '../components/builders/types';
+import { TextStyle } from '../components/Text';
 import EventDispatcher from '../EventDispatcher';
 import { Vec2 } from '../geometry/Vec2';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
@@ -123,6 +124,28 @@ export const makeHandToolIcon = () => {
 	</g>
 	`;
 	icon.setAttribute('viewBox', '0 0 100 100');
+	return icon;
+};
+
+export const makeTextIcon = (textStyle: TextStyle) => {
+	const icon = document.createElementNS(svgNamespace, 'svg');
+	icon.setAttribute('viewBox', '0 0 100 100');
+
+	const textNode = document.createElementNS(svgNamespace, 'text');
+	textNode.appendChild(document.createTextNode('T'));
+
+	textNode.style.fontFamily = textStyle.fontFamily;
+	textNode.style.fontWeight = textStyle.fontWeight ?? '';
+	textNode.style.fontVariant = textStyle.fontVariant ?? '';
+	textNode.style.fill = textStyle.renderingStyle.fill.toHexString();
+
+	textNode.style.textAnchor = 'middle';
+	textNode.setAttribute('x', '50');
+	textNode.setAttribute('y', '75');
+	textNode.style.fontSize = '65px';
+
+	icon.appendChild(textNode);
+
 	return icon;
 };
 

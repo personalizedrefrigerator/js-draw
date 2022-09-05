@@ -15,7 +15,7 @@ import { makeLineBuilder } from '../components/builders/LineBuilder';
 import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../components/builders/RectangleBuilder';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
-import { makeDropdownIcon, makeEraserIcon, makeIconFromFactory, makePenIcon, makeRedoIcon, makeSelectionIcon, makeHandToolIcon, makeUndoIcon } from './icons';
+import { makeDropdownIcon, makeEraserIcon, makeIconFromFactory, makePenIcon, makeRedoIcon, makeSelectionIcon, makeHandToolIcon, makeUndoIcon, makeTextIcon } from './icons';
 import PanZoom, { PanZoomMode } from '../tools/PanZoom';
 import Mat33 from '../geometry/Mat33';
 import Viewport from '../Viewport';
@@ -405,17 +405,56 @@ class HandToolWidget extends ToolbarWidget {
 }
 
 class TextToolWidget extends ToolbarWidget {
+	private updateDropdownInputs: (()=>void)|null = null;
+	public constructor(editor: Editor, private tool: TextTool, localization: ToolbarLocalization) {
+		super(editor, tool, localization);
+
+		editor.notifier.on(EditorEventType.ToolUpdated, evt => {
+			if (evt.kind === EditorEventType.ToolUpdated && evt.tool === tool) {
+				this.updateIcon();
+				this.updateDropdownInputs?.();
+			}
+		});
+	}
+
 	protected getTitle(): string {
 		return this.targetTool.description;
 	}
+
 	protected createIcon(): Element {
-		const icon = document.createElement('span');
-		icon.innerText = 'T';
-		icon.style.fontSize = '14pt';
-		return icon;
+		const textStyle = this.tool.getTextStyle();
+		return makeTextIcon(textStyle);
 	}
-	protected fillDropdown(_dropdown: HTMLElement): boolean {
-		return false;
+
+	private static idCounter: number = 0;
+	protected fillDropdown(dropdown: HTMLElement): boolean {
+		const colorRow = document.createElement('div');
+		const colorInput = document.createElement('input');
+		const colorLabel = document.createElement('label');
+
+		colorLabel.innerText = this.localizationTable.colorLabel;
+
+		colorInput.classList.add('coloris_input');
+		colorInput.type = 'button';
+		colorInput.id = `${toolbarCSSPrefix}-text-color-input-${TextToolWidget.idCounter++}`;
+		colorLabel.setAttribute('for', colorInput.id);
+
+		colorInput.oninput = () => {
+			this.tool.setColor(Color4.fromString(colorInput.value));
+		};
+
+		colorRow.appendChild(colorLabel);
+		colorRow.appendChild(colorInput);
+
+		this.updateDropdownInputs = () => {
+			const style = this.tool.getTextStyle();
+			colorInput.value = style.renderingStyle.fill.toHexString();
+		};
+		this.updateDropdownInputs();
+
+		dropdown.appendChild(colorRow);
+
+		return true;
 	}
 }
 
