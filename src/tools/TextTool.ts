@@ -7,6 +7,7 @@ import { Vec2 } from '../geometry/Vec2';
 import { PointerDevice } from '../Pointer';
 import { EditorEventType, PointerEvt } from '../types';
 import BaseTool from './BaseTool';
+import { ToolLocalization } from './localization';
 import { ToolType } from './ToolController';
 
 const overlayCssClass = 'textEditorOverlay';
@@ -19,11 +20,11 @@ export default class TextTool extends BaseTool {
 	private textTargetPosition: Vec2|null = null;
 	private textMeasuringCtx: CanvasRenderingContext2D|null = null;
 
-	public constructor(private editor: Editor, description: string) {
+	public constructor(private editor: Editor, description: string, private localizationTable: ToolLocalization) {
 		super(editor.notifier, description);
 		this.textStyle = {
 			size: 32,
-			fontFamily: 'sans',
+			fontFamily: 'sans-serif',
 			renderingStyle: {
 				fill: Color4.purple,
 			},
@@ -64,6 +65,10 @@ export default class TextTool extends BaseTool {
 			this.textInputElem.remove();
 			this.textInputElem = null;
 
+			if (content === '') {
+				return;
+			}
+
 			const textTransform = Mat33.translation(
 				this.textTargetPosition
 			).rightMul(
@@ -89,13 +94,15 @@ export default class TextTool extends BaseTool {
 
 		const textScreenPos = this.editor.viewport.canvasToScreen(this.textTargetPosition);
 		this.textInputElem.type = 'text';
-		this.textInputElem.style.position = 'relative';
-		this.textInputElem.style.left = `${textScreenPos.x}px`;
+		this.textInputElem.placeholder = this.localizationTable.enterTextToInsert;
 		this.textInputElem.style.fontFamily = this.textStyle.fontFamily;
 		this.textInputElem.style.fontVariant = this.textStyle.fontVariant ?? '';
 		this.textInputElem.style.fontWeight = this.textStyle.fontWeight ?? '';
 		this.textInputElem.style.fontSize = `${this.textStyle.size}px`;
 		this.textInputElem.style.color = this.textStyle.renderingStyle.fill.toHexString();
+
+		this.textInputElem.style.position = 'relative';
+		this.textInputElem.style.left = `${textScreenPos.x}px`;
 		const ascent = this.getTextAscent(this.textInputElem.value || 'W', this.textStyle);
 		this.textInputElem.style.top = `${textScreenPos.y - ascent}px`;
 	}
@@ -115,6 +122,11 @@ export default class TextTool extends BaseTool {
 		};
 		this.textInputElem.onblur = () => {
 			this.flushInput();
+		};
+		this.textInputElem.onkeyup = (evt) => {
+			if (evt.key === 'Enter') {
+				this.flushInput();
+			}
 		};
 
 		this.textEditOverlay.replaceChildren(this.textInputElem);

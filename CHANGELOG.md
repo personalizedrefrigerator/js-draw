@@ -1,3 +1,8 @@
+# 0.1.3
+ * Very minimalistic text tool.
+ * Ability to load and save text.
+ * Fix a rounding bug where small strokes could be stretched/moved to the wrong locations.
+
 # 0.1.2
  * Replace 'touch drawing' with a hand tool.
  * Bug fixes related to importing SVGs from other applications.

@@ -39,7 +39,7 @@ export default class ToolController {
 			// Highlighter-like pen with width=64
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }),
 
-			new TextTool(editor, localization.textTool),
+			new TextTool(editor, localization.textTool, localization),
 		];
 		this.tools = [
 			panZoomTool,
