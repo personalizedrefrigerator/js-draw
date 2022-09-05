@@ -135,6 +135,11 @@ export default class TextTool extends BaseTool {
 			if (evt.key === 'Enter') {
 				this.flushInput();
 				this.editor.focus();
+			} else if (evt.key === 'Escape') {
+				// Cancel input.
+				this.textInputElem?.remove();
+				this.textInputElem = null;
+				this.editor.focus();
 			}
 		};
 
