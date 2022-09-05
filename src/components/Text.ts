@@ -23,12 +23,16 @@ export default class Text extends AbstractComponent {
 	}
 
 	public static applyTextStyles(ctx: CanvasRenderingContext2D, style: TextStyle) {
+		// Quote the font family if necessary.
+		const fontFamily = style.fontFamily.match(/\s/) ? style.fontFamily.replace(/["]/g, '\\"') : style.fontFamily;
+
 		ctx.font =	[
 			(style.size ?? 12) + 'px',
 			style.fontWeight ?? '',
-			`"${style.fontFamily.replace(/["]/g, '\\"')}"`,
+			`${fontFamily}`,
 			style.fontWeight
 		].join(' ');
+
 		ctx.textAlign = 'left';
 	}
 

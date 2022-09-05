@@ -121,7 +121,9 @@ export default class TextTool extends BaseTool {
 			}
 		};
 		this.textInputElem.onblur = () => {
-			this.flushInput();
+			// Don't remove the input within the context of a blur event handler.
+			// Doing so causes errors.
+			setTimeout(() => this.flushInput(), 0);
 		};
 		this.textInputElem.onkeyup = (evt) => {
 			if (evt.key === 'Enter') {
@@ -130,7 +132,7 @@ export default class TextTool extends BaseTool {
 		};
 
 		this.textEditOverlay.replaceChildren(this.textInputElem);
-		setTimeout(() => this.textInputElem!.focus(), 100);
+		setTimeout(() => this.textInputElem?.focus(), 0);
 	}
 
 	public setEnabled(enabled: boolean) {
