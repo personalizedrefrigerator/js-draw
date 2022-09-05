@@ -1,6 +1,7 @@
 # 0.1.4
  * Option to enable pan gestures only if the editor has focus
  * Text tool bug fixes and improvements.
+ * Defocus/blur editor when `Esc` key is pressed.
 
 # 0.1.3
  * Very minimalistic text tool.

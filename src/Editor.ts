@@ -245,6 +245,8 @@ export class Editor {
 				ctrlKey: evt.ctrlKey,
 			})) {
 				evt.preventDefault();
+			} else if (evt.key === 'Escape') {
+				this.renderingRegion.blur();
 			}
 		});
 
