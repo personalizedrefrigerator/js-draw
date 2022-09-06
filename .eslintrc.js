@@ -53,5 +53,6 @@ module.exports = {
 	},
 	'ignorePatterns': [
 		'**/*.bundle.js',
+		'dist/',
 	],
 };
