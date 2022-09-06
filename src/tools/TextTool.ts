@@ -19,6 +19,7 @@ export default class TextTool extends BaseTool {
 	private textInputElem: HTMLInputElement|null = null;
 	private textTargetPosition: Vec2|null = null;
 	private textMeasuringCtx: CanvasRenderingContext2D|null = null;
+	private textRotation: number;
 
 	public constructor(private editor: Editor, description: string, private localizationTable: ToolLocalization) {
 		super(editor.notifier, description);
@@ -73,6 +74,8 @@ export default class TextTool extends BaseTool {
 				this.textTargetPosition
 			).rightMul(
 				Mat33.scaling2D(this.editor.viewport.getSizeOfPixelOnCanvas())
+			).rightMul(
+				Mat33.zRotation(this.textRotation)
 			);
 			
 			const textComponent = new Text(
@@ -93,7 +96,7 @@ export default class TextTool extends BaseTool {
 		}
 
 		const viewport = this.editor.viewport;
-		const textScreenPos = this.editor.viewport.canvasToScreen(this.textTargetPosition);
+		const textScreenPos = viewport.canvasToScreen(this.textTargetPosition);
 		this.textInputElem.type = 'text';
 		this.textInputElem.placeholder = this.localizationTable.enterTextToInsert;
 		this.textInputElem.style.fontFamily = this.textStyle.fontFamily;
@@ -107,7 +110,7 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.top = `${textScreenPos.y}px`;
 		this.textInputElem.style.margin = '0';
 
-		const rotation = viewport.getRotationAngle();
+		const rotation = this.textRotation + viewport.getRotationAngle();
 		const ascent = this.getTextAscent(this.textInputElem.value || 'W', this.textStyle);
 		this.textInputElem.style.transform = `rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-ascent}px)`;
 		this.textInputElem.style.transformOrigin = 'top left';
@@ -119,6 +122,7 @@ export default class TextTool extends BaseTool {
 		this.textInputElem = document.createElement('input');
 		this.textInputElem.value = initialText;
 		this.textTargetPosition = textCanvasPos;
+		this.textRotation = -this.editor.viewport.getRotationAngle();
 		this.updateTextInput();
 
 		this.textInputElem.oninput = () => {
