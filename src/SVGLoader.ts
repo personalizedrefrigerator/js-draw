@@ -198,14 +198,19 @@ export default class SVGLoader implements ImageLoader {
 		}
 		const style: TextStyle = {
 			size: fontSize,
-			fontFamily: computedStyles.fontFamily || 'sans-serif',
+			fontFamily: computedStyles.fontFamily || elem.style.fontFamily || 'sans-serif',
 			renderingStyle: {
 				fill: Color4.fromString(computedStyles.fill)
 			},
 		};
 
+		let transformProperty = computedStyles.transform;
+		if (transformProperty === '' || transformProperty === 'none') {
+			transformProperty = elem.style.transform || 'none';
+		}
+
 		// Compute transform matrix
-		let transform = Mat33.fromCSSMatrix(computedStyles.transform);
+		let transform = Mat33.fromCSSMatrix(transformProperty);
 		const supportedAttrs = [];
 		const elemX = elem.getAttribute('x');
 		const elemY = elem.getAttribute('y');
