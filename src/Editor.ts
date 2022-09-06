@@ -277,7 +277,7 @@ export class Editor {
 				delta = Vec3.of(0, 0, evt.deltaY);
 			}
 
-			const pos = Vec2.of(evt.clientX, evt.clientY);
+			const pos = Vec2.of(evt.offsetX, evt.offsetY);
 			if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.WheelEvt,
 				delta,
