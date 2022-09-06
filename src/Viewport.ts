@@ -181,18 +181,18 @@ export class Viewport {
 			throw new Error(`${toMakeVisible.toString()} rectangle has NaN size! Cannot zoom to!`);
 		}
 
-		// Try to move the selection within the center 2/3rds of the viewport.
+		// Try to move the selection within the center 3/4ths of the viewport.
 		const recomputeTargetRect = () => {
 			// transform transforms objects on the canvas. As such, we need to invert it
 			// to transform the viewport.
 			const visibleRect = this.visibleRect.transformedBoundingBox(transform.inverse());
-			return visibleRect.transformedBoundingBox(Mat33.scaling2D(2 / 3, visibleRect.center));
+			return visibleRect.transformedBoundingBox(Mat33.scaling2D(3 / 4, visibleRect.center));
 		};
 
 		let targetRect = recomputeTargetRect();
 		const largerThanTarget = targetRect.w < toMakeVisible.w || targetRect.h < toMakeVisible.h;
 
-		// Ensure that toMakeVisible is at least 1/4th of the visible region.
+		// Ensure that toMakeVisible is at least 1/8th of the visible region.
 		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 0.25;
 
 		if ((largerThanTarget && allowZoomOut) || (muchSmallerThanTarget && allowZoomIn)) {
