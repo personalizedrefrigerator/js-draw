@@ -13,7 +13,7 @@
     justify-content: center;
 
     /* Display above selection dialogs, etc. */
-    z-index: 1000;
+    z-index: 2;
 
     font-family: system-ui, -apple-system, sans-serif;
 }

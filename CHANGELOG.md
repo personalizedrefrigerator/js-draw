@@ -1,3 +1,6 @@
+# 0.1.6
+ * Fix loading text in SVG images in Chrome.
+
 # 0.1.5
  * Add a text-only renderer (only renders text objects at present) that can be activated with a screen reader.
  * Make new text objects parallel to screen's horizontal axis.

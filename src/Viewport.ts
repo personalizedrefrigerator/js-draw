@@ -192,8 +192,8 @@ export class Viewport {
 		let targetRect = recomputeTargetRect();
 		const largerThanTarget = targetRect.w < toMakeVisible.w || targetRect.h < toMakeVisible.h;
 
-		// Ensure that toMakeVisible is at least 1/4th of the visible region.
-		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 0.25;
+		// Ensure that toMakeVisible is at least 1/3rd of the visible region.
+		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 1/3;
 
 		if ((largerThanTarget && allowZoomOut) || (muchSmallerThanTarget && allowZoomIn)) {
 			// If larger than the target, ensure that the longest axis is visible.
