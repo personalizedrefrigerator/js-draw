@@ -91,7 +91,7 @@ export const makeSelectionIcon = () => {
 export const makeHandToolIcon = () => {
 	const icon = document.createElementNS(svgNamespace, 'svg');
 
-	// Draw a cursor-like shape
+	// Draw a cursor-like shape (like some of the other icons, made with Inkscape)
 	icon.innerHTML = `
 	<g>
 		<path d='
@@ -123,6 +123,49 @@ export const makeHandToolIcon = () => {
 		/>
 	</g>
 	`;
+	icon.setAttribute('viewBox', '0 0 100 100');
+	return icon;
+};
+
+export const makeTouchDrawingIcon = () => {
+	const icon = document.createElementNS(svgNamespace, 'svg');
+	icon.innerHTML = `
+		<path
+			d='
+				M 5,5.5
+				V 17.2
+				L 16.25,5.46
+				Z
+
+				m 33.75,0
+				L 50,17
+				V 5.5
+				Z
+
+				M 5,40.7
+				v 11.7
+				h 11.25
+				z
+				
+				M 26,19
+				C 19.8,19.4 17.65,30.4 21.9,34.8
+				L 50,70
+				H 27.5
+				c -11.25,0 -11.25,17.6 0,17.6
+				H 61.25
+				C 94.9,87.8 95,87.6 95,40.7 78.125,23 67,29 55.6,46.5
+				L 33.1,23
+				C 30.3125,20.128192 27.9,19 25.830078,19.119756
+				Z
+			'
+			fill='none'
+			style='
+				stroke: var(--primary-foreground-color);
+				stroke-width: 2;
+			'
+		/>
+	`;
+
 	icon.setAttribute('viewBox', '0 0 100 100');
 	return icon;
 };
