@@ -68,3 +68,13 @@
 	overflow: hidden;
 	pointer-events: none;
 }
+
+.imageEditorContainer .textRendererOutputContainer {
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.imageEditorContainer .textRendererOutputContainer:focus-within {
+	overflow: visible;
+}

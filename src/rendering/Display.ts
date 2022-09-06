@@ -5,6 +5,7 @@ import { EditorEventType } from '../types';
 import DummyRenderer from './renderers/DummyRenderer';
 import { Vec2 } from '../geometry/Vec2';
 import RenderingCache from './caching/RenderingCache';
+import TextOnlyRenderer from './renderers/TextOnlyRenderer';
 
 export enum RenderingMode {
 	DummyRenderer,
@@ -15,6 +16,7 @@ export enum RenderingMode {
 export default class Display {
 	private dryInkRenderer: AbstractRenderer;
 	private wetInkRenderer: AbstractRenderer;
+	private textRenderer: TextOnlyRenderer;
 	private cache: RenderingCache;
 	private resizeSurfacesCallback?: ()=> void;
 	private flattenCallback?: ()=> void;
@@ -30,6 +32,9 @@ export default class Display {
 		} else {
 			throw new Error(`Unknown rendering mode, ${mode}!`);
 		}
+
+		this.textRenderer = new TextOnlyRenderer(editor.viewport, editor.localization);
+		this.initializeTextRendering();
 
 		const cacheBlockResolution = Vec2.of(600, 600);
 		this.cache = new RenderingCache({
@@ -127,6 +132,27 @@ export default class Display {
 		this.flattenCallback = () => {
 			dryInkCtx.drawImage(wetInkCanvas, 0, 0);
 		};
+	}
+
+	private initializeTextRendering() {
+		const textRendererOutputContainer = document.createElement('div');
+		textRendererOutputContainer.classList.add('textRendererOutputContainer');
+
+		const rerenderButton = document.createElement('button');
+		rerenderButton.classList.add('rerenderButton');
+		rerenderButton.innerText = this.editor.localization.rerenderAsText;
+
+		const rerenderOutput = document.createElement('div');
+		rerenderOutput.ariaLive = 'polite';
+
+		rerenderButton.onclick = () => {
+			this.textRenderer.clear();
+			this.editor.image.render(this.textRenderer, this.editor.viewport);
+			rerenderOutput.innerText = this.textRenderer.getDescription();
+		};
+
+		textRendererOutputContainer.replaceChildren(rerenderButton, rerenderOutput);
+		this.editor.createHTMLOverlay(textRendererOutputContainer);
 	}
 
 	// Clears the drawing surfaces and otherwise prepares for a rerender.
