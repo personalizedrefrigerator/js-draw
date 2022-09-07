@@ -499,7 +499,7 @@ export default class SelectionTool extends BaseTool {
 			);
 
 			const selectionRect = this.selectionBox.region;
-			this.editor.viewport.zoomTo(selectionRect, false).apply(this.editor);
+			this.editor.dispatchNoAnnounce(this.editor.viewport.zoomTo(selectionRect, false), false);
 		}
 	}
 

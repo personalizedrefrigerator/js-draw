@@ -1,3 +1,8 @@
+# 0.1.7
+ * Show the six most recent color selections in the color palette.
+ * Switch from checkboxes to togglebuttons in the dropdown for the hand tool.
+ * Adds a "duplicate selection" button.
+
 # 0.1.6
  * Fix loading text in SVG images in Chrome.
 

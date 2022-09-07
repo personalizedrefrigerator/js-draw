@@ -307,6 +307,7 @@ export class Editor {
 		});
 	}
 
+	// Adds to history by default
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		if (addToHistory) {
 			// .push applies [command] to this
@@ -316,6 +317,15 @@ export class Editor {
 		}
 
 		this.announceForAccessibility(command.description(this.localization));
+	}
+
+	// Dispatches a command without announcing it. By default, does not add to history.
+	public dispatchNoAnnounce(command: Command, addToHistory: boolean = false) {
+		if (addToHistory) {
+			this.history.push(command);
+		} else {
+			command.apply(this);
+		}
 	}
 
 	// Apply a large transformation in chunks.
@@ -486,7 +496,7 @@ export class Editor {
 		this.display.setDraftMode(true);
 
 		await loader.start((component) => {
-			(new EditorImage.AddElementCommand(component)).apply(this);
+			this.dispatchNoAnnounce(new EditorImage.AddElementCommand(component));
 		}, (countProcessed: number, totalToProcess: number) => {
 			if (countProcessed % 500 === 0) {
 				this.showLoadingWarning(countProcessed / totalToProcess);
@@ -498,8 +508,8 @@ export class Editor {
 
 			return null;
 		}, (importExportRect: Rect2) => {
-			this.setImportExportRect(importExportRect).apply(this);
-			this.viewport.zoomTo(importExportRect).apply(this);
+			this.dispatchNoAnnounce(this.setImportExportRect(importExportRect), false);
+			this.dispatchNoAnnounce(this.viewport.zoomTo(importExportRect), false);
 		});
 		this.hideLoadingWarning();
 
