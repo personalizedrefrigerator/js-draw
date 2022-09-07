@@ -18,6 +18,7 @@ export interface ToolbarLocalization {
 	thicknessLabel: string;
 	resizeImageToSelection: string;
 	deleteSelection: string;
+	duplicateSelection: string;
 	undo: string;
 	redo: string;
 	zoom: string;
@@ -38,6 +39,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	fontLabel: 'Font: ',
 	resizeImageToSelection: 'Resize image to selection',
 	deleteSelection: 'Delete selection',
+	duplicateSelection: 'Duplicate selection',
 	undo: 'Undo',
 	redo: 'Redo',
 	selectObjectType: 'Object type: ',

@@ -555,4 +555,6 @@ export default class Path {
 
 		return new Path(startPos ?? Vec2.zero, commands);
 	}
+
+	public static empty: Path = new Path(Vec2.zero, []);
 }

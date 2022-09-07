@@ -2,7 +2,6 @@
 
 import Color4 from '../Color4';
 import Stroke from '../components/Stroke';
-import { RenderingMode } from '../rendering/Display';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Path from '../geometry/Path';
@@ -10,12 +9,11 @@ import { Vec2 } from '../geometry/Vec2';
 import { InputEvtType } from '../types';
 import SelectionTool from './SelectionTool';
 import { ToolType } from './ToolController';
+import createEditor from '../testing/createEditor';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(ToolType.Selection)[0] as SelectionTool;
 };
-
-const createEditor = () => new Editor(document.body, { renderingMode: RenderingMode.DummyRenderer });
 
 const createSquareStroke = () => {
 	const testStroke = new Stroke([

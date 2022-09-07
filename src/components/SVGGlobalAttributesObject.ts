@@ -32,6 +32,10 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 	protected applyTransformation(_affineTransfm: Mat33): void {
 	}
 
+	protected createClone() {
+		return new SVGGlobalAttributesObject(this.attrs);
+	}
+
 	public description(localization: ImageComponentLocalization): string {
 		return localization.svgObject;
 	}

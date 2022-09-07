@@ -19,10 +19,6 @@ export default class EditorImage {
 		this.root = new ImageNode();
 	}
 
-	private addElement(elem: AbstractComponent): ImageNode {
-		return this.root.addLeaf(elem);
-	}
-
 	// Returns the parent of the given element, if it exists.
 	public findParent(elem: AbstractComponent): ImageNode|null {
 		const candidates = this.root.getLeavesIntersectingRegion(elem.getBBox());
@@ -59,6 +55,10 @@ export default class EditorImage {
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
+	private addElementDirectly(elem: AbstractComponent): ImageNode {
+		return this.root.addLeaf(elem);
+	}
+
 	// A Command that can access private [EditorImage] functionality
 	public static AddElementCommand = class implements Command {
 		readonly #element: AbstractComponent;
@@ -80,7 +80,7 @@ export default class EditorImage {
 		}
 
 		public apply(editor: Editor) {
-			editor.image.addElement(this.#element);
+			editor.image.addElementDirectly(this.#element);
 
 			if (!this.#applyByFlattening) {
 				editor.queueRerender();

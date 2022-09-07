@@ -96,6 +96,16 @@ export default class Stroke extends AbstractComponent {
 		});
 	}
 
+	public getPath() {
+		return this.parts.reduce((accumulator: Path, current: StrokePart) => {
+			return accumulator.union(current.path);
+		}, Path.empty);
+	}
+
+	protected createClone(): AbstractComponent {
+		return new Stroke(this.parts);
+	}
+
 	public description(localization: ImageComponentLocalization): string {
 		return localization.stroke;
 	}

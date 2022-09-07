@@ -17,7 +17,11 @@ export interface TextStyle {
 export default class Text extends AbstractComponent {
 	protected contentBBox: Rect2;
 
-	public constructor(protected textObjects: Array<string|Text>, private transform: Mat33, private style: TextStyle) {
+	public constructor(
+		protected readonly textObjects: Array<string|Text>,
+		private transform: Mat33,
+		private readonly style: TextStyle
+	) {
 		super();
 		this.recomputeBBox();
 	}
@@ -118,6 +122,10 @@ export default class Text extends AbstractComponent {
 	protected applyTransformation(affineTransfm: Mat33): void {
 		this.transform = affineTransfm.rightMul(this.transform);
 		this.recomputeBBox();
+	}
+
+	protected createClone(): AbstractComponent {
+		return new Text(this.textObjects, this.transform, this.style);
 	}
 
 	private getText() {

@@ -88,5 +88,17 @@ export default abstract class AbstractComponent {
 		};
 	}
 
+	protected abstract createClone(): AbstractComponent;
+
+	public clone() {
+		const clone = this.createClone();
+
+		for (const attachmentKey in this.loadSaveData) {
+			clone.attachLoadSaveData(attachmentKey, this.loadSaveData[attachmentKey]);
+		}
+
+		return clone;
+	}
+
 	public abstract description(localizationTable: ImageComponentLocalization): string;
 }

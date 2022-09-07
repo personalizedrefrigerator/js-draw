@@ -1,4 +1,5 @@
 import Command from '../commands/Command';
+import Duplicate from '../commands/Duplicate';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import Editor from '../Editor';
@@ -430,6 +431,10 @@ class Selection {
 
 	public deleteSelectedObjects(): Command {
 		return new Erase(this.selectedElems);
+	}
+
+	public duplicateSelectedObjects(): Command {
+		return new Duplicate(this.selectedElems);
 	}
 }
 

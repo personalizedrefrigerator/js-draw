@@ -23,12 +23,15 @@ export class SelectionWidget extends BaseToolWidget {
 	protected fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		const resizeButton = document.createElement('button');
+		const duplicateButton = document.createElement('button');
 		const deleteButton = document.createElement('button');
 
 		resizeButton.innerText = this.localizationTable.resizeImageToSelection;
 		resizeButton.disabled = true;
 		deleteButton.innerText = this.localizationTable.deleteSelection;
 		deleteButton.disabled = true;
+		duplicateButton.innerText = this.localizationTable.duplicateSelection;
+		duplicateButton.disabled = true;
 
 		resizeButton.onclick = () => {
 			const selection = this.tool.getSelection();
@@ -39,6 +42,11 @@ export class SelectionWidget extends BaseToolWidget {
 			const selection = this.tool.getSelection();
 			this.editor.dispatch(selection!.deleteSelectedObjects());
 			this.tool.clearSelection();
+		};
+
+		duplicateButton.onclick = () => {
+			const selection = this.tool.getSelection();
+			this.editor.dispatch(selection!.duplicateSelectedObjects());
 		};
 
 		// Enable/disable actions based on whether items are selected
@@ -53,10 +61,11 @@ export class SelectionWidget extends BaseToolWidget {
 
 				resizeButton.disabled = !hasSelection;
 				deleteButton.disabled = resizeButton.disabled;
+				duplicateButton.disabled = resizeButton.disabled;
 			}
 		});
 
-		container.replaceChildren(resizeButton, deleteButton);
+		container.replaceChildren(resizeButton, duplicateButton, deleteButton);
 		dropdown.appendChild(container);
 		return true;
 	}
