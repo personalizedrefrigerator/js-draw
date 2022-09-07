@@ -43,22 +43,44 @@ export default class HTMLToolbar {
 		closePickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;
 		this.editor.createHTMLOverlay(closePickerOverlay);
 
-		coloris({
-			el: '.coloris_input',
-			format: 'hex',
-			selectInput: false,
-			focusInput: false,
-			themeMode: 'auto',
+		const swatches = [
+			Color4.red.toHexString(),
+			Color4.purple.toHexString(),
+			Color4.blue.toHexString(),
+			Color4.clay.toHexString(),
+			Color4.black.toHexString(),
+			Color4.white.toHexString(),
+		];
 
-			swatches: [
-				Color4.red.toHexString(),
-				Color4.purple.toHexString(),
-				Color4.blue.toHexString(),
-				Color4.clay.toHexString(),
-				Color4.black.toHexString(),
-				Color4.white.toHexString(),
-			],
-		});
+		// (Re)init Coloris -- update the swatches list.
+		const initColoris = () => {
+			coloris({
+				el: '.coloris_input',
+				format: 'hex',
+				selectInput: false,
+				focusInput: false,
+				themeMode: 'auto',
+
+				swatches
+			});
+		};
+		initColoris();
+
+		const addColorToSwatch = (newColor: string) => {
+			let alreadyPresent = false;
+
+			for (const color of swatches) {
+				if (color === newColor) {
+					alreadyPresent = true;
+				}
+			}
+
+			if (!alreadyPresent) {
+				swatches.splice(0, 1);
+				swatches.push(newColor);
+				initColoris();
+			}
+		};
 
 		this.editor.notifier.on(EditorEventType.ColorPickerToggled, event => {
 			if (event.kind !== EditorEventType.ColorPickerToggled) {
@@ -68,6 +90,11 @@ export default class HTMLToolbar {
 			// Show/hide the overlay. Making the overlay visible gives users a surface to click
 			// on that shows/hides the color picker.
 			closePickerOverlay.style.display = event.open ? 'block' : 'none';
+
+			// Add to new color to swatch to the recent colors list.
+			if (event.color && !event.open) {
+				addColorToSwatch(event.color.toHexString());
+			}
 		});
 	}
 

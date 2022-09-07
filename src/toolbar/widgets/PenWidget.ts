@@ -135,8 +135,11 @@ export default class PenWidget extends BaseToolWidget {
 
 		colorInput.className = 'coloris_input';
 		colorInput.type = 'button';
+
+		let currentColor: Color4|undefined = undefined;
 		colorInput.oninput = () => {
-			this.tool.setColor(Color4.fromHex(colorInput.value));
+			currentColor = Color4.fromHex(colorInput.value);
+			this.tool.setColor(currentColor);
 		};
 		colorInput.addEventListener('open', () => {
 			this.editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
@@ -148,6 +151,7 @@ export default class PenWidget extends BaseToolWidget {
 			this.editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
 				kind: EditorEventType.ColorPickerToggled,
 				open: false,
+				color: currentColor,
 			});
 		});
 

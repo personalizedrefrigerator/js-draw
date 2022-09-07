@@ -122,6 +122,7 @@ export interface EditorUndoStackUpdated {
 export interface ColorPickerToggled {
 	readonly kind: EditorEventType.ColorPickerToggled;
 	readonly open: boolean;
+	readonly color?: Color4;
 }
 
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent | EditorViewportChangedEvent | DisplayResizedEvent | EditorUndoStackUpdated | ColorPickerToggled;
