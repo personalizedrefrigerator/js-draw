@@ -1,22 +1,21 @@
 import Editor from '../../Editor';
-import BaseTool from '../../tools/BaseTool';
-import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeDropdownIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
 
-export default abstract class BaseToolbarWidget {
+export default abstract class BaseWidget {
 	protected readonly container: HTMLElement;
 	private button: HTMLElement;
 	private icon: Element|null;
 	private dropdownContainer: HTMLElement;
 	private dropdownIcon: Element;
 	private label: HTMLLabelElement;
-	private hasDropdown: boolean;
+	#hasDropdown: boolean;
+	private disabled: boolean = false;
+	private subWidgets: BaseWidget[] = [];
 
 	public constructor(
 		protected editor: Editor,
-		protected targetTool: BaseTool,
 		protected localizationTable: ToolbarLocalization,
 	) {
 		this.icon = null;
@@ -25,34 +24,13 @@ export default abstract class BaseToolbarWidget {
 		this.dropdownContainer = document.createElement('div');
 		this.dropdownContainer.classList.add(`${toolbarCSSPrefix}dropdown`);
 		this.dropdownContainer.classList.add('hidden');
-		this.hasDropdown = false;
+		this.#hasDropdown = false;
 
 		this.button = document.createElement('div');
 		this.button.classList.add(`${toolbarCSSPrefix}button`);
 		this.label = document.createElement('label');
 		this.button.setAttribute('role', 'button');
 		this.button.tabIndex = 0;
-
-		editor.notifier.on(EditorEventType.ToolEnabled, toolEvt => {
-			if (toolEvt.kind !== EditorEventType.ToolEnabled) {
-				throw new Error('Incorrect event type! (Expected ToolEnabled)');
-			}
-
-			if (toolEvt.tool === targetTool) {
-				this.updateSelected(true);
-			}
-		});
-
-		editor.notifier.on(EditorEventType.ToolDisabled, toolEvt => {
-			if (toolEvt.kind !== EditorEventType.ToolDisabled) {
-				throw new Error('Incorrect event type! (Expected ToolDisabled)');
-			}
-
-			if (toolEvt.tool === targetTool) {
-				this.updateSelected(false);
-				this.setDropdownVisible(false);
-			}
-		});
 	}
 
 	protected abstract getTitle(): string;
@@ -60,24 +38,34 @@ export default abstract class BaseToolbarWidget {
 
 	// Add content to the widget's associated dropdown menu.
 	// Returns true if such a menu should be created, false otherwise.
-	protected abstract fillDropdown(dropdown: HTMLElement): boolean;
+	protected fillDropdown(dropdown: HTMLElement): boolean {
+		if (this.subWidgets.length === 0) {
+			return false;
+		}
+
+		for (const widget of this.subWidgets) {
+			widget.addTo(dropdown);
+		}
+		return true;
+	}
 
 	protected setupActionBtnClickListener(button: HTMLElement) {
 		button.onclick = () => {
-			this.handleClick();
+			if (!this.disabled) {
+				this.handleClick();
+			}
 		};
 	}
 
-	protected handleClick() {
-		if (this.hasDropdown) {
-			if (!this.targetTool.isEnabled()) {
-				this.targetTool.setEnabled(true);
-			} else {
-				this.setDropdownVisible(!this.isDropdownVisible());
-			}
-		} else {
-			this.targetTool.setEnabled(!this.targetTool.isEnabled());
-		}
+	protected abstract handleClick(): void;
+
+	protected get hasDropdown() {
+		return this.#hasDropdown;
+	}
+
+	// Add a widget to this' dropdown. Must be called before this.addTo.
+	protected addSubWidget(widget: BaseWidget) {
+		this.subWidgets.push(widget);
 	}
 
 	// Adds this to [parent]. This can only be called once for each ToolbarWidget.
@@ -89,13 +77,11 @@ export default abstract class BaseToolbarWidget {
 		this.icon = null;
 		this.updateIcon();
 
-		this.updateSelected(this.targetTool.isEnabled());
-
 		this.button.replaceChildren(this.icon!, this.label);
 		this.container.appendChild(this.button);
 
-		this.hasDropdown = this.fillDropdown(this.dropdownContainer);
-		if (this.hasDropdown) {
+		this.#hasDropdown = this.fillDropdown(this.dropdownContainer);
+		if (this.#hasDropdown) {
 			this.dropdownIcon = this.createDropdownIcon();
 			this.button.appendChild(this.dropdownIcon);
 			this.container.appendChild(this.dropdownContainer);
@@ -105,6 +91,7 @@ export default abstract class BaseToolbarWidget {
 		parent.appendChild(this.container);
 	}
 
+
 	protected updateIcon() {
 		const newIcon = this.createIcon();
 		this.icon?.replaceWith(newIcon);
@@ -112,8 +99,17 @@ export default abstract class BaseToolbarWidget {
 		this.icon.classList.add(`${toolbarCSSPrefix}icon`);
 	}
 
-	protected updateSelected(selected: boolean) {
-		const currentlySelected = this.container.classList.contains('selected');
+	public setDisabled(disabled: boolean) {
+		this.disabled = disabled;
+		if (this.disabled) {
+			this.button.classList.add('disabled');
+		} else {
+			this.button.classList.remove('disabled');
+		}
+	}
+
+	public setSelected(selected: boolean) {
+		const currentlySelected = this.isSelected();
 		if (currentlySelected === selected) {
 			return;
 		}
@@ -137,13 +133,13 @@ export default abstract class BaseToolbarWidget {
 			this.dropdownContainer.classList.remove('hidden');
 			this.container.classList.add('dropdownVisible');
 			this.editor.announceForAccessibility(
-				this.localizationTable.dropdownShown(this.targetTool.description)
+				this.localizationTable.dropdownShown(this.getTitle())
 			);
 		} else {
 			this.dropdownContainer.classList.add('hidden');
 			this.container.classList.remove('dropdownVisible');
 			this.editor.announceForAccessibility(
-				this.localizationTable.dropdownHidden(this.targetTool.description)
+				this.localizationTable.dropdownHidden(this.getTitle())
 			);
 		}
 
@@ -165,6 +161,10 @@ export default abstract class BaseToolbarWidget {
 
 	protected isDropdownVisible(): boolean {
 		return !this.dropdownContainer.classList.contains('hidden');
+	}
+
+	protected isSelected(): boolean {
+		return this.container.classList.contains('selected');
 	}
 
 	private createDropdownIcon(): Element {

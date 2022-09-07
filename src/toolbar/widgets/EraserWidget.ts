@@ -1,7 +1,7 @@
 import { makeEraserIcon } from '../icons';
-import BaseToolbarWidget from './BaseToolbarWidget';
+import BaseToolWidget from './BaseToolWidget';
 
-export default class EraserWidget extends BaseToolbarWidget {
+export default class EraserWidget extends BaseToolWidget {
 	protected getTitle(): string {
 		return this.localizationTable.eraser;
 	}

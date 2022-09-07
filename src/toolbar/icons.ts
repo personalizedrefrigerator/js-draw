@@ -127,7 +127,7 @@ export const makeHandToolIcon = () => {
 	return icon;
 };
 
-export const makeTouchDrawingIcon = () => {
+export const makeTouchPanningIcon = () => {
 	const icon = document.createElementNS(svgNamespace, 'svg');
 	icon.innerHTML = `
 		<path
@@ -167,6 +167,96 @@ export const makeTouchDrawingIcon = () => {
 	`;
 
 	icon.setAttribute('viewBox', '0 0 100 100');
+	return icon;
+};
+
+export const makeAllDevicePanningIcon = () => {
+	const icon = document.createElementNS(svgNamespace, 'svg');
+	icon.innerHTML = `
+		<path
+			d='
+				M 5 5
+				L 5 17.5
+				  17.5 5
+				  5 5
+				z
+				
+				M 42.5 5
+				L 55 17.5
+				  55 5
+				  42.5 5
+				z
+				
+				M 70 10
+				L 70 21
+				  61 15
+			      55.5 23
+			      66 30
+				  56 37
+				  61 45
+				  70 39
+				  70 50
+				  80 50
+				  80 39
+				  89 45
+				  95 36
+				  84 30
+				  95 23
+				  89 15
+				  80 21
+				  80 10
+				  70 10
+				z
+
+				M 27.5 26.25
+				L 27.5 91.25
+				L 43.75 83.125
+				L 52 99
+				L 68 91
+				L 60 75
+				L 76.25 66.875
+				L 27.5 26.25
+				z
+				
+				M 5 42.5
+				L 5 55
+				L 17.5 55
+				L 5 42.5
+				z 
+			'
+			fill='none'
+			style='
+				stroke: var(--primary-foreground-color);
+				stroke-width: 2;
+			'
+		/>
+	`;
+
+	icon.setAttribute('viewBox', '0 0 100 100');
+	return icon;
+};
+
+export const makeZoomIcon = () => {
+	const icon = document.createElementNS(svgNamespace, 'svg');
+	icon.setAttribute('viewBox', '0 0 100 100');
+
+	const addTextNode = (text: string, x: number, y: number) => {
+		const textNode = document.createElementNS(svgNamespace, 'text');
+		textNode.appendChild(document.createTextNode(text));
+		textNode.setAttribute('x', x.toString());
+		textNode.setAttribute('y', y.toString());
+		textNode.style.textAlign = 'center';
+		textNode.style.textAnchor = 'middle';
+		textNode.style.fontSize = '55px';
+		textNode.style.fill = 'var(--primary-foreground-color)';
+		textNode.style.fontFamily = 'monospace';
+
+		icon.appendChild(textNode);
+	};
+
+	addTextNode('+', 40, 45);
+	addTextNode('-', 70, 75);
+
 	return icon;
 };
 

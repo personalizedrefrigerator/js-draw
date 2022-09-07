@@ -10,7 +10,7 @@ import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeIconFromFactory, makePenIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
-import BaseToolbarWidget from './BaseToolbarWidget';
+import BaseToolWidget from './BaseToolWidget';
 
 
 interface PenTypeRecord {
@@ -18,7 +18,7 @@ interface PenTypeRecord {
 	factory: ComponentBuilderFactory;
 }
 
-export default class PenWidget extends BaseToolbarWidget {
+export default class PenWidget extends BaseToolWidget {
 	private updateInputs: ()=> void = () => {};
 	protected penTypes: PenTypeRecord[];
 

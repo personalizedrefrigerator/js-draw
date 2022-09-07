@@ -3,9 +3,9 @@ import SelectionTool from '../../tools/SelectionTool';
 import { EditorEventType } from '../../types';
 import { makeSelectionIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
-import BaseToolbarWidget from './BaseToolbarWidget';
+import BaseToolWidget from './BaseToolWidget';
 
-export class SelectionWidget extends BaseToolbarWidget {
+export class SelectionWidget extends BaseToolWidget {
 	public constructor(
 		editor: Editor, private tool: SelectionTool, localization: ToolbarLocalization
 	) {

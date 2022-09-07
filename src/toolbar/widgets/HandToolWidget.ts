@@ -4,9 +4,10 @@ import PanZoom, { PanZoomMode } from '../../tools/PanZoom';
 import { EditorEventType } from '../../types';
 import Viewport from '../../Viewport';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
-import { makeHandToolIcon } from '../icons';
+import { makeAllDevicePanningIcon, makeHandToolIcon, makeTouchPanningIcon, makeZoomIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
-import BaseToolbarWidget from './BaseToolbarWidget';
+import BaseToolWidget from './BaseToolWidget';
+import BaseWidget from './BaseWidget';
 
 const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
 	const zoomLevelRow = document.createElement('div');
@@ -61,12 +62,111 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 	return zoomLevelRow;
 };
 
-export default class HandToolWidget extends BaseToolbarWidget {
+class ZoomWidget extends BaseWidget {
+	public constructor(editor: Editor, localizationTable: ToolbarLocalization) {
+		super(editor, localizationTable);
+
+		// Make it possible to open the dropdown, even if this widget isn't selected.
+		this.container.classList.add('dropdownShowable');
+	}
+
+	protected getTitle(): string {
+		return this.localizationTable.zoom;
+	}
+	
+	protected createIcon(): Element {
+		return makeZoomIcon();
+	}
+
+	protected handleClick(): void {
+		this.setDropdownVisible(!this.isDropdownVisible());
+	}
+
+	protected fillDropdown(dropdown: HTMLElement): boolean {
+		dropdown.appendChild(makeZoomControl(this.localizationTable, this.editor));
+		return true;
+	}
+}
+
+class HandModeWidget extends BaseWidget {
+	public constructor(
+		editor: Editor, localizationTable: ToolbarLocalization,
+
+		protected tool: PanZoom, protected flag: PanZoomMode, protected makeIcon: ()=> Element,
+		private title: string,
+	) {
+		super(editor, localizationTable);
+
+		editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
+			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === tool) {
+				const allEnabled = !!(tool.getMode() & PanZoomMode.SinglePointerGestures);
+				this.setSelected(!!(tool.getMode() & flag) || allEnabled);
+
+				// Unless this widget toggles all single pointer gestures, toggling while
+				// single pointer gestures are enabled should have no effect
+				this.setDisabled(allEnabled && flag !== PanZoomMode.SinglePointerGestures);
+			}
+		});
+		this.setSelected(false);
+	}
+
+	private setModeFlag(enabled: boolean) {
+		const mode = this.tool.getMode();
+		if (enabled) {
+			this.tool.setMode(mode | this.flag);
+		} else {
+			this.tool.setMode(mode & ~this.flag);
+		}
+	}
+
+	protected handleClick() {
+		this.setModeFlag(!this.isSelected());
+	}
+
+	protected getTitle(): string {
+		return this.title;
+	}
+
+	protected createIcon(): Element {
+		return this.makeIcon();
+	}
+
+	protected fillDropdown(_dropdown: HTMLElement): boolean {
+		return false;
+	}
+}
+
+export default class HandToolWidget extends BaseToolWidget {
+	private touchPanningWidget: HandModeWidget;
 	public constructor(
 		editor: Editor, protected tool: PanZoom, localizationTable: ToolbarLocalization
 	) {
 		super(editor, tool, localizationTable);
 		this.container.classList.add('dropdownShowable');
+
+		this.touchPanningWidget = new HandModeWidget(
+			editor, localizationTable,
+
+			tool, PanZoomMode.OneFingerTouchGestures,
+			makeTouchPanningIcon,
+
+			localizationTable.touchPanning
+		);
+
+		this.addSubWidget(this.touchPanningWidget);
+		this.addSubWidget(
+			new HandModeWidget(
+				editor, localizationTable,
+
+				tool, PanZoomMode.SinglePointerGestures,
+				makeAllDevicePanningIcon,
+
+				localizationTable.anyDevicePanning
+			)
+		);
+		this.addSubWidget(
+			new ZoomWidget(editor, localizationTable)
+		);
 	}
 
 	protected getTitle(): string {
@@ -77,71 +177,7 @@ export default class HandToolWidget extends BaseToolbarWidget {
 		return makeHandToolIcon();
 	}
 
-	protected fillDropdown(dropdown: HTMLElement): boolean {
-		type OnToggle = (checked: boolean)=>void;
-		let idCounter = 0;
-		const addCheckbox = (label: string, onToggle: OnToggle) => {
-			const rowContainer = document.createElement('div');
-			const labelElem = document.createElement('label');
-			const checkboxElem = document.createElement('input');
-
-			checkboxElem.type = 'checkbox';
-			checkboxElem.id = `${toolbarCSSPrefix}hand-tool-option-${idCounter++}`;
-			labelElem.setAttribute('for', checkboxElem.id);
-
-			checkboxElem.oninput = () => {
-				onToggle(checkboxElem.checked);
-			};
-			labelElem.innerText = label;
-
-			rowContainer.replaceChildren(checkboxElem, labelElem);
-			dropdown.appendChild(rowContainer);
-
-			return checkboxElem;
-		};
-
-		const setModeFlag = (enabled: boolean, flag: PanZoomMode) => {
-			const mode = this.tool.getMode();
-			if (enabled) {
-				this.tool.setMode(mode | flag);
-			} else {
-				this.tool.setMode(mode & ~flag);
-			}
-		};
-
-		const touchPanningCheckbox = addCheckbox(this.localizationTable.touchPanning, checked => {
-			setModeFlag(checked, PanZoomMode.OneFingerTouchGestures);
-		});
-
-		const anyDevicePanningCheckbox = addCheckbox(this.localizationTable.anyDevicePanning, checked => {
-			setModeFlag(checked, PanZoomMode.SinglePointerGestures);
-		});
-
-		dropdown.appendChild(makeZoomControl(this.localizationTable, this.editor));
-
-		const updateInputs = () => {
-			const mode = this.tool.getMode();
-			anyDevicePanningCheckbox.checked = !!(mode & PanZoomMode.SinglePointerGestures);
-			if (anyDevicePanningCheckbox.checked) {
-				touchPanningCheckbox.checked = true;
-				touchPanningCheckbox.disabled = true;
-			} else {
-				touchPanningCheckbox.checked = !!(mode & PanZoomMode.OneFingerTouchGestures);
-				touchPanningCheckbox.disabled = false;
-			}
-		};
-
-		updateInputs();
-		this.editor.notifier.on(EditorEventType.ToolUpdated, event => {
-			if (event.kind === EditorEventType.ToolUpdated && event.tool === this.tool) {
-				updateInputs();
-			}
-		});
-
-		return true;
-	}
-
-	protected updateSelected(_active: boolean) {
+	public setSelected(_selected: boolean): void {
 	}
 
 	protected handleClick() {

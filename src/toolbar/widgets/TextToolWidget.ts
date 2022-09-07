@@ -5,9 +5,9 @@ import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeTextIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
-import BaseToolbarWidget from './BaseToolbarWidget';
+import BaseToolWidget from './BaseToolWidget';
 
-export default class TextToolWidget extends BaseToolbarWidget {
+export default class TextToolWidget extends BaseToolWidget {
 	private updateDropdownInputs: (()=>void)|null = null;
 	public constructor(editor: Editor, private tool: TextTool, localization: ToolbarLocalization) {
 		super(editor, tool, localization);

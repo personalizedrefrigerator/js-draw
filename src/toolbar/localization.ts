@@ -20,6 +20,7 @@ export interface ToolbarLocalization {
 	deleteSelection: string;
 	undo: string;
 	redo: string;
+	zoom: string;
 
 	dropdownShown: (toolName: string)=>string;
 	dropdownHidden: (toolName: string)=>string;
@@ -31,6 +32,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	eraser: 'Eraser',
 	select: 'Select',
 	handTool: 'Pan',
+	zoom: 'Zoom',
 	thicknessLabel: 'Thickness: ',
 	colorLabel: 'Color: ',
 	fontLabel: 'Font: ',

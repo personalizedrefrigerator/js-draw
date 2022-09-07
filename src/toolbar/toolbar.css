@@ -18,6 +18,22 @@
     font-family: system-ui, -apple-system, sans-serif;
 }
 
+.toolbar-root > .toolbar-toolContainer > .toolbar-button,
+.toolbar-root > .toolbar-toolContainer > * > button,
+.toolbar-root > .toolbar-buttonGroup > button {
+    width: min-content;
+    height: min(20vh, 60px);
+}
+
+.toolbar-dropdown .toolbar-button > .toolbar-icon {
+    max-width: 50px;
+}
+
+
+.toolbar-button.disabled {
+    filter: opacity(0.8) saturate(0.1);
+}
+
 .toolbar-button, .toolbar-root button {
     display: flex;
     flex-direction: column;
@@ -35,12 +51,10 @@
 
     min-width: 40px;
     max-width: 70px;
-    width: min-content;
     font-size: 11pt;
 
     cursor: pointer;
 
-    height: min(20vh, 60px);
     background-color: var(--primary-background-color);
     color: var(--primary-foreground-color);
     border: none;
@@ -61,6 +75,7 @@
 .toolbar-root .toolbar-icon {
     flex-shrink: 1;
     min-width: 30px;
+    min-height: 30px;
 }
 
 .toolbar-toolContainer.selected .toolbar-button {
@@ -68,16 +83,16 @@
     color: var(--secondary-foreground-color);
 }
 
-.toolbar-toolContainer:not(.selected):not(.dropdownShowable) .toolbar-showHideDropdownIcon {
+.toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
     display: none;
 }
 
-.toolbar-toolContainer .toolbar-showHideDropdownIcon {
+.toolbar-toolContainer > .toolbar-button > .toolbar-showHideDropdownIcon {
     height: 10px;
     transition: transform 0.5s ease;
 }
 
-.toolbar-toolContainer.dropdownVisible .toolbar-showHideDropdownIcon {
+.toolbar-toolContainer.dropdownVisible > .toolbar-button > .toolbar-showHideDropdownIcon {
     transform: rotate(180deg);
 }
 
