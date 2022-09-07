@@ -43,6 +43,7 @@ export default class HTMLToolbar {
 		closePickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;
 		this.editor.createHTMLOverlay(closePickerOverlay);
 
+		const maxSwatchLen = 12;
 		const swatches = [
 			Color4.red.toHexString(),
 			Color4.purple.toHexString(),
@@ -51,6 +52,7 @@ export default class HTMLToolbar {
 			Color4.black.toHexString(),
 			Color4.white.toHexString(),
 		];
+		const presetColorEnd = swatches.length;
 
 		// (Re)init Coloris -- update the swatches list.
 		const initColoris = () => {
@@ -76,8 +78,10 @@ export default class HTMLToolbar {
 			}
 
 			if (!alreadyPresent) {
-				swatches.splice(0, 1);
 				swatches.push(newColor);
+				if (swatches.length > maxSwatchLen) {
+					swatches.splice(presetColorEnd, 1);
+				}
 				initColoris();
 			}
 		};
