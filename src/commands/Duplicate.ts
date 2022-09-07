@@ -5,11 +5,13 @@ import { EditorLocalization } from '../localization';
 import Command from './Command';
 import Erase from './Erase';
 
-export default class Duplicate implements Command {
+export default class Duplicate extends Command {
 	private duplicates: AbstractComponent[];
 	private reverse: Erase;
 
 	public constructor(toDuplicate: AbstractComponent[]) {
+		super();
+
 		this.duplicates = toDuplicate.map(elem => elem.clone());
 		this.reverse = new Erase(this.duplicates);
 	}

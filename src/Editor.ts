@@ -527,22 +527,24 @@ export class Editor {
 		const origSize = this.importExportViewport.visibleRect.size;
 		const origTransform = this.importExportViewport.canvasToScreenTransform;
 
-		return {
-			apply(editor) {
+		return new class extends Command {
+			public apply(editor: Editor) {
 				const viewport = editor.importExportViewport;
 				viewport.updateScreenSize(imageRect.size);
 				viewport.resetTransform(Mat33.translation(imageRect.topLeft.times(-1)));
 				editor.queueRerender();
-			},
-			unapply(editor) {
+			}
+
+			public unapply(editor: Editor) {
 				const viewport = editor.importExportViewport;
 				viewport.updateScreenSize(origSize);
 				viewport.resetTransform(origTransform);
 				editor.queueRerender();
-			},
-			description(localizationTable) {
+			}
+
+			public description(localizationTable: EditorLocalization) {
 				return localizationTable.resizeOutputCommand(imageRect);
-			},
+			}
 		};
 	}
 

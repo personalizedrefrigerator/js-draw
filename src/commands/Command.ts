@@ -1,32 +1,28 @@
 import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
 
-interface Command {
-	apply(editor: Editor): void;
-	unapply(editor: Editor): void;
+export abstract class Command {
+	public constructor() {
+	}
 
-	description(localizationTable: EditorLocalization): string;
-}
+	public abstract apply(editor: Editor): void;
+	public abstract unapply(editor: Editor): void;
 
-// eslint-disable-next-line no-redeclare
-namespace Command {
-	export const empty = {
-		apply(_editor: Editor) { },
-		unapply(_editor: Editor) { },
-	};
+	public abstract description(localizationTable: EditorLocalization): string;
 
-	export const union = (a: Command, b: Command): Command => {
-		return {
-			apply(editor: Editor) {
+	public static union(a: Command, b: Command): Command {
+		return new class extends Command {
+			public apply(editor: Editor) {
 				a.apply(editor);
 				b.apply(editor);
-			},
-			unapply(editor: Editor) {
+			}
+
+			public unapply(editor: Editor) {
 				b.unapply(editor);
 				a.unapply(editor);
-			},
+			}
 
-			description(localizationTable: EditorLocalization) {
+			public description(localizationTable: EditorLocalization) {
 				const aDescription = a.description(localizationTable);
 				const bDescription = b.description(localizationTable);
 
@@ -35,8 +31,14 @@ namespace Command {
 				}
 
 				return `${aDescription}, ${bDescription}`;
-			},
+			}
 		};
+	}
+
+	public static readonly empty = new class extends Command {
+		public description(_localizationTable: EditorLocalization) { return ''; }
+		public apply(_editor: Editor) { }
+		public unapply(_editor: Editor) { }
 	};
 }
 

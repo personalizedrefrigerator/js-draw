@@ -5,10 +5,12 @@ import EditorImage from '../EditorImage';
 import { EditorLocalization } from '../localization';
 import Command from './Command';
 
-export default class Erase implements Command {
+export default class Erase extends Command {
 	private toRemove: AbstractComponent[];
 
 	public constructor(toRemove: AbstractComponent[]) {
+		super();
+
 		// Clone the list
 		this.toRemove = toRemove.map(elem => elem);
 	}

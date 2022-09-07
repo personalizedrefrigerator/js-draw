@@ -4,6 +4,7 @@ import EditorImage from '../EditorImage';
 import LineSegment2 from '../geometry/LineSegment2';
 import Mat33 from '../geometry/Mat33';
 import Rect2 from '../geometry/Rect2';
+import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 
@@ -67,24 +68,30 @@ export default abstract class AbstractComponent {
 				new EditorImage.AddElementCommand(this).apply(editor);
 			}
 		};
+		const setZIndex = (index: number) => {
+			this.zIndex = index;
+		};
+
 		const origZIndex = this.zIndex;
 
-		return {
-			apply: (editor: Editor) => {
-				this.zIndex = AbstractComponent.zIndexCounter++;
+		return new class extends Command {
+			public apply(editor: Editor) {
+				setZIndex(AbstractComponent.zIndexCounter++);
 				updateTransform(editor, affineTransfm);
 				editor.queueRerender();
-			},
-			unapply: (editor: Editor): void => {
-				this.zIndex = origZIndex;
+			}
+
+			public unapply(editor: Editor) {
+				setZIndex(origZIndex);
 				updateTransform(
 					editor, affineTransfm.inverse()
 				);
 				editor.queueRerender();
-			},
-			description(localizationTable) {
+			}
+
+			public description(localizationTable: EditorLocalization) {
 				return localizationTable.transformedElements(1);
-			},
+			}
 		};
 	}
 

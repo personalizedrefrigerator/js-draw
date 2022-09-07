@@ -7,6 +7,7 @@ import Mat33 from '../geometry/Mat33';
 // import Mat33 from "../geometry/Mat33";
 import Rect2 from '../geometry/Rect2';
 import { Point2, Vec2 } from '../geometry/Vec2';
+import { EditorLocalization } from '../localization';
 import { EditorEventType, PointerEvt } from '../types';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
@@ -264,32 +265,46 @@ class Selection {
 		this.region = this.region.transformedBoundingBox(inverseTransform);
 
 		// Make the commands undo-able
-		this.editor.dispatch({
-			apply: async (editor) => {
-				// Approximate the new selection
-				this.region = this.region.transformedBoundingBox(fullTransform);
-				this.boxRotation += deltaBoxRotation;
-				this.updateUI();
-
-				await editor.asyncApplyCommands(currentTransfmCommands, updateChunkSize);
-				this.recomputeRegion();
-				this.updateUI();
-			},
-			unapply: async (editor) => {
-				this.region = this.region.transformedBoundingBox(inverseTransform);
-				this.boxRotation -= deltaBoxRotation;
-				this.updateUI();
-
-				await editor.asyncUnapplyCommands(currentTransfmCommands, updateChunkSize);
-				this.recomputeRegion();
-				this.updateUI();
-			},
-
-			description(localizationTable) {
-				return localizationTable.transformedElements(currentTransfmCommands.length);
-			},
-		});
+		this.editor.dispatch(new Selection.ApplyTransformationCommand(
+			this, currentTransfmCommands, fullTransform, inverseTransform, deltaBoxRotation
+		));
 	}
+
+	private static ApplyTransformationCommand = class extends Command {
+		public constructor(
+			private selection: Selection,
+			private currentTransfmCommands: Command[],
+			private fullTransform: Mat33, private inverseTransform: Mat33,
+			private deltaBoxRotation: number,
+		) {
+			super();
+		}
+
+		public async apply(editor: Editor) {
+			// Approximate the new selection
+			this.selection.region = this.selection.region.transformedBoundingBox(this.fullTransform);
+			this.selection.boxRotation += this.deltaBoxRotation;
+			this.selection.updateUI();
+
+			await editor.asyncApplyCommands(this.currentTransfmCommands, updateChunkSize);
+			this.selection.recomputeRegion();
+			this.selection.updateUI();
+		}
+
+		public async unapply(editor: Editor) {
+			this.selection.region = this.selection.region.transformedBoundingBox(this.inverseTransform);
+			this.selection.boxRotation -= this.deltaBoxRotation;
+			this.selection.updateUI();
+
+			await editor.asyncUnapplyCommands(this.currentTransfmCommands, updateChunkSize);
+			this.selection.recomputeRegion();
+			this.selection.updateUI();
+		}
+
+		public description(localizationTable: EditorLocalization) {
+			return localizationTable.transformedElements(this.currentTransfmCommands.length);
+		}
+	};
 
 	// Preview the effects of the current transformation on the selection
 	private previewTransformCmds() {
