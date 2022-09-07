@@ -1,4 +1,3 @@
-import Color4 from '../../Color4';
 import { makeArrowBuilder } from '../../components/builders/ArrowBuilder';
 import { makeFreehandLineBuilder } from '../../components/builders/FreehandLineBuilder';
 import { makeLineBuilder } from '../../components/builders/LineBuilder';
@@ -10,6 +9,7 @@ import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeIconFromFactory, makePenIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
+import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 
 
@@ -127,33 +127,13 @@ export default class PenWidget extends BaseToolWidget {
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const colorInput = document.createElement('input');
+		const colorInput = makeColorInput(this.editor, color => {
+			this.tool.setColor(color);
+		});
 
 		colorInput.id = `${toolbarCSSPrefix}colorInput${PenWidget.idCounter++}`;
 		colorLabel.innerText = this.localizationTable.colorLabel;
 		colorLabel.setAttribute('for', colorInput.id);
-
-		colorInput.className = 'coloris_input';
-		colorInput.type = 'button';
-
-		let currentColor: Color4|undefined = undefined;
-		colorInput.oninput = () => {
-			currentColor = Color4.fromHex(colorInput.value);
-			this.tool.setColor(currentColor);
-		};
-		colorInput.addEventListener('open', () => {
-			this.editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
-				kind: EditorEventType.ColorPickerToggled,
-				open: true,
-			});
-		});
-		colorInput.addEventListener('close', () => {
-			this.editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
-				kind: EditorEventType.ColorPickerToggled,
-				open: false,
-				color: currentColor,
-			});
-		});
 
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInput);

@@ -1,10 +1,10 @@
-import Color4 from '../../Color4';
 import Editor from '../../Editor';
 import TextTool from '../../tools/TextTool';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeTextIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
+import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 
 export default class TextToolWidget extends BaseToolWidget {
@@ -37,7 +37,9 @@ export default class TextToolWidget extends BaseToolWidget {
 		const fontInput = document.createElement('select');
 		const fontLabel = document.createElement('label');
 
-		const colorInput = document.createElement('input');
+		const colorInput = makeColorInput(this.editor, color => {
+			this.tool.setColor(color);
+		});
 		const colorLabel = document.createElement('label');
 
 		const fontsInInput = new Set();
@@ -52,8 +54,6 @@ export default class TextToolWidget extends BaseToolWidget {
 		fontLabel.innerText = this.localizationTable.fontLabel;
 		colorLabel.innerText = this.localizationTable.colorLabel;
 
-		colorInput.classList.add('coloris_input');
-		colorInput.type = 'button';
 		colorInput.id = `${toolbarCSSPrefix}-text-color-input-${TextToolWidget.idCounter++}`;
 		colorLabel.setAttribute('for', colorInput.id);
 
@@ -65,10 +65,6 @@ export default class TextToolWidget extends BaseToolWidget {
 
 		fontInput.onchange = () => {
 			this.tool.setFontFamily(fontInput.value);
-		};
-
-		colorInput.oninput = () => {
-			this.tool.setColor(Color4.fromString(colorInput.value));
 		};
 
 		colorRow.appendChild(colorLabel);
