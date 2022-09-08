@@ -170,3 +170,7 @@
 .color-input-container .pipetteButton > svg {
 	width: 100%;
 }
+
+.color-input-container .pipetteButton.active {
+	background-color: var(--secondary-background-color);
+}

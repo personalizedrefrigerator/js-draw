@@ -75,6 +75,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	const pipetteColorSelect = (color: Color4|null) => {
 		pipetteTool?.clearColorListener();
 		updatePipetteIcon();
+		pipetteButton.classList.remove('active');
 
 		if (color) {
 			onColorChange(color);
@@ -93,6 +94,9 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 			pipetteColorPreview,
 			pipetteColorSelect,
 		);
+		if (pipetteTool) {
+			pipetteButton.classList.add('active');
+		}
 	};
 
 	container.appendChild(pipetteButton);
