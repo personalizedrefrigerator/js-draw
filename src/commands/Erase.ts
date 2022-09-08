@@ -3,19 +3,21 @@ import describeComponentList from '../components/util/describeComponentList';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import { EditorLocalization } from '../localization';
-import Command from './Command';
+import SerializableCommand from './SerializableCommand';
 
-export default class Erase extends Command {
+export default class Erase extends SerializableCommand {
 	private toRemove: AbstractComponent[];
+	private applied: boolean;
 
 	public constructor(toRemove: AbstractComponent[]) {
-		super();
+		super('erase');
 
 		// Clone the list
 		this.toRemove = toRemove.map(elem => elem);
+		this.applied = false;
 	}
 
-	public apply(editor: Editor): void {
+	public apply(editor: Editor) {
 		for (const part of this.toRemove) {
 			const parent = editor.image.findParent(part);
 
@@ -24,17 +26,27 @@ export default class Erase extends Command {
 			}
 		}
 
+		this.applied = true;
 		editor.queueRerender();
 	}
 
-	public unapply(editor: Editor): void {
+	public unapply(editor: Editor) {
 		for (const part of this.toRemove) {
 			if (!editor.image.findParent(part)) {
-				new EditorImage.AddElementCommand(part).apply(editor);
+				EditorImage.addElement(part).apply(editor);
 			}
 		}
 
+		this.applied = false;
 		editor.queueRerender();
+	}
+
+	public onDrop(editor: Editor) {
+		if (this.applied) {
+			for (const part of this.toRemove) {
+				editor.image.onDestroyElement(part);
+			}
+		}
 	}
 
 	public description(localizationTable: EditorLocalization): string {
@@ -44,5 +56,18 @@ export default class Erase extends Command {
 
 		const description = describeComponentList(localizationTable, this.toRemove) ?? localizationTable.elements;
 		return localizationTable.eraseAction(description, this.toRemove.length);
+	}
+
+	protected serializeToString() {
+		const elemIds = this.toRemove.map(elem => elem.getId());
+		return JSON.stringify(elemIds);
+	}
+
+	static {
+		SerializableCommand.register('erase', (data: string, editor: Editor) => {
+			const json = JSON.parse(data);
+			const elems = json.map((elemId: string) => editor.image.lookupElement(elemId));
+			return new Erase(elems);
+		});
 	}
 }

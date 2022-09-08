@@ -6,11 +6,12 @@ import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
+const componentId = 'unknown-svg-object';
 export default class UnknownSVGObject extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	public constructor(private svgObject: SVGElement) {
-		super();
+		super(componentId);
 		this.contentBBox = Rect2.of(svgObject.getBoundingClientRect());
 	}
 
@@ -37,4 +38,13 @@ export default class UnknownSVGObject extends AbstractComponent {
 	public description(localization: ImageComponentLocalization): string {
 		return localization.svgObject;
 	}
+
+	protected serializeToString(): string | null {
+		return JSON.stringify({
+			html: this.svgObject.outerHTML,
+		});
+	}
 }
+
+// null: Do not deserialize UnknownSVGObjects.
+AbstractComponent.registerComponent(componentId, null);

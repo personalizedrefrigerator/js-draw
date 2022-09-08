@@ -8,7 +8,8 @@ import Mat33 from './geometry/Mat33';
 import Path from './geometry/Path';
 import Rect2 from './geometry/Rect2';
 import { Vec2 } from './geometry/Vec2';
-import { RenderablePathSpec, RenderingStyle } from './rendering/renderers/AbstractRenderer';
+import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
+import RenderingStyle from './rendering/RenderingStyle';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 
 type OnFinishListener = ()=> void;

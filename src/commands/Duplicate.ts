@@ -2,15 +2,15 @@ import AbstractComponent from '../components/AbstractComponent';
 import describeComponentList from '../components/util/describeComponentList';
 import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
-import Command from './Command';
 import Erase from './Erase';
+import SerializableCommand from './SerializableCommand';
 
-export default class Duplicate extends Command {
+export default class Duplicate extends SerializableCommand {
 	private duplicates: AbstractComponent[];
 	private reverse: Erase;
 
-	public constructor(toDuplicate: AbstractComponent[]) {
-		super();
+	public constructor(private toDuplicate: AbstractComponent[]) {
+		super('duplicate');
 
 		this.duplicates = toDuplicate.map(elem => elem.clone());
 		this.reverse = new Erase(this.duplicates);
@@ -33,5 +33,17 @@ export default class Duplicate extends Command {
 			describeComponentList(localizationTable, this.duplicates) ?? localizationTable.elements,
 			this.duplicates.length
 		);
+	}
+
+	protected serializeToString(): string {
+		return JSON.stringify(this.toDuplicate.map(elem => elem.getId()));
+	}
+
+	static {
+		SerializableCommand.register('duplicate', (data: string, editor: Editor) => {
+			const json = JSON.parse(data);
+			const elems = json.map((id: string) => editor.image.lookupElement(id));
+			return new Duplicate(elems);
+		});
 	}
 }

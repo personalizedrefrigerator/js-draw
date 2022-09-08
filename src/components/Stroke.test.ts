@@ -58,4 +58,14 @@ describe('Stroke', () => {
 		expect(stroke.getBBox()).not.objEq(origBBox);
 		expect(copy.getBBox()).objEq(origBBox);
 	});
+
+	it('strokes should deserialize from JSON data', () => {
+		const deserialized = Stroke.deserializeFromString(`[
+			{
+				"style": { "fill": "#f00" },
+				"path": "m0,0 l10,10z"
+			}
+		]`);
+		expect(deserialized.getPath().toString()).toBe('M0,0L10,10L0,0');
+	});
 });

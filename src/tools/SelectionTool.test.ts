@@ -20,7 +20,7 @@ const createSquareStroke = () => {
 		// A filled unit square
 		Path.fromString('M0,0 L1,0 L1,1 L0,1 Z').toRenderable({ fill: Color4.blue }),
 	]);
-	const addTestStrokeCommand = new EditorImage.AddElementCommand(testStroke);
+	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
 	return { testStroke, addTestStrokeCommand };
 };

@@ -17,6 +17,8 @@ const config = {
 		'\\.(css|lessc)': '<rootDir>/__mocks__/styleMock.js',
 		'@melloware/coloris': '<rootDir>/__mocks__/coloris.ts',
 	},
+	
+	testEnvironment: 'jsdom',
 };
 
 module.exports = config;

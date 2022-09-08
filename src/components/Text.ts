@@ -1,7 +1,8 @@
 import LineSegment2 from '../geometry/LineSegment2';
 import Mat33 from '../geometry/Mat33';
 import Rect2 from '../geometry/Rect2';
-import AbstractRenderer, { RenderingStyle } from '../rendering/renderers/AbstractRenderer';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
+import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
@@ -13,16 +14,21 @@ export interface TextStyle {
 	renderingStyle: RenderingStyle;
 }
 
+type GetTextDimensCallback = (text: string, style: TextStyle) => Rect2;
 
+const componentTypeId = 'text';
 export default class Text extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	public constructor(
 		protected readonly textObjects: Array<string|Text>,
 		private transform: Mat33,
-		private readonly style: TextStyle
+		private readonly style: TextStyle,
+
+		// If not given, an HtmlCanvasElement is used to determine text boundaries.
+		private readonly getTextDimens: GetTextDimensCallback = Text.getTextDimens,
 	) {
-		super();
+		super(componentTypeId);
 		this.recomputeBBox();
 	}
 
@@ -56,7 +62,7 @@ export default class Text extends AbstractComponent {
 
 	private computeBBoxOfPart(part: string|Text) {
 		if (typeof part === 'string') {
-			const textBBox = Text.getTextDimens(part, this.style);
+			const textBBox = this.getTextDimens(part, this.style);
 			return textBBox.transformedBoundingBox(this.transform);
 		} else {
 			const bbox = part.contentBBox.transformedBoundingBox(this.transform);
@@ -145,4 +151,65 @@ export default class Text extends AbstractComponent {
 	public description(localizationTable: ImageComponentLocalization): string {
 		return localizationTable.text(this.getText());
 	}
+
+	protected serializeToString(): string {
+		const serializableStyle = {
+			...this.style,
+			renderingStyle: styleToJSON(this.style.renderingStyle),
+		};
+
+		const textObjects = this.textObjects.map(text => {
+			if (typeof text === 'string') {
+				return {
+					text,
+				};
+			} else {
+				return {
+					json: text.serializeToString(),
+				};
+			}
+		});
+
+		return JSON.stringify({
+			textObjects,
+			transform: this.transform.toArray(),
+			style: serializableStyle,
+		});
+	}
+
+	public static deserializeFromString(data: string, getTextDimens: GetTextDimensCallback = Text.getTextDimens): Text {
+		const json = JSON.parse(data);
+
+		const style: TextStyle = {
+			renderingStyle: styleFromJSON(json.style.renderingStyle),
+			size: json.style.size,
+			fontWeight: json.style.fontWeight,
+			fontVariant: json.style.fontVariant,
+			fontFamily: json.style.fontFamily,
+		};
+
+		const textObjects: Array<string|Text> = json.textObjects.map((data: any) => {
+			if ((data.text ?? null) !== null) {
+				return data.text;
+			}
+
+			return Text.deserializeFromString(data.json);
+		});
+
+		json.transform = json.transform.filter((elem: any) => typeof elem === 'number');
+		if (json.transform.length !== 9) {
+			throw new Error(`Unable to deserialize transform, ${json.transform}.`);
+		}
+
+		const transformData = json.transform as [
+			number, number, number,
+			number, number, number,
+			number, number, number,
+		];
+		const transform = new Mat33(...transformData);
+
+		return new Text(textObjects, transform, style, getTextDimens);
+	}
 }
+
+AbstractComponent.registerComponent(componentTypeId, (data: string) => Text.deserializeFromString(data));

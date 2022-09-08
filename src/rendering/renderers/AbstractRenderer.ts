@@ -1,4 +1,3 @@
-import Color4 from '../../Color4';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import { TextStyle } from '../../components/Text';
 import Mat33 from '../../geometry/Mat33';
@@ -6,26 +5,13 @@ import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
 import Rect2 from '../../geometry/Rect2';
 import { Point2, Vec2 } from '../../geometry/Vec2';
 import Viewport from '../../Viewport';
-
-export interface RenderingStyle {
-	fill: Color4;
-	stroke?: {
-		color: Color4;
-		width: number;
-	};
-}
+import RenderingStyle, { stylesEqual } from '../RenderingStyle';
 
 export interface RenderablePathSpec {
 	startPoint: Point2;
 	commands: PathCommand[];
 	style: RenderingStyle;
 }
-
-const stylesEqual = (a: RenderingStyle, b: RenderingStyle) => {
-	return a === b || (a.fill.eq(b.fill)
-		&& a.stroke?.color?.eq(b.stroke?.color)
-		&& a.stroke?.width === b.stroke?.width);
-};
 
 export default abstract class AbstractRenderer {
 	// If null, this' transformation is linked to the Viewport

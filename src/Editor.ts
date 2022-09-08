@@ -496,7 +496,7 @@ export class Editor {
 		this.display.setDraftMode(true);
 
 		await loader.start((component) => {
-			this.dispatchNoAnnounce(new EditorImage.AddElementCommand(component));
+			this.dispatchNoAnnounce(EditorImage.addElement(component));
 		}, (countProcessed: number, totalToProcess: number) => {
 			if (countProcessed % 500 === 0) {
 				this.showLoadingWarning(countProcessed / totalToProcess);

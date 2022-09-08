@@ -9,7 +9,7 @@ import { InputEvtType } from '../types';
 
 describe('UndoRedoShortcut', () => {
 	const testStroke = new Stroke([Path.fromString('M0,0L10,10').toRenderable({ fill: Color4.red })]);
-	const addTestStrokeCommand = new EditorImage.AddElementCommand(testStroke);
+	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
 	it('ctrl+z should undo', () => {
 		const editor = createEditor();

@@ -1,5 +1,5 @@
-import { ImageComponentLocalization } from '../../../dist/src/components/localization';
 import AbstractComponent from '../AbstractComponent';
+import { ImageComponentLocalization } from '../localization';
 
 // Returns the description of all given elements, if identical, otherwise,
 // returns null.

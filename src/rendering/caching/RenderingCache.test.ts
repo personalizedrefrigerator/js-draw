@@ -28,7 +28,7 @@ describe('RenderingCache', () => {
 		editor.image.renderWithCache(screenRenderer, cache, editor.viewport);
 		expect(lastRenderer).toBeNull();
 
-		editor.dispatch(new EditorImage.AddElementCommand(testStroke));
+		editor.dispatch(EditorImage.addElement(testStroke));
 		editor.image.renderWithCache(screenRenderer, cache, editor.viewport);
 
 		expect(allocdRenderers).toBeGreaterThanOrEqual(1);

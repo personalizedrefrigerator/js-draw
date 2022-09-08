@@ -2,7 +2,8 @@ import LineSegment2 from '../geometry/LineSegment2';
 import Mat33 from '../geometry/Mat33';
 import Path from '../geometry/Path';
 import Rect2 from '../geometry/Rect2';
-import AbstractRenderer, { RenderablePathSpec, RenderingStyle } from '../rendering/renderers/AbstractRenderer';
+import AbstractRenderer, { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
+import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
@@ -16,7 +17,7 @@ export default class Stroke extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	public constructor(parts: RenderablePathSpec[]) {
-		super();
+		super('stroke');
 
 		this.parts = parts.map(section => {
 			const path = Path.fromRenderable(section);
@@ -97,16 +98,40 @@ export default class Stroke extends AbstractComponent {
 	}
 
 	public getPath() {
-		return this.parts.reduce((accumulator: Path, current: StrokePart) => {
-			return accumulator.union(current.path);
-		}, Path.empty);
+		return this.parts.reduce((accumulator: Path|null, current: StrokePart) => {
+			return accumulator?.union(current.path) ?? current.path;
+		}, null) ?? Path.empty;
+	}
+
+	public description(localization: ImageComponentLocalization): string {
+		return localization.stroke;
 	}
 
 	protected createClone(): AbstractComponent {
 		return new Stroke(this.parts);
 	}
 
-	public description(localization: ImageComponentLocalization): string {
-		return localization.stroke;
+	protected serializeToString(): string | null {
+		return JSON.stringify(this.parts.map(part => {
+			return {
+				style: styleToJSON(part.style),
+				path: part.path.serialize(),
+			};
+		}));
+	}
+
+	public static deserializeFromString(data: string): Stroke {
+		const json = JSON.parse(data);
+		if (typeof json !== 'object' || typeof json.length !== 'number') {
+			throw new Error(`${data} is missing required field, parts, or parts is of the wrong type.`);
+		}
+
+		const pathSpec: RenderablePathSpec[] = json.map((part: any) => {
+			const style = styleFromJSON(part.style);
+			return Path.fromString(part.path).toRenderable(style);
+		});
+		return new Stroke(pathSpec);
 	}
 }
+
+AbstractComponent.registerComponent('stroke', Stroke.deserializeFromString);

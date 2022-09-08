@@ -7,7 +7,8 @@ import Rect2 from '../../geometry/Rect2';
 import { Point2, Vec2 } from '../../geometry/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
-import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
+import RenderingStyle from '../RenderingStyle';
+import AbstractRenderer from './AbstractRenderer';
 
 const svgNameSpace = 'http://www.w3.org/2000/svg';
 export default class SVGRenderer extends AbstractRenderer {

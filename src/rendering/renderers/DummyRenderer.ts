@@ -6,7 +6,8 @@ import Rect2 from '../../geometry/Rect2';
 import { Point2, Vec2 } from '../../geometry/Vec2';
 import Vec3 from '../../geometry/Vec3';
 import Viewport from '../../Viewport';
-import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
+import RenderingStyle from '../RenderingStyle';
+import AbstractRenderer from './AbstractRenderer';
 
 export default class DummyRenderer extends AbstractRenderer {
 	// Variables that track the state of what's been rendered

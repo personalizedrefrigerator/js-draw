@@ -2,11 +2,11 @@ import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
 
 export abstract class Command {
-	public constructor() {
-	}
-
 	public abstract apply(editor: Editor): void;
 	public abstract unapply(editor: Editor): void;
+
+	// Called when the command is being deleted
+	public onDrop(_editor: Editor) { }
 
 	public abstract description(localizationTable: EditorLocalization): string;
 

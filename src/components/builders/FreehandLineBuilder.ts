@@ -1,5 +1,5 @@
 import { Bezier } from 'bezier-js';
-import AbstractRenderer, { RenderingStyle, RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
+import AbstractRenderer, { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
 import { Point2, Vec2 } from '../../geometry/Vec2';
 import Rect2 from '../../geometry/Rect2';
 import { PathCommand, PathCommandType } from '../../geometry/Path';
@@ -8,6 +8,7 @@ import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
+import RenderingStyle from '../../rendering/RenderingStyle';
 
 export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
 	// Don't smooth if input is more than ± 7 pixels from the true curve, do smooth if

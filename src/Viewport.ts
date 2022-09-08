@@ -13,10 +13,11 @@ type PointDataType<T extends Point2|StrokeDataPoint|number> = T extends Point2 ?
 
 export class Viewport {
 	// Command that translates/scales the viewport.
-	public static ViewportTransform = class implements Command {
+	public static ViewportTransform = class extends Command {
 		readonly #inverseTransform: Mat33;
 
 		public constructor(public readonly transform: Mat33) {
+			super();
 			this.#inverseTransform = transform.inverse();
 		}
 

@@ -6,11 +6,15 @@ import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
+type GlobalAttrsList = Array<[string, string|null]>;
+
+const componentKind = 'svg-global-attributes';
+
 // Stores global SVG attributes (e.g. namespace identifiers.)
 export default class SVGGlobalAttributesObject extends AbstractComponent {
 	protected contentBBox: Rect2;
-	public constructor(private readonly attrs: Array<[string, string|null]>) {
-		super();
+	public constructor(private readonly attrs: GlobalAttrsList) {
+		super(componentKind);
 		this.contentBBox = Rect2.empty;
 	}
 
@@ -39,4 +43,28 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 	public description(localization: ImageComponentLocalization): string {
 		return localization.svgObject;
 	}
+
+	protected serializeToString(): string | null {
+		return JSON.stringify(this.attrs);
+	}
+
+	public static deserializeFromString(data: string): AbstractComponent {
+		const json = JSON.parse(data) as GlobalAttrsList;
+		const attrs: GlobalAttrsList = [];
+
+		const numericAndSpaceContentExp = /^[ \t\n0-9.-eE]+$/;
+
+		// Don't deserialize all attributes, just those that should be safe.
+		for (const [ key, val ] of json) {
+			if (key === 'viewBox' || key === 'width' || key === 'height') {
+				if (val && numericAndSpaceContentExp.exec(val)) {
+					attrs.push([key, val]);
+				}
+			}
+		}
+
+		return new SVGGlobalAttributesObject(attrs);
+	}
 }
+
+AbstractComponent.registerComponent(componentKind, SVGGlobalAttributesObject.deserializeFromString);

@@ -84,7 +84,7 @@ export default class TextTool extends BaseTool {
 				this.textStyle,
 			);
 
-			const action = new EditorImage.AddElementCommand(textComponent);
+			const action = EditorImage.addElement(textComponent);
 			this.editor.dispatch(action);
 		}
 	}

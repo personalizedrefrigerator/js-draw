@@ -6,6 +6,7 @@ import AbstractComponent from './components/AbstractComponent';
 import Rect2 from './geometry/Rect2';
 import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
+import SerializableCommand from './commands/SerializableCommand';
 
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 	leaves.sort((a, b) => a.getContent()!.getZIndex() - b.getContent()!.getZIndex());
@@ -14,9 +15,11 @@ export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 // Handles lookup/storage of elements in the image
 export default class EditorImage {
 	private root: ImageNode;
+	private componentsById: Record<string, AbstractComponent>;
 
 	public constructor() {
 		this.root = new ImageNode();
+		this.componentsById = {};
 	}
 
 	// Returns the parent of the given element, if it exists.
@@ -55,54 +58,76 @@ export default class EditorImage {
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
+	public onDestroyElement(elem: AbstractComponent) {
+		delete this.componentsById[elem.getId()];
+	}
+
+	public lookupElement(id: string): AbstractComponent|null {
+		return this.componentsById[id] ?? null;
+	}
+
 	private addElementDirectly(elem: AbstractComponent): ImageNode {
+		this.componentsById[elem.getId()] = elem;
 		return this.root.addLeaf(elem);
 	}
 
-	// A Command that can access private [EditorImage] functionality
-	public static AddElementCommand = class implements Command {
-		readonly #element: AbstractComponent;
-		#applyByFlattening: boolean = false;
+	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): Command {
+		return new EditorImage.AddElementCommand(elem, applyByFlattening);
+	}
 
+	// A Command that can access private [EditorImage] functionality
+	private static AddElementCommand = class extends SerializableCommand {
 		// If [applyByFlattening], then the rendered content of this element
 		// is present on the display's wet ink canvas. As such, no re-render is necessary
 		// the first time this command is applied (the surfaces are joined instead).
 		public constructor(
-			element: AbstractComponent,
-			applyByFlattening: boolean = false
+			private element: AbstractComponent,
+			private applyByFlattening: boolean = false
 		) {
-			this.#element = element;
-			this.#applyByFlattening = applyByFlattening;
+			super('add-element');
 
-			if (isNaN(this.#element.getBBox().area)) {
+			if (isNaN(element.getBBox().area)) {
 				throw new Error('Elements in the image cannot have NaN bounding boxes');
 			}
 		}
 
 		public apply(editor: Editor) {
-			editor.image.addElementDirectly(this.#element);
+			editor.image.addElementDirectly(this.element);
 
-			if (!this.#applyByFlattening) {
+			if (!this.applyByFlattening) {
 				editor.queueRerender();
 			} else {
-				this.#applyByFlattening = false;
+				this.applyByFlattening = false;
 				editor.display.flatten();
 			}
 		}
 
 		public unapply(editor: Editor) {
-			const container = editor.image.findParent(this.#element);
+			const container = editor.image.findParent(this.element);
 			container?.remove();
 			editor.queueRerender();
 		}
 
 		public description(localization: EditorLocalization) {
-			return localization.addElementAction(this.#element.description(localization));
+			return localization.addElementAction(this.element.description(localization));
+		}
+
+		protected serializeToString() {
+			return JSON.stringify({
+				elemData: this.element.serialize(),
+			});
+		}
+
+		static {
+			SerializableCommand.register('add-element', (data: string, _editor: Editor) => {
+				const json = JSON.parse(data);
+				const elem = AbstractComponent.deserialize(json.elemData);
+				return new EditorImage.AddElementCommand(elem);
+			});
 		}
 	};
 }
 
-export type AddElementCommand = typeof EditorImage.AddElementCommand.prototype;
 type TooSmallToRenderCheck = (rect: Rect2)=> boolean;
 
 // TODO: Assign leaf nodes to CacheNodes. When leaf nodes are modified, the corresponding CacheNodes can be updated.
@@ -221,6 +246,7 @@ export class ImageNode {
 			nodeForChildren.children = this.children;
 			this.children = [nodeForNewLeaf, nodeForChildren];
 			nodeForChildren.recomputeBBox(true);
+			nodeForChildren.updateParents();
 
 			return nodeForNewLeaf.addLeaf(leaf);
 		}
@@ -279,6 +305,16 @@ export class ImageNode {
 		}
 	}
 
+	private updateParents(recursive: boolean = false) {
+		for (const child of this.children) {
+			child.parent = this;
+
+			if (recursive) {
+				child.updateParents(recursive);
+			}
+		}
+	}
+
 	private rebalance() {
 		// If the current node is its parent's only child,
 		if (this.parent && this.parent.children.length === 1) {
@@ -296,6 +332,7 @@ export class ImageNode {
 			} else if (this.content === null) {
 				// Remove this and transfer this' children to the parent.
 				this.parent.children = this.children;
+				this.parent.updateParents();
 				this.parent = null;
 			}
 		}
@@ -314,7 +351,11 @@ export class ImageNode {
 		this.parent.children = this.parent.children.filter(node => {
 			return node !== this;
 		});
-		console.assert(this.parent.children.length === oldChildCount - 1);
+
+		console.assert(
+			this.parent.children.length === oldChildCount - 1,
+			`${oldChildCount - 1} ≠ ${this.parent.children.length} after removing all nodes equal to ${this}. Nodes should only be removed once.`
+		);
 
 		this.parent.children.forEach(child => {
 			child.rebalance();

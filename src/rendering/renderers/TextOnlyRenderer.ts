@@ -5,7 +5,8 @@ import { Vec2 } from '../../geometry/Vec2';
 import Vec3 from '../../geometry/Vec3';
 import Viewport from '../../Viewport';
 import { TextRendererLocalization } from '../localization';
-import AbstractRenderer, { RenderingStyle } from './AbstractRenderer';
+import RenderingStyle from '../RenderingStyle';
+import AbstractRenderer from './AbstractRenderer';
 
 // Outputs a description of what was rendered.
 

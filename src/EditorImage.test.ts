@@ -6,8 +6,8 @@ import { Vec2 } from './geometry/Vec2';
 import Path, { PathCommandType } from './geometry/Path';
 import Color4 from './Color4';
 import DummyRenderer from './rendering/renderers/DummyRenderer';
-import { RenderingStyle } from './rendering/renderers/AbstractRenderer';
 import createEditor from './testing/createEditor';
+import RenderingStyle from './rendering/RenderingStyle';
 
 describe('EditorImage', () => {
 	const testStroke = new Stroke([
@@ -25,7 +25,7 @@ describe('EditorImage', () => {
 		},
 	]);
 	const testFill: RenderingStyle = { fill: Color4.black };
-	const addTestStrokeCommand = new EditorImage.AddElementCommand(testStroke);
+	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
 	it('elements added to the image should be findable', () => {
 		const editor = createEditor();
@@ -69,7 +69,7 @@ describe('EditorImage', () => {
 
 		expect(!leftmostStroke.getBBox().intersects(rightmostStroke.getBBox()));
 
-		(new EditorImage.AddElementCommand(leftmostStroke)).apply(editor);
+		(EditorImage.addElement(leftmostStroke)).apply(editor);
 
 		// The first node should be at the image's root.
 		let firstParent = image.findParent(leftmostStroke);
@@ -77,7 +77,7 @@ describe('EditorImage', () => {
 		expect(firstParent?.getParent()).toBe(null);
 		expect(firstParent?.getBBox()?.corners).toMatchObject(leftmostStroke.getBBox()?.corners);
 
-		(new EditorImage.AddElementCommand(rightmostStroke)).apply(editor);
+		(EditorImage.addElement(rightmostStroke)).apply(editor);
 
 		firstParent = image.findParent(leftmostStroke);
 		const secondParent = image.findParent(rightmostStroke);
