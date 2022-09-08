@@ -36,8 +36,8 @@ const editor = new Editor(document.body);
 ### Without a bundler
 If you're not using a bundler, consider using the pre-bundled editor:
 ```html
-<!-- Replace 0.1.5 with the latest version of js-draw -->
-<script src="https://cdn.jsdelivr.net/npm/js-draw@0.1.5/dist/bundle.js"></script>
+<!-- Replace 0.1.7 with the latest version of js-draw -->
+<script src="https://cdn.jsdelivr.net/npm/js-draw@0.1.7/dist/bundle.js"></script>
 <script>
     const editor = new jsdraw.Editor(document.body);
     editor.addToolbar();
