@@ -25,6 +25,8 @@ export const toolbarCSSPrefix = 'toolbar-';
 export default class HTMLToolbar {
 	private container: HTMLElement;
 
+	private static colorisStarted: boolean = false;
+
 	public constructor(
 		private editor: Editor, parent: HTMLElement,
 		private localizationTable: ToolbarLocalization = defaultToolbarLocalization,
@@ -34,7 +36,10 @@ export default class HTMLToolbar {
 		this.container.setAttribute('role', 'toolbar');
 		parent.appendChild(this.container);
 
-		colorisInit();
+		if (!HTMLToolbar.colorisStarted) {
+			colorisInit();
+			HTMLToolbar.colorisStarted = true;
+		}
 		this.setupColorPickers();
 	}
 

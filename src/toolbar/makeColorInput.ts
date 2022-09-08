@@ -78,10 +78,13 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	updatePipetteIcon();
 
 	const pipetteTool: PipetteTool|undefined = editor.toolController.getMatchingTools(ToolType.Pipette)[0] as PipetteTool|undefined;
-	const pipetteColorSelect = (color: Color4|null) => {
+	const endColorSelectMode = () => {
 		pipetteTool?.clearColorListener();
 		updatePipetteIcon();
 		pipetteButton.classList.remove('active');
+	};
+	const pipetteColorSelect = (color: Color4|null) => {
+		endColorSelectMode();
 
 		if (color) {
 			onColorChange(color);
@@ -96,6 +99,12 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	};
 
 	pipetteButton.onclick = () => {
+		// If already picking, cancel it.
+		if (pipetteButton.classList.contains('active')) {
+			endColorSelectMode();
+			return;
+		}
+
 		pipetteTool?.setColorListener(
 			pipetteColorPreview,
 			pipetteColorSelect,

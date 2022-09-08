@@ -1,3 +1,7 @@
+# 0.1.9
+ * Fix regression -- color picker hides just after clicking it.
+ * Allow toggling the pipette tool.
+
 # 0.1.8
  * Don't render if the screen has a size of 0x0.
    * This was breaking the cache data structure's invariant -- cache blocks weren't dividing when they had zero size.
