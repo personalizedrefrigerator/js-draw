@@ -166,3 +166,7 @@
 	padding: 0;
 	display: inline-flex;
 }
+
+.color-input-container .pipetteButton > svg {
+	width: 100%;
+}
