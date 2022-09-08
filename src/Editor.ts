@@ -391,6 +391,11 @@ export class Editor {
 	public rerender(showImageBounds: boolean = true) {
 		this.display.startRerender();
 
+		// Don't render if the display has zero size.
+		if (this.display.width === 0 || this.display.height === 0) {
+			return;
+		}
+
 		// Draw a rectangle around the region that will be visible on save
 		const renderer = this.display.getDryInkRenderer();
 

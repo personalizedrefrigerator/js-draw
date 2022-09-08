@@ -65,6 +65,11 @@ export default class RenderingCacheNode {
 		if (this.instantiatedChildren.length === 0) {
 			const childRects = this.region.divideIntoGrid(cacheDivisionSize, cacheDivisionSize);
 
+			if (this.region.size.x === 0 || this.region.size.y === 0) {
+				console.warn('Cache element has zero size! Not generating children.');
+				return;
+			}
+
 			for (const rect of childRects) {
 				const child = new RenderingCacheNode(rect, this.cacheState);
 				child.parent = this;
@@ -357,7 +362,7 @@ export default class RenderingCacheNode {
 
 	private checkRep() {
 		if (this.instantiatedChildren.length !== cacheDivisionSize * cacheDivisionSize && this.instantiatedChildren.length !== 0) {
-			throw new Error('Repcheck: Wrong number of children');
+			throw new Error(`Repcheck: Wrong number of children. Got ${this.instantiatedChildren.length}`);
 		}
 
 		if (this.renderedIds[1] !== undefined && this.renderedIds[0] >= this.renderedIds[1]) {
