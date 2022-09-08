@@ -155,8 +155,14 @@
 	height: min-content;
 }
 
-.pipetteButton {
+.color-input-container {
+	display: inline-flex;
+	flex-direction: row;
+}
+
+.color-input-container .pipetteButton {
 	width: 30px;
 	height: 30px;
+	padding: 0;
 	display: inline-flex;
 }

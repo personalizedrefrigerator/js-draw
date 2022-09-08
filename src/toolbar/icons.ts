@@ -367,8 +367,6 @@ export const makeIconFromFactory = (pen: Pen, factory: ComponentBuilderFactory) 
 export const makePipetteIcon = (color?: Color4) => {
 	const icon = document.createElementNS(svgNamespace, 'svg');
 	const pipette = document.createElementNS(svgNamespace, 'path');
-	const defs = document.createElementNS(svgNamespace, 'defs');
-	defs.innerHTML = checkerboardPatternDef;
 
 	pipette.setAttribute('d', `
 		M 47,6
@@ -393,8 +391,11 @@ export const makePipetteIcon = (color?: Color4) => {
 	`);
 	pipette.style.fill = 'var(--primary-foreground-color)';
 
-	icon.appendChild(defs);
 	if (color) {
+		const defs = document.createElementNS(svgNamespace, 'defs');
+		defs.innerHTML = checkerboardPatternDef;
+		icon.appendChild(defs);
+
 		const fluidBackground = document.createElementNS(svgNamespace, 'path');
 		const fluid = document.createElementNS(svgNamespace, 'path');
 

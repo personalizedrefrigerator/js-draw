@@ -15,6 +15,7 @@ export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListe
 
 	colorInput.type = 'button';
 	colorInput.classList.add('coloris_input');
+	colorInputContainer.classList.add('color-input-container');
 
 	colorInputContainer.appendChild(colorInput);
 	addPipetteTool(editor, colorInputContainer, (color: Color4) => {
