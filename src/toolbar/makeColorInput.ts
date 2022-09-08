@@ -20,7 +20,7 @@ export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListe
 	colorInputContainer.appendChild(colorInput);
 	addPipetteTool(editor, colorInputContainer, (color: Color4) => {
 		colorInput.value = color.toHexString();
-		handleColorInput();
+		onInputEnd();
 
 		// Update the color preview, if it exists (may be managed by Coloris).
 		const parentElem = colorInput.parentElement;
@@ -32,15 +32,20 @@ export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListe
 	let currentColor: Color4|undefined;
 	const handleColorInput = () => {
 		currentColor = Color4.fromHex(colorInput.value);
-		editor.announceForAccessibility(
-			editor.localization.colorChangedAnnouncement(currentColor.toHexString())
-		);
-		onColorChange(currentColor);
+	};
+	const onInputEnd = () => {
+		handleColorInput();
 
-		editor.notifier.dispatch(EditorEventType.ColorPickerColorSelected, {
-			kind: EditorEventType.ColorPickerColorSelected,
-			color: currentColor,
-		});
+		if (currentColor) {
+			editor.announceForAccessibility(
+				editor.localization.colorChangedAnnouncement(currentColor.toHexString())
+			);
+			onColorChange(currentColor);
+			editor.notifier.dispatch(EditorEventType.ColorPickerColorSelected, {
+				kind: EditorEventType.ColorPickerColorSelected,
+				color: currentColor,
+			});
+		}
 	};
 
 	colorInput.oninput = handleColorInput;
@@ -55,6 +60,7 @@ export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListe
 			kind: EditorEventType.ColorPickerToggled,
 			open: false,
 		});
+		onInputEnd();
 	});
 
 	return [ colorInput, colorInputContainer ];
