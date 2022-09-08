@@ -48,7 +48,7 @@ describe('EditorImage', () => {
 		expect(renderer.objectNestingLevel).toBe(0);
 		editor.dispatch(addTestStrokeCommand);
 		editor.rerender();
-		expect(renderer.renderedPathCount - emptyDocumentPathCount).toBe(1);
+		expect(renderer.renderedPathCount - emptyDocumentPathCount).toBeGreaterThanOrEqual(1);
 
 		// Should not be within objects after finished rendering
 		expect(renderer.objectNestingLevel).toBe(0);

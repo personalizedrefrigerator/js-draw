@@ -1,3 +1,4 @@
+import Mat33 from '../../geometry/Mat33';
 import Path from '../../geometry/Path';
 import Rect2 from '../../geometry/Rect2';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
@@ -7,18 +8,22 @@ import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 
-export const makeFilledRectangleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, _viewport: Viewport) => {
-	return new RectangleBuilder(initialPoint, true);
+export const makeFilledRectangleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
+	return new RectangleBuilder(initialPoint, true, viewport);
 };
 
-export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, _viewport: Viewport) => {
-	return new RectangleBuilder(initialPoint, false);
+export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
+	return new RectangleBuilder(initialPoint, false, viewport);
 };
 
 export default class RectangleBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;
 
-	public constructor(private readonly startPoint: StrokeDataPoint, private filled: boolean) {
+	public constructor(
+		private readonly startPoint: StrokeDataPoint,
+		private filled: boolean,
+		private viewport: Viewport,
+	) {
 		// Initially, the start and end points are the same.
 		this.endPoint = startPoint;
 	}
@@ -29,11 +34,21 @@ export default class RectangleBuilder implements ComponentBuilder {
 	}
 
 	private buildPreview(): Stroke {
-		const startPoint = this.startPoint.pos;
-		const endPoint = this.endPoint.pos;
+		const canvasAngle = this.viewport.getRotationAngle();
+		const rotationMat = Mat33.zRotation(-canvasAngle);
+
+		// Adjust startPoint and endPoint such that applying [rotationMat] to them
+		// brings them to this.startPoint and this.endPoint.
+		const startPoint = rotationMat.inverse().transformVec2(this.startPoint.pos);
+		const endPoint = rotationMat.inverse().transformVec2(this.endPoint.pos);
+
+		const rect = Rect2.fromCorners(startPoint, endPoint);
 		const path = Path.fromRect(
-			Rect2.fromCorners(startPoint, endPoint),
+			rect,
 			this.filled ? null : this.endPoint.width,
+		).transformedBy(
+			// Rotate the canvas rectangle so that its rotation matches the screen
+			rotationMat
 		);
 
 		const preview = new Stroke([
