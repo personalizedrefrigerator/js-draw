@@ -108,7 +108,7 @@ export class Editor {
 		);
 
 		this.registerListeners();
-		this.rerender();
+		this.queueRerender();
 		this.hideLoadingWarning();
 	}
 
