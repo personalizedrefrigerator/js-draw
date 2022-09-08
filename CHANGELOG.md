@@ -1,3 +1,8 @@
+# 0.1.8
+ * Don't render if the screen has a size of 0x0.
+   * This was breaking the cache data structure's invariant -- cache blocks weren't dividing when they had zero size.
+ * Fix rectangles drawn with the pen's rectangle mode not having edges parallel to the viewport.
+
 # 0.1.7
  * Show the six most recent color selections in the color palette.
  * Switch from checkboxes to togglebuttons in the dropdown for the hand tool.
