@@ -3,9 +3,10 @@ import CanvasRenderer from './renderers/CanvasRenderer';
 import { Editor } from '../Editor';
 import { EditorEventType } from '../types';
 import DummyRenderer from './renderers/DummyRenderer';
-import { Vec2 } from '../geometry/Vec2';
+import { Point2, Vec2 } from '../geometry/Vec2';
 import RenderingCache from './caching/RenderingCache';
 import TextOnlyRenderer from './renderers/TextOnlyRenderer';
+import Color4 from '../Color4';
 
 export enum RenderingMode {
 	DummyRenderer,
@@ -88,6 +89,10 @@ export default class Display {
 		return this.cache;
 	}
 
+	public getColorAt = (_screenPos: Point2): Color4|null => {
+		return null;
+	};
+
 	private initializeCanvasRendering() {
 		const dryInkCanvas = document.createElement('canvas');
 		const wetInkCanvas = document.createElement('canvas');
@@ -131,6 +136,17 @@ export default class Display {
 
 		this.flattenCallback = () => {
 			dryInkCtx.drawImage(wetInkCanvas, 0, 0);
+		};
+
+		this.getColorAt = (screenPos: Point2) => {
+			const pixel = dryInkCtx.getImageData(screenPos.x, screenPos.y, 1, 1);
+			const data = pixel?.data;
+
+			if (data) {
+				const color = Color4.ofRGBA(data[0] / 255, data[1] / 255, data[2] / 255, data[3] / 255);
+				return color;
+			}
+			return null;
 		};
 	}
 

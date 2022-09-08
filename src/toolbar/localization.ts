@@ -19,13 +19,15 @@ export interface ToolbarLocalization {
 	resizeImageToSelection: string;
 	deleteSelection: string;
 	duplicateSelection: string;
+	pickColorFronScreen: string;
 	undo: string;
 	redo: string;
 	zoom: string;
 
-	dropdownShown: (toolName: string)=>string;
-	dropdownHidden: (toolName: string)=>string;
+	dropdownShown: (toolName: string)=> string;
+	dropdownHidden: (toolName: string)=> string;
 	zoomLevel: (zoomPercentage: number)=> string;
+	colorChangedAnnouncement: (color: string)=> string;
 }
 
 export const defaultToolbarLocalization: ToolbarLocalization = {
@@ -43,6 +45,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	undo: 'Undo',
 	redo: 'Redo',
 	selectObjectType: 'Object type: ',
+	pickColorFronScreen: 'Pick color from screen',
 
 	touchPanning: 'Touchscreen panning',
 	anyDevicePanning: 'Any device panning',
@@ -56,4 +59,5 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
 	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
 	zoomLevel: (zoomPercent: number) => `Zoom: ${zoomPercent}%`,
+	colorChangedAnnouncement: (color: string)=> `Color changed to ${color}`,
 };

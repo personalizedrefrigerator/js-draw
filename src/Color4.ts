@@ -5,14 +5,20 @@ export default class Color4 {
 		public readonly g: number,
 		public readonly b: number,
 		public readonly a: number
-	) { }
+	) {
+	}
 
 	// Each component should be in the range [0, 1]
 	public static ofRGB(red: number, green: number, blue: number): Color4 {
-		return new Color4(red, green, blue, 1.0);
+		return Color4.ofRGBA(red, green, blue, 1.0);
 	}
 
 	public static ofRGBA(red: number, green: number, blue: number, alpha: number): Color4 {
+		red = Math.max(0, Math.min(red, 1));
+		green = Math.max(0, Math.min(green, 1));
+		blue = Math.max(0, Math.min(blue, 1));
+		alpha = Math.max(0, Math.min(alpha, 1));
+
 		return new Color4(red, green, blue, alpha);
 	}
 
@@ -49,7 +55,7 @@ export default class Color4 {
 			throw new Error(`Unable to parse ${hexString}: Wrong number of components.`);
 		}
 
-		return new Color4(components[0], components[1], components[2], components[3]);
+		return Color4.ofRGBA(components[0], components[1], components[2], components[3]);
 	}
 
 	// Like fromHex, but can handle additional colors if an HTML5Canvas is available.

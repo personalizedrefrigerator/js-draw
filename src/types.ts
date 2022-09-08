@@ -77,6 +77,8 @@ export type InputEvt = KeyPressEvent | WheelEvt | GestureCancelEvt | PointerEvt;
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
 
+
+
 export enum EditorEventType {
 	ToolEnabled,
 	ToolDisabled,
@@ -86,6 +88,7 @@ export enum EditorEventType {
 	ViewportChanged,
 	DisplayResized,
 	ColorPickerToggled,
+	ColorPickerColorSelected
 }
 
 type EditorToolEventType = EditorEventType.ToolEnabled
@@ -122,10 +125,17 @@ export interface EditorUndoStackUpdated {
 export interface ColorPickerToggled {
 	readonly kind: EditorEventType.ColorPickerToggled;
 	readonly open: boolean;
-	readonly color?: Color4;
 }
 
-export type EditorEventDataType = EditorToolEvent | EditorObjectEvent | EditorViewportChangedEvent | DisplayResizedEvent | EditorUndoStackUpdated | ColorPickerToggled;
+export interface ColorPickerColorSelected {
+	readonly kind: EditorEventType.ColorPickerColorSelected;
+	readonly color: Color4;
+}
+
+export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
+	| EditorViewportChangedEvent | DisplayResizedEvent
+	| EditorUndoStackUpdated
+	| ColorPickerToggled| ColorPickerColorSelected;
 
 
 // Returns a Promise to indicate that the event source should pause until the Promise resolves.

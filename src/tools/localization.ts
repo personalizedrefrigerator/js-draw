@@ -1,12 +1,14 @@
 
 export interface ToolLocalization {
-	rightClickDragPanTool: string;
     penTool: (penId: number)=>string;
     selectionTool: string;
     eraserTool: string;
     touchPanTool: string;
     twoFingerPanZoomTool: string;
     undoRedoTool: string;
+	pipetteTool: string;
+	rightClickDragPanTool: string;
+
 	textTool: string;
 	enterTextToInsert: string;
 
@@ -18,10 +20,11 @@ export const defaultToolLocalization: ToolLocalization = {
 	penTool: (penId) => `Pen ${penId}`,
 	selectionTool: 'Selection',
 	eraserTool: 'Eraser',
-	touchPanTool: 'Touch Panning',
-	twoFingerPanZoomTool: 'Panning and Zooming',
+	touchPanTool: 'Touch panning',
+	twoFingerPanZoomTool: 'Panning and zooming',
 	undoRedoTool: 'Undo/Redo',
 	rightClickDragPanTool: 'Right-click drag',
+	pipetteTool: 'Pick color from screen',
 
 	textTool: 'Text',
 	enterTextToInsert: 'Text to insert',

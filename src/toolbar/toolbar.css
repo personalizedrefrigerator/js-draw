@@ -1,154 +1,162 @@
 .toolbar-root {
-    background-color: var(--primary-background-color);
+	background-color: var(--primary-background-color);
 
-    border: 1px solid var(--secondary-background-color);
-    border-radius: 2px;
-    flex-wrap: wrap;
+	border: 1px solid var(--secondary-background-color);
+	border-radius: 2px;
+	flex-wrap: wrap;
 
-    box-sizing: border-box;
-    width: 100%;
+	box-sizing: border-box;
+	width: 100%;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
 
-    /* Display above selection dialogs, etc. */
-    z-index: 2;
+	/* Display above selection dialogs, etc. */
+	z-index: 2;
 
-    font-family: system-ui, -apple-system, sans-serif;
+	font-family: system-ui, -apple-system, sans-serif;
 }
 
 .toolbar-root > .toolbar-toolContainer > .toolbar-button,
 .toolbar-root > .toolbar-toolContainer > * > button,
 .toolbar-root > .toolbar-buttonGroup > button {
-    width: min-content;
-    height: min(20vh, 60px);
+	width: min-content;
+	height: min(20vh, 60px);
 }
 
 .toolbar-dropdown .toolbar-button > .toolbar-icon {
-    max-width: 50px;
+	max-width: 50px;
 }
 
-
 .toolbar-button.disabled {
-    filter: opacity(0.8) saturate(0.1);
+	filter: opacity(0.8) saturate(0.1);
 }
 
 .toolbar-button, .toolbar-root button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+	cursor: pointer;
+	text-align: center;
+	border-radius: 6px;
 
-    text-align: center;
-    border-radius: 6px;
-    cursor: pointer;
+	background-color: var(--primary-background-color);
+	color: var(--primary-foreground-color);
+	border: none;
+	box-shadow: 0px 0px 2px var(--primary-shadow-color);
 
-    padding-left: 3px;
-    padding-right: 3px;
-    margin-left: 3px;
-    margin-right: 3px;
+	transition: background-color 0.25s ease, box-shadow 0.25s ease, opacity 0.3s ease;
+}
 
-    min-width: 40px;
-    max-width: 70px;
-    font-size: 11pt;
+.toolbar-button,
+.toolbar-buttonGroup > button,
+.toolbar-toolContainer > * > button,
+.toolbar-root > button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 
-    cursor: pointer;
+	padding-left: 3px;
+	padding-right: 3px;
+	margin-left: 3px;
+	margin-right: 3px;
 
-    background-color: var(--primary-background-color);
-    color: var(--primary-foreground-color);
-    border: none;
-    box-shadow: 0px 0px 2px var(--primary-shadow-color);
-
-    transition: background-color 0.25s ease, box-shadow 0.25s ease, opacity 0.3s ease;
+	min-width: 40px;
+	max-width: 70px;
+	font-size: 11pt;
 }
 
 .toolbar-button:hover, .toolbar-root button:not(:disabled):hover {
-    box-shadow: 0px 2px 4px var(--primary-shadow-color);
+	box-shadow: 0px 2px 4px var(--primary-shadow-color);
 }
 
 .toolbar-root button:disabled {
-    cursor: inherit;
-    filter: opacity(0.5);
+	cursor: inherit;
+	filter: opacity(0.5);
 }
 
 .toolbar-root .toolbar-icon {
-    flex-shrink: 1;
-    min-width: 30px;
-    min-height: 30px;
+	flex-shrink: 1;
+	min-width: 30px;
+	min-height: 30px;
 }
 
 .toolbar-toolContainer.selected .toolbar-button {
-    background-color: var(--secondary-background-color);
-    color: var(--secondary-foreground-color);
+	background-color: var(--secondary-background-color);
+	color: var(--secondary-foreground-color);
 }
 
 .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
-    display: none;
+	display: none;
 }
 
 .toolbar-toolContainer > .toolbar-button > .toolbar-showHideDropdownIcon {
-    height: 10px;
-    transition: transform 0.5s ease;
+	height: 10px;
+	transition: transform 0.5s ease;
 }
 
 .toolbar-toolContainer.dropdownVisible > .toolbar-button > .toolbar-showHideDropdownIcon {
-    transform: rotate(180deg);
+	transform: rotate(180deg);
 }
 
 .toolbar-dropdown.hidden,
 .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-dropdown {
-    display: none;
+	display: none;
 }
 
 .toolbar-dropdown {
-    position: absolute;
-    padding: 15px;
-    padding-top: 5px;
+	position: absolute;
+	padding: 15px;
+	padding-top: 5px;
 
-    /* Prevent overlap/being displayed under the undo/redo buttons */
-    z-index: 2;
-    background-color: var(--primary-background-color);
-    box-shadow: 0px 3px 3px var(--primary-shadow-color);
+	/* Prevent overlap/being displayed under the undo/redo buttons */
+	z-index: 2;
+	background-color: var(--primary-background-color);
+	box-shadow: 0px 3px 3px var(--primary-shadow-color);
 }
 
 .toolbar-buttonGroup {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
 }
 
 .toolbar-closeColorPickerOverlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
 
-    background-color: var(--primary-background-color);
-    opacity: 0.3;
+	background-color: var(--primary-background-color);
+	opacity: 0.3;
 }
 
 /* Make color selection buttons fill their containing label */
 .toolbar-dropdown .clr-field button {
-    width: 100%;
-    height: 100%;
-    border-radius: 2px;
-    margin-left: 0;
-    margin-right: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 2px;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .toolbar-root .toolbar-zoomLevelEditor {
-    display: flex;
-    flex-direction: row;
+	display: flex;
+	flex-direction: row;
 }
 
 .toolbar-root .toolbar-zoomLevelEditor .zoomDisplay {
-    flex-grow: 1;
+	flex-grow: 1;
 }
 
 .toolbar-root .toolbar-zoomLevelEditor button {
-    width: min-content;
-    height: min-content;
+	width: min-content;
+	height: min-content;
+}
+
+.pipetteButton {
+	width: 30px;
+	height: 30px;
+	display: inline-flex;
 }

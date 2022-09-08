@@ -94,9 +94,11 @@ export default class HTMLToolbar {
 			// Show/hide the overlay. Making the overlay visible gives users a surface to click
 			// on that shows/hides the color picker.
 			closePickerOverlay.style.display = event.open ? 'block' : 'none';
+		});
 
-			// Add to new color to swatch to the recent colors list.
-			if (event.color && !event.open) {
+		// Add newly-selected colors to the swatch.
+		this.editor.notifier.on(EditorEventType.ColorPickerColorSelected, event => {
+			if (event.kind === EditorEventType.ColorPickerColorSelected) {
 				addColorToSwatch(event.color.toHexString());
 			}
 		});

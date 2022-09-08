@@ -37,7 +37,7 @@ export default class TextToolWidget extends BaseToolWidget {
 		const fontInput = document.createElement('select');
 		const fontLabel = document.createElement('label');
 
-		const colorInput = makeColorInput(this.editor, color => {
+		const [ colorInput, colorInputContainer ] = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 		const colorLabel = document.createElement('label');
@@ -68,7 +68,7 @@ export default class TextToolWidget extends BaseToolWidget {
 		};
 
 		colorRow.appendChild(colorLabel);
-		colorRow.appendChild(colorInput);
+		colorRow.appendChild(colorInputContainer);
 
 		fontRow.appendChild(fontLabel);
 		fontRow.appendChild(fontInput);

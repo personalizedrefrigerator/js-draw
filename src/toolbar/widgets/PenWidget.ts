@@ -127,7 +127,7 @@ export default class PenWidget extends BaseToolWidget {
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const colorInput = makeColorInput(this.editor, color => {
+		const [ colorInput, colorInputContainer ] = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 
@@ -136,7 +136,7 @@ export default class PenWidget extends BaseToolWidget {
 		colorLabel.setAttribute('for', colorInput.id);
 
 		colorRow.appendChild(colorLabel);
-		colorRow.appendChild(colorInput);
+		colorRow.appendChild(colorInputContainer);
 
 		this.updateInputs = () => {
 			colorInput.value = this.tool.getColor().toHexString();

@@ -2,6 +2,8 @@
  * Show the six most recent color selections in the color palette.
  * Switch from checkboxes to togglebuttons in the dropdown for the hand tool.
  * Adds a "duplicate selection" button.
+ * Add a pipette (select color from screen) tool.
+ * Make `Erase`, `Duplicate`, `AddElement`, `TransformElement` commands serializable.
 
 # 0.1.6
  * Fix loading text in SVG images in Chrome.

@@ -1,3 +1,4 @@
+import Color4 from '../Color4';
 import { ComponentBuilderFactory } from '../components/builders/types';
 import { TextStyle } from '../components/Text';
 import EventDispatcher from '../EventDispatcher';
@@ -14,6 +15,20 @@ const primaryForegroundFill = `
 const primaryForegroundStrokeFill = `
 	style='fill: var(--primary-foreground-color); stroke: var(--primary-foreground-color);'
 `;
+const checkerboardPatternDef = `
+	<pattern
+		id='checkerboard'
+		viewBox='0,0,10,10'
+		width='20%'
+		height='20%'
+		patternUnits='userSpaceOnUse'
+	>
+		<rect x=0 y=0 width=10 height=10 fill='white'/>
+		<rect x=0 y=0 width=5 height=5 fill='gray'/>
+		<rect x=5 y=5 width=5 height=5 fill='gray'/>
+	</pattern>
+`;
+const checkerboardPatternRef = 'url(#checkerboard)';
 
 export const makeUndoIcon = () => {
 	return makeRedoIcon(true);
@@ -294,17 +309,7 @@ export const makePenIcon = (tipThickness: number, color: string) => {
 	const backgroundStrokeTipPath = `M14,63 L${50 - halfThickness},85 L${50 + halfThickness},83 L88,60 Z`;
 	icon.innerHTML = `
 	<defs>
-		<pattern
-			id='checkerboard'
-			viewBox='0,0,10,10'
-			width='20%'
-			height='20%'
-			patternUnits='userSpaceOnUse'
-		>
-			<rect x=0 y=0 width=10 height=10 fill='white'/>
-			<rect x=0 y=0 width=5 height=5 fill='gray'/>
-			<rect x=5 y=5 width=5 height=5 fill='gray'/>
-		</pattern>
+		${checkerboardPatternDef}
 	</defs>
 	<g>
 		<!-- Pen grip -->
@@ -315,7 +320,7 @@ export const makePenIcon = (tipThickness: number, color: string) => {
 	</g>
 	<g>
 		<!-- Checkerboard background for slightly transparent pens -->
-		<path d='${backgroundStrokeTipPath}' fill='url(#checkerboard)'/>
+		<path d='${backgroundStrokeTipPath}' fill='${checkerboardPatternRef}'/>
 
 		<!-- Actual pen tip -->
 		<path
@@ -356,5 +361,58 @@ export const makeIconFromFactory = (pen: Pen, factory: ComponentBuilderFactory) 
 	const renderer = new SVGRenderer(icon, viewport);
 	builder.preview(renderer);
 
+	return icon;
+};
+
+export const makePipetteIcon = (color?: Color4) => {
+	const icon = document.createElementNS(svgNamespace, 'svg');
+	const pipette = document.createElementNS(svgNamespace, 'path');
+	const defs = document.createElementNS(svgNamespace, 'defs');
+	defs.innerHTML = checkerboardPatternDef;
+
+	pipette.setAttribute('d', `
+		M 47,6
+		C 35,5 25,15 35,30
+		c -9.2,1.3 -15,0 -15,3
+			0,2 5,5 15,7
+		V 81
+		L 40,90
+		h 6
+		L 40,80
+		V 40
+		h 15
+		v 40
+		l -6,10
+		h 6
+		l 5,-9.2
+		V 40
+		C 70,38 75,35 75,33
+			75,30 69.2,31.2 60,30
+			65,15 65,5      47,6
+		Z
+	`);
+	pipette.style.fill = 'var(--primary-foreground-color)';
+
+	icon.appendChild(defs);
+	if (color) {
+		const fluidBackground = document.createElementNS(svgNamespace, 'path');
+		const fluid = document.createElementNS(svgNamespace, 'path');
+
+		const fluidPathData = `
+			m 40,50 c 5,5 10,0 15,-5 V 80 L 50,90 H 45 L 40,80 Z
+		`;
+
+		fluid.setAttribute('d', fluidPathData);
+		fluidBackground.setAttribute('d', fluidPathData);
+
+		fluid.style.fill = color.toHexString();
+		fluidBackground.style.fill = checkerboardPatternRef;
+
+		icon.appendChild(fluidBackground);
+		icon.appendChild(fluid);
+	}
+	icon.appendChild(pipette);
+
+	icon.setAttribute('viewBox', '0 0 100 100');
 	return icon;
 };

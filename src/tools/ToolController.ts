@@ -10,14 +10,17 @@ import Color4 from '../Color4';
 import { ToolLocalization } from './localization';
 import UndoRedoShortcut from './UndoRedoShortcut';
 import TextTool from './TextTool';
+import PipetteTool from './PipetteTool';
 
 export enum ToolType {
-	Pen,
-	Selection,
-	Eraser,
-	PanZoom,
-	Text,
-	UndoRedoShortcut,
+    Pen,
+    Selection,
+    Eraser,
+    PanZoom,
+    Text,
+    UndoRedoShortcut,
+    Pipette,
+    Other,
 }
 
 export default class ToolController {
@@ -42,6 +45,7 @@ export default class ToolController {
 			new TextTool(editor, localization.textTool, localization),
 		];
 		this.tools = [
+			new PipetteTool(editor, localization.pipetteTool),
 			panZoomTool,
 			...primaryTools,
 			new UndoRedoShortcut(editor),
