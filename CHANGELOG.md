@@ -1,3 +1,6 @@
+# 0.1.11
+ * Fix 'Enter' key not toggling toolbar buttons.
+
 # 0.1.10
  * Keyboard shortcuts for the selection tool.
  * Scroll the selection into view while moving it with the keyboard/mouse.
