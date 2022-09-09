@@ -33,6 +33,8 @@ const localization: EditorLocalization = {
 	freehandPen: 'Dibuja sin restricción de forma',
 	selectObjectType: 'Forma de dibuja:',
 	handTool: 'Mover',
+	zoom: 'Zoom',
+	resetView: 'Reiniciar vista',
 	resizeImageToSelection: 'Redimensionar la imagen a lo que está seleccionado',
 	deleteSelection: 'Borra la selección',
 	duplicateSelection: 'Duplica la selección',

@@ -23,6 +23,7 @@ export interface ToolbarLocalization {
 	undo: string;
 	redo: string;
 	zoom: string;
+	resetView: string;
 	selectionToolKeyboardShortcuts: string;
 
 	dropdownShown: (toolName: string)=> string;
@@ -37,6 +38,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	select: 'Select',
 	handTool: 'Pan',
 	zoom: 'Zoom',
+	resetView: 'Reset view',
 	thicknessLabel: 'Thickness: ',
 	colorLabel: 'Color: ',
 	fontLabel: 'Font: ',

@@ -14,10 +14,12 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 
 	const increaseButton = document.createElement('button');
 	const decreaseButton = document.createElement('button');
+	const resetViewButton = document.createElement('button');
 	const zoomLevelDisplay = document.createElement('span');
 	increaseButton.innerText = '+';
 	decreaseButton.innerText = '-';
-	zoomLevelRow.replaceChildren(zoomLevelDisplay, increaseButton, decreaseButton);
+	resetViewButton.innerText = localizationTable.resetView;
+	zoomLevelRow.replaceChildren(zoomLevelDisplay, increaseButton, decreaseButton, resetViewButton);
 
 	zoomLevelRow.classList.add(`${toolbarCSSPrefix}zoomLevelEditor`);
 	zoomLevelDisplay.classList.add('zoomDisplay');
@@ -42,6 +44,9 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 	editor.notifier.on(EditorEventType.ViewportChanged, (event) => {
 		if (event.kind === EditorEventType.ViewportChanged) {
 			updateZoomDisplay();
+
+			// Can't reset if already reset.
+			resetViewButton.disabled = event.newTransform.eq(Mat33.identity);
 		}
 	});
 
@@ -57,6 +62,12 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 
 	decreaseButton.onclick = () => {
 		zoomBy(4.0/5);
+	};
+
+	resetViewButton.onclick = () => {
+		editor.dispatch(new Viewport.ViewportTransform(
+			editor.viewport.canvasToScreenTransform.inverse()
+		), true);
 	};
 
 	return zoomLevelRow;
