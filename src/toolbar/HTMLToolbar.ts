@@ -200,12 +200,9 @@ export default class HTMLToolbar {
 			(new TextToolWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
 		}
 
-		for (const tool of toolController.getMatchingTools(ToolType.PanZoom)) {
-			if (!(tool instanceof PanZoom)) {
-				throw new Error('All SelectionTools must have kind === ToolType.PanZoom');
-			}
-	
-			(new HandToolWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
+		const panZoomTool = toolController.getMatchingTools(ToolType.PanZoom)[0];
+		if (panZoomTool && panZoomTool instanceof PanZoom) {
+			(new HandToolWidget(this.editor, panZoomTool, this.localizationTable)).addTo(this.container);
 		}
 
 		this.setupColorPickers();

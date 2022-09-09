@@ -51,10 +51,11 @@ export default abstract class BaseWidget {
 	}
 
 	protected setupActionBtnClickListener(button: HTMLElement) {
+		const clickTriggers = { enter: true, ' ': true, };
 		button.onkeydown = (evt) => {
 			let handled = false;
 
-			if (evt.key === 'Enter' || evt.key === ' ') {
+			if (evt.key in clickTriggers) {
 				if (!this.disabled) {
 					this.handleClick();
 					handled = true;
@@ -69,6 +70,18 @@ export default abstract class BaseWidget {
 					ctrlKey: evt.ctrlKey,
 				});
 			}
+		};
+
+		button.onkeyup = evt => {
+			if (evt.key in clickTriggers) {
+				return;
+			}
+
+			this.editor.toolController.dispatchInputEvent({
+				kind: InputEvtType.KeyUpEvent,
+				key: evt.key,
+				ctrlKey: evt.ctrlKey,
+			});
 		};
 
 		button.onclick = () => {

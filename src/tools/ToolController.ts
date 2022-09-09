@@ -30,6 +30,7 @@ export default class ToolController {
 	public constructor(editor: Editor, localization: ToolLocalization) {
 		const primaryToolEnabledGroup = new ToolEnabledGroup();
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
+		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 16 });
 		const primaryTools = [
 			new SelectionTool(editor, localization.selectionTool),
@@ -48,6 +49,7 @@ export default class ToolController {
 			new PipetteTool(editor, localization.pipetteTool),
 			panZoomTool,
 			...primaryTools,
+			keyboardPanZoomTool,
 			new UndoRedoShortcut(editor),
 		];
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolEnabledGroup));
@@ -88,9 +90,10 @@ export default class ToolController {
 			this.activeTool = null;
 			handled = true;
 		} else if (
-			event.kind === InputEvtType.WheelEvt || event.kind === InputEvtType.KeyPressEvent
+			event.kind === InputEvtType.WheelEvt || event.kind === InputEvtType.KeyPressEvent || event.kind === InputEvtType.KeyUpEvent
 		) {
 			const isKeyPressEvt = event.kind === InputEvtType.KeyPressEvent;
+			const isKeyReleaseEvt = event.kind === InputEvtType.KeyUpEvent;
 			const isWheelEvt = event.kind === InputEvtType.WheelEvt;
 			for (const tool of this.tools) {
 				if (!tool.isEnabled()) {
@@ -99,7 +102,8 @@ export default class ToolController {
 
 				const wheelResult = isWheelEvt && tool.onWheel(event);
 				const keyPressResult = isKeyPressEvt && tool.onKeyPress(event);
-				handled = keyPressResult || wheelResult;
+				const keyReleaseResult = isKeyReleaseEvt && tool.onKeyUp(event);
+				handled = keyPressResult || wheelResult || keyReleaseResult;
 
 				if (handled) {
 					break;

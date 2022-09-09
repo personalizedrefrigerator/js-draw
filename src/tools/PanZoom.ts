@@ -16,11 +16,13 @@ interface PinchData {
 	dist: number;
 }
 
+
 export enum PanZoomMode {
 	OneFingerTouchGestures = 0x1,
 	TwoFingerTouchGestures = 0x1 << 1,
 	RightClickDrags = 0x1 << 2,
 	SinglePointerGestures = 0x1 << 3,
+	Keyboard = 0x1 << 4,
 }
 
 export default class PanZoom extends BaseTool {
@@ -180,6 +182,10 @@ export default class PanZoom extends BaseTool {
 	}
 
 	public onKeyPress({ key }: KeyPressEvent): boolean {
+		if (!(this.mode & PanZoomMode.Keyboard)) {
+			return false;
+		}
+
 		let translation = Vec2.zero;
 		let scale = 1;
 		let rotation = 0;

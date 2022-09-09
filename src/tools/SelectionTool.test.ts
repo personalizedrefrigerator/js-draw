@@ -66,7 +66,7 @@ describe('SelectionTool', () => {
 
 		// Drag the object
 		selection!.handleBackgroundDrag(Vec2.of(5, 5));
-		selection!.finishDragging();
+		selection!.finalizeTransform();
 
 		expect(testStroke.getBBox().topLeft).toMatchObject({
 			x: 5,

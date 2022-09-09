@@ -24,6 +24,7 @@ export interface PointerEvtListener {
 	onGestureCancel(): void;
 }
 
+
 export enum InputEvtType {
 	PointerDownEvt,
 	PointerMoveEvt,
@@ -32,6 +33,7 @@ export enum InputEvtType {
 
 	WheelEvt,
 	KeyPressEvent,
+	KeyUpEvent
 }
 
 // [delta.x] is horizontal scroll,
@@ -45,6 +47,12 @@ export interface WheelEvt {
 
 export interface KeyPressEvent {
 	readonly kind: InputEvtType.KeyPressEvent;
+	readonly key: string;
+	readonly ctrlKey: boolean;
+}
+
+export interface KeyUpEvent {
+	readonly kind: InputEvtType.KeyUpEvent;
 	readonly key: string;
 	readonly ctrlKey: boolean;
 }
@@ -72,7 +80,7 @@ export interface PointerUpEvt extends PointerEvtBase {
 }
 
 export type PointerEvt = PointerDownEvt | PointerMoveEvt | PointerUpEvt;
-export type InputEvt = KeyPressEvent | WheelEvt | GestureCancelEvt | PointerEvt;
+export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt;
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 

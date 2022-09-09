@@ -8,7 +8,7 @@ import Mat33 from '../geometry/Mat33';
 import Rect2 from '../geometry/Rect2';
 import { Point2, Vec2 } from '../geometry/Vec2';
 import { EditorLocalization } from '../localization';
-import { EditorEventType, PointerEvt } from '../types';
+import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt } from '../types';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
 
@@ -163,15 +163,15 @@ class Selection {
 
 		makeDraggable(draggableBackground, (deltaPosition: Vec2) => {
 			this.handleBackgroundDrag(deltaPosition);
-		}, () => this.finishDragging());
+		}, () => this.finalizeTransform());
 
 		makeDraggable(resizeCorner, (deltaPosition) => {
 			this.handleResizeCornerDrag(deltaPosition);
-		}, () => this.finishDragging());
+		}, () => this.finalizeTransform());
 
 		makeDraggable(this.rotateCircle, (_deltaPosition, offset) => {
 			this.handleRotateCircleDrag(offset);
-		}, () => this.finishDragging());
+		}, () => this.finalizeTransform());
 	}
 
 	// Note a small change in the position of this' background while dragging
@@ -186,10 +186,7 @@ class Selection {
 		// Snap position to a multiple of 10 (additional decimal points lead to larger files).
 		deltaPosition = this.editor.viewport.roundPoint(deltaPosition);
 
-		this.region = this.region.translatedBy(deltaPosition);
-		this.transform = this.transform.rightMul(Mat33.translation(deltaPosition));
-
-		this.previewTransformCmds();
+		this.transformPreview(Mat33.translation(deltaPosition));
 	}
 
 	public handleResizeCornerDrag(deltaPosition: Vec2) {
@@ -203,21 +200,13 @@ class Selection {
 		const newSize = this.region.size.plus(deltaPosition);
 
 		if (newSize.y > 0 && newSize.x > 0) {
-			this.region = this.region.resizedTo(newSize);
-			const scaleFactor = Vec2.of(this.region.w / oldWidth, this.region.h / oldHeight);
+			const scaleFactor = Vec2.of(newSize.x / oldWidth, newSize.y / oldHeight);
 
-			const currentTransfm = Mat33.scaling2D(scaleFactor, this.region.topLeft);
-			this.transform = this.transform.rightMul(currentTransfm);
-			this.previewTransformCmds();
+			this.transformPreview(Mat33.scaling2D(scaleFactor, this.region.topLeft));
 		}
 	}
 
 	public handleRotateCircleDrag(offset: Vec2) {
-		this.boxRotation = this.boxRotation % (2 * Math.PI);
-		if (this.boxRotation < 0) {
-			this.boxRotation += 2 * Math.PI;
-		}
-
 		let targetRotation = offset.angle();
 		targetRotation = targetRotation % (2 * Math.PI);
 		if (targetRotation < 0) {
@@ -237,9 +226,7 @@ class Selection {
 			deltaRotation *= rotationDirection;
 		}
 
-		this.transform = this.transform.rightMul(Mat33.zRotation(deltaRotation, this.region.center));
-		this.boxRotation += deltaRotation;
-		this.previewTransformCmds();
+		this.transformPreview(Mat33.zRotation(deltaRotation, this.region.center));
 	}
 
 	private computeTransformCommands() {
@@ -248,8 +235,28 @@ class Selection {
 		});
 	}
 
+	// Applies, previews, but doesn't finalize the given transformation.
+	public transformPreview(transform: Mat33) {
+		this.transform = this.transform.rightMul(transform);
+		const deltaRotation = transform.transformVec3(Vec2.unitX).angle();
+		transform = transform.rightMul(Mat33.zRotation(-deltaRotation, this.region.center));
+
+		this.boxRotation += deltaRotation;
+		this.boxRotation = this.boxRotation % (2 * Math.PI);
+		if (this.boxRotation < 0) {
+			this.boxRotation += 2 * Math.PI;
+		}
+
+		const newSize = transform.transformVec3(this.region.size);
+		const translation = transform.transformVec2(this.region.topLeft).minus(this.region.topLeft);
+		this.region = this.region.resizedTo(newSize);
+		this.region = this.region.translatedBy(translation);
+
+		this.previewTransformCmds();
+	}
+
 	// Applies the current transformation to the selection
-	public finishDragging() {
+	public finalizeTransform() {
 		this.transformationCommands.forEach(cmd => {
 			cmd.unapply(this.editor);
 		});
@@ -320,7 +327,6 @@ class Selection {
 
 		this.updateUI();
 	}
-
 
 	public appendBackgroundBoxTo(elem: HTMLElement) {
 		if (this.backgroundBox.parentElement) {
@@ -473,6 +479,8 @@ export default class SelectionTool extends BaseTool {
 			this.selectionBox?.recomputeRegion();
 			this.selectionBox?.updateUI();
 		});
+
+		this.editor.handleKeyEventsFrom(this.handleOverlay);
 	}
 
 	public onPointerDown(event: PointerEvt): boolean {
@@ -512,7 +520,12 @@ export default class SelectionTool extends BaseTool {
 			this.editor.announceForAccessibility(
 				this.editor.localization.selectedElements(this.selectionBox.getSelectedItemCount())
 			);
+			this.zoomToSelection();
+		}
+	}
 
+	private zoomToSelection() {
+		if (this.selectionBox) {
 			const selectionRect = this.selectionBox.region;
 			this.editor.dispatchNoAnnounce(this.editor.viewport.zoomTo(selectionRect, false), false);
 		}
@@ -532,6 +545,107 @@ export default class SelectionTool extends BaseTool {
 		this.selectionBox?.appendBackgroundBoxTo(this.handleOverlay);
 	}
 
+	private static handleableKeys = [
+		'a', 'h', 'ArrowLeft',
+		'd', 'l', 'ArrowRight',
+		'q', 'k', 'ArrowUp',
+		'e', 'j', 'ArrowDown',
+		'r', 'R',
+		'i', 'I', 'o', 'O',
+	];
+	public onKeyPress(event: KeyPressEvent): boolean {
+		let rotationSteps = 0;
+		let xTranslateSteps = 0;
+		let yTranslateSteps = 0;
+		let xScaleSteps = 0;
+		let yScaleSteps = 0;
+
+		switch (event.key) {
+		case 'a':
+		case 'h':
+		case 'ArrowLeft':
+			xTranslateSteps -= 1;
+			break;
+		case 'd':
+		case 'l':
+		case 'ArrowRight':
+			xTranslateSteps += 1;
+			break;
+		case 'q':
+		case 'k':
+		case 'ArrowUp':
+			yTranslateSteps -= 1;
+			break;
+		case 'e':
+		case 'j':
+		case 'ArrowDown':
+			yTranslateSteps += 1;
+			break;
+		case 'r':
+			rotationSteps += 1;
+			break;
+		case 'R':
+			rotationSteps -= 1;
+			break;
+		case 'i':
+			xScaleSteps -= 1;
+			break;
+		case 'I':
+			xScaleSteps += 1;
+			break;
+		case 'o':
+			yScaleSteps -= 1;
+			break;
+		case 'O':
+			yScaleSteps += 1;
+			break;
+		}
+
+		let handled = xTranslateSteps !== 0
+			|| yTranslateSteps !== 0
+			|| rotationSteps !== 0
+			|| xScaleSteps !== 0
+			|| yScaleSteps !== 0;
+
+		if (!this.selectionBox) {
+			handled = false;
+		} else if (handled) {
+			const translateStepSize = 10 * this.editor.viewport.getSizeOfPixelOnCanvas();
+			const rotateStepSize = Math.PI / 8;
+			const scaleStepSize = translateStepSize / 2;
+
+			const region = this.selectionBox.region;
+			const scaledSize = this.selectionBox.region.size.plus(
+				Vec2.of(xScaleSteps, yScaleSteps).times(scaleStepSize)
+			);
+
+			const transform = Mat33.scaling2D(
+				Vec2.of(
+					// Don't more-than-half the size of the selection
+					Math.max(0.5, scaledSize.x / region.size.x),
+					Math.max(0.5, scaledSize.y / region.size.y)
+				),
+				region.topLeft
+			).rightMul(Mat33.zRotation(
+				rotationSteps * rotateStepSize, region.center
+			)).rightMul(Mat33.translation(
+				Vec2.of(xTranslateSteps, yTranslateSteps).times(translateStepSize)
+			));
+			this.selectionBox.transformPreview(transform);
+			this.zoomToSelection();
+		}
+
+		return handled;
+	}
+
+	public onKeyUp(evt: KeyUpEvent) {
+		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
+			this.selectionBox.finalizeTransform();
+			return true;
+		}
+		return false;
+	}
+
 	public setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
@@ -540,6 +654,13 @@ export default class SelectionTool extends BaseTool {
 		this.selectionBox = null;
 
 		this.handleOverlay.style.display = enabled ? 'block' : 'none';
+
+		if (enabled) {
+			this.handleOverlay.tabIndex = 0;
+			this.handleOverlay.ariaLabel = this.editor.localization.selectionToolKeyboardShortcuts;
+		} else {
+			this.handleOverlay.tabIndex = -1;
+		}
 	}
 
 	// Get the object responsible for displaying this' selection.

@@ -51,6 +51,7 @@ export default class Rect2 {
 		return new Rect2(vec.x + this.x, vec.y + this.y, this.w, this.h);
 	}
 
+	// Returns a copy of this with the given size (but same top-left).
 	public resizedTo(size: Vec2): Rect2 {
 		return new Rect2(this.x, this.y, size.x, size.y);
 	}

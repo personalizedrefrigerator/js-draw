@@ -238,17 +238,7 @@ export class Editor {
 			pointerEnd(evt);
 		});
 
-		this.renderingRegion.addEventListener('keydown', evt => {
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.KeyPressEvent,
-				key: evt.key,
-				ctrlKey: evt.ctrlKey,
-			})) {
-				evt.preventDefault();
-			} else if (evt.key === 'Escape') {
-				this.renderingRegion.blur();
-			}
-		});
+		this.handleKeyEventsFrom(this.renderingRegion);
 
 		this.container.addEventListener('wheel', evt => {
 			let delta = Vec3.of(evt.deltaX, evt.deltaY, evt.deltaZ);
@@ -305,6 +295,33 @@ export class Editor {
 			});
 			this.queueRerender();
 		});
+	}
+
+	// Adds event listners for keypresses to [elem] and forwards those events to the
+	// editor.
+	public handleKeyEventsFrom(elem: HTMLElement) {
+		elem.addEventListener('keydown', evt => {
+			if (this.toolController.dispatchInputEvent({
+				kind: InputEvtType.KeyPressEvent,
+				key: evt.key,
+				ctrlKey: evt.ctrlKey,
+			})) {
+				evt.preventDefault();
+			} else if (evt.key === 'Escape') {
+				this.renderingRegion.blur();
+			}
+		});
+
+		elem.addEventListener('keyup', evt => {
+			if (this.toolController.dispatchInputEvent({
+				kind: InputEvtType.KeyUpEvent,
+				key: evt.key,
+				ctrlKey: evt.ctrlKey,
+			})) {
+				evt.preventDefault();
+			}
+		});
+		console.log(elem);
 	}
 
 	// Adds to history by default

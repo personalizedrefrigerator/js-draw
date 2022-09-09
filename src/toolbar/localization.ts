@@ -23,6 +23,7 @@ export interface ToolbarLocalization {
 	undo: string;
 	redo: string;
 	zoom: string;
+	selectionToolKeyboardShortcuts: string;
 
 	dropdownShown: (toolName: string)=> string;
 	dropdownHidden: (toolName: string)=> string;
@@ -46,6 +47,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	redo: 'Redo',
 	selectObjectType: 'Object type: ',
 	pickColorFronScreen: 'Pick color from screen',
+	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 
 	touchPanning: 'Touchscreen panning',
 	anyDevicePanning: 'Any device panning',

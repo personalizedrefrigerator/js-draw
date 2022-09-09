@@ -1,5 +1,6 @@
 
 export interface ToolLocalization {
+	keyboardPanZoom: string;
     penTool: (penId: number)=>string;
     selectionTool: string;
     eraserTool: string;
@@ -25,6 +26,7 @@ export const defaultToolLocalization: ToolLocalization = {
 	undoRedoTool: 'Undo/Redo',
 	rightClickDragPanTool: 'Right-click drag',
 	pipetteTool: 'Pick color from screen',
+	keyboardPanZoom: 'Keyboard pan/zoom shortcuts',
 
 	textTool: 'Text',
 	enterTextToInsert: 'Text to insert',
