@@ -50,6 +50,14 @@ export default abstract class BaseWidget {
 	}
 
 	protected setupActionBtnClickListener(button: HTMLElement) {
+		button.onkeydown = (evt) => {
+			if (evt.key === 'Enter' || evt.key === ' ') {
+				if (!this.disabled) {
+					this.handleClick();
+				}
+			}
+		};
+
 		button.onclick = () => {
 			if (!this.disabled) {
 				this.handleClick();
