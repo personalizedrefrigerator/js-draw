@@ -32,6 +32,10 @@ class UndoRedoHistory {
 			command.apply(this.editor);
 		}
 		this.undoStack.push(command);
+
+		for (const elem of this.redoStack) {
+			elem.onDrop(this.editor);
+		}
 		this.redoStack = [];
 		this.fireUpdateEvent();
 	}
