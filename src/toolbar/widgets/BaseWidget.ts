@@ -51,7 +51,7 @@ export default abstract class BaseWidget {
 	}
 
 	protected setupActionBtnClickListener(button: HTMLElement) {
-		const clickTriggers = { enter: true, ' ': true, };
+		const clickTriggers = { Enter: true, ' ': true, };
 		button.onkeydown = (evt) => {
 			let handled = false;
 
