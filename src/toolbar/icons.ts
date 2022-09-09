@@ -9,11 +9,11 @@ import { StrokeDataPoint } from '../types';
 import Viewport from '../Viewport';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
-const primaryForegroundFill = `
-	style='fill: var(--primary-foreground-color);'
+const iconColorFill = `
+	style='fill: var(--icon-color);'
 `;
-const primaryForegroundStrokeFill = `
-	style='fill: var(--primary-foreground-color); stroke: var(--primary-foreground-color);'
+const iconColorStrokeFill = `
+	style='fill: var(--icon-color); stroke: var(--icon-color);'
 `;
 const checkerboardPatternDef = `
 	<pattern
@@ -39,7 +39,7 @@ export const makeRedoIcon = (mirror: boolean = false) => {
 	icon.innerHTML = `
 		<style>
 			.toolbar-svg-undo-redo-icon {
-				stroke: var(--primary-foreground-color);
+				stroke: var(--icon-color);
 				stroke-width: 12;
 				stroke-linejoin: round;
 				stroke-linecap: round;
@@ -63,7 +63,7 @@ export const makeDropdownIcon = () => {
 	<g>
 		<path
 			d='M5,10 L50,90 L95,10 Z'
-			${primaryForegroundFill}
+			${iconColorFill}
 		/>
 	</g>
 	`;
@@ -80,7 +80,7 @@ export const makeEraserIcon = () => {
 		<rect x=10 y=50 width=80 height=30 rx=10 fill='pink' />
 		<rect
 			x=10 y=10 width=80 height=50
-			${primaryForegroundFill}
+			${iconColorFill}
 		/>
 	</g>
 	`;
@@ -132,7 +132,7 @@ export const makeHandToolIcon = () => {
 			
 			fill='none'
 			style='
-				stroke: var(--primary-foreground-color);
+				stroke: var(--icon-color);
 				stroke-width: 2;
 			'
 		/>
@@ -175,7 +175,7 @@ export const makeTouchPanningIcon = () => {
 			'
 			fill='none'
 			style='
-				stroke: var(--primary-foreground-color);
+				stroke: var(--icon-color);
 				stroke-width: 2;
 			'
 		/>
@@ -241,7 +241,7 @@ export const makeAllDevicePanningIcon = () => {
 			'
 			fill='none'
 			style='
-				stroke: var(--primary-foreground-color);
+				stroke: var(--icon-color);
 				stroke-width: 2;
 			'
 		/>
@@ -263,7 +263,7 @@ export const makeZoomIcon = () => {
 		textNode.style.textAlign = 'center';
 		textNode.style.textAnchor = 'middle';
 		textNode.style.fontSize = '55px';
-		textNode.style.fill = 'var(--primary-foreground-color)';
+		textNode.style.fill = 'var(--icon-color)';
 		textNode.style.fontFamily = 'monospace';
 
 		icon.appendChild(textNode);
@@ -315,7 +315,7 @@ export const makePenIcon = (tipThickness: number, color: string) => {
 		<!-- Pen grip -->
 		<path
 			d='M10,10 L90,10 L90,60 L${50 + halfThickness},80 L${50 - halfThickness},80 L10,60 Z'
-			${primaryForegroundStrokeFill}
+			${iconColorStrokeFill}
 		/>
 	</g>
 	<g>
@@ -389,7 +389,7 @@ export const makePipetteIcon = (color?: Color4) => {
 			65,15 65,5      47,6
 		Z
 	`);
-	pipette.style.fill = 'var(--primary-foreground-color)';
+	pipette.style.fill = 'var(--icon-color)';
 
 	if (color) {
 		const defs = document.createElementNS(svgNamespace, 'defs');

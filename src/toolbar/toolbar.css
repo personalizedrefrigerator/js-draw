@@ -1,5 +1,7 @@
 .toolbar-root {
 	background-color: var(--primary-background-color);
+	--icon-color: var(--primary-foreground-color);
+
 
 	border: 1px solid var(--secondary-background-color);
 	border-radius: 2px;
@@ -38,6 +40,7 @@
 	text-align: center;
 	border-radius: 6px;
 
+	--icon-color: var(--primary-foreground-color);
 	background-color: var(--primary-background-color);
 	color: var(--primary-foreground-color);
 	border: none;
@@ -83,6 +86,7 @@
 .toolbar-toolContainer.selected .toolbar-button {
 	background-color: var(--secondary-background-color);
 	color: var(--secondary-foreground-color);
+	--icon-color: var(--secondary-foreground-color);
 }
 
 .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
@@ -173,4 +177,5 @@
 
 .color-input-container .pipetteButton.active {
 	background-color: var(--secondary-background-color);
+	--icon-color: var(--secondary-foreground-color);
 }
