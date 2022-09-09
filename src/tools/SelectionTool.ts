@@ -9,6 +9,7 @@ import Rect2 from '../geometry/Rect2';
 import { Point2, Vec2 } from '../geometry/Vec2';
 import { EditorLocalization } from '../localization';
 import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt } from '../types';
+import Viewport from '../Viewport';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
 
@@ -253,6 +254,7 @@ class Selection {
 		this.region = this.region.translatedBy(translation);
 
 		this.previewTransformCmds();
+		this.scrollTo();
 	}
 
 	// Applies the current transformation to the selection
@@ -450,6 +452,19 @@ class Selection {
 		this.rotateCircle.style.transform = `rotate(${-rotationDeg}deg)`;
 	}
 
+	// Scroll the viewport to this. Does not zoom
+	public scrollTo() {
+		const viewport = this.editor.viewport;
+		const visibleRect = viewport.visibleRect;
+		if (!visibleRect.containsPoint(this.region.center)) {
+			const closestPoint = visibleRect.getClosestPointOnBoundaryTo(this.region.center);
+			const delta = this.region.center.minus(closestPoint);
+			this.editor.dispatchNoAnnounce(
+				new Viewport.ViewportTransform(Mat33.translation(delta.times(-1))), false
+			);
+		}
+	}
+
 	public deleteSelectedObjects(): Command {
 		return new Erase(this.selectedElems);
 	}
@@ -632,7 +647,6 @@ export default class SelectionTool extends BaseTool {
 				Vec2.of(xTranslateSteps, yTranslateSteps).times(translateStepSize)
 			));
 			this.selectionBox.transformPreview(transform);
-			this.zoomToSelection();
 		}
 
 		return handled;

@@ -80,4 +80,27 @@ describe('SelectionTool', () => {
 			y: 0,
 		});
 	});
+
+	it('moving the selection with a keyboard should move the view to keep the selection in view', () => {
+		const { addTestStrokeCommand } = createSquareStroke();
+		const editor = createEditor();
+		editor.dispatch(addTestStrokeCommand);
+
+		// Select the stroke
+		const selectionTool = getSelectionTool(editor);
+		selectionTool.setEnabled(true);
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(100, 100));
+
+		const selection = selectionTool.getSelection();
+		if (selection === null) {
+			// Throw to allow TypeScript's non-null checker to understand that selection
+			// must be non-null after this.
+			throw new Error('Selection should be non-null.');
+		}
+
+		selection.handleBackgroundDrag(Vec2.of(0, -1000));
+		expect(editor.viewport.visibleRect.containsPoint(selection.region.center)).toBe(true);
+	});
 });

@@ -7,6 +7,7 @@ interface IntersectionResult {
 }
 
 export default class LineSegment2 {
+	// invariant: ||direction|| = 1
 	public readonly direction: Vec2;
 	public readonly length: number;
 	public readonly bbox;
@@ -123,5 +124,24 @@ export default class LineSegment2 {
 			point: resultPoint,
 			t: resultT,
 		};
+	}
+
+	// Returns the closest point on this to [target]
+	public closestPointTo(target: Point2) {
+		// Distance from P1 along this' direction.
+		const projectedDistFromP1 = target.minus(this.p1).dot(this.direction);
+		const projectedDistFromP2 = this.length - projectedDistFromP1;
+
+		const projection = this.p1.plus(this.direction.times(projectedDistFromP1));
+
+		if (projectedDistFromP1 > 0 && projectedDistFromP1 < this.length) {
+			return projection;
+		}
+
+		if (Math.abs(projectedDistFromP2) < Math.abs(projectedDistFromP1)) {
+			return this.p2;
+		} else {
+			return this.p1;
+		}
 	}
 }

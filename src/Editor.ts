@@ -321,7 +321,6 @@ export class Editor {
 				evt.preventDefault();
 			}
 		});
-		console.log(elem);
 	}
 
 	// Adds to history by default

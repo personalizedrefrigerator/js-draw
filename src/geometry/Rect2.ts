@@ -164,6 +164,23 @@ export default class Rect2 {
 		);
 	}
 
+	public getClosestPointOnBoundaryTo(target: Point2) {
+		const closestEdgePoints = this.getEdges().map(edge => {
+			return edge.closestPointTo(target);
+		});
+
+		let closest: Point2|null = null;
+		let closestDist: number|null = null;
+		for (const point of closestEdgePoints) {
+			const dist = point.minus(target).length();
+			if (closestDist === null || dist < closestDist) {
+				closest = point;
+				closestDist = dist;
+			}
+		}
+		return closest!;
+	}
+
 	public get corners(): Point2[] {
 		return [
 			this.bottomRight,
@@ -173,7 +190,7 @@ export default class Rect2 {
 		];
 	}
 
-	public get maxDimension(): number {
+	public get maxDimension() {
 		return Math.max(this.w, this.h);
 	}
 

@@ -74,4 +74,19 @@ describe('Line2', () => {
 		expect(line1.intersection(line2)).toBeNull();
 		expect(line2.intersection(line1)).toBeNull();
 	});
+
+	it('Closest point to (0,0) on the line x = 1 should be (1,0)', () => {
+		const line = new LineSegment2(Vec2.of(1, 100), Vec2.of(1, -100));
+		expect(line.closestPointTo(Vec2.zero)).objEq(Vec2.of(1, 0));
+	});
+
+	it('Closest point from (-1,2) to segment((1,1) -> (2,4)) should be (1,1)', () => {
+		const line = new LineSegment2(Vec2.of(1, 1), Vec2.of(2, 4));
+		expect(line.closestPointTo(Vec2.of(-1, 2))).objEq(Vec2.of(1, 1));
+	});
+
+	it('Closest point from (5,2) to segment((1,1) -> (2,4)) should be (2,4)', () => {
+		const line = new LineSegment2(Vec2.of(1, 1), Vec2.of(2, 4));
+		expect(line.closestPointTo(Vec2.of(5, 2))).objEq(Vec2.of(2, 4));
+	});
 });

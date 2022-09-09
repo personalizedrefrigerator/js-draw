@@ -147,14 +147,27 @@ describe('Rect2', () => {
 		it('division of empty square', () => {
 			expect(Rect2.empty.divideIntoGrid(1000, 10000).length).toBe(1);
 		});
+
+		it('division of rectangle', () => {
+			expect(new Rect2(0, 0, 2, 1).divideIntoGrid(2, 2)).toMatchObject(
+				[
+					new Rect2(0, 0, 1, 0.5), new Rect2(1, 0, 1, 0.5),
+					new Rect2(0, 0.5, 1, 0.5), new Rect2(1, 0.5, 1, 0.5),
+				]
+			);
+		});
 	});
 
-	it('division of rectangle', () => {
-		expect(new Rect2(0, 0, 2, 1).divideIntoGrid(2, 2)).toMatchObject(
-			[
-				new Rect2(0, 0, 1, 0.5), new Rect2(1, 0, 1, 0.5),
-				new Rect2(0, 0.5, 1, 0.5), new Rect2(1, 0.5, 1, 0.5),
-			]
-		);
+	describe('should correctly return the closest point on the edge of a rectangle', () => {
+		it('with the unit square', () => {
+			const rect = Rect2.unitSquare;
+			expect(rect.getClosestPointOnBoundaryTo(Vec2.zero)).objEq(Vec2.zero);
+			expect(rect.getClosestPointOnBoundaryTo(Vec2.of(-1, -1))).objEq(Vec2.zero);
+			expect(rect.getClosestPointOnBoundaryTo(Vec2.of(-1, 0.5))).objEq(Vec2.of(0, 0.5));
+			expect(rect.getClosestPointOnBoundaryTo(Vec2.of(1, 0.5))).objEq(Vec2.of(1, 0.5));
+			expect(rect.getClosestPointOnBoundaryTo(Vec2.of(0.6, 0.6))).objEq(Vec2.of(1, 0.6));
+			expect(rect.getClosestPointOnBoundaryTo(Vec2.of(2, 0.5))).objEq(Vec2.of(1, 0.5));
+			expect(rect.getClosestPointOnBoundaryTo(Vec2.of(0.6, 0.6))).objEq(Vec2.of(1, 0.6));
+		});
 	});
 });
