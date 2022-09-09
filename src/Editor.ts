@@ -31,6 +31,9 @@ export interface EditorSettings {
 	// This does not include pinch-zoom events.
 	// Defaults to true.
 	wheelEventsEnabled: boolean|'only-if-focused';
+
+	minZoom: number,
+	maxZoom: number,
 }
 
 export class Editor {
@@ -69,6 +72,8 @@ export class Editor {
 			wheelEventsEnabled: settings.wheelEventsEnabled ?? true,
 			renderingMode: settings.renderingMode ?? RenderingMode.CanvasRenderer,
 			localization: this.localization,
+			minZoom: settings.minZoom ?? 2e-10,
+			maxZoom: settings.maxZoom ?? 1e12,
 		};
 
 		this.container = document.createElement('div');
@@ -111,6 +116,24 @@ export class Editor {
 		this.registerListeners();
 		this.queueRerender();
 		this.hideLoadingWarning();
+
+
+		// Enforce zoom limits.
+		this.notifier.on(EditorEventType.ViewportChanged, evt => {
+			if (evt.kind === EditorEventType.ViewportChanged) {
+				const zoom = evt.newTransform.transformVec3(Vec2.unitX).length();
+				if (zoom > this.settings.maxZoom || zoom < this.settings.minZoom) {
+					const oldZoom = evt.oldTransform.transformVec3(Vec2.unitX).length();
+					let resetTransform = Mat33.identity;
+
+					if (oldZoom <= this.settings.maxZoom && oldZoom >= this.settings.minZoom) {
+						resetTransform = evt.oldTransform;
+					}
+	
+					this.viewport.resetTransform(resetTransform);
+				}
+			}
+		});
 	}
 
 	// Returns a reference to this' container.

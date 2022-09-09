@@ -117,6 +117,7 @@ export interface EditorViewportChangedEvent {
 
 	// Canvas -> screen transform
 	readonly newTransform: Mat33;
+	readonly oldTransform: Mat33;
 }
 
 export interface DisplayResizedEvent {

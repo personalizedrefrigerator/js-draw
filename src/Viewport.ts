@@ -103,11 +103,13 @@ export class Viewport {
 	// Updates the transformation directly. Using ViewportTransform is preferred.
 	// [newTransform] should map from canvas coordinates to screen coordinates.
 	public resetTransform(newTransform: Mat33 = Mat33.identity) {
+		const oldTransform = this.transform;
 		this.transform = newTransform;
 		this.inverseTransform = newTransform.inverse();
 		this.notifier.dispatch(EditorEventType.ViewportChanged, {
 			kind: EditorEventType.ViewportChanged,
 			newTransform,
+			oldTransform,
 		});
 	}
 

@@ -158,9 +158,9 @@ export default class PanZoom extends BaseTool {
 	}
 
 	public onWheel({ delta, screenPos }: WheelEvt): boolean {
-		if (this.transform === null) {
-			this.transform = new Viewport.ViewportTransform(Mat33.identity);
-		}
+		// Reset the transformation -- wheel events are individual events, so we don't
+		// need to unapply/reapply.
+		this.transform = new Viewport.ViewportTransform(Mat33.identity);
 
 		const canvasPos = this.editor.viewport.screenToCanvas(screenPos);
 		const toCanvas = this.editor.viewport.screenToCanvasTransform;
@@ -172,7 +172,7 @@ export default class PanZoom extends BaseTool {
 			);
 		const pinchZoomScaleFactor = 1.04;
 		const transformUpdate = Mat33.scaling2D(
-			Math.pow(pinchZoomScaleFactor, -delta.z), canvasPos
+			Math.max(0.25, Math.min(Math.pow(pinchZoomScaleFactor, -delta.z), 4)), canvasPos
 		).rightMul(
 			Mat33.translation(translation)
 		);
@@ -185,6 +185,9 @@ export default class PanZoom extends BaseTool {
 		if (!(this.mode & PanZoomMode.Keyboard)) {
 			return false;
 		}
+
+		// No need to keep the same the transform for keyboard events.
+		this.transform = new Viewport.ViewportTransform(Mat33.identity);
 
 		let translation = Vec2.zero;
 		let scale = 1;
