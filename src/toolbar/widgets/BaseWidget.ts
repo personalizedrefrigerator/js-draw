@@ -1,4 +1,5 @@
 import Editor from '../../Editor';
+import { InputEvtType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeDropdownIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
@@ -51,10 +52,22 @@ export default abstract class BaseWidget {
 
 	protected setupActionBtnClickListener(button: HTMLElement) {
 		button.onkeydown = (evt) => {
+			let handled = false;
+
 			if (evt.key === 'Enter' || evt.key === ' ') {
 				if (!this.disabled) {
 					this.handleClick();
+					handled = true;
 				}
+			}
+
+			// If we didn't do anything with the event, send it to the editor.
+			if (!handled) {
+				this.editor.toolController.dispatchInputEvent({
+					kind: InputEvtType.KeyPressEvent,
+					key: evt.key,
+					ctrlKey: evt.ctrlKey,
+				});
 			}
 		};
 
