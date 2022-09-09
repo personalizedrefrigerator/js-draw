@@ -31,9 +31,10 @@
 
 			const editor2 = new jsdraw.Editor(document.body, {
 				wheelEventsEnabled: 'only-if-focused',
+				localization: jsdraw.getLocalizationTable([ 'es' ])
 			});
 			editor2.addToolbar();
-			editor2.loadFromSVG('<svg><text>Wheel events enabled, only if focused.</text></svg>');
+			editor2.loadFromSVG('<svg><text>Wheel events enabled, only if focused.</text><text y=100>En Español</text></svg>');
 
 			const editor3 = new jsdraw.Editor(document.body);
 			editor3.addToolbar();

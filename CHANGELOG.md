@@ -1,3 +1,8 @@
+# 0.1.10
+ * Keyboard shortcuts for the selection tool.
+ * Scroll the selection into view while moving it with the keyboard/mouse.
+ * Fix toolbar buttons not activating when focused and enter/space is pressed.
+
 # 0.1.9
  * Fix regression -- color picker hides just after clicking it.
  * Allow toggling the pipette tool.

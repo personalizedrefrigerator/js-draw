@@ -138,13 +138,13 @@ export default class HTMLToolbar {
 		undoRedoGroup.classList.add(`${toolbarCSSPrefix}buttonGroup`);
 
 		const undoButton = this.addActionButton({
-			label: 'Undo',
+			label: this.localizationTable.undo,
 			icon: makeUndoIcon()
 		}, () => {
 			this.editor.history.undo();
 		}, undoRedoGroup);
 		const redoButton = this.addActionButton({
-			label: 'Redo',
+			label: this.localizationTable.redo,
 			icon: makeRedoIcon(),
 		}, () => {
 			this.editor.history.redo();

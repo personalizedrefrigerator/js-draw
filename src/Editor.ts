@@ -17,7 +17,8 @@ import SVGLoader from './SVGLoader';
 import Pointer from './Pointer';
 import Mat33 from './geometry/Mat33';
 import Rect2 from './geometry/Rect2';
-import { defaultEditorLocalization, EditorLocalization } from './localization';
+import { EditorLocalization } from './localization';
+import getLocalizationTable from './localizations/getLocalizationTable';
 
 export interface EditorSettings {
 	// Defaults to RenderingMode.CanvasRenderer
@@ -43,7 +44,7 @@ export class Editor {
 
 	// Viewport for the exported/imported image
 	private importExportViewport: Viewport;
-	public localization: EditorLocalization = defaultEditorLocalization;
+	public localization: EditorLocalization;
 
 	public viewport: Viewport;
 	public toolController: ToolController;
@@ -59,7 +60,7 @@ export class Editor {
 		settings: Partial<EditorSettings> = {},
 	) {
 		this.localization = {
-			...this.localization,
+			...getLocalizationTable(),
 			...settings.localization,
 		};
 

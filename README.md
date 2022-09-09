@@ -118,9 +118,21 @@ const editor = new Editor(document.body, {
 
 ### Localization
 
-See [src/localization.ts](src/localization.ts) for a list of strings.
+If a user's language is available in [src/localizations/](src/localizations/) (as determined by `navigator.languages`), that localization will be used.
 
-Some of the default strings in the editor might be overridden like this:
+To override the default language, use `getLocalizationTable([ 'custom locale here' ])`. For example,
+```ts
+const editor = new Editor(document.body, {
+    // Force the Spanish (Español) localizaiton
+    localization: getLocalizationTable([ 'es' ]),
+});
+```
+
+<details><summary>Creating a custom localization</summary>
+
+See [src/localization.ts](src/localization.ts) for a list of strings that can be translated.
+
+Many of the default strings in the editor might be overridden like this:
 ```ts
 const editor = new Editor(document.body, {
     // Example partial Spanish localization
@@ -141,7 +153,6 @@ const editor = new Editor(document.body, {
         pen: 'Lapiz',
         eraser: 'Borrador',
         select: 'Selecciona',
-        touchDrawing: 'Dibuja con un dedo',
         thicknessLabel: 'Tamaño: ',
         colorLabel: 'Color: ',
         
@@ -150,6 +161,7 @@ const editor = new Editor(document.body, {
 });
 ```
 
+</details>
 
 ## Changing the editor's color theme
 

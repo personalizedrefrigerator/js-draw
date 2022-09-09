@@ -2,6 +2,7 @@
 
 import '../styles';
 import Editor from '../Editor';
+import getLocalizationTable from '../localizations/getLocalizationTable';
 
 export default Editor;
-export { Editor };
+export { Editor, getLocalizationTable };
