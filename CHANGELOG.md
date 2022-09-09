@@ -1,5 +1,7 @@
 # 0.1.11
  * Fix 'Enter' key not toggling toolbar buttons.
+ * Add zoom limits.
+ * Add a reset zoom button.
 
 # 0.1.10
  * Keyboard shortcuts for the selection tool.
