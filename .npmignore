@@ -1,5 +1,7 @@
 *.bundle.js
 docs/
+dist/docs/
+dist-test/
 .vscode/
 *.swp
 *.swo

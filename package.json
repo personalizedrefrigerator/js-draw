@@ -9,6 +9,10 @@
       "types": "./dist/src/Editor.d.ts",
       "default": "./dist/src/Editor.js"
     },
+    "./localizations/getLocalizationTable": {
+      "types": "./dist/src/localizations/getLocalizationTable.d.ts",
+      "default": "./dist/src/localizations/getLocalizationTable.js"
+    },
     "./getLocalizationTable": {
       "types": "./dist/src/localizations/getLocalizationTable.d.ts",
       "default": "./dist/src/localizations/getLocalizationTable.js"
