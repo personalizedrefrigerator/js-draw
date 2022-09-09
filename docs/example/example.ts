@@ -195,5 +195,9 @@ const showSavePopup = (editor: Editor) => {
 		if (sourceText && sourceText.length > 0) {
 			editor.loadFromSVG(sourceText);
 		}
+
+		window.onbeforeunload = () => {
+			return 'There may be unsaved changes. Really quit?';
+		};
 	};
 })();
