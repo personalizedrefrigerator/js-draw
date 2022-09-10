@@ -205,10 +205,12 @@ export default class PanZoom extends BaseTool {
 		case 'ArrowRight':
 			translation = Vec2.of(1, 0);
 			break;
+		case 'q':
 		case 'k':
 		case 'ArrowUp':
 			translation = Vec2.of(0, -1);
 			break;
+		case 'e':
 		case 'j':
 		case 'ArrowDown':
 			translation = Vec2.of(0, 1);
