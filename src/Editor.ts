@@ -169,7 +169,7 @@ export class Editor {
 	public announceForAccessibility(message: string) {
 		// Force re-announcing an announcement if announced again.
 		if (message === this.previousAccessibilityAnnouncement) {
-			message = message + ' ';
+			message = message + '. ';
 		}
 		this.accessibilityAnnounceArea.innerText = message;
 		this.previousAccessibilityAnnouncement = message;
