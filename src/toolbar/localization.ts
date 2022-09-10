@@ -19,7 +19,8 @@ export interface ToolbarLocalization {
 	resizeImageToSelection: string;
 	deleteSelection: string;
 	duplicateSelection: string;
-	pickColorFronScreen: string;
+	pickColorFromScreen: string;
+	clickToPickColorAnnouncement: string;
 	undo: string;
 	redo: string;
 	zoom: string;
@@ -48,7 +49,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	undo: 'Undo',
 	redo: 'Redo',
 	selectObjectType: 'Object type: ',
-	pickColorFronScreen: 'Pick color from screen',
+	pickColorFromScreen: 'Pick color from screen',
+	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
 	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 
 	touchPanning: 'Touchscreen panning',

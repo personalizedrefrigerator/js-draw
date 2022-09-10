@@ -128,7 +128,7 @@ export default abstract class AbstractComponent {
 			editor.queueRerender();
 		}
 
-		public description(localizationTable: EditorLocalization) {
+		public description(_editor: Editor, localizationTable: EditorLocalization) {
 			return localizationTable.transformedElements(1);
 		}
 

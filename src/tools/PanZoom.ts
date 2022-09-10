@@ -5,7 +5,7 @@ import { Point2, Vec2 } from '../geometry/Vec2';
 import Vec3 from '../geometry/Vec3';
 import Pointer, { PointerDevice } from '../Pointer';
 import { EditorEventType, KeyPressEvent, PointerEvt, WheelEvt } from '../types';
-import { Viewport } from '../Viewport';
+import { Viewport, ViewportTransform } from '../Viewport';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
 
@@ -27,7 +27,7 @@ export enum PanZoomMode {
 
 export default class PanZoom extends BaseTool {
 	public readonly kind: ToolType.PanZoom = ToolType.PanZoom;
-	private transform: Viewport.ViewportTransform|null = null;
+	private transform: ViewportTransform|null = null;
 
 	private lastAngle: number;
 	private lastDist: number;
@@ -74,7 +74,7 @@ export default class PanZoom extends BaseTool {
 		}
 
 		if (handlingGesture) {
-			this.transform ??= new Viewport.ViewportTransform(Mat33.identity);
+			this.transform ??= Viewport.transformBy(Mat33.identity);
 			this.editor.display.setDraftMode(true);
 		}
 
@@ -100,14 +100,14 @@ export default class PanZoom extends BaseTool {
 		this.lastScreenCenter = screenCenter;
 		this.lastDist = dist;
 		this.lastAngle = angle;
-		this.transform = new Viewport.ViewportTransform(
+		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(transformUpdate)
 		);
 	}
 
 	private handleOneFingerMove(pointer: Pointer) {
 		const delta = this.getCenterDelta(pointer.screenPos);
-		this.transform = new Viewport.ViewportTransform(
+		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(
 				Mat33.translation(delta)
 			)
@@ -116,7 +116,7 @@ export default class PanZoom extends BaseTool {
 	}
 
 	public onPointerMove({ allPointers }: PointerEvt): void {
-		this.transform ??= new Viewport.ViewportTransform(Mat33.identity);
+		this.transform ??= Viewport.transformBy(Mat33.identity);
 
 		const lastTransform = this.transform;
 		if (allPointers.length === 2) {
@@ -146,21 +146,25 @@ export default class PanZoom extends BaseTool {
 
 	// Applies [transformUpdate] to the editor. This stacks on top of the
 	// current transformation, if it exists.
-	private updateTransform(transformUpdate: Mat33) {
+	private updateTransform(transformUpdate: Mat33, announce: boolean = false) {
 		let newTransform = transformUpdate;
 		if (this.transform) {
 			newTransform = this.transform.transform.rightMul(transformUpdate);
 		}
 
 		this.transform?.unapply(this.editor);
-		this.transform = new Viewport.ViewportTransform(newTransform);
+		this.transform = Viewport.transformBy(newTransform);
 		this.transform.apply(this.editor);
+
+		if (announce) {
+			this.editor.announceForAccessibility(this.transform.description(this.editor, this.editor.localization));
+		}
 	}
 
 	public onWheel({ delta, screenPos }: WheelEvt): boolean {
 		// Reset the transformation -- wheel events are individual events, so we don't
 		// need to unapply/reapply.
-		this.transform = new Viewport.ViewportTransform(Mat33.identity);
+		this.transform = Viewport.transformBy(Mat33.identity);
 
 		const canvasPos = this.editor.viewport.screenToCanvas(screenPos);
 		const toCanvas = this.editor.viewport.screenToCanvasTransform;
@@ -176,7 +180,7 @@ export default class PanZoom extends BaseTool {
 		).rightMul(
 			Mat33.translation(translation)
 		);
-		this.updateTransform(transformUpdate);
+		this.updateTransform(transformUpdate, true);
 
 		return true;
 	}
@@ -187,7 +191,7 @@ export default class PanZoom extends BaseTool {
 		}
 
 		// No need to keep the same the transform for keyboard events.
-		this.transform = new Viewport.ViewportTransform(Mat33.identity);
+		this.transform = Viewport.transformBy(Mat33.identity);
 
 		let translation = Vec2.zero;
 		let scale = 1;
@@ -255,7 +259,7 @@ export default class PanZoom extends BaseTool {
 		)).rightMul(Mat33.translation(
 			translation
 		));
-		this.updateTransform(transformUpdate);
+		this.updateTransform(transformUpdate, true);
 
 		return true;
 	}

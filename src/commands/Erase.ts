@@ -49,7 +49,7 @@ export default class Erase extends SerializableCommand {
 		}
 	}
 
-	public description(localizationTable: EditorLocalization): string {
+	public description(_editor: Editor, localizationTable: EditorLocalization): string {
 		if (this.toRemove.length === 0) {
 			return localizationTable.erasedNoElements;
 		}

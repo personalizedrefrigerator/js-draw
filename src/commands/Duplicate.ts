@@ -24,7 +24,7 @@ export default class Duplicate extends SerializableCommand {
 		this.reverse.apply(editor);
 	}
 
-	public description(localizationTable: EditorLocalization): string {
+	public description(_editor: Editor, localizationTable: EditorLocalization): string {
 		if (this.duplicates.length === 0) {
 			return localizationTable.duplicatedNoElements;
 		}

@@ -8,7 +8,7 @@ export abstract class Command {
 	// Called when the command is being deleted
 	public onDrop(_editor: Editor) { }
 
-	public abstract description(localizationTable: EditorLocalization): string;
+	public abstract description(editor: Editor, localizationTable: EditorLocalization): string;
 
 	public static union(a: Command, b: Command): Command {
 		return new class extends Command {
@@ -22,9 +22,9 @@ export abstract class Command {
 				a.unapply(editor);
 			}
 
-			public description(localizationTable: EditorLocalization) {
-				const aDescription = a.description(localizationTable);
-				const bDescription = b.description(localizationTable);
+			public description(editor: Editor, localizationTable: EditorLocalization) {
+				const aDescription = a.description(editor, localizationTable);
+				const bDescription = b.description(editor, localizationTable);
 
 				if (aDescription === bDescription) {
 					return aDescription;
@@ -36,7 +36,7 @@ export abstract class Command {
 	}
 
 	public static readonly empty = new class extends Command {
-		public description(_localizationTable: EditorLocalization) { return ''; }
+		public description(_editor: Editor, _localizationTable: EditorLocalization) { return ''; }
 		public apply(_editor: Editor) { }
 		public unapply(_editor: Editor) { }
 	};

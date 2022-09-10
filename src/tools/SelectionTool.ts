@@ -310,7 +310,7 @@ class Selection {
 			this.selection.updateUI();
 		}
 
-		public description(localizationTable: EditorLocalization) {
+		public description(_editor: Editor, localizationTable: EditorLocalization) {
 			return localizationTable.transformedElements(this.currentTransfmCommands.length);
 		}
 	};
@@ -460,7 +460,7 @@ class Selection {
 			const closestPoint = visibleRect.getClosestPointOnBoundaryTo(this.region.center);
 			const delta = this.region.center.minus(closestPoint);
 			this.editor.dispatchNoAnnounce(
-				new Viewport.ViewportTransform(Mat33.translation(delta.times(-1))), false
+				Viewport.transformBy(Mat33.translation(delta.times(-1))), false
 			);
 		}
 	}
@@ -671,7 +671,7 @@ export default class SelectionTool extends BaseTool {
 
 		if (enabled) {
 			this.handleOverlay.tabIndex = 0;
-			this.handleOverlay.ariaLabel = this.editor.localization.selectionToolKeyboardShortcuts;
+			this.handleOverlay.setAttribute('aria-label', this.editor.localization.selectionToolKeyboardShortcuts);
 		} else {
 			this.handleOverlay.tabIndex = -1;
 		}

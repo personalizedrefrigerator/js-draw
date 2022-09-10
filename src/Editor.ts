@@ -55,6 +55,7 @@ export class Editor {
 
 	private loadingWarning: HTMLElement;
 	private accessibilityAnnounceArea: HTMLElement;
+	private accessibilityControlArea: HTMLTextAreaElement;
 
 	private settings: EditorSettings;
 
@@ -86,15 +87,23 @@ export class Editor {
 		this.loadingWarning.ariaLive = 'polite';
 		this.container.appendChild(this.loadingWarning);
 
+		this.accessibilityControlArea = document.createElement('textarea');
+		this.accessibilityControlArea.setAttribute('placeholder', this.localization.accessibilityInputInstructions);
+		this.accessibilityControlArea.style.opacity = '0';
+		this.accessibilityControlArea.style.width = '0';
+		this.accessibilityControlArea.style.height = '0';
+		this.accessibilityControlArea.style.position = 'absolute';
+
 		this.accessibilityAnnounceArea = document.createElement('div');
-		this.accessibilityAnnounceArea.ariaLive = 'assertive';
+		this.accessibilityAnnounceArea.setAttribute('aria-live', 'assertive');
 		this.accessibilityAnnounceArea.className = 'accessibilityAnnouncement';
 		this.container.appendChild(this.accessibilityAnnounceArea);
 
 		this.renderingRegion.style.touchAction = 'none';
 		this.renderingRegion.className = 'imageEditorRenderArea';
+		this.renderingRegion.appendChild(this.accessibilityControlArea);
 		this.renderingRegion.setAttribute('tabIndex', '0');
-		this.renderingRegion.ariaLabel = this.localization.imageEditor;
+		this.renderingRegion.setAttribute('alt', '');
 
 		this.notifier = new EventDispatcher();
 		this.importExportViewport = new Viewport(this.notifier);
@@ -156,8 +165,14 @@ export class Editor {
 		this.announceForAccessibility(this.localization.doneLoading);
 	}
 
+	private previousAccessibilityAnnouncement: string = '';
 	public announceForAccessibility(message: string) {
+		// Force re-announcing an announcement if announced again.
+		if (message === this.previousAccessibilityAnnouncement) {
+			message = message + ' ';
+		}
 		this.accessibilityAnnounceArea.innerText = message;
+		this.previousAccessibilityAnnouncement = message;
 	}
 
 	public addToolbar(defaultLayout: boolean = true): HTMLToolbar {
@@ -319,13 +334,20 @@ export class Editor {
 			});
 			this.queueRerender();
 		});
+
+		this.accessibilityControlArea.addEventListener('input', () => {
+			this.accessibilityControlArea.value = '';
+		});
 	}
 
 	// Adds event listners for keypresses to [elem] and forwards those events to the
 	// editor.
 	public handleKeyEventsFrom(elem: HTMLElement) {
 		elem.addEventListener('keydown', evt => {
-			if (this.toolController.dispatchInputEvent({
+			if (evt.key === 't' || evt.key === 'T') {
+				evt.preventDefault();
+				this.display.rerenderAsText();
+			} else if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.KeyPressEvent,
 				key: evt.key,
 				ctrlKey: evt.ctrlKey,
@@ -333,7 +355,7 @@ export class Editor {
 				evt.preventDefault();
 			} else if (evt.key === 'Escape') {
 				this.renderingRegion.blur();
-			}
+			} 
 		});
 
 		elem.addEventListener('keyup', evt => {
@@ -356,7 +378,7 @@ export class Editor {
 			command.apply(this);
 		}
 
-		this.announceForAccessibility(command.description(this.localization));
+		this.announceForAccessibility(command.description(this, this.localization));
 	}
 
 	// Dispatches a command without announcing it. By default, does not add to history.
@@ -410,11 +432,11 @@ export class Editor {
 	}
 
 	private announceUndoCallback = (command: Command) => {
-		this.announceForAccessibility(this.localization.undoAnnouncement(command.description(this.localization)));
+		this.announceForAccessibility(this.localization.undoAnnouncement(command.description(this, this.localization)));
 	};
 
 	private announceRedoCallback = (command: Command) => {
-		this.announceForAccessibility(this.localization.redoAnnouncement(command.description(this.localization)));
+		this.announceForAccessibility(this.localization.redoAnnouncement(command.description(this, this.localization)));
 	};
 
 	private rerenderQueued: boolean = false;
@@ -587,7 +609,7 @@ export class Editor {
 				editor.queueRerender();
 			}
 
-			public description(localizationTable: EditorLocalization) {
+			public description(_editor: Editor, localizationTable: EditorLocalization) {
 				return localizationTable.resizeOutputCommand(imageRect);
 			}
 		};

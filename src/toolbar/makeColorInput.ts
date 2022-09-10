@@ -69,7 +69,7 @@ export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListe
 const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: OnColorChangeListener) => {
 	const pipetteButton = document.createElement('button');
 	pipetteButton.classList.add('pipetteButton');
-	pipetteButton.title = editor.localization.pickColorFronScreen;
+	pipetteButton.title = editor.localization.pickColorFromScreen;
 	pipetteButton.setAttribute('alt', pipetteButton.title);
 
 	const updatePipetteIcon = (color?: Color4) => {
@@ -111,6 +111,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 		);
 		if (pipetteTool) {
 			pipetteButton.classList.add('active');
+			editor.announceForAccessibility(editor.localization.clickToPickColorAnnouncement);
 		}
 	};
 

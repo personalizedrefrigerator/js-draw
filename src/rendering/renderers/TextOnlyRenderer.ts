@@ -12,6 +12,9 @@ import AbstractRenderer from './AbstractRenderer';
 
 export default class TextOnlyRenderer extends AbstractRenderer {
 	private descriptionBuilder: string[] = [];
+	private pathCount: number = 0;
+	private textNodeCount: number = 0;
+
 	public constructor(viewport: Viewport, private localizationTable: TextRendererLocalization) {
 		super(viewport);
 	}
@@ -23,15 +26,22 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 
 	public clear(): void {
 		this.descriptionBuilder = [];
+		this.pathCount = 0;
+		this.textNodeCount = 0;
 	}
 
 	public getDescription(): string {
-		return this.descriptionBuilder.join('\n');
+		return [
+			this.localizationTable.pathNodeCount(this.pathCount),
+			this.localizationTable.textNodeCount(this.textNodeCount),
+			...this.descriptionBuilder
+		].join('\n');
 	}
 
 	protected beginPath(_startPoint: Vec3): void {
 	}
 	protected endPath(_style: RenderingStyle): void {
+		this.pathCount ++;
 	}
 	protected lineTo(_point: Vec3): void {
 	}
@@ -43,9 +53,10 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 	}
 	public drawText(text: string, _transform: Mat33, _style: TextStyle): void {
 		this.descriptionBuilder.push(this.localizationTable.textNode(text));
+		this.textNodeCount ++;
 	}
 	public isTooSmallToRender(rect: Rect2): boolean {
-		return rect.maxDimension < 10 / this.getSizeOfCanvasPixelOnScreen();
+		return rect.maxDimension < 15 / this.getSizeOfCanvasPixelOnScreen();
 	}
 	public drawPoints(..._points: Vec3[]): void {
 	}

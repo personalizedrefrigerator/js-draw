@@ -11,9 +11,13 @@ import { EditorEventType, EditorNotifier } from './types';
 // Returns the base type of some type of point/number
 type PointDataType<T extends Point2|StrokeDataPoint|number> = T extends Point2 ? Point2 : number;
 
+export abstract class ViewportTransform extends Command {
+	public abstract readonly transform: Mat33;
+}
+
 export class Viewport {
 	// Command that translates/scales the viewport.
-	public static ViewportTransform = class extends Command {
+	private static ViewportTransform = class extends ViewportTransform {
 		readonly #inverseTransform: Mat33;
 
 		public constructor(public readonly transform: Mat33) {
@@ -33,14 +37,14 @@ export class Viewport {
 			editor.queueRerender();
 		}
 
-		public description(localizationTable: CommandLocalization): string {
+		public description(editor: Editor, localizationTable: CommandLocalization): string {
 			const result: string[] = [];
 
 			// Describe the transformation's affect on the viewport (note that transformation transforms
 			// the **elements** within the viewport). Assumes the transformation only does rotation/scale/translation.
-			const origVec = Vec2.unitX;
+			const origVec = editor.viewport.visibleRect.center;
 			const linearTransformedVec = this.transform.transformVec3(Vec2.unitX);
-			const affineTransformedVec = this.transform.transformVec2(Vec2.unitX);
+			const affineTransformedVec = this.transform.transformVec2(origVec);
 
 			const scale = linearTransformedVec.magnitude();
 			const rotation = 180 / Math.PI * linearTransformedVec.angle();
@@ -48,8 +52,7 @@ export class Viewport {
 
 			if (scale > 1.2) {
 				result.push(localizationTable.zoomedIn);
-			}
-			else if (scale < 0.8) {
+			} else if (scale < 0.8) {
 				result.push(localizationTable.zoomedOut);
 			}
 
@@ -64,7 +67,7 @@ export class Viewport {
 				result.push(localizationTable.movedRight);
 			}
 
-			if (translation.y < minTranslation) {
+			if (translation.y < -minTranslation) {
 				result.push(localizationTable.movedDown);
 			} else if (translation.y > minTranslation) {
 				result.push(localizationTable.movedUp);
@@ -100,7 +103,11 @@ export class Viewport {
 		return this.transform.transformVec2(canvasPoint);
 	}
 
-	// Updates the transformation directly. Using ViewportTransform is preferred.
+	public static transformBy(transform: Mat33): ViewportTransform {
+		return new Viewport.ViewportTransform(transform);
+	}
+
+	// Updates the transformation directly. Using transformBy is preferred.
 	// [newTransform] should map from canvas coordinates to screen coordinates.
 	public resetTransform(newTransform: Mat33 = Mat33.identity) {
 		const oldTransform = this.transform;
@@ -229,11 +236,6 @@ export class Viewport {
 
 		return new Viewport.ViewportTransform(transform);
 	}
-}
-
-export namespace Viewport { // eslint-disable-line
-	// Needed to allow accessing as a type. See https://stackoverflow.com/a/68201883
-	export type ViewportTransform = typeof Viewport.ViewportTransform.prototype;
 }
 
 export default Viewport;

@@ -53,7 +53,7 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 	const zoomBy = (factor: number) => {
 		const screenCenter = editor.viewport.visibleRect.center;
 		const transformUpdate = Mat33.scaling2D(factor, screenCenter);
-		editor.dispatch(new Viewport.ViewportTransform(transformUpdate), false);
+		editor.dispatch(Viewport.transformBy(transformUpdate), false);
 	};
 
 	increaseButton.onclick = () => {
@@ -65,7 +65,7 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 	};
 
 	resetViewButton.onclick = () => {
-		editor.dispatch(new Viewport.ViewportTransform(
+		editor.dispatch(Viewport.transformBy(
 			editor.viewport.canvasToScreenTransform.inverse()
 		), true);
 	};

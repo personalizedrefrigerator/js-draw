@@ -38,7 +38,8 @@ const localization: EditorLocalization = {
 	resizeImageToSelection: 'Redimensionar la imagen a lo que está seleccionado',
 	deleteSelection: 'Borra la selección',
 	duplicateSelection: 'Duplica la selección',
-	pickColorFronScreen: 'Selecciona un color de la pantalla',
+	pickColorFromScreen: 'Selecciona un color de la pantalla',
+	clickToPickColorAnnouncement: 'Haga un clic en la pantalla para seleccionar un color',
 	dropdownShown(toolName: string): string {
 		return `Menú por ${toolName} es visible`;
 	},

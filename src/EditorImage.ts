@@ -108,7 +108,7 @@ export default class EditorImage {
 			editor.queueRerender();
 		}
 
-		public description(localization: EditorLocalization) {
+		public description(editor: Editor, localization: EditorLocalization) {
 			return localization.addElementAction(this.element.description(localization));
 		}
 

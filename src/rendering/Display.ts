@@ -18,6 +18,7 @@ export default class Display {
 	private dryInkRenderer: AbstractRenderer;
 	private wetInkRenderer: AbstractRenderer;
 	private textRenderer: TextOnlyRenderer;
+	private textRerenderOutput: HTMLElement|null = null;
 	private cache: RenderingCache;
 	private resizeSurfacesCallback?: ()=> void;
 	private flattenCallback?: ()=> void;
@@ -158,17 +159,24 @@ export default class Display {
 		rerenderButton.classList.add('rerenderButton');
 		rerenderButton.innerText = this.editor.localization.rerenderAsText;
 
-		const rerenderOutput = document.createElement('div');
-		rerenderOutput.ariaLive = 'polite';
+		this.textRerenderOutput = document.createElement('div');
+		this.textRerenderOutput.setAttribute('aria-live', 'polite');
 
 		rerenderButton.onclick = () => {
-			this.textRenderer.clear();
-			this.editor.image.render(this.textRenderer, this.editor.viewport);
-			rerenderOutput.innerText = this.textRenderer.getDescription();
+			this.rerenderAsText();
 		};
 
-		textRendererOutputContainer.replaceChildren(rerenderButton, rerenderOutput);
+		textRendererOutputContainer.replaceChildren(rerenderButton, this.textRerenderOutput);
 		this.editor.createHTMLOverlay(textRendererOutputContainer);
+	}
+
+	public rerenderAsText() {
+		this.textRenderer.clear();
+		this.editor.image.render(this.textRenderer, this.editor.viewport);
+		
+		if (this.textRerenderOutput) {
+			this.textRerenderOutput.innerText = this.textRenderer.getDescription();
+		}
 	}
 
 	// Clears the drawing surfaces and otherwise prepares for a rerender.

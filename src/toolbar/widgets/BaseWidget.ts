@@ -137,8 +137,10 @@ export default abstract class BaseWidget {
 		this.disabled = disabled;
 		if (this.disabled) {
 			this.button.classList.add('disabled');
+			this.button.setAttribute('aria-disabled', 'true');
 		} else {
 			this.button.classList.remove('disabled');
+			this.button.removeAttribute('aria-disabled');
 		}
 	}
 
