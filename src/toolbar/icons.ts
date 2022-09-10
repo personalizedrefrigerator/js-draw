@@ -103,152 +103,141 @@ export const makeSelectionIcon = () => {
 	return icon;
 };
 
-export const makeHandToolIcon = () => {
+const pathIcon = (
+	pathData: string,
+	fill: string = 'var(--icon-color)', 
+	strokeColor: string = 'none',
+	strokeWidth: string = '0px',
+) => {
 	const icon = document.createElementNS(svgNamespace, 'svg');
+	const path = document.createElementNS(svgNamespace, 'path');
+	path.setAttribute('d', pathData);
+	path.style.fill = fill;
+	path.style.stroke = strokeColor;
+	path.style.strokeWidth = strokeWidth;
+	icon.appendChild(path);
+	icon.setAttribute('viewBox', '0 0 100 100');
+
+	return icon;
+};
+
+export const makeHandToolIcon = () => {
+	const fill = 'none';
+	const strokeColor = 'var(--icon-color)';
+	const strokeWidth = '3';
 
 	// Draw a cursor-like shape (like some of the other icons, made with Inkscape)
-	icon.innerHTML = `
-	<g>
-		<path d='
-			m 10,60
-			  5,30
-			H 90
-			V 30
-			C 90,20 75,20 75,30
-			V 60
-			  20
-			C 75,10 60,10 60,20
-			V 60
-			  15
-			C 60,5 45,5 45,15
-			V 60
-			  25
-			C 45,15 30,15 30,25
-			V 60
-			  75
-			L 25,60
-			C 20,45 10,50 10,60 
-			Z'
-			
-			fill='none'
-			style='
-				stroke: var(--icon-color);
-				stroke-width: 2;
-			'
-		/>
-	</g>
-	`;
-	icon.setAttribute('viewBox', '0 0 100 100');
-	return icon;
+	return pathIcon(`
+		m 10,60
+			5,30
+		H 90
+		V 30
+		C 90,20 75,20 75,30
+		V 60
+			20
+		C 75,10 60,10 60,20
+		V 60
+			15
+		C 60,5 45,5 45,15
+		V 60
+			25
+		C 45,15 30,15 30,25
+		V 60
+			75
+		L 25,60
+		C 20,45 10,50 10,60
+		Z
+	`, fill, strokeColor, strokeWidth);
 };
 
 export const makeTouchPanningIcon = () => {
-	const icon = document.createElementNS(svgNamespace, 'svg');
-	icon.innerHTML = `
-		<path
-			d='
-				M 5,5.5
-				V 17.2
-				L 16.25,5.46
-				Z
+	const fill = 'none';
+	const strokeColor = 'var(--icon-color)';
+	const strokeWidth = '3';
 
-				m 33.75,0
-				L 50,17
-				V 5.5
-				Z
+	return pathIcon(`
+		M 5,5.5
+		V 17.2
+		L 16.25,5.46
+		Z
 
-				M 5,40.7
-				v 11.7
-				h 11.25
-				z
-				
-				M 26,19
-				C 19.8,19.4 17.65,30.4 21.9,34.8
-				L 50,70
-				H 27.5
-				c -11.25,0 -11.25,17.6 0,17.6
-				H 61.25
-				C 94.9,87.8 95,87.6 95,40.7 78.125,23 67,29 55.6,46.5
-				L 33.1,23
-				C 30.3125,20.128192 27.9,19 25.830078,19.119756
-				Z
-			'
-			fill='none'
-			style='
-				stroke: var(--icon-color);
-				stroke-width: 2;
-			'
-		/>
-	`;
+		m 33.75,0
+		L 50,17
+		V 5.5
+		Z
 
-	icon.setAttribute('viewBox', '0 0 100 100');
-	return icon;
+		M 5,40.7
+		v 11.7
+		h 11.25
+		z
+
+		M 26,19
+		C 19.8,19.4 17.65,30.4 21.9,34.8
+		L 50,70
+		H 27.5
+		c -11.25,0 -11.25,17.6 0,17.6
+		H 61.25
+		C 94.9,87.8 95,87.6 95,40.7 78.125,23 67,29 55.6,46.5
+		L 33.1,23
+		C 30.3125,20.128192 27.9,19 25.830078,19.119756
+		Z
+	`, fill, strokeColor, strokeWidth);
 };
 
 export const makeAllDevicePanningIcon = () => {
-	const icon = document.createElementNS(svgNamespace, 'svg');
-	icon.innerHTML = `
-		<path
-			d='
-				M 5 5
-				L 5 17.5
-				  17.5 5
-				  5 5
-				z
-				
-				M 42.5 5
-				L 55 17.5
-				  55 5
-				  42.5 5
-				z
-				
-				M 70 10
-				L 70 21
-				  61 15
-			      55.5 23
-			      66 30
-				  56 37
-				  61 45
-				  70 39
-				  70 50
-				  80 50
-				  80 39
-				  89 45
-				  95 36
-				  84 30
-				  95 23
-				  89 15
-				  80 21
-				  80 10
-				  70 10
-				z
+	const fill = 'none';
+	const strokeColor = 'var(--icon-color)';
+	const strokeWidth = '3';
+	return pathIcon(`
+		M 5 5
+		L 5 17.5
+			17.5 5
+			5 5
+		z
 
-				M 27.5 26.25
-				L 27.5 91.25
-				L 43.75 83.125
-				L 52 99
-				L 68 91
-				L 60 75
-				L 76.25 66.875
-				L 27.5 26.25
-				z
-				
-				M 5 42.5
-				L 5 55
-				L 17.5 55
-				L 5 42.5
-				z 
-			'
-			fill='none'
-			style='
-				stroke: var(--icon-color);
-				stroke-width: 2;
-			'
-		/>
-	`;
+		M 42.5 5
+		L 55 17.5
+			55 5
+			42.5 5
+		z
 
-	icon.setAttribute('viewBox', '0 0 100 100');
-	return icon;
+		M 70 10
+		L 70 21
+			61 15
+			55.5 23
+			66 30
+			56 37
+			61 45
+			70 39
+			70 50
+			80 50
+			80 39
+			89 45
+			95 36
+			84 30
+			95 23
+			89 15
+			80 21
+			80 10
+			70 10
+		z
+
+		M 27.5 26.25
+		L 27.5 91.25
+		L 43.75 83.125
+		L 52 99
+		L 68 91
+		L 60 75
+		L 76.25 66.875
+		L 27.5 26.25
+		z
+
+		M 5 42.5
+		L 5 55
+		L 17.5 55
+		L 5 42.5
+		z
+	`, fill, strokeColor, strokeWidth);
 };
 
 export const makeZoomIcon = () => {
@@ -416,4 +405,35 @@ export const makePipetteIcon = (color?: Color4) => {
 
 	icon.setAttribute('viewBox', '0 0 100 100');
 	return icon;
+};
+
+export const makeResizeViewportIcon = () => {
+	return pathIcon(`
+		M 75 5 75 10 90 10 90 25 95 25 95 5 75 5 z
+		M 15 15 15 30 20 30 20 20 30 20 30 15 15 15 z
+        M 84 15 82 17 81 16 81 20 85 20 84 19 86 17 84 15 z
+        M 26 24 24 26 26 28 25 29 29 29 29 25 28 26 26 24 z
+        M 25 71 26 72 24 74 26 76 28 74 29 75 29 71 25 71 z
+        M 15 75 15 85 25 85 25 80 20 80 20 75 15 75 z
+        M 90 75 90 90 75 90 75 95 95 95 95 75 90 75 z
+        M 81 81 81 85 82 84 84 86 86 84 84 82 85 81 81 81 z
+	`);
+};
+
+export const makeDuplicateSelectionIcon = () => {
+	return pathIcon(`
+		M 45,10 45,55 90,55 90,10 45,10 z
+		M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z 
+	`);
+};
+
+export const makeDeleteSelectionIcon = () => {
+	const strokeWidth = '5px';
+	const strokeColor = 'var(--icon-color)';
+	const fillColor = 'none';
+
+	return pathIcon(`
+		M 10,10 90,90
+		M 10,90 90,10
+	`, fillColor, strokeColor, strokeWidth);
 };

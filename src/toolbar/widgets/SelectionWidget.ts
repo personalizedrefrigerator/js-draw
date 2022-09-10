@@ -1,8 +1,9 @@
 import Editor from '../../Editor';
 import SelectionTool from '../../tools/SelectionTool';
 import { EditorEventType } from '../../types';
-import { makeSelectionIcon } from '../icons';
+import { makeDeleteSelectionIcon, makeDuplicateSelectionIcon, makeResizeViewportIcon, makeSelectionIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
+import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
 
 export class SelectionWidget extends BaseToolWidget {
@@ -10,44 +11,46 @@ export class SelectionWidget extends BaseToolWidget {
 		editor: Editor, private tool: SelectionTool, localization: ToolbarLocalization
 	) {
 		super(editor, tool, localization);
-	}
 
-	protected getTitle(): string {
-		return this.localizationTable.select;
-	}
+		const resizeButton = new ActionButtonWidget(
+			editor, localization,
+			makeResizeViewportIcon,
+			this.localizationTable.resizeImageToSelection,
+			() => {
+				const selection = this.tool.getSelection();
+				this.editor.dispatch(this.editor.setImportExportRect(selection!.region));
+			},
+		);
+		const deleteButton = new ActionButtonWidget(
+			editor, localization,
+			makeDeleteSelectionIcon,
+			this.localizationTable.deleteSelection,
+			() => {
+				const selection = this.tool.getSelection();
+				this.editor.dispatch(selection!.deleteSelectedObjects());
+				this.tool.clearSelection();
+			},
+		);
+		const duplicateButton = new ActionButtonWidget(
+			editor, localization,
+			makeDuplicateSelectionIcon,
+			this.localizationTable.duplicateSelection,
+			() => {
+				const selection = this.tool.getSelection();
+				this.editor.dispatch(selection!.duplicateSelectedObjects());
+			},
+		);
 
-	protected createIcon(): Element {
-		return makeSelectionIcon();
-	}
+		this.addSubWidget(resizeButton);
+		this.addSubWidget(deleteButton);
+		this.addSubWidget(duplicateButton);
 
-	protected fillDropdown(dropdown: HTMLElement): boolean {
-		const container = document.createElement('div');
-		const resizeButton = document.createElement('button');
-		const duplicateButton = document.createElement('button');
-		const deleteButton = document.createElement('button');
-
-		resizeButton.innerText = this.localizationTable.resizeImageToSelection;
-		resizeButton.disabled = true;
-		deleteButton.innerText = this.localizationTable.deleteSelection;
-		deleteButton.disabled = true;
-		duplicateButton.innerText = this.localizationTable.duplicateSelection;
-		duplicateButton.disabled = true;
-
-		resizeButton.onclick = () => {
-			const selection = this.tool.getSelection();
-			this.editor.dispatch(this.editor.setImportExportRect(selection!.region));
+		const updateDisabled = (disabled: boolean) => {
+			resizeButton.setDisabled(disabled);
+			deleteButton.setDisabled(disabled);
+			duplicateButton.setDisabled(disabled);
 		};
-
-		deleteButton.onclick = () => {
-			const selection = this.tool.getSelection();
-			this.editor.dispatch(selection!.deleteSelectedObjects());
-			this.tool.clearSelection();
-		};
-
-		duplicateButton.onclick = () => {
-			const selection = this.tool.getSelection();
-			this.editor.dispatch(selection!.duplicateSelectedObjects());
-		};
+		updateDisabled(true);
 
 		// Enable/disable actions based on whether items are selected
 		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
@@ -59,14 +62,16 @@ export class SelectionWidget extends BaseToolWidget {
 				const selection = this.tool.getSelection();
 				const hasSelection = selection && selection.region.area > 0;
 
-				resizeButton.disabled = !hasSelection;
-				deleteButton.disabled = resizeButton.disabled;
-				duplicateButton.disabled = resizeButton.disabled;
+				updateDisabled(!hasSelection);
 			}
 		});
+	}
 
-		container.replaceChildren(resizeButton, duplicateButton, deleteButton);
-		dropdown.appendChild(container);
-		return true;
+	protected getTitle(): string {
+		return this.localizationTable.select;
+	}
+
+	protected createIcon(): Element {
+		return makeSelectionIcon();
 	}
 }

@@ -1,3 +1,6 @@
+# 0.1.12
+ * Add icons to the selection menu.
+
 # 0.1.11
  * Fix 'Enter' key not toggling toolbar buttons.
  * Add zoom limits.

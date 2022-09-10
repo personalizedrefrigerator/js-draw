@@ -83,7 +83,7 @@
 	min-height: 30px;
 }
 
-.toolbar-toolContainer.selected .toolbar-button {
+.toolbar-toolContainer.selected > .toolbar-button {
 	background-color: var(--secondary-background-color);
 	color: var(--secondary-foreground-color);
 	--icon-color: var(--secondary-foreground-color);
