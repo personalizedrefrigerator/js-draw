@@ -281,21 +281,30 @@ export default class Path {
 	}
 
 	public toString(): string {
-		return Path.toString(this.startPoint, this.parts);
+		// Hueristic: Try to determine whether converting absolute to relative commands is worth it.
+		//            If we're near (0, 0), it probably isn't worth it and if bounding boxes are large,
+		//            it also probably isn't worth it.
+		const makeRelativeCommands =
+			Math.abs(this.bbox.topLeft.x) > 10 && Math.abs(this.bbox.size.x) < 2
+			&& Math.abs(this.bbox.topLeft.y) > 10 && Math.abs(this.bbox.size.y) < 2;
+
+		return Path.toString(this.startPoint, this.parts, !makeRelativeCommands);
 	}
 
 	public serialize(): string {
 		return this.toString();
 	}
 
-	public static toString(startPoint: Point2, parts: PathCommand[]): string {
+	// [onlyAbsCommands]: True if we should avoid converting absolute coordinates to relative offsets -- such
+	//                    conversions can lead to smaller output strings, but also take time.
+	public static toString(startPoint: Point2, parts: PathCommand[], onlyAbsCommands: boolean = true): string {
 		const result: string[] = [];
 
 		let prevPoint: Point2|undefined;
 		const addCommand = (command: string, ...points: Point2[]) => {
 			const absoluteCommandParts: string[] = [];
 			const relativeCommandParts: string[] = [];
-			const makeAbsCommand = !prevPoint;
+			const makeAbsCommand = !prevPoint || onlyAbsCommands;
 			const roundedPrevX = prevPoint ? toRoundedString(prevPoint.x) : '';
 			const roundedPrevY = prevPoint ? toRoundedString(prevPoint.y) : '';
 

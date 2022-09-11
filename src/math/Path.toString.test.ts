@@ -15,7 +15,7 @@ describe('Path.toString', () => {
 				point: Vec2.of(0.3, 0.4),
 			},
 		]);
-		expect(path.toString()).toBe('M.1,.2l.2,.2');
+		expect(path.toString()).toBe('M.1,.2L.3,.4');
 	});
 
 	it('should fix rounding errors', () => {
@@ -30,10 +30,8 @@ describe('Path.toString', () => {
 				point: Vec2.of(184.00482359999998, 1)
 			}
 		]);
-		// -.1 and
-		// 84.0045236 vs 84.0045: We're basing the precision on the precision at the start of the stroke
-		//                        because converting numbers to strings can be slow.
-		expect(path.toString()).toBe('M.1,.2q9998.9-11.2 -.1,1.2l184.0045-.4');
+
+		expect(path.toString()).toBe('M.1,.2Q9999,-11 .0003,1.4L184.0048236,1');
 	});
 
 	it('should not remove trailing zeroes before decimal points', () => {
@@ -43,19 +41,14 @@ describe('Path.toString', () => {
 				point: Vec2.of(30.0001, 40.000000001),
 			},
 		]);
-		// 969.9999 vs -970: Percision is based on the first move-to.
-		expect(path.toString()).toBe('M1000,2000000l-970-1999960');
+
+		expect(path.toString()).toBe('M1000,2000000L30.0001,40');
 	});
 
-	it('should prefer relative commands to absolute commands', () => {
+	it('deserialized path should serialize to the same/similar path, but with rounded components', () => {
 		const path1 = Path.fromString('M100,100 L101,101 Q102,102 90.000000001,89.99999999 Z');
 		expect(path1.toString()).toBe([
-			'M100,100', 'l1,1', 'q1,1 -11-11', 'l10,10'
-		].join(''));
-
-		const path2 = Path.fromString('M297.2,197.5 L292.2,196.1 Q292.8,198.3 291.3,196');
-		expect(path2.toString()).toBe([
-			'M297.2,197.5', 'l-5-1.4', 'q.6,2.2 -.9-.1'
+			'M100,100', 'L101,101', 'Q102,102 90,90', 'L100,100'
 		].join(''));
 	});
 });

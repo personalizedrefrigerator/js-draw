@@ -64,6 +64,6 @@ describe('Stroke', () => {
 				"path": "m0,0 l10,10z"
 			}
 		]`);
-		expect(deserialized.getPath().toString()).toBe('M0,0l10,10l-10-10');
+		expect(deserialized.getPath().toString()).toBe('M0,0L10,10L0,0');
 	});
 });
