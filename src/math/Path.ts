@@ -1,7 +1,7 @@
 import { Bezier } from 'bezier-js';
 import { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle from '../rendering/RenderingStyle';
-import { toRoundedString } from './toRoundedString';
+import { toRoundedString, toStringOfSamePrecision } from './rounding';
 import LineSegment2 from './LineSegment2';
 import Mat33 from './Mat33';
 import Rect2 from './Rect2';
@@ -296,11 +296,14 @@ export default class Path {
 			const absoluteCommandParts: string[] = [];
 			const relativeCommandParts: string[] = [];
 			for (const point of points) {
+				const xComponent = toRoundedString(point.x);
+				const yComponent = toRoundedString(point.y);
+
 				// Relative commands are often shorter as strings than absolute commands.
 				// Try generating both.
 				if (prevPoint) {
-					const xComponentRelative = toRoundedString(point.x - prevPoint.x);
-					const yComponentRelative = toRoundedString(point.y - prevPoint.y);
+					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint.x, xComponent, yComponent);
+					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint.y, xComponent, yComponent);
 
 					// No need for an additional separator if it starts with a '-'
 					if (yComponentRelative.charAt(0) === '-') {
@@ -310,8 +313,6 @@ export default class Path {
 					}
 				}
 
-				const xComponent = toRoundedString(point.x);
-				const yComponent = toRoundedString(point.y);
 				absoluteCommandParts.push(`${xComponent},${yComponent}`);
 			}
 

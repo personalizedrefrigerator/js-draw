@@ -30,7 +30,7 @@ describe('Path.toString', () => {
 				point: Vec2.of(184.00482359999998, 1)
 			}
 		]);
-		expect(path.toString()).toBe('M0.1,0.2q9998.9-11.2 -0.0997,1.2L184.0048236,1');
+		expect(path.toString()).toBe('M0.1,0.2Q9999,-11 0.0003,1.4L184.0048236,1');
 	});
 
 	it('should not remove trailing zeroes before decimal points', () => {
