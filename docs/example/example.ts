@@ -121,8 +121,12 @@ const showSavePopup = (editor: Editor) => {
 	let localStorageSaveStatus = 'Unable to save to localStorage. ';
 	if (window.localStorage) {
 		// Save
-		window.localStorage.setItem(saveLocalStorageKey, imgHTML);
-		localStorageSaveStatus = 'Saved to localStorage! ';
+		try {
+			window.localStorage.setItem(saveLocalStorageKey, imgHTML);
+			localStorageSaveStatus = 'Saved to localStorage! ';
+		} catch(e) {
+			localStorageSaveStatus = `Error saving to localStorage: ${e}`;
+		}
 	}
 
 	let imageSize = `${Math.round(imgHTML.length / 1024 * 10) / 10} KiB`;
