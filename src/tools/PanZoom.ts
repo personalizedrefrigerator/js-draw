@@ -237,12 +237,18 @@ export default class PanZoom extends BaseTool {
 
 		// For each keypress,
 		translation = translation.times(30); // Move at most 30 units
-		rotation *= Math.PI / 8; // Rotate at most a sixteenth of a rotation
+		rotation *= Math.PI / 8; // Rotate at least a sixteenth of a rotation
 
 		// Transform the canvas, not the viewport:
 		translation = translation.times(-1);
 		rotation = rotation * -1;
 		scale = 1 / scale;
+
+		// Work around an issue that seems to be related to rotation matricies losing precision on inversion.
+		// TODO: Figure out why and implement a better solution.
+		if (rotation !== 0) {
+			rotation += 0.0001;
+		}
 
 		const toCanvas = this.editor.viewport.screenToCanvasTransform;
 

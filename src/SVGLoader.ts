@@ -210,8 +210,16 @@ export default class SVGLoader implements ImageLoader {
 			transformProperty = elem.style.transform || 'none';
 		}
 
-		// Compute transform matrix
-		let transform = Mat33.fromCSSMatrix(transformProperty);
+		// Compute transform matrix. Prefer the actual .style.transform
+		// to the computed stylesheet -- in some browsers, the computedStyles version
+		// can have lower precision.
+		let transform;
+		try {
+			transform = Mat33.fromCSSMatrix(elem.style.transform);
+		} catch(_e) {
+			transform = Mat33.fromCSSMatrix(transformProperty);
+		}
+
 		const supportedAttrs = [];
 		const elemX = elem.getAttribute('x');
 		const elemY = elem.getAttribute('y');

@@ -4,6 +4,7 @@ import { TextStyle } from '../../components/Text';
 import Mat33 from '../../math/Mat33';
 import Path, { PathCommand, PathCommandType } from '../../math/Path';
 import Rect2 from '../../math/Rect2';
+import { toRoundedString } from '../../math/rounding';
 import { Point2, Vec2 } from '../../math/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
@@ -113,6 +114,9 @@ export default class SVGRenderer extends AbstractRenderer {
 	public drawText(text: string, transform: Mat33, style: TextStyle): void {
 		transform = this.getCanvasToScreenTransform().rightMul(transform);
 
+		const translation = transform.transformVec2(Vec2.zero);
+		transform = transform.rightMul(Mat33.translation(translation.times(-1)));
+
 		const textElem = document.createElementNS(svgNameSpace, 'text');
 		textElem.appendChild(document.createTextNode(text));
 		textElem.style.transform = `matrix(
@@ -125,6 +129,8 @@ export default class SVGRenderer extends AbstractRenderer {
 		textElem.style.fontWeight = style.fontWeight ?? '';
 		textElem.style.fontSize = style.size + 'px';
 		textElem.style.fill = style.renderingStyle.fill.toHexString();
+		textElem.setAttribute('x', `${toRoundedString(translation.x)}`);
+		textElem.setAttribute('y', `${toRoundedString(translation.y)}`);
 
 		if (style.renderingStyle.stroke) {
 			const strokeStyle = style.renderingStyle.stroke;
