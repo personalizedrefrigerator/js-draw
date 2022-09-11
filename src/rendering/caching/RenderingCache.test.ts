@@ -35,7 +35,7 @@ describe('RenderingCache', () => {
 		expect(lastRenderer).not.toBeNull();
 		expect(lastRenderer!.renderedPathCount).toBe(1);
 
-		editor.dispatch(new Viewport.ViewportTransform(Mat33.scaling2D(0.1)));
+		editor.dispatch(Viewport.transformBy(Mat33.scaling2D(0.1)));
 		editor.image.renderWithCache(screenRenderer, cache, editor.viewport);
 		expect(allocdRenderers).toBe(1);
 		expect(lastRenderer!.renderedPathCount).toBe(1);
