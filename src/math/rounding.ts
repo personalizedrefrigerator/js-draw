@@ -1,19 +1,27 @@
 // Clean up stringified numbers
 const cleanUpNumber = (text: string) => {
-	// Remove trailing zeroes
-	text = text.replace(/([.]\d*[^0]+)0+$/, '$1');
-	text = text.replace(/[.]0+$/, '.');
+	// Regular expression substitions can be somewhat expensive. Only do them
+	// if necessary.
+	const lastChar = text.charAt(text.length - 1);
+	if (lastChar === '0' || lastChar === '.') {
+		// Remove trailing zeroes
+		text = text.replace(/([.]\d*[^0]+)0+$/, '$1');
+		text = text.replace(/[.]0+$/, '.');
 
-	// Remove trailing period
-	text = text.replace(/[.]$/, '');
+		// Remove trailing period
+		text = text.replace(/[.]$/, '');
 
-	if (text === '-0') {
-		return '0';
+		if (text === '-0') {
+			return '0';
+		}
 	}
 
-	// Remove unnecessary leading zeroes.
-	text = text.replace(/^(0+)[.]/, '.');
-	text = text.replace(/^-(0+)[.]/, '-.');
+	const firstChar = text.charAt(0);
+	if (firstChar === '0' || firstChar === '-') {
+		// Remove unnecessary leading zeroes.
+		text = text.replace(/^(0+)[.]/, '.');
+		text = text.replace(/^-(0+)[.]/, '-.');
+	}
 
 	return text;
 };
