@@ -10,6 +10,11 @@ const cleanUpNumber = (text: string) => {
 	if (text === '-0') {
 		return '0';
 	}
+
+	// Remove unnecessary leading zeroes.
+	text = text.replace(/^(0+)[.]/, '.');
+	text = text.replace(/^-(0+)[.]/, '-.');
+
 	return text;
 };
 

@@ -15,7 +15,7 @@ describe('Path.toString', () => {
 				point: Vec2.of(0.3, 0.4),
 			},
 		]);
-		expect(path.toString()).toBe('M0.1,0.2L0.3,0.4');
+		expect(path.toString()).toBe('M.1,.2l.2,.2');
 	});
 
 	it('should fix rounding errors', () => {
@@ -30,7 +30,7 @@ describe('Path.toString', () => {
 				point: Vec2.of(184.00482359999998, 1)
 			}
 		]);
-		expect(path.toString()).toBe('M0.1,0.2Q9999,-11 0.0003,1.4L184.0048236,1');
+		expect(path.toString()).toBe('M.1,.2q9998.9-11.2 -.0997,1.2l184.0045236-.4');
 	});
 
 	it('should not remove trailing zeroes before decimal points', () => {
@@ -40,10 +40,10 @@ describe('Path.toString', () => {
 				point: Vec2.of(30.0001, 40.000000001),
 			},
 		]);
-		expect(path.toString()).toBe('M1000,2000000L30.0001,40');
+		expect(path.toString()).toBe('M1000,2000000l-969.9999-1999960');
 	});
 
-	it('should use relative commands when shorter', () => {
+	it('should prefer relative commands to absolute commands', () => {
 		const path1 = Path.fromString('M100,100 L101,101 Q102,102 90.000000001,89.99999999 Z');
 		expect(path1.toString()).toBe([
 			'M100,100', 'l1,1', 'q1,1 -11-11', 'l10,10'
@@ -51,7 +51,7 @@ describe('Path.toString', () => {
 
 		const path2 = Path.fromString('M297.2,197.5 L292.2,196.1 Q292.8,198.3 291.3,196');
 		expect(path2.toString()).toBe([
-			'M297.2,197.5', 'l-5-1.4', 'q0.6,2.2 -0.9-0.1'
+			'M297.2,197.5', 'l-5-1.4', 'q.6,2.2 -.9-.1'
 		].join(''));
 	});
 });

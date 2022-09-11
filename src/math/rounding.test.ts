@@ -3,7 +3,7 @@ import { toRoundedString, toStringOfSamePrecision } from './rounding';
 describe('toRoundedString', () => {
 	it('should round up numbers endings similar to .999999999999999', () => {
 		expect(toRoundedString(0.999999999)).toBe('1');
-		expect(toRoundedString(0.899999999)).toBe('0.9');
+		expect(toRoundedString(0.899999999)).toBe('.9');
 		expect(toRoundedString(9.999999999)).toBe('10');
 		expect(toRoundedString(-10.999999999)).toBe('-11');
 	});
@@ -32,7 +32,9 @@ it('toStringOfSamePrecision', () => {
 	expect(toStringOfSamePrecision(1.89999, '1.1', '5.32')).toBe('1.9');
 	expect(toStringOfSamePrecision(9.99999999, '-1.1234')).toBe('10');
 	expect(toStringOfSamePrecision(9.999999998999996, '100')).toBe('10');
-	expect(toStringOfSamePrecision(0.000012345, '0.000012')).toBe('0.000012');
-	expect(toStringOfSamePrecision(0.000012645, '0.000012')).toBe('0.000013');
-	expect(toStringOfSamePrecision(-0.09999999999999432, '291.3')).toBe('-0.1');
+	expect(toStringOfSamePrecision(0.000012345, '0.000012')).toBe('.000012');
+	expect(toStringOfSamePrecision(0.000012645, '.000012')).toBe('.000013');
+	expect(toStringOfSamePrecision(-0.09999999999999432, '291.3')).toBe('-.1');
+	expect(toStringOfSamePrecision(-0.9999999999999432, '291.3')).toBe('-1');
+	expect(toStringOfSamePrecision(9998.9, '.1', '-11')).toBe('9998.9');
 });

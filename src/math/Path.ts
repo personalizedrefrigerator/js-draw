@@ -295,15 +295,18 @@ export default class Path {
 		const addCommand = (command: string, ...points: Point2[]) => {
 			const absoluteCommandParts: string[] = [];
 			const relativeCommandParts: string[] = [];
+			const makeAbsCommand = !prevPoint;
+			const roundedPrevX = prevPoint ? toRoundedString(prevPoint.x) : '';
+			const roundedPrevY = prevPoint ? toRoundedString(prevPoint.y) : '';
+
 			for (const point of points) {
 				const xComponent = toRoundedString(point.x);
 				const yComponent = toRoundedString(point.y);
 
 				// Relative commands are often shorter as strings than absolute commands.
-				// Try generating both.
-				if (prevPoint) {
-					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint.x, xComponent, yComponent);
-					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint.y, xComponent, yComponent);
+				if (!makeAbsCommand) {
+					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint!.x, xComponent, roundedPrevX);
+					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint!.y, yComponent, roundedPrevY);
 
 					// No need for an additional separator if it starts with a '-'
 					if (yComponentRelative.charAt(0) === '-') {
@@ -311,16 +314,16 @@ export default class Path {
 					} else {
 						relativeCommandParts.push(`${xComponentRelative},${yComponentRelative}`);
 					}
+				} else {
+					absoluteCommandParts.push(`${xComponent},${yComponent}`);
 				}
-
-				absoluteCommandParts.push(`${xComponent},${yComponent}`);
 			}
 
-			const absoluteCommand = `${command}${absoluteCommandParts.join(' ')}`;
-			const relativeCommand = prevPoint ? `${command.toLowerCase()}${relativeCommandParts.join(' ')}` : null;
-			let commandString = absoluteCommand;
-			if (relativeCommand && relativeCommand.length < absoluteCommand.length) {
-				commandString = relativeCommand;
+			let commandString;
+			if (makeAbsCommand) {
+				commandString = `${command}${absoluteCommandParts.join(' ')}`;
+			} else {
+				commandString = `${command.toLowerCase()}${relativeCommandParts.join(' ')}`;
 			}
 
 			// Don't add no-ops.
