@@ -151,18 +151,29 @@ export default class RenderingCacheNode {
 		return result;
 	}
 
-	private renderingIsUpToDate(sortedIds: number[]) {
-		if (this.cachedRenderer === null || sortedIds.length !== this.renderedIds.length) {
+	// Returns true iff all elems of this.renderedIds are in sortedIds.
+	// sortedIds should be sorted by z-index (or some other order, so long as they are
+	// sorted by the same thing as this.renderedIds.)
+	private allRenderedIdsIn(sortedIds: number[]) {
+		if (this.renderedIds.length > sortedIds.length) {
 			return false;
 		}
 
-		for (let i = 0; i < sortedIds.length; i++) {
+		for (let i = 0; i < this.renderedIds.length; i++) {
 			if (sortedIds[i] !== this.renderedIds[i]) {
 				return false;
 			}
 		}
 
 		return true;
+	}
+
+	private renderingIsUpToDate(sortedIds: number[]) {
+		if (this.cachedRenderer === null || sortedIds.length !== this.renderedIds.length) {
+			return false;
+		}
+
+		return this.allRenderedIdsIn(sortedIds);
 	}
 
 	// Render all [items] within [viewport]
@@ -238,8 +249,7 @@ export default class RenderingCacheNode {
 				}
 
 				// Is it worth it to render the items?
-				// TODO: Replace this with something performace based.
-				// TODO: Determine whether it is 'worth it' to cache this depending on rendering time.
+				// TODO: Consider replacing this with something performace based.
 				if (leavesByIds.length > this.cacheState.props.minComponentsPerCache) {
 					let fullRerenderNeeded = true;
 					if (!this.cachedRenderer) {
@@ -247,7 +257,7 @@ export default class RenderingCacheNode {
 							this.region,
 							() => this.onRegionDealloc()
 						);
-					} else if (leavesByIds.length > this.renderedIds.length && this.renderedMaxZIndex !== null) {
+					} else if (leavesByIds.length > this.renderedIds.length && this.allRenderedIdsIn(leafIds) && this.renderedMaxZIndex !== null) {
 						// We often don't need to do a full re-render even if something's changed.
 						// Check whether we can just draw on top of the existing cache.
 						const newLeaves = [];
@@ -287,6 +297,12 @@ export default class RenderingCacheNode {
 								screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
 							}
 						}
+					} else if (debugMode) {
+						console.log('Decided on a full re-render. Reason: At least one of the following is false:',
+							'\n leafIds.length > this.renderedIds.length: ', leafIds.length > this.renderedIds.length,
+							'\n this.allRenderedIdsIn(leafIds): ', this.allRenderedIdsIn(leafIds),
+							'\n this.renderedMaxZIndex !== null: ', this.renderedMaxZIndex !== null,
+							'\n\nthis.rerenderedIds: ', this.renderedIds, ', leafIds: ', leafIds);
 					}
 
 					if (fullRerenderNeeded) {
