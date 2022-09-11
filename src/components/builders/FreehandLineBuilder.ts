@@ -94,20 +94,25 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	}
 
 	private previewPath(): RenderablePathSpec|null {
-		if (this.pathStartConnector === null || this.mostRecentConnector === null) {
-			return null;
-		}
-
-		let upperPath, lowerPath, lowerToUpperCap;
+		let upperPath: QuadraticBezierPathCommand[];
+		let lowerPath: QuadraticBezierPathCommand[];
+		let lowerToUpperCap: LinePathCommand;
+		let pathStartConnector: LinePathCommand;
 		if (this.currentCurve) {
-			const { upperCurve, lowerToUpperConnector, lowerCurve } = this.currentSegmentToPath();
+			const { upperCurve, lowerToUpperConnector, upperToLowerConnector, lowerCurve } = this.currentSegmentToPath();
 			upperPath = this.upperSegments.concat(upperCurve);
 			lowerPath = this.lowerSegments.concat(lowerCurve);
 			lowerToUpperCap = lowerToUpperConnector;
+			pathStartConnector = this.pathStartConnector ?? upperToLowerConnector;
 		} else {
+			if (this.mostRecentConnector === null || this.pathStartConnector === null) {
+				return null;
+			}
+
 			upperPath = this.upperSegments.slice();
 			lowerPath = this.lowerSegments.slice();
 			lowerToUpperCap = this.mostRecentConnector;
+			pathStartConnector = this.pathStartConnector;
 		}
 		const startPoint = lowerPath[lowerPath.length - 1].endPoint;
 
@@ -139,7 +144,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				//  __/  __/
 				// /___ /
 				// •
-				this.pathStartConnector,
+				pathStartConnector,
 
 				// Move back to the start point:
 				//     •
