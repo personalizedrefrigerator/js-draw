@@ -70,7 +70,7 @@ export const toRoundedString = (num: number): string => {
 };
 
 const numberExp = /^([-]?)(\d*)[.](\d+)$/;
-const getLenAfterDecimal = (numberAsString: string) => {
+export const getLenAfterDecimal = (numberAsString: string) => {
 	const numberMatch = numberExp.exec(numberAsString);
 	if (!numberMatch) {
 		// If not a match, either the number is exponential notation (or is something

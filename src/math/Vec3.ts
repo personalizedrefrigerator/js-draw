@@ -115,9 +115,9 @@ export default class Vec3 {
 	}
 
 	// Returns a vector with each component acted on by [fn]
-	public map(fn: (component: number)=> number): Vec3 {
+	public map(fn: (component: number, index: number)=> number): Vec3 {
 		return Vec3.of(
-			fn(this.x), fn(this.y), fn(this.z)
+			fn(this.x, 0), fn(this.y, 1), fn(this.z, 2)
 		);
 	}
 

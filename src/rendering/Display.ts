@@ -60,10 +60,10 @@ export default class Display {
 				return this.dryInkRenderer.canRenderFromWithoutDataLoss(renderer);
 			},
 			blockResolution: cacheBlockResolution,
-			cacheSize: 500 * 500 * 4 * 200,
+			cacheSize: 500 * 500 * 4 * 220,
 			maxScale: 1.5,
-			minComponentsPerCache: 40,
-			minComponentsToUseCache: 100,
+			minComponentsPerCache: 45,
+			minComponentsToUseCache: 105,
 		});
 
 		this.editor.notifier.on(EditorEventType.DisplayResized, event => {

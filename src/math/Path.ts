@@ -171,8 +171,8 @@ export default class Path {
 		return result;
 	}
 
-	public transformedBy(affineTransfm: Mat33): Path {
-		const startPoint = affineTransfm.transformVec2(this.startPoint);
+	public mapPoints(mapping: (point: Point2)=>Point2): Path {
+		const startPoint = mapping(this.startPoint);
 		const newParts: PathCommand[] = [];
 
 		let exhaustivenessCheck: never;
@@ -182,22 +182,22 @@ export default class Path {
 			case PathCommandType.LineTo:
 				newParts.push({
 					kind: part.kind,
-					point: affineTransfm.transformVec2(part.point),
+					point: mapping(part.point),
 				});
 				break;
 			case PathCommandType.CubicBezierTo:
 				newParts.push({
 					kind: part.kind,
-					controlPoint1: affineTransfm.transformVec2(part.controlPoint1),
-					controlPoint2: affineTransfm.transformVec2(part.controlPoint2),
-					endPoint: affineTransfm.transformVec2(part.endPoint),
+					controlPoint1: mapping(part.controlPoint1),
+					controlPoint2: mapping(part.controlPoint2),
+					endPoint: mapping(part.endPoint),
 				});
 				break;
 			case PathCommandType.QuadraticBezierTo:
 				newParts.push({
 					kind: part.kind,
-					controlPoint: affineTransfm.transformVec2(part.controlPoint),
-					endPoint: affineTransfm.transformVec2(part.endPoint),
+					controlPoint: mapping(part.controlPoint),
+					endPoint: mapping(part.endPoint),
 				});
 				break;
 			default:
@@ -207,6 +207,10 @@ export default class Path {
 		}
 
 		return new Path(startPoint, newParts);
+	}
+
+	public transformedBy(affineTransfm: Mat33): Path {
+		return this.mapPoints(point => affineTransfm.transformVec2(point));
 	}
 
 	// Creates a new path by joining [other] to the end of this path
