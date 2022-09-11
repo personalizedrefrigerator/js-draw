@@ -32,4 +32,7 @@ it('toStringOfSamePrecision', () => {
 	expect(toStringOfSamePrecision(1.89999, '1.1', '5.32')).toBe('1.9');
 	expect(toStringOfSamePrecision(9.99999999, '-1.1234')).toBe('10');
 	expect(toStringOfSamePrecision(9.999999998999996, '100')).toBe('10');
+	expect(toStringOfSamePrecision(0.000012345, '0.000012')).toBe('0.000012');
+	expect(toStringOfSamePrecision(0.000012645, '0.000012')).toBe('0.000013');
+	expect(toStringOfSamePrecision(-0.09999999999999432, '291.3')).toBe('-0.1');
 });

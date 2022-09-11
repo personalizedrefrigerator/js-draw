@@ -101,7 +101,23 @@ export const toStringOfSamePrecision = (num: number, ...references: string[]): s
 		if (asNumber >= 5) {
 			// Don't attempt to parseInt() an empty string.
 			if (postDecimal.length > 0) {
+				const leadingZeroMatch = /^(0+)(\d*)$/.exec(postDecimal);
+
+				let leadingZeroes = '';
+				let postLeading = postDecimal;
+				if (leadingZeroMatch) {
+					leadingZeroes = leadingZeroMatch[1];
+					postLeading = leadingZeroMatch[2];
+				}
+
 				postDecimal = (parseInt(postDecimal) + 1).toString();
+
+				// If postDecimal got longer, remove leading zeroes if possible
+				if (postDecimal.length > postLeading.length && leadingZeroes.length > 0) {
+					leadingZeroes = leadingZeroes.substring(1);
+				}
+
+				postDecimal = leadingZeroes + postDecimal;
 			}
 
 			if (postDecimal.length === 0 || postDecimal.length > decimalPlaces) {
