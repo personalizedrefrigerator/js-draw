@@ -30,7 +30,10 @@ describe('Path.toString', () => {
 				point: Vec2.of(184.00482359999998, 1)
 			}
 		]);
-		expect(path.toString()).toBe('M.1,.2q9998.9-11.2 -.0997,1.2l184.0045236-.4');
+		// -.1 and
+		// 84.0045236 vs 84.0045: We're basing the precision on the precision at the start of the stroke
+		//                        because converting numbers to strings can be slow.
+		expect(path.toString()).toBe('M.1,.2q9998.9-11.2 -.1,1.2l184.0045-.4');
 	});
 
 	it('should not remove trailing zeroes before decimal points', () => {
@@ -40,7 +43,8 @@ describe('Path.toString', () => {
 				point: Vec2.of(30.0001, 40.000000001),
 			},
 		]);
-		expect(path.toString()).toBe('M1000,2000000l-969.9999-1999960');
+		// 969.9999 vs -970: Percision is based on the first move-to.
+		expect(path.toString()).toBe('M1000,2000000l-970-1999960');
 	});
 
 	it('should prefer relative commands to absolute commands', () => {

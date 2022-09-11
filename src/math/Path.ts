@@ -300,13 +300,10 @@ export default class Path {
 			const roundedPrevY = prevPoint ? toRoundedString(prevPoint.y) : '';
 
 			for (const point of points) {
-				const xComponent = toRoundedString(point.x);
-				const yComponent = toRoundedString(point.y);
-
 				// Relative commands are often shorter as strings than absolute commands.
 				if (!makeAbsCommand) {
-					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint!.x, xComponent, roundedPrevX);
-					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint!.y, yComponent, roundedPrevY);
+					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint!.x, roundedPrevX, roundedPrevY);
+					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint!.y, roundedPrevX, roundedPrevY);
 
 					// No need for an additional separator if it starts with a '-'
 					if (yComponentRelative.charAt(0) === '-') {
@@ -315,6 +312,9 @@ export default class Path {
 						relativeCommandParts.push(`${xComponentRelative},${yComponentRelative}`);
 					}
 				} else {
+					const xComponent = toRoundedString(point.x);
+					const yComponent = toRoundedString(point.y);
+
 					absoluteCommandParts.push(`${xComponent},${yComponent}`);
 				}
 			}
