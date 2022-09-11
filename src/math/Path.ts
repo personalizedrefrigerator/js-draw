@@ -301,7 +301,13 @@ export default class Path {
 				if (prevPoint) {
 					const xComponentRelative = toRoundedString(point.x - prevPoint.x);
 					const yComponentRelative = toRoundedString(point.y - prevPoint.y);
-					relativeCommandParts.push(`${xComponentRelative},${yComponentRelative}`);
+
+					// No need for an additional separator if it starts with a '-'
+					if (yComponentRelative.charAt(0) === '-') {
+						relativeCommandParts.push(`${xComponentRelative}${yComponentRelative}`);
+					} else {
+						relativeCommandParts.push(`${xComponentRelative},${yComponentRelative}`);
+					}
 				}
 
 				const xComponent = toRoundedString(point.x);

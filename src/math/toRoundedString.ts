@@ -1,8 +1,8 @@
 export const toRoundedString = (num: number): string => {
 	// Try to remove rounding errors. If the number ends in at least three/four zeroes
 	// (or nines) just one or two digits, it's probably a rounding error.
-	const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d+$/;
-	const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,})\d+$/;
+	const fixRoundingUpExp = /^([-]?\d*\.\d{2,})0{5,}\d+$/;
+	const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{2,}9{5,})\d+$/;
 
 	let text = num.toString();
 	do {
