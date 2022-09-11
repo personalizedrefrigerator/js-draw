@@ -1,5 +1,5 @@
 import { Bezier } from 'bezier-js';
-import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
+import AbstractRenderer, { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
 import { Point2, Vec2 } from '../../geometry/Vec2';
 import Rect2 from '../../geometry/Rect2';
 import { LinePathCommand, PathCommandType, QuadraticBezierPathCommand } from '../../geometry/Path';
@@ -93,7 +93,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		};
 	}
 
-	private previewStroke(): Stroke|null {
+	private previewPath(): RenderablePathSpec|null {
 		if (this.pathStartConnector === null || this.mostRecentConnector === null) {
 			return null;
 		}
@@ -112,7 +112,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		const startPoint = lowerPath[lowerPath.length - 1].endPoint;
 
 
-		return new Stroke([{
+		return {
 			// Start at the end of the lower curve:
 			//    Start point
 			//     ↓     
@@ -148,11 +148,23 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				...lowerPath,
 			],
 			style: this.getRenderingStyle(),
-		}]);
+		};
+	}
+
+	private previewStroke(): Stroke|null {
+		const pathPreview = this.previewPath();
+
+		if (pathPreview) {
+			return new Stroke([ pathPreview ]);
+		}
+		return null;
 	}
 
 	public preview(renderer: AbstractRenderer) {
-		this.previewStroke()?.render(renderer);
+		const path = this.previewPath();
+		if (path) {
+			renderer.drawPath(path);
+		}
 	}
 
 	public build(): Stroke {
