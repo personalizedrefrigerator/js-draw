@@ -2,6 +2,8 @@
  * Add icons to the selection menu.
  * Screen-reader-related bug fixes.
  * Fix bug where parent cache nodes were not fully re-rendered after erasing a stroke and replacing it with more, larger strokes.
+ * Generate strokes with single paths, instead of one path for each segment.
+   * This should make new strokes take less space when saving to SVG because we don't need to store the edges for each part of the stroke.
 
 # 0.1.11
  * Fix 'Enter' key not toggling toolbar buttons.

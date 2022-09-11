@@ -1,8 +1,8 @@
 import { Bezier } from 'bezier-js';
-import AbstractRenderer, { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
+import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { Point2, Vec2 } from '../../geometry/Vec2';
 import Rect2 from '../../geometry/Rect2';
-import { PathCommand, PathCommandType } from '../../geometry/Path';
+import { LinePathCommand, PathCommandType, QuadraticBezierPathCommand } from '../../geometry/Path';
 import LineSegment2 from '../../geometry/LineSegment2';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
@@ -22,9 +22,35 @@ export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: S
 	);
 };
 
+type CurrentSegmentToPathResult = {
+	upperCurve: QuadraticBezierPathCommand,
+	lowerToUpperConnector: LinePathCommand,
+	upperToLowerConnector: LinePathCommand,
+	lowerCurve: QuadraticBezierPathCommand,
+};
+
 // Handles stroke smoothing and creates Strokes from user/stylus input.
 export default class FreehandLineBuilder implements ComponentBuilder {
-	private segments: RenderablePathSpec[];
+	private isFirstSegment: boolean = true;
+	private pathStartConnector: LinePathCommand|null = null;
+	private mostRecentConnector: LinePathCommand|null = null;
+
+	//    Beginning of the list of lower parts
+	//        ↓
+	//        /---pathStartConnector---/ ← Beginning of the list of upper parts
+	//    ___/                      __/
+	//   /                         /
+	//  /--Most recent connector--/ ← most recent upper part goes here
+	//  ↑    
+	//  most recent lower part goes here
+	//
+	// The upperSegments form a path that goes in reverse from the most recent edge to the
+	// least recent edge.
+	// The lowerSegments form a path that goes from the least recent edge to the most
+	// recent edge.
+	private upperSegments: QuadraticBezierPathCommand[];
+	private lowerSegments: QuadraticBezierPathCommand[];
+
 	private buffer: Point2[];
 	private lastPoint: StrokeDataPoint;
 	private lastExitingVec: Vec2;
@@ -47,7 +73,9 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		private maxFitAllowed: number
 	) {
 		this.lastPoint = this.startPoint;
-		this.segments = [];
+		this.upperSegments = [];
+		this.lowerSegments = [];
+
 		this.buffer = [this.startPoint.pos];
 		this.momentum = Vec2.zero;
 		this.currentCurve = null;
@@ -65,29 +93,73 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		};
 	}
 
-	// Get the segments that make up this' path. Can be called after calling build()
-	private getPreview(): RenderablePathSpec[] {
-		if (this.currentCurve && this.lastPoint) {
-			const currentPath = this.currentSegmentToPath();
-			return this.segments.concat(currentPath);
+	private previewStroke(): Stroke|null {
+		if (this.pathStartConnector === null || this.mostRecentConnector === null) {
+			return null;
 		}
 
-		return this.segments;
+		let upperPath, lowerPath, lowerToUpperCap;
+		if (this.currentCurve) {
+			const { upperCurve, lowerToUpperConnector, lowerCurve } = this.currentSegmentToPath();
+			upperPath = this.upperSegments.concat(upperCurve);
+			lowerPath = this.lowerSegments.concat(lowerCurve);
+			lowerToUpperCap = lowerToUpperConnector;
+		} else {
+			upperPath = this.upperSegments.slice();
+			lowerPath = this.lowerSegments.slice();
+			lowerToUpperCap = this.mostRecentConnector;
+		}
+		const startPoint = lowerPath[lowerPath.length - 1].endPoint;
+
+
+		return new Stroke([{
+			// Start at the end of the lower curve:
+			//    Start point
+			//     ↓     
+			//  __/  __/ ← Most recent points on this end
+			// /___ /
+			//  ↑
+			//  Oldest points
+			startPoint,
+
+			commands: [
+				// Move to the most recent point on the upperPath:
+				//     ----→•     
+				//  __/  __/
+				// /___ /
+				lowerToUpperCap,
+
+				// Move to the beginning of the upperPath:
+				//  __/  __/
+				// /___ /
+				//     • ←-
+				...upperPath.reverse(),
+
+				// Move to the beginning of the lowerPath:
+				//  __/  __/
+				// /___ /
+				// •
+				this.pathStartConnector,
+
+				// Move back to the start point:
+				//     •
+				//  __/  __/
+				// /___ /
+				...lowerPath,
+			],
+			style: this.getRenderingStyle(),
+		}]);
 	}
 
 	public preview(renderer: AbstractRenderer) {
-		for (const part of this.getPreview()) {
-			renderer.drawPath(part);
-		}
+		this.previewStroke()?.render(renderer);
 	}
 
 	public build(): Stroke {
 		if (this.lastPoint) {
 			this.finalizeCurrentCurve();
 		}
-		return new Stroke(
-			this.segments,
-		);
+		return this.previewStroke()!;
 	}
 
 	private roundPoint(point: Point2): Point2 {
@@ -98,59 +170,77 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		// Case where no points have been added
 		if (!this.currentCurve) {
 			// Don't create a circle around the initial point if the stroke has more than one point.
-			if (this.segments.length > 0) {
+			if (!this.isFirstSegment) {
 				return;
 			}
 
-			const width = Viewport.roundPoint(this.startPoint.width / 3, this.minFitAllowed);
+			const width = Viewport.roundPoint(this.startPoint.width / 3.5, this.minFitAllowed);
 			const center = this.roundPoint(this.startPoint.pos);
 
-			// Draw a circle-ish shape around the start point
-			this.segments.push({
-				// Start on the right, cycle clockwise:
-				//    |
-				//  ----- ←
-				//    |
-				startPoint: this.startPoint.pos.plus(Vec2.of(width, 0)),
-				commands: [
-					{
-						kind: PathCommandType.QuadraticBezierTo,
-						controlPoint: center.plus(Vec2.of(width, width)),
+			// Start on the right, cycle clockwise:
+			//    |
+			//  ----- ←
+			//    |
+			const startPoint = this.startPoint.pos.plus(Vec2.of(width, 0));
 
-						// Bottom of the circle
-						//    |
-						//  -----
-						//    |
-						//    ↑
-						endPoint: center.plus(Vec2.of(0, width)),
-					},
-					{
-						kind: PathCommandType.QuadraticBezierTo,
-						controlPoint: center.plus(Vec2.of(-width, width)),
-						endPoint: center.plus(Vec2.of(-width, 0)),
-					},
-					{
-						kind: PathCommandType.QuadraticBezierTo,
-						controlPoint: center.plus(Vec2.of(-width, -width)),
-						endPoint: center.plus(Vec2.of(0, -width)),
-					},
-					{
-						kind: PathCommandType.QuadraticBezierTo,
-						controlPoint: center.plus(Vec2.of(width, -width)),
-						endPoint: center.plus(Vec2.of(width, 0)),
-					},
-				],
-				style: this.getRenderingStyle(),
-			});
+			// Draw a circle-ish shape around the start point
+			this.lowerSegments.push(
+				{
+					kind: PathCommandType.QuadraticBezierTo,
+					controlPoint: center.plus(Vec2.of(width, width)),
+
+					// Bottom of the circle
+					//    |
+					//  -----
+					//    |
+					//    ↑
+					endPoint: center.plus(Vec2.of(0, width)),
+				},
+				{
+					kind: PathCommandType.QuadraticBezierTo,
+					controlPoint: center.plus(Vec2.of(-width, width)),
+					endPoint: center.plus(Vec2.of(-width, 0)),
+				},
+				{
+					kind: PathCommandType.QuadraticBezierTo,
+					controlPoint: center.plus(Vec2.of(-width, -width)),
+					endPoint: center.plus(Vec2.of(0, -width)),
+				},
+				{
+					kind: PathCommandType.QuadraticBezierTo,
+					controlPoint: center.plus(Vec2.of(width, -width)),
+					endPoint: center.plus(Vec2.of(width, 0)),
+				}
+			);
+			this.pathStartConnector = {
+				kind: PathCommandType.LineTo,
+				point: startPoint,
+			};
+			this.mostRecentConnector = this.pathStartConnector;
+
 			return;
 		}
 
-		this.segments.push(this.currentSegmentToPath());
+		const { upperCurve, lowerToUpperConnector, upperToLowerConnector, lowerCurve } = this.currentSegmentToPath();
+
+		if (this.isFirstSegment) {
+			// We draw the upper path (reversed), then the lower path, so we need the
+			// upperToLowerConnector to join the two paths.
+			this.pathStartConnector = upperToLowerConnector;
+			this.isFirstSegment = false;
+		}
+		// With the most recent connector, we're joining the end of the lowerPath to the most recent
+		// upperPath:
+		this.mostRecentConnector = lowerToUpperConnector;
+
+		this.upperSegments.push(upperCurve);
+		this.lowerSegments.push(lowerCurve);
+
 		const lastPoint = this.buffer[this.buffer.length - 1];
 		this.lastExitingVec = Vec2.ofXY(
 			this.currentCurve.points[2]
 		).minus(Vec2.ofXY(this.currentCurve.points[1]));
-		console.assert(this.lastExitingVec.magnitude() !== 0);
+		console.assert(this.lastExitingVec.magnitude() !== 0, 'lastExitingVec has zero length!');
 
 		// Use the last two points to start a new curve (the last point isn't used
 		// in the current curve and we want connected curves to share end points)
@@ -160,7 +250,8 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		this.currentCurve = null;
 	}
 
-	private currentSegmentToPath(): RenderablePathSpec {
+	// Returns [upper curve, connector, lower curve]
+	private currentSegmentToPath(): CurrentSegmentToPathResult {
 		if (this.currentCurve == null) {
 			throw new Error('Invalid State: currentCurve is null!');
 		}
@@ -217,31 +308,33 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			halfVec = halfVec.times(2);
 		}
 
+		// Each starts at startPt ± startVec
 
-		const pathCommands: PathCommand[] = [
-			{
-				kind: PathCommandType.QuadraticBezierTo,
-				controlPoint: this.roundPoint(controlPoint.plus(halfVec)),
-				endPoint: this.roundPoint(endPt.plus(endVec)),
-			},
-
-			{
-				kind: PathCommandType.LineTo,
-				point: this.roundPoint(endPt.minus(endVec)),
-			},
-
-			{
-				kind: PathCommandType.QuadraticBezierTo,
-				controlPoint: this.roundPoint(controlPoint.minus(halfVec)),
-				endPoint: this.roundPoint(startPt.minus(startVec)),
-			},
-		];
-
-		return {
-			startPoint: this.roundPoint(startPt.plus(startVec)),
-			commands: pathCommands,
-			style: this.getRenderingStyle(),
+		const lowerCurve: QuadraticBezierPathCommand = {
+			kind: PathCommandType.QuadraticBezierTo,
+			controlPoint: this.roundPoint(controlPoint.plus(halfVec)),
+			endPoint: this.roundPoint(endPt.plus(endVec)),
 		};
+
+		// From the end of the upperCurve to the start of the lowerCurve:
+		const upperToLowerConnector: LinePathCommand = {
+			kind: PathCommandType.LineTo,
+			point: this.roundPoint(startPt.plus(startVec)),
+		};
+
+		// From the end of lowerCurve to the start of upperCurve:
+		const lowerToUpperConnector: LinePathCommand = {
+			kind: PathCommandType.LineTo,
+			point: this.roundPoint(endPt.minus(endVec))
+		};
+
+		const upperCurve: QuadraticBezierPathCommand = {
+			kind: PathCommandType.QuadraticBezierTo,
+			controlPoint: this.roundPoint(controlPoint.minus(halfVec)),
+			endPoint: this.roundPoint(startPt.minus(startVec)),
+		};
+
+		return { upperCurve, upperToLowerConnector, lowerToUpperConnector, lowerCurve };
 	}
 
 	// Compute the direction of the velocity at the end of this.buffer
@@ -264,7 +357,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			
 			const threshold = Math.min(this.lastPoint.width, newPoint.width) / 4;
 			const shouldSnapToInitial = this.startPoint.pos.minus(newPoint.pos).magnitude() < threshold
-				&& this.segments.length === 0;
+				&& this.isFirstSegment;
 			
 			// Snap to the starting point if the stroke is contained within a small ball centered
 			// at the starting point.
