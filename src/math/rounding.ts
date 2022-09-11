@@ -24,7 +24,7 @@ export const toRoundedString = (num: number): string => {
 	const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d{1,2}$/;
 	const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,})\d{1,2}$/;
 
-	let text = num.toString();
+	let text = num.toString(10);
 	if (text.indexOf('.') === -1) {
 		return text;
 	}

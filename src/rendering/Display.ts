@@ -62,8 +62,8 @@ export default class Display {
 			blockResolution: cacheBlockResolution,
 			cacheSize: 500 * 500 * 4 * 200,
 			maxScale: 1.5,
-			minComponentsPerCache: 50,
-			minComponentsToUseCache: 120,
+			minComponentsPerCache: 40,
+			minComponentsToUseCache: 100,
 		});
 
 		this.editor.notifier.on(EditorEventType.DisplayResized, event => {
