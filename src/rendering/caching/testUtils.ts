@@ -1,4 +1,4 @@
-import { Vec2 } from '../../geometry/Vec2';
+import { Vec2 } from '../../math/Vec2';
 import DummyRenderer from '../renderers/DummyRenderer';
 import createEditor from '../../testing/createEditor';
 import AbstractRenderer from '../renderers/AbstractRenderer';

@@ -1,5 +1,5 @@
-import { PathCommandType } from '../../geometry/Path';
-import Rect2 from '../../geometry/Rect2';
+import { PathCommandType } from '../../math/Path';
+import Rect2 from '../../math/Rect2';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';

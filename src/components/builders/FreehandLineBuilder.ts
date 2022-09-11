@@ -1,9 +1,9 @@
 import { Bezier } from 'bezier-js';
 import AbstractRenderer, { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
-import { Point2, Vec2 } from '../../geometry/Vec2';
-import Rect2 from '../../geometry/Rect2';
-import { LinePathCommand, PathCommandType, QuadraticBezierPathCommand } from '../../geometry/Path';
-import LineSegment2 from '../../geometry/LineSegment2';
+import { Point2, Vec2 } from '../../math/Vec2';
+import Rect2 from '../../math/Rect2';
+import { LinePathCommand, PathCommandType, QuadraticBezierPathCommand } from '../../math/Path';
+import LineSegment2 from '../../math/LineSegment2';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';

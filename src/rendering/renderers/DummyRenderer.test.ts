@@ -1,7 +1,7 @@
 
 import EventDispatcher from '../../EventDispatcher';
-import Mat33 from '../../geometry/Mat33';
-import { Vec2 } from '../../geometry/Vec2';
+import Mat33 from '../../math/Mat33';
+import { Vec2 } from '../../math/Vec2';
 import Viewport from '../../Viewport';
 import DummyRenderer from './DummyRenderer';
 

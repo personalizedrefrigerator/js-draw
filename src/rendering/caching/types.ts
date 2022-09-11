@@ -1,4 +1,4 @@
-import { Vec2 } from '../../geometry/Vec2';
+import { Vec2 } from '../../math/Vec2';
 import AbstractRenderer from '../renderers/AbstractRenderer';
 import { CacheRecordManager } from './CacheRecordManager';
 

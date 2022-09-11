@@ -1,9 +1,7 @@
-/* @jest-environment jsdom */
-
 import EditorImage from './EditorImage';
 import Stroke from './components/Stroke';
-import { Vec2 } from './geometry/Vec2';
-import Path, { PathCommandType } from './geometry/Path';
+import { Vec2 } from './math/Vec2';
+import Path, { PathCommandType } from './math/Path';
 import Color4 from './Color4';
 import DummyRenderer from './rendering/renderers/DummyRenderer';
 import createEditor from './testing/createEditor';

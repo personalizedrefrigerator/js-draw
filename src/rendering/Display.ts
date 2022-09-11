@@ -3,7 +3,7 @@ import CanvasRenderer from './renderers/CanvasRenderer';
 import { Editor } from '../Editor';
 import { EditorEventType } from '../types';
 import DummyRenderer from './renderers/DummyRenderer';
-import { Point2, Vec2 } from '../geometry/Vec2';
+import { Point2, Vec2 } from '../math/Vec2';
 import RenderingCache from './caching/RenderingCache';
 import TextOnlyRenderer from './renderers/TextOnlyRenderer';
 import Color4 from '../Color4';

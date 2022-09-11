@@ -1,12 +1,10 @@
-/* @jest-environment jsdom */
-
 import Color4 from '../Color4';
-import Path from '../geometry/Path';
-import { Vec2 } from '../geometry/Vec2';
+import Path from '../math/Path';
+import { Vec2 } from '../math/Vec2';
 import Stroke from './Stroke';
 import { loadExpectExtensions } from '../testing/loadExpectExtensions';
 import createEditor from '../testing/createEditor';
-import Mat33 from '../geometry/Mat33';
+import Mat33 from '../math/Mat33';
 
 loadExpectExtensions();
 

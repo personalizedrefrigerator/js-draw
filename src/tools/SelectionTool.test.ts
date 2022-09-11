@@ -1,11 +1,9 @@
-/* @jest-environment jsdom */
-
 import Color4 from '../Color4';
 import Stroke from '../components/Stroke';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
-import Path from '../geometry/Path';
-import { Vec2 } from '../geometry/Vec2';
+import Path from '../math/Path';
+import { Vec2 } from '../math/Vec2';
 import { InputEvtType } from '../types';
 import SelectionTool from './SelectionTool';
 import { ToolType } from './ToolController';

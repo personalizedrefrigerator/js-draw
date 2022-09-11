@@ -1,8 +1,8 @@
 
 import { Editor } from '../Editor';
-import Mat33 from '../geometry/Mat33';
-import { Point2, Vec2 } from '../geometry/Vec2';
-import Vec3 from '../geometry/Vec3';
+import Mat33 from '../math/Mat33';
+import { Point2, Vec2 } from '../math/Vec2';
+import Vec3 from '../math/Vec3';
 import Pointer, { PointerDevice } from '../Pointer';
 import { EditorEventType, KeyPressEvent, PointerEvt, WheelEvt } from '../types';
 import { Viewport, ViewportTransform } from '../Viewport';

@@ -1,10 +1,10 @@
 
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import { TextStyle } from '../../components/Text';
-import Mat33 from '../../geometry/Mat33';
-import Path, { PathCommand, PathCommandType } from '../../geometry/Path';
-import Rect2 from '../../geometry/Rect2';
-import { Point2, Vec2 } from '../../geometry/Vec2';
+import Mat33 from '../../math/Mat33';
+import Path, { PathCommand, PathCommandType } from '../../math/Path';
+import Rect2 from '../../math/Rect2';
+import { Point2, Vec2 } from '../../math/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';

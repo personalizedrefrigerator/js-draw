@@ -1,6 +1,7 @@
 import { Bezier } from 'bezier-js';
 import { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle from '../rendering/RenderingStyle';
+import { toRoundedString } from './toRoundedString';
 import LineSegment2 from './LineSegment2';
 import Mat33 from './Mat33';
 import Rect2 from './Rect2';
@@ -290,61 +291,40 @@ export default class Path {
 	public static toString(startPoint: Point2, parts: PathCommand[]): string {
 		const result: string[] = [];
 
-		const toRoundedString = (num: number): string => {
-			// Try to remove rounding errors. If the number ends in at least three/four zeroes
-			// (or nines) just one or two digits, it's probably a rounding error.
-			const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d$/;
-			const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,}\d)$/;
-
-			let text = num.toString();
-			if (text.indexOf('.') === -1) {
-				return text;
-			}
-
-			const roundingDownMatch = hasRoundingDownExp.exec(text);
-			if (roundingDownMatch) {
-				const negativeSign = roundingDownMatch[1];
-				const lastDigit = parseInt(text.charAt(text.length - 1), 10);
-				const postDecimal = parseInt(roundingDownMatch[3], 10);
-				const preDecimal = parseInt(roundingDownMatch[2], 10);
-
-				const origPostDecimalString = roundingDownMatch[3];
-
-				let newPostDecimal = (postDecimal + 10 - lastDigit).toString();
-				let carry = 0;
-				if (newPostDecimal.length > postDecimal.toString().length) {
-					// Left-shift
-					newPostDecimal = newPostDecimal.substring(1);
-					carry = 1;
-				}
-
-				// parseInt(...).toString() removes leading zeroes. Add them back.
-				while (newPostDecimal.length < origPostDecimalString.length) {
-					newPostDecimal = carry.toString(10) + newPostDecimal;
-					carry = 0;
-				}
-
-				text = `${negativeSign + (preDecimal + carry).toString()}.${newPostDecimal}`;
-			}
-
-			text = text.replace(fixRoundingUpExp, '$1');
-
-			// Remove trailing zeroes
-			text = text.replace(/([.]\d*[^0]+)0+$/, '$1');
-			text = text.replace(/[.]0+$/, '.');
-
-			// Remove trailing period
-			return text.replace(/[.]$/, '');
-		};
-
+		let prevPoint: Point2|undefined;
 		const addCommand = (command: string, ...points: Point2[]) => {
-			const parts: string[] = [];
+			const absoluteCommandParts: string[] = [];
+			const relativeCommandParts: string[] = [];
 			for (const point of points) {
+				// Relative commands are often shorter as strings than absolute commands.
+				// Try generating both.
+				if (prevPoint) {
+					const xComponentRelative = toRoundedString(point.x - prevPoint.x);
+					const yComponentRelative = toRoundedString(point.y - prevPoint.y);
+					relativeCommandParts.push(`${xComponentRelative},${yComponentRelative}`);
+				}
+
 				const xComponent = toRoundedString(point.x);
 				const yComponent = toRoundedString(point.y);
-				parts.push(`${xComponent},${yComponent}`);
+				absoluteCommandParts.push(`${xComponent},${yComponent}`);
 			}
-			result.push(`${command}${parts.join(' ')}`);
+
+			const absoluteCommand = `${command}${absoluteCommandParts.join(' ')}`;
+			const relativeCommand = prevPoint ? `${command.toLowerCase()}${relativeCommandParts.join(' ')}` : null;
+			let commandString = absoluteCommand;
+			if (relativeCommand && relativeCommand.length < absoluteCommand.length) {
+				commandString = relativeCommand;
+			}
+
+			// Don't add no-ops.
+			if (commandString === 'l0,0') {
+				return;
+			}
+			result.push(commandString);
+
+			if (points.length > 0) {
+				prevPoint = points[points.length - 1];
+			}
 		};
 
 		addCommand('M', startPoint);

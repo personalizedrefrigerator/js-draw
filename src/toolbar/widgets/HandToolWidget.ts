@@ -1,5 +1,5 @@
 import Editor from '../../Editor';
-import Mat33 from '../../geometry/Mat33';
+import Mat33 from '../../math/Mat33';
 import PanZoom, { PanZoomMode } from '../../tools/PanZoom';
 import { EditorEventType } from '../../types';
 import Viewport from '../../Viewport';

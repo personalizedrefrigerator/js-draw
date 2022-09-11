@@ -3,7 +3,7 @@
 
 import Color4 from '../../Color4';
 import { ImageNode, sortLeavesByZIndex } from '../../EditorImage';
-import Rect2 from '../../geometry/Rect2';
+import Rect2 from '../../math/Rect2';
 import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';
 import CacheRecord from './CacheRecord';

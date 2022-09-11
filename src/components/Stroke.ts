@@ -1,7 +1,7 @@
-import LineSegment2 from '../geometry/LineSegment2';
-import Mat33 from '../geometry/Mat33';
-import Path from '../geometry/Path';
-import Rect2 from '../geometry/Rect2';
+import LineSegment2 from '../math/LineSegment2';
+import Mat33 from '../math/Mat33';
+import Path from '../math/Path';
+import Rect2 from '../math/Rect2';
 import AbstractRenderer, { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';

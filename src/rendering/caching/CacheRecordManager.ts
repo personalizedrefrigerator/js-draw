@@ -1,6 +1,6 @@
 import { BeforeDeallocCallback, PartialCacheState } from './types';
 import CacheRecord from './CacheRecord';
-import Rect2 from '../../geometry/Rect2';
+import Rect2 from '../../math/Rect2';
 
 
 export class CacheRecordManager {

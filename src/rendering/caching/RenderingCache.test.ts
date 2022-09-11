@@ -3,11 +3,11 @@
 import DummyRenderer from '../renderers/DummyRenderer';
 import { createCache } from './testUtils';
 import Stroke from '../../components/Stroke';
-import Path from '../../geometry/Path';
+import Path from '../../math/Path';
 import Color4 from '../../Color4';
 import EditorImage from '../../EditorImage';
 import Viewport from '../../Viewport';
-import Mat33 from '../../geometry/Mat33';
+import Mat33 from '../../math/Mat33';
 
 describe('RenderingCache', () => {
 	const testPath = Path.fromString('M0,0 l100,500 l-20,20 L-100,-100');

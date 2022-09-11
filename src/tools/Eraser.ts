@@ -1,8 +1,8 @@
 import { PointerEvt } from '../types';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
-import { Point2 } from '../geometry/Vec2';
-import LineSegment2 from '../geometry/LineSegment2';
+import { Point2 } from '../math/Vec2';
+import LineSegment2 from '../math/LineSegment2';
 import Erase from '../commands/Erase';
 import { ToolType } from './ToolController';
 import AbstractComponent from '../components/AbstractComponent';
