@@ -4,6 +4,9 @@ dist/
 *.swp
 *.swo
 
+# Bundled files
+*.bundle.js
+
 # .gitignore for deploying to Firebase hosting
 # Logs
 logs
