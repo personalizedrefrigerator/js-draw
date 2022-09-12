@@ -55,7 +55,7 @@
     "lint": "eslint .",
     "linter-precommit": "eslint --fix --ext .js --ext .ts",
     "lint-staged": "lint-staged",
-    "postinstall": "husky install",
+    "prepare": "husky install && yarn build",
     "prepack": "yarn build && pinst --disable",
     "postpack": "pinst --enable"
   },
