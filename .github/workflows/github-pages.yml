@@ -32,8 +32,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Install dependencies
+        run: yarn install
+      - name: Run tests
+        run: yarn test
       - name: Build
-        run: yarn install && cd docs/example && echo 'Installing dependencies for example project...' && yarn install
+        run: cd docs/example && yarn install && yarn build
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
