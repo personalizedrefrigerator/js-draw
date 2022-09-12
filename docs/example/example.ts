@@ -61,13 +61,50 @@ const showSavePopup = (editor: Editor) => {
 					flex-shrink: 1;
 					width: auto;
 				}
+
+				main {
+					border: 1px solid gray;
+					background-color: #eee;
+
+					max-width: 600px;
+					margin-left: auto;
+					margin-right: auto;
+
+					padding: 15px;
+					border-radius: 15px;
+				}
+
+				#controlsArea {
+					display: flex;
+					flex-direction: row;
+					margin-top: 14px;
+				}
+
+				#controlsArea button {
+					flex-grow: 1;
+				}
+
+				@media (prefers-color-scheme: dark) {
+					body, :root {
+						background-color: black;
+						color: white;
+					}
+
+					main {
+						background-color: #333;
+					}
+				}
 			</style>
-			<p>
-				⚠ Warning ⚠: Some browsers won't save images over 2.5-ish MiB!
-			</p>
-			<div id='previewRegion'>
-				<p>Saving to <code>localStorage</code>...</p>
-			</div>
+			<main>
+				<p>
+					⚠ Warning ⚠: Some browsers won't save images over 2.5-ish MiB!
+				</p>
+				<div id='previewRegion'>
+					<p>Saving to <code>localStorage</code>...</p>
+				</div>
+				<div id='controlsArea'>
+				</div>
+			</main>
 		</body>
 		</html>`
 	);
@@ -123,8 +160,10 @@ const showSavePopup = (editor: Editor) => {
 		popup.close();
 	};
 
-	popup.document.body.appendChild(closeButton);
-	popup.document.body.appendChild(downloadButton);
+	const popupControlsArea = popup.document.querySelector('main > #controlsArea')!;
+	popupControlsArea.appendChild(closeButton);
+	popupControlsArea.appendChild(previewButton);
+	popupControlsArea.appendChild(downloadButton);
 
 
 	let localStorageSaveStatus = 'Unable to save to localStorage. ';
@@ -134,7 +173,7 @@ const showSavePopup = (editor: Editor) => {
 			window.localStorage.setItem(saveLocalStorageKey, imgHTML);
 			localStorageSaveStatus = 'Saved to localStorage! ';
 		} catch(e) {
-			localStorageSaveStatus = `Error saving to localStorage: ${e}`;
+			localStorageSaveStatus = `Error saving to localStorage: ${e} `;
 		}
 	}
 
@@ -148,7 +187,6 @@ const showSavePopup = (editor: Editor) => {
 		popup.document.createTextNode(
 			`Image size: ${imageSize}.`
 		),
-		previewButton,
 	);
 };
 
