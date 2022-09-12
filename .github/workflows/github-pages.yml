@@ -33,14 +33,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build
-        run: yarn install && cd docs/example && yarn install && yarn build
+        run: yarn install && cd docs/example && echo 'Installing dependencies for example project...' && yarn install
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          # Upload entire repository
-          path: '.'
+          # Upload just the docs folder
+          path: './docs/'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
