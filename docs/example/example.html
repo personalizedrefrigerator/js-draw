@@ -3,6 +3,10 @@
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+		<title>js-draw demo</title>
+		<link rel="manifest" href="./manifest.json"/>
+		<link rel="shortcut icon" href="./icons/js-draw-icon-vector-medium.svg"/>
+		<link rel="apple-touch-icon" href="./icons/js-draw-icon-medium.png"/>
 		<style>
 			#editorOptions {
 				max-width: 400px;
@@ -93,4 +97,9 @@
 		</textarea>
 	</body>
 	<script src='example.bundle.js'></script>
+	<script>
+		navigator.serviceWorker?.register('./sw.js')?.catch(err => {
+			console.warn('Error registering service worker,', err);
+		});
+	</script>
 </html>
