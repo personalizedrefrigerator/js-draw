@@ -23,7 +23,21 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 
 // Saves [editor]'s content as an SVG and displays the result.
 const showSavePopup = (editor: Editor) => {
-	const popup = window.open();
+	const popupContainer = document.createElement('div');
+	popupContainer.classList.add('popupContainer');
+	popupContainer.appendChild(document.createTextNode('Saving...'));
+	document.body.appendChild(popupContainer);
+
+	const popupIframe = document.createElement('iframe');
+	popupIframe.src = 'about:blank';
+
+	// Turn on sandboxing -- the user may attempt to display the SVG directly in the sandbox.
+	popupIframe.setAttribute('sandbox', 'allow-same-origin allow-downloads');
+	popupIframe.setAttribute('csp', 'default-src \'about:blank\'');
+	popupContainer.replaceChildren(popupIframe);
+
+	const popup = popupIframe.contentWindow!;
+	const popupDoc = popupIframe.contentDocument!;
 
 	if (popup === null) {
 		throw new Error('Unable to open save popup!');
@@ -32,8 +46,8 @@ const showSavePopup = (editor: Editor) => {
 	const img = editor.toSVG();
 	const imgHTML = img.outerHTML;
 
-	popup.document.open();
-	popup.document.write(`
+	popupDoc.open();
+	popupDoc.write(`
 		<!DOCTYPE html>
 		<html>
 		<head>
@@ -65,6 +79,7 @@ const showSavePopup = (editor: Editor) => {
 				main {
 					border: 1px solid gray;
 					background-color: #eee;
+					font-family: sans-serif;
 
 					max-width: 600px;
 					margin-left: auto;
@@ -84,13 +99,43 @@ const showSavePopup = (editor: Editor) => {
 					flex-grow: 1;
 				}
 
+				body, :root {
+					background-color: rgba(255, 255, 255, 0.3);
+				}
+
+				button {
+					min-height: 35px;
+				}
+
 				@media (prefers-color-scheme: dark) {
 					body, :root {
-						background-color: black;
+						background-color: rgba(0, 0, 0, 0.3);
 						color: white;
 					}
 
 					main {
+						background-color: #333;
+					}
+
+					a {
+						color: pink;
+					}
+
+					input, button {
+						background-color: #444;
+						color: #eee;
+						border: 1px solid #222;
+						border-radius: 2px;
+
+						transition: background-color 0.2s ease;
+					}
+
+					button:focus-visible, input:focus-visible {
+						outline: 3px solid #777;
+						background-color: #555;
+					}
+
+					button:active {
 						background-color: #333;
 					}
 				}
@@ -102,24 +147,25 @@ const showSavePopup = (editor: Editor) => {
 				<div id='previewRegion'>
 					<p>Saving to <code>localStorage</code>...</p>
 				</div>
+				<div><label for='filename'>Download as: </label><input id='filename' type='text' value='editor-save.svg'/></div>
 				<div id='controlsArea'>
 				</div>
 			</main>
 		</body>
 		</html>`
 	);
-	popup.document.close();
+	popupDoc.close();
 
 	// Loading the preview can be much slower than saving the image.
 	// Only do so if requested.
-	const previewRegion = popup.document.querySelector('#previewRegion')!;
-	const previewButton = popup.document.createElement('button');
+	const previewRegion = popupDoc.querySelector('#previewRegion')!;
+	const previewButton = popupDoc.createElement('button');
 	previewButton.innerText = 'View generated SVG image';
 	previewButton.onclick = () => {
-		const messageContainer = popup.document.createElement('p');
-		const svgTextContainer = popup.document.createElement('textarea');
+		const messageContainer = popupDoc.createElement('p');
+		const svgTextContainer = popupDoc.createElement('textarea');
 
-		const imagePreview = popup.document.createElementNS(
+		const imagePreview = popupDoc.createElementNS(
 			'http://www.w3.org/2000/svg', 'svg'
 		);
 		imagePreview.innerHTML = img.innerHTML;
@@ -133,6 +179,7 @@ const showSavePopup = (editor: Editor) => {
 		);
 	};
 
+	const filenameInput: HTMLInputElement = popupDoc.querySelector('input#filename')!;
 	const downloadButton = popup.document.createElement('button');
 	downloadButton.innerText = 'Download';
 	downloadButton.onclick = () => {
@@ -142,10 +189,11 @@ const showSavePopup = (editor: Editor) => {
 		const link = popup.document.createElement('a');
 		link.href = objectURL;
 		link.innerText = 'Download';
-		// Download as: (Ref: https://stackoverflow.com/a/52814195/17055750)
-		link.setAttribute('download', 'editor-save.svg');
+		// Download as (Ref: https://stackoverflow.com/a/52814195/17055750)
+		link.setAttribute('download', filenameInput.value);
 
-		downloadButton.replaceWith(link);
+		downloadButton.style.display = 'none';
+		popupControlsArea.appendChild(link);
 		link.click();
 
 		// Release URL (see section on object URLs in
@@ -154,10 +202,14 @@ const showSavePopup = (editor: Editor) => {
 		URL.revokeObjectURL(objectURL);
 	};
 
+	filenameInput.oninput = () => {
+		downloadButton.style.display = 'block';
+	};
+
 	const closeButton = popup.document.createElement('button');
 	closeButton.innerText = 'Close';
 	closeButton.onclick = () => {
-		popup.close();
+		popupContainer.remove();
 	};
 
 	const popupControlsArea = popup.document.querySelector('main > #controlsArea')!;
