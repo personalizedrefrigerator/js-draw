@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "docs",
+    "ignore": [
+      "firebase.json",
+      "src/**",
+      ".husky/**",
+      ".vscode/**",
+      "build_tools/**",
+      "dist/**",
+      "__mocks__/**",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
