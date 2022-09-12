@@ -116,7 +116,16 @@ const showSavePopup = (editor: Editor) => {
 		link.remove();
 		URL.revokeObjectURL(objectURL);
 	};
+
+	const closeButton = popup.document.createElement('button');
+	closeButton.innerText = 'Close';
+	closeButton.onclick = () => {
+		popup.close();
+	};
+
+	popup.document.body.appendChild(closeButton);
 	popup.document.body.appendChild(downloadButton);
+
 
 	let localStorageSaveStatus = 'Unable to save to localStorage. ';
 	if (window.localStorage) {
