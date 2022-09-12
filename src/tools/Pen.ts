@@ -34,7 +34,16 @@ export default class Pen extends BaseTool {
 
 	private getStrokePoint(pointer: Pointer): StrokeDataPoint {
 		const minPressure = 0.3;
-		const pressure = Math.max(pointer.pressure ?? 1.0, minPressure);
+		let pressure = Math.max(pointer.pressure ?? 1.0, minPressure);
+
+		if (!isFinite(pressure)) {
+			console.warn('Non-finite pressure!', pointer);
+			pressure = minPressure;
+		}
+		console.assert(isFinite(pointer.canvasPos.length()), 'Non-finite canvas position!');
+		console.assert(isFinite(pointer.screenPos.length()), 'Non-finite screen position!');
+		console.assert(isFinite(pointer.timeStamp), 'Non-finite timeStamp on pointer!');
+
 		return {
 			pos: pointer.canvasPos,
 			width: pressure * this.getPressureMultiplier(),
