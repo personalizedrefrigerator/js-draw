@@ -239,15 +239,18 @@ export class ImageNode {
 		// share a parent.
 		const leafBBox = leaf.getBBox();
 		if (leafBBox.containsRect(this.getBBox())) {
-			// Create a node for this' children and for the new content..
 			const nodeForNewLeaf = new ImageNode(this);
-			const nodeForChildren = new ImageNode(this);
 
-			nodeForChildren.children = this.children;
-			this.children = [nodeForNewLeaf, nodeForChildren];
-			nodeForChildren.recomputeBBox(true);
-			nodeForChildren.updateParents();
+			if (this.children.length < this.targetChildCount) {
+				this.children.push(nodeForNewLeaf);
+			} else {
+				const nodeForChildren = new ImageNode(this);
 
+				nodeForChildren.children = this.children;
+				this.children = [nodeForNewLeaf, nodeForChildren];
+				nodeForChildren.recomputeBBox(true);
+				nodeForChildren.updateParents();
+			}
 			return nodeForNewLeaf.addLeaf(leaf);
 		}
 
