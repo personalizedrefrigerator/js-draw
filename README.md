@@ -1,10 +1,12 @@
 # js-draw
 
-[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
+[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
 
 ![](docs/img/js-draw.jpg)
 
-For example usage, see [docs/example/example.ts](docs/example/example.ts).
+For example usage, see [docs/example/example.ts](docs/example/example.ts) or read [the (work-in-progress) documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/Editor.Editor.html#constructor).
+
+At present, not all documented modules are `import`-able.
 
 # API
 

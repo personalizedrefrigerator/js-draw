@@ -131,7 +131,14 @@ export class Editor {
 	 * });
 	 * 
 	 * // Add the default toolbar
-	 * editor.addToolbar();
+	 * const toolbar = editor.addToolbar();
+	 * toolbar.addActionButton({
+	 *   label: 'Save'
+	 *   icon: createSaveIcon(),
+	 * }, () => {
+	 *   const saveData = editor.toSVG().outerHTML;
+	 *   // Do something with saveData
+	 * });
 	 * ```
 	 */
 	public constructor(
@@ -246,6 +253,9 @@ export class Editor {
 	}
 
 	private previousAccessibilityAnnouncement: string = '';
+
+	// Announce `message` for screen readers. If `message` is the same as the previous
+	// message, it is re-announced.
 	public announceForAccessibility(message: string) {
 		// Force re-announcing an announcement if announced again.
 		if (message === this.previousAccessibilityAnnouncement) {
@@ -493,7 +503,7 @@ export class Editor {
 	 * Triggers a re-render after each `updateChunkSize`-sized group of commands
 	 * has been applied.
 	 */
-	private async asyncApplyOrUnapplyCommands(
+	public async asyncApplyOrUnapplyCommands(
 		commands: Command[], apply: boolean, updateChunkSize: number
 	) {
 		this.display.setDraftMode(true);
@@ -522,10 +532,12 @@ export class Editor {
 		this.hideLoadingWarning();
 	}
 
+	// @see {@link #asyncApplyOrUnapplyCommands }
 	public asyncApplyCommands(commands: Command[], chunkSize: number) {
 		return this.asyncApplyOrUnapplyCommands(commands, true, chunkSize);
 	}
 
+	// @see {@link #asyncApplyOrUnapplyCommands }
 	public asyncUnapplyCommands(commands: Command[], chunkSize: number) {
 		return this.asyncApplyOrUnapplyCommands(commands, false, chunkSize);
 	}
@@ -539,6 +551,8 @@ export class Editor {
 	};
 
 	private rerenderQueued: boolean = false;
+	// Schedule a re-render for some time in the near future. Does not schedule an additional
+	// re-render if a re-render is already queued.
 	public queueRerender() {
 		if (!this.rerenderQueued) {
 			this.rerenderQueued = true;
@@ -585,11 +599,13 @@ export class Editor {
 		this.display.getWetInkRenderer().clear();
 	}
 
-	// Focuses the region used for text input
+	// Focuses the region used for text input/key commands.
 	public focus() {
 		this.renderingRegion.focus();
 	}
 
+	// Creates an element that will be positioned on top of the dry/wet ink
+	// renderers.
 	public createHTMLOverlay(overlay: HTMLElement) {
 		overlay.classList.add('overlay');
 		this.container.appendChild(overlay);
@@ -688,7 +704,7 @@ export class Editor {
 		return this.importExportViewport.visibleRect;
 	}
 
-	// Resize the output SVG
+	// Resize the output SVG to match `imageRect`.
 	public setImportExportRect(imageRect: Rect2): Command {
 		const origSize = this.importExportViewport.visibleRect.size;
 		const origTransform = this.importExportViewport.canvasToScreenTransform;
