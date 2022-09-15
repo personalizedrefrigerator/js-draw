@@ -1,5 +1,6 @@
 # 0.1.13
  * Export `Mat33`, `Vec3`, `Vec2`, and `Color4`.
+ * [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/index.html)
  * Bug fixes:
    * After using up all blocks in the rendering cache, a single block was repeatedly re-allocated, leading to slow performance.
 

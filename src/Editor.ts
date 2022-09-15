@@ -124,8 +124,11 @@ export class Editor {
 	/**
 	 * @example
 	 * ```
+	 * const container = document.body;
+	 * 
 	 * // Create an editor
-	 * const editor = new Editor(document.body, {
+	 * const editor = new Editor(container, {
+	 *   // 2e-10 and 1e12 are the default values for minimum/maximum zoom.
 	 *   minZoom: 2e-10,
 	 *   maxZoom: 1e12,
 	 * });
@@ -476,17 +479,17 @@ export class Editor {
 
 	/**
 	 * Dispatches a command without announcing it. By default, does not add to history.
-	 * Use this to preview commands that are still being built.
+	 * Use this to show finalized commands that don't need to have `announceForAccessibility`
+	 * called.
 	 * 
-	 * Prefer `dispatchNoAnnounce` to `command.apply(editor)`. `dispatchNoAnnounce` may allow
+	 * Prefer `command.apply(editor)` for incomplete commands. `dispatchNoAnnounce` may allow
 	 * clients to listen for the application of commands (e.g. `SerializableCommand`s so they can
-	 * be sent across the network).
+	 * be sent across the network), while `apply` does not.
 	 * 
 	 * @example
 	 * ```
-	 * myTransformViewportCommand.unapply(editor);
-	 * myTransformViewportCommand = someFunctionThatUpdatesMyCommand(myTransformViewportCommand);
-	 * editor.dispatchNoAnnounce(myTransformViewportCommand);
+	 * const addToHistory = false;
+	 * editor.dispatchNoAnnounce(editor.viewport.zoomTo(someRectangle), addToHistory);
 	 * ```
 	 */
 	public dispatchNoAnnounce(command: Command, addToHistory: boolean = false) {
