@@ -4,46 +4,41 @@ import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';
 import RenderingCacheNode from './RenderingCacheNode';
 import { CacheRecordManager } from './CacheRecordManager';
-import { CacheProps, CacheState, PartialCacheState } from './types';
+import { CacheProps, CacheState } from './types';
 
 export default class RenderingCache {
-	private partialSharedState: PartialCacheState;
+	private sharedState: CacheState;
 	private recordManager: CacheRecordManager;
 	private rootNode: RenderingCacheNode|null;
 
 	public constructor(cacheProps: CacheProps) {
-		this.partialSharedState = {
+		this.recordManager = new CacheRecordManager(cacheProps);
+		this.sharedState = {
 			props: cacheProps,
 			currentRenderingCycle: 0,
-		};
-		this.recordManager = new CacheRecordManager(this.partialSharedState);
-	}
-
-	public getSharedState(): CacheState {
-		return {
-			...this.partialSharedState,
 			recordManager: this.recordManager,
 		};
+		this.recordManager.setSharedState(this.sharedState);
 	}
 
 	public render(screenRenderer: AbstractRenderer, image: ImageNode, viewport: Viewport) {
 		const visibleRect = viewport.visibleRect;
-		this.partialSharedState.currentRenderingCycle ++;
+		this.sharedState.currentRenderingCycle ++;
 
 		// If we can't use the cache,
-		if (!this.partialSharedState.props.isOfCorrectType(screenRenderer)) {
+		if (!this.sharedState.props.isOfCorrectType(screenRenderer)) {
 			image.render(screenRenderer, visibleRect);
 			return;
 		}
 
 		if (!this.rootNode) {
 			// Adjust the node so that it has the correct aspect ratio
-			const res = this.partialSharedState.props.blockResolution;
+			const res = this.sharedState.props.blockResolution;
 
 			const topLeft = visibleRect.topLeft;
 			this.rootNode = new RenderingCacheNode(
 				new Rect2(topLeft.x, topLeft.y, res.x, res.y),
-				this.getSharedState()
+				this.sharedState
 			);
 		}
 
@@ -54,7 +49,7 @@ export default class RenderingCache {
 		this.rootNode = this.rootNode!.smallestChildContaining(visibleRect) ?? this.rootNode;
 
 		const visibleLeaves = image.getLeavesIntersectingRegion(viewport.visibleRect, rect => screenRenderer.isTooSmallToRender(rect));
-		if (visibleLeaves.length > this.partialSharedState.props.minComponentsToUseCache) {
+		if (visibleLeaves.length > this.sharedState.props.minComponentsToUseCache) {
 			this.rootNode!.renderItems(screenRenderer, [ image ], viewport);
 		} else {
 			image.render(screenRenderer, visibleRect);

@@ -11,6 +11,9 @@ export default class CacheRecord {
 	private lastUsedCycle: number;
 	private allocd: boolean = false;
 
+	// For debugging
+	public allocCount: number = 0;
+
 	public constructor(
 		private onBeforeDeallocCallback: BeforeDeallocCallback|null,
 		private cacheState: CacheState,
@@ -46,6 +49,7 @@ export default class CacheRecord {
 		this.allocd = true;
 		this.onBeforeDeallocCallback = newDeallocCallback;
 		this.lastUsedCycle = this.cacheState.currentRenderingCycle;
+		this.allocCount ++;
 	}
 
 	public getLastUsedCycle(): number {

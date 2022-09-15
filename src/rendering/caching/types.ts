@@ -27,13 +27,8 @@ export interface CacheProps {
     minComponentsToUseCache: number;
 }
 
-// CacheRecordManager relies on a partial copy of the shared state. Thus,
-// we need to separate partial/non-partial state.
-export interface PartialCacheState {
+export interface CacheState {
     currentRenderingCycle: number;
     props: CacheProps;
-}
-
-export interface CacheState extends PartialCacheState {
     recordManager: CacheRecordManager;
 }
