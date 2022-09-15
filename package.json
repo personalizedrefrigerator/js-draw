@@ -24,6 +24,10 @@
       "types": "./dist/src/Editor.d.ts",
       "default": "./dist/src/Editor.js"
     },
+    "./types": {
+      "types": "./dist/src/types.d.ts",
+      "default": "./dist/src/types.js"
+    },
     "./localization": {
       "types": "./dist/src/localization.d.ts",
       "default": "./dist/src/localization.js"
@@ -44,9 +48,29 @@
       "types": "./dist/src/math/Vec2.d.ts",
       "default": "./dist/src/math/Vec2.js"
     },
+    "./math/Rect2": {
+      "types": "./dist/src/math/Rect2.d.ts",
+      "default": "./dist/src/math/Rect2.js"
+    },
+    "./math/Path": {
+      "types": "./dist/src/math/Path.d.ts",
+      "default": "./dist/src/math/Path.js"
+    },
     "./Color4": {
       "types": "./dist/src/Color4.d.ts",
       "default": "./dist/src/Color4.js"
+    },
+    "./components/AbstractComponent": {
+      "types": "./dist/src/components/AbstractComponent.d.ts",
+      "default": "./dist/src/components/AbstractComponent.js"
+    },
+    "./components/Stroke": {
+      "types": "./dist/src/components/Stroke.d.ts",
+      "default": "./dist/src/components/Stroke.js"
+    },
+    "./components/Text": {
+      "types": "./dist/src/components/Text.d.ts",
+      "default": "./dist/src/components/Text.js"
     },
     "./Editor.css": {
       "default": "./src/Editor.css"
@@ -55,6 +79,7 @@
       "default": "./src/toolbar/toolbar.css"
     },
     "./bundle": {
+      "types": "./dist/src/bundle/bundled.d.ts",
       "default": "./dist/bundle.js"
     }
   },

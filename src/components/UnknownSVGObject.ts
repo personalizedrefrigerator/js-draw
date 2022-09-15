@@ -1,3 +1,9 @@
+//
+// Stores objects loaded from an SVG that aren't recognised by the editor.
+// @internal
+// @packageDocumentation
+//
+
 import LineSegment2 from '../math/LineSegment2';
 import Mat33 from '../math/Mat33';
 import Rect2 from '../math/Rect2';

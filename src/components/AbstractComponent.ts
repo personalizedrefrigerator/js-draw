@@ -9,9 +9,9 @@ import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 
-type LoadSaveData = (string[]|Record<symbol, string|number>);
+export type LoadSaveData = (string[]|Record<symbol, string|number>);
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
-type DeserializeCallback = (data: string)=>AbstractComponent;
+export type DeserializeCallback = (data: string)=>AbstractComponent;
 type ComponentId = string;
 
 export default abstract class AbstractComponent {
@@ -38,6 +38,8 @@ export default abstract class AbstractComponent {
 		}
 	}
 
+	// Returns a unique ID for this element.
+	// @see { @link EditorImage!default.lookupElement }
 	public getId() {
 		return this.id;
 	}

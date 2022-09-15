@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import Command from './Command';
 
-type DeserializationCallback = (data: string, editor: Editor) => SerializableCommand;
+export type DeserializationCallback = (data: string, editor: Editor) => SerializableCommand;
 
 export default abstract class SerializableCommand extends Command {
 	public constructor(private commandTypeId: string) {

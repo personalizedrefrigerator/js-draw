@@ -1,3 +1,10 @@
+//
+// Used by `SVGLoader`s to store unrecognised global attributes
+// (e.g. unrecognised XML namespace declarations).
+// @internal
+// @packageDocumentation
+//
+
 import LineSegment2 from '../math/LineSegment2';
 import Mat33 from '../math/Mat33';
 import Rect2 from '../math/Rect2';

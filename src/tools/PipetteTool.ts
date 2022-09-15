@@ -1,3 +1,5 @@
+// @internal @packageDocumentation
+
 import Color4 from '../Color4';
 import Editor from '../Editor';
 import { PointerEvt } from '../types';

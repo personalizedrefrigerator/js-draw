@@ -16,6 +16,7 @@ export default class EditorImage {
 	private root: ImageNode;
 	private componentsById: Record<string, AbstractComponent>;
 
+	/** @internal */
 	public constructor() {
 		this.root = new ImageNode();
 		this.componentsById = {};
@@ -32,15 +33,17 @@ export default class EditorImage {
 		return null;
 	}
 
+	/** @internal */
 	public renderWithCache(screenRenderer: AbstractRenderer, cache: RenderingCache, viewport: Viewport) {
 		cache.render(screenRenderer, this.root, viewport);
 	}
 
+	/** @internal */
 	public render(renderer: AbstractRenderer, viewport: Viewport) {
 		this.root.render(renderer, viewport.visibleRect);
 	}
 
-	// Renders all nodes, even ones not within the viewport
+	/** Renders all nodes, even ones not within the viewport. @internal */
 	public renderAll(renderer: AbstractRenderer) {
 		const leaves = this.root.getLeaves();
 		sortLeavesByZIndex(leaves);
@@ -57,6 +60,7 @@ export default class EditorImage {
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
+	/** @internal */
 	public onDestroyElement(elem: AbstractComponent) {
 		delete this.componentsById[elem.getId()];
 	}
@@ -129,7 +133,7 @@ export default class EditorImage {
 
 type TooSmallToRenderCheck = (rect: Rect2)=> boolean;
 
-// TODO: Assign leaf nodes to CacheNodes. When leaf nodes are modified, the corresponding CacheNodes can be updated.
+/** Part of the Editor's image. @internal */
 export class ImageNode {
 	private content: AbstractComponent|null;
 	private bbox: Rect2;

@@ -1,3 +1,5 @@
+// @internal @packageDocumentation
+
 import { makeArrowBuilder } from '../../components/builders/ArrowBuilder';
 import { makeFreehandLineBuilder } from '../../components/builders/FreehandLineBuilder';
 import { makeLineBuilder } from '../../components/builders/LineBuilder';

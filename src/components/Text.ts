@@ -26,6 +26,7 @@ export default class Text extends AbstractComponent {
 		private readonly style: TextStyle,
 
 		// If not given, an HtmlCanvasElement is used to determine text boundaries.
+		// @internal
 		private readonly getTextDimens: GetTextDimensCallback = Text.getTextDimens,
 	) {
 		super(componentTypeId);

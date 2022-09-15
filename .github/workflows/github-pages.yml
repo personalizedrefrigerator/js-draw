@@ -36,6 +36,8 @@ jobs:
         run: yarn install
       - name: Run tests
         run: yarn test
+      - name: Build documentation
+        run: yarn doc
       - name: Build
         run: cd docs/example && yarn install && yarn build
       - name: Setup Pages

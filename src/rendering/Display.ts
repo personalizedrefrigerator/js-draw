@@ -1,3 +1,18 @@
+/**
+ * Handles `HTMLCanvasElement`s (or other drawing surfaces if being used) used to display the editor's contents.
+ *
+ * @example
+ * ```
+ * const editor = new Editor(document.body);
+ * const w = editor.display.width;
+ * const h = editor.display.height;
+ * const center = Vec2.of(w / 2, h / 2);
+ * const colorAtCenter = editor.display.getColorAt(center);
+ * ```
+ * 
+ * @packageDocumentation
+ */
+
 import AbstractRenderer from './renderers/AbstractRenderer';
 import CanvasRenderer from './renderers/CanvasRenderer';
 import { Editor } from '../Editor';
@@ -23,6 +38,7 @@ export default class Display {
 	private resizeSurfacesCallback?: ()=> void;
 	private flattenCallback?: ()=> void;
 
+	/** @internal */
 	public constructor(
 		private editor: Editor, mode: RenderingMode, private parent: HTMLElement|null
 	) {
@@ -211,10 +227,15 @@ export default class Display {
 		this.dryInkRenderer.setDraftMode(draftMode);
 	}
 
+	/** @internal */
 	public getDryInkRenderer(): AbstractRenderer {
 		return this.dryInkRenderer;
 	}
 
+	/**
+	 * @returns The renderer used for showing action previews (e.g. an unfinished stroke).
+	 * The `wetInkRenderer`'s surface is stacked above the `dryInkRenderer`'s.
+	 */
 	public getWetInkRenderer(): AbstractRenderer {
 		return this.wetInkRenderer;
 	}

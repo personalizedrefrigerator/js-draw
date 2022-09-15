@@ -1,14 +1,9 @@
-// Code shared with Joplin
-
-type Listener<Value> = (data: Value)=> void;
-type CallbackHandler<EventType> = (data: EventType)=> void;
-
 /**
  * Handles notifying listeners of events.
- * 
+ *
  * `EventKeyType` is used to distinguish events (e.g. a `ClickEvent` vs a `TouchEvent`)
  * while `EventMessageType` is the type of the data sent with an event (can be `void`).
- * 
+ *
  * @example
  * ```
  * const dispatcher = new EventDispatcher<'event1'|'event2'|'event3', void>();
@@ -17,7 +12,16 @@ type CallbackHandler<EventType> = (data: EventType)=> void;
  * });
  * dispatcher.dispatch('event1');
  * ```
+ *
+ * @packageDocumentation
  */
+
+// Code shared with Joplin (js-draw was originally intended to be part of Joplin).
+
+type Listener<Value> = (data: Value)=> void;
+type CallbackHandler<EventType> = (data: EventType)=> void;
+
+// { @inheritDoc EventDispatcher! }
 export default class EventDispatcher<EventKeyType extends string|symbol|number, EventMessageType> {
 	private listeners: Partial<Record<EventKeyType, Array<Listener<EventMessageType>>>>;
 	public constructor() {

@@ -10,5 +10,11 @@
 	"commentStyle": "all",
 	"readme": "README.md",
 	"entryPointStrategy": "expand",
-	"out": "docs/typedoc/"
+	"out": "docs/typedoc/",
+
+	"validation": {
+		"notExported": false,
+		"invalidLink": true,
+		"notDocumented": false
+	}
 }

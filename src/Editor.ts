@@ -1,3 +1,21 @@
+/**
+ * The main entrypoint for the full editor.
+ * 
+ * @example
+ * To create an editor with a toolbar,
+ * ```
+ * const editor = new Editor(document.body);
+ * 
+ * const toolbar = editor.addToolbar();
+ * toolbar.addActionButton('Save', () => {
+ *   const saveData = editor.toSVG().outerHTML;
+ *   // Do something with saveData...
+ * });
+ * ```
+ * 
+ * @packageDocumentation
+ */
+
 
 import EditorImage from './EditorImage';
 import ToolController from './tools/ToolController';
@@ -39,16 +57,47 @@ export interface EditorSettings {
 	maxZoom: number,
 }
 
+// { @inheritDoc Editor! }
 export class Editor {
 	// Wrapper around the viewport and toolbar
 	private container: HTMLElement;
 	private renderingRegion: HTMLElement;
 
-	/** Undo/redo */
-	public history: UndoRedoHistory;
 	public display: Display;
 
-	/** Data structure for adding/removing/querying objects in the image. */
+	/**
+	 * Handles undo/redo.
+	 * 
+	 * @example
+	 * ```
+	 * const editor = new Editor(document.body);
+	 * 
+	 * // Do something undoable.
+	 * // ...
+	 * 
+	 * // Undo the last action
+	 * editor.history.undo();
+	 * ```
+	 */
+	public history: UndoRedoHistory;
+
+	/**
+	 * Data structure for adding/removing/querying objects in the image.
+	 * 
+	 * @example
+	 * ```
+	 * const editor = new Editor(document.body);
+	 * 
+	 * // Create a path.
+	 * const stroke = new Stroke([
+	 *   Path.fromString('M0,0 L30,30 z').toRenderable({ fill: Color4.black }),
+	 * ]);
+	 * const addElementCommand = editor.image.addElement(stroke);
+	 * 
+	 * // Add the stroke to the editor
+	 * editor.dispatch(addElementCommand);
+	 * ```
+	 */
 	public image: EditorImage;
 
 	/** Viewport for the exported/imported image. */
@@ -62,7 +111,7 @@ export class Editor {
 
 	/**
 	 * Global event dispatcher/subscriber.
-	 * @see {@link EditorEventType}
+	 * @see {@link types.EditorEventType}
 	 */
 	public notifier: EditorNotifier;
 
@@ -559,7 +608,7 @@ export class Editor {
 	}
 
 	// Dispatch a pen event to the currently selected tool.
-	// Intented for unit tests.
+	// Intended primarially for unit tests.
 	public sendPenEvent(
 		eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
 		point: Point2,

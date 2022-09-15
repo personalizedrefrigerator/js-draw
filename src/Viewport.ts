@@ -81,11 +81,13 @@ export class Viewport {
 	private inverseTransform: Mat33;
 	private screenRect: Rect2;
 
+	// @internal
 	public constructor(private notifier: EditorNotifier) {
 		this.resetTransform(Mat33.identity);
 		this.screenRect = Rect2.empty;
 	}
 
+	// @internal
 	public updateScreenSize(screenSize: Vec2) {
 		this.screenRect = this.screenRect.resizedTo(screenSize);
 	}
@@ -107,7 +109,7 @@ export class Viewport {
 		return new Viewport.ViewportTransform(transform);
 	}
 
-	// Updates the transformation directly. Using transformBy is preferred.
+	// Updates the transformation directly. Using `transformBy` is preferred.
 	// [newTransform] should map from canvas coordinates to screen coordinates.
 	public resetTransform(newTransform: Mat33 = Mat33.identity) {
 		const oldTransform = this.transform;
@@ -138,6 +140,7 @@ export class Viewport {
 		return this.transform.transformVec3(Vec3.unitX).magnitude();
 	}
 
+	// Returns the size of one screen pixel in canvas units.
 	public getSizeOfPixelOnCanvas(): number {
 		return 1/this.getScaleFactor();
 	}
@@ -147,7 +150,7 @@ export class Viewport {
 		return this.transform.transformVec3(Vec3.unitX).angle();
 	}
 
-	// Rounds the given [point] to a multiple of 10 such that it is within [tolerance] of
+	// Rounds the given `point` to a multiple of 10 such that it is within `tolerance` of
 	// its original location. This is useful for preparing data for base-10 conversion.
 	public static roundPoint<T extends Point2|number>(
 		point: T, tolerance: number,

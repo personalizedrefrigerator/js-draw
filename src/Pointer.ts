@@ -11,7 +11,7 @@ export enum PointerDevice {
 }
 
 // Provides a snapshot containing information about a pointer. A Pointer
-// object is immutable --- it will not be updated when the pointer's information changes.
+// object is immutable — it will not be updated when the pointer's information changes.
 export default class Pointer {
 	private constructor(
         // The (x, y) position of the pointer relative to the top-left corner
@@ -31,11 +31,12 @@ export default class Pointer {
         // Unique ID for the pointer
         public readonly id: number,
 
-        // Numeric timestamp (milliseconds, as from (new Date).getTime())
+        // Numeric timestamp (milliseconds, as from `(new Date).getTime()`)
         public readonly timeStamp: number,
 	) {
 	}
 
+	// Creates a Pointer from a DOM event.
 	public static ofEvent(evt: PointerEvent, isDown: boolean, viewport: Viewport): Pointer {
 		const screenPos = Vec2.of(evt.offsetX, evt.offsetY);
 
