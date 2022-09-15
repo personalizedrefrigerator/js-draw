@@ -18,6 +18,11 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 		saveCallback();
 	});
 
+	// Show a confirmation dialog when the user tries to close the page.
+	window.onbeforeunload = () => {
+		return 'There may be unsaved changes. Really quit?';
+	};
+
 	return editor;
 };
 
@@ -244,6 +249,9 @@ const showSavePopup = (editor: Editor) => {
 	);
 };
 
+// PWA file access. At the time of this writing, TypeScript does not recognise window.launchQueue.
+declare let launchQueue: any;
+
 (() => {
 	const loadFromTextarea: HTMLTextAreaElement = document.querySelector('#initialData')!;
 	const fileInput: HTMLInputElement = document.querySelector('#initialFile')!;
@@ -286,6 +294,25 @@ const showSavePopup = (editor: Editor) => {
 		reader.readAsText(files[0]);
 	};
 
+	// PWA: Handle files on launch.
+	// Ref: https://docs.microsoft.com/en-us/microsoft-edge/progressive-web-apps-chromium/how-to/handle-files#:~:text=Progressive%20Web%20Apps%20that%20can%20handle%20files%20feel,register%20as%20file%20handlers%20on%20the%20operating%20system.
+	if ('launchQueue' in window) {
+		// Create the editor and load files.
+		launchQueue.setConsumer(async ({ files }: { files: any[] }) => {
+			optionsScreen.remove();	
+			const editor = createEditor(() => showSavePopup(editor));
+
+			if (files && files.length > 0) {
+				for (const file of files) {
+					const blob = await file.getFile();
+					blob.handle = file;
+					const data = blob.text();
+					editor.loadFromSVG(data);
+				}
+			}
+		});
+	}
+
 	startButton.onclick = () => {
 		const textareaData = loadFromTextarea.value;
 		optionsScreen.remove();
@@ -300,9 +327,5 @@ const showSavePopup = (editor: Editor) => {
 		if (sourceText && sourceText.length > 0) {
 			editor.loadFromSVG(sourceText);
 		}
-
-		window.onbeforeunload = () => {
-			return 'There may be unsaved changes. Really quit?';
-		};
 	};
 })();

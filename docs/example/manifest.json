@@ -29,6 +29,16 @@
             "sizes": "64x64"
         }
     ],
+    "file_handlers": [
+        {
+            "action": "/",
+            "accept": {
+                "image/svg+xml": [
+                    ".svg"
+                ]
+            }
+        }
+    ],
     "start_url": "./example.html",
     "background_color": "#853360",
     "theme_color": "#803380",

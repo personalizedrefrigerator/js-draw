@@ -1,6 +1,5 @@
 import Editor from './Editor';
 import AbstractRenderer from './rendering/renderers/AbstractRenderer';
-import Command from './commands/Command';
 import Viewport from './Viewport';
 import AbstractComponent from './components/AbstractComponent';
 import Rect2 from './math/Rect2';
@@ -71,7 +70,7 @@ export default class EditorImage {
 		return this.root.addLeaf(elem);
 	}
 
-	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): Command {
+	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {
 		return new EditorImage.AddElementCommand(elem, applyByFlattening);
 	}
 
@@ -108,7 +107,7 @@ export default class EditorImage {
 			editor.queueRerender();
 		}
 
-		public description(editor: Editor, localization: EditorLocalization) {
+		public description(_editor: Editor, localization: EditorLocalization) {
 			return localization.addElementAction(this.element.description(localization));
 		}
 
