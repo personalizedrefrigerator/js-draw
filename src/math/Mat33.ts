@@ -1,15 +1,22 @@
 import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
 
-// Represents a three dimensional linear transformation or
-// a two-dimensional affine transformation. (An affine transformation scales/rotates/shears
-// **and** translates while a linear transformation just scales/rotates/shears).
+/**
+ * Represents a three dimensional linear transformation or
+ * a two-dimensional affine transformation. (An affine transformation scales/rotates/shears
+ * **and** translates while a linear transformation just scales/rotates/shears).
+ */
 export default class Mat33 {
 	private readonly rows: Vec3[];
 
-	// ⎡ a1 a2 a3 ⎤
-	// ⎢ b1 b2 b3 ⎥
-	// ⎣ c1 c2 c3 ⎦
+	/**
+	 * Creates a matrix from inputs in the form,
+	 * ```
+	 * ⎡ a1 a2 a3 ⎤
+	 * ⎢ b1 b2 b3 ⎥
+	 * ⎣ c1 c2 c3 ⎦
+	 * ```
+	 */
 	public constructor(
 		public readonly a1: number,
 		public readonly a2: number,
@@ -30,6 +37,14 @@ export default class Mat33 {
 		];
 	}
 
+	/**
+	 * Creates a matrix from the given rows:
+	 * ```
+	 *  ⎡ r1.x r1.y r1.z ⎤
+	 *  ⎢ r2.x r2.y r2.z ⎥
+	 *  ⎣ r3.x r3.y r3.z ⎦
+	 * ```
+	 */
 	public static ofRows(r1: Vec3, r2: Vec3, r3: Vec3): Mat33 {
 		return new Mat33(
 			r1.x, r1.y, r1.z,
@@ -44,8 +59,13 @@ export default class Mat33 {
 		0, 0, 1
 	);
 
-	// Either returns the inverse of this, or, if this matrix is singular/uninvertable,
-	// returns Mat33.identity.
+	/**
+	 * Either returns the inverse of this, or, if this matrix is singular/uninvertable,
+	 * returns Mat33.identity.
+	 * 
+	 * This may cache the computed inverse and return the cached version instead of recomputing
+	 * it.
+	 */
 	public inverse(): Mat33 {
 		return this.computeInverse() ?? Mat33.identity;
 	}
@@ -162,9 +182,11 @@ export default class Mat33 {
 		);
 	}
 
-	// Applies this as an affine transformation to the given vector.
-	// Returns a transformed version of [other].
-	public transformVec2(other: Vec3): Vec2 {
+	/**
+	 * Applies this as an affine transformation to the given vector.
+	 * Returns a transformed version of `other`.
+	 */
+	public transformVec2(other: Vec2): Vec2 {
 		// When transforming a Vec2, we want to use the z transformation
 		// components of this for translation:
 		//  ⎡ . . tX ⎤
@@ -179,8 +201,10 @@ export default class Mat33 {
 		return Vec2.of(intermediate.x, intermediate.y);
 	}
 
-	// Applies this as a linear transformation to the given vector (doesn't translate).
-	// This is the standard way of transforming vectors in ℝ³.
+	/**
+	 * Applies this as a linear transformation to the given vector (doesn't translate).
+	 * This is the standard way of transforming vectors in ℝ³.
+	 */
 	public transformVec3(other: Vec3): Vec3 {
 		return Vec3.of(
 			this.rows[0].dot(other),
@@ -189,7 +213,7 @@ export default class Mat33 {
 		);
 	}
 
-	// Returns true iff this = other ± fuzz
+	/** Returns true iff this = other ± fuzz */
 	public eq(other: Mat33, fuzz: number = 0): boolean {
 		for (let i = 0; i < 3; i++) {
 			if (!this.rows[i].eq(other.rows[i], fuzz)) {
@@ -205,12 +229,16 @@ export default class Mat33 {
 ⎡ ${this.a1},\t ${this.a2},\t ${this.a3}\t ⎤
 ⎢ ${this.b1},\t ${this.b2},\t ${this.b3}\t ⎥
 ⎣ ${this.c1},\t ${this.c2},\t ${this.c3}\t ⎦
-		`.trimRight();
+		`.trimEnd().trimStart();
 	}
 
-	// result[0] = top left element
-	// result[1] = element at row zero, column 1
-	// ...
+	/**
+	 * ```
+	 * result[0] = top left element
+	 * result[1] = element at row zero, column 1
+	 * ...
+	 * ```
+	 */
 	public toArray(): number[] {
 		return [
 			this.a1, this.a2, this.a3,
@@ -219,7 +247,7 @@ export default class Mat33 {
 		];
 	}
 
-	// Constructs a 3x3 translation matrix (for translating Vec2s)
+	/** Constructs a 3x3 translation matrix (for translating `Vec2`s) */
 	public static translation(amount: Vec2): Mat33 {
 		// When transforming Vec2s by a 3x3 matrix, we give the input
 		// Vec2s z = 1. As such,
@@ -269,7 +297,7 @@ export default class Mat33 {
 		return result.rightMul(Mat33.translation(center.times(-1)));
 	}
 
-	// Converts a CSS-form matrix(a, b, c, d, e, f) to a Mat33.
+	/** Converts a CSS-form `matrix(a, b, c, d, e, f)` to a Mat33. */
 	public static fromCSSMatrix(cssString: string): Mat33 {
 		if (cssString === '' || cssString === 'none') {
 			return Mat33.identity;

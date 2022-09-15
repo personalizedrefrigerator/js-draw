@@ -2,8 +2,8 @@ import LineSegment2 from './LineSegment2';
 import Mat33 from './Mat33';
 import { Point2, Vec2 } from './Vec2';
 
-// An object that can be converted to a Rect2.
-interface RectTemplate {
+/** An object that can be converted to a Rect2. */
+export interface RectTemplate {
 	x: number;
 	y: number;
 	w?: number;

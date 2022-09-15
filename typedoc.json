@@ -1,0 +1,14 @@
+{
+	"entryPoints": [
+		"./src/"
+	],
+	"exclude": [
+		"**/*.test.ts"
+	],
+	"excludePrivate": true,
+	"excludeInternal": true,
+	"commentStyle": "all",
+	"readme": "README.md",
+	"entryPointStrategy": "expand",
+	"out": "docs/typedoc/"
+}

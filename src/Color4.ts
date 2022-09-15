@@ -1,14 +1,25 @@
 
 export default class Color4 {
 	private constructor(
+		/** Red component. Should be in the range [0, 1]. */
 		public readonly r: number,
+
+		/** Green component. `g` ∈ [0, 1] */
 		public readonly g: number,
+
+		/** Blue component. `b` ∈ [0, 1] */
 		public readonly b: number,
+
+		/** Alpha/transparent component. `a` ∈ [0, 1] */
 		public readonly a: number
 	) {
 	}
 
-	// Each component should be in the range [0, 1]
+	/**
+	 * Create a color from red, green, blue components. The color is fully opaque (`a = 1.0`).
+	 * 
+	 * Each component should be in the range [0, 1].
+	 */
 	public static ofRGB(red: number, green: number, blue: number): Color4 {
 		return Color4.ofRGBA(red, green, blue, 1.0);
 	}
@@ -58,7 +69,7 @@ export default class Color4 {
 		return Color4.ofRGBA(components[0], components[1], components[2], components[3]);
 	}
 
-	// Like fromHex, but can handle additional colors if an HTML5Canvas is available.
+	/** Like fromHex, but can handle additional colors if an `HTMLCanvasElement` is available. */
 	public static fromString(text: string): Color4 {
 		if (text.startsWith('#')) {
 			return Color4.fromHex(text);
@@ -82,6 +93,7 @@ export default class Color4 {
 		}
 	}
 
+	/** @returns true if `this` and `other` are approximately equal. */
 	public eq(other: Color4|null|undefined): boolean {
 		if (other == null) {
 			return false;
@@ -91,6 +103,15 @@ export default class Color4 {
 	}
 
 	private hexString: string|null = null;
+
+	/**
+	 * @returns a hexadecimal color string representation of `this`, in the form `#rrggbbaa`.
+	 * 
+	 * @example
+	 * ```
+	 * Color4.red.toHexString(); // -> #ff0000ff
+	 * ```
+	 */
 	public toHexString(): string {
 		if (this.hexString) {
 			return this.hexString;

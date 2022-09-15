@@ -75,9 +75,11 @@ export default class Display {
 		});
 	}
 
-	// Returns the visible width of the display (e.g. how much
-	// space the display's element takes up in the x direction
-	// in the DOM).
+	/**
+	 * @returns the visible width of the display (e.g. how much
+	 * space the display's element takes up in the x direction
+	 * in the DOM).
+	 */
 	public get width(): number {
 		return this.dryInkRenderer.displaySize().x;
 	}
@@ -86,10 +88,15 @@ export default class Display {
 		return this.dryInkRenderer.displaySize().y;
 	}
 
+	/** @internal */
 	public getCache() {
 		return this.cache;
 	}
 
+	/**
+	 * @returns the color at the given point on the dry ink renderer, or `null` if `screenPos`
+	 * 	is not on the display.
+	 */
 	public getColorAt = (_screenPos: Point2): Color4|null => {
 		return null;
 	};
@@ -170,6 +177,10 @@ export default class Display {
 		this.editor.createHTMLOverlay(textRendererOutputContainer);
 	}
 
+	/**
+	 * Rerenders the text-based display.
+	 * The text-based display is intended for screen readers and can be navigated to by pressing `tab`.
+	 */
 	public rerenderAsText() {
 		this.textRenderer.clear();
 		this.editor.image.render(this.textRenderer, this.editor.viewport);
@@ -179,7 +190,11 @@ export default class Display {
 		}
 	}
 
-	// Clears the drawing surfaces and otherwise prepares for a rerender.
+	/**
+	 * Clears the drawing surfaces and otherwise prepares for a rerender.
+	 * 
+	 * @returns the dry ink renderer.
+	 */
 	public startRerender(): AbstractRenderer {
 		this.resizeSurfacesCallback?.();
 		this.wetInkRenderer.clear();
@@ -188,6 +203,10 @@ export default class Display {
 		return this.dryInkRenderer;
 	}
 
+	/**
+	 * If `draftMode`, the dry ink renderer is configured to render
+	 * low-quality output.
+	 */
 	public setDraftMode(draftMode: boolean) {
 		this.dryInkRenderer.setDraftMode(draftMode);
 	}
@@ -200,7 +219,7 @@ export default class Display {
 		return this.wetInkRenderer;
 	}
 
-	// Re-renders the contents of the wetInkRenderer onto the dryInkRenderer
+	/** Re-renders the contents of the wetInkRenderer onto the dryInkRenderer. */
 	public flatten() {
 		this.flattenCallback?.();
 	}

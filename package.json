@@ -32,6 +32,22 @@
       "types": "./dist/src/toolbar/HTMLToolbar.d.ts",
       "default": "./dist/src/toolbar/HTMLToolbar.js"
     },
+    "./math/Mat33": {
+      "types": "./dist/src/math/Mat33.d.ts",
+      "default": "./dist/src/math/Mat33.js"
+    },
+    "./math/Vec3": {
+      "types": "./dist/src/math/Vec3.d.ts",
+      "default": "./dist/src/math/Vec3.js"
+    },
+    "./math/Vec2": {
+      "types": "./dist/src/math/Vec2.d.ts",
+      "default": "./dist/src/math/Vec2.js"
+    },
+    "./Color4": {
+      "types": "./dist/src/Color4.d.ts",
+      "default": "./dist/src/Color4.js"
+    },
     "./Editor.css": {
       "default": "./src/Editor.css"
     },
@@ -52,6 +68,8 @@
   "scripts": {
     "test": "jest",
     "build": "rm -rf ./dist; mkdir dist && yarn tsc && ts-node ./build_tools/bundle.ts",
+    "doc": "typedoc --options typedoc.json",
+    "watch-docs": "typedoc --watch --options typedoc.json",
     "lint": "eslint .",
     "linter-precommit": "eslint --fix --ext .js --ext .ts",
     "lint-staged": "lint-staged",
@@ -83,6 +101,7 @@
     "ts-jest": "^28.0.8",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.9.1",
+    "typedoc": "^0.23.14",
     "typescript": "^4.8.2",
     "webpack": "^5.74.0"
   },

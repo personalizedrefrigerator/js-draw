@@ -3,11 +3,22 @@
 type Listener<Value> = (data: Value)=> void;
 type CallbackHandler<EventType> = (data: EventType)=> void;
 
-// EventKeyType is used to distinguish events (e.g. a 'ClickEvent' vs a 'TouchEvent')
-// while EventMessageType is the type of the data sent with an event (can be `void`)
+/**
+ * Handles notifying listeners of events.
+ * 
+ * `EventKeyType` is used to distinguish events (e.g. a `ClickEvent` vs a `TouchEvent`)
+ * while `EventMessageType` is the type of the data sent with an event (can be `void`).
+ * 
+ * @example
+ * ```
+ * const dispatcher = new EventDispatcher<'event1'|'event2'|'event3', void>();
+ * dispatcher.on('event1', () => {
+ *   console.log('Event 1 triggered.');
+ * });
+ * dispatcher.dispatch('event1');
+ * ```
+ */
 export default class EventDispatcher<EventKeyType extends string|symbol|number, EventMessageType> {
-	// Partial marks all fields as optional. To initialize with an empty object, this is required.
-	// See https://stackoverflow.com/a/64526384
 	private listeners: Partial<Record<EventKeyType, Array<Listener<EventMessageType>>>>;
 	public constructor() {
 		this.listeners = {};
@@ -38,7 +49,7 @@ export default class EventDispatcher<EventKeyType extends string|symbol|number, 
 		};
 	}
 
-	// Equivalent to calling .remove() on the object returned by .on
+	/** Removes an event listener. This is equivalent to calling `.remove()` on the object returned by `.on`. */
 	public off(eventName: EventKeyType, callback: CallbackHandler<EventMessageType>) {
 		const listeners = this.listeners[eventName];
 		if (!listeners) return;

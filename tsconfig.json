@@ -24,6 +24,9 @@
 
 		// Files that don't need transpilation
 		"**/*.test.ts",
-		"__mocks__/*"
+		"__mocks__/*",
+
+		// Output files
+		"./dist/**"
 	],
 }

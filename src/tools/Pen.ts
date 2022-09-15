@@ -8,7 +8,7 @@ import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 
-interface PenStyle {
+export interface PenStyle {
     color: Color4;
     thickness: number;
 }

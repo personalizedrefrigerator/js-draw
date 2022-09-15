@@ -21,17 +21,20 @@ import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
 
 export interface EditorSettings {
-	// Defaults to RenderingMode.CanvasRenderer
+	/** Defaults to `RenderingMode.CanvasRenderer` */
 	renderingMode: RenderingMode,
 
-	// Uses a default English localization if a translation is not given.
+	/** Uses a default English localization if a translation is not given. */
 	localization: Partial<EditorLocalization>,
 
-	// True if touchpad/mousewheel scrolling should scroll the editor instead of the document.
-	// This does not include pinch-zoom events.
-	// Defaults to true.
+	/**
+	 * `true` if touchpad/mousewheel scrolling should scroll the editor instead of the document.
+	 * This does not include pinch-zoom events.
+	 * Defaults to true.
+	 */
 	wheelEventsEnabled: boolean|'only-if-focused';
 
+	/** Minimum zoom fraction (e.g. 0.5 → 50% zoom). */
 	minZoom: number,
 	maxZoom: number,
 }
@@ -41,16 +44,26 @@ export class Editor {
 	private container: HTMLElement;
 	private renderingRegion: HTMLElement;
 
+	/** Undo/redo */
 	public history: UndoRedoHistory;
 	public display: Display;
+
+	/** Data structure for adding/removing/querying objects in the image. */
 	public image: EditorImage;
 
-	// Viewport for the exported/imported image
+	/** Viewport for the exported/imported image. */
 	private importExportViewport: Viewport;
+
+	/** @internal */
 	public localization: EditorLocalization;
 
 	public viewport: Viewport;
 	public toolController: ToolController;
+
+	/**
+	 * Global event dispatcher/subscriber.
+	 * @see {@link EditorEventType}
+	 */
 	public notifier: EditorNotifier;
 
 	private loadingWarning: HTMLElement;
@@ -59,6 +72,19 @@ export class Editor {
 
 	private settings: EditorSettings;
 
+	/**
+	 * @example
+	 * ```
+	 * // Create an editor
+	 * const editor = new Editor(document.body, {
+	 *   minZoom: 2e-10,
+	 *   maxZoom: 1e12,
+	 * });
+	 * 
+	 * // Add the default toolbar
+	 * editor.addToolbar();
+	 * ```
+	 */
 	public constructor(
 		parent: HTMLElement,
 		settings: Partial<EditorSettings> = {},
@@ -145,14 +171,19 @@ export class Editor {
 		});
 	}
 
-	// Returns a reference to this' container.
-	// Example usage:
-	//   editor.getRootElement().style.height = '500px';
+	/**
+	 * @returns a reference to the editor's container.
+	 * 
+	 * @example
+	 * ```
+	 *   editor.getRootElement().style.height = '500px';
+	 * ```
+	 */
 	public getRootElement(): HTMLElement {
 		return this.container;
 	}
 
-	// [fractionLoaded] should be a number from 0 to 1, where 1 represents completely loaded.
+	/** @param fractionLoaded - should be a number from 0 to 1, where 1 represents completely loaded. */
 	public showLoadingWarning(fractionLoaded: number) {
 		const loadingPercent = Math.round(fractionLoaded * 100);
 		this.loadingWarning.innerText = this.localization.loading(loadingPercent);
@@ -175,6 +206,10 @@ export class Editor {
 		this.previousAccessibilityAnnouncement = message;
 	}
 
+	/**
+	 * Creates a toolbar. If `defaultLayout` is true, default buttons are used.
+	 * @returns a reference to the toolbar.
+	 */
 	public addToolbar(defaultLayout: boolean = true): HTMLToolbar {
 		const toolbar = new HTMLToolbar(this, this.container, this.localization);
 
@@ -340,8 +375,7 @@ export class Editor {
 		});
 	}
 
-	// Adds event listners for keypresses to [elem] and forwards those events to the
-	// editor.
+	/** Adds event listners for keypresses to `elem` and forwards those events to the editor. */
 	public handleKeyEventsFrom(elem: HTMLElement) {
 		elem.addEventListener('keydown', evt => {
 			if (evt.key === 't' || evt.key === 'T') {
@@ -369,7 +403,7 @@ export class Editor {
 		});
 	}
 
-	// Adds to history by default
+	/** `apply` a command. `command` will be announced for accessibility. */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		if (addToHistory) {
 			// .push applies [command] to this
@@ -381,7 +415,21 @@ export class Editor {
 		this.announceForAccessibility(command.description(this, this.localization));
 	}
 
-	// Dispatches a command without announcing it. By default, does not add to history.
+	/**
+	 * Dispatches a command without announcing it. By default, does not add to history.
+	 * Use this to preview commands that are still being built.
+	 * 
+	 * Prefer `dispatchNoAnnounce` to `command.apply(editor)`. `dispatchNoAnnounce` may allow
+	 * clients to listen for the application of commands (e.g. `SerializableCommand`s so they can
+	 * be sent across the network).
+	 * 
+	 * @example
+	 * ```
+	 * myTransformViewportCommand.unapply(editor);
+	 * myTransformViewportCommand = someFunctionThatUpdatesMyCommand(myTransformViewportCommand);
+	 * editor.dispatchNoAnnounce(myTransformViewportCommand);
+	 * ```
+	 */
 	public dispatchNoAnnounce(command: Command, addToHistory: boolean = false) {
 		if (addToHistory) {
 			this.history.push(command);
@@ -390,10 +438,12 @@ export class Editor {
 		}
 	}
 
-	// Apply a large transformation in chunks.
-	// If [apply] is false, the commands are unapplied.
-	// Triggers a re-render after each [updateChunkSize]-sized group of commands
-	// has been applied.
+	/**
+	 * Apply a large transformation in chunks.
+	 * If `apply` is `false`, the commands are unapplied.
+	 * Triggers a re-render after each `updateChunkSize`-sized group of commands
+	 * has been applied.
+	 */
 	private async asyncApplyOrUnapplyCommands(
 		commands: Command[], apply: boolean, updateChunkSize: number
 	) {
@@ -615,8 +665,12 @@ export class Editor {
 		};
 	}
 
-	// Alias for loadFrom(SVGLoader.fromString).
-	// This is particularly useful when accessing a bundled version of the editor.
+	/**
+	 * Alias for loadFrom(SVGLoader.fromString).
+	 * 
+	 * This is particularly useful when accessing a bundled version of the editor,
+	 * where `SVGLoader.fromString` is unavailable.
+	 */
 	public async loadFromSVG(svgData: string) {
 		const loader = SVGLoader.fromString(svgData);
 		await this.loadFrom(loader);

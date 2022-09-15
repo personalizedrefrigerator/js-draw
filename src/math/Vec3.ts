@@ -1,6 +1,10 @@
 
 
-// A vector with three components. Can also be used to represent a two-component vector
+/**
+ * A vector with three components. Can also be used to represent a two-component vector.
+ * 
+ * A `Vec3` is immutable.
+ */
 export default class Vec3 {
 	private constructor(
 		public readonly x: number,
@@ -9,7 +13,7 @@ export default class Vec3 {
 	) {
 	}
 
-	// Returns the x, y components of this
+	/** Returns the x, y components of this. */
 	public get xy(): { x: number; y: number } {
 		// Useful for APIs that behave differently if .z is present.
 		return {
@@ -22,7 +26,7 @@ export default class Vec3 {
 		return new Vec3(x, y, z);
 	}
 
-	// Returns this' [idx]th component
+	/** Returns this' `idx`th component. For example, `Vec3.of(1, 2, 3).at(1) → 2`. */
 	public at(idx: number): number {
 		if (idx === 0) return this.x;
 		if (idx === 1) return this.y;
@@ -31,7 +35,7 @@ export default class Vec3 {
 		throw new Error(`${idx} out of bounds!`);
 	}
 
-	// Alias for this.magnitude
+	/** Alias for this.magnitude. */
 	public length(): number {
 		return this.magnitude();
 	}
@@ -44,16 +48,26 @@ export default class Vec3 {
 		return this.dot(this);
 	}
 
-	// Return this' angle in the XY plane (treats this as a Vec2)
+	/**
+	 * Return this' angle in the XY plane (treats this as a Vec2).
+	 * 
+	 * This is equivalent to `Math.atan2(vec.y, vec.x)`.
+	 */
 	public angle(): number {
 		return Math.atan2(this.y, this.x);
 	}
 
+	/**
+	 * Returns a unit vector in the same direction as this.
+	 * 
+	 * If `this` has zero length, the resultant vector has `NaN` components.
+	 */
 	public normalized(): Vec3 {
 		const norm = this.magnitude();
 		return Vec3.of(this.x / norm, this.y / norm, this.z / norm);
 	}
 
+	/** @returns A copy of `this` multiplied by a scalar. */
 	public times(c: number): Vec3 {
 		return Vec3.of(this.x * c, this.y * c, this.z * c);
 	}
@@ -81,8 +95,10 @@ export default class Vec3 {
 		);
 	}
 
-	// Returns a vector orthogonal to this. If this is a Vec2, returns [this] rotated
-	// 90 degrees counter-clockwise.
+	/**
+	 * Returns a vector orthogonal to this. If this is a Vec2, returns `this` rotated
+	 * 90 degrees counter-clockwise.
+	 */
 	public orthog(): Vec3 {
 		// If parallel to the z-axis
 		if (this.dot(Vec3.unitX) === 0 && this.dot(Vec3.unitY) === 0) {
@@ -92,18 +108,32 @@ export default class Vec3 {
 		return this.cross(Vec3.unitZ.times(-1)).normalized();
 	}
 
-	// Returns this plus a vector of length [distance] in [direction]
+	/** Returns this plus a vector of length `distance` in `direction`. */
 	public extend(distance: number, direction: Vec3): Vec3 {
 		return this.plus(direction.normalized().times(distance));
 	}
 
-	// Returns a vector [fractionTo] of the way to target from this.
+	/** Returns a vector `fractionTo` of the way to target from this. */
 	public lerp(target: Vec3, fractionTo: number): Vec3 {
 		return this.times(1 - fractionTo).plus(target.times(fractionTo));
 	}
 
-	// [zip] Maps a component of this and a corresponding component of
-	// [other] to a component of the output vector.
+	/**
+	 * `zip` Maps a component of this and a corresponding component of
+	 * `other` to a component of the output vector.
+	 * 
+	 * @example
+	 * ```
+	 * const a = Vec3.of(1, 2, 3);
+	 * const b = Vec3.of(0.5, 2.1, 2.9);
+	 * 
+	 * const zipped = a.zip(b, (aComponent, bComponent) => {
+	 *   return Math.min(aComponent, bComponent);
+	 * });
+	 * 
+	 * console.log(zipped.toString()); // → Vec(0.5, 2, 2.9)
+	 * ```
+	 */
 	public zip(
 		other: Vec3, zip: (componentInThis: number, componentInOther: number)=> number
 	): Vec3 {
@@ -114,7 +144,14 @@ export default class Vec3 {
 		);
 	}
 
-	// Returns a vector with each component acted on by [fn]
+	/**
+	 * Returns a vector with each component acted on by `fn`.
+	 * 
+	 * @example
+	 * ```
+	 * console.log(Vec3.of(1, 2, 3).map(val => val + 1)); // → Vec(2, 3, 4)
+	 * ```
+	 */
 	public map(fn: (component: number, index: number)=> number): Vec3 {
 		return Vec3.of(
 			fn(this.x, 0), fn(this.y, 1), fn(this.z, 2)
@@ -125,8 +162,19 @@ export default class Vec3 {
 		return [this.x, this.y, this.z];
 	}
 
-	// [fuzz] The maximum difference between two components for this and [other]
-	// to be considered equal.
+	/**
+	 * [fuzz] The maximum difference between two components for this and [other]
+	 * to be considered equal.
+	 * 
+	 * @example
+	 * ```
+	 * Vec3.of(1, 2, 3).eq(Vec3.of(4, 5, 6), 100);  // → true
+	 * Vec3.of(1, 2, 3).eq(Vec3.of(4, 5, 6), 0.1);  // → false
+	 * Vec3.of(1, 2, 3).eq(Vec3.of(4, 5, 6), 3);    // → true
+	 * Vec3.of(1, 2, 3).eq(Vec3.of(4, 5, 6), 3.01); // → true
+	 * Vec3.of(1, 2, 3).eq(Vec3.of(4, 5, 6), 2.99); // → false
+	 * ```
+	 */
 	public eq(other: Vec3, fuzz: number): boolean {
 		for (let i = 0; i < 3; i++) {
 			if (Math.abs(other.at(i) - this.at(i)) > fuzz) {
