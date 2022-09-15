@@ -9,6 +9,7 @@ class UndoRedoHistory {
 	private undoStack: Command[];
 	private redoStack: Command[];
 
+	// @internal
 	public constructor(
 		private readonly editor: Editor,
 		private announceRedoCallback: AnnounceRedoCallback,

@@ -7,6 +7,7 @@ import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';
 
+// @internal
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 	leaves.sort((a, b) => a.getContent()!.getZIndex() - b.getContent()!.getZIndex());
 };
@@ -16,7 +17,7 @@ export default class EditorImage {
 	private root: ImageNode;
 	private componentsById: Record<string, AbstractComponent>;
 
-	/** @internal */
+	// @internal
 	public constructor() {
 		this.root = new ImageNode();
 		this.componentsById = {};

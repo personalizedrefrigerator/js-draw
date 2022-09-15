@@ -16,7 +16,6 @@ interface PinchData {
 	dist: number;
 }
 
-
 export enum PanZoomMode {
 	OneFingerTouchGestures = 0x1,
 	TwoFingerTouchGestures = 0x1 << 1,

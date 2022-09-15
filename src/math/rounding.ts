@@ -1,3 +1,5 @@
+// @packageDocumentation @internal
+
 // Clean up stringified numbers
 const cleanUpNumber = (text: string) => {
 	// Regular expression substitions can be somewhat expensive. Only do them

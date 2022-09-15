@@ -299,8 +299,8 @@ export default class Path {
 		return this.toString();
 	}
 
-	// [onlyAbsCommands]: True if we should avoid converting absolute coordinates to relative offsets -- such
-	//                    conversions can lead to smaller output strings, but also take time.
+	// @param onlyAbsCommands - True if we should avoid converting absolute coordinates to relative offsets -- such
+	//   conversions can lead to smaller output strings, but also take time.
 	public static toString(startPoint: Point2, parts: PathCommand[], onlyAbsCommands: boolean = true): string {
 		const result: string[] = [];
 
@@ -377,7 +377,7 @@ export default class Path {
 
 	// Create a Path from a SVG path specification.
 	// TODO: Support a larger subset of SVG paths.
-	// TODO: Support s,t shorthands.
+	// TODO: Support `s`,`t` commands shorthands.
 	public static fromString(pathString: string): Path {
 		// See the MDN reference:
 		// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d

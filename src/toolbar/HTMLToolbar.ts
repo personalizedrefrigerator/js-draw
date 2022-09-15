@@ -43,6 +43,7 @@ export default class HTMLToolbar {
 		this.setupColorPickers();
 	}
 
+	// @internal
 	public setupColorPickers() {
 		const closePickerOverlay = document.createElement('div');
 		closePickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;

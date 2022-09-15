@@ -8,7 +8,7 @@ import { makePipetteIcon } from './icons';
 type OnColorChangeListener = (color: Color4)=>void;
 
 
-// Returns [ input, container ].
+// Returns [ color input, input container ].
 export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListener): [ HTMLInputElement, HTMLElement ] => {
 	const colorInputContainer = document.createElement('span');
 	const colorInput = document.createElement('input');
