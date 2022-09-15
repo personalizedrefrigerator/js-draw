@@ -11,7 +11,7 @@ describe('CacheRecord', () => {
 		const { cache } = createCache(undefined, {
 			blockResolution,
 		});
-		const state = cache.getSharedState();
+		const state = cache['sharedState'];
 
 		const record = new CacheRecord(() => {}, state);
 
