@@ -1,3 +1,7 @@
+# 0.1.13
+ * Bug fixes:
+   * After using up all blocks in the rendering cache, a single block was repeatedly re-allocated, leading to slow performance.
+
 # 0.1.12
  * Add icons to the selection menu.
  * Screen-reader-related bug fixes.

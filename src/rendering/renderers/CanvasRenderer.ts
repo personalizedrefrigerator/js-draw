@@ -64,7 +64,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.minRenderSizeAnyDimen = 2;
 		} else {
 			this.minSquareCurveApproxDist = 1;
-			this.minRenderSizeBothDimens = 1;
+			this.minRenderSizeBothDimens = 0.5;
 			this.minRenderSizeAnyDimen = 0;
 		}
 	}

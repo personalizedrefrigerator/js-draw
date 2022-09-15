@@ -182,19 +182,29 @@ export class ImageNode {
 	// Returns a list of `ImageNode`s with content (and thus no children).
 	public getLeavesIntersectingRegion(region: Rect2, isTooSmall?: TooSmallToRenderCheck): ImageNode[] {
 		const result: ImageNode[] = [];
+		let current: ImageNode|undefined;
+		const workList: ImageNode[] = [];
 
-		// Don't render if too small
-		if (isTooSmall?.(this.bbox)) {
-			return [];
-		}
+		workList.push(this);
+		const toNext = () => {
+			current = undefined;
 
-		if (this.content !== null && this.getBBox().intersects(region)) {
-			result.push(this);
-		}
+			const next = workList.pop();
+			if (next && !isTooSmall?.(next.bbox)) {
+				current = next;
 
-		const children = this.getChildrenIntersectingRegion(region);
-		for (const child of children) {
-			result.push(...child.getLeavesIntersectingRegion(region, isTooSmall));
+				if (current.content !== null && current.getBBox().intersection(region)) {
+					result.push(current);
+				}
+
+				workList.push(
+					...current.getChildrenIntersectingRegion(region)
+				);
+			}
+		};
+
+		while (workList.length > 0) {
+			toNext();
 		}
 
 		return result;
