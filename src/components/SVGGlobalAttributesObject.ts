@@ -51,7 +51,7 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 		return localization.svgObject;
 	}
 
-	protected serializeToString(): string | null {
+	protected serializeToJSON(): string | null {
 		return JSON.stringify(this.attrs);
 	}
 

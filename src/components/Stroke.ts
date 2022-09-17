@@ -111,19 +111,23 @@ export default class Stroke extends AbstractComponent {
 		return new Stroke(this.parts);
 	}
 
-	protected serializeToString(): string | null {
-		return JSON.stringify(this.parts.map(part => {
+	protected serializeToJSON() {
+		return this.parts.map(part => {
 			return {
 				style: styleToJSON(part.style),
 				path: part.path.serialize(),
 			};
-		}));
+		});
 	}
 
-	public static deserializeFromString(data: string): Stroke {
-		const json = JSON.parse(data);
+	/** @internal */
+	public static deserializeFromJSON(json: any): Stroke {
+		if (typeof json === 'string') {
+			json = JSON.parse(json);
+		}
+
 		if (typeof json !== 'object' || typeof json.length !== 'number') {
-			throw new Error(`${data} is missing required field, parts, or parts is of the wrong type.`);
+			throw new Error(`${json} is missing required field, parts, or parts is of the wrong type.`);
 		}
 
 		const pathSpec: RenderablePathSpec[] = json.map((part: any) => {
@@ -134,4 +138,4 @@ export default class Stroke extends AbstractComponent {
 	}
 }
 
-AbstractComponent.registerComponent('stroke', Stroke.deserializeFromString);
+AbstractComponent.registerComponent('stroke', Stroke.deserializeFromJSON);

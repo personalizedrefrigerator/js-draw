@@ -58,7 +58,7 @@ describe('Stroke', () => {
 	});
 
 	it('strokes should deserialize from JSON data', () => {
-		const deserialized = Stroke.deserializeFromString(`[
+		const deserialized = Stroke.deserializeFromJSON(`[
 			{
 				"style": { "fill": "#f00" },
 				"path": "m0,0 l10,10z"

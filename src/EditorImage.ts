@@ -123,8 +123,10 @@ export default class EditorImage {
 		}
 
 		static {
-			SerializableCommand.register('add-element', (json: any, _editor: Editor) => {
-				const elem = AbstractComponent.deserialize(json.elemData);
+			SerializableCommand.register('add-element', (json: any, editor: Editor) => {
+				const id = json.elemData.id;
+				const foundElem = editor.image.lookupElement(id);
+				const elem = foundElem ?? AbstractComponent.deserialize(json.elemData);
 				return new EditorImage.AddElementCommand(elem);
 			});
 		}

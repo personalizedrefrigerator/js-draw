@@ -18,11 +18,11 @@ const postSerializedCommand = async (data: string) => {
 };
 
 interface FetchResult {
-	commands: jsdraw.SerializableCommand[];
 	lastCommandIdx: number;
 }
 
-const fetchUpdates = async (lastUpdateIndex: number): Promise<FetchResult> => {
+type ProcessCommandCallback = (command: jsdraw.SerializableCommand)=> void;
+const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessCommandCallback): Promise<FetchResult> => {
 	const data = await fetch('/commandsSince/' + lastUpdateIndex);
 	const json = await data.json();
 
@@ -33,14 +33,16 @@ const fetchUpdates = async (lastUpdateIndex: number): Promise<FetchResult> => {
 	let lastCommandIdx = lastUpdateIndex;
 	const commands: jsdraw.SerializableCommand[] = [];
 
-	for (const command of json.commands) {
-		if (!('id' in command) || !('data' in command) || typeof command.id !== 'number') {
+	for (const commandJSON of json.commands) {
+		if (!('id' in commandJSON) || !('data' in commandJSON) || typeof commandJSON.id !== 'number') {
 			throw new Error('Command has invalid type');
 		}
 
-		lastCommandIdx = command.id;
+		lastCommandIdx = commandJSON.id;
 		try {
-			commands.push(jsdraw.SerializableCommand.deserialize(command.data, editor));
+			const command = jsdraw.SerializableCommand.deserialize(commandJSON.data, editor);
+			commands.push(command);
+			processCommand(command);
 		} catch(e) {
 			console.warn('Error parsing command', e);
 		}
@@ -48,7 +50,6 @@ const fetchUpdates = async (lastUpdateIndex: number): Promise<FetchResult> => {
 
 	return {
 		lastCommandIdx,
-		commands,
 	};
 };
 
@@ -87,14 +88,12 @@ const timeout = (delay: number) => {
 (async () => {
 	for (;;) {
 		try {
-			const updates = await fetchUpdates(lastUpdateIdx);
-			lastUpdateIdx = updates.lastCommandIdx;
-
-			for (const command of updates.commands) {
+			const updates = await fetchUpdates(lastUpdateIdx, command => {
 				console.log('Applying', command);
 				// .apply and .unapply don't dispatch CommandDone and CommandUndone events.
 				command.apply(editor);
-			}
+			});
+			lastUpdateIdx = updates.lastCommandIdx;
 		} catch(e) {
 			console.warn('Error fetching updates', e);
 		}

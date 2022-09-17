@@ -45,7 +45,7 @@ export default class UnknownSVGObject extends AbstractComponent {
 		return localization.svgObject;
 	}
 
-	protected serializeToString(): string | null {
+	protected serializeToJSON(): string | null {
 		return JSON.stringify({
 			html: this.svgObject.outerHTML,
 		});

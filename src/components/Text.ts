@@ -153,7 +153,7 @@ export default class Text extends AbstractComponent {
 		return localizationTable.text(this.getText());
 	}
 
-	protected serializeToString(): string {
+	protected serializeToJSON(): Record<string, any> {
 		const serializableStyle = {
 			...this.style,
 			renderingStyle: styleToJSON(this.style.renderingStyle),
@@ -166,21 +166,19 @@ export default class Text extends AbstractComponent {
 				};
 			} else {
 				return {
-					json: text.serializeToString(),
+					json: text.serializeToJSON(),
 				};
 			}
 		});
 
-		return JSON.stringify({
+		return {
 			textObjects,
 			transform: this.transform.toArray(),
 			style: serializableStyle,
-		});
+		};
 	}
 
-	public static deserializeFromString(data: string, getTextDimens: GetTextDimensCallback = Text.getTextDimens): Text {
-		const json = JSON.parse(data);
-
+	public static deserializeFromString(json: any, getTextDimens: GetTextDimensCallback = Text.getTextDimens): Text {
 		const style: TextStyle = {
 			renderingStyle: styleFromJSON(json.style.renderingStyle),
 			size: json.style.size,

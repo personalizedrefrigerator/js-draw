@@ -78,7 +78,7 @@ export default abstract class AbstractComponent {
 	public abstract intersects(lineSegment: LineSegment2): boolean;
 
 	// Return null iff this object cannot be safely serialized/deserialized.
-	protected abstract serializeToString(): string|null;
+	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
 
 	// Private helper for transformBy: Apply the given transformation to all points of this.
 	protected abstract applyTransformation(affineTransfm: Mat33): void;
@@ -178,26 +178,30 @@ export default abstract class AbstractComponent {
 		return clone;
 	}
 
+	// Convert the component to an object that can be passed to
+	// `JSON.stringify`.
 	public serialize() {
-		const data = this.serializeToString();
+		const data = this.serializeToJSON();
 
 		if (data === null) {
 			throw new Error(`${this} cannot be serialized.`);
 		}
 
-		return JSON.stringify({
+		return {
 			name: this.componentKind,
 			zIndex: this.zIndex,
 			id: this.id,
 			loadSaveData: this.loadSaveData,
 			data,
-		});
+		};
 	}
 
-	// Returns true if [data] is not deserializable. May return false even if [data]
+	// Returns true if `data` is not deserializable. May return false even if [data]
 	// is not deserializable.
-	private static isNotDeserializable(data: string) {
-		const json = JSON.parse(data);
+	private static isNotDeserializable(json: any|string) {
+		if (typeof json === 'string') {
+			json = JSON.parse(json);
+		}
 
 		if (typeof json !== 'object') {
 			return true;
@@ -214,12 +218,16 @@ export default abstract class AbstractComponent {
 		return false;
 	}
 
-	public static deserialize(data: string): AbstractComponent {
-		if (AbstractComponent.isNotDeserializable(data)) {
-			throw new Error(`Element with data ${data} cannot be deserialized.`);
+	// Convert a string or an object produced by `JSON.parse` into an `AbstractComponent`.
+	public static deserialize(json: string|any): AbstractComponent {
+		if (typeof json === 'string') {
+			json = JSON.parse(json);
 		}
 
-		const json = JSON.parse(data);
+		if (AbstractComponent.isNotDeserializable(json)) {
+			throw new Error(`Element with data ${json} cannot be deserialized.`);
+		}
+
 		const instance = this.deserializationCallbacks[json.name]!(json.data);
 		instance.zIndex = json.zIndex;
 		instance.id = json.id;
