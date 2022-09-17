@@ -1,10 +1,10 @@
 // To test importing from a parent directory
-import Editor from '../../src/Editor';
-import '../../src/styles';
+//import Editor from '../../src/Editor';
+//import '../../src/styles';
 
 // To test the NPM package
-//import Editor from 'js-draw';
-//import 'js-draw/styles';
+import Editor from 'js-draw';
+import 'js-draw/styles';
 
 // Key in window.localStorage to save the SVG as.
 const saveLocalStorageKey = 'lastSave';

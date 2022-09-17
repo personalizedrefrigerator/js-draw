@@ -1,7 +1,7 @@
+//import * as jsdraw from 'js-draw';
+//import 'js-draw/styles';
 import * as jsdraw from '../../src/bundle/bundled';
 import './style.css';
-
-// import jsdraw from 'js-draw/bundle';
 
 const editor = new jsdraw.Editor(document.body);
 editor.addToolbar();

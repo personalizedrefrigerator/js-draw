@@ -1,13 +1,13 @@
 {
   "name": "js-draw",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
-  "main": "dist/src/Editor.js",
-  "types": "dist/src/Editor.d.ts",
+  "main": "./dist/src/lib.d.ts",
+  "types": "./dist/src/lib.js",
   "exports": {
     ".": {
-      "types": "./dist/src/Editor.d.ts",
-      "default": "./dist/src/Editor.js"
+      "types": "./dist/src/lib.d.ts",
+      "default": "./dist/src/lib.js"
     },
     "./localizations/getLocalizationTable": {
       "types": "./dist/src/localizations/getLocalizationTable.d.ts",
@@ -36,6 +36,12 @@
       "types": "./dist/src/toolbar/HTMLToolbar.d.ts",
       "default": "./dist/src/toolbar/HTMLToolbar.js"
     },
+    "./toolbar/toolbar.css": {
+      "default": "./src/toolbar/toolbar.css"
+    },
+    "./Editor.css": {
+      "default": "./src/Editor.css"
+    },
     "./math": {
       "types": "./dist/src/math/lib.d.ts",
       "default": "./dist/src/math/lib.js"
@@ -51,12 +57,6 @@
     "./commands": {
       "types": "./dist/src/commands/lib.d.ts",
       "default": "./dist/src/commands/lib.js"
-    },
-    "./Editor.css": {
-      "default": "./src/Editor.css"
-    },
-    "./toolbar/toolbar.css": {
-      "default": "./src/toolbar/toolbar.css"
     },
     "./bundle": {
       "types": "./dist/src/bundle/bundled.d.ts",
