@@ -36,41 +36,21 @@
       "types": "./dist/src/toolbar/HTMLToolbar.d.ts",
       "default": "./dist/src/toolbar/HTMLToolbar.js"
     },
-    "./math/Mat33": {
-      "types": "./dist/src/math/Mat33.d.ts",
-      "default": "./dist/src/math/Mat33.js"
-    },
-    "./math/Vec3": {
-      "types": "./dist/src/math/Vec3.d.ts",
-      "default": "./dist/src/math/Vec3.js"
-    },
-    "./math/Vec2": {
-      "types": "./dist/src/math/Vec2.d.ts",
-      "default": "./dist/src/math/Vec2.js"
-    },
-    "./math/Rect2": {
-      "types": "./dist/src/math/Rect2.d.ts",
-      "default": "./dist/src/math/Rect2.js"
-    },
-    "./math/Path": {
-      "types": "./dist/src/math/Path.d.ts",
-      "default": "./dist/src/math/Path.js"
+    "./math": {
+      "types": "./dist/src/math/lib.d.ts",
+      "default": "./dist/src/math/lib.js"
     },
     "./Color4": {
       "types": "./dist/src/Color4.d.ts",
       "default": "./dist/src/Color4.js"
     },
-    "./components/AbstractComponent": {
-      "types": "./dist/src/components/AbstractComponent.d.ts",
-      "default": "./dist/src/components/AbstractComponent.js"
+    "./components": {
+      "types": "./dist/src/components/lib.d.ts",
+      "default": "./dist/src/components/lib.js"
     },
-    "./components/Stroke": {
-      "types": "./dist/src/components/Stroke.d.ts",
-      "default": "./dist/src/components/Stroke.js"
-    },
-    "./components/Text": {
-      "types": "./dist/src/components/Text.d.ts",
-      "default": "./dist/src/components/Text.js"
+    "./commands": {
+      "types": "./dist/src/commands/lib.d.ts",
+      "default": "./dist/src/commands/lib.js"
     },
     "./Editor.css": {
       "default": "./src/Editor.css"

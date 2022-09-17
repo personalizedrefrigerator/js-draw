@@ -35,13 +35,12 @@ export default class Duplicate extends SerializableCommand {
 		);
 	}
 
-	protected serializeToString(): string {
-		return JSON.stringify(this.toDuplicate.map(elem => elem.getId()));
+	protected serializeToJSON() {
+		return this.toDuplicate.map(elem => elem.getId());
 	}
 
 	static {
-		SerializableCommand.register('duplicate', (data: string, editor: Editor) => {
-			const json = JSON.parse(data);
+		SerializableCommand.register('duplicate', (json: any, editor: Editor) => {
 			const elems = json.map((id: string) => editor.image.lookupElement(id));
 			return new Duplicate(elems);
 		});

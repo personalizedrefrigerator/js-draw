@@ -38,7 +38,12 @@ class UndoRedoHistory {
 			elem.onDrop(this.editor);
 		}
 		this.redoStack = [];
+
 		this.fireUpdateEvent();
+		this.editor.notifier.dispatch(EditorEventType.CommandDone, {
+			kind: EditorEventType.CommandDone,
+			command,
+		});
 	}
 
 	// Remove the last command from this' undo stack and apply it.
@@ -48,8 +53,13 @@ class UndoRedoHistory {
 			this.redoStack.push(command);
 			command.unapply(this.editor);
 			this.announceUndoCallback(command);
+
+			this.fireUpdateEvent();
+			this.editor.notifier.dispatch(EditorEventType.CommandUndone, {
+				kind: EditorEventType.CommandUndone,
+				command,
+			});
 		}
-		this.fireUpdateEvent();
 	}
 
 	public redo() {
@@ -58,8 +68,13 @@ class UndoRedoHistory {
 			this.undoStack.push(command);
 			command.apply(this.editor);
 			this.announceRedoCallback(command);
+
+			this.fireUpdateEvent();
+			this.editor.notifier.dispatch(EditorEventType.CommandDone, {
+				kind: EditorEventType.CommandDone,
+				command,
+			});
 		}
-		this.fireUpdateEvent();
 	}
 
 	public get undoStackSize(): number {

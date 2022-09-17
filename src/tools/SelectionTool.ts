@@ -12,6 +12,7 @@ import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt } from '../types
 import Viewport from '../Viewport';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
+import SerializableCommand from '../commands/SerializableCommand';
 
 const handleScreenSize = 30;
 const styles = `
@@ -132,7 +133,7 @@ class Selection {
 	private rotateCircle: HTMLElement;
 	private selectedElems: AbstractComponent[];
 	private transform: Mat33;
-	private transformationCommands: Command[];
+	private transformationCommands: SerializableCommand[];
 
 	public constructor(
 		public startPoint: Point2, private editor: Editor
@@ -231,7 +232,7 @@ class Selection {
 		this.transformPreview(Mat33.zRotation(deltaRotation, this.region.center));
 	}
 
-	private computeTransformCommands() {
+	private computeTransformCommands(): SerializableCommand[] {
 		return this.selectedElems.map(elem => {
 			return elem.transformBy(this.transform);
 		});
@@ -276,39 +277,65 @@ class Selection {
 
 		// Make the commands undo-able
 		this.editor.dispatch(new Selection.ApplyTransformationCommand(
-			this, currentTransfmCommands, fullTransform, inverseTransform, deltaBoxRotation
+			this, currentTransfmCommands, fullTransform, deltaBoxRotation
 		));
 	}
 
-	private static ApplyTransformationCommand = class extends Command {
+	static {
+		SerializableCommand.register('selection-tool-transform', (json: any, editor) => {
+			// The selection box is lost when serializing/deserializing. No need to store box rotation
+			const guiBoxRotation = 0;
+			const fullTransform: Mat33 = new Mat33(...(json.transform as [
+				number, number, number,
+				number, number, number,
+				number, number, number,
+			]));
+			const commands = (json.commands as any[]).map(data => SerializableCommand.deserialize(data, editor));
+
+			return new this.ApplyTransformationCommand(null, commands, fullTransform, guiBoxRotation);
+		});
+	}
+
+	private static ApplyTransformationCommand = class extends SerializableCommand {
 		public constructor(
-			private selection: Selection,
-			private currentTransfmCommands: Command[],
-			private fullTransform: Mat33, private inverseTransform: Mat33,
+			private selection: Selection|null,
+			private currentTransfmCommands: SerializableCommand[],
+			private fullTransform: Mat33,
 			private deltaBoxRotation: number,
 		) {
-			super();
+			super('selection-tool-transform');
 		}
 
 		public async apply(editor: Editor) {
 			// Approximate the new selection
-			this.selection.region = this.selection.region.transformedBoundingBox(this.fullTransform);
-			this.selection.boxRotation += this.deltaBoxRotation;
-			this.selection.updateUI();
+			if (this.selection) {
+				this.selection.region = this.selection.region.transformedBoundingBox(this.fullTransform);
+				this.selection.boxRotation += this.deltaBoxRotation;
+				this.selection.updateUI();
+			}
 
 			await editor.asyncApplyCommands(this.currentTransfmCommands, updateChunkSize);
-			this.selection.recomputeRegion();
-			this.selection.updateUI();
+			this.selection?.recomputeRegion();
+			this.selection?.updateUI();
 		}
 
 		public async unapply(editor: Editor) {
-			this.selection.region = this.selection.region.transformedBoundingBox(this.inverseTransform);
-			this.selection.boxRotation -= this.deltaBoxRotation;
-			this.selection.updateUI();
+			if (this.selection) {
+				this.selection.region = this.selection.region.transformedBoundingBox(this.fullTransform.inverse());
+				this.selection.boxRotation -= this.deltaBoxRotation;
+				this.selection.updateUI();
+			}
 
 			await editor.asyncUnapplyCommands(this.currentTransfmCommands, updateChunkSize);
-			this.selection.recomputeRegion();
-			this.selection.updateUI();
+			this.selection?.recomputeRegion();
+			this.selection?.updateUI();
+		}
+
+		protected serializeToJSON() {
+			return {
+				commands: this.currentTransfmCommands.map(command => command.serialize()),
+				transform: this.fullTransform.toArray(),
+			};
 		}
 
 		public description(_editor: Editor, localizationTable: EditorLocalization) {

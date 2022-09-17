@@ -116,15 +116,14 @@ export default class EditorImage {
 			return localization.addElementAction(this.element.description(localization));
 		}
 
-		protected serializeToString() {
-			return JSON.stringify({
+		protected serializeToJSON() {
+			return {
 				elemData: this.element.serialize(),
-			});
+			};
 		}
 
 		static {
-			SerializableCommand.register('add-element', (data: string, _editor: Editor) => {
-				const json = JSON.parse(data);
+			SerializableCommand.register('add-element', (json: any, _editor: Editor) => {
 				const elem = AbstractComponent.deserialize(json.elemData);
 				return new EditorImage.AddElementCommand(elem);
 			});

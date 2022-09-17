@@ -1,4 +1,3 @@
-import Command from '../commands/Command';
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
@@ -86,7 +85,7 @@ export default abstract class AbstractComponent {
 
 	// Returns a command that, when applied, transforms this by [affineTransfm] and
 	// updates the editor.
-	public transformBy(affineTransfm: Mat33): Command {
+	public transformBy(affineTransfm: Mat33): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this);
 	}
 
@@ -135,8 +134,7 @@ export default abstract class AbstractComponent {
 		}
 
 		static {
-			SerializableCommand.register('transform-element', (data: string, editor: Editor) => {
-				const json = JSON.parse(data);
+			SerializableCommand.register('transform-element', (json: any, editor: Editor) => {
 				const elem = editor.image.lookupElement(json.id);
 
 				if (!elem) {
@@ -156,11 +154,11 @@ export default abstract class AbstractComponent {
 			});
 		}
 
-		protected serializeToString(): string {
-			return JSON.stringify({
+		protected serializeToJSON() {
+			return {
 				id: this.component.getId(),
 				transfm: this.affineTransfm.toArray(),
-			});
+			};
 		}
 	};
 

@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import Command from './Command';
 
-export type DeserializationCallback = (data: string, editor: Editor) => SerializableCommand;
+export type DeserializationCallback = (data: Record<string, any>|any[], editor: Editor) => SerializableCommand;
 
 export default abstract class SerializableCommand extends Command {
 	public constructor(private commandTypeId: string) {
@@ -14,25 +14,25 @@ export default abstract class SerializableCommand extends Command {
 		}
 	}
 
-	protected abstract serializeToString(): string;
+	protected abstract serializeToJSON(): string|Record<string, any>|any[];
 	private static deserializationCallbacks: Record<string, DeserializationCallback> = {};
 
-	public serialize(): string {
-		return JSON.stringify({
-			data: this.serializeToString(),
+	public serialize(): Record<string|symbol, any> {
+		return {
+			data: this.serializeToJSON(),
 			commandType: this.commandTypeId,
-		});
+		};
 	}
 
-	public static deserialize(data: string, editor: Editor): SerializableCommand {
-		const json = JSON.parse(data);
+	public static deserialize(data: string|Record<string, any>, editor: Editor): SerializableCommand {
+		const json = typeof data === 'string' ? JSON.parse(data) : data;
 		const commandType = json.commandType as string;
 
 		if (!(commandType in SerializableCommand.deserializationCallbacks)) {
 			throw new Error(`Unrecognised command type ${commandType}!`);
 		}
 
-		return SerializableCommand.deserializationCallbacks[commandType](json.data as string, editor);
+		return SerializableCommand.deserializationCallbacks[commandType](json.data, editor);
 	}
 
 	public static register(commandTypeId: string, deserialize: DeserializationCallback) {

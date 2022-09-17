@@ -58,15 +58,16 @@ export default class Erase extends SerializableCommand {
 		return localizationTable.eraseAction(description, this.toRemove.length);
 	}
 
-	protected serializeToString() {
+	protected serializeToJSON() {
 		const elemIds = this.toRemove.map(elem => elem.getId());
-		return JSON.stringify(elemIds);
+		return elemIds;
 	}
 
 	static {
-		SerializableCommand.register('erase', (data: string, editor: Editor) => {
-			const json = JSON.parse(data);
-			const elems = json.map((elemId: string) => editor.image.lookupElement(elemId));
+		SerializableCommand.register('erase', (json: any, editor) => {
+			const elems = json
+				.map((elemId: string) => editor.image.lookupElement(elemId))
+				.filter((elem: AbstractComponent|null) => elem !== null);
 			return new Erase(elems);
 		});
 	}

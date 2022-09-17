@@ -9,6 +9,7 @@ import AbstractComponent from './components/AbstractComponent';
 import Rect2 from './math/Rect2';
 import Pointer from './Pointer';
 import Color4 from './Color4';
+import Command from './commands/Command';
 
 
 export interface PointerEvtListener {
@@ -91,12 +92,17 @@ export enum EditorEventType {
 	ToolEnabled,
 	ToolDisabled,
 	ToolUpdated,
+
 	UndoRedoStackUpdated,
+	CommandDone,
+	CommandUndone,
 	ObjectAdded,
+
 	ViewportChanged,
 	DisplayResized,
+
 	ColorPickerToggled,
-	ColorPickerColorSelected
+	ColorPickerColorSelected,
 }
 
 type EditorToolEventType = EditorEventType.ToolEnabled
@@ -131,6 +137,16 @@ export interface EditorUndoStackUpdated {
 	readonly redoStackSize: number;
 }
 
+export interface CommandDoneEvent {
+	readonly kind: EditorEventType.CommandDone;
+	readonly command: Command;
+}
+
+export interface CommandUndoneEvent {
+	readonly kind: EditorEventType.CommandUndone;
+	readonly command: Command;
+}
+
 export interface ColorPickerToggled {
 	readonly kind: EditorEventType.ColorPickerToggled;
 	readonly open: boolean;
@@ -143,8 +159,8 @@ export interface ColorPickerColorSelected {
 
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
 	| EditorViewportChangedEvent | DisplayResizedEvent
-	| EditorUndoStackUpdated
-	| ColorPickerToggled| ColorPickerColorSelected;
+	| EditorUndoStackUpdated | CommandDoneEvent | CommandUndoneEvent
+	| ColorPickerToggled | ColorPickerColorSelected;
 
 
 // Returns a Promise to indicate that the event source should pause until the Promise resolves.
