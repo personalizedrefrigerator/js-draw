@@ -2,7 +2,7 @@
 name: Translation
 about: Translate the editor to a new language!
 title: ''
-labels: ''
+labels: localization
 assignees: ''
 
 ---
