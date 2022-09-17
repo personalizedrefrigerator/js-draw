@@ -32,9 +32,6 @@
 			"types": "./dist/src/toolbar/HTMLToolbar.d.ts",
 			"default": "./dist/src/toolbar/HTMLToolbar.js"
 		},
-		"./toolbar/toolbar.css": {
-			"default": "./src/toolbar/toolbar.css"
-		},
 		"./Editor.css": {
 			"default": "./src/Editor.css"
 		},

@@ -17,6 +17,10 @@ export default abstract class SerializableCommand extends Command {
 	protected abstract serializeToJSON(): string|Record<string, any>|any[];
 	private static deserializationCallbacks: Record<string, DeserializationCallback> = {};
 
+	// Convert this command to an object that can be passed to `JSON.stringify`.
+	//
+	// Do not rely on the stability of the optupt of this function — it can change
+	// form without a major version increase.
 	public serialize(): Record<string|symbol, any> {
 		return {
 			data: this.serializeToJSON(),
@@ -24,6 +28,8 @@ export default abstract class SerializableCommand extends Command {
 		};
 	}
 
+	// Convert a `string` containing JSON data (or the output of `JSON.parse`) into a
+	// `Command`.
 	public static deserialize(data: string|Record<string, any>, editor: Editor): SerializableCommand {
 		const json = typeof data === 'string' ? JSON.parse(data) : data;
 		const commandType = json.commandType as string;
@@ -35,6 +41,8 @@ export default abstract class SerializableCommand extends Command {
 		return SerializableCommand.deserializationCallbacks[commandType](json.data, editor);
 	}
 
+	// Register a deserialization callback. This must be called at least once for every subclass of
+	// `SerializableCommand`.
 	public static register(commandTypeId: string, deserialize: DeserializationCallback) {
 		SerializableCommand.deserializationCallbacks[commandTypeId] = deserialize;
 	}

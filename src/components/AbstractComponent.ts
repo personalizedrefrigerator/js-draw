@@ -180,6 +180,9 @@ export default abstract class AbstractComponent {
 
 	// Convert the component to an object that can be passed to
 	// `JSON.stringify`.
+	//
+	// Do not rely on the output of this function to take a particular form —
+	// this function's output can change form without a major version increase.
 	public serialize() {
 		const data = this.serializeToJSON();
 
