@@ -4,8 +4,11 @@
  * 
  * @example
  * ```
- * import { Editor, Vec3, Mat33, HTMLToolbar } from 'js-draw';
+ * import { Editor, Vec3, Mat33 } from 'js-draw';
  * ```
+ * 
+ * @see
+ * {@link Editor!}
  * 
  * @packageDocumentation
  */
