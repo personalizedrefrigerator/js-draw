@@ -1,3 +1,6 @@
+# 0.2.2
+ * Fix custon toolbar action buttons having wrong height.
+
 # 0.2.1
  * German localization.
 

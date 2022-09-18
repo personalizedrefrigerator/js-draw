@@ -112,7 +112,7 @@ export default class HTMLToolbar {
 
 	public addActionButton(title: string|ActionButtonIcon, command: ()=> void, parent?: Element) {
 		const button = document.createElement('button');
-		button.classList.add(`${toolbarCSSPrefix}toolButton`);
+		button.classList.add(`${toolbarCSSPrefix}button`);
 
 		if (typeof title === 'string') {
 			button.innerText = title;
