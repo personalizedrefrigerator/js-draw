@@ -249,10 +249,47 @@ const showSavePopup = (editor: Editor) => {
 	);
 };
 
+const startVisualErrorLog = () => {
+	const logArea: HTMLTextAreaElement = document.querySelector('#logOutput')!;
+	logArea.style.display = 'block';
+	logArea.value = `
+If enabled, errors will be logged to this textarea.
+	`;
+
+	const scrollLogToEnd = () => {
+		logArea.value = logArea.value.substring(logArea.value.length - 2000);
+		logArea.scrollTop = logArea.scrollHeight;
+	};
+
+	window.onerror = (evt) => {
+		logArea.value += '\nError thrown: ' + evt + '\n';
+		scrollLogToEnd();
+	};
+	const originalErrFn = console.error;
+	const originalWarnFn = console.warn;
+	const originalLogFn = console.log;
+	console.error = (...data) => {
+		originalErrFn.apply(console, data);
+		logArea.value += '\nError logged: ' + data.join(', ') + '\n';
+		scrollLogToEnd();
+	};
+	console.warn = (...data) => {
+		originalWarnFn.apply(console, data);
+		logArea.value += '\nWarning: ' + data.join(', ') + '\n';
+		scrollLogToEnd();
+	};
+	console.log = (...data) => {
+		originalLogFn.apply(console, data);
+		logArea.value += '\nLog: ' + data.join(', ') + '\n';
+		scrollLogToEnd();
+	};
+};
+
 // PWA file access. At the time of this writing, TypeScript does not recognise window.launchQueue.
 declare let launchQueue: any;
 
 (() => {
+	const showErrorsCheckbox: HTMLInputElement = document.querySelector('#alertOnError')!;
 	const loadFromTextarea: HTMLTextAreaElement = document.querySelector('#initialData')!;
 	const fileInput: HTMLInputElement = document.querySelector('#initialFile')!;
 	const startButton: HTMLButtonElement = document.querySelector('#startButton')!;
@@ -315,7 +352,12 @@ declare let launchQueue: any;
 
 	startButton.onclick = () => {
 		const textareaData = loadFromTextarea.value;
+		const showErrors = showErrorsCheckbox.checked;
 		optionsScreen.remove();
+
+		if (showErrors) {
+			startVisualErrorLog();
+		}
 
 		const editor = createEditor(() => showSavePopup(editor));
 

@@ -23,6 +23,25 @@
 				border-bottom: 1px solid gray;
 			}
 
+			#logOutput {
+				display: none;
+				width: 100vw;
+				height: 90vh;
+				z-index: 9999;
+
+				color: orange;
+				text-shadow: 0px 0px 3px black;
+				background-color: rgba(0, 0, 0, 0.0);
+				border: none;
+				pointer-events: none;
+				border-bottom: 1px solid red;
+
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+			}
+
 			@media (prefers-color-scheme: dark) {
 				body {
 					background-color: black;
@@ -32,18 +51,6 @@
 				#editorOptions {
 					background-color: #222;
 				}
-			}
-
-			#logOutput {
-				display: none;
-				width: 100vw;
-				height: 100vh;
-
-				position: fixed;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
 			}
 
 			#startButton {
@@ -61,6 +68,9 @@
 				position: fixed;
 				top: 0;
 				left: 0;
+
+				/* Transparent background: Make the log visible. */
+				background-color: rgba(255, 255, 255, 0.0) !important;
 			}
 
 			/* Container for the save popup. */
@@ -99,6 +109,11 @@
 			<p>Options for testing the image editor:</p>
 			<noscript>JavaScript has been disabled!</noscript>
 			<ul>
+				<li>
+					<input type="checkbox" id="alertOnError"/><label for="alertOnError">
+						Display error messages (useful for debugging on mobile devices).
+					</label>
+				</li>
 				<li>
 					<label for="initialData">
 						SVG image to load (paste the contents of a saved SVG here).
