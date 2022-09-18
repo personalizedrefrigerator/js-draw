@@ -24,6 +24,7 @@
 .toolbar-root > .toolbar-toolContainer > * > button,
 .toolbar-root > .toolbar-buttonGroup > button {
 	width: min-content;
+	white-space: pre;
 	height: min(20vh, 60px);
 }
 
@@ -64,8 +65,13 @@
 	margin-right: 3px;
 
 	min-width: 40px;
-	max-width: 70px;
-	font-size: 11pt;
+	width: min-content;
+	font-size: 1em;
+}
+
+.toolbar-dropdown > .toolbar-toolContainer > button,
+.toolbar-dropdown > .toolbar-toolContainer > .toolbar-button {
+	width: 6em;
 }
 
 .toolbar-button:hover, .toolbar-root button:not(:disabled):hover {
