@@ -76,7 +76,10 @@
 				height: 100vh;
 
 				border: none;
-				backdrop-filter: blur(6px) contrast(2);
+
+				--backdrop-filter: blur(6px) contrast(150%);
+				backdrop-filter: var(--backdrop-filter);
+				-webkit-backdrop-filter: var(--backdrop-filter);
 			}
 		</style>
 	</head>

@@ -107,7 +107,7 @@ const showSavePopup = (editor: Editor) => {
 				}
 
 				body, :root {
-					background-color: rgba(255, 255, 255, 0.3);
+					background-color: rgba(255, 255, 255, 0.0);
 				}
 
 				button {
@@ -116,7 +116,7 @@ const showSavePopup = (editor: Editor) => {
 
 				@media (prefers-color-scheme: dark) {
 					body, :root {
-						background-color: rgba(0, 0, 0, 0.3);
+						background-color: rgba(0, 0, 0, 0.0);
 						color: white;
 					}
 
