@@ -1,3 +1,6 @@
+# 0.2.1
+ * German localization.
+
 # 0.2.0
  * Export `Mat33`, `Vec3`, `Vec2`, and `Color4`.
  * [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/index.html)

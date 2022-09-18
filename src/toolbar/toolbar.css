@@ -22,7 +22,8 @@
 
 .toolbar-root > .toolbar-toolContainer > .toolbar-button,
 .toolbar-root > .toolbar-toolContainer > * > button,
-.toolbar-root > .toolbar-buttonGroup > button {
+.toolbar-root > .toolbar-buttonGroup > button,
+.toolbar-root > .toolbar-button {
 	width: min-content;
 	white-space: pre;
 	height: min(20vh, 60px);
