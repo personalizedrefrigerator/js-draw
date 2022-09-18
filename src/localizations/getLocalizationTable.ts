@@ -1,9 +1,11 @@
 
 import { defaultEditorLocalization, EditorLocalization } from '../localization';
+import de from './de';
 import en from './en';
 import es from './es';
 
 const allLocales: Record<string, EditorLocalization> = {
+	de,
 	en,
 	es,
 };
