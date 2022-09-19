@@ -67,11 +67,17 @@ export default class Pen extends BaseTool {
 	}
 
 	public onPointerDown({ current, allPointers }: PointerEvt): boolean {
-		if (current.device === PointerDevice.Eraser) {
-			return false;
+		const isEraser = current.device === PointerDevice.Eraser;
+
+		let anyDeviceIsStylus = false;
+		for (const pointer of allPointers) {
+			if (pointer.device === PointerDevice.Pen) {
+				anyDeviceIsStylus = true;
+				break;
+			}
 		}
 
-		if (allPointers.length === 1 || current.device === PointerDevice.Pen) {
+		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
 			this.builder = this.builderFactory(this.getStrokePoint(current), this.editor.viewport);
 			return true;
 		}
