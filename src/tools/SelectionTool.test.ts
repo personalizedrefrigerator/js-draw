@@ -6,11 +6,10 @@ import Path from '../math/Path';
 import { Vec2 } from '../math/Vec2';
 import { InputEvtType } from '../types';
 import SelectionTool from './SelectionTool';
-import { ToolType } from './ToolController';
 import createEditor from '../testing/createEditor';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
-	return editor.toolController.getMatchingTools(ToolType.Selection)[0] as SelectionTool;
+	return editor.toolController.getMatchingTools(SelectionTool)[0];
 };
 
 const createSquareStroke = () => {

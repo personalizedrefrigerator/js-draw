@@ -1,7 +1,7 @@
 {
-	"name": "js-draw-example-collaborative",
+	"name": "js-draw-example-custom-tools",
 	"version": "0.0.1",
-	"description": "Example collaborative editor",
+	"description": "Example demonstrating custom tools",
 	"license": "MIT",
 	"private": true,
 	"scripts": {

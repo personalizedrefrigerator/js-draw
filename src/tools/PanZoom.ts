@@ -7,7 +7,6 @@ import Pointer, { PointerDevice } from '../Pointer';
 import { EditorEventType, KeyPressEvent, PointerEvt, WheelEvt } from '../types';
 import { Viewport, ViewportTransform } from '../Viewport';
 import BaseTool from './BaseTool';
-import { ToolType } from './ToolController';
 
 interface PinchData {
 	canvasCenter: Point2;
@@ -25,7 +24,6 @@ export enum PanZoomMode {
 }
 
 export default class PanZoom extends BaseTool {
-	public readonly kind: ToolType.PanZoom = ToolType.PanZoom;
 	private transform: ViewportTransform|null = null;
 
 	private lastAngle: number;

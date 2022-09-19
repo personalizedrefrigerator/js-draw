@@ -6,7 +6,7 @@ import { ToolbarLocalization } from '../localization';
 import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
 
-export class SelectionWidget extends BaseToolWidget {
+export default class SelectionToolWidget extends BaseToolWidget {
 	public constructor(
 		editor: Editor, private tool: SelectionTool, localization: ToolbarLocalization
 	) {

@@ -4,14 +4,12 @@ import Editor from '../Editor';
 import { Point2 } from '../math/Vec2';
 import LineSegment2 from '../math/LineSegment2';
 import Erase from '../commands/Erase';
-import { ToolType } from './ToolController';
 import AbstractComponent from '../components/AbstractComponent';
 import { PointerDevice } from '../Pointer';
 
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2;
 	private command: Erase|null = null;
-	public kind: ToolType = ToolType.Eraser;
 	private toRemove: AbstractComponent[];
 
 	public constructor(private editor: Editor, description: string) {

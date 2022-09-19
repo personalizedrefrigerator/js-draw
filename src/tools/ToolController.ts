@@ -12,17 +12,6 @@ import UndoRedoShortcut from './UndoRedoShortcut';
 import TextTool from './TextTool';
 import PipetteTool from './PipetteTool';
 
-export enum ToolType {
-    Pen,
-    Selection,
-    Eraser,
-    PanZoom,
-    Text,
-    Shortcut,
-    Pipette,
-    Other,
-}
-
 export default class ToolController {
 	private tools: BaseTool[];
 	private activeTool: BaseTool|null = null;
@@ -85,6 +74,16 @@ export default class ToolController {
 	// This should be called before creating the app's toolbar.
 	public addPrimaryTool(tool: BaseTool) {
 		tool.setToolGroup(this.primaryToolGroup);
+		if (tool.isEnabled()) {
+			this.primaryToolGroup.notifyEnabled(tool);
+		}
+
+		this.addTool(tool);
+	}
+
+	// Add a tool to the end of this' tool list (the added tool receives events after tools already added to this).
+	// This should be called before creating the app's toolbar.
+	public addTool(tool: BaseTool) {
 		this.tools.push(tool);
 	}
 
@@ -150,8 +149,8 @@ export default class ToolController {
 		return handled;
 	}
 
-	public getMatchingTools(kind: ToolType): BaseTool[] {
-		return this.tools.filter(tool => tool.kind === kind);
+	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
+		return this.tools.filter(tool => tool instanceof type) as Type[];
 	}
 }
 

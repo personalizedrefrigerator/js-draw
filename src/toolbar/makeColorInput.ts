@@ -1,7 +1,6 @@
 import Color4 from '../Color4';
 import Editor from '../Editor';
 import PipetteTool from '../tools/PipetteTool';
-import { ToolType } from '../tools/ToolController';
 import { EditorEventType } from '../types';
 import { makePipetteIcon } from './icons';
 
@@ -77,7 +76,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	};
 	updatePipetteIcon();
 
-	const pipetteTool: PipetteTool|undefined = editor.toolController.getMatchingTools(ToolType.Pipette)[0] as PipetteTool|undefined;
+	const pipetteTool: PipetteTool|undefined = editor.toolController.getMatchingTools(PipetteTool)[0];
 	const endColorSelectMode = () => {
 		pipetteTool?.clearColorListener();
 		updatePipetteIcon();

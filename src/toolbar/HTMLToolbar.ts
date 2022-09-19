@@ -1,11 +1,8 @@
 import Editor from '../Editor';
-import { ToolType } from '../tools/ToolController';
 import { EditorEventType } from '../types';
 
 import { coloris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
-import Pen from '../tools/Pen';
-import Eraser from '../tools/Eraser';
 import SelectionTool from '../tools/SelectionTool';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
@@ -13,11 +10,12 @@ import { makeRedoIcon, makeUndoIcon } from './icons';
 import PanZoom from '../tools/PanZoom';
 import TextTool from '../tools/TextTool';
 import PenToolWidget from './widgets/PenToolWidget';
-import EraserWidget from './widgets/EraserWidget';
+import EraserWidget from './widgets/EraserToolWidget';
 import SelectionToolWidget from './widgets/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget from './widgets/BaseWidget';
+import { EraserTool, PenTool } from '../tools/lib';
 
 
 export const toolbarCSSPrefix = 'toolbar-';
@@ -183,43 +181,27 @@ export default class HTMLToolbar {
 
 	public addDefaultToolWidgets() {
 		const toolController = this.editor.toolController;
-		for (const tool of toolController.getMatchingTools(ToolType.Pen)) {
-			if (!(tool instanceof Pen)) {
-				throw new Error('All `Pen` tools must have kind === ToolType.Pen');
-			}
-
+		for (const tool of toolController.getMatchingTools(PenTool)) {
 			const widget = new PenToolWidget(
 				this.editor, tool, this.localizationTable,
 			);
 			this.addWidget(widget);
 		}
 
-		for (const tool of toolController.getMatchingTools(ToolType.Eraser)) {
-			if (!(tool instanceof Eraser)) {
-				throw new Error('All Erasers must have kind === ToolType.Eraser!');
-			}
-
+		for (const tool of toolController.getMatchingTools(EraserTool)) {
 			this.addWidget(new EraserWidget(this.editor, tool, this.localizationTable));
 		}
 
-		for (const tool of toolController.getMatchingTools(ToolType.Selection)) {
-			if (!(tool instanceof SelectionTool)) {
-				throw new Error('All SelectionTools must have kind === ToolType.Selection');
-			}
-
+		for (const tool of toolController.getMatchingTools(SelectionTool)) {
 			this.addWidget(new SelectionToolWidget(this.editor, tool, this.localizationTable));
 		}
 
-		for (const tool of toolController.getMatchingTools(ToolType.Text)) {
-			if (!(tool instanceof TextTool)) {
-				throw new Error('All text tools must have kind === ToolType.Text');
-			}
-	
+		for (const tool of toolController.getMatchingTools(TextTool)) {
 			this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
 		}
 
-		const panZoomTool = toolController.getMatchingTools(ToolType.PanZoom)[0];
-		if (panZoomTool && panZoomTool instanceof PanZoom) {
+		const panZoomTool = toolController.getMatchingTools(PanZoom)[0];
+		if (panZoomTool) {
 			this.addWidget(new HandToolWidget(this.editor, panZoomTool, this.localizationTable));
 		}
 	}

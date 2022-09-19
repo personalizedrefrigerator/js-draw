@@ -14,7 +14,6 @@ import { EditorLocalization } from '../localization';
 import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt } from '../types';
 import Viewport from '../Viewport';
 import BaseTool from './BaseTool';
-import { ToolType } from './ToolController';
 import SerializableCommand from '../commands/SerializableCommand';
 
 const handleScreenSize = 30;
@@ -510,7 +509,6 @@ export default class SelectionTool extends BaseTool {
 	private handleOverlay: HTMLElement;
 	private prevSelectionBox: Selection|null;
 	private selectionBox: Selection|null;
-	public readonly kind: ToolType = ToolType.Selection;
 
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);

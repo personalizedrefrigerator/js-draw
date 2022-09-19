@@ -287,7 +287,11 @@ export const makeTextIcon = (textStyle: TextStyle) => {
 	return icon;
 };
 
-export const makePenIcon = (tipThickness: number, color: string) => {
+export const makePenIcon = (tipThickness: number, color: string|Color4) => {
+	if (color instanceof Color4) {
+		color = color.toHexString();
+	}
+
 	const icon = document.createElementNS(svgNamespace, 'svg');
 	icon.setAttribute('viewBox', '0 0 100 100');
 

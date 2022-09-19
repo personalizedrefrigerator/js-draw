@@ -5,7 +5,6 @@ import Pointer, { PointerDevice } from '../Pointer';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import { EditorEventType, PointerEvt, StrokeDataPoint } from '../types';
 import BaseTool from './BaseTool';
-import { ToolType } from './ToolController';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 
 export interface PenStyle {
@@ -17,8 +16,6 @@ export default class Pen extends BaseTool {
 	protected builder: ComponentBuilder|null = null;
 	protected builderFactory: ComponentBuilderFactory = makeFreehandLineBuilder;
 	private lastPoint: StrokeDataPoint|null = null;
-
-	public readonly kind: ToolType = ToolType.Pen;
 
 	public constructor(
 		private editor: Editor,

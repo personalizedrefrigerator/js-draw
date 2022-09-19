@@ -1,5 +1,4 @@
 import { PointerEvtListener, WheelEvt, PointerEvt, EditorNotifier, EditorEventType, KeyPressEvent, KeyUpEvent } from '../types';
-import { ToolType } from './ToolController';
 import ToolEnabledGroup from './ToolEnabledGroup';
 
 export default abstract class BaseTool implements PointerEvtListener {
@@ -10,8 +9,6 @@ export default abstract class BaseTool implements PointerEvtListener {
 	public onPointerMove(_event: PointerEvt) { }
 	public onPointerUp(_event: PointerEvt) { }
 	public onGestureCancel() { }
-
-	public abstract readonly kind: ToolType;
 
 	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
 	}

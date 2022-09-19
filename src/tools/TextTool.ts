@@ -8,11 +8,9 @@ import { PointerDevice } from '../Pointer';
 import { EditorEventType, PointerEvt } from '../types';
 import BaseTool from './BaseTool';
 import { ToolLocalization } from './localization';
-import { ToolType } from './ToolController';
 
 const overlayCssClass = 'textEditorOverlay';
 export default class TextTool extends BaseTool {
-	public kind: ToolType = ToolType.Text;
 	private textStyle: TextStyle;
 
 	private textEditOverlay: HTMLElement;

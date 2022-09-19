@@ -4,13 +4,10 @@ import Color4 from '../Color4';
 import Editor from '../Editor';
 import { PointerEvt } from '../types';
 import BaseTool from './BaseTool';
-import { ToolType } from './ToolController';
 
 type ColorListener = (color: Color4|null)=>void;
 
 export default class PipetteTool extends BaseTool {
-	public kind: ToolType = ToolType.Pipette;
-
 	private colorPreviewListener: ColorListener|null = null;
 	private colorSelectListener: ColorListener|null = null;
 
