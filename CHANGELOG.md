@@ -1,3 +1,6 @@
+# 0.2.3
+ * Fix lines with thickness set to small numbers self-intersecting many times.
+
 # 0.2.2
  * Fix custon toolbar action buttons having wrong height.
 
