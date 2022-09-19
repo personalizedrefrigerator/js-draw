@@ -59,12 +59,12 @@ export default class CanvasRenderer extends AbstractRenderer {
 	// Set parameters for lower/higher quality rendering
 	public setDraftMode(draftMode: boolean) {
 		if (draftMode) {
-			this.minSquareCurveApproxDist = 64;
-			this.minRenderSizeBothDimens = 8;
-			this.minRenderSizeAnyDimen = 2;
+			this.minSquareCurveApproxDist = 9;
+			this.minRenderSizeBothDimens = 2;
+			this.minRenderSizeAnyDimen = 0.5;
 		} else {
-			this.minSquareCurveApproxDist = 1;
-			this.minRenderSizeBothDimens = 0.5;
+			this.minSquareCurveApproxDist = 0.5;
+			this.minRenderSizeBothDimens = 0.35;
 			this.minRenderSizeAnyDimen = 0;
 		}
 	}
