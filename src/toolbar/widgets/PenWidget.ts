@@ -106,7 +106,7 @@ export default class PenWidget extends BaseToolWidget {
 		objectSelectLabel.setAttribute('for', objectTypeSelect.id);
 
 		thicknessInput.type = 'range';
-		thicknessInput.min = '1';
+		thicknessInput.min = '2';
 		thicknessInput.max = '20';
 		thicknessInput.step = '1';
 		thicknessInput.oninput = () => {
