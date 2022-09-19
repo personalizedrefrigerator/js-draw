@@ -72,6 +72,17 @@
 
 			/* Container for the save popup. */
 			.popupContainer iframe {
+				width: 100vw;
+				height: 100vh;
+
+				border: none;
+				padding: 0;
+				margin: 0;
+
+				background-color: rgba(0, 0, 0, 0.0);
+			}
+
+			.popupContainer {
 				position: fixed;
 				z-index: 100;
 				top: 0;
@@ -79,10 +90,7 @@
 				bottom: 0;
 				right: 0;
 
-				width: 100vw;
-				height: 100vh;
-
-				border: none;
+				padding: 0;
 
 				--backdrop-filter: blur(6px) contrast(150%);
 				backdrop-filter: var(--backdrop-filter);
