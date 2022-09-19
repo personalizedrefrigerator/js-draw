@@ -388,7 +388,6 @@ export class ImageNode {
 	}
 
 	public render(renderer: AbstractRenderer, visibleRect: Rect2) {
-		// Don't render components that are < 0.1% of the viewport.
 		const leaves = this.getLeavesIntersectingRegion(visibleRect, rect => renderer.isTooSmallToRender(rect));
 		sortLeavesByZIndex(leaves);
 

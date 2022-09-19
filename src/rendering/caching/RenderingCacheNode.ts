@@ -221,11 +221,13 @@ export default class RenderingCacheNode {
 			}
 		} else {
 			// Determine whether we already have rendered the items
+			const tooSmallToRender = (rect: Rect2) => rect.w / this.region.w < 1 / this.cacheState.props.blockResolution.x;
+
 			const leaves = [];
 			for (const item of items) {
 				leaves.push(
 					...item.getLeavesIntersectingRegion(
-						this.region, rect => rect.w / this.region.w < 2 / this.cacheState.props.blockResolution.x,
+						this.region, tooSmallToRender,
 					)
 				);
 			}
