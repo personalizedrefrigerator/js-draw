@@ -13,9 +13,8 @@ import RenderingStyle from '../../rendering/RenderingStyle';
 export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
 	// Don't smooth if input is more than ± 7 pixels from the true curve, do smooth if
 	// less than ± 2 px from the curve.
-	const canvasTransform = viewport.screenToCanvasTransform;
-	const maxSmoothingDist = canvasTransform.transformVec3(Vec2.unitX).magnitude() * 7;
-	const minSmoothingDist = canvasTransform.transformVec3(Vec2.unitX).magnitude() * 2;
+	const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 7;
+	const minSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 2;
 
 	return new FreehandLineBuilder(
 		initialPoint, minSmoothingDist, maxSmoothingDist
@@ -79,6 +78,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		this.buffer = [this.startPoint.pos];
 		this.momentum = Vec2.zero;
 		this.currentCurve = null;
+		this.curveStartWidth = startPoint.width;
 
 		this.bbox = new Rect2(this.startPoint.pos.x, this.startPoint.pos.y, 0, 0);
 	}
@@ -180,7 +180,13 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	}
 
 	private roundPoint(point: Point2): Point2 {
-		return Viewport.roundPoint(point, this.minFitAllowed);
+		let minFit = Math.min(this.minFitAllowed, this.curveStartWidth);
+
+		if (minFit < 1e-10) {
+			minFit = this.minFitAllowed;
+		}
+
+		return Viewport.roundPoint(point, minFit);
 	}
 
 	private finalizeCurrentCurve() {
