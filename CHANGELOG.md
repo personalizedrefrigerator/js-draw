@@ -1,3 +1,7 @@
+# 0.3.0
+ * Pen-related bug fixes
+ * API: Allow creating custom tools and tool widgets.
+
 # 0.2.3
  * Fix lines with thickness set to small numbers self-intersecting many times.
 
