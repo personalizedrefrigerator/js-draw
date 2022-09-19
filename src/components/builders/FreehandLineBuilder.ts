@@ -2,7 +2,7 @@ import { Bezier } from 'bezier-js';
 import AbstractRenderer, { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Rect2 from '../../math/Rect2';
-import { LinePathCommand, PathCommandType, QuadraticBezierPathCommand } from '../../math/Path';
+import { LinePathCommand, PathCommand, PathCommandType, QuadraticBezierPathCommand } from '../../math/Path';
 import LineSegment2 from '../../math/LineSegment2';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
@@ -24,16 +24,16 @@ export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: S
 
 type CurrentSegmentToPathResult = {
 	upperCurve: QuadraticBezierPathCommand,
-	lowerToUpperConnector: LinePathCommand,
-	upperToLowerConnector: LinePathCommand,
+	lowerToUpperConnector: PathCommand,
+	upperToLowerConnector: PathCommand,
 	lowerCurve: QuadraticBezierPathCommand,
 };
 
 // Handles stroke smoothing and creates Strokes from user/stylus input.
 export default class FreehandLineBuilder implements ComponentBuilder {
 	private isFirstSegment: boolean = true;
-	private pathStartConnector: LinePathCommand|null = null;
-	private mostRecentConnector: LinePathCommand|null = null;
+	private pathStartConnector: PathCommand|null = null;
+	private mostRecentConnector: PathCommand|null = null;
 
 	//    Beginning of the list of lower parts
 	//        ↓
@@ -53,7 +53,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 	private buffer: Point2[];
 	private lastPoint: StrokeDataPoint;
-	private lastExitingVec: Vec2;
+	private lastExitingVec: Vec2|null = null;
 	private currentCurve: Bezier|null = null;
 	private curveStartWidth: number;
 	private curveEndWidth: number;
@@ -96,8 +96,8 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	private previewPath(): RenderablePathSpec|null {
 		let upperPath: QuadraticBezierPathCommand[];
 		let lowerPath: QuadraticBezierPathCommand[];
-		let lowerToUpperCap: LinePathCommand;
-		let pathStartConnector: LinePathCommand;
+		let lowerToUpperCap: PathCommand;
+		let pathStartConnector: PathCommand;
 		if (this.currentCurve) {
 			const { upperCurve, lowerToUpperConnector, upperToLowerConnector, lowerCurve } = this.currentSegmentToPath();
 			upperPath = this.upperSegments.concat(upperCurve);
@@ -317,11 +317,14 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			);
 		};
 
-		const upperBoundary = computeBoundaryCurve(1, halfVec);
-		const lowerBoundary = computeBoundaryCurve(-1, halfVec);
+		const boundariesIntersect = () => {
+			const upperBoundary = computeBoundaryCurve(1, halfVec);
+			const lowerBoundary = computeBoundaryCurve(-1, halfVec);
+			return upperBoundary.intersects(lowerBoundary).length > 0;
+		};
 
 		// If the boundaries have two intersections, increasing the half vector's length could fix this.
-		if (upperBoundary.intersects(lowerBoundary).length > 0) {
+		if (boundariesIntersect()) {
 			halfVec = halfVec.times(2);
 		}
 
@@ -372,7 +375,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				return;
 			}
 			
-			const threshold = Math.min(this.lastPoint.width, newPoint.width) / 4;
+			const threshold = Math.min(this.lastPoint.width, newPoint.width) / 3;
 			const shouldSnapToInitial = this.startPoint.pos.minus(newPoint.pos).magnitude() < threshold
 				&& this.isFirstSegment;
 			
@@ -493,7 +496,8 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			return true;
 		};
 
-		if (this.buffer.length > 3) {
+		const approxCurveLen = controlPoint.minus(segmentStart).magnitude() + segmentEnd.minus(controlPoint).magnitude();
+		if (this.buffer.length > 3 && approxCurveLen > this.curveEndWidth / 2) {
 			if (!curveMatchesPoints(this.currentCurve)) {
 				// Use a curve that better fits the points
 				this.currentCurve = prevCurve;
