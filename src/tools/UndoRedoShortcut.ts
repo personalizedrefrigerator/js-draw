@@ -1,11 +1,14 @@
+// Handles ctrl+Z, ctrl+Shift+Z keyboard shortcuts.
+// @packageDocumentation
+
 import Editor from '../Editor';
 import { KeyPressEvent } from '../types';
 import BaseTool from './BaseTool';
 import { ToolType } from './ToolController';
 
-
+// {@inheritDoc UndoRedoShortcut!}
 export default class UndoRedoShortcut extends BaseTool {
-	public kind: ToolType.UndoRedoShortcut = ToolType.UndoRedoShortcut;
+	public kind: ToolType.Shortcut = ToolType.Shortcut;
 
 	public constructor(private editor: Editor) {
 		super(editor.notifier, editor.localization.undoRedoTool);

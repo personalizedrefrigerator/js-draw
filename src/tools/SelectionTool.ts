@@ -1,10 +1,13 @@
+// Allows users to select/transform portions of the `EditorImage`.
+// With respect to `extend`ing, `SelectionTool` is not stable.
+// @packageDocumentation
+
 import Command from '../commands/Command';
 import Duplicate from '../commands/Duplicate';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import Editor from '../Editor';
 import Mat33 from '../math/Mat33';
-// import Mat33 from "../geometry/Mat33";
 import Rect2 from '../math/Rect2';
 import { Point2, Vec2 } from '../math/Vec2';
 import { EditorLocalization } from '../localization';
@@ -502,6 +505,7 @@ class Selection {
 	}
 }
 
+// {@inheritDoc SelectionTool!}
 export default class SelectionTool extends BaseTool {
 	private handleOverlay: HTMLElement;
 	private prevSelectionBox: Selection|null;

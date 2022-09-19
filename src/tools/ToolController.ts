@@ -18,17 +18,21 @@ export enum ToolType {
     Eraser,
     PanZoom,
     Text,
-    UndoRedoShortcut,
+    Shortcut,
     Pipette,
     Other,
 }
 
 export default class ToolController {
 	private tools: BaseTool[];
-	private activeTool: BaseTool|null;
+	private activeTool: BaseTool|null = null;
+	private primaryToolGroup: ToolEnabledGroup;
 
+	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
-		const primaryToolEnabledGroup = new ToolEnabledGroup();
+		const primaryToolGroup = new ToolEnabledGroup();
+		this.primaryToolGroup = primaryToolGroup;
+
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 16 });
@@ -52,7 +56,7 @@ export default class ToolController {
 			keyboardPanZoomTool,
 			new UndoRedoShortcut(editor),
 		];
-		primaryTools.forEach(tool => tool.setToolGroup(primaryToolEnabledGroup));
+		primaryTools.forEach(tool => tool.setToolGroup(primaryToolGroup));
 		panZoomTool.setEnabled(true);
 		primaryPenTool.setEnabled(true);
 
@@ -68,6 +72,20 @@ export default class ToolController {
 		});
 
 		this.activeTool = null;
+	}
+
+	// Replaces the current set of tools with `tools`. This should only be done before
+	// the creation of the app's toolbar (if using `HTMLToolbar`).
+	public setTools(tools: BaseTool[], primaryToolGroup?: ToolEnabledGroup) {
+		this.tools = tools;
+		this.primaryToolGroup = primaryToolGroup ?? new ToolEnabledGroup();
+	}
+
+	// Add a tool that acts like one of the primary tools (only one primary tool can be enabled at a time).
+	// This should be called before creating the app's toolbar.
+	public addPrimaryTool(tool: BaseTool) {
+		tool.setToolGroup(this.primaryToolGroup);
+		this.tools.push(tool);
 	}
 
 	// Returns true if the event was handled

@@ -12,20 +12,23 @@ import { ActionButtonIcon } from './types';
 import { makeRedoIcon, makeUndoIcon } from './icons';
 import PanZoom from '../tools/PanZoom';
 import TextTool from '../tools/TextTool';
-import PenWidget from './widgets/PenWidget';
+import PenToolWidget from './widgets/PenToolWidget';
 import EraserWidget from './widgets/EraserWidget';
-import { SelectionWidget } from './widgets/SelectionWidget';
+import SelectionToolWidget from './widgets/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
+import BaseWidget from './widgets/BaseWidget';
 
 
 export const toolbarCSSPrefix = 'toolbar-';
 
+type UpdateColorisCallback = ()=>void;
 
 export default class HTMLToolbar {
 	private container: HTMLElement;
 
 	private static colorisStarted: boolean = false;
+	private updateColoris: UpdateColorisCallback|null = null;
 
 	public constructor(
 		private editor: Editor, parent: HTMLElement,
@@ -45,6 +48,12 @@ export default class HTMLToolbar {
 
 	// @internal
 	public setupColorPickers() {
+		// Much of the setup only needs to be done once.
+		if (this.updateColoris) {
+			this.updateColoris();
+			return;
+		}
+
 		const closePickerOverlay = document.createElement('div');
 		closePickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;
 		this.editor.createHTMLOverlay(closePickerOverlay);
@@ -73,6 +82,7 @@ export default class HTMLToolbar {
 			});
 		};
 		initColoris();
+		this.updateColoris = initColoris;
 
 		const addColorToSwatch = (newColor: string) => {
 			let alreadyPresent = false;
@@ -110,6 +120,13 @@ export default class HTMLToolbar {
 		});
 	}
 
+	// Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
+	// (i.e. its `addTo` method should not have been called).
+	public addWidget(widget: BaseWidget) {
+		widget.addTo(this.container);
+		this.setupColorPickers();
+	}
+
 	public addActionButton(title: string|ActionButtonIcon, command: ()=> void, parent?: Element) {
 		const button = document.createElement('button');
 		button.classList.add(`${toolbarCSSPrefix}button`);
@@ -134,7 +151,7 @@ export default class HTMLToolbar {
 		return button;
 	}
 
-	private addUndoRedoButtons() {
+	public addUndoRedoButtons() {
 		const undoRedoGroup = document.createElement('div');
 		undoRedoGroup.classList.add(`${toolbarCSSPrefix}buttonGroup`);
 
@@ -171,10 +188,10 @@ export default class HTMLToolbar {
 				throw new Error('All `Pen` tools must have kind === ToolType.Pen');
 			}
 
-			const widget = new PenWidget(
+			const widget = new PenToolWidget(
 				this.editor, tool, this.localizationTable,
 			);
-			widget.addTo(this.container);
+			this.addWidget(widget);
 		}
 
 		for (const tool of toolController.getMatchingTools(ToolType.Eraser)) {
@@ -182,7 +199,7 @@ export default class HTMLToolbar {
 				throw new Error('All Erasers must have kind === ToolType.Eraser!');
 			}
 
-			(new EraserWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
+			this.addWidget(new EraserWidget(this.editor, tool, this.localizationTable));
 		}
 
 		for (const tool of toolController.getMatchingTools(ToolType.Selection)) {
@@ -190,7 +207,7 @@ export default class HTMLToolbar {
 				throw new Error('All SelectionTools must have kind === ToolType.Selection');
 			}
 
-			(new SelectionWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
+			this.addWidget(new SelectionToolWidget(this.editor, tool, this.localizationTable));
 		}
 
 		for (const tool of toolController.getMatchingTools(ToolType.Text)) {
@@ -198,15 +215,13 @@ export default class HTMLToolbar {
 				throw new Error('All text tools must have kind === ToolType.Text');
 			}
 	
-			(new TextToolWidget(this.editor, tool, this.localizationTable)).addTo(this.container);
+			this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
 		}
 
 		const panZoomTool = toolController.getMatchingTools(ToolType.PanZoom)[0];
 		if (panZoomTool && panZoomTool instanceof PanZoom) {
-			(new HandToolWidget(this.editor, panZoomTool, this.localizationTable)).addTo(this.container);
+			this.addWidget(new HandToolWidget(this.editor, panZoomTool, this.localizationTable));
 		}
-
-		this.setupColorPickers();
 	}
 
 	public addDefaultActionButtons() {

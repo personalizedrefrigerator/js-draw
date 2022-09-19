@@ -22,6 +22,8 @@ export { default as Color4 } from './Color4';
 export * from './math/lib';
 export * from './components/lib';
 export * from './commands/lib';
+export * from './tools/lib';
+export * from './toolbar/lib';
 export { default as HTMLToolbar } from './toolbar/HTMLToolbar';
 
 export { Editor };

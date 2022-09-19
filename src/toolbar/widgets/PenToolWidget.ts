@@ -1,5 +1,3 @@
-// @internal @packageDocumentation
-
 import { makeArrowBuilder } from '../../components/builders/ArrowBuilder';
 import { makeFreehandLineBuilder } from '../../components/builders/FreehandLineBuilder';
 import { makeLineBuilder } from '../../components/builders/LineBuilder';
@@ -15,12 +13,15 @@ import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 
 
-interface PenTypeRecord {
+export interface PenTypeRecord {
+	// Description of the factory (e.g. 'Freehand line')
 	name: string;
+
+	// Creates an `AbstractComponent` from pen input.
 	factory: ComponentBuilderFactory;
 }
 
-export default class PenWidget extends BaseToolWidget {
+export default class PenToolWidget extends BaseToolWidget {
 	private updateInputs: ()=> void = () => {};
 	protected penTypes: PenTypeRecord[];
 
@@ -97,8 +98,8 @@ export default class PenWidget extends BaseToolWidget {
 		const objectTypeSelect = document.createElement('select');
 
 		// Give inputs IDs so we can label them with a <label for=...>Label text</label>
-		thicknessInput.id = `${toolbarCSSPrefix}thicknessInput${PenWidget.idCounter++}`;
-		objectTypeSelect.id = `${toolbarCSSPrefix}builderSelect${PenWidget.idCounter++}`;
+		thicknessInput.id = `${toolbarCSSPrefix}thicknessInput${PenToolWidget.idCounter++}`;
+		objectTypeSelect.id = `${toolbarCSSPrefix}builderSelect${PenToolWidget.idCounter++}`;
 
 		thicknessLabel.innerText = this.localizationTable.thicknessLabel;
 		thicknessLabel.setAttribute('for', thicknessInput.id);
@@ -133,7 +134,7 @@ export default class PenWidget extends BaseToolWidget {
 			this.tool.setColor(color);
 		});
 
-		colorInput.id = `${toolbarCSSPrefix}colorInput${PenWidget.idCounter++}`;
+		colorInput.id = `${toolbarCSSPrefix}colorInput${PenToolWidget.idCounter++}`;
 		colorLabel.innerText = this.localizationTable.colorLabel;
 		colorLabel.setAttribute('for', colorInput.id);
 

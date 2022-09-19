@@ -14,8 +14,8 @@ export interface PenStyle {
 }
 
 export default class Pen extends BaseTool {
-	private builder: ComponentBuilder|null = null;
-	private builderFactory: ComponentBuilderFactory = makeFreehandLineBuilder;
+	protected builder: ComponentBuilder|null = null;
+	protected builderFactory: ComponentBuilderFactory = makeFreehandLineBuilder;
 	private lastPoint: StrokeDataPoint|null = null;
 
 	public readonly kind: ToolType = ToolType.Pen;
@@ -32,7 +32,8 @@ export default class Pen extends BaseTool {
 		return 1 / this.editor.viewport.getScaleFactor() * this.style.thickness;
 	}
 
-	private getStrokePoint(pointer: Pointer): StrokeDataPoint {
+	// Converts a `pointer` to a `StrokeDataPoint`.
+	protected toStrokePoint(pointer: Pointer): StrokeDataPoint {
 		const minPressure = 0.3;
 		let pressure = Math.max(pointer.pressure ?? 1.0, minPressure);
 
@@ -52,12 +53,14 @@ export default class Pen extends BaseTool {
 		};
 	}
 
-	private previewStroke() {
+	// Displays the stroke that is currently being built with the display's `wetInkRenderer`.
+	protected previewStroke() {
 		this.editor.clearWetInk();
 		this.builder?.preview(this.editor.display.getWetInkRenderer());
 	}
 
-	private addPointToStroke(point: StrokeDataPoint) {
+	// Throws if no stroke builder exists.
+	protected addPointToStroke(point: StrokeDataPoint) {
 		if (!this.builder) {
 			throw new Error('No stroke is currently being generated.');
 		}
@@ -78,7 +81,7 @@ export default class Pen extends BaseTool {
 		}
 
 		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
-			this.builder = this.builderFactory(this.getStrokePoint(current), this.editor.viewport);
+			this.builder = this.builderFactory(this.toStrokePoint(current), this.editor.viewport);
 			return true;
 		}
 
@@ -86,7 +89,7 @@ export default class Pen extends BaseTool {
 	}
 
 	public onPointerMove({ current }: PointerEvt): void {
-		this.addPointToStroke(this.getStrokePoint(current));
+		this.addPointToStroke(this.toStrokePoint(current));
 	}
 
 	public onPointerUp({ current }: PointerEvt): void {
@@ -95,7 +98,7 @@ export default class Pen extends BaseTool {
 		}
 
 		// onPointerUp events can have zero pressure. Use the last pressure instead.
-		const currentPoint = this.getStrokePoint(current);
+		const currentPoint = this.toStrokePoint(current);
 		const strokePoint = {
 			...currentPoint,
 			width: this.lastPoint?.width ?? currentPoint.width,
@@ -118,7 +121,7 @@ export default class Pen extends BaseTool {
 		this.editor.clearWetInk();
 	}
 
-	public onGestureCancel(): void {
+	public onGestureCancel() {
 		this.editor.clearWetInk();
 	}
 
