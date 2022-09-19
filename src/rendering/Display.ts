@@ -76,8 +76,8 @@ export default class Display {
 				return this.dryInkRenderer.canRenderFromWithoutDataLoss(renderer);
 			},
 			blockResolution: cacheBlockResolution,
-			cacheSize: 500 * 500 * 4 * 150,
-			maxScale: 1.5,
+			cacheSize: 600 * 600 * 4 * 120,
+			maxScale: 1.4,
 			minComponentsPerCache: 45,
 			minComponentsToUseCache: 105,
 		});

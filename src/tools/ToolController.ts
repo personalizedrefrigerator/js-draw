@@ -38,7 +38,7 @@ export default class ToolController {
 
 			// Three pens
 			primaryPenTool,
-			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 8 }),
+			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 }),
 
 			// Highlighter-like pen with width=64
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }),
