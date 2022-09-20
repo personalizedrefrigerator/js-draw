@@ -12,9 +12,9 @@ import RenderingStyle from '../../rendering/RenderingStyle';
 
 export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
 	// Don't smooth if input is more than ± 7 pixels from the true curve, do smooth if
-	// less than ± 2 px from the curve.
+	// less than ±1 px from the curve.
 	const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 7;
-	const minSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 2;
+	const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
 
 	return new FreehandLineBuilder(
 		initialPoint, minSmoothingDist, maxSmoothingDist
@@ -197,7 +197,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				return;
 			}
 
-			const width = Viewport.roundPoint(this.startPoint.width / 3.5, this.minFitAllowed);
+			const width = Viewport.roundPoint(this.startPoint.width / 3.5, Math.min(this.minFitAllowed, this.startPoint.width / 4));
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
@@ -492,7 +492,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				const dist = proj.minus(point).magnitude();
 
 				const minFit = Math.max(
-					Math.min(this.curveStartWidth, this.curveEndWidth) / 2,
+					Math.min(this.curveStartWidth, this.curveEndWidth) / 3,
 					this.minFitAllowed
 				);
 				if (dist > minFit || dist > this.maxFitAllowed) {
