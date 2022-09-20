@@ -503,7 +503,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		};
 
 		const approxCurveLen = controlPoint.minus(segmentStart).magnitude() + segmentEnd.minus(controlPoint).magnitude();
-		if (this.buffer.length > 3 && approxCurveLen > this.curveEndWidth / 2) {
+		if (this.buffer.length > 3 && approxCurveLen > this.curveEndWidth / 3) {
 			if (!curveMatchesPoints(this.currentCurve)) {
 				// Use a curve that better fits the points
 				this.currentCurve = prevCurve;
