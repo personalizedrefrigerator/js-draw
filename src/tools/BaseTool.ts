@@ -56,5 +56,13 @@ export default abstract class BaseTool implements PointerEvtListener {
 
 		this.group = group;
 	}
+
+	public getToolGroup(): ToolEnabledGroup|null {
+		if (this.group) {
+			return this.group;
+		}
+
+		return null;
+	}
 }
 

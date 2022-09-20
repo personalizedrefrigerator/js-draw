@@ -1,3 +1,8 @@
+# 0.3.1
+ * Keyboard shortcuts:
+   * Press `Ctrl+1` to select the first pen, `Ctrl+2` to select the second, etc.
+   * When a pen is active, press `+` to increase a pen's size, `-` to decrease it.
+
 # 0.3.0
  * Pen-related bug fixes
  * API: Allow creating custom tools and tool widgets.

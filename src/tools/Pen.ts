@@ -3,7 +3,7 @@ import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Pointer, { PointerDevice } from '../Pointer';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
-import { EditorEventType, PointerEvt, StrokeDataPoint } from '../types';
+import { EditorEventType, KeyPressEvent, PointerEvt, StrokeDataPoint } from '../types';
 import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 
@@ -159,4 +159,23 @@ export default class Pen extends BaseTool {
 	public getThickness() { return this.style.thickness; }
 	public getColor() { return this.style.color; }
 	public getStrokeFactory() { return this.builderFactory; }
+
+	public onKeyPress({ key }: KeyPressEvent): boolean {
+		key = key.toLowerCase();
+
+		let newThickness: number|undefined;
+		if (key === '-' || key === '_') {
+			newThickness = this.getThickness() * 2/3;
+		} else if (key === '+' || key === '=') {
+			newThickness = this.getThickness() * 3/2;
+		}
+
+		if (newThickness !== undefined) {
+			newThickness = Math.min(Math.max(1, newThickness), 128);
+			this.setThickness(newThickness);
+			return true;
+		}
+
+		return false;
+	}
 }

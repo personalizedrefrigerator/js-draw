@@ -11,6 +11,7 @@ import { ToolLocalization } from './localization';
 import UndoRedoShortcut from './UndoRedoShortcut';
 import TextTool from './TextTool';
 import PipetteTool from './PipetteTool';
+import ToolSwitcherShortcut from './ToolSwitcherShortcut';
 
 export default class ToolController {
 	private tools: BaseTool[];
@@ -26,9 +27,6 @@ export default class ToolController {
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 16 });
 		const primaryTools = [
-			new SelectionTool(editor, localization.selectionTool),
-			new Eraser(editor, localization.eraserTool),
-
 			// Three pens
 			primaryPenTool,
 			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 }),
@@ -36,6 +34,8 @@ export default class ToolController {
 			// Highlighter-like pen with width=64
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }),
 
+			new Eraser(editor, localization.eraserTool),
+			new SelectionTool(editor, localization.selectionTool),
 			new TextTool(editor, localization.textTool, localization),
 		];
 		this.tools = [
@@ -44,6 +44,7 @@ export default class ToolController {
 			...primaryTools,
 			keyboardPanZoomTool,
 			new UndoRedoShortcut(editor),
+			new ToolSwitcherShortcut(editor),
 		];
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolGroup));
 		panZoomTool.setEnabled(true);
@@ -79,6 +80,12 @@ export default class ToolController {
 		}
 
 		this.addTool(tool);
+	}
+
+	public getPrimaryTools(): BaseTool[] {
+		return this.tools.filter(tool => {
+			return tool.getToolGroup() === this.primaryToolGroup;
+		});
 	}
 
 	// Add a tool to the end of this' tool list (the added tool receives events after tools already added to this).

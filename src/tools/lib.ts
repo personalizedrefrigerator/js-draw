@@ -8,6 +8,7 @@ export { default as ToolController } from './ToolController';
 export { default as ToolEnabledGroup } from './ToolEnabledGroup';
 
 export { default as UndoRedoShortcut } from './UndoRedoShortcut';
+export { default as ToolSwitcherShortcut } from './ToolSwitcherShortcut';
 export { default as PanZoomTool, PanZoomMode } from './PanZoom';
 
 export { default as PenTool, PenStyle } from './Pen';
