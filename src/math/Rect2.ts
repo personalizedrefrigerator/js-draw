@@ -12,7 +12,7 @@ export interface RectTemplate {
 	height?: number;
 }
 
-// invariant: w > 0, h > 0.
+// invariant: w ≥ 0, h ≥ 0.
 export default class Rect2 {
 	// Derived state:
 
