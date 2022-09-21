@@ -267,7 +267,7 @@ export default class Path {
 	// this path's interior.
 	//
 	// Note: Assumes that this is a closed, non-self-intersecting path.
-	public closedRoughlyIntersects(rect: Rect2): boolean {
+	public closedIntersects(rect: Rect2): boolean {
 		if (rect.containsRect(this.bbox)) {
 			return true;
 		}
@@ -275,17 +275,10 @@ export default class Path {
 		// Choose a point outside of the path.
 		const startPt = this.bbox.topLeft.minus(Vec2.of(1, 1));
 		const testPts = rect.corners;
-		const polygon = this.polylineApproximation();
 
 		for (const point of testPts) {
 			const testLine = new LineSegment2(point, startPt);
-
-			let intersectionCount = 0;
-			for (const line of polygon) {
-				if (line.intersects(testLine)) {
-					intersectionCount ++;
-				}
-			}
+			const intersectionCount = this.intersection(testLine).length;
 
 			// Odd? The point is within the polygon!
 			if (intersectionCount % 2 === 1) {
@@ -294,10 +287,9 @@ export default class Path {
 		}
 
 		for (const edge of rect.getEdges()) {
-			for (const line of polygon) {
-				if (edge.intersects(line)) {
-					return true;
-				}
+			const intersectionCount = this.intersection(edge).length;
+			if (intersectionCount > 0) {
+				return true;
 			}
 		}
 
