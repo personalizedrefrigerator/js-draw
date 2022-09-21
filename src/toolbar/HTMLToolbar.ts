@@ -5,7 +5,7 @@ import { coloris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
 import SelectionTool from '../tools/SelectionTool';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
-import { ActionButtonIcon, ToolbarNotifier } from './types';
+import { ActionButtonIcon } from './types';
 import { makeRedoIcon, makeUndoIcon } from './icons';
 import PanZoom from '../tools/PanZoom';
 import TextTool from '../tools/TextTool';
@@ -16,8 +16,6 @@ import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget from './widgets/BaseWidget';
 import { EraserTool, PenTool } from '../tools/lib';
-import EventDispatcher from '../EventDispatcher';
-
 
 export const toolbarCSSPrefix = 'toolbar-';
 
@@ -28,15 +26,12 @@ export default class HTMLToolbar {
 
 	private static colorisStarted: boolean = false;
 	private updateColoris: UpdateColorisCallback|null = null;
-	public readonly notifier: ToolbarNotifier;
 
 	/** @internal */
 	public constructor(
 		private editor: Editor, parent: HTMLElement,
 		private localizationTable: ToolbarLocalization = defaultToolbarLocalization,
 	) {
-		this.notifier = new EventDispatcher();
-
 		this.container = document.createElement('div');
 		this.container.classList.add(`${toolbarCSSPrefix}root`);
 		this.container.setAttribute('role', 'toolbar');
