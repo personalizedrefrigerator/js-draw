@@ -42,7 +42,7 @@ describe('Path.toString', () => {
 			},
 		]);
 
-		expect(path.toString()).toBe('M1000,2000000L30.0001,40');
+		expect(path.toString()).toBe('M1000,2000000l-970-1999960');
 	});
 
 	it('deserialized path should serialize to the same/similar path, but with rounded components', () => {
@@ -50,7 +50,7 @@ describe('Path.toString', () => {
 		path1['cachedStringVersion'] = null; // Clear the cache.
 
 		expect(path1.toString()).toBe([
-			'M100,100', 'L101,101', 'Q102,102 90,90', 'L100,100'
+			'M100,100', 'l1,1', 'q1,1 -11-11', 'l10,10'
 		].join(''));
 	});
 });
