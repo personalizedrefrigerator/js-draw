@@ -1,5 +1,5 @@
 import Editor from '../../Editor';
-import { InputEvtType } from '../../types';
+import { EditorEventType, InputEvtType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeDropdownIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
@@ -103,6 +103,7 @@ export default abstract class BaseWidget {
 	}
 
 	// Adds this to [parent]. This can only be called once for each ToolbarWidget.
+	// @internal
 	public addTo(parent: HTMLElement) {
 		this.label.innerText = this.getTitle();
 
@@ -119,6 +120,12 @@ export default abstract class BaseWidget {
 			this.dropdownIcon = this.createDropdownIcon();
 			this.button.appendChild(this.dropdownIcon);
 			this.container.appendChild(this.dropdownContainer);
+
+			this.editor.notifier.on(EditorEventType.ToolbarDropdownShown, (evt) => {
+				if (evt.kind === EditorEventType.ToolbarDropdownShown && evt.parentWidget !== this) {
+					this.setDropdownVisible(false);
+				}
+			});
 		}
 
 		this.setDropdownVisible(false);
@@ -171,6 +178,11 @@ export default abstract class BaseWidget {
 			this.editor.announceForAccessibility(
 				this.localizationTable.dropdownShown(this.getTitle())
 			);
+
+			this.editor.notifier.dispatch(EditorEventType.ToolbarDropdownShown, {
+				kind: EditorEventType.ToolbarDropdownShown,
+				parentWidget: this,
+			});
 		} else {
 			this.dropdownContainer.classList.add('hidden');
 			this.container.classList.remove('dropdownVisible');

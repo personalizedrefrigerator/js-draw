@@ -10,6 +10,7 @@ import Rect2 from './math/Rect2';
 import Pointer from './Pointer';
 import Color4 from './Color4';
 import Command from './commands/Command';
+import { BaseWidget } from './lib';
 
 
 export interface PointerEvtListener {
@@ -88,6 +89,10 @@ export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataTyp
 
 
 
+
+
+
+
 export enum EditorEventType {
 	ToolEnabled,
 	ToolDisabled,
@@ -103,6 +108,7 @@ export enum EditorEventType {
 
 	ColorPickerToggled,
 	ColorPickerColorSelected,
+	ToolbarDropdownShown,
 }
 
 type EditorToolEventType = EditorEventType.ToolEnabled
@@ -157,10 +163,16 @@ export interface ColorPickerColorSelected {
 	readonly color: Color4;
 }
 
+export interface ToolbarDropdownShownEvent {
+	readonly kind: EditorEventType.ToolbarDropdownShown;
+	readonly parentWidget: BaseWidget;
+}
+
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
 	| EditorViewportChangedEvent | DisplayResizedEvent
 	| EditorUndoStackUpdated | CommandDoneEvent | CommandUndoneEvent
-	| ColorPickerToggled | ColorPickerColorSelected;
+	| ColorPickerToggled | ColorPickerColorSelected
+	| ToolbarDropdownShownEvent;
 
 
 // Returns a Promise to indicate that the event source should pause until the Promise resolves.
