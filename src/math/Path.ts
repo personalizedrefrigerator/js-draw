@@ -301,7 +301,7 @@ export default class Path {
 
 	// @param onlyAbsCommands - True if we should avoid converting absolute coordinates to relative offsets -- such
 	//   conversions can lead to smaller output strings, but also take time.
-	public static toString(startPoint: Point2, parts: PathCommand[], onlyAbsCommands: boolean = true): string {
+	public static toString(startPoint: Point2, parts: PathCommand[], onlyAbsCommands?: boolean): string {
 		const result: string[] = [];
 
 		let prevPoint: Point2|undefined;

@@ -96,8 +96,13 @@ export default class SVGRenderer extends AbstractRenderer {
 			return;
 		}
 
+		// Try to make longer paths take less space.
+		const compressPath = this.lastPath.length > 6;
+
 		const pathElem = document.createElementNS(svgNameSpace, 'path');
-		pathElem.setAttribute('d', Path.toString(this.lastPathStart!, this.lastPath));
+		pathElem.setAttribute(
+			'd', Path.toString(this.lastPathStart!, this.lastPath, !compressPath)
+		);
 
 		const style = this.lastPathStyle;
 		pathElem.setAttribute('fill', style.fill.toHexString());
