@@ -267,7 +267,7 @@ export default class Path {
 	// this path's interior.
 	//
 	// Note: Assumes that this is a closed, non-self-intersecting path.
-	public closedIntersects(rect: Rect2): boolean {
+	public closedRoughlyIntersects(rect: Rect2): boolean {
 		if (rect.containsRect(this.bbox)) {
 			return true;
 		}
