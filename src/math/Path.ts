@@ -275,10 +275,17 @@ export default class Path {
 		// Choose a point outside of the path.
 		const startPt = this.bbox.topLeft.minus(Vec2.of(1, 1));
 		const testPts = rect.corners;
+		const polygon = this.polylineApproximation();
 
 		for (const point of testPts) {
 			const testLine = new LineSegment2(point, startPt);
-			const intersectionCount = this.intersection(testLine).length;
+
+			let intersectionCount = 0;
+			for (const line of polygon) {
+				if (line.intersects(testLine)) {
+					intersectionCount ++;
+				}
+			}
 
 			// Odd? The point is within the polygon!
 			if (intersectionCount % 2 === 1) {
@@ -286,10 +293,18 @@ export default class Path {
 			}
 		}
 
-		for (const edge of rect.getEdges()) {
-			const intersectionCount = this.intersection(edge).length;
-			if (intersectionCount > 0) {
-				return true;
+		// Grow the rectangle for possible additional precision.
+		const grownRect = rect.grownBy(Math.min(rect.size.x * 2, rect.size.y * 2));
+		const edges = [];
+		for (const subrect of grownRect.divideIntoGrid(4, 4)) {
+			edges.push(...subrect.getEdges());
+		}
+
+		for (const edge of edges) {
+			for (const line of polygon) {
+				if (edge.intersects(line)) {
+					return true;
+				}
 			}
 		}
 
