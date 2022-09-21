@@ -298,7 +298,7 @@ export default class Path {
 		}
 
 		// Grow the rectangle for possible additional precision.
-		const grownRect = rect.grownBy(Math.min(rect.size.x * 2, rect.size.y * 2));
+		const grownRect = rect.grownBy(Math.min(rect.size.x, rect.size.y));
 		const edges = [];
 		for (const subrect of grownRect.divideIntoGrid(4, 4)) {
 			edges.push(...subrect.getEdges());
@@ -384,11 +384,7 @@ export default class Path {
 		}
 
 		// Hueristic: Try to determine whether converting absolute to relative commands is worth it.
-		//            If we're near (0, 0), it probably isn't worth it and if bounding boxes are large,
-		//            it also probably isn't worth it.
-		const makeRelativeCommands =
-			Math.abs(this.bbox.topLeft.x) > 10 && Math.abs(this.bbox.size.x) < 2
-			&& Math.abs(this.bbox.topLeft.y) > 10 && Math.abs(this.bbox.size.y) < 2;
+		const makeRelativeCommands = Math.abs(this.bbox.topLeft.x) > 10 && Math.abs(this.bbox.topLeft.y) > 10;
 
 		const result = Path.toString(this.startPoint, this.parts, !makeRelativeCommands);
 		this.cachedStringVersion = result;

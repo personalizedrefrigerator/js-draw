@@ -58,8 +58,8 @@ export default class Stroke extends AbstractComponent {
 					continue;
 				}
 
-				const biggerThanVisible = bbox.size.x > visibleRect.size.x || bbox.size.y > visibleRect.size.y;
-				if (biggerThanVisible && !part.path.closedRoughlyIntersects(visibleRect)) {
+				const muchBiggerThanVisible = bbox.size.x > visibleRect.size.x * 2 || bbox.size.y > visibleRect.size.y * 2;
+				if (muchBiggerThanVisible && !part.path.closedRoughlyIntersects(visibleRect)) {
 					continue;
 				}
 			}
