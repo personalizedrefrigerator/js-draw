@@ -14,6 +14,7 @@ export default abstract class BaseWidget {
 	#hasDropdown: boolean;
 	private disabled: boolean = false;
 	private subWidgets: BaseWidget[] = [];
+	private toplevel: boolean = true;
 
 	public constructor(
 		protected editor: Editor,
@@ -46,6 +47,7 @@ export default abstract class BaseWidget {
 
 		for (const widget of this.subWidgets) {
 			widget.addTo(dropdown);
+			widget.setIsToplevel(false);
 		}
 		return true;
 	}
@@ -122,7 +124,14 @@ export default abstract class BaseWidget {
 			this.container.appendChild(this.dropdownContainer);
 
 			this.editor.notifier.on(EditorEventType.ToolbarDropdownShown, (evt) => {
-				if (evt.kind === EditorEventType.ToolbarDropdownShown && evt.parentWidget !== this) {
+				if (
+					evt.kind === EditorEventType.ToolbarDropdownShown
+					&& evt.parentWidget !== this
+
+					// Don't hide if a submenu wash shown (it might be a submenu of
+					// the current menu).
+					&& evt.parentWidget.toplevel
+				) {
 					this.setDropdownVisible(false);
 				}
 			});
@@ -205,6 +214,11 @@ export default abstract class BaseWidget {
 			this.dropdownContainer.style.marginLeft = '';
 			this.dropdownContainer.style.transform = '';
 		}
+	}
+
+	/** Set whether the widget is contained within another. @internal */
+	protected setIsToplevel(toplevel: boolean) {
+		this.toplevel = toplevel;
 	}
 
 	protected isDropdownVisible(): boolean {
