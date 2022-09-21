@@ -163,6 +163,10 @@ export default class Path {
 	}
 
 	public intersection(line: LineSegment2): IntersectionResult[] {
+		if (!line.bbox.intersects(this.bbox)) {
+			return [];
+		}
+
 		const result: IntersectionResult[] = [];
 		for (const part of this.geometry) {
 			if (part instanceof LineSegment2) {
