@@ -9,7 +9,6 @@ import { ImageComponentLocalization } from './localization';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
-	bbox: Rect2;
 }
 
 export default class Stroke extends AbstractComponent {
@@ -19,7 +18,7 @@ export default class Stroke extends AbstractComponent {
 	public constructor(parts: RenderablePathSpec[]) {
 		super('stroke');
 
-		this.parts = parts.map(section => {
+		this.parts = parts.map((section): StrokePart => {
 			const path = Path.fromRenderable(section);
 			const pathBBox = this.bboxForPart(path.bbox, section.style);
 
@@ -31,7 +30,6 @@ export default class Stroke extends AbstractComponent {
 
 			return {
 				path,
-				bbox: pathBBox,
 
 				// To implement RenderablePathSpec
 				startPoint: path.startPoint,
@@ -54,7 +52,7 @@ export default class Stroke extends AbstractComponent {
 	public render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.getBBox());
 		for (const part of this.parts) {
-			const bbox = part.bbox;
+			const bbox = this.bboxForPart(part.path.bbox, part.style);
 			if (visibleRect) {
 				if (!bbox.intersects(visibleRect)) {
 					continue;
@@ -98,7 +96,6 @@ export default class Stroke extends AbstractComponent {
 
 			return {
 				path: newPath,
-				bbox: newBBox,
 				startPoint: newPath.startPoint,
 				commands: newPath.parts,
 				style: part.style,

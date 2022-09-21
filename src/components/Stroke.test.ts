@@ -64,6 +64,11 @@ describe('Stroke', () => {
 				"path": "m0,0 l10,10z"
 			}
 		]`);
+		const path = deserialized.getPath();
+
+		// Should cache the original string representation.
+		expect(deserialized.getPath().toString()).toBe('m0,0 l10,10z');
+		path['cachedStringVersion'] = null;
 		expect(deserialized.getPath().toString()).toBe('M0,0L10,10L0,0');
 	});
 });
