@@ -11,6 +11,7 @@ export interface RenderablePathSpec {
 	startPoint: Point2;
 	commands: PathCommand[];
 	style: RenderingStyle;
+	path?: Path;
 }
 
 export default abstract class AbstractRenderer {

@@ -349,6 +349,10 @@ export default class Path {
 	}
 
 	public static fromRenderable(renderable: RenderablePathSpec): Path {
+		if (renderable.path) {
+			return renderable.path;
+		}
+
 		return new Path(renderable.startPoint, renderable.commands);
 	}
 
@@ -357,10 +361,17 @@ export default class Path {
 			startPoint: this.startPoint,
 			style: fill,
 			commands: this.parts,
+			path: this,
 		};
 	}
 
+	private cachedStringVersion: string|null = null;
+
 	public toString(): string {
+		if (this.cachedStringVersion) {
+			return this.cachedStringVersion;
+		}
+
 		// Hueristic: Try to determine whether converting absolute to relative commands is worth it.
 		//            If we're near (0, 0), it probably isn't worth it and if bounding boxes are large,
 		//            it also probably isn't worth it.
@@ -368,7 +379,9 @@ export default class Path {
 			Math.abs(this.bbox.topLeft.x) > 10 && Math.abs(this.bbox.size.x) < 2
 			&& Math.abs(this.bbox.topLeft.y) > 10 && Math.abs(this.bbox.size.y) < 2;
 
-		return Path.toString(this.startPoint, this.parts, !makeRelativeCommands);
+		const result = Path.toString(this.startPoint, this.parts, !makeRelativeCommands);
+		this.cachedStringVersion = result;
+		return result;
 	}
 
 	public serialize(): string {
@@ -637,7 +650,9 @@ export default class Path {
 			}
 		}
 
-		return new Path(startPos ?? Vec2.zero, commands);
+		const result = new Path(startPos ?? Vec2.zero, commands);
+		result.cachedStringVersion = pathString;
+		return result;
 	}
 
 	public static empty: Path = new Path(Vec2.zero, []);

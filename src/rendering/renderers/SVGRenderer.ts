@@ -2,23 +2,19 @@
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import { TextStyle } from '../../components/Text';
 import Mat33 from '../../math/Mat33';
-import Path, { PathCommand, PathCommandType } from '../../math/Path';
+import Path from '../../math/Path';
 import Rect2 from '../../math/Rect2';
 import { toRoundedString } from '../../math/rounding';
 import { Point2, Vec2 } from '../../math/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
-import AbstractRenderer from './AbstractRenderer';
+import AbstractRenderer, { RenderablePathSpec } from './AbstractRenderer';
 
 const svgNameSpace = 'http://www.w3.org/2000/svg';
 export default class SVGRenderer extends AbstractRenderer {
-	private currentPath: PathCommand[]|null;
-	private pathStart: Point2|null;
-
-	private lastPathStyle: RenderingStyle|null;
-	private lastPath: PathCommand[]|null;
-	private lastPathStart: Point2|null;
+	private lastPathStyle: RenderingStyle|null = null;
+	private lastPathString: string[] = [];
 	private objectElems: SVGElement[]|null = null;
 
 	private overwrittenAttrs: Record<string, string|null> = {};
@@ -58,51 +54,17 @@ export default class SVGRenderer extends AbstractRenderer {
 			}
 		}
 		this.overwrittenAttrs = {};
-	}
-
-	protected beginPath(startPoint: Point2) {
-		this.currentPath = [];
-		this.pathStart = this.canvasToScreen(startPoint);
-		this.lastPathStart ??= this.pathStart;
-	}
-
-	protected endPath(style: RenderingStyle) {
-		if (this.currentPath == null) {
-			throw new Error('No path exists to end! Make sure beginPath was called!');
-		}
-
-		// Try to extend the previous path, if possible
-		if (style.fill.eq(this.lastPathStyle?.fill) && this.lastPath != null) {
-			this.lastPath.push({
-				kind: PathCommandType.MoveTo,
-				point: this.pathStart!,
-			}, ...this.currentPath);
-			this.pathStart = null;
-			this.currentPath = null;
-		} else {
-			this.addPathToSVG();
-			this.lastPathStart = this.pathStart;
-			this.lastPathStyle = style;
-			this.lastPath = this.currentPath;
-
-			this.pathStart = null;
-			this.currentPath = null;
-		}
+		this.lastPathString = [];
 	}
 
 	// Push [this.fullPath] to the SVG
 	private addPathToSVG() {
-		if (!this.lastPathStyle || !this.lastPath) {
+		if (!this.lastPathStyle || this.lastPathString.length === 0) {
 			return;
 		}
 
-		// Try to make longer paths take less space.
-		const compressPath = this.lastPath.length > 6;
-
 		const pathElem = document.createElementNS(svgNameSpace, 'path');
-		pathElem.setAttribute(
-			'd', Path.toString(this.lastPathStart!, this.lastPath, !compressPath)
-		);
+		pathElem.setAttribute('d', this.lastPathString.join(' '));
 
 		const style = this.lastPathStyle;
 		pathElem.setAttribute('fill', style.fill.toHexString());
@@ -114,6 +76,19 @@ export default class SVGRenderer extends AbstractRenderer {
 
 		this.elem.appendChild(pathElem);
 		this.objectElems?.push(pathElem);
+	}
+
+	public drawPath(pathSpec: RenderablePathSpec) {
+		const style = pathSpec.style;
+		const path = Path.fromRenderable(pathSpec);
+
+		// Try to extend the previous path, if possible
+		if (!style.fill.eq(this.lastPathStyle?.fill) || this.lastPathString.length === 0) {
+			this.addPathToSVG();
+			this.lastPathStyle = style;
+			this.lastPathString = [];
+		}
+		this.lastPathString.push(path.toString());
 	}
 
 	public drawText(text: string, transform: Mat33, style: TextStyle): void {
@@ -151,8 +126,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		super.startObject(boundingBox);
 
 		// Only accumulate a path within an object
-		this.lastPath = null;
-		this.lastPathStart = null;
+		this.lastPathString = [];
 		this.lastPathStyle = null;
 		this.objectElems = [];
 	}
@@ -184,49 +158,16 @@ export default class SVGRenderer extends AbstractRenderer {
 		}
 	}
 
-	protected lineTo(point: Point2) {
-		point = this.canvasToScreen(point);
-
-		this.currentPath!.push({
-			kind: PathCommandType.LineTo,
-			point,
-		});
-	}
-
-	protected moveTo(point: Point2) {
-		point = this.canvasToScreen(point);
-
-		this.currentPath!.push({
-			kind: PathCommandType.MoveTo,
-			point,
-		});
-	}
-
+	// Not implemented -- use drawPath instead.
+	private unimplementedMessage() { throw new Error('Not implemenented!'); }
+	protected beginPath(_startPoint: Point2) { this.unimplementedMessage(); }
+	protected endPath(_style: RenderingStyle) { this.unimplementedMessage(); }
+	protected lineTo(_point: Point2) { this.unimplementedMessage(); }
+	protected moveTo(_point: Point2) { this.unimplementedMessage(); }
 	protected traceCubicBezierCurve(
-		controlPoint1: Point2, controlPoint2: Point2, endPoint: Point2
-	) {
-		controlPoint1 = this.canvasToScreen(controlPoint1);
-		controlPoint2 = this.canvasToScreen(controlPoint2);
-		endPoint = this.canvasToScreen(endPoint);
-
-		this.currentPath!.push({
-			kind: PathCommandType.CubicBezierTo,
-			controlPoint1,
-			controlPoint2,
-			endPoint,
-		});
-	}
-
-	protected traceQuadraticBezierCurve(controlPoint: Point2, endPoint: Point2) {
-		controlPoint = this.canvasToScreen(controlPoint);
-		endPoint = this.canvasToScreen(endPoint);
-
-		this.currentPath!.push({
-			kind: PathCommandType.QuadraticBezierTo,
-			controlPoint,
-			endPoint,
-		});
-	}
+		_controlPoint1: Point2, _controlPoint2: Point2, _endPoint: Point2
+	) { this.unimplementedMessage(); }
+	protected traceQuadraticBezierCurve(_controlPoint: Point2, _endPoint: Point2) { this.unimplementedMessage(); }
 
 	public drawPoints(...points: Point2[]) {
 		points.map(point => {

@@ -47,6 +47,8 @@ describe('Path.toString', () => {
 
 	it('deserialized path should serialize to the same/similar path, but with rounded components', () => {
 		const path1 = Path.fromString('M100,100 L101,101 Q102,102 90.000000001,89.99999999 Z');
+		path1['cachedStringVersion'] = null; // Clear the cache.
+
 		expect(path1.toString()).toBe([
 			'M100,100', 'L101,101', 'Q102,102 90,90', 'L100,100'
 		].join(''));
