@@ -1,6 +1,7 @@
 import { Bezier } from 'bezier-js';
 import LineSegment2 from './LineSegment2';
 import Path, { PathCommandType } from './Path';
+import Rect2 from './Rect2';
 import { Vec2 } from './Vec2';
 
 describe('Path', () => {
@@ -91,6 +92,58 @@ describe('Path', () => {
 		expect(firstIntersection.curve.get(firstIntersection.parameterValue)).toMatchObject({
 			x: -50,
 			y: 100,
+		});
+	});
+
+	describe('polylineApproximation', () => {
+		it('should approximate Bézier curves with polylines', () => {
+			const path = Path.fromString('m0,0 l4,4 Q 1,4 4,1z');
+
+			expect(path.polylineApproximation()).toMatchObject([
+				new LineSegment2(Vec2.of(0, 0), Vec2.of(4, 4)),
+				new LineSegment2(Vec2.of(4, 4), Vec2.of(1, 4)),
+				new LineSegment2(Vec2.of(1, 4), Vec2.of(4, 1)),
+				new LineSegment2(Vec2.of(4, 1), Vec2.of(0, 0)),
+			]);
+		});
+	});
+
+	describe('roughlyIntersectsClosed', () => {
+		it('small, line-only path', () => {
+			const path = Path.fromString('m0,0 l10,10 L0,10 z');
+			expect(
+				path.closedRoughlyIntersects(Rect2.fromCorners(Vec2.zero, Vec2.of(20, 20)))
+			).toBe(true);
+			expect(
+				path.closedRoughlyIntersects(Rect2.fromCorners(Vec2.zero, Vec2.of(2, 2)))
+			).toBe(true);
+			expect(
+				path.closedRoughlyIntersects(new Rect2(10, 1, 1, 1))
+			).toBe(false);
+			expect(
+				path.closedRoughlyIntersects(new Rect2(1, 5, 1, 1))
+			).toBe(true);
+		});
+
+		it('path with Bézier curves', () => {
+			const path = Path.fromString(`
+				M1090,2560
+				L1570,2620
+				Q1710,1300 1380,720
+				Q980,100 -460,-640
+				L-680,-200
+				Q670,470 960,980
+				Q1230,1370 1090,2560
+			`);
+			expect(
+				path.closedRoughlyIntersects(new Rect2(0, 0, 500, 500))
+			).toBe(true);
+			expect(
+				path.closedRoughlyIntersects(new Rect2(0, 0, 5, 5))
+			).toBe(true);
+			expect(
+				path.closedRoughlyIntersects(new Rect2(-10000, 0, 500, 500))
+			).toBe(false);
 		});
 	});
 });

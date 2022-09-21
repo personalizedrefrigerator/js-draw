@@ -55,9 +55,18 @@ export default class Stroke extends AbstractComponent {
 		canvas.startObject(this.getBBox());
 		for (const part of this.parts) {
 			const bbox = part.bbox;
-			if (!visibleRect || bbox.intersects(visibleRect)) {
-				canvas.drawPath(part);
+			if (visibleRect) {
+				if (!bbox.intersects(visibleRect)) {
+					continue;
+				}
+
+				const biggerThanVisible = bbox.size.x > visibleRect.size.x || bbox.size.y > visibleRect.size.y;
+				if (biggerThanVisible && !part.path.closedRoughlyIntersects(visibleRect)) {
+					continue;
+				}
 			}
+
+			canvas.drawPath(part);
 		}
 		canvas.endObject(this.getLoadSaveData());
 	}

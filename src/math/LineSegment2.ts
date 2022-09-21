@@ -126,6 +126,10 @@ export default class LineSegment2 {
 		};
 	}
 
+	public intersects(other: LineSegment2) {
+		return this.intersection(other) !== null;
+	}
+
 	// Returns the closest point on this to [target]
 	public closestPointTo(target: Point2) {
 		// Distance from P1 along this' direction.
@@ -143,5 +147,9 @@ export default class LineSegment2 {
 		} else {
 			return this.p1;
 		}
+	}
+
+	public toString() {
+		return `LineSegment(${this.p1.toString()}, ${this.p2.toString()})`;
 	}
 }

@@ -47,12 +47,9 @@ interface IntersectionResult {
 
 type GeometryArrayType = Array<LineSegment2|Bezier>;
 export default class Path {
-	private cachedGeometry: GeometryArrayType|null;
 	public readonly bbox: Rect2;
 
 	public constructor(public readonly startPoint: Point2, public readonly parts: PathCommand[]) {
-		this.cachedGeometry = null;
-
 		// Initial bounding box contains one point: the start point.
 		this.bbox = Rect2.bboxOf([startPoint]);
 
@@ -62,6 +59,8 @@ export default class Path {
 			this.bbox = this.bbox.union(Path.computeBBoxForSegment(startPoint, part));
 		}
 	}
+
+	private cachedGeometry: GeometryArrayType|null = null;
 
 	// Lazy-loads and returns this path's geometry
 	public get geometry(): Array<LineSegment2|Bezier> {
@@ -104,6 +103,41 @@ export default class Path {
 
 		this.cachedGeometry = geometry;
 		return this.cachedGeometry;
+	}
+
+	private cachedPolylineApproximation: LineSegment2[]|null = null;
+
+	// Approximates this path with a group of line segments.
+	public polylineApproximation(): LineSegment2[] {
+		if (this.cachedPolylineApproximation) {
+			return this.cachedPolylineApproximation;
+		}
+
+		const points: Point2[] = [];
+
+		for (const part of this.parts) {
+			switch (part.kind) {
+			case PathCommandType.CubicBezierTo:
+				points.push(part.controlPoint1, part.controlPoint2, part.endPoint);
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				points.push(part.controlPoint, part.endPoint);
+				break;
+			case PathCommandType.MoveTo:
+			case PathCommandType.LineTo:
+				points.push(part.point);
+				break;
+			}
+		}
+
+		const result: LineSegment2[] = [];
+		let prevPoint = this.startPoint;
+		for (const point of points) {
+			result.push(new LineSegment2(prevPoint, point));
+			prevPoint = point;
+		}
+
+		return result;
 	}
 
 	public static computeBBoxForSegment(startPoint: Point2, part: PathCommand): Rect2 {
@@ -227,6 +261,48 @@ export default class Path {
 			},
 			...other.parts,
 		]);
+	}
+
+	// Treats this as a closed path and returns true if part of `rect` is roughly within
+	// this path's interior.
+	//
+	// Note: Assumes that this is a closed, non-self-intersecting path.
+	public closedRoughlyIntersects(rect: Rect2): boolean {
+		if (rect.containsRect(this.bbox)) {
+			return true;
+		}
+
+		// Choose a point outside of the path.
+		const startPt = this.bbox.topLeft.minus(Vec2.of(1, 1));
+		const testPts = rect.corners;
+		const polygon = this.polylineApproximation();
+
+		for (const point of testPts) {
+			const testLine = new LineSegment2(point, startPt);
+
+			let intersectionCount = 0;
+			for (const line of polygon) {
+				if (line.intersects(testLine)) {
+					intersectionCount ++;
+				}
+			}
+
+			// Odd? The point is within the polygon!
+			if (intersectionCount % 2 === 1) {
+				return true;
+			}
+		}
+
+		for (const edge of rect.getEdges()) {
+			for (const line of polygon) {
+				if (edge.intersects(line)) {
+					return true;
+				}
+			}
+		}
+
+		// Even? Probably no intersection.
+		return false;
 	}
 
 	// Returns a path that outlines [rect]. If [lineWidth] is not given, the resultant path is
