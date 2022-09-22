@@ -329,9 +329,9 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			return upperBoundary.intersects(lowerBoundary).length > 0;
 		};
 
-		// If the boundaries have two intersections, increasing the half vector's length could fix this.
+		// If the boundaries have intersections, increasing the half vector's length could fix this.
 		if (boundariesIntersect()) {
-			halfVec = halfVec.times(2);
+			halfVec = halfVec.times(1.1);
 		}
 
 		// Each starts at startPt ± startVec
