@@ -1,5 +1,5 @@
 # 0.3.2
- * PNG/JPEG image loading
+ * Embedded PNG/JPEG image loading
  * Copy and paste
  * Open images when dropped into editor
  * Keyboard shortcuts:

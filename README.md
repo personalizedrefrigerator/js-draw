@@ -4,9 +4,7 @@
 
 ![](docs/img/js-draw.jpg)
 
-For example usage, see [docs/example/example.ts](docs/example/example.ts) or read [the (work-in-progress) documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html).
-
-At present, not all documented modules are `import`-able.
+For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the (work-in-progress) documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html).
 
 # API
 
