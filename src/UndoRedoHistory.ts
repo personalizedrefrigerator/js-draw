@@ -9,6 +9,8 @@ class UndoRedoHistory {
 	private undoStack: Command[];
 	private redoStack: Command[];
 
+	private maxUndoRedoStackSize: number = 700;
+
 	// @internal
 	public constructor(
 		private readonly editor: Editor,
@@ -38,6 +40,12 @@ class UndoRedoHistory {
 			elem.onDrop(this.editor);
 		}
 		this.redoStack = [];
+
+		if (this.undoStack.length > this.maxUndoRedoStackSize) {
+			const removeAtOnceCount = 10;
+			const removedElements = this.undoStack.splice(0, removeAtOnceCount);
+			removedElements.forEach(elem => elem.onDrop(this.editor));
+		}
 
 		this.fireUpdateEvent();
 		this.editor.notifier.dispatch(EditorEventType.CommandDone, {
