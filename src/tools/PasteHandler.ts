@@ -1,12 +1,14 @@
-// Handles paste/copy events.
-// @packageDocumentation
+/**
+ * A tool that handles paste events.
+ * @packageDocumentation
+ */
 
 import Editor from '../Editor';
 import { AbstractComponent, TextComponent } from '../components/lib';
 import { Command, uniteCommands } from '../commands/lib';
 import SVGLoader from '../SVGLoader';
 import { PasteEvent } from '../types';
-import { Mat33, Rect2 } from '../math/lib';
+import { Mat33, Rect2, Vec2 } from '../math/lib';
 import BaseTool from './BaseTool';
 import EditorImage from '../EditorImage';
 import SelectionTool from './SelectionTool';
@@ -14,7 +16,7 @@ import TextTool from './TextTool';
 import Color4 from '../Color4';
 import { TextStyle } from '../components/Text';
 
-// {@inheritDoc PasteHandler!}
+// { @inheritDoc PasteHandler! }
 export default class PasteHandler extends BaseTool {
 	public constructor(private editor: Editor) {
 		super(editor.notifier, editor.localization.pasteHandler);
@@ -26,25 +28,7 @@ export default class PasteHandler extends BaseTool {
 			return true;
 		}
 		else if (event.mime === 'text/plain') {
-			const textTools = this.editor.toolController.getMatchingTools(TextTool);
-
-			textTools.sort((a, b) => {
-				if (!a.isEnabled() && b.isEnabled()) {
-					return -1;
-				}
-
-				if (!b.isEnabled() && a.isEnabled()) {
-					return 1;
-				}
-
-				return 0;
-			});
-
-			const defaultTextStyle: TextStyle = { size: 12, fontFamily: 'sans', renderingStyle: { fill: Color4.red } };
-			const pastedTextStyle: TextStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
-			void this.addComponentsFromPaste([
-				new TextComponent([ event.data ], Mat33.identity, pastedTextStyle)
-			]);
+			void this.doTextPaste(event.data);
 			return true;
 		}
 
@@ -109,6 +93,50 @@ export default class PasteHandler extends BaseTool {
 		for (const selectionTool of this.editor.toolController.getMatchingTools(SelectionTool)) {
 			selectionTool.setEnabled(true);
 			selectionTool.setSelection(components);
+		}
+	}
+
+	private async doTextPaste(text: string) {
+		const textTools = this.editor.toolController.getMatchingTools(TextTool);
+
+		textTools.sort((a, b) => {
+			if (!a.isEnabled() && b.isEnabled()) {
+				return -1;
+			}
+
+			if (!b.isEnabled() && a.isEnabled()) {
+				return 1;
+			}
+
+			return 0;
+		});
+
+		const defaultTextStyle: TextStyle = { size: 12, fontFamily: 'sans', renderingStyle: { fill: Color4.red } };
+		const pastedTextStyle: TextStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
+
+		const lines = text.split('\n');
+		let lastComponent: TextComponent|null = null;
+		const components: TextComponent[] = [];
+
+		for (const line of lines) {
+			let position = Vec2.zero;
+			if (lastComponent) {
+				const lineMargin = Math.floor(pastedTextStyle.size);
+				position = lastComponent.getBBox().bottomLeft.plus(Vec2.unitY.times(lineMargin));
+			}
+
+			const component = new TextComponent([ line ], Mat33.translation(position), pastedTextStyle);
+			components.push(component);
+			lastComponent = component;
+		}
+
+		if (components.length === 1) {
+			await this.addComponentsFromPaste([ components[0] ]);
+		} else {
+			// Wrap the existing `TextComponent`s --- dragging one component should drag all.
+			await this.addComponentsFromPaste([
+				new TextComponent(components, Mat33.identity, pastedTextStyle)
+			]);
 		}
 	}
 }
