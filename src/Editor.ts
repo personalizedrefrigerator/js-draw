@@ -285,20 +285,6 @@ export class Editor {
 	}
 
 	private registerListeners() {
-		const pointers: Record<number, Pointer> = {};
-		const getPointerList = () => {
-			const nowTime = (new Date()).getTime();
-
-			const res: Pointer[] = [];
-			for (const id in pointers) {
-				const maxUnupdatedTime = 2000; // Maximum time without a pointer update (ms)
-				if (pointers[id] && (nowTime - pointers[id].timeStamp) < maxUnupdatedTime) {
-					res.push(pointers[id]);
-				}
-			}
-			return res;
-		};
-
 		// May be required to prevent text selection on iOS/Safari:
 		// See https://stackoverflow.com/a/70992717/17055750
 		this.renderingRegion.addEventListener('touchstart', evt => evt.preventDefault());
@@ -308,71 +294,19 @@ export class Editor {
 		});
 
 		this.renderingRegion.addEventListener('pointerdown', evt => {
-			const pointer = Pointer.ofEvent(evt, true, this.viewport);
-			pointers[pointer.id] = pointer;
-
-			this.renderingRegion.setPointerCapture(pointer.id);
-			const event: PointerEvt = {
-				kind: InputEvtType.PointerDownEvt,
-				current: pointer,
-				allPointers: getPointerList(),
-			};
-			this.toolController.dispatchInputEvent(event);
-
-			return true;
+			return this.handleHTMLPointerEvent('pointerdown', evt);
 		});
 
 		this.renderingRegion.addEventListener('pointermove', evt => {
-			const pointer = Pointer.ofEvent(
-				evt, pointers[evt.pointerId]?.down ?? false, this.viewport
-			);
-			if (pointer.down) {
-				const prevData = pointers[pointer.id];
-
-				if (prevData) {
-					const distanceMoved = pointer.screenPos.minus(prevData.screenPos).magnitude();
-
-					// If the pointer moved less than two pixels, don't send a new event.
-					if (distanceMoved < 2) {
-						return;
-					}
-				}
-
-				pointers[pointer.id] = pointer;
-				if (this.toolController.dispatchInputEvent({
-					kind: InputEvtType.PointerMoveEvt,
-					current: pointer,
-					allPointers: getPointerList(),
-				})) {
-					evt.preventDefault();
-				}
-			}
+			return this.handleHTMLPointerEvent('pointermove', evt);
 		});
 
-		const pointerEnd = (evt: PointerEvent) => {
-			const pointer = Pointer.ofEvent(evt, false, this.viewport);
-			if (!pointers[pointer.id]) {
-				return;
-			}
-
-			pointers[pointer.id] = pointer;
-			this.renderingRegion.releasePointerCapture(pointer.id);
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.PointerUpEvt,
-				current: pointer,
-				allPointers: getPointerList(),
-			})) {
-				evt.preventDefault();
-			}
-			delete pointers[pointer.id];
-		};
-
 		this.renderingRegion.addEventListener('pointerup', evt => {
-			pointerEnd(evt);
+			return this.handleHTMLPointerEvent('pointerup', evt);
 		});
 
 		this.renderingRegion.addEventListener('pointercancel', evt => {
-			pointerEnd(evt);
+			return this.handleHTMLPointerEvent('pointercancel', evt);
 		});
 
 		this.handleKeyEventsFrom(this.renderingRegion);
@@ -457,6 +391,85 @@ export class Editor {
 		document.addEventListener('paste', evt => {
 			this.handlePaste(evt);
 		});
+	}
+
+	private pointers: Record<number, Pointer> = {};
+	private getPointerList() {
+		const nowTime = (new Date()).getTime();
+
+		const res: Pointer[] = [];
+		for (const id in this.pointers) {
+			const maxUnupdatedTime = 2000; // Maximum time without a pointer update (ms)
+			if (this.pointers[id] && (nowTime - this.pointers[id].timeStamp) < maxUnupdatedTime) {
+				res.push(this.pointers[id]);
+			}
+		}
+		return res;
+	}
+
+	private handleHTMLPointerEvent(eventType: 'pointerdown'|'pointermove'|'pointerup'|'pointercancel', evt: PointerEvent): boolean {
+		const eventTarget = (evt.target as HTMLElement|null) ?? this.renderingRegion;
+		if (eventType === 'pointerdown') {
+			const pointer = Pointer.ofEvent(evt, true, this.viewport);
+			this.pointers[pointer.id] = pointer;
+
+			eventTarget.setPointerCapture(pointer.id);
+			const event: PointerEvt = {
+				kind: InputEvtType.PointerDownEvt,
+				current: pointer,
+				allPointers: this.getPointerList(),
+			};
+			this.toolController.dispatchInputEvent(event);
+
+			return true;
+		}
+		else if (eventType === 'pointermove') {
+			const pointer = Pointer.ofEvent(
+				evt, this.pointers[evt.pointerId]?.down ?? false, this.viewport
+			);
+			if (pointer.down) {
+				const prevData = this.pointers[pointer.id];
+
+				if (prevData) {
+					const distanceMoved = pointer.screenPos.minus(prevData.screenPos).magnitude();
+
+					// If the pointer moved less than two pixels, don't send a new event.
+					if (distanceMoved < 2) {
+						return false;
+					}
+				}
+
+				this.pointers[pointer.id] = pointer;
+				if (this.toolController.dispatchInputEvent({
+					kind: InputEvtType.PointerMoveEvt,
+					current: pointer,
+					allPointers: this.getPointerList(),
+				})) {
+					evt.preventDefault();
+				}
+			}
+			return true;
+		}
+		else if (eventType === 'pointercancel' || eventType === 'pointerup') {
+			const pointer = Pointer.ofEvent(evt, false, this.viewport);
+			if (!this.pointers[pointer.id]) {
+				return false;
+			}
+
+			this.pointers[pointer.id] = pointer;
+			eventTarget.releasePointerCapture(pointer.id);
+			if (this.toolController.dispatchInputEvent({
+				kind: InputEvtType.PointerUpEvt,
+				current: pointer,
+				allPointers: this.getPointerList(),
+			})) {
+				evt.preventDefault();
+			}
+			delete this.pointers[pointer.id];
+			return true;
+		}
+
+		return eventType;
 	}
 
 	private isEventSink(evtTarget: Element|EventTarget|null) {

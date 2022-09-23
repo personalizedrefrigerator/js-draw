@@ -171,7 +171,7 @@ export default class Pen extends BaseTool {
 		}
 
 		if (newThickness !== undefined) {
-			newThickness = Math.min(Math.max(1, newThickness), 128);
+			newThickness = Math.min(Math.max(1, newThickness), 256);
 			this.setThickness(newThickness);
 			return true;
 		}
