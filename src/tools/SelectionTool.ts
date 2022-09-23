@@ -86,6 +86,9 @@ const makeDraggable = (element: HTMLElement, onDrag: DragCallback, onDragEnd: Dr
 	// Work around a Safari bug
 	element.addEventListener('touchstart', evt => evt.preventDefault());
 
+	// Don't show a context menu
+	element.addEventListener('contextmenu', evt => evt.preventDefault());
+
 	let lastX: number;
 	let lastY: number;
 	element.addEventListener('pointerdown', event => {
@@ -396,10 +399,15 @@ class Selection {
 	// select them.
 	// Returns false iff nothing was selected.
 	public resolveToObjects(): boolean {
+		let singleItemSelectionMode = false;
+
 		// Grow the rectangle, if necessary
 		if (this.region.w === 0 || this.region.h === 0) {
-			const padding = this.editor.viewport.visibleRect.maxDimension / 100;
+			const padding = this.editor.viewport.visibleRect.maxDimension / 200;
 			this.region = Rect2.bboxOf(this.region.corners, padding);
+
+			// Only select one item if the rectangle was very small.
+			singleItemSelectionMode = true;
 		}
 
 		this.selectedElems = this.editor.image.getElementsIntersectingRegion(this.region).filter(elem => {
@@ -416,6 +424,10 @@ class Selection {
 
 			return testLines.some(edge => elem.intersects(edge));
 		});
+
+		if (singleItemSelectionMode && this.selectedElems.length > 0) {
+			this.selectedElems = [ this.selectedElems[this.selectedElems.length - 1] ];
+		}
 
 		// Find the bounding box of all selected elements.
 		if (!this.recomputeRegion()) {
