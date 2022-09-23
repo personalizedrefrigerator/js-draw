@@ -15,4 +15,5 @@ export { default as PenTool, PenStyle } from './Pen';
 export { default as TextTool } from './TextTool';
 export { default as SelectionTool } from './SelectionTool';
 export { default as EraserTool } from './Eraser';
+export { default as PasteHandler } from './PasteHandler';
 
