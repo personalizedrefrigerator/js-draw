@@ -694,6 +694,12 @@ export default class SelectionTool extends BaseTool {
 			this.selectionBox.transformPreview(transform);
 		}
 
+		if (this.selectionBox && !handled && (event.key === 'Delete' || event.key === 'Backspace')) {
+			this.editor.dispatch(this.selectionBox.deleteSelectedObjects());
+			this.clearSelection();
+			handled = true;
+		}
+
 		return handled;
 	}
 

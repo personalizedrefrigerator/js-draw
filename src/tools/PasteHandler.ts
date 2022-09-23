@@ -24,15 +24,17 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	public onPaste(event: PasteEvent): boolean {
-		if (event.mime === 'image/svg+xml') {
+		const mime = event.mime.toLowerCase();
+
+		if (mime === 'image/svg+xml') {
 			void this.doSVGPaste(event.data);
 			return true;
 		}
-		else if (event.mime === 'text/plain') {
+		else if (mime === 'text/plain') {
 			void this.doTextPaste(event.data);
 			return true;
 		}
-		else if (event.mime === 'image/png' || event.mime === 'image/jpeg') {
+		else if (mime === 'image/png' || mime === 'image/jpeg') {
 			void this.doImagePaste(event.data);
 			return true;
 		}

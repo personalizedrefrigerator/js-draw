@@ -1,3 +1,11 @@
+# 0.3.2
+ * PNG/JPEG image loading
+ * Copy and paste
+ * Open images when dropped into editor
+ * Keyboard shortcuts:
+   * `Delete`/`Backspace` deletes selected content.
+   * `Ctrl+C`, `Ctrl+V` for copy/paste.
+
 # 0.3.1
  * Keyboard shortcuts:
    * Press `Ctrl+1` to select the first pen, `Ctrl+2` to select the second, etc.

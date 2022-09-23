@@ -486,7 +486,7 @@ export class Editor {
 
 		// Handle SVG files (prefer to PNG/JPEG)
 		for (const file of clipboardData.files) {
-			if (file.type === 'image/svg+xml') {
+			if (file.type.toLowerCase() === 'image/svg+xml') {
 				const text = await file.text();
 				if (this.toolController.dispatchInputEvent({
 					kind: InputEvtType.PasteEvent,
@@ -501,22 +501,35 @@ export class Editor {
 
 		// Handle image files.
 		for (const file of clipboardData.files) {
-			if (file.type === 'image/png' || file.type === 'image/jpg') {
+			const fileType = file.type.toLowerCase();
+			if (fileType === 'image/png' || fileType === 'image/jpg') {
 				const reader = new FileReader();
-				const data = await new Promise((resolve: (result: string|null)=>void, reject) => {
-					reader.onload = () => resolve(reader.result as string|null);
-					reader.onerror = reject;
-					reader.onabort = reject;
-					reader.readAsDataURL(file);
-				});
-				if (data && this.toolController.dispatchInputEvent({
-					kind: InputEvtType.PasteEvent,
-					mime: file.type,
-					data: data,
-				})) {
-					evt.preventDefault();
-					return;
+
+				this.showLoadingWarning(0);
+				try {
+					const data = await new Promise((resolve: (result: string|null)=>void, reject) => {
+						reader.onload = () => resolve(reader.result as string|null);
+						reader.onerror = reject;
+						reader.onabort = reject;
+						reader.onprogress = (evt) => {
+							this.showLoadingWarning(evt.loaded / evt.total);
+						};
+
+						reader.readAsDataURL(file);
+					});
+					if (data && this.toolController.dispatchInputEvent({
+						kind: InputEvtType.PasteEvent,
+						mime: fileType,
+						data: data,
+					})) {
+						evt.preventDefault();
+						this.hideLoadingWarning();
+						return;
+					}
+				} catch (e) {
+					console.error('Error reading image:', e);
 				}
+				this.hideLoadingWarning();
 			}
 		}
 
