@@ -6,7 +6,7 @@ import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
-import AbstractRenderer, { RenderablePathSpec } from './AbstractRenderer';
+import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
 export default class CanvasRenderer extends AbstractRenderer {
 	private ignoreObjectsAboveLevel: number|null = null;
@@ -165,6 +165,15 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.ctx.strokeText(text, 0, 0);
 		}
 
+		this.ctx.restore();
+	}
+
+	public drawImage(image: RenderableImage) {
+		this.ctx.save();
+		const transform = this.getCanvasToScreenTransform().rightMul(image.transform);
+		this.transformBy(transform);
+
+		this.ctx.drawImage(image.image, 0, 0);
 		this.ctx.restore();
 	}
 

@@ -7,7 +7,7 @@ import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
-import AbstractRenderer from './AbstractRenderer';
+import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
 
 export default class DummyRenderer extends AbstractRenderer {
 	// Variables that track the state of what's been rendered
@@ -17,6 +17,7 @@ export default class DummyRenderer extends AbstractRenderer {
 	public lastPoint: Point2|null = null;
 	public objectNestingLevel: number = 0;
 	public lastText: string|null = null;
+	public lastImage: RenderableImage|null = null;
 
 	// List of points drawn since the last clear.
 	public pointBuffer: Point2[] = [];
@@ -44,6 +45,7 @@ export default class DummyRenderer extends AbstractRenderer {
 		this.renderedPathCount = 0;
 		this.pointBuffer = [];
 		this.lastText = null;
+		this.lastImage = null;
 
 		// Ensure all objects finished rendering
 		if (this.objectNestingLevel > 0) {
@@ -95,6 +97,9 @@ export default class DummyRenderer extends AbstractRenderer {
 
 	public drawText(text: string, _transform: Mat33, _style: TextStyle): void {
 		this.lastText = text;
+	}
+	public drawImage(image: RenderableImage) {
+		this.lastImage = image;
 	}
 
 	public startObject(boundingBox: Rect2, _clip: boolean) {

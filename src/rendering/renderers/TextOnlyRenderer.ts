@@ -6,7 +6,7 @@ import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import { TextRendererLocalization } from '../localization';
 import RenderingStyle from '../RenderingStyle';
-import AbstractRenderer from './AbstractRenderer';
+import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
 
 // Outputs a description of what was rendered.
 
@@ -14,6 +14,7 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 	private descriptionBuilder: string[] = [];
 	private pathCount: number = 0;
 	private textNodeCount: number = 0;
+	private imageNodeCount: number = 0;
 
 	public constructor(viewport: Viewport, private localizationTable: TextRendererLocalization) {
 		super(viewport);
@@ -33,7 +34,8 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 	public getDescription(): string {
 		return [
 			this.localizationTable.pathNodeCount(this.pathCount),
-			this.localizationTable.textNodeCount(this.textNodeCount),
+			...(this.textNodeCount > 0 ? this.localizationTable.textNodeCount(this.textNodeCount) : []),
+			...(this.imageNodeCount > 0 ? this.localizationTable.imageNodeCount(this.imageNodeCount) : []),
 			...this.descriptionBuilder
 		].join('\n');
 	}
@@ -54,6 +56,13 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 	public drawText(text: string, _transform: Mat33, _style: TextStyle): void {
 		this.descriptionBuilder.push(this.localizationTable.textNode(text));
 		this.textNodeCount ++;
+	}
+	public drawImage(image: RenderableImage): void {
+		const label = image.image.getAttribute('alt') ?? image.image.getAttribute('aria-label');
+		this.descriptionBuilder.push(
+			label ? this.localizationTable.imageNode(label) : this.localizationTable.unlabeledImageNode,
+		);
+		this.imageNodeCount ++;
 	}
 	public isTooSmallToRender(rect: Rect2): boolean {
 		return rect.maxDimension < 15 / this.getSizeOfCanvasPixelOnScreen();

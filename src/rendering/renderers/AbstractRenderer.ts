@@ -14,6 +14,19 @@ export interface RenderablePathSpec {
 	path?: Path;
 }
 
+export interface RenderableImage {
+	transform: Mat33;
+
+	// An Image or HTMLCanvasElement. If an Image, it must be loaded from the same origin as this
+	// (and should have `src=this.base64Url`).
+	image: HTMLImageElement|HTMLCanvasElement;
+
+	// All images that can be drawn **must** have a base64 URL in the form
+	// data:image/[format];base64,[data here]
+	// If `image` is an Image, this should be equivalent to `image.src`.
+	base64Url: string;
+}
+
 export default abstract class AbstractRenderer {
 	// If null, this' transformation is linked to the Viewport
 	private selfTransform: Mat33|null = null;
@@ -41,6 +54,7 @@ export default abstract class AbstractRenderer {
 		controlPoint: Point2, endPoint: Point2,
 	): void;
 	public abstract drawText(text: string, transform: Mat33, style: TextStyle): void;
+	public abstract drawImage(image: RenderableImage): void;
 
 	// Returns true iff the given rectangle is so small, rendering anything within
 	// it has no effect on the image.

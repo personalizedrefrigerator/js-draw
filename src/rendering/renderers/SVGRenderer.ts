@@ -9,7 +9,7 @@ import { Point2, Vec2 } from '../../math/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
-import AbstractRenderer, { RenderablePathSpec } from './AbstractRenderer';
+import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
 const svgNameSpace = 'http://www.w3.org/2000/svg';
 export default class SVGRenderer extends AbstractRenderer {
@@ -99,26 +99,31 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.lastPathString.push(path.toString());
 	}
 
-	public drawText(text: string, transform: Mat33, style: TextStyle): void {
-		transform = this.getCanvasToScreenTransform().rightMul(transform);
-
+	// Apply [elemTransform] to [elem].
+	private transformFrom(elemTransform: Mat33, elem: SVGElement) {
+		let transform = this.getCanvasToScreenTransform().rightMul(elemTransform);
 		const translation = transform.transformVec2(Vec2.zero);
 		transform = transform.rightMul(Mat33.translation(translation.times(-1)));
 
-		const textElem = document.createElementNS(svgNameSpace, 'text');
-		textElem.appendChild(document.createTextNode(text));
-		textElem.style.transform = `matrix(
+		elem.style.transform = `matrix(
 			${transform.a1}, ${transform.b1},
 			${transform.a2}, ${transform.b2},
 			${transform.a3}, ${transform.b3}
 		)`;
+		elem.setAttribute('x', `${toRoundedString(translation.x)}`);
+		elem.setAttribute('y', `${toRoundedString(translation.y)}`);
+	}
+
+	public drawText(text: string, transform: Mat33, style: TextStyle): void {
+		const textElem = document.createElementNS(svgNameSpace, 'text');
+		textElem.appendChild(document.createTextNode(text));
+		this.transformFrom(transform, textElem);
+
 		textElem.style.fontFamily = style.fontFamily;
 		textElem.style.fontVariant = style.fontVariant ?? '';
 		textElem.style.fontWeight = style.fontWeight ?? '';
 		textElem.style.fontSize = style.size + 'px';
 		textElem.style.fill = style.renderingStyle.fill.toHexString();
-		textElem.setAttribute('x', `${toRoundedString(translation.x)}`);
-		textElem.setAttribute('y', `${toRoundedString(translation.y)}`);
 
 		if (style.renderingStyle.stroke) {
 			const strokeStyle = style.renderingStyle.stroke;
@@ -128,6 +133,18 @@ export default class SVGRenderer extends AbstractRenderer {
 
 		this.elem.appendChild(textElem);
 		this.objectElems?.push(textElem);
+	}
+
+	public drawImage(image: RenderableImage) {
+		const svgImgElem = document.createElementNS(svgNameSpace, 'image');
+		svgImgElem.setAttribute('href', image.base64Url);
+		svgImgElem.setAttribute('width', image.image.getAttribute('width') ?? '');
+		svgImgElem.setAttribute('height', image.image.getAttribute('height') ?? '');
+		svgImgElem.setAttribute('aria-label', image.image.getAttribute('aria-label') ?? image.image.getAttribute('alt') ?? '');
+		this.transformFrom(image.transform, svgImgElem);
+
+		this.elem.appendChild(svgImgElem);
+		this.objectElems?.push(svgImgElem);
 	}
 
 	public startObject(boundingBox: Rect2) {
