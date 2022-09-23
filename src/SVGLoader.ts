@@ -1,5 +1,6 @@
 import Color4 from './Color4';
 import AbstractComponent from './components/AbstractComponent';
+import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
 import Text, { TextStyle } from './components/Text';
@@ -175,6 +176,40 @@ export default class SVGLoader implements ImageLoader {
 		this.onAddComponent?.(elem);
 	}
 
+	// If given, 'supportedAttrs' will have x, y, etc. attributes that were used in computing the transform added to it,
+	// to prevent storing duplicate transform information when saving the component.
+	private getTransform(elem: SVGElement, supportedAttrs?: string[], computedStyles?: CSSStyleDeclaration): Mat33 {
+		computedStyles ??= window.getComputedStyle(elem);
+		
+		let transformProperty = computedStyles.transform;
+		if (transformProperty === '' || transformProperty === 'none') {
+			transformProperty = elem.style.transform || 'none';
+		}
+
+		// Prefer the actual .style.transform
+		// to the computed stylesheet -- in some browsers, the computedStyles version
+		// can have lower precision.
+		let transform;
+		try {
+			transform = Mat33.fromCSSMatrix(elem.style.transform);
+		} catch(_e) {
+			transform = Mat33.fromCSSMatrix(transformProperty);
+		}
+
+		const elemX = elem.getAttribute('x');
+		const elemY = elem.getAttribute('y');
+		if (elemX && elemY) {
+			const x = parseFloat(elemX);
+			const y = parseFloat(elemY);
+			if (!isNaN(x) && !isNaN(y)) {
+				supportedAttrs?.push('x', 'y');
+				transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
+			}
+		}
+
+		return transform;
+	}
+
 	private makeText(elem: SVGTextElement|SVGTSpanElement): Text {
 		const contentList: Array<Text|string> = [];
 		for (const child of elem.childNodes) {
@@ -214,33 +249,8 @@ export default class SVGLoader implements ImageLoader {
 			},
 		};
 
-		let transformProperty = computedStyles.transform;
-		if (transformProperty === '' || transformProperty === 'none') {
-			transformProperty = elem.style.transform || 'none';
-		}
-
-		// Compute transform matrix. Prefer the actual .style.transform
-		// to the computed stylesheet -- in some browsers, the computedStyles version
-		// can have lower precision.
-		let transform;
-		try {
-			transform = Mat33.fromCSSMatrix(elem.style.transform);
-		} catch(_e) {
-			transform = Mat33.fromCSSMatrix(transformProperty);
-		}
-
-		const supportedAttrs = [];
-		const elemX = elem.getAttribute('x');
-		const elemY = elem.getAttribute('y');
-		if (elemX && elemY) {
-			const x = parseFloat(elemX);
-			const y = parseFloat(elemY);
-			if (!isNaN(x) && !isNaN(y)) {
-				supportedAttrs.push('x', 'y');
-				transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
-			}
-		}
-
+		const supportedAttrs: string[] = [];
+		const transform = this.getTransform(elem, supportedAttrs, computedStyles);
 		const result = new Text(contentList, transform, style);
 		this.attachUnrecognisedAttrs(
 			result,
@@ -257,7 +267,29 @@ export default class SVGLoader implements ImageLoader {
 			const textElem = this.makeText(elem);
 			this.onAddComponent?.(textElem);
 		} catch (e) {
-			console.error('Invalid text object in node', elem, '. Adding as an unknown object. Error:', e);
+			console.error('Invalid text object in node', elem, '. Continuing.... Error:', e);
+			this.addUnknownNode(elem);
+		}
+	}
+
+	private async addImage(elem: SVGImageElement) {
+		const image = new Image();
+		image.src = elem.getAttribute('xlink:href') ?? elem.href.baseVal;
+
+		try {
+			const supportedAttrs: string[] = [];
+			const transform = this.getTransform(elem, supportedAttrs);
+			const imageElem = await ImageComponent.fromImage(image, transform);
+			this.attachUnrecognisedAttrs(
+				imageElem,
+				elem,
+				new Set(supportedAttrs),
+				new Set([ 'transform' ])
+			);
+
+			this.onAddComponent?.(imageElem);
+		} catch (e) {
+			console.error('Error loading image:', e, '. Element: ', elem, '. Continuing...');
 			this.addUnknownNode(elem);
 		}
 	}
@@ -309,6 +341,12 @@ export default class SVGLoader implements ImageLoader {
 			break;
 		case 'text':
 			this.addText(node as SVGTextElement);
+			visitChildren = false;
+			break;
+		case 'image':
+			await this.addImage(node as SVGImageElement);
+
+			// Images should not have children.
 			visitChildren = false;
 			break;
 		case 'svg':

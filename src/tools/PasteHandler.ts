@@ -15,6 +15,7 @@ import SelectionTool from './SelectionTool';
 import TextTool from './TextTool';
 import Color4 from '../Color4';
 import { TextStyle } from '../components/Text';
+import ImageComponent from '../components/ImageComponent';
 
 // { @inheritDoc PasteHandler! }
 export default class PasteHandler extends BaseTool {
@@ -31,22 +32,12 @@ export default class PasteHandler extends BaseTool {
 			void this.doTextPaste(event.data);
 			return true;
 		}
+		else if (event.mime === 'image/png' || event.mime === 'image/jpeg') {
+			void this.doImagePaste(event.data);
+			return true;
+		}
 
 		return false;
-	}
-
-	private async doSVGPaste(data: string) {
-		const sanitize = true;
-		const loader = SVGLoader.fromString(data, sanitize);
-
-		const components: AbstractComponent[] = [];
-
-		await loader.start((component) => {
-			components.push(component);
-		},
-		(_countProcessed: number, _totalToProcess: number) => null);
-
-		await this.addComponentsFromPaste(components);
 	}
 
 	private async addComponentsFromPaste(components: AbstractComponent[]) {
@@ -96,6 +87,20 @@ export default class PasteHandler extends BaseTool {
 		}
 	}
 
+	private async doSVGPaste(data: string) {
+		const sanitize = true;
+		const loader = SVGLoader.fromString(data, sanitize);
+
+		const components: AbstractComponent[] = [];
+
+		await loader.start((component) => {
+			components.push(component);
+		},
+		(_countProcessed: number, _totalToProcess: number) => null);
+
+		await this.addComponentsFromPaste(components);
+	}
+
 	private async doTextPaste(text: string) {
 		const textTools = this.editor.toolController.getMatchingTools(TextTool);
 
@@ -138,5 +143,12 @@ export default class PasteHandler extends BaseTool {
 				new TextComponent(components, Mat33.identity, pastedTextStyle)
 			]);
 		}
+	}
+
+	private async doImagePaste(dataURL: string) {
+		const image = new Image();
+		image.src = dataURL;
+		const component = await ImageComponent.fromImage(image, Mat33.identity);
+		await this.addComponentsFromPaste([ component ]);
 	}
 }

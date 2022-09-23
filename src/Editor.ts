@@ -484,15 +484,10 @@ export class Editor {
 			return;
 		}
 
-		const supportedMIMEs = [
-			'image/svg+xml',
-			'text/plain',
-		];
-
+		// Handle SVG files (prefer to PNG/JPEG)
 		for (const file of clipboardData.files) {
 			if (file.type === 'image/svg+xml') {
 				const text = await file.text();
-				console.log('txt', text);
 				if (this.toolController.dispatchInputEvent({
 					kind: InputEvtType.PasteEvent,
 					mime: file.type,
@@ -503,6 +498,33 @@ export class Editor {
 				}
 			}
 		}
+
+		// Handle image files.
+		for (const file of clipboardData.files) {
+			if (file.type === 'image/png' || file.type === 'image/jpg') {
+				const reader = new FileReader();
+				const data = await new Promise((resolve: (result: string|null)=>void, reject) => {
+					reader.onload = () => resolve(reader.result as string|null);
+					reader.onerror = reject;
+					reader.onabort = reject;
+					reader.readAsDataURL(file);
+				});
+				if (data && this.toolController.dispatchInputEvent({
+					kind: InputEvtType.PasteEvent,
+					mime: file.type,
+					data: data,
+				})) {
+					evt.preventDefault();
+					return;
+				}
+			}
+		}
+
+		// Supported MIMEs for text data, in order of preference
+		const supportedMIMEs = [
+			'image/svg+xml',
+			'text/plain',
+		];
 
 		for (const mime of supportedMIMEs) {
 			const data = clipboardData.getData(mime);

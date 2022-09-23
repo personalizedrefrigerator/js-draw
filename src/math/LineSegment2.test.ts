@@ -1,6 +1,7 @@
 import LineSegment2 from './LineSegment2';
 import { loadExpectExtensions } from '../testing/loadExpectExtensions';
 import { Vec2 } from './Vec2';
+import Mat33 from './Mat33';
 
 loadExpectExtensions();
 
@@ -88,5 +89,13 @@ describe('Line2', () => {
 	it('Closest point from (5,2) to segment((1,1) -> (2,4)) should be (2,4)', () => {
 		const line = new LineSegment2(Vec2.of(1, 1), Vec2.of(2, 4));
 		expect(line.closestPointTo(Vec2.of(5, 2))).objEq(Vec2.of(2, 4));
+	});
+
+	it('Should translate when translated by a translation matrix', () => {
+		const line = new LineSegment2(Vec2.of(-1, 1), Vec2.of(2, 100));
+		expect(line.transformedBy(Mat33.translation(Vec2.of(1, -2)))).toMatchObject({
+			p1: Vec2.of(0, -1),
+			p2: Vec2.of(3, 98),
+		});
 	});
 });

@@ -57,11 +57,10 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 		this.descriptionBuilder.push(this.localizationTable.textNode(text));
 		this.textNodeCount ++;
 	}
-	public drawImage(image: RenderableImage): void {
-		const label = image.image.getAttribute('alt') ?? image.image.getAttribute('aria-label');
-		this.descriptionBuilder.push(
-			label ? this.localizationTable.imageNode(label) : this.localizationTable.unlabeledImageNode,
-		);
+	public drawImage(image: RenderableImage) {
+		const label = image.label ? this.localizationTable.imageNode(image.label) : this.localizationTable.unlabeledImageNode;
+
+		this.descriptionBuilder.push(label);
 		this.imageNodeCount ++;
 	}
 	public isTooSmallToRender(rect: Rect2): boolean {

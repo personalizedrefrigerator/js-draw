@@ -25,6 +25,8 @@ export interface RenderableImage {
 	// data:image/[format];base64,[data here]
 	// If `image` is an Image, this should be equivalent to `image.src`.
 	base64Url: string;
+
+	label?: string;
 }
 
 export default abstract class AbstractRenderer {

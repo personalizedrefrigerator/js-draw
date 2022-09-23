@@ -1,3 +1,4 @@
+import Mat33 from './Mat33';
 import Rect2 from './Rect2';
 import { Vec2, Point2 } from './Vec2';
 
@@ -147,6 +148,10 @@ export default class LineSegment2 {
 		} else {
 			return this.p1;
 		}
+	}
+
+	public transformedBy(affineTransfm: Mat33): LineSegment2 {
+		return new LineSegment2(affineTransfm.transformVec2(this.p1), affineTransfm.transformVec2(this.p2));
 	}
 
 	public toString() {

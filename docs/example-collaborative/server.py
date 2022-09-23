@@ -103,8 +103,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 			if isnan(target_len):
 				self.send_error(HTTPStatus.BAD_REQUEST, 'Content-Length must be a number')
 
-			# Limit size to 100 KiB
-			max_size = 100 * 1024
+			# Limit size to 2 MiB
+			max_size = 1024 * 1024 * 2
 
 			if max_size < target_len:
 				self.send_error(
