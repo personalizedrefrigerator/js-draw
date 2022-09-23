@@ -164,7 +164,6 @@ export default abstract class AbstractComponent {
 		}
 
 		public apply(editor: Editor) {
-			console.log('transforming\n', this.affineTransfm.toString(), '\norig\n', this.component.serialize());
 			this.component.zIndex = AbstractComponent.zIndexCounter++;
 			this.updateTransform(editor, this.affineTransfm);
 			editor.queueRerender();

@@ -95,7 +95,6 @@ export default class PasteHandler extends BaseTool {
 		).rightMul(
 			Mat33.scaling2D(scaleRatio, bbox.center)
 		);
-		console.log('from\n', transfm.toString());
 
 		const commands: Command[] = [];
 		for (const component of components) {
