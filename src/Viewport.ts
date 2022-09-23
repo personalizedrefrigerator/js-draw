@@ -92,6 +92,7 @@ export class Viewport {
 		this.screenRect = this.screenRect.resizedTo(screenSize);
 	}
 
+	// Get the screen's visible region transformed into canvas space.
 	public get visibleRect(): Rect2 {
 		return this.screenRect.transformedBoundingBox(this.inverseTransform);
 	}
@@ -180,10 +181,8 @@ export class Viewport {
 		return Viewport.roundPoint(point, 1 / this.getScaleFactor());
 	}
 
-	// Returns a Command that transforms the view such that [rect] is visible, and perhaps
-	// centered in the viewport.
-	// Returns null if no transformation is necessary
-	public zoomTo(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Command {
+	// Computes and returns an affine transformation that makes `toMakeVisible` visible and roughly centered on the screen.
+	public computeZoomToTransform(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Mat33 {
 		let transform = Mat33.identity;
 
 		if (toMakeVisible.w === 0 || toMakeVisible.h === 0) {
@@ -237,6 +236,16 @@ export class Viewport {
 			transform = Mat33.identity;
 		}
 
+		return transform;
+	}
+
+	// Returns a Command that transforms the view such that [rect] is visible, and perhaps
+	// centered in the viewport.
+	// Returns null if no transformation is necessary
+	//
+	// @see {@link computeZoomToTransform}
+	public zoomTo(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Command {
+		const transform = this.computeZoomToTransform(toMakeVisible, allowZoomIn, allowZoomOut);
 		return new Viewport.ViewportTransform(transform);
 	}
 }

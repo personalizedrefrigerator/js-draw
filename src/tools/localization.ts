@@ -13,6 +13,10 @@ export interface ToolLocalization {
 	textTool: string;
 	enterTextToInsert: string;
 	changeTool: string;
+	pasteHandler: string;
+
+	copied: (count: number, description: string) => string;
+	pasted: (count: number, description: string) => string;
 
     toolEnabledAnnouncement: (toolName: string) => string;
     toolDisabledAnnouncement: (toolName: string) => string;
@@ -32,6 +36,10 @@ export const defaultToolLocalization: ToolLocalization = {
 	textTool: 'Text',
 	enterTextToInsert: 'Text to insert',
 	changeTool: 'Change tool',
+	pasteHandler: 'Copy paste handler',
+
+	copied: (count: number, description: string) => `Copied ${count} ${description}`,
+	pasted: (count: number, description: string) => `Pasted ${count} ${description}`,
 
 	toolEnabledAnnouncement: (toolName) => `${toolName} enabled`,
 	toolDisabledAnnouncement: (toolName) => `${toolName} disabled`,

@@ -118,6 +118,7 @@ export class Editor {
 	private loadingWarning: HTMLElement;
 	private accessibilityAnnounceArea: HTMLElement;
 	private accessibilityControlArea: HTMLTextAreaElement;
+	private eventListenerTargets: HTMLElement[] = [];
 
 	private settings: EditorSettings;
 
@@ -435,6 +436,86 @@ export class Editor {
 		this.accessibilityControlArea.addEventListener('input', () => {
 			this.accessibilityControlArea.value = '';
 		});
+
+		document.addEventListener('copy', evt => {
+			if (!this.isEventSink(document.querySelector(':focus'))) {
+				return;
+			}
+
+			const clipboardData = evt.clipboardData;
+
+			if (this.toolController.dispatchInputEvent({
+				kind: InputEvtType.CopyEvent,
+				setData: (mime, data) => {
+					clipboardData?.setData(mime, data);
+				},
+			})) {
+				evt.preventDefault();
+			}
+		});
+
+		document.addEventListener('paste', evt => {
+			this.handlePaste(evt);
+		});
+	}
+
+	private isEventSink(evtTarget: Element|EventTarget|null) {
+		let currentElem: Element|null = evtTarget as Element|null;
+		while (currentElem !== null) {
+			for (const elem of this.eventListenerTargets) {
+				if (elem === currentElem) {
+					return true;
+				}
+			}
+
+			currentElem = (currentElem as Element).parentElement;
+		}
+		return false;
+	}
+
+	private async handlePaste(evt: DragEvent|ClipboardEvent) {
+		const target = document.querySelector(':focus') ?? evt.target;
+		if (!this.isEventSink(target)) {
+			return;
+		}
+
+		const clipboardData: DataTransfer = (evt as any).dataTransfer ?? (evt as any).clipboardData;
+		if (!clipboardData) {
+			return;
+		}
+
+		const supportedMIMEs = [
+			'image/svg+xml',
+			'text/plain',
+		];
+
+		for (const file of clipboardData.files) {
+			if (file.type === 'image/svg+xml') {
+				const text = await file.text();
+				console.log('txt', text);
+				if (this.toolController.dispatchInputEvent({
+					kind: InputEvtType.PasteEvent,
+					mime: file.type,
+					data: text,
+				})) {
+					evt.preventDefault();
+					return;
+				}
+			}
+		}
+
+		for (const mime of supportedMIMEs) {
+			const data = clipboardData.getData(mime);
+
+			if (data && this.toolController.dispatchInputEvent({
+				kind: InputEvtType.PasteEvent,
+				mime,
+				data,
+			})) {
+				evt.preventDefault();
+				return;
+			}
+		}
 	}
 
 	/** Adds event listners for keypresses to `elem` and forwards those events to the editor. */
@@ -463,6 +544,18 @@ export class Editor {
 				evt.preventDefault();
 			}
 		});
+
+		// Allow drop.
+		elem.ondragover = evt => {
+			evt.preventDefault();
+		};
+
+		elem.ondrop = evt => {
+			evt.preventDefault();
+			this.handlePaste(evt);
+		};
+
+		this.eventListenerTargets.push(elem);
 	}
 
 	/** `apply` a command. `command` will be announced for accessibility. */
@@ -509,6 +602,7 @@ export class Editor {
 	public async asyncApplyOrUnapplyCommands(
 		commands: Command[], apply: boolean, updateChunkSize: number
 	) {
+		console.assert(updateChunkSize > 0);
 		this.display.setDraftMode(true);
 		for (let i = 0; i < commands.length; i += updateChunkSize) {
 			this.showLoadingWarning(i / commands.length);
@@ -739,8 +833,8 @@ export class Editor {
 	 * This is particularly useful when accessing a bundled version of the editor,
 	 * where `SVGLoader.fromString` is unavailable.
 	 */
-	public async loadFromSVG(svgData: string) {
-		const loader = SVGLoader.fromString(svgData);
+	public async loadFromSVG(svgData: string, sanitize: boolean = false) {
+		const loader = SVGLoader.fromString(svgData, sanitize);
 		await this.loadFrom(loader);
 	}
 }

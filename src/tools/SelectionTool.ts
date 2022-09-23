@@ -11,10 +11,11 @@ import Mat33 from '../math/Mat33';
 import Rect2 from '../math/Rect2';
 import { Point2, Vec2 } from '../math/Vec2';
 import { EditorLocalization } from '../localization';
-import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt } from '../types';
+import { CopyEvent, EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt } from '../types';
 import Viewport from '../Viewport';
 import BaseTool from './BaseTool';
 import SerializableCommand from '../commands/SerializableCommand';
+import SVGRenderer from '../rendering/renderers/SVGRenderer';
 
 const handleScreenSize = 30;
 const styles = `
@@ -381,6 +382,16 @@ class Selection {
 		this.region = Rect2.empty;
 	}
 
+	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
+		this.region = bbox;
+		this.selectedElems = objects;
+		this.updateUI();
+	}
+
+	public getSelectedObjects(): AbstractComponent[] {
+		return this.selectedElems;
+	}
+
 	// Find the objects corresponding to this in the document,
 	// select them.
 	// Returns false iff nothing was selected.
@@ -528,15 +539,19 @@ export default class SelectionTool extends BaseTool {
 		this.editor.handleKeyEventsFrom(this.handleOverlay);
 	}
 
+	private makeSelectionBox(selectionStartPos: Point2) {
+		this.prevSelectionBox = this.selectionBox;
+		this.selectionBox = new Selection(
+			selectionStartPos, this.editor
+		);
+		// Remove any previous selection rects
+		this.handleOverlay.replaceChildren();
+		this.selectionBox.appendBackgroundBoxTo(this.handleOverlay);
+	}
+
 	public onPointerDown(event: PointerEvt): boolean {
 		if (event.allPointers.length === 1 && event.current.isPrimary) {
-			this.prevSelectionBox = this.selectionBox;
-			this.selectionBox = new Selection(
-				event.current.canvasPos, this.editor
-			);
-			// Remove any previous selection rects
-			this.handleOverlay.replaceChildren();
-			this.selectionBox.appendBackgroundBoxTo(this.handleOverlay);
+			this.makeSelectionBox(event.current.canvasPos);
 
 			return true;
 		}
@@ -690,6 +705,35 @@ export default class SelectionTool extends BaseTool {
 		return false;
 	}
 
+	public onCopy(event: CopyEvent): boolean {
+		if (!this.selectionBox) {
+			return false;
+		}
+
+		const selectedElems = this.selectionBox.getSelectedObjects();
+		const bbox = this.selectionBox.region;
+		if (selectedElems.length === 0) {
+			return false;
+		}
+
+		const exportViewport = new Viewport(this.editor.notifier);
+		exportViewport.updateScreenSize(Vec2.of(bbox.w, bbox.h));
+		exportViewport.resetTransform(Mat33.translation(bbox.topLeft));
+
+		const svgNameSpace = 'http://www.w3.org/2000/svg';
+		const exportElem = document.createElementNS(svgNameSpace, 'svg');
+
+		const sanitize = true;
+		const renderer = new SVGRenderer(exportElem, exportViewport, sanitize);
+
+		for (const elem of selectedElems) {
+			elem.render(renderer);
+		}
+
+		event.setData('image/svg+xml', exportElem.outerHTML);
+		return true;
+	}
+
 	public setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
@@ -710,6 +754,28 @@ export default class SelectionTool extends BaseTool {
 	// Get the object responsible for displaying this' selection.
 	public getSelection(): Selection|null {
 		return this.selectionBox;
+	}
+
+	public setSelection(objects: AbstractComponent[]) {
+		let bbox: Rect2|null = null;
+		for (const object of objects) {
+			if (bbox) {
+				bbox = bbox.union(object.getBBox());
+			} else {
+				bbox = object.getBBox();
+			}
+		}
+
+		if (!bbox) {
+			return;
+		}
+
+		this.clearSelection();
+		if (!this.selectionBox) {
+			this.makeSelectionBox(bbox.topLeft);
+		}
+
+		this.selectionBox!.setSelectedObjects(objects, bbox);
 	}
 
 	public clearSelection() {

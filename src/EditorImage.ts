@@ -81,6 +81,8 @@ export default class EditorImage {
 
 	// A Command that can access private [EditorImage] functionality
 	private static AddElementCommand = class extends SerializableCommand {
+		private serializedElem: any;
+
 		// If [applyByFlattening], then the rendered content of this element
 		// is present on the display's wet ink canvas. As such, no re-render is necessary
 		// the first time this command is applied (the surfaces are joined instead).
@@ -89,6 +91,10 @@ export default class EditorImage {
 			private applyByFlattening: boolean = false
 		) {
 			super('add-element');
+
+			// Store the element's serialization --- .serializeToJSON may be called on this
+			// even when this is not at the top of the undo/redo stack.
+			this.serializedElem = element.serialize();
 
 			if (isNaN(element.getBBox().area)) {
 				throw new Error('Elements in the image cannot have NaN bounding boxes');
@@ -118,7 +124,7 @@ export default class EditorImage {
 
 		protected serializeToJSON() {
 			return {
-				elemData: this.element.serialize(),
+				elemData: this.serializedElem,
 			};
 		}
 

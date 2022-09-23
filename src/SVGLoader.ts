@@ -36,7 +36,8 @@ export default class SVGLoader implements ImageLoader {
 	private totalToProcess: number = 0;
 	private rootViewBox: Rect2|null;
 
-	private constructor(private source: SVGSVGElement, private onFinish?: OnFinishListener) {
+	private constructor(
+		private source: SVGSVGElement, private onFinish?: OnFinishListener, private readonly storeUnknown: boolean = true) {
 	}
 
 	private getStyle(node: SVGElement) {
@@ -108,6 +109,10 @@ export default class SVGLoader implements ImageLoader {
 		supportedAttrs: Set<string>,
 		supportedStyleAttrs?: Set<string>
 	) {
+		if (!this.storeUnknown) {
+			return;
+		}
+
 		for (const attr of node.getAttributeNames()) {
 			if (supportedAttrs.has(attr) || (attr === 'style' && supportedStyleAttrs)) {
 				continue;
@@ -161,7 +166,11 @@ export default class SVGLoader implements ImageLoader {
 				'\nAdding as an unknown object.'
 			);
 
-			elem = new UnknownSVGObject(node);
+			if (this.storeUnknown) {
+				elem = new UnknownSVGObject(node);
+			} else {
+				return;
+			}
 		}
 		this.onAddComponent?.(elem);
 	}
@@ -254,8 +263,10 @@ export default class SVGLoader implements ImageLoader {
 	}
 
 	private addUnknownNode(node: SVGElement) {
-		const component = new UnknownSVGObject(node);
-		this.onAddComponent?.(component);
+		if (this.storeUnknown) {
+			const component = new UnknownSVGObject(node);
+			this.onAddComponent?.(component);
+		}
 	}
 
 	private updateViewBox(node: SVGSVGElement) {
@@ -280,7 +291,9 @@ export default class SVGLoader implements ImageLoader {
 	}
 
 	private updateSVGAttrs(node: SVGSVGElement) {
-		this.onAddComponent?.(new SVGGlobalAttributesObject(this.getSourceAttrs(node)));
+		if (this.storeUnknown) {
+			this.onAddComponent?.(new SVGGlobalAttributesObject(this.getSourceAttrs(node)));
+		}
 	}
 
 	private async visit(node: Element) {
@@ -305,7 +318,9 @@ export default class SVGLoader implements ImageLoader {
 		default:
 			console.warn('Unknown SVG element,', node);
 			if (!(node instanceof SVGElement)) {
-				console.warn('Element', node, 'is not an SVGElement! Continuing anyway.');
+				console.warn(
+					'Element', node, 'is not an SVGElement!', this.storeUnknown ? 'Continuing anyway.' : 'Skipping.'
+				);
 			}
 
 			this.addUnknownNode(node as SVGElement);
@@ -354,7 +369,8 @@ export default class SVGLoader implements ImageLoader {
 	}
 
 	// TODO: Handling unsafe data! Tripple-check that this is secure!
-	public static fromString(text: string): SVGLoader {
+	// @param sanitize - if `true`, don't store unknown attributes.
+	public static fromString(text: string, sanitize: boolean = false): SVGLoader {
 		const sandbox = document.createElement('iframe');
 		sandbox.src = 'about:blank';
 		sandbox.setAttribute('sandbox', 'allow-same-origin');
@@ -400,6 +416,6 @@ export default class SVGLoader implements ImageLoader {
 		return new SVGLoader(svgElem, () => {
 			svgElem.remove();
 			sandbox.remove();
-		});
+		}, !sanitize);
 	}
 }

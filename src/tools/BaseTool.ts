@@ -1,4 +1,4 @@
-import { PointerEvtListener, WheelEvt, PointerEvt, EditorNotifier, EditorEventType, KeyPressEvent, KeyUpEvent } from '../types';
+import { PointerEvtListener, WheelEvt, PointerEvt, EditorNotifier, EditorEventType, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent } from '../types';
 import ToolEnabledGroup from './ToolEnabledGroup';
 
 export default abstract class BaseTool implements PointerEvtListener {
@@ -14,6 +14,14 @@ export default abstract class BaseTool implements PointerEvtListener {
 	}
 
 	public onWheel(_event: WheelEvt): boolean {
+		return false;
+	}
+
+	public onCopy(_event: CopyEvent): boolean {
+		return false;
+	}
+
+	public onPaste(_event: PasteEvent): boolean {
 		return false;
 	}
 

@@ -89,6 +89,52 @@ export default abstract class AbstractComponent {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this);
 	}
 
+	private static transformElementCommandId = 'transform-element';
+
+	private static UnresolvedTransformElementCommand = class extends SerializableCommand {
+		private command: SerializableCommand|null = null;
+
+		public constructor(
+			private affineTransfm: Mat33,
+			private componentID: string,
+		) {
+			super(AbstractComponent.transformElementCommandId);
+		}
+
+		private resolveCommand(editor: Editor) {
+			if (this.command) {
+				return;
+			}
+
+			const component = editor.image.lookupElement(this.componentID);
+			if (!component) {
+				throw new Error(`Unable to resolve component with ID ${this.componentID}`);
+			}
+			this.command = new AbstractComponent.TransformElementCommand(this.affineTransfm, component);
+		}
+
+		public apply(editor: Editor) {
+			this.resolveCommand(editor);
+			this.command!.apply(editor);
+		}
+
+		public unapply(editor: Editor) {
+			this.resolveCommand(editor);
+			this.command!.unapply(editor);
+		}
+
+		public description(_editor: Editor, localizationTable: EditorLocalization) {
+			return localizationTable.transformedElements(1);
+		}
+
+		protected serializeToJSON() {
+			return {
+				id: this.componentID,
+				transfm: this.affineTransfm.toArray(),
+			};
+		}
+	};
+
 	private static TransformElementCommand = class extends SerializableCommand {
 		private origZIndex: number;
 
@@ -96,7 +142,7 @@ export default abstract class AbstractComponent {
 			private affineTransfm: Mat33,
 			private component: AbstractComponent,
 		) {
-			super('transform-element');
+			super(AbstractComponent.transformElementCommandId);
 			this.origZIndex = component.zIndex;
 		}
 
@@ -118,6 +164,7 @@ export default abstract class AbstractComponent {
 		}
 
 		public apply(editor: Editor) {
+			console.log('transforming\n', this.affineTransfm.toString(), '\norig\n', this.component.serialize());
 			this.component.zIndex = AbstractComponent.zIndexCounter++;
 			this.updateTransform(editor, this.affineTransfm);
 			editor.queueRerender();
@@ -134,21 +181,21 @@ export default abstract class AbstractComponent {
 		}
 
 		static {
-			SerializableCommand.register('transform-element', (json: any, editor: Editor) => {
+			SerializableCommand.register(AbstractComponent.transformElementCommandId, (json: any, editor: Editor) => {
 				const elem = editor.image.lookupElement(json.id);
 
+				const transform = new Mat33(...(json.transfm as [
+					number, number, number,
+					number, number, number,
+					number, number, number,
+				]));
+
 				if (!elem) {
-					throw new Error(`Unable to retrieve non-existent element, ${elem}`);
+					return new AbstractComponent.UnresolvedTransformElementCommand(transform, json.id);
 				}
 
-				const transform = json.transfm as [
-					number, number, number,
-					number, number, number,
-					number, number, number,
-				];
-
 				return new AbstractComponent.TransformElementCommand(
-					new Mat33(...transform),
+					transform,
 					elem,
 				);
 			});

@@ -19,13 +19,18 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	private overwrittenAttrs: Record<string, string|null> = {};
 
-	public constructor(private elem: SVGSVGElement, viewport: Viewport) {
+	// Renders onto `elem`. If `sanitize`, don't render potentially untrusted data.
+	public constructor(private elem: SVGSVGElement, viewport: Viewport, private sanitize: boolean = false) {
 		super(viewport);
 		this.clear();
 	}
 
 	// Sets an attribute on the root SVG element.
 	public setRootSVGAttribute(name: string, value: string|null) {
+		if (this.sanitize) {
+			return;
+		}
+	
 		// Make the original value of the attribute restorable on clear
 		if (!(name in this.overwrittenAttrs)) {
 			this.overwrittenAttrs[name] = this.elem.getAttribute(name);
@@ -43,18 +48,21 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	public clear() {
-		// Restore all alltributes
-		for (const attrName in this.overwrittenAttrs) {
-			const value = this.overwrittenAttrs[attrName];
-
-			if (value) {
-				this.elem.setAttribute(attrName, value);
-			} else {
-				this.elem.removeAttribute(attrName);
-			}
-		}
-		this.overwrittenAttrs = {};
 		this.lastPathString = [];
+
+		if (!this.sanitize) {
+			// Restore all all attributes
+			for (const attrName in this.overwrittenAttrs) {
+				const value = this.overwrittenAttrs[attrName];
+
+				if (value) {
+					this.elem.setAttribute(attrName, value);
+				} else {
+					this.elem.removeAttribute(attrName);
+				}
+			}
+			this.overwrittenAttrs = {};
+		}
 	}
 
 	// Push [this.fullPath] to the SVG
@@ -137,7 +145,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		// Don't extend paths across objects
 		this.addPathToSVG();
 
-		if (loaderData) {
+		if (loaderData && !this.sanitize) {
 			// Restore any attributes unsupported by the app.
 			for (const elem of this.objectElems ?? []) {
 				const attrs = loaderData[svgAttributesDataKey] as SVGLoaderUnknownAttribute[]|undefined;
@@ -181,6 +189,10 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	// Renders a **copy** of the given element.
 	public drawSVGElem(elem: SVGElement) {
+		if (this.sanitize) {
+			return;
+		}
+
 		this.elem.appendChild(elem.cloneNode(true));
 	}
 

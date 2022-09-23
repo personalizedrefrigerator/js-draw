@@ -9,4 +9,7 @@ export {
 	AbstractComponent,
 	Stroke,
 	Text,
+
+	Text as TextComponent,
+	Stroke as StrokeComponent,
 };

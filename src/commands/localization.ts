@@ -18,6 +18,7 @@ export interface CommandLocalization {
 	eraseAction: (elemDescription: string, numElems: number) => string;
 	duplicateAction: (elemDescription: string, count: number)=> string;
 	inverseOf: (actionDescription: string)=> string;
+	unionOf: (actionDescription: string, actionCount: number)=> string;
 
 	selectedElements: (count: number)=>string;
 }
@@ -29,6 +30,7 @@ export const defaultCommandLocalization: CommandLocalization = {
 	addElementAction: (componentDescription: string) => `Added ${componentDescription}`,
 	eraseAction: (componentDescription: string, numElems: number) => `Erased ${numElems} ${componentDescription}`,
 	duplicateAction: (componentDescription: string, numElems: number) => `Duplicated ${numElems} ${componentDescription}`,
+	unionOf: (actionDescription: string, actionCount: number) => `Union: ${actionCount} ${actionDescription}`,
 	inverseOf: (actionDescription: string) => `Inverse of ${actionDescription}`,
 	elements: 'Elements',
 	erasedNoElements: 'Erased nothing',

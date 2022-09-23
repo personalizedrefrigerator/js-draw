@@ -35,7 +35,10 @@ export enum InputEvtType {
 
 	WheelEvt,
 	KeyPressEvent,
-	KeyUpEvent
+	KeyUpEvent,
+
+	CopyEvent,
+	PasteEvent,
 }
 
 // [delta.x] is horizontal scroll,
@@ -57,6 +60,17 @@ export interface KeyUpEvent {
 	readonly kind: InputEvtType.KeyUpEvent;
 	readonly key: string;
 	readonly ctrlKey: boolean;
+}
+
+export interface CopyEvent {
+	readonly kind: InputEvtType.CopyEvent;
+	setData(mime: string, data: string): void;
+}
+
+export interface PasteEvent {
+	readonly kind: InputEvtType.PasteEvent;
+	readonly data: string;
+	readonly mime: string;
 }
 
 // Event triggered when pointer capture is taken by a different [PointerEvtListener].
@@ -82,7 +96,7 @@ export interface PointerUpEvt extends PointerEvtBase {
 }
 
 export type PointerEvt = PointerDownEvt | PointerMoveEvt | PointerUpEvt;
-export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt;
+export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt | CopyEvent | PasteEvent;
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
