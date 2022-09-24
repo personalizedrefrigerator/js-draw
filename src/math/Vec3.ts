@@ -158,7 +158,7 @@ export default class Vec3 {
 		);
 	}
 
-	public asArray(): number[] {
+	public asArray(): [ number, number, number ] {
 		return [this.x, this.y, this.z];
 	}
 

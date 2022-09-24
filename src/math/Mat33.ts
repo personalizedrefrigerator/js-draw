@@ -1,6 +1,12 @@
 import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
 
+export type Mat33Array = [
+	number, number, number,
+	number, number, number,
+	number, number, number,
+];
+
 /**
  * Represents a three dimensional linear transformation or
  * a two-dimensional affine transformation. (An affine transformation scales/rotates/shears
@@ -239,7 +245,7 @@ export default class Mat33 {
 	 * ...
 	 * ```
 	 */
-	public toArray(): number[] {
+	public toArray(): Mat33Array {
 		return [
 			this.a1, this.a2, this.a3,
 			this.b1, this.b2, this.b3,
