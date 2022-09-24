@@ -378,15 +378,17 @@ export default class Path {
 
 	private cachedStringVersion: string|null = null;
 
-	public toString(): string {
+	public toString(useNonAbsCommands?: boolean): string {
 		if (this.cachedStringVersion) {
 			return this.cachedStringVersion;
 		}
 
-		// Hueristic: Try to determine whether converting absolute to relative commands is worth it.
-		const makeRelativeCommands = Math.abs(this.bbox.topLeft.x) > 10 && Math.abs(this.bbox.topLeft.y) > 10;
+		if (useNonAbsCommands === undefined) {
+			// Hueristic: Try to determine whether converting absolute to relative commands is worth it.
+			useNonAbsCommands = Math.abs(this.bbox.topLeft.x) > 10 && Math.abs(this.bbox.topLeft.y) > 10;
+		}
 
-		const result = Path.toString(this.startPoint, this.parts, !makeRelativeCommands);
+		const result = Path.toString(this.startPoint, this.parts, !useNonAbsCommands);
 		this.cachedStringVersion = result;
 		return result;
 	}
@@ -409,10 +411,13 @@ export default class Path {
 			const roundedPrevY = prevPoint ? toRoundedString(prevPoint.y) : '';
 
 			for (const point of points) {
+				const xComponent = toRoundedString(point.x);
+				const yComponent = toRoundedString(point.y);
+
 				// Relative commands are often shorter as strings than absolute commands.
 				if (!makeAbsCommand) {
-					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint!.x, roundedPrevX, roundedPrevY);
-					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint!.y, roundedPrevX, roundedPrevY);
+					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint!.x, xComponent, roundedPrevX, roundedPrevY);
+					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint!.y, yComponent, roundedPrevX, roundedPrevY);
 
 					// No need for an additional separator if it starts with a '-'
 					if (yComponentRelative.charAt(0) === '-') {
@@ -421,9 +426,6 @@ export default class Path {
 						relativeCommandParts.push(`${xComponentRelative},${yComponentRelative}`);
 					}
 				} else {
-					const xComponent = toRoundedString(point.x);
-					const yComponent = toRoundedString(point.y);
-
 					absoluteCommandParts.push(`${xComponent},${yComponent}`);
 				}
 			}

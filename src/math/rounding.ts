@@ -1,7 +1,7 @@
 // @packageDocumentation @internal
 
 // Clean up stringified numbers
-const cleanUpNumber = (text: string) => {
+export const cleanUpNumber = (text: string) => {
 	// Regular expression substitions can be somewhat expensive. Only do them
 	// if necessary.
 	const lastChar = text.charAt(text.length - 1);
@@ -12,10 +12,6 @@ const cleanUpNumber = (text: string) => {
 
 		// Remove trailing period
 		text = text.replace(/[.]$/, '');
-
-		if (text === '-0') {
-			return '0';
-		}
 	}
 
 	const firstChar = text.charAt(0);
@@ -23,6 +19,11 @@ const cleanUpNumber = (text: string) => {
 		// Remove unnecessary leading zeroes.
 		text = text.replace(/^(0+)[.]/, '.');
 		text = text.replace(/^-(0+)[.]/, '-.');
+		text = text.replace(/^(-?)0+$/, '$10');
+	}
+
+	if (text === '-0') {
+		return '0';
 	}
 
 	return text;
