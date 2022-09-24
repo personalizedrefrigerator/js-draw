@@ -67,6 +67,11 @@ export default class PasteHandler extends BaseTool {
 		}
 		scaleRatio *= 2 / 3;
 
+		// Rounding: Represent as k 10ⁿ for some n, k ∈ ℤ.
+		const decimalComponent = 10 ** Math.floor(Math.log10(scaleRatio));
+		console.log(decimalComponent, scaleRatio);
+		scaleRatio = Math.round(scaleRatio / decimalComponent) * decimalComponent;
+
 		const transfm = Mat33.translation(
 			visibleRect.center.minus(bbox.center)
 		).rightMul(
