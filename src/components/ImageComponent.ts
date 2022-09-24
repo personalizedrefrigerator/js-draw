@@ -1,5 +1,5 @@
 import LineSegment2 from '../math/LineSegment2';
-import Mat33 from '../math/Mat33';
+import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
 import AbstractRenderer, { RenderableImage } from '../rendering/renderers/AbstractRenderer';
 import AbstractComponent from './AbstractComponent';
@@ -141,11 +141,7 @@ export default class ImageComponent extends AbstractComponent {
 			image: image,
 			base64Url: image.src,
 			label: data.label,
-			transform: new Mat33(...(data.transform as [
-				number, number, number,
-				number, number, number,
-				number, number, number,
-			])),
+			transform: new Mat33(...(data.transform as Mat33Array)),
 		});
 	}
 }

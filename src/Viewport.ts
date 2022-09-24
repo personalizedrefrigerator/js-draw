@@ -175,10 +175,21 @@ export class Viewport {
 		return point.map(roundComponent);
 	}
 
-
 	// Round a point with a tolerance of ±1 screen unit.
 	public roundPoint(point: Point2): Point2 {
 		return Viewport.roundPoint(point, 1 / this.getScaleFactor());
+	}
+
+	public static roundScaleRatio(scaleRatio: number): number {
+		if (Math.abs(scaleRatio) <= 1e-12) {
+			return 0;
+		}
+
+		// Represent as k 10ⁿ for some n, k ∈ ℤ.
+		const decimalComponent = 10 ** Math.floor(Math.log10(Math.abs(scaleRatio)));
+		scaleRatio = Math.round(scaleRatio / decimalComponent * 2) / 2 * decimalComponent;
+
+		return scaleRatio;
 	}
 
 	// Computes and returns an affine transformation that makes `toMakeVisible` visible and roughly centered on the screen.

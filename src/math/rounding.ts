@@ -4,6 +4,13 @@
 export const cleanUpNumber = (text: string) => {
 	// Regular expression substitions can be somewhat expensive. Only do them
 	// if necessary.
+	if (text.indexOf('e') > 0) {
+		// Round to zero.
+		if (text.match(/[eE][-]\d{2,}$/)) {
+			return '0';
+		}
+	}
+
 	const lastChar = text.charAt(text.length - 1);
 	if (lastChar === '0' || lastChar === '.') {
 		// Remove trailing zeroes
@@ -32,8 +39,8 @@ export const cleanUpNumber = (text: string) => {
 export const toRoundedString = (num: number): string => {
 	// Try to remove rounding errors. If the number ends in at least three/four zeroes
 	// (or nines) just one or two digits, it's probably a rounding error.
-	const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d{1,2}$/;
-	const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,})\d{1,2}$/;
+	const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d{1,3}$/;
+	const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,})\d{1,3}$/;
 
 	let text = num.toString(10);
 	if (text.indexOf('.') === -1) {

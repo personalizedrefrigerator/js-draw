@@ -7,7 +7,7 @@ import Duplicate from '../commands/Duplicate';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import Editor from '../Editor';
-import Mat33 from '../math/Mat33';
+import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
 import { Point2, Vec2 } from '../math/Vec2';
 import { EditorLocalization } from '../localization';
@@ -271,7 +271,26 @@ class Selection {
 			cmd.unapply(this.editor);
 		});
 
-		const fullTransform = this.transform;
+		const roundScaling = (num: number) => {
+			// Add additional precision to allow scaling by, for example,
+			// (1.25, 1.25).
+			return Viewport.roundScaleRatio(num * 2) / 2;
+		};
+
+		// Scale/shear  Translation
+		//   ↓          ↓ 
+		// ⎡ a1 a2    a3 ⎤
+		// ⎢ b1 b2    b3 ⎥
+		// ⎣ 0  0     1  ⎦
+		// Round the transform to prevent long decimals in the saved image.
+		const translation = this.editor.viewport.roundPoint(Vec2.of(this.transform.a3, this.transform.b3));
+		const fullTransform = new Mat33(
+			roundScaling(this.transform.a1), roundScaling(this.transform.a2), translation.x,
+			roundScaling(this.transform.b1), roundScaling(this.transform.b2), translation.y,
+			this.transform.c1, this.transform.c2, this.transform.c3,
+		);
+		this.transform = fullTransform;
+
 		const inverseTransform = this.transform.inverse();
 		const deltaBoxRotation = this.boxRotation;
 		const currentTransfmCommands = this.computeTransformCommands();
@@ -291,11 +310,7 @@ class Selection {
 		SerializableCommand.register('selection-tool-transform', (json: any, editor) => {
 			// The selection box is lost when serializing/deserializing. No need to store box rotation
 			const guiBoxRotation = 0;
-			const fullTransform: Mat33 = new Mat33(...(json.transform as [
-				number, number, number,
-				number, number, number,
-				number, number, number,
-			]));
+			const fullTransform: Mat33 = new Mat33(...(json.transform as Mat33Array));
 			const commands = (json.commands as any[]).map(data => SerializableCommand.deserialize(data, editor));
 
 			return new this.ApplyTransformationCommand(null, commands, fullTransform, guiBoxRotation);

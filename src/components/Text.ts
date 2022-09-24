@@ -1,5 +1,5 @@
 import LineSegment2 from '../math/LineSegment2';
-import Mat33 from '../math/Mat33';
+import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -200,11 +200,7 @@ export default class Text extends AbstractComponent {
 			throw new Error(`Unable to deserialize transform, ${json.transform}.`);
 		}
 
-		const transformData = json.transform as [
-			number, number, number,
-			number, number, number,
-			number, number, number,
-		];
+		const transformData = json.transform as Mat33Array;
 		const transform = new Mat33(...transformData);
 
 		return new Text(textObjects, transform, style, getTextDimens);

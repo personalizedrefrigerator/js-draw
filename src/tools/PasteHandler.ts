@@ -16,6 +16,7 @@ import TextTool from './TextTool';
 import Color4 from '../Color4';
 import { TextStyle } from '../components/Text';
 import ImageComponent from '../components/ImageComponent';
+import Viewport from '../Viewport';
 
 // { @inheritDoc PasteHandler! }
 export default class PasteHandler extends BaseTool {
@@ -67,10 +68,7 @@ export default class PasteHandler extends BaseTool {
 		}
 		scaleRatio *= 2 / 3;
 
-		// Rounding: Represent as k 10ⁿ for some n, k ∈ ℤ.
-		const decimalComponent = 10 ** Math.floor(Math.log10(scaleRatio));
-		console.log(decimalComponent, scaleRatio);
-		scaleRatio = Math.round(scaleRatio / decimalComponent) * decimalComponent;
+		scaleRatio = Viewport.roundScaleRatio(scaleRatio);
 
 		const transfm = Mat33.translation(
 			visibleRect.center.minus(bbox.center)

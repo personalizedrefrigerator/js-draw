@@ -12,10 +12,10 @@ describe('toRoundedString', () => {
 		expect(toRoundedString(10.999999998)).toBe('11');
 	});
 
-	// Handling this creates situations with potential error:
-	//it('should round strings with multiple digits after the ending decimal points', () => {
-	//	expect(toRoundedString(292.2 - 292.8)).toBe('-0.6');
-	//});
+	it('should round strings with multiple digits after the ending decimal points', () => {
+		expect(toRoundedString(292.2 - 292.8)).toBe('-.6');
+		expect(toRoundedString(4.06425600000023)).toBe('4.064256');
+	});
 
 	it('should round down strings ending endings similar to .00000001', () => {
 		expect(toRoundedString(10.00000001)).toBe('10');
@@ -59,4 +59,5 @@ it('cleanUpNumber', () => {
 	expect(cleanUpNumber('1234')).toBe('1234');
 	expect(cleanUpNumber('1234.5')).toBe('1234.5');
 	expect(cleanUpNumber('1234.500')).toBe('1234.5');
+	expect(cleanUpNumber('1.1368683772161603e-13')).toBe('0');
 });

@@ -2,7 +2,7 @@ import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import LineSegment2 from '../math/LineSegment2';
-import Mat33 from '../math/Mat33';
+import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
@@ -183,11 +183,7 @@ export default abstract class AbstractComponent {
 			SerializableCommand.register(AbstractComponent.transformElementCommandId, (json: any, editor: Editor) => {
 				const elem = editor.image.lookupElement(json.id);
 
-				const transform = new Mat33(...(json.transfm as [
-					number, number, number,
-					number, number, number,
-					number, number, number,
-				]));
+				const transform = new Mat33(...(json.transfm as Mat33Array));
 
 				if (!elem) {
 					return new AbstractComponent.UnresolvedTransformElementCommand(transform, json.id);
