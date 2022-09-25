@@ -4,6 +4,7 @@
 export const cleanUpNumber = (text: string) => {
 	// Regular expression substitions can be somewhat expensive. Only do them
 	// if necessary.
+
 	if (text.indexOf('e') > 0) {
 		// Round to zero.
 		if (text.match(/[eE][-]\d{2,}$/)) {

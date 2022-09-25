@@ -96,6 +96,27 @@ export default class Vec3 {
 	}
 
 	/**
+	 * If `other` is a `Vec3`, multiplies `this` component-wise by `other`. Otherwise,
+	 * if `other is a `number`, returns the result of scalar multiplication.
+	 * 
+	 * @example
+	 * ```
+	 * Vec3.of(1, 2, 3).scale(Vec3.of(2, 4, 6)); // → Vec3(2, 8, 18)
+	 * ```
+	 */
+	public scale(other: Vec3|number): Vec3 {
+		if (typeof other === 'number') {
+			return this.times(other);
+		}
+
+		return Vec3.of(
+			this.x * other.x,
+			this.y * other.y,
+			this.z * other.z,
+		);
+	}
+
+	/**
 	 * Returns a vector orthogonal to this. If this is a Vec2, returns `this` rotated
 	 * 90 degrees counter-clockwise.
 	 */

@@ -122,8 +122,9 @@ export default abstract class AbstractRenderer {
 		}
 	}
 
-	// Draw a rectangle. Boundary lines have width [lineWidth] and are filled with [lineFill]
-	public drawRect(rect: Rect2, lineWidth: number, lineFill: RenderingStyle): void {
+	// Draw a rectangle. Boundary lines have width [lineWidth] and are filled with [lineFill].
+	// This is equivalent to `drawPath(Path.fromRect(...).toRenderable(...))`.
+	public drawRect(rect: Rect2, lineWidth: number, lineFill: RenderingStyle) {
 		const path = Path.fromRect(rect, lineWidth);
 		this.drawPath(path.toRenderable(lineFill));
 	}

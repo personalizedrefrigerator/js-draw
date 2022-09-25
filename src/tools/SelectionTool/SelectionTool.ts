@@ -17,7 +17,119 @@ import BaseTool from './BaseTool';
 import SerializableCommand from '../commands/SerializableCommand';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
 
+export const cssPrefix = 'selection-tool-';
+
 const handleScreenSize = 30;
+const styles = `
+	.handleOverlay {
+		pointer-events: none;
+	}
+
+	.handleOverlay > .selectionBox {
+		position: absolute;
+		z-index: 0;
+		transform-origin: center;
+	}
+
+	.handleOverlay > .selectionBox .draggableBackground {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+
+		background-color: var(--secondary-background-color);
+		opacity: 0.8;
+		border: 1px solid var(--primary-background-color);
+	}
+
+	.handleOverlay .resizeCorner {
+		width: ${handleScreenSize}px;
+		height: ${handleScreenSize}px;
+		margin-right: -${handleScreenSize / 2}px;
+		margin-bottom: -${handleScreenSize / 2}px;
+
+		position: absolute;
+		bottom: 0;
+		right: 0;
+
+		opacity: 0.8;
+		background-color: var(--primary-background-color);
+		border: 1px solid var(--primary-foreground-color);
+	}
+
+	.handleOverlay > .selectionBox .rotateCircleContainer {
+		position: absolute;
+		top: 50%;
+		bottom: 50%;
+		left: 50%;
+		right: 50%;
+	}
+
+	.handleOverlay .rotateCircle {
+		width: ${handleScreenSize}px;
+		height: ${handleScreenSize}px;
+		margin-left: -${handleScreenSize / 2}px;
+		margin-top: -${handleScreenSize / 2}px;
+		opacity: 0.8;
+
+		border: 1px solid var(--primary-foreground-color);
+		background-color: var(--primary-background-color);
+		border-radius: 100%;
+	}
+`;
+
+type DragCallback = (delta: Vec2, offset: Point2)=> void;
+type DragEndCallback = ()=> void;
+
+const makeDraggable = (element: HTMLElement, onDrag: DragCallback, onDragEnd: DragEndCallback) => {
+	element.style.touchAction = 'none';
+	let down = false;
+
+	// Work around a Safari bug
+	element.addEventListener('touchstart', evt => evt.preventDefault());
+
+	// Don't show a context menu
+	element.addEventListener('contextmenu', evt => evt.preventDefault());
+
+	let lastX: number;
+	let lastY: number;
+	element.addEventListener('pointerdown', event => {
+		if (event.isPrimary) {
+			down = true;
+			element.setPointerCapture(event.pointerId);
+			lastX = event.pageX;
+			lastY = event.pageY;
+
+			return true;
+		}
+		return false;
+	});
+	element.addEventListener('pointermove', event => {
+		if (event.isPrimary && down) {
+			// Safari/iOS doesn't seem to support movementX/movementY on pointer events.
+			// Calculate manually:
+			const delta = Vec2.of(event.pageX - lastX, event.pageY - lastY);
+			onDrag(delta, Vec2.of(event.offsetX, event.offsetY));
+			lastX = event.pageX;
+			lastY = event.pageY;
+
+			return true;
+		}
+		return false;
+	});
+	const onPointerEnd = (event: PointerEvent) => {
+		if (event.isPrimary) {
+			down = false;
+			onDragEnd();
+
+			return true;
+		}
+		return false;
+	};
+	element.addEventListener('pointerup', onPointerEnd);
+	element.addEventListener('pointercancel', onPointerEnd);
+};
 
 // Maximum number of strokes to transform without a re-render.
 const updateChunkSize = 100;
@@ -26,8 +138,9 @@ const updateChunkSize = 100;
 class Selection {
 	public region: Rect2;
 	private boxRotation: number;
+	private backgroundBox: HTMLElement;
+	private rotateCircle: HTMLElement;
 	private selectedElems: AbstractComponent[];
-    private colorQueryElem: HTMLElement;
 	private transform: Mat33;
 	private transformationCommands: SerializableCommand[];
 
@@ -446,6 +559,7 @@ export default class SelectionTool extends BaseTool {
 		editor.addStyleSheet(styles);
 
 		this.handleOverlay.style.display = 'none';
+        this.handleOverlay.style.pointerEvents = 'none';
 		this.handleOverlay.classList.add('handleOverlay');
 
 		editor.notifier.on(EditorEventType.ViewportChanged, _data => {
