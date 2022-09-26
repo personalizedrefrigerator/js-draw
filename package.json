@@ -71,6 +71,7 @@
 		"lint": "eslint .",
 		"linter-precommit": "eslint --fix --ext .js --ext .ts",
 		"lint-staged": "lint-staged",
+		"lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
 		"prepare": "husky install && yarn build",
 		"prepack": "yarn build && yarn test && pinst --disable",
 		"postpack": "pinst --enable"
