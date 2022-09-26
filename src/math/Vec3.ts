@@ -196,7 +196,7 @@ export default class Vec3 {
 	 * Vec3.of(1, 2, 3).eq(Vec3.of(4, 5, 6), 2.99); // → false
 	 * ```
 	 */
-	public eq(other: Vec3, fuzz: number): boolean {
+	public eq(other: Vec3, fuzz: number = 0): boolean {
 		for (let i = 0; i < 3; i++) {
 			if (Math.abs(other.at(i) - this.at(i)) > fuzz) {
 				return false;

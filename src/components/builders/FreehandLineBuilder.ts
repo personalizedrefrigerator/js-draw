@@ -443,12 +443,12 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			return;
 		}
 
-		console.assert(!isNaN(enteringVec.magnitude()));
+		console.assert(!isNaN(enteringVec.magnitude()), 'Pre-normalized enteringVec has NaN magnitude!');
 
 		enteringVec = enteringVec.normalized();
 		exitingVec = exitingVec.normalized();
 
-		console.assert(!isNaN(enteringVec.magnitude()));
+		console.assert(!isNaN(enteringVec.magnitude()), 'Normalized enteringVec has NaN magnitude!');
 
 		const lineFromStart = new LineSegment2(
 			segmentStart,
@@ -461,14 +461,20 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		const intersection = lineFromEnd.intersection(lineFromStart);
 
 		// Position the control point at this intersection
-		let controlPoint: Point2;
+		let controlPoint: Point2|null = null;
 		if (intersection) {
 			controlPoint = intersection.point;
-		} else {
+		}
+
+		// No intersection or the intersection is one of the end points?
+		if (!controlPoint || segmentStart.eq(controlPoint) || segmentEnd.eq(controlPoint)) {
 			// Position the control point closer to the first -- the connecting
 			// segment will be roughly a line.
 			controlPoint = segmentStart.plus(enteringVec.times(startEndDist / 4));
 		}
+
+		console.assert(!segmentStart.eq(controlPoint, 1e-11), 'Start and control points are equal!');
+		console.assert(!controlPoint.eq(segmentEnd, 1e-11), 'Control and end points are equal!');
 
 		if (isNaN(controlPoint.magnitude()) || isNaN(segmentStart.magnitude())) {
 			console.error('controlPoint is NaN', intersection, 'Start:', segmentStart, 'End:', segmentEnd, 'in:', enteringVec, 'out:', exitingVec);
