@@ -46,7 +46,7 @@ describe('SelectionTool', () => {
 		});
 	});
 
-	it('dragging the selected region should move selected items', () => {
+	it('sending keyboard events to the selected region should move selected items', () => {
 		const { testStroke, addTestStrokeCommand } = createSquareStroke(50);
 		const editor = createEditor();
 		editor.dispatch(addTestStrokeCommand);
@@ -62,14 +62,12 @@ describe('SelectionTool', () => {
 		expect(selection).not.toBeNull();
 
 		// Drag the object
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(25, 25));
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(30, 30));
+		// (d => move right (d is from WASD controls.))
+		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'd');
+		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'd');
+		editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'd');
 
-		expect(testStroke.getBBox().topLeft).toMatchObject({
-			x: 5,
-			y: 5,
-		});
+		expect(testStroke.getBBox().topLeft.x).toBeGreaterThan(5);
 
 		editor.history.undo();
 
@@ -98,10 +96,8 @@ describe('SelectionTool', () => {
 			throw new Error('Selection should be non-null.');
 		}
 
-
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(5, 5));
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(100, 100));
+		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'a');
+		editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'a');
 		expect(editor.viewport.visibleRect.containsPoint(selection.region.center)).toBe(true);
 	});
 });

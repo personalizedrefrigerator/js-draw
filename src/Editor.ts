@@ -778,6 +778,20 @@ export class Editor {
 		return styleSheet;
 	}
 
+	// Dispatch a keyboard event to the currently selected tool.
+	// Intended for unit testing
+	public sendKeyboardEvent(
+		eventType: InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent,
+		key: string,
+		ctrlKey: boolean = false
+	) {
+		this.toolController.dispatchInputEvent({
+			kind: eventType,
+			key,
+			ctrlKey
+		});
+	}
+
 	// Dispatch a pen event to the currently selected tool.
 	// Intended primarially for unit tests.
 	public sendPenEvent(
