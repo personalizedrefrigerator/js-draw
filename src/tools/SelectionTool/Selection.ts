@@ -1,3 +1,8 @@
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import SerializableCommand from '../../commands/SerializableCommand';
 import Editor from '../../Editor';
 import { Mat33, Rect2 } from '../../math/lib';
@@ -17,6 +22,7 @@ import { ResizeMode } from './types';
 
 const updateChunkSize = 100;
 
+// @internal
 export default class Selection {
 	private handles: SelectionHandle[];
 	private originalRegion: Rect2;

@@ -60,7 +60,7 @@ export class ResizeTransformer {
 
 		// Round: If this isn't done, scaling can create numbers with long decimal representations.
 		//    long decimal representations => large file sizes.
-		scale = scale.map(component => Viewport.roundScaleRatio(component));
+		scale = scale.map(component => Viewport.roundScaleRatio(component, 2));
 
 		if (scale.x > 0 && scale.y > 0) {
 			const origin = this.editor.viewport.roundPoint(this.selection.preTransformRegion.topLeft);

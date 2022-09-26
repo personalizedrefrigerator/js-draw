@@ -181,15 +181,17 @@ export class Viewport {
 		return Viewport.roundPoint(point, 1 / this.getScaleFactor());
 	}
 
-	public static roundScaleRatio(scaleRatio: number): number {
+	// `roundAmount`: An integer >= 0, larger numbers cause less rounding. Smaller numbers cause more
+	// (as such `roundAmount = 0` does the most rounding).
+	public static roundScaleRatio(scaleRatio: number, roundAmount: number = 1): number {
 		if (Math.abs(scaleRatio) <= 1e-12) {
 			return 0;
 		}
 
 		// Represent as k 10ⁿ for some n, k ∈ ℤ.
 		const decimalComponent = 10 ** Math.floor(Math.log10(Math.abs(scaleRatio)));
-		const roundAmount = 2;
-		scaleRatio = Math.round(scaleRatio / decimalComponent * roundAmount) / roundAmount * decimalComponent;
+		const roundAnountFactor = 2 ** roundAmount;
+		scaleRatio = Math.round(scaleRatio / decimalComponent * roundAnountFactor) / roundAnountFactor * decimalComponent;
 
 		return scaleRatio;
 	}
