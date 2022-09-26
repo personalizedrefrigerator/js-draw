@@ -203,24 +203,28 @@ export default class SelectionTool extends BaseTool {
 		} else if (handled) {
 			const translateStepSize = 10 * this.editor.viewport.getSizeOfPixelOnCanvas();
 			const rotateStepSize = Math.PI / 8;
-			const scaleStepSize = translateStepSize / 2;
+			const scaleStepSize = 5 / 4;
 
 			const region = this.selectionBox.region;
-			const scaledSize = this.selectionBox.region.size.plus(
-				Vec2.of(xScaleSteps, yScaleSteps).times(scaleStepSize)
+			const scaleFactor = Vec2.of(scaleStepSize ** xScaleSteps, scaleStepSize ** yScaleSteps);
+
+			const rotationMat = Mat33.zRotation(
+				rotationSteps * rotateStepSize
 			);
+			const roundedRotationMatrix = rotationMat.mapEntries(component => Viewport.roundScaleRatio(component));
+			const regionCenter = this.editor.viewport.roundPoint(region.center);
 
 			const transform = Mat33.scaling2D(
-				Vec2.of(
-					// Don't more-than-half the size of the selection
-					Math.max(0.5, scaledSize.x / region.size.x),
-					Math.max(0.5, scaledSize.y / region.size.y)
-				),
-				region.topLeft
-			).rightMul(Mat33.zRotation(
-				rotationSteps * rotateStepSize, region.center
-			)).rightMul(Mat33.translation(
-				Vec2.of(xTranslateSteps, yTranslateSteps).times(translateStepSize)
+				scaleFactor,
+				this.editor.viewport.roundPoint(region.topLeft)
+			).rightMul(
+				Mat33.translation(regionCenter).rightMul(
+					roundedRotationMatrix
+				).rightMul(
+					Mat33.translation(regionCenter.times(-1))
+				)
+			).rightMul(Mat33.translation(
+				this.editor.viewport.roundPoint(Vec2.of(xTranslateSteps, yTranslateSteps).times(translateStepSize))
 			));
 			const oldTransform = this.selectionBox.getTransform();
 			this.selectionBox.setTransform(oldTransform.rightMul(transform));

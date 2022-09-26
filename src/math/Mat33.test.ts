@@ -142,20 +142,18 @@ describe('Mat33 tests', () => {
 		).objEq(Vec2.unitX, fuzz);
 	});
 
-	it('Translation matrix should have no origin', () => {
-		expect(Mat33.translation(Vec2.of(1, 1)).origin()).objEq(Vec2.zero);
-	});
-
-	it('Should return origin of rotation matrix', () => {
-		const origin = Mat33.zRotation(2, Vec2.of(10, 11)).origin();
-		expect(origin).not.toBeNull();
-		expect(origin).objEq(Vec2.of(10, 11));
-	});
-
-	it('Should return origin of scaling2D matrix', () => {
-		const origin = Mat33.scaling2D(3, Vec2.of(-0.1, 0.2)).origin();
-		expect(origin).not.toBeNull();
-		expect(origin).objEq(Vec2.of(-0.1, 0.2));
+	it('should correctly apply a mapping to all components', () => {
+		expect(
+			new Mat33(
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 9,
+			).mapEntries(component => component - 1)
+		).toMatchObject(new Mat33(
+			0, 1, 2,
+			3, 4, 5,
+			6, 7, 8,
+		));
 	});
 
 	it('should convert CSS matrix(...) strings to matricies', () => {

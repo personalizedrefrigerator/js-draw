@@ -20,6 +20,7 @@ describe('toRoundedString', () => {
 	it('should round down strings ending endings similar to .00000001', () => {
 		expect(toRoundedString(10.00000001)).toBe('10');
 		expect(toRoundedString(-30.00000001)).toBe('-30');
+		expect(toRoundedString(-14.20000000000002)).toBe('-14.2');
 	});
 
 	it('should not round numbers insufficiently close to the next', () => {
@@ -46,6 +47,7 @@ it('toStringOfSamePrecision', () => {
 	expect(toStringOfSamePrecision(-0.09999999999999432, '291.3')).toBe('-.1');
 	expect(toStringOfSamePrecision(-0.9999999999999432, '291.3')).toBe('-1');
 	expect(toStringOfSamePrecision(9998.9, '.1', '-11')).toBe('9998.9');
+	expect(toStringOfSamePrecision(-14.20000000000002, '.000001', '-11')).toBe('-14.2');
 });
 
 it('cleanUpNumber', () => {

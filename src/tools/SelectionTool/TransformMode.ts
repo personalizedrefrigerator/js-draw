@@ -99,13 +99,7 @@ export class RotateTransformer {
 		// Transform in canvas space
 		const canvasSelCenter = this.editor.viewport.roundPoint(this.selection.preTransformRegion.center);
 		const unrounded = Mat33.zRotation(targetRotation);
-
-		const round = (entry: number) => Viewport.roundScaleRatio(entry);
-		const roundedRotationTransform = new Mat33(
-			round(unrounded.a1), round(unrounded.a2), 0,
-			round(unrounded.b1), round(unrounded.b2), 0,
-			0, 0, 1
-		);
+		const roundedRotationTransform = unrounded.mapEntries(entry => Viewport.roundScaleRatio(entry));
 
 		const fullRoundedTransform = Mat33
 			.translation(canvasSelCenter)
