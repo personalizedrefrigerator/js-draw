@@ -285,10 +285,8 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		startVec = startVec.times(this.curveStartWidth / 2);
 		endVec = endVec.times(this.curveEndWidth / 2);
 
-		if (isNaN(startVec.magnitude())) {
-			// TODO: This can happen when events are too close together. Find out why and
-			// 		 fix.
-			console.error('startVec is NaN', startVec, endVec, this.currentCurve);
+		if (!isFinite(startVec.magnitude())) {
+			console.error('Warning: startVec is NaN or ∞', startVec, endVec, this.currentCurve);
 			startVec = endVec;
 		}
 
@@ -439,16 +437,16 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		const maxControlPointDist = maxRelativeLength * startEndDist;
 
 		// Exit in cases where we would divide by zero
-		if (maxControlPointDist === 0 || exitingVec.magnitude() === 0 || isNaN(exitingVec.magnitude())) {
+		if (maxControlPointDist === 0 || exitingVec.magnitude() === 0 || !isFinite(exitingVec.magnitude())) {
 			return;
 		}
 
-		console.assert(!isNaN(enteringVec.magnitude()), 'Pre-normalized enteringVec has NaN magnitude!');
+		console.assert(isFinite(enteringVec.magnitude()), 'Pre-normalized enteringVec has NaN or ∞ magnitude!');
 
 		enteringVec = enteringVec.normalized();
 		exitingVec = exitingVec.normalized();
 
-		console.assert(!isNaN(enteringVec.magnitude()), 'Normalized enteringVec has NaN magnitude!');
+		console.assert(isFinite(enteringVec.magnitude()), 'Normalized enteringVec has NaN or ∞ magnitude!');
 
 		const lineFromStart = new LineSegment2(
 			segmentStart,
@@ -475,10 +473,6 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 		console.assert(!segmentStart.eq(controlPoint, 1e-11), 'Start and control points are equal!');
 		console.assert(!controlPoint.eq(segmentEnd, 1e-11), 'Control and end points are equal!');
-
-		if (isNaN(controlPoint.magnitude()) || isNaN(segmentStart.magnitude())) {
-			console.error('controlPoint is NaN', intersection, 'Start:', segmentStart, 'End:', segmentEnd, 'in:', enteringVec, 'out:', exitingVec);
-		}
 
 		const prevCurve = this.currentCurve;
 		this.currentCurve = new Bezier(segmentStart.xy, controlPoint.xy, segmentEnd.xy);
