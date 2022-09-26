@@ -1,18 +1,18 @@
 /**
  * The main entrypoint for the full editor.
- * 
+ *
  * @example
  * To create an editor with a toolbar,
  * ```
  * const editor = new Editor(document.body);
- * 
+ *
  * const toolbar = editor.addToolbar();
  * toolbar.addActionButton('Save', () => {
  *   const saveData = editor.toSVG().outerHTML;
  *   // Do something with saveData...
  * });
  * ```
- * 
+ *
  * @packageDocumentation
  */
 
@@ -37,6 +37,9 @@ import Mat33 from './math/Mat33';
 import Rect2 from './math/Rect2';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
+
+type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
+type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -67,14 +70,14 @@ export class Editor {
 
 	/**
 	 * Handles undo/redo.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * const editor = new Editor(document.body);
-	 * 
+	 *
 	 * // Do something undoable.
 	 * // ...
-	 * 
+	 *
 	 * // Undo the last action
 	 * editor.history.undo();
 	 * ```
@@ -83,17 +86,17 @@ export class Editor {
 
 	/**
 	 * Data structure for adding/removing/querying objects in the image.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * const editor = new Editor(document.body);
-	 * 
+	 *
 	 * // Create a path.
 	 * const stroke = new Stroke([
 	 *   Path.fromString('M0,0 L30,30 z').toRenderable({ fill: Color4.black }),
 	 * ]);
 	 * const addElementCommand = editor.image.addElement(stroke);
-	 * 
+	 *
 	 * // Add the stroke to the editor
 	 * editor.dispatch(addElementCommand);
 	 * ```
@@ -126,14 +129,14 @@ export class Editor {
 	 * @example
 	 * ```
 	 * const container = document.body;
-	 * 
+	 *
 	 * // Create an editor
 	 * const editor = new Editor(container, {
 	 *   // 2e-10 and 1e12 are the default values for minimum/maximum zoom.
 	 *   minZoom: 2e-10,
 	 *   maxZoom: 1e12,
 	 * });
-	 * 
+	 *
 	 * // Add the default toolbar
 	 * const toolbar = editor.addToolbar();
 	 * toolbar.addActionButton({
@@ -224,7 +227,7 @@ export class Editor {
 					if (oldZoom <= this.settings.maxZoom && oldZoom >= this.settings.minZoom) {
 						resetTransform = evt.oldTransform;
 					}
-	
+
 					this.viewport.resetTransform(resetTransform);
 				}
 			}
@@ -233,7 +236,7 @@ export class Editor {
 
 	/**
 	 * @returns a reference to the editor's container.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 *   editor.getRootElement().style.height = '500px';
@@ -285,30 +288,7 @@ export class Editor {
 	}
 
 	private registerListeners() {
-		// May be required to prevent text selection on iOS/Safari:
-		// See https://stackoverflow.com/a/70992717/17055750
-		this.renderingRegion.addEventListener('touchstart', evt => evt.preventDefault());
-		this.renderingRegion.addEventListener('contextmenu', evt => {
-			// Don't show a context menu
-			evt.preventDefault();
-		});
-
-		this.renderingRegion.addEventListener('pointerdown', evt => {
-			return this.handleHTMLPointerEvent('pointerdown', evt);
-		});
-
-		this.renderingRegion.addEventListener('pointermove', evt => {
-			return this.handleHTMLPointerEvent('pointermove', evt);
-		});
-
-		this.renderingRegion.addEventListener('pointerup', evt => {
-			return this.handleHTMLPointerEvent('pointerup', evt);
-		});
-
-		this.renderingRegion.addEventListener('pointercancel', evt => {
-			return this.handleHTMLPointerEvent('pointercancel', evt);
-		});
-
+		this.handlePointerEventsFrom(this.renderingRegion);
 		this.handleKeyEventsFrom(this.renderingRegion);
 
 		this.container.addEventListener('wheel', evt => {
@@ -338,7 +318,10 @@ export class Editor {
 				delta = Vec3.of(0, 0, evt.deltaY);
 			}
 
-			const pos = Vec2.of(evt.offsetX, evt.offsetY);
+			// Ensure that `pos` is relative to `this.container`
+			const bbox = this.container.getBoundingClientRect();
+			const pos = Vec2.of(evt.clientX, evt.clientY).minus(Vec2.of(bbox.left, bbox.top));
+
 			if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.WheelEvt,
 				delta,
@@ -407,10 +390,16 @@ export class Editor {
 		return res;
 	}
 
-	private handleHTMLPointerEvent(eventType: 'pointerdown'|'pointermove'|'pointerup'|'pointercancel', evt: PointerEvent): boolean {
+	/**
+	 * Dispatches a `PointerEvent` to the editor. The target element for `evt` must have the same top left
+	 * as the content of the editor.
+	 */
+	public handleHTMLPointerEvent(eventType: 'pointerdown'|'pointermove'|'pointerup'|'pointercancel', evt: PointerEvent): boolean {
+		const eventsRelativeTo = this.renderingRegion;
 		const eventTarget = (evt.target as HTMLElement|null) ?? this.renderingRegion;
+
 		if (eventType === 'pointerdown') {
-			const pointer = Pointer.ofEvent(evt, true, this.viewport);
+			const pointer = Pointer.ofEvent(evt, true, this.viewport, eventsRelativeTo);
 			this.pointers[pointer.id] = pointer;
 
 			eventTarget.setPointerCapture(pointer.id);
@@ -425,7 +414,7 @@ export class Editor {
 		}
 		else if (eventType === 'pointermove') {
 			const pointer = Pointer.ofEvent(
-				evt, this.pointers[evt.pointerId]?.down ?? false, this.viewport
+				evt, this.pointers[evt.pointerId]?.down ?? false, this.viewport, eventsRelativeTo
 			);
 			if (pointer.down) {
 				const prevData = this.pointers[pointer.id];
@@ -451,7 +440,7 @@ export class Editor {
 			return true;
 		}
 		else if (eventType === 'pointercancel' || eventType === 'pointerup') {
-			const pointer = Pointer.ofEvent(evt, false, this.viewport);
+			const pointer = Pointer.ofEvent(evt, false, this.viewport, eventsRelativeTo);
 			if (!this.pointers[pointer.id]) {
 				return false;
 			}
@@ -566,6 +555,27 @@ export class Editor {
 		}
 	}
 
+	public handlePointerEventsFrom(elem: HTMLElement, filter?: HTMLPointerEventFilter) {
+		// May be required to prevent text selection on iOS/Safari:
+		// See https://stackoverflow.com/a/70992717/17055750
+		elem.addEventListener('touchstart', evt => evt.preventDefault());
+		elem.addEventListener('contextmenu', evt => {
+			// Don't show a context menu
+			evt.preventDefault();
+		});
+
+		const eventNames: HTMLPointerEventType[] = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'];
+		for (const eventName of eventNames) {
+			elem.addEventListener(eventName, evt => {
+				if (filter && !filter(eventName, evt)) {
+					return true;
+				}
+
+				return this.handleHTMLPointerEvent(eventName, evt);
+			});
+		}
+	}
+
 	/** Adds event listners for keypresses to `elem` and forwards those events to the editor. */
 	public handleKeyEventsFrom(elem: HTMLElement) {
 		elem.addEventListener('keydown', evt => {
@@ -580,7 +590,7 @@ export class Editor {
 				evt.preventDefault();
 			} else if (evt.key === 'Escape') {
 				this.renderingRegion.blur();
-			} 
+			}
 		});
 
 		elem.addEventListener('keyup', evt => {
@@ -622,11 +632,11 @@ export class Editor {
 	 * Dispatches a command without announcing it. By default, does not add to history.
 	 * Use this to show finalized commands that don't need to have `announceForAccessibility`
 	 * called.
-	 * 
+	 *
 	 * Prefer `command.apply(editor)` for incomplete commands. `dispatchNoAnnounce` may allow
 	 * clients to listen for the application of commands (e.g. `SerializableCommand`s so they can
 	 * be sent across the network), while `apply` does not.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * const addToHistory = false;
@@ -877,7 +887,7 @@ export class Editor {
 
 	/**
 	 * Alias for loadFrom(SVGLoader.fromString).
-	 * 
+	 *
 	 * This is particularly useful when accessing a bundled version of the editor,
 	 * where `SVGLoader.fromString` is unavailable.
 	 */

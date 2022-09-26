@@ -3,19 +3,20 @@ import { EditorEventType } from '../types';
 
 import { coloris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
-import SelectionTool from '../tools/SelectionTool';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
 import { makeRedoIcon, makeUndoIcon } from './icons';
-import PanZoom from '../tools/PanZoom';
+import SelectionTool from '../tools/SelectionTool/SelectionTool';
+import PanZoomTool from '../tools/PanZoom';
 import TextTool from '../tools/TextTool';
+import EraserTool from '../tools/Eraser';
+import PenTool from '../tools/Pen';
 import PenToolWidget from './widgets/PenToolWidget';
 import EraserWidget from './widgets/EraserToolWidget';
 import SelectionToolWidget from './widgets/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget from './widgets/BaseWidget';
-import { EraserTool, PenTool } from '../tools/lib';
 
 export const toolbarCSSPrefix = 'toolbar-';
 
@@ -200,7 +201,7 @@ export default class HTMLToolbar {
 			this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
 		}
 
-		const panZoomTool = toolController.getMatchingTools(PanZoom)[0];
+		const panZoomTool = toolController.getMatchingTools(PanZoomTool)[0];
 		if (panZoomTool) {
 			this.addWidget(new HandToolWidget(this.editor, panZoomTool, this.localizationTable));
 		}

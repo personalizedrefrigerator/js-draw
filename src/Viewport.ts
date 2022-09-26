@@ -146,7 +146,8 @@ export class Viewport {
 		return 1/this.getScaleFactor();
 	}
 
-	// Returns the angle of the canvas in radians
+	// Returns the angle of the canvas in radians.
+	// This is the angle by which the canvas is rotated relative to the screen.
 	public getRotationAngle(): number {
 		return this.transform.transformVec3(Vec3.unitX).angle();
 	}

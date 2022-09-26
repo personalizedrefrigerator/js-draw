@@ -11,7 +11,7 @@ import { PasteEvent } from '../types';
 import { Mat33, Rect2, Vec2 } from '../math/lib';
 import BaseTool from './BaseTool';
 import EditorImage from '../EditorImage';
-import SelectionTool from './SelectionTool';
+import SelectionTool from './SelectionTool/SelectionTool';
 import TextTool from './TextTool';
 import Color4 from '../Color4';
 import { TextStyle } from '../components/Text';

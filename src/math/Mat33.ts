@@ -66,6 +66,52 @@ export default class Mat33 {
 	);
 
 	/**
+	 * @returns the vector v for which `M (v.x, v.y, 1)ᵀ = (v.x, v.y, k)ᵀ`, for some k.
+	 *          Returns the zero vector if no such vector exists (letting `M = this`).
+	 */
+	public origin(): Point2 {
+		if (!this.invertable()) {
+			return Vec2.zero;
+		}
+		// Determine the origin, the vector, v, for which
+		//   M (v.x, v.y, 1)ᵀ = (v.x, v.y, k)ᵀ, for some k.
+		// ⇒ M (v.x, v.y, 1)ᵀ - (v.x, v.y, k)ᵀ   = 0
+		// ⇒ M (v.x, v.y, 1)ᵀ - I (v.x, v.y, k)ᵀ = 0
+		// ⇒ M[:,0] v.x + M[:,1] v.y + M[:,2] - (v.x,0,0)ᵀ - (0,v.y,0)ᵀ - (0,0,k)ᵀ = 0
+		// ⇒ (M[0,0] v.x - v.x, M[1,0] v.x, M[2, 0] v.x)ᵀ + (M[0,1] v.y, M[1,1] v.y - v.y, M[2,1] v.y)ᵀ
+		//              + M[:,2] - (0,0,k)ᵀ = 0
+		// ⇒ ((M[0,0] - 1), M[1,0], M[2,0])ᵀ v.x + (M[0,1], (M[1,1] - 1), M[2,1])ᵀ v.y + M[:,2] - (0,0,k)ᵀ = 0
+		// ⇒ ((M[0,0] - 1), M[1,0], M[2,0])ᵀ v.x + (M[0,1], (M[1,1] - 1), M[2,1])ᵀ v.y + M[:,2] = (0,0,k)ᵀ
+		// ⇒ ⎡ M[0,0] - 1,  M[0,1],     M[0,2] ⎤ ⎛ v.x ⎞    ⎛ 0 ⎞
+		//   ⎢ M[1,0],      M[1,1] - 1, M[1,2] ⎥ ⎜ v.y ⎟  = ⎜ 0 ⎟
+		//   ⎣ M[2,0],      M[2,1],     M[2,2] ⎦ ⎝ 1   ⎠    ⎝ k ⎠
+		// ⇒ ⎛ v.x ⎞    ⎡ M[0,0] - 1,  M[0,1],     M[0,2] ⎤⁻¹ ⎛ 0 ⎞
+		//   ⎜ v.y ⎟  = ⎢ M[1,0],      M[1,1] - 1, M[1,2] ⎥   ⎜ 0 ⎟
+		//   ⎝ 1   ⎠    ⎣ M[2,0],      M[2,1],     M[2,2] ⎦   ⎝ k ⎠
+		//             ⎡ M[0,0] - 1,  M[0,1],     M[0,2] ⎤⁻¹
+		// Letting A = ⎢ M[1,0],      M[1,1] - 1, M[1,2] ⎥  ,  we have,
+		//             ⎣ M[2,0],      M[2,1],     M[2,2] ⎦
+		//   ⎛ v.x ⎞    
+		//   ⎜ v.y ⎟ = A[:,0] • 0 + A[:,1] • 0 + A[:,2] • k
+		//   ⎝ 1   ⎠
+		//
+		// So we need only choose k such that v.z = 1:
+		//   A[0,2] k = v.x ∧ A[1,2] k = v.y ∧ A[2,2] k = 1
+		//   ⇒ k = 1 / A[2]
+		const A = this.inverse();
+		const k = 1 / A.c3;
+		const result = Vec2.of(
+			A.c1 * k,
+			A.c2 * k,
+		);
+
+		if (isFinite(k) && isFinite(result.x) && isFinite(result.y)) {
+			return result;
+		}
+		return Vec2.zero;
+	}
+
+	/**
 	 * Either returns the inverse of this, or, if this matrix is singular/uninvertable,
 	 * returns Mat33.identity.
 	 * 
@@ -303,7 +349,21 @@ export default class Mat33 {
 		return result.rightMul(Mat33.translation(center.times(-1)));
 	}
 
-	/** Converts a CSS-form `matrix(a, b, c, d, e, f)` to a Mat33. */
+	/** @see {@link !fromCSSMatrix} */
+	public toCSSMatrix(): string {
+		return `matrix(${this.a1},${this.b1},${this.a2},${this.b2},${this.a3},${this.b3})`;
+	}
+
+	/**
+	 * Converts a CSS-form `matrix(a, b, c, d, e, f)` to a Mat33.
+	 * 
+	 * Note that such a matrix has the form,
+	 * ```
+	 * ⎡ a c e ⎤
+	 * ⎢ b d f ⎥
+	 * ⎣ 0 0 1 ⎦
+	 * ```
+	 */
 	public static fromCSSMatrix(cssString: string): Mat33 {
 		if (cssString === '' || cssString === 'none') {
 			return Mat33.identity;

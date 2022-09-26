@@ -1,5 +1,5 @@
 import Editor from '../../Editor';
-import SelectionTool from '../../tools/SelectionTool';
+import SelectionTool from '../../tools/SelectionTool/SelectionTool';
 import { EditorEventType } from '../../types';
 import { makeDeleteSelectionIcon, makeDuplicateSelectionIcon, makeResizeViewportIcon, makeSelectionIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';

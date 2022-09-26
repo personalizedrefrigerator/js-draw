@@ -1,0 +1,22 @@
+
+.selection-tool-selection-background {
+    background-color: var(--secondary-background-color);
+    opacity: 0.8;
+    overflow: visible;
+}
+
+.selection-tool-handle {
+    border: 1px solid var(--primary-foreground-color);
+    background: var(--primary-background-color);
+    position: absolute;
+    cursor: grab;
+}
+
+.selection-tool-handle.selection-tool-circle {
+    border-radius: 100%;
+}
+
+.overlay.handleOverlay {
+    height: 0;
+    overflow: visible;
+}

@@ -36,9 +36,14 @@ export default class Pointer {
 	) {
 	}
 
-	// Creates a Pointer from a DOM event.
-	public static ofEvent(evt: PointerEvent, isDown: boolean, viewport: Viewport): Pointer {
-		const screenPos = Vec2.of(evt.offsetX, evt.offsetY);
+	// Creates a Pointer from a DOM event. If `relativeTo` is given, (0, 0) in screen coordinates is
+	// considered the top left of `relativeTo`.
+	public static ofEvent(evt: PointerEvent, isDown: boolean, viewport: Viewport, relativeTo?: HTMLElement): Pointer {
+		let screenPos = Vec2.of(evt.clientX, evt.clientY);
+		if (relativeTo) {
+			const bbox = relativeTo.getBoundingClientRect();
+			screenPos = screenPos.minus(Vec2.of(bbox.left, bbox.top));
+		}
 
 		const pointerTypeToDevice: Record<string, PointerDevice> = {
 			'mouse': PointerDevice.PrimaryButtonMouse,

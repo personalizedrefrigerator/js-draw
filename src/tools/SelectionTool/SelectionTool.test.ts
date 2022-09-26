@@ -1,21 +1,21 @@
-import Color4 from '../Color4';
-import Stroke from '../components/Stroke';
-import Editor from '../Editor';
-import EditorImage from '../EditorImage';
-import Path from '../math/Path';
-import { Vec2 } from '../math/Vec2';
-import { InputEvtType } from '../types';
+import Color4 from '../../Color4';
+import Stroke from '../../components/Stroke';
+import Editor from '../../Editor';
+import EditorImage from '../../EditorImage';
+import Path from '../../math/Path';
+import { Vec2 } from '../../math/Vec2';
+import { InputEvtType } from '../../types';
 import SelectionTool from './SelectionTool';
-import createEditor from '../testing/createEditor';
+import createEditor from '../../testing/createEditor';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(SelectionTool)[0];
 };
 
-const createSquareStroke = () => {
+const createSquareStroke = (size: number = 1) => {
 	const testStroke = new Stroke([
-		// A filled unit square
-		Path.fromString('M0,0 L1,0 L1,1 L0,1 Z').toRenderable({ fill: Color4.blue }),
+		// A filled square
+		Path.fromString(`M0,0 L${size},0 L${size},${size} L0,${size} Z`).toRenderable({ fill: Color4.blue }),
 	]);
 	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
@@ -47,7 +47,7 @@ describe('SelectionTool', () => {
 	});
 
 	it('dragging the selected region should move selected items', () => {
-		const { testStroke, addTestStrokeCommand } = createSquareStroke();
+		const { testStroke, addTestStrokeCommand } = createSquareStroke(50);
 		const editor = createEditor();
 		editor.dispatch(addTestStrokeCommand);
 
@@ -62,8 +62,9 @@ describe('SelectionTool', () => {
 		expect(selection).not.toBeNull();
 
 		// Drag the object
-		selection!.handleBackgroundDrag(Vec2.of(5, 5));
-		selection!.finalizeTransform();
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(25, 25));
+		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(30, 30));
 
 		expect(testStroke.getBBox().topLeft).toMatchObject({
 			x: 5,
@@ -79,7 +80,7 @@ describe('SelectionTool', () => {
 	});
 
 	it('moving the selection with a keyboard should move the view to keep the selection in view', () => {
-		const { addTestStrokeCommand } = createSquareStroke();
+		const { addTestStrokeCommand } = createSquareStroke(100);
 		const editor = createEditor();
 		editor.dispatch(addTestStrokeCommand);
 
@@ -97,7 +98,10 @@ describe('SelectionTool', () => {
 			throw new Error('Selection should be non-null.');
 		}
 
-		selection.handleBackgroundDrag(Vec2.of(0, -1000));
+
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(5, 5));
+		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(100, 100));
 		expect(editor.viewport.visibleRect.containsPoint(selection.region.center)).toBe(true);
 	});
 });

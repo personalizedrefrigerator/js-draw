@@ -1,30 +1,28 @@
-import { assertUnreachable } from "../../language/assertions";
-import { Point2, Vec2 } from "../../math/Vec2";
-import { cssPrefix } from "./SelectionTool";
+import { assertUnreachable } from '../../language/assertions';
+import { Point2, Vec2 } from '../../math/Vec2';
+import { cssPrefix } from './SelectionTool';
 import Selection from './Selection';
-import { Rect2 } from "../../lib";
 import Pointer from '../../Pointer';
 
 export enum HandleShape {
 	Circle,
 	Square,
-};
+}
 
-const handleSize = 30;
+export const handleSize = 30;
 
 // `startPoint` is in screen coordinates
 export type DragStartCallback = (startPoint: Point2)=>void;
-export type DragUpdateCallback = (currentPoint: Point2, screenDelta: Vec2)=> void;
+export type DragUpdateCallback = (canvasPoint: Point2)=> void;
 export type DragEndCallback = ()=> void;
 
 export default class SelectionHandle {
 	private element: HTMLElement;
 
 	// Bounding box in screen coordinates.
-	private bbox: Rect2;
 
 	public constructor(
-		private readonly shape: HandleShape,
+		readonly shape: HandleShape,
 		private readonly parentSide: Vec2,
 		private readonly parent: Selection,
 
@@ -49,46 +47,39 @@ export default class SelectionHandle {
 		this.updatePosition();
 	}
 
+	/**
+     * Adds this to `container`, where `conatiner` should be the background/selection
+     * element visible on the screen.
+     */
 	public addTo(container: HTMLElement) {
 		container.appendChild(this.element);
 	}
 
 	public updatePosition() {
-		const parentRect = this.parent.region;
+		const parentRect = this.parent.screenRegion;
 		const size = Vec2.of(handleSize, handleSize);
-		const topLeft = parentRect
-			.topLeft.plus(parentRect.size.scale(this.parentSide))
+		const topLeft = parentRect.size.scale(this.parentSide)
 			// Center
 			.minus(size.times(1/2));
-		this.bbox = Rect2.fromCorners(topLeft, topLeft.plus(size));
 
-		this.element.style.left = `${topLeft.x}px`;
-		this.element.style.top = `${topLeft.y}px`;
-		this.element.style.width = `${this.bbox.width}px`;
-		this.element.style.height = `${this.bbox.height}px`;
+		// Position within the selection box.
+		this.element.style.marginLeft = `${topLeft.x}px`;
+		this.element.style.marginTop = `${topLeft.y}px`;
+		this.element.style.width = `${size.x}px`;
+		this.element.style.height = `${size.y}px`;
 	}
 
-	public contains(screenPoint: Point2): boolean {
-		if (this.shape === HandleShape.Circle) {
-			const handleRadius = handleSize / 2;
-			return this.bbox.center.minus(screenPoint).magnitudeSquared() <= handleRadius ** 2;
-		}
-		else if (this.shape === HandleShape.Square) {
-			return this.bbox.containsPoint(screenPoint);
-		}
-
-		return assertUnreachable(this.shape);
+	/**
+     * @returns `true` if the given `EventTarget` matches this.
+     */
+	public isTarget(target: EventTarget): boolean {
+		return target === this.element;
 	}
 
 	private dragLastPos: Vec2|null = null;
 	public handleDragStart(pointer: Pointer) {
-		if (!this.contains(pointer.screenPos)) {
-			return false;
-		}
-
-		this.onDragStart(pointer.screenPos);
-		this.dragLastPos = pointer.screenPos;
-		return true;
+		this.onDragStart(pointer.canvasPos);
+		this.dragLastPos = pointer.canvasPos;
 	}
 
 	public handleDragUpdate(pointer: Pointer) {
@@ -96,16 +87,13 @@ export default class SelectionHandle {
 			return;
 		}
 
-		const delta = pointer.screenPos.minus(this.dragLastPos);
-		this.onDragUpdate(pointer.screenPos, delta);
-		this.dragLastPos = pointer.screenPos;
+		this.onDragUpdate(pointer.canvasPos);
 	}
 
-	public handleDragEnd(pointer: Pointer) {
+	public handleDragEnd() {
 		if (!this.dragLastPos) {
 			return;
 		}
-		this.handleDragUpdate(pointer);
 		this.onDragEnd();
 	}
 }

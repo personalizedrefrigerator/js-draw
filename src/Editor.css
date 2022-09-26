@@ -1,5 +1,6 @@
 
 @import url('./toolbar/toolbar.css');
+@import url('./tools/SelectionTool/SelectionTool.css');
 
 .imageEditorContainer {
 	/* Deafult colors for the editor */

@@ -10,7 +10,7 @@ import Rect2 from './math/Rect2';
 import Pointer from './Pointer';
 import Color4 from './Color4';
 import Command from './commands/Command';
-import { BaseWidget } from './lib';
+import BaseWidget from './toolbar/widgets/BaseWidget';
 
 
 export interface PointerEvtListener {
