@@ -78,6 +78,26 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
+	private onSelectionUpdated() {
+		// Note that the selection has changed
+		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+			kind: EditorEventType.ToolUpdated,
+			tool: this,
+		});
+
+		const selectedItemCount = this.selectionBox?.getSelectedItemCount() ?? 0;
+		if (selectedItemCount > 0) {
+			this.editor.announceForAccessibility(
+				this.editor.localization.selectedElements(selectedItemCount)
+			);
+			this.zoomToSelection();
+		} else if (this.selectionBox) {
+			this.selectionBox.cancelSelection();
+			this.prevSelectionBox = this.selectionBox;
+			this.selectionBox = null;
+		}
+	}
+
 	private onGestureEnd() {
 		this.lastEvtTarget = null;
 
@@ -85,24 +105,8 @@ export default class SelectionTool extends BaseTool {
 
 		if (!this.selectionBoxHandlingEvt) {
 			// Expand/shrink the selection rectangle, if applicable
-			const hasSelection = this.selectionBox.resolveToObjects();
-
-			// Note that the selection has changed
-			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
-				kind: EditorEventType.ToolUpdated,
-				tool: this,
-			});
-
-			if (hasSelection) {
-				this.editor.announceForAccessibility(
-					this.editor.localization.selectedElements(this.selectionBox.getSelectedItemCount())
-				);
-				this.zoomToSelection();
-			} else {
-				this.selectionBox.cancelSelection();
-				this.prevSelectionBox = this.selectionBox;
-				this.selectionBox = null;
-			}
+			this.selectionBox.resolveToObjects();
+			this.onSelectionUpdated();
 		} else {
 			this.selectionBox.onDragEnd();
 		}
@@ -318,6 +322,7 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		this.selectionBox!.setSelectedObjects(objects, bbox);
+		this.onSelectionUpdated();
 	}
 
 	public clearSelection() {
@@ -325,9 +330,6 @@ export default class SelectionTool extends BaseTool {
 		this.prevSelectionBox = this.selectionBox;
 		this.selectionBox = null;
 
-		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
-			kind: EditorEventType.ToolUpdated,
-			tool: this,
-		});
+		this.onSelectionUpdated();
 	}
 }
