@@ -1,3 +1,11 @@
+# 0.4.0
+ * Moved the selection tool rotate handle to the top, added resize horizontally and resize vertically handles.
+ * Selection-tool-related bug fixes
+   * Reduced increase in file size after rotating/resizing selected objects.
+   * Fix "resize to selection" button disabled when working with selections created by pasting.
+ * Other bug fixes
+   * Fix occasional stroke distortion when saving.
+
 # 0.3.2
  * Embedded PNG/JPEG image loading
  * Copy and paste
