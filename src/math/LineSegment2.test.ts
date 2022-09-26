@@ -12,13 +12,13 @@ describe('Line2', () => {
 	});
 
 	it('y = -2x + 2 and y = 2x - 2 should intersect at (1,0)', () => {
-		// y = -2x + 2
+		// y = -4x + 2
 		const line1 = new LineSegment2(Vec2.of(0, 2), Vec2.of(1, -2));
-		// y = 2x - 2
+		// y = 4x - 2
 		const line2 = new LineSegment2(Vec2.of(0, -2), Vec2.of(1, 2));
 
-		expect(line1.intersection(line2)?.point).objEq(Vec2.of(1, 0));
-		expect(line2.intersection(line1)?.point).objEq(Vec2.of(1, 0));
+		expect(line1.intersection(line2)?.point).objEq(Vec2.of(0.5, 0));
+		expect(line2.intersection(line1)?.point).objEq(Vec2.of(0.5, 0));
 	});
 
 	it('line from (10, 10) to (-100, 10) should intersect with the y-axis at t = 10', () => {
@@ -79,14 +79,14 @@ describe('Line2', () => {
 		expect(line.closestPointTo(Vec2.zero)).objEq(Vec2.of(1, 0));
 	});
 
-	it('Closest point from (-1,2) to segment((1,1) -> (2,4)) should be (1,1)', () => {
+	it('Closest point from (-1,-2) to segment((1,1) -> (2,4)) should be (1,1)', () => {
 		const line = new LineSegment2(Vec2.of(1, 1), Vec2.of(2, 4));
-		expect(line.closestPointTo(Vec2.of(-1, 2))).objEq(Vec2.of(1, 1));
+		expect(line.closestPointTo(Vec2.of(-1, -2))).objEq(Vec2.of(1, 1));
 	});
 
-	it('Closest point from (5,2) to segment((1,1) -> (2,4)) should be (2,4)', () => {
+	it('Closest point from (5,8) to segment((1,1) -> (2,4)) should be (2,4)', () => {
 		const line = new LineSegment2(Vec2.of(1, 1), Vec2.of(2, 4));
-		expect(line.closestPointTo(Vec2.of(5, 2))).objEq(Vec2.of(2, 4));
+		expect(line.closestPointTo(Vec2.of(5, 8))).objEq(Vec2.of(2, 4));
 	});
 
 	it('Should translate when translated by a translation matrix', () => {

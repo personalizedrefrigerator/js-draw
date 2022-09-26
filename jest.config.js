@@ -10,6 +10,10 @@ const config = {
 		'js',
 	],
 
+	testPathIgnorePatterns: [
+		'<rootDir>/dist/', '<rootDir>/node_modules/'
+	],
+
 	// Mocks.
 	// See https://jestjs.io/docs/webpack#handling-static-assets
 	moduleNameMapper: {
