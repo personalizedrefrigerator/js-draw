@@ -19,6 +19,7 @@ const config = {
 	},
 	
 	testEnvironment: 'jsdom',
+	setupFilesAfterEnv: [ '<rootDir>/src/testing/beforeEachFile.ts' ],
 };
 
 module.exports = config;

@@ -1,8 +1,5 @@
 import { Vec2 } from './Vec2';
 import Vec3 from './Vec3';
-import { loadExpectExtensions } from '../testing/loadExpectExtensions';
-
-loadExpectExtensions();
 
 describe('Vec2', () => {
 	it('Magnitude', () => {

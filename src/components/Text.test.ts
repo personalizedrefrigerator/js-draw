@@ -3,9 +3,6 @@ import Mat33 from '../math/Mat33';
 import Rect2 from '../math/Rect2';
 import AbstractComponent from './AbstractComponent';
 import Text, { TextStyle } from './Text';
-import { loadExpectExtensions } from '../testing/loadExpectExtensions';
-
-loadExpectExtensions();
 
 const estimateTextBounds = (text: string, style: TextStyle): Rect2 => {
 	const widthEst = text.length * style.size;

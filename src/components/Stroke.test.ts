@@ -2,11 +2,8 @@ import Color4 from '../Color4';
 import Path from '../math/Path';
 import { Vec2 } from '../math/Vec2';
 import Stroke from './Stroke';
-import { loadExpectExtensions } from '../testing/loadExpectExtensions';
 import createEditor from '../testing/createEditor';
 import Mat33 from '../math/Mat33';
-
-loadExpectExtensions();
 
 describe('Stroke', () => {
 	it('empty stroke should have an empty bounding box', () => {

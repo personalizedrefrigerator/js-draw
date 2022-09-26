@@ -1,10 +1,7 @@
 
 import Rect2 from './Rect2';
 import { Vec2 } from './Vec2';
-import loadExpectExtensions from '../testing/loadExpectExtensions';
 import Mat33 from './Mat33';
-
-loadExpectExtensions();
 
 describe('Rect2', () => {
 	it('width, height should always be positive', () => {

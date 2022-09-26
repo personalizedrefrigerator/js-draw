@@ -1,9 +1,7 @@
 import Mat33 from './Mat33';
 import { Vec2 } from './Vec2';
-import { loadExpectExtensions } from '../testing/loadExpectExtensions';
 import Vec3 from './Vec3';
 
-loadExpectExtensions();
 
 describe('Mat33 tests', () => {
 	it('equality', () => {

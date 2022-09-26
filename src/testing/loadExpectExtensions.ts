@@ -22,19 +22,4 @@ export const loadExpectExtensions = () => {
 	});
 };
 
-// Type declarations for custom matchers
-export interface CustomMatchers<R = unknown> {
-	objEq(expected: {
-		eq: (other: any, ...args: any)=> boolean;
-	}, ...opts: any): R;
-}
-
-declare global {
-	export namespace jest {
-		interface Expect extends CustomMatchers {}
-		interface Matchers<R> extends CustomMatchers<R> {}
-		interface AsyncAsymmetricMatchers extends CustomMatchers {}
-	}
-}
-
 export default loadExpectExtensions;

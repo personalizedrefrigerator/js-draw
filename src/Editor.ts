@@ -797,6 +797,8 @@ export class Editor {
 	public sendPenEvent(
 		eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
 		point: Point2,
+
+		// @deprecated
 		allPointers?: Pointer[]
 	) {
 		const mainPointer = Pointer.ofCanvasPoint(

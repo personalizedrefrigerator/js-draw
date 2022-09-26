@@ -1,6 +1,9 @@
 *.bundle.js
 docs/
 dist/docs/
+dist/**/*.test.d.ts
+dist/**/*.test.js
+dist/testing/
 dist-test/
 .vscode/
 *.swp

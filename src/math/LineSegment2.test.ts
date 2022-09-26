@@ -1,9 +1,7 @@
 import LineSegment2 from './LineSegment2';
-import { loadExpectExtensions } from '../testing/loadExpectExtensions';
 import { Vec2 } from './Vec2';
 import Mat33 from './Mat33';
 
-loadExpectExtensions();
 
 describe('Line2', () => {
 	it('x and y axes should intersect at (0, 0)', () => {

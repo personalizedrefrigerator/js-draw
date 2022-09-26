@@ -1,8 +1,5 @@
 
-import { loadExpectExtensions } from '../testing/loadExpectExtensions';
 import Vec3 from './Vec3';
-
-loadExpectExtensions();
 
 describe('Vec3', () => {
 	it('.xy should contain the x and y components', () => {

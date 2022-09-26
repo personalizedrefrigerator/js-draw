@@ -374,7 +374,6 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			const fuzzEq = 1e-10;
 			const deltaTime = newPoint.time - this.lastPoint.time;
 			if (newPoint.pos.eq(this.lastPoint.pos, fuzzEq) || deltaTime === 0) {
-				console.warn('Discarding identical point');
 				return;
 			} else if (isNaN(newPoint.pos.magnitude())) {
 				console.warn('Discarding NaN point.', newPoint);
