@@ -2,19 +2,20 @@ import Editor from '../../Editor';
 import Mat33 from '../../math/Mat33';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
+import Viewport from '../../Viewport';
 import Selection from './Selection';
 import { ResizeMode } from './types';
 
 export class DragTransformer {
 	private dragStartPoint: Point2;
-	public constructor(_editor: Editor, private selection: Selection) { }
+	public constructor(private readonly editor: Editor, private selection: Selection) { }
 
 	public onDragStart(startPoint: Vec3) {
 		this.selection.setTransform(Mat33.identity);
 		this.dragStartPoint = startPoint;
 	}
 	public onDragUpdate(canvasPos: Vec3) {
-		const delta = canvasPos.minus(this.dragStartPoint);
+		const delta = this.editor.viewport.roundPoint(canvasPos.minus(this.dragStartPoint));
 		this.selection.setTransform(Mat33.translation(
 			delta
 		));
@@ -27,7 +28,7 @@ export class DragTransformer {
 export class ResizeTransformer {
 	private mode: ResizeMode = ResizeMode.Both;
 	private dragStartPoint: Point2;
-	public constructor(_editor: Editor, private selection: Selection) { }
+	public constructor(private readonly editor: Editor, private selection: Selection) { }
 
 	public onDragStart(startPoint: Vec3, mode: ResizeMode) {
 		this.selection.setTransform(Mat33.identity);
@@ -57,10 +58,13 @@ export class ResizeTransformer {
 			scale = Vec2.of(newWidth / origWidth, newWidth / origWidth);
 		}
 
-		// TODO: Round scale as a scale factor.
+		// Round: If this isn't done, scaling can create numbers with long decimal representations.
+		//    long decimal representations => large file sizes.
+		scale = scale.map(component => Viewport.roundScaleRatio(component));
 
 		if (scale.x > 0 && scale.y > 0) {
-			this.selection.setTransform(Mat33.scaling2D(scale, this.selection.preTransformRegion.topLeft));
+			const origin = this.editor.viewport.roundPoint(this.selection.preTransformRegion.topLeft);
+			this.selection.setTransform(Mat33.scaling2D(scale, origin));
 		}
 	}
 	public onDragEnd() {
@@ -70,12 +74,18 @@ export class ResizeTransformer {
 
 export class RotateTransformer {
 	private startAngle: number = 0;
-	public constructor(_editor: Editor, private selection: Selection) { }
+	public constructor(private readonly editor: Editor, private selection: Selection) { }
 
 	private getAngle(canvasPoint: Point2) {
 		const selectionCenter = this.selection.preTransformRegion.center;
 		const offset = canvasPoint.minus(selectionCenter);
 		return offset.angle();
+	}
+
+	private roundAngle(angle: number) {
+		// Round angles to the nearest 16th of a turn
+		const roundingFactor = 16 / 2 / Math.PI;
+		return Math.round(angle * roundingFactor) / roundingFactor;
 	}
 
 	public onDragStart(startPoint: Vec3) {
@@ -84,11 +94,25 @@ export class RotateTransformer {
 	}
 
 	public onDragUpdate(canvasPos: Vec3) {
-		const targetRotation = this.getAngle(canvasPos) - this.startAngle;
+		const targetRotation = this.roundAngle(this.getAngle(canvasPos) - this.startAngle);
 
 		// Transform in canvas space
-		const canvasSelCenter = this.selection.preTransformRegion.center;
-		this.selection.setTransform(Mat33.zRotation(targetRotation, canvasSelCenter));
+		const canvasSelCenter = this.editor.viewport.roundPoint(this.selection.preTransformRegion.center);
+		const unrounded = Mat33.zRotation(targetRotation);
+
+		const round = (entry: number) => Viewport.roundScaleRatio(entry);
+		const roundedRotationTransform = new Mat33(
+			round(unrounded.a1), round(unrounded.a2), 0,
+			round(unrounded.b1), round(unrounded.b2), 0,
+			0, 0, 1
+		);
+
+		const fullRoundedTransform = Mat33
+			.translation(canvasSelCenter)
+			.rightMul(roundedRotationTransform)
+			.rightMul(Mat33.translation(canvasSelCenter.times(-1)));
+
+		this.selection.setTransform(fullRoundedTransform);
 	}
 	public onDragEnd() {
 		this.selection.finalizeTransform();
