@@ -40,8 +40,8 @@ export const cleanUpNumber = (text: string) => {
 export const toRoundedString = (num: number): string => {
 	// Try to remove rounding errors. If the number ends in at least three/four zeroes
 	// (or nines) just one or two digits, it's probably a rounding error.
-	const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d{1,3}$/;
-	const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,})\d{1,3}$/;
+	const fixRoundingUpExp = /^([-]?\d*\.\d{3,})0{4,}\d{1,4}$/;
+	const hasRoundingDownExp = /^([-]?)(\d*)\.(\d{3,}9{4,})\d{1,4}$/;
 
 	let text = num.toString(10);
 	if (text.indexOf('.') === -1) {
