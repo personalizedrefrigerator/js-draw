@@ -1,3 +1,8 @@
+# 0.4.1 (unreleased)
+ * Bug fixes
+   * Fix in-progress strokes occasionally flickering and disappearing.
+     * This was caused by a division-by-zero error.
+
 # 0.4.0
  * Moved the selection tool rotate handle to the top, added resize horizontally and resize vertically handles.
  * Selection-tool-related bug fixes
