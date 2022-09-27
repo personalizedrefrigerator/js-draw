@@ -10,7 +10,6 @@ permissions:
   contents: read
   pull-requests: write
   checks: write
-  pull-requests-reason: Commenting on pull requests
 
 jobs:
   build_and_preview:
