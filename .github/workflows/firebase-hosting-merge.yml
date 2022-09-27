@@ -6,6 +6,13 @@ name: Deploy to Firebase Hosting on merge
   push:
     branches:
       - 'main'
+
+# See https://github.com/FirebaseExtended/action-hosting-deploy/issues/198
+permissions:
+  contents: read
+  pull-requests: write
+  pull-requests-reason: Commenting on pull requests
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
