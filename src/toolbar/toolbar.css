@@ -34,7 +34,8 @@
 }
 
 .toolbar-button.disabled {
-	filter: opacity(0.8) saturate(0.1);
+	filter: opacity(0.5) sepia(0.2);
+	cursor: unset;
 }
 
 .toolbar-button, .toolbar-root button {
@@ -75,7 +76,7 @@
 	width: 6em;
 }
 
-.toolbar-button:hover, .toolbar-root button:not(:disabled):hover {
+.toolbar-button:not(.disabled):hover, .toolbar-root button:not(:disabled):hover {
 	box-shadow: 0px 2px 4px var(--primary-shadow-color);
 }
 
