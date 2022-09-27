@@ -18,7 +18,8 @@ export default class Stroke extends AbstractComponent {
 	public constructor(parts: RenderablePathSpec[]) {
 		super('stroke');
 
-		this.parts = parts.map((section): StrokePart => {
+		this.parts = [];
+		for (const section of parts) {
 			const path = Path.fromRenderable(section);
 			const pathBBox = this.bboxForPart(path.bbox, section.style);
 
@@ -28,15 +29,15 @@ export default class Stroke extends AbstractComponent {
 				this.contentBBox = this.contentBBox.union(pathBBox);
 			}
 
-			return {
+			this.parts.push({
 				path,
 
 				// To implement RenderablePathSpec
 				startPoint: path.startPoint,
 				style: section.style,
 				commands: path.parts,
-			};
-		});
+			});
+		}
 		this.contentBBox ??= Rect2.empty;
 	}
 
@@ -104,9 +105,15 @@ export default class Stroke extends AbstractComponent {
 	}
 
 	public getPath() {
-		return this.parts.reduce((accumulator: Path|null, current: StrokePart) => {
-			return accumulator?.union(current.path) ?? current.path;
-		}, null) ?? Path.empty;
+		let result: Path|null = null;
+		for (const part of this.parts) {
+			if (result) {
+				result = result.union(part.path);
+			} else {
+				result ??= part.path;
+			}
+		}
+		return result ?? Path.empty;
 	}
 
 	public description(localization: ImageComponentLocalization): string {

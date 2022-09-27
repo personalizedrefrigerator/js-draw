@@ -173,7 +173,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	}
 
 	public build(): Stroke {
-		if (this.lastPoint) {
+		if (this.lastPoint && (this.lowerSegments.length === 0 || this.approxCurrentCurveLength() > this.curveStartWidth * 2)) {
 			this.finalizeCurrentCurve();
 		}
 		return this.previewStroke()!;
@@ -187,6 +187,19 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		}
 
 		return Viewport.roundPoint(point, minFit);
+	}
+
+	// Returns the distance between the start, control, and end points of the curve.
+	private approxCurrentCurveLength() {
+		if (!this.currentCurve) {
+			return 0;
+		}
+		const startPt = Vec2.ofXY(this.currentCurve.points[0]);
+		const controlPt = Vec2.ofXY(this.currentCurve.points[1]);
+		const endPt = Vec2.ofXY(this.currentCurve.points[2]);
+		const toControlDist = startPt.minus(controlPt).length();
+		const toEndDist = endPt.minus(controlPt).length();
+		return toControlDist + toEndDist;
 	}
 
 	private finalizeCurrentCurve() {
@@ -305,39 +318,22 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		}
 
 		const halfVecT = projectionT;
-		let halfVec = Vec2.ofXY(this.currentCurve.normal(halfVecT))
+		const halfVec = Vec2.ofXY(this.currentCurve.normal(halfVecT))
 			.normalized().times(
 				this.curveStartWidth / 2 * halfVecT
 				+ this.curveEndWidth / 2 * (1 - halfVecT)
 			);
 
-		// Computes a boundary curve. [direction] should be either +1 or -1 (determines the side
-		// of the center curve to place the boundary).
-		const computeBoundaryCurve = (direction: number, halfVec: Vec2) => {
-			return new Bezier(
-				startPt.plus(startVec.times(direction)),
-				controlPoint.plus(halfVec.times(direction)),
-				endPt.plus(endVec.times(direction)),
-			);
-		};
-
-		const boundariesIntersect = () => {
-			const upperBoundary = computeBoundaryCurve(1, halfVec);
-			const lowerBoundary = computeBoundaryCurve(-1, halfVec);
-			return upperBoundary.intersects(lowerBoundary).length > 0;
-		};
-
-		// If the boundaries have intersections, increasing the half vector's length could fix this.
-		if (boundariesIntersect()) {
-			halfVec = halfVec.times(1.1);
-		}
-
 		// Each starts at startPt ± startVec
+		const lowerCurveControlPoint = this.roundPoint(controlPoint.plus(halfVec));
+		const lowerCurveEndPoint = this.roundPoint(endPt.plus(endVec));
+		const upperCurveControlPoint = this.roundPoint(controlPoint.minus(halfVec));
+		const upperCurveStartPoint = this.roundPoint(endPt.minus(endVec));
 
 		const lowerCurve: QuadraticBezierPathCommand = {
 			kind: PathCommandType.QuadraticBezierTo,
-			controlPoint: this.roundPoint(controlPoint.plus(halfVec)),
-			endPoint: this.roundPoint(endPt.plus(endVec)),
+			controlPoint: lowerCurveControlPoint,
+			endPoint: lowerCurveEndPoint,
 		};
 
 		// From the end of the upperCurve to the start of the lowerCurve:
@@ -349,12 +345,12 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		// From the end of lowerCurve to the start of upperCurve:
 		const lowerToUpperConnector: LinePathCommand = {
 			kind: PathCommandType.LineTo,
-			point: this.roundPoint(endPt.minus(endVec))
+			point: upperCurveStartPoint,
 		};
 
 		const upperCurve: QuadraticBezierPathCommand = {
 			kind: PathCommandType.QuadraticBezierTo,
-			controlPoint: this.roundPoint(controlPoint.minus(halfVec)),
+			controlPoint: upperCurveControlPoint,
 			endPoint: this.roundPoint(startPt.minus(startVec)),
 		};
 
@@ -430,7 +426,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		let exitingVec = this.computeExitingVec();
 
 		// Find the intersection between the entering vector and the exiting vector
-		const maxRelativeLength = 2;
+		const maxRelativeLength = 3;
 		const segmentStart = this.buffer[0];
 		const segmentEnd = newPoint.pos;
 		const startEndDist = segmentEnd.minus(segmentStart).magnitude();
@@ -501,8 +497,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			return true;
 		};
 
-		const approxCurveLen = controlPoint.minus(segmentStart).magnitude() + segmentEnd.minus(controlPoint).magnitude();
-		if (this.buffer.length > 3 && approxCurveLen > this.curveEndWidth / 3) {
+		if (this.buffer.length > 3 && this.approxCurrentCurveLength() > this.curveStartWidth) {
 			if (!curveMatchesPoints(this.currentCurve)) {
 				// Use a curve that better fits the points
 				this.currentCurve = prevCurve;

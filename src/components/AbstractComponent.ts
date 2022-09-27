@@ -206,8 +206,10 @@ export default abstract class AbstractComponent {
 
 	public abstract description(localizationTable: ImageComponentLocalization): string;
 
+	// Component-specific implementation of {@link clone}.
 	protected abstract createClone(): AbstractComponent;
 
+	// Returns a copy of this component.
 	public clone() {
 		const clone = this.createClone();
 
