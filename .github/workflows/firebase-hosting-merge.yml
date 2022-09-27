@@ -8,10 +8,9 @@ name: Deploy to Firebase Hosting on merge
       - 'main'
 
 # See https://github.com/FirebaseExtended/action-hosting-deploy/issues/198
-# and https://github.com/FirebaseExtended/action-hosting-deploy/issues/108#issuecomment-1036024111
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read write
   pull-requests-reason: Commenting on pull requests
 
 jobs:

@@ -8,7 +8,7 @@ name: Deploy to Firebase Hosting on PR
 # and https://github.com/FirebaseExtended/action-hosting-deploy/issues/108#issuecomment-1036024111
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read write
   checks: write
   checks-reason: Watching pull requests for pushes
   pull-requests-reason: Commenting on pull requests
