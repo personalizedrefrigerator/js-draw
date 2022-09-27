@@ -16,7 +16,7 @@
 		"js-draw": "../../"
 	},
 	"devDependencies": {
-		"@types/jest": "^28.1.7",
+		"@types/jest": "^29.0.3",
 		"@types/jsdom": "^20.0.0",
 		"@types/node": "^18.7.9",
 		"css-loader": "^6.7.1",
