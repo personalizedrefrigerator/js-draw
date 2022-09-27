@@ -10,7 +10,6 @@ permissions:
   contents: read
   pull-requests: write
   checks: write
-  checks-reason: Watching pull requests for pushes
   pull-requests-reason: Commenting on pull requests
 
 jobs:
