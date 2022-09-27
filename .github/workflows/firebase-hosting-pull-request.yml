@@ -3,6 +3,13 @@
 
 name: Deploy to Firebase Hosting on PR
 'on': pull_request
+
+# See https://github.com/FirebaseExtended/action-hosting-deploy/issues/198
+permissions:
+  contents: read
+  pull-requests: write
+  pull-requests-reason: Commenting on pull requests
+
 jobs:
   build_and_preview:
     if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
