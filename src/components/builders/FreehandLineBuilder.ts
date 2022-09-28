@@ -426,7 +426,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		let exitingVec = this.computeExitingVec();
 
 		// Find the intersection between the entering vector and the exiting vector
-		const maxRelativeLength = 3;
+		const maxRelativeLength = 2;
 		const segmentStart = this.buffer[0];
 		const segmentEnd = newPoint.pos;
 		const startEndDist = segmentEnd.minus(segmentStart).magnitude();

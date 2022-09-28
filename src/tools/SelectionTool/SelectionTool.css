@@ -1,7 +1,7 @@
 
 .selection-tool-selection-background {
     background-color: var(--secondary-background-color);
-    opacity: 0.8;
+    opacity: 0.5;
     overflow: visible;
 }
 
