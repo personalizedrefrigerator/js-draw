@@ -5,7 +5,7 @@ import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../../
 import { ComponentBuilderFactory } from '../../components/builders/types';
 import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
-import { EditorEventType } from '../../types';
+import { EditorEventType, KeyPressEvent } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeIconFromFactory, makePenIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
@@ -164,5 +164,22 @@ export default class PenToolWidget extends BaseToolWidget {
 		container.replaceChildren(colorRow, thicknessRow, objectTypeRow);
 		dropdown.replaceChildren(container);
 		return true;
+	}
+
+	protected onKeyPress(event: KeyPressEvent): boolean {
+		if (!this.isSelected()) {
+			return false;
+		}
+
+		// Map alt+0-9 to different pen types.
+		if (/^[0-9]$/.exec(event.key) && event.ctrlKey) {
+			const penTypeIdx = parseInt(event.key) - 1;
+			if (penTypeIdx >= 0 && penTypeIdx < this.penTypes.length) {
+				this.tool.setStrokeFactory(this.penTypes[penTypeIdx].factory);
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

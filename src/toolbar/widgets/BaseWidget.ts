@@ -1,5 +1,6 @@
 import Editor from '../../Editor';
-import { EditorEventType, InputEvtType } from '../../types';
+import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
+import { EditorEventType, InputEvtType, KeyPressEvent } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { makeDropdownIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
@@ -33,6 +34,14 @@ export default abstract class BaseWidget {
 		this.label = document.createElement('label');
 		this.button.setAttribute('role', 'button');
 		this.button.tabIndex = 0;
+
+		const toolbarShortcutHandlers = this.editor.toolController.getMatchingTools(ToolbarShortcutHandler);
+
+		// If the onKeyPress function has been extended and the editor is configured to send keypress events to
+		// toolbar widgets,
+		if (toolbarShortcutHandlers.length > 0 && this.onKeyPress !== BaseWidget.prototype.onKeyPress) {
+			toolbarShortcutHandlers[0].registerListener(event => this.onKeyPress(event));
+		}
 	}
 
 	protected abstract getTitle(): string;
@@ -70,6 +79,7 @@ export default abstract class BaseWidget {
 					kind: InputEvtType.KeyPressEvent,
 					key: evt.key,
 					ctrlKey: evt.ctrlKey,
+					altKey: evt.altKey,
 				});
 			}
 		};
@@ -83,6 +93,7 @@ export default abstract class BaseWidget {
 				kind: InputEvtType.KeyUpEvent,
 				key: evt.key,
 				ctrlKey: evt.ctrlKey,
+				altKey: evt.altKey,
 			});
 		};
 
@@ -91,6 +102,13 @@ export default abstract class BaseWidget {
 				this.handleClick();
 			}
 		};
+	}
+
+	// Add a listener that is triggered when a key is pressed.
+	// Listeners will fire regardless of whether this widget is selected and require that
+	// {@link lib!Editor.toolController} to have an enabled {@link lib!ToolbarShortcutHandler} tool.
+	protected onKeyPress(_event: KeyPressEvent): boolean {
+		return false;
 	}
 
 	protected abstract handleClick(): void;

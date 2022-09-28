@@ -13,6 +13,7 @@ import TextTool from './TextTool';
 import PipetteTool from './PipetteTool';
 import ToolSwitcherShortcut from './ToolSwitcherShortcut';
 import PasteHandler from './PasteHandler';
+import ToolbarShortcutHandler from './ToolbarShortcutHandler';
 
 export default class ToolController {
 	private tools: BaseTool[];
@@ -45,6 +46,7 @@ export default class ToolController {
 			...primaryTools,
 			keyboardPanZoomTool,
 			new UndoRedoShortcut(editor),
+			new ToolbarShortcutHandler(editor),
 			new ToolSwitcherShortcut(editor),
 			new PasteHandler(editor),
 		];

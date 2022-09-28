@@ -1,3 +1,11 @@
+# 0.5.0
+ * Increase contrast between selection box/background
+ * Keyboard shortcuts
+   * `Ctrl+1` through `Ctrl+9`: Switch pen drawing mode.
+     * For this to work, the `ToolbarShortcutHandler` must be loaded (and the toolbar must also be loaded).
+ * Bug fixes
+   * Fix text shifting away from strokes on paste.
+
 # 0.4.1
  * Bug fixes
    * Fix in-progress strokes occasionally flickering and disappearing.

@@ -586,6 +586,7 @@ export class Editor {
 				kind: InputEvtType.KeyPressEvent,
 				key: evt.key,
 				ctrlKey: evt.ctrlKey,
+				altKey: evt.altKey,
 			})) {
 				evt.preventDefault();
 			} else if (evt.key === 'Escape') {
@@ -598,6 +599,7 @@ export class Editor {
 				kind: InputEvtType.KeyUpEvent,
 				key: evt.key,
 				ctrlKey: evt.ctrlKey,
+				altKey: evt.altKey,
 			})) {
 				evt.preventDefault();
 			}
@@ -783,12 +785,14 @@ export class Editor {
 	public sendKeyboardEvent(
 		eventType: InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent,
 		key: string,
-		ctrlKey: boolean = false
+		ctrlKey: boolean = false,
+		altKey: boolean = false,
 	) {
 		this.toolController.dispatchInputEvent({
 			kind: eventType,
 			key,
-			ctrlKey
+			ctrlKey,
+			altKey,
 		});
 	}
 

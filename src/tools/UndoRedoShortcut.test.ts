@@ -19,6 +19,7 @@ describe('UndoRedoShortcut', () => {
 		editor.toolController.dispatchInputEvent({
 			kind: InputEvtType.KeyPressEvent,
 			ctrlKey: true,
+			altKey: false,
 			key: 'z',
 		});
 		
@@ -35,6 +36,7 @@ describe('UndoRedoShortcut', () => {
 		editor.toolController.dispatchInputEvent({
 			kind: InputEvtType.KeyPressEvent,
 			ctrlKey: true,
+			altKey: false,
 			key: 'z',
 		});
 
@@ -44,6 +46,7 @@ describe('UndoRedoShortcut', () => {
 		editor.toolController.dispatchInputEvent({
 			kind: InputEvtType.KeyPressEvent,
 			ctrlKey: true,
+			altKey: false,
 			key: 'Z',
 		});
 

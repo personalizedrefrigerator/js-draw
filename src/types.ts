@@ -52,14 +52,25 @@ export interface WheelEvt {
 
 export interface KeyPressEvent {
 	readonly kind: InputEvtType.KeyPressEvent;
+
+	// key, as given by an HTML `KeyboardEvent`
 	readonly key: string;
-	readonly ctrlKey: boolean;
+
+	// If `ctrlKey` is undefined, that is equivalent to `ctrlKey = false`.
+	readonly ctrlKey: boolean|undefined;
+
+	// If falsey, the `alt` key is not pressed.
+	readonly altKey: boolean|undefined;
 }
 
 export interface KeyUpEvent {
 	readonly kind: InputEvtType.KeyUpEvent;
 	readonly key: string;
-	readonly ctrlKey: boolean;
+
+	// As in `KeyPressEvent, if `ctrlKey` is undefined, that is equivalent to
+	// `ctrlKey = false`.
+	readonly ctrlKey: boolean|undefined;
+	readonly altKey: boolean|undefined;
 }
 
 export interface CopyEvent {
@@ -99,12 +110,6 @@ export type PointerEvt = PointerDownEvt | PointerMoveEvt | PointerUpEvt;
 export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt | CopyEvent | PasteEvent;
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
-
-
-
-
-
-
 
 
 export enum EditorEventType {
