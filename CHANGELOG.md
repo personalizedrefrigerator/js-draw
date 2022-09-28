@@ -1,4 +1,4 @@
-# 0.4.1 (unreleased)
+# 0.4.1
  * Bug fixes
    * Fix in-progress strokes occasionally flickering and disappearing.
      * This was caused by a division-by-zero error.
