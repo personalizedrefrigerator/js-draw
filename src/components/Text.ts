@@ -135,7 +135,7 @@ export default class Text extends AbstractComponent {
 		return new Text(this.textObjects, this.transform, this.style);
 	}
 
-	private getText() {
+	public getText() {
 		const result: string[] = [];
 
 		for (const textObject of this.textObjects) {
@@ -146,7 +146,7 @@ export default class Text extends AbstractComponent {
 			}
 		}
 
-		return result.join(' ');
+		return result.join('\n');
 	}
 
 	public description(localizationTable: ImageComponentLocalization): string {

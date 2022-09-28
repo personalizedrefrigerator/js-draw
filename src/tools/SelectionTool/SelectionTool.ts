@@ -12,6 +12,7 @@ import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
+import TextComponent from '../../components/Text';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -272,11 +273,19 @@ export default class SelectionTool extends BaseTool {
 		const sanitize = true;
 		const renderer = new SVGRenderer(exportElem, exportViewport, sanitize);
 
+		const text: string[] = [];
 		for (const elem of selectedElems) {
 			elem.render(renderer);
+
+			if (elem instanceof TextComponent) {
+				text.push(elem.getText());
+			}
 		}
 
 		event.setData('image/svg+xml', exportElem.outerHTML);
+		if (text.length > 0) {
+			event.setData('text/plain', text.join('\n'));
+		}
 		return true;
 	}
 

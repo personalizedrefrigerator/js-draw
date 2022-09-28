@@ -2,6 +2,8 @@
  * Bug fixes
    * Fix in-progress strokes occasionally flickering and disappearing.
      * This was caused by a division-by-zero error.
+   * Increase contrast between disabled and enabled buttons.
+   * Copy selected text objects as text.
 
 # 0.4.0
  * Moved the selection tool rotate handle to the top, added resize horizontally and resize vertically handles.
