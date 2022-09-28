@@ -88,7 +88,7 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	public drawPath(pathSpec: RenderablePathSpec) {
 		const style = pathSpec.style;
-		const path = Path.fromRenderable(pathSpec);
+		const path = Path.fromRenderable(pathSpec).transformedBy(this.getCanvasToScreenTransform());
 
 		// Try to extend the previous path, if possible
 		if (!style.fill.eq(this.lastPathStyle?.fill) || this.lastPathString.length === 0) {
