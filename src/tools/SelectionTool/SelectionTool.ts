@@ -150,6 +150,12 @@ export default class SelectionTool extends BaseTool {
 		'i', 'I', 'o', 'O',
 	];
 	public onKeyPress(event: KeyPressEvent): boolean {
+		// Duplicate the selection.
+		if (this.selectionBox && event.key === 'd' && event.ctrlKey) {
+			this.editor.dispatch(this.selectionBox.duplicateSelectedObjects());
+			return true;
+		}
+
 		let rotationSteps = 0;
 		let xTranslateSteps = 0;
 		let yTranslateSteps = 0;
