@@ -415,8 +415,8 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 		let enteringVec = this.lastExitingVec;
 		if (!enteringVec) {
-			let sampleIdx = Math.ceil(this.buffer.length / 3);
-			if (sampleIdx === 0) {
+			let sampleIdx = Math.ceil(this.buffer.length / 2);
+			if (sampleIdx === 0 || sampleIdx >= this.buffer.length) {
 				sampleIdx = this.buffer.length - 1;
 			}
 
