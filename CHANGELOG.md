@@ -6,7 +6,7 @@
    * `ctrl+a` selects everything (when the selection tool is enabled)
  * Panning tool: Toggle all device panning by clicking on the hand button.
  * `HandToolWidget` now expects, but does not require, a primary hand tool to work properly. See `ToolController#addPrimaryTool`.
- * Breaiking changes:
+ * **Breaiking changes:**
    * Icons are no longer accessible through `import {makeFooIcon} from '...'`. Use `editor.icons.makeFooIcon` instead.
 
 # 0.5.0
