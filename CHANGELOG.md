@@ -1,3 +1,9 @@
+# 0.6.0 (unreleased)
+ * Selection tool: Shift+click extends a selection, `ctrl+d` duplicates a selected object.
+ * Panning tool: Toggle all device panning by clicking on the hand button.
+ * Breaking changes:
+   * `HandToolWidget` now expects, but does not require, a primary hand tool to work properly. See `ToolController#addPrimaryTool`.
+
 # 0.5.0
  * Increase contrast between selection box/background
  * Keyboard shortcuts

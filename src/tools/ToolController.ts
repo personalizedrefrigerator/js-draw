@@ -39,6 +39,7 @@ export default class ToolController {
 			new Eraser(editor, localization.eraserTool),
 			new SelectionTool(editor, localization.selectionTool),
 			new TextTool(editor, localization.textTool, localization),
+			new PanZoom(editor, PanZoomMode.SinglePointerGestures, localization.anyDevicePanning)
 		];
 		this.tools = [
 			new PipetteTool(editor, localization.pipetteTool),

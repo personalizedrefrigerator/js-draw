@@ -2,7 +2,6 @@
 
 export interface ToolbarLocalization {
 	fontLabel: string;
-	anyDevicePanning: string;
 	touchPanning: string;
 	outlinedRectanglePen: string;
 	filledRectanglePen: string;
@@ -54,7 +53,6 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 
 	touchPanning: 'Touchscreen panning',
-	anyDevicePanning: 'Any device panning',
 
 	freehandPen: 'Freehand',
 	arrowPen: 'Arrow',

@@ -15,6 +15,8 @@ export interface ToolLocalization {
 	changeTool: string;
 	pasteHandler: string;
 
+	anyDevicePanning: string;
+
 	copied: (count: number, description: string) => string;
 	pasted: (count: number, description: string) => string;
 
@@ -37,6 +39,8 @@ export const defaultToolLocalization: ToolLocalization = {
 	enterTextToInsert: 'Text to insert',
 	changeTool: 'Change tool',
 	pasteHandler: 'Copy paste handler',
+
+	anyDevicePanning: 'Any device panning',
 
 	copied: (count: number, description: string) => `Copied ${count} ${description}`,
 	pasted: (count: number, description: string) => `Pasted ${count} ${description}`,

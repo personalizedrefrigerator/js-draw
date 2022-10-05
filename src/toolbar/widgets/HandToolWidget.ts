@@ -1,10 +1,11 @@
 import Editor from '../../Editor';
 import Mat33 from '../../math/Mat33';
 import PanZoom, { PanZoomMode } from '../../tools/PanZoom';
+import ToolController from '../../tools/ToolController';
 import { EditorEventType } from '../../types';
 import Viewport from '../../Viewport';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
-import { makeAllDevicePanningIcon, makeHandToolIcon, makeTouchPanningIcon, makeZoomIcon } from '../icons';
+import { makeHandToolIcon, makeTouchPanningIcon, makeZoomIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget from './BaseWidget';
@@ -149,16 +150,35 @@ class HandModeWidget extends BaseWidget {
 
 export default class HandToolWidget extends BaseToolWidget {
 	private touchPanningWidget: HandModeWidget;
+	private allowTogglingBaseTool: boolean;
+	
 	public constructor(
-		editor: Editor, protected tool: PanZoom, localizationTable: ToolbarLocalization
-	) {
-		super(editor, tool, localizationTable);
-		this.container.classList.add('dropdownShowable');
+		editor: Editor,
 
+		// Pan zoom tool that overrides all other tools (enabling this tool for a device
+		// causes that device to pan/zoom instead of interact with the primary tools)
+		protected overridePanZoomTool: PanZoom,
+
+		localizationTable: ToolbarLocalization,
+	) {
+		const primaryHandTool = HandToolWidget.getPrimaryHandTool(editor.toolController);
+		const tool = primaryHandTool ?? overridePanZoomTool;
+		super(editor, tool, localizationTable);
+
+		// Only allow toggling a hand tool if we're using the primary hand tool and not the override
+		// hand tool for this button.
+		this.allowTogglingBaseTool = primaryHandTool !== null;
+
+		// Allow showing/hiding the dropdown, even if `overridePanZoomTool` isn't enabled.
+		if (!this.allowTogglingBaseTool) {
+			this.container.classList.add('dropdownShowable');
+		}
+
+		// Controls for the overriding hand tool.
 		this.touchPanningWidget = new HandModeWidget(
 			editor, localizationTable,
 
-			tool, PanZoomMode.OneFingerTouchGestures,
+			overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
 			makeTouchPanningIcon,
 
 			localizationTable.touchPanning
@@ -166,18 +186,14 @@ export default class HandToolWidget extends BaseToolWidget {
 
 		this.addSubWidget(this.touchPanningWidget);
 		this.addSubWidget(
-			new HandModeWidget(
-				editor, localizationTable,
-
-				tool, PanZoomMode.SinglePointerGestures,
-				makeAllDevicePanningIcon,
-
-				localizationTable.anyDevicePanning
-			)
-		);
-		this.addSubWidget(
 			new ZoomWidget(editor, localizationTable)
 		);
+	}
+
+	private static getPrimaryHandTool(toolController: ToolController): PanZoom|null {
+		const primaryPanZoomToolList = toolController.getPrimaryTools().filter(tool => tool instanceof PanZoom);
+		const primaryPanZoomTool = primaryPanZoomToolList[0];
+		return primaryPanZoomTool as PanZoom|null;
 	}
 
 	protected getTitle(): string {
@@ -188,10 +204,17 @@ export default class HandToolWidget extends BaseToolWidget {
 		return makeHandToolIcon();
 	}
 
-	public setSelected(_selected: boolean): void {
+	protected handleClick(): void {
+		if (this.allowTogglingBaseTool) {
+			super.handleClick();
+		} else {
+			this.setDropdownVisible(!this.isDropdownVisible());
+		}
 	}
 
-	protected handleClick() {
-		this.setDropdownVisible(!this.isDropdownVisible());
+	public setSelected(selected: boolean): void {
+		if (this.allowTogglingBaseTool) {
+			super.setSelected(selected);
+		}
 	}
 }
