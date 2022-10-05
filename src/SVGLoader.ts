@@ -124,7 +124,7 @@ export default class SVGLoader implements ImageLoader {
 			);
 		}
 
-		if (supportedStyleAttrs) {
+		if (supportedStyleAttrs && node.style) {
 			for (const attr of node.style) {
 				if (attr === '' || !attr) {
 					continue;
@@ -198,9 +198,9 @@ export default class SVGLoader implements ImageLoader {
 
 		const elemX = elem.getAttribute('x');
 		const elemY = elem.getAttribute('y');
-		if (elemX && elemY) {
-			const x = parseFloat(elemX);
-			const y = parseFloat(elemY);
+		if (elemX || elemY) {
+			const x = parseFloat(elemX ?? '0');
+			const y = parseFloat(elemY ?? '0');
 			if (!isNaN(x) && !isNaN(y)) {
 				supportedAttrs?.push('x', 'y');
 				transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
@@ -245,7 +245,7 @@ export default class SVGLoader implements ImageLoader {
 			size: fontSize,
 			fontFamily: computedStyles.fontFamily || elem.style.fontFamily || 'sans-serif',
 			renderingStyle: {
-				fill: Color4.fromString(computedStyles.fill)
+				fill: Color4.fromString(computedStyles.fill || elem.style.fill || '#000')
 			},
 		};
 
@@ -406,7 +406,6 @@ export default class SVGLoader implements ImageLoader {
 		this.onFinish?.();
 	}
 
-	// TODO: Handling unsafe data! Tripple-check that this is secure!
 	// @param sanitize - if `true`, don't store unknown attributes.
 	public static fromString(text: string, sanitize: boolean = false): SVGLoader {
 		const sandbox = document.createElement('iframe');

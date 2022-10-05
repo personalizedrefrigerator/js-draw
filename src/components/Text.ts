@@ -14,8 +14,6 @@ export interface TextStyle {
 	renderingStyle: RenderingStyle;
 }
 
-type GetTextDimensCallback = (text: string, style: TextStyle) => Rect2;
-
 const componentTypeId = 'text';
 export default class Text extends AbstractComponent {
 	protected contentBBox: Rect2;
@@ -24,10 +22,6 @@ export default class Text extends AbstractComponent {
 		protected readonly textObjects: Array<string|Text>,
 		private transform: Mat33,
 		private readonly style: TextStyle,
-
-		// If not given, an HtmlCanvasElement is used to determine text boundaries.
-		// @internal
-		private readonly getTextDimens: GetTextDimensCallback = Text.getTextDimens,
 	) {
 		super(componentTypeId);
 		this.recomputeBBox();
@@ -47,9 +41,25 @@ export default class Text extends AbstractComponent {
 		ctx.textAlign = 'left';
 	}
 
-	private static textMeasuringCtx: CanvasRenderingContext2D;
+	private static textMeasuringCtx: CanvasRenderingContext2D|null = null;
+
+	// Roughly estimate the bounding box of `text`. Use if no CanvasRenderingContext2D is available.
+	private static estimateTextDimens(text: string, style: TextStyle): Rect2 {
+		const widthEst = text.length * style.size;
+		const heightEst = style.size;
+
+		// Text is drawn with (0, 0) as its baseline. As such, the majority of the text's height should
+		// be above (0, 0).
+		return new Rect2(0, -heightEst * 2/3, widthEst, heightEst);
+	}
+
+	// Returns the bounding box of `text`. This is approximate if no Canvas is available.
 	private static getTextDimens(text: string, style: TextStyle): Rect2 {
-		Text.textMeasuringCtx ??= document.createElement('canvas').getContext('2d')!;
+		Text.textMeasuringCtx ??= document.createElement('canvas').getContext('2d') ?? null;
+		if (!Text.textMeasuringCtx) {
+			return this.estimateTextDimens(text, style);
+		}
+
 		const ctx = Text.textMeasuringCtx;
 		Text.applyTextStyles(ctx, style);
 
@@ -63,7 +73,7 @@ export default class Text extends AbstractComponent {
 
 	private computeBBoxOfPart(part: string|Text) {
 		if (typeof part === 'string') {
-			const textBBox = this.getTextDimens(part, this.style);
+			const textBBox = Text.getTextDimens(part, this.style);
 			return textBBox.transformedBoundingBox(this.transform);
 		} else {
 			const bbox = part.contentBBox.transformedBoundingBox(this.transform);
@@ -178,7 +188,7 @@ export default class Text extends AbstractComponent {
 		};
 	}
 
-	public static deserializeFromString(json: any, getTextDimens: GetTextDimensCallback = Text.getTextDimens): Text {
+	public static deserializeFromString(json: any): Text {
 		const style: TextStyle = {
 			renderingStyle: styleFromJSON(json.style.renderingStyle),
 			size: json.style.size,
@@ -203,7 +213,7 @@ export default class Text extends AbstractComponent {
 		const transformData = json.transform as Mat33Array;
 		const transform = new Mat33(...transformData);
 
-		return new Text(textObjects, transform, style, getTextDimens);
+		return new Text(textObjects, transform, style);
 	}
 }
 

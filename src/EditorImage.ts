@@ -54,6 +54,7 @@ export default class EditorImage {
 		}
 	}
 
+	/** @returns a list of `AbstractComponent`s intersecting `region`, sorted by z-index. */
 	public getElementsIntersectingRegion(region: Rect2): AbstractComponent[] {
 		const leaves = this.root.getLeavesIntersectingRegion(region);
 		sortLeavesByZIndex(leaves);
