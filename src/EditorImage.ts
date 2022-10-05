@@ -54,6 +54,14 @@ export default class EditorImage {
 		}
 	}
 
+	/** @returns all elements in the image, sorted by z-index. This can be slow for large images. */
+	public getAllElements() {
+		const leaves = this.root.getLeaves();
+		sortLeavesByZIndex(leaves);
+
+		return leaves.map(leaf => leaf.getContent()!);
+	}
+
 	/** @returns a list of `AbstractComponent`s intersecting `region`, sorted by z-index. */
 	public getElementsIntersectingRegion(region: Rect2): AbstractComponent[] {
 		const leaves = this.root.getLeavesIntersectingRegion(region);

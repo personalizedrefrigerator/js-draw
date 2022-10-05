@@ -89,6 +89,11 @@ export default abstract class AbstractComponent {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this);
 	}
 
+	// @returns true iff this component can be selected (e.g. by the selection tool.)
+	public isSelectable(): boolean {
+		return true;
+	}
+
 	private static transformElementCommandId = 'transform-element';
 
 	private static UnresolvedTransformElementCommand = class extends SerializableCommand {

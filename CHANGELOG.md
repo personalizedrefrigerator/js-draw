@@ -1,9 +1,13 @@
-# 0.6.0 (unreleased)
- * Selection tool: Shift+click extends a selection, `ctrl+d` duplicates a selected object.
+# 0.6.0
+ * Selection tool:
+   * Shift+click extends a selection
+   * `ctrl+d` duplicates selected objects
+   * `ctrl+r` resizes the image to the selected region
+   * `ctrl+a` selects everything (when the selection tool is enabled)
  * Panning tool: Toggle all device panning by clicking on the hand button.
  * `HandToolWidget` now expects, but does not require, a primary hand tool to work properly. See `ToolController#addPrimaryTool`.
  * Breaiking changes:
-   * Use `editor.icons. ...` instead of `import { ... } from '.../.../icons';
+   * Icons are no longer accessible through `import {makeFooIcon} from '...'`. Use `editor.icons.makeFooIcon` instead.
 
 # 0.5.0
  * Increase contrast between selection box/background

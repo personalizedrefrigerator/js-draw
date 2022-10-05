@@ -37,6 +37,10 @@ export default class UnknownSVGObject extends AbstractComponent {
 	protected applyTransformation(_affineTransfm: Mat33): void {
 	}
 
+	public isSelectable() {
+		return false;
+	}
+
 	protected createClone(): AbstractComponent {
 		return new UnknownSVGObject(this.svgObject.cloneNode(true) as SVGElement);
 	}

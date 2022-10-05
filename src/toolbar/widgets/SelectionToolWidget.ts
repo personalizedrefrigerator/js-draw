@@ -1,6 +1,6 @@
 import Editor from '../../Editor';
 import SelectionTool from '../../tools/SelectionTool/SelectionTool';
-import { EditorEventType } from '../../types';
+import { EditorEventType, KeyPressEvent } from '../../types';
 import { ToolbarLocalization } from '../localization';
 import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
@@ -16,8 +16,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			() => editor.icons.makeResizeViewportIcon(),
 			this.localizationTable.resizeImageToSelection,
 			() => {
-				const selection = this.tool.getSelection();
-				this.editor.dispatch(this.editor.setImportExportRect(selection!.region));
+				this.resizeImageToSelection();
 			},
 		);
 		const deleteButton = new ActionButtonWidget(
@@ -64,6 +63,24 @@ export default class SelectionToolWidget extends BaseToolWidget {
 				updateDisabled(!hasSelection);
 			}
 		});
+	}
+
+	private resizeImageToSelection() {
+		const selection = this.tool.getSelection();
+		if (selection) {
+			this.editor.dispatch(this.editor.setImportExportRect(selection.region));
+		}
+	}
+
+	protected onKeyPress(event: KeyPressEvent): boolean {
+		// Resize image to selection:
+		// Other keys are handled directly by the selection tool.
+		if (event.ctrlKey && event.key === 'r') {
+			this.resizeImageToSelection();
+			return true;
+		}
+
+		return false;
 	}
 
 	protected getTitle(): string {

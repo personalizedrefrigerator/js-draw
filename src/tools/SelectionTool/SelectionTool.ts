@@ -175,10 +175,20 @@ export default class SelectionTool extends BaseTool {
 		'i', 'I', 'o', 'O',
 	];
 	public onKeyPress(event: KeyPressEvent): boolean {
-		// Duplicate the selection.
-		if (this.selectionBox && event.key === 'd' && event.ctrlKey) {
-			this.editor.dispatch(this.selectionBox.duplicateSelectedObjects());
+		if (this.selectionBox && event.ctrlKey && event.key === 'd') {
+			// Handle duplication on key up — we don't want to accidentally duplicate
+			// many times.
 			return true;
+		}
+		else if (event.key === 'a' && event.ctrlKey) {
+			// Handle ctrl+A on key up.
+			// Return early to prevent 'a' from moving the selection/view.
+			return true;
+		}
+		else if (event.ctrlKey) {
+			// Don't transform the selection with, for example, ctrl+i.
+			// Pass it to another tool, if apliccable.
+			return false;
 		}
 		else if (event.key === 'Shift') {
 			this.shiftKeyPressed = true;
@@ -284,6 +294,16 @@ export default class SelectionTool extends BaseTool {
 			this.shiftKeyPressed = false;
 			return true;
 		}
+		else if (evt.ctrlKey) {
+			if (this.selectionBox && evt.key === 'd') {
+				this.editor.dispatch(this.selectionBox.duplicateSelectedObjects());
+				return true;
+			}
+			else if (evt.key === 'a') {
+				this.setSelection(this.editor.image.getAllElements());
+				return true;
+			}
+		}
 
 		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
 			this.selectionBox.finalizeTransform();
@@ -356,7 +376,11 @@ export default class SelectionTool extends BaseTool {
 		return this.selectionBox?.getSelectedObjects() ?? [];
 	}
 
+	// Select the given `objects`. Any non-selectable objects in `objects` are ignored.
 	public setSelection(objects: AbstractComponent[]) {
+		// Only select selectable objects.
+		objects = objects.filter(obj => obj.isSelectable());
+
 		let bbox: Rect2|null = null;
 		for (const object of objects) {
 			if (bbox) {

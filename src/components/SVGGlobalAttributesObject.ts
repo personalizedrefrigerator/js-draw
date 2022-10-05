@@ -43,6 +43,10 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 	protected applyTransformation(_affineTransfm: Mat33): void {
 	}
 
+	public isSelectable() {
+		return false;
+	}
+
 	protected createClone() {
 		return new SVGGlobalAttributesObject(this.attrs);
 	}

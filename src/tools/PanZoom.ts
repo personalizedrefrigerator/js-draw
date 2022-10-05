@@ -182,8 +182,11 @@ export default class PanZoom extends BaseTool {
 		return true;
 	}
 
-	public onKeyPress({ key }: KeyPressEvent): boolean {
+	public onKeyPress({ key, ctrlKey, altKey }: KeyPressEvent): boolean {
 		if (!(this.mode & PanZoomMode.Keyboard)) {
+			return false;
+		}
+		if (ctrlKey || altKey) {
 			return false;
 		}
 
