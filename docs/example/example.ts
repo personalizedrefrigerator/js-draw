@@ -15,7 +15,10 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 	const editor = new Editor(parentElement);
 	const toolbar = editor.addToolbar();
 
-	toolbar.addActionButton('Save', () => {
+	toolbar.addActionButton({
+		label: 'Save',
+		icon: editor.icons.makeSaveIcon(),
+	}, () => {
 		saveCallback();
 	});
 
