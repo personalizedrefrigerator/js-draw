@@ -46,7 +46,7 @@ If you're updating an existing translation, please only include the strings you'
 	dropdownHidden: t=>`Dropdown for ${t} hidden`,
 	zoomLevel: t=>`Zoom: ${t}%`,
 	colorChangedAnnouncement: t=>`Color changed to ${t}`,
-	penTool: t=>`Pen ${t}`,
+	penTool: penNumber=>`Pen ${penNumber}`,
 	selectionTool: "Selection",
 	eraserTool: "Eraser",
 	touchPanTool: "Touch panning",
