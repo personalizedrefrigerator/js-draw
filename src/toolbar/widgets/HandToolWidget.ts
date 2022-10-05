@@ -5,7 +5,6 @@ import ToolController from '../../tools/ToolController';
 import { EditorEventType } from '../../types';
 import Viewport from '../../Viewport';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
-import { makeHandToolIcon, makeTouchPanningIcon, makeZoomIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget from './BaseWidget';
@@ -87,7 +86,7 @@ class ZoomWidget extends BaseWidget {
 	}
 	
 	protected createIcon(): Element {
-		return makeZoomIcon();
+		return this.editor.icons.makeZoomIcon();
 	}
 
 	protected handleClick(): void {
@@ -179,7 +178,7 @@ export default class HandToolWidget extends BaseToolWidget {
 			editor, localizationTable,
 
 			overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
-			makeTouchPanningIcon,
+			() => this.editor.icons.makeTouchPanningIcon(),
 
 			localizationTable.touchPanning
 		);
@@ -201,7 +200,7 @@ export default class HandToolWidget extends BaseToolWidget {
 	}
 
 	protected createIcon(): Element {
-		return makeHandToolIcon();
+		return this.editor.icons.makeHandToolIcon();
 	}
 
 	protected handleClick(): void {

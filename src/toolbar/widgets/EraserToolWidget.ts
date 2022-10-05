@@ -1,4 +1,3 @@
-import { makeEraserIcon } from '../icons';
 import BaseToolWidget from './BaseToolWidget';
 
 export default class EraserToolWidget extends BaseToolWidget {
@@ -6,7 +5,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 		return this.localizationTable.eraser;
 	}
 	protected createIcon(): Element {
-		return makeEraserIcon();
+		return this.editor.icons.makeEraserIcon();
 	}
 
 	protected fillDropdown(_dropdown: HTMLElement): boolean {

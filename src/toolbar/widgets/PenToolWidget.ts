@@ -7,7 +7,6 @@ import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
 import { EditorEventType, KeyPressEvent } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
-import { makeIconFromFactory, makePenIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
@@ -77,10 +76,10 @@ export default class PenToolWidget extends BaseToolWidget {
 			// Use a square-root scale to prevent the pen's tip from overflowing.
 			const scale = Math.round(Math.sqrt(this.tool.getThickness()) * 4);
 			const color = this.tool.getColor();
-			return makePenIcon(scale, color.toHexString());
+			return this.editor.icons.makePenIcon(scale, color.toHexString());
 		} else {
 			const strokeFactory = this.tool.getStrokeFactory();
-			return makeIconFromFactory(this.tool, strokeFactory);
+			return this.editor.icons.makeIconFromFactory(this.tool, strokeFactory);
 		}
 	}
 

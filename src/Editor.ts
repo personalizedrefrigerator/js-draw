@@ -37,6 +37,7 @@ import Mat33 from './math/Mat33';
 import Rect2 from './math/Rect2';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
+import IconProvider from './toolbar/IconProvider';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
@@ -58,6 +59,8 @@ export interface EditorSettings {
 	/** Minimum zoom fraction (e.g. 0.5 → 50% zoom). */
 	minZoom: number,
 	maxZoom: number,
+
+	iconProvider: IconProvider,
 }
 
 // { @inheritDoc Editor! }
@@ -101,22 +104,23 @@ export class Editor {
 	 * editor.dispatch(addElementCommand);
 	 * ```
 	 */
-	public image: EditorImage;
+	public readonly image: EditorImage;
 
 	/** Viewport for the exported/imported image. */
 	private importExportViewport: Viewport;
 
 	/** @internal */
-	public localization: EditorLocalization;
+	public readonly localization: EditorLocalization;
 
-	public viewport: Viewport;
-	public toolController: ToolController;
+	public readonly icons: IconProvider;
+	public readonly viewport: Viewport;
+	public readonly toolController: ToolController;
 
 	/**
 	 * Global event dispatcher/subscriber.
 	 * @see {@link types.EditorEventType}
 	 */
-	public notifier: EditorNotifier;
+	public readonly notifier: EditorNotifier;
 
 	private loadingWarning: HTMLElement;
 	private accessibilityAnnounceArea: HTMLElement;
@@ -164,7 +168,9 @@ export class Editor {
 			localization: this.localization,
 			minZoom: settings.minZoom ?? 2e-10,
 			maxZoom: settings.maxZoom ?? 1e12,
+			iconProvider: settings.iconProvider ?? new IconProvider(),
 		};
+		this.icons = this.settings.iconProvider;
 
 		this.container = document.createElement('div');
 		this.renderingRegion = document.createElement('div');

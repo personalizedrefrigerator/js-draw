@@ -5,7 +5,6 @@ import { coloris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
-import { makeRedoIcon, makeUndoIcon } from './icons';
 import SelectionTool from '../tools/SelectionTool/SelectionTool';
 import PanZoomTool from '../tools/PanZoom';
 import TextTool from '../tools/TextTool';
@@ -156,13 +155,13 @@ export default class HTMLToolbar {
 
 		const undoButton = this.addActionButton({
 			label: this.localizationTable.undo,
-			icon: makeUndoIcon()
+			icon: this.editor.icons.makeUndoIcon()
 		}, () => {
 			this.editor.history.undo();
 		}, undoRedoGroup);
 		const redoButton = this.addActionButton({
 			label: this.localizationTable.redo,
-			icon: makeRedoIcon(),
+			icon: this.editor.icons.makeRedoIcon(),
 		}, () => {
 			this.editor.history.redo();
 		}, undoRedoGroup);

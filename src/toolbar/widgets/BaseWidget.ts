@@ -2,7 +2,6 @@ import Editor from '../../Editor';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
 import { EditorEventType, InputEvtType, KeyPressEvent } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
-import { makeDropdownIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
 
 export default abstract class BaseWidget {
@@ -248,7 +247,7 @@ export default abstract class BaseWidget {
 	}
 
 	private createDropdownIcon(): Element {
-		const icon = makeDropdownIcon();
+		const icon = this.editor.icons.makeDropdownIcon();
 		icon.classList.add(`${toolbarCSSPrefix}showHideDropdownIcon`);
 		return icon;
 	}

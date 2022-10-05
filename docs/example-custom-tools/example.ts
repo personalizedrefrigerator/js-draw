@@ -117,7 +117,7 @@ class CustomPenToolbarWidget extends jsdraw.BaseToolWidget {
 	}
 	protected createIcon(): Element {
 		const style = this.pen.getStyle();
-		return jsdraw.icons.makePenIcon(style.thickness, style.color);
+		return editor.icons.makePenIcon(style.thickness, style.color);
 	}
 
 	protected fillDropdown(dropdown: HTMLElement): boolean {

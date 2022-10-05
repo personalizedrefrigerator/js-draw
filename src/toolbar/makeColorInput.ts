@@ -2,7 +2,6 @@ import Color4 from '../Color4';
 import Editor from '../Editor';
 import PipetteTool from '../tools/PipetteTool';
 import { EditorEventType } from '../types';
-import { makePipetteIcon } from './icons';
 
 type OnColorChangeListener = (color: Color4)=>void;
 
@@ -72,7 +71,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	pipetteButton.setAttribute('alt', pipetteButton.title);
 
 	const updatePipetteIcon = (color?: Color4) => {
-		pipetteButton.replaceChildren(makePipetteIcon(color));
+		pipetteButton.replaceChildren(editor.icons.makePipetteIcon(color));
 	};
 	updatePipetteIcon();
 

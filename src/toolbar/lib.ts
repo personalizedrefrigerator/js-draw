@@ -1,4 +1,4 @@
 
 export * from './widgets/lib';
-export * as icons from './icons';
 export * from './makeColorInput';
+export { default as IconProvider } from './IconProvider';

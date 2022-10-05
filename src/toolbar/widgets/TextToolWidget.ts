@@ -2,7 +2,6 @@ import Editor from '../../Editor';
 import TextTool from '../../tools/TextTool';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
-import { makeTextIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
@@ -26,7 +25,7 @@ export default class TextToolWidget extends BaseToolWidget {
 
 	protected createIcon(): Element {
 		const textStyle = this.tool.getTextStyle();
-		return makeTextIcon(textStyle);
+		return this.editor.icons.makeTextIcon(textStyle);
 	}
 
 	private static idCounter: number = 0;

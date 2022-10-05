@@ -1,7 +1,6 @@
 import Editor from '../../Editor';
 import SelectionTool from '../../tools/SelectionTool/SelectionTool';
 import { EditorEventType } from '../../types';
-import { makeDeleteSelectionIcon, makeDuplicateSelectionIcon, makeResizeViewportIcon, makeSelectionIcon } from '../icons';
 import { ToolbarLocalization } from '../localization';
 import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
@@ -14,7 +13,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 
 		const resizeButton = new ActionButtonWidget(
 			editor, localization,
-			makeResizeViewportIcon,
+			() => editor.icons.makeResizeViewportIcon(),
 			this.localizationTable.resizeImageToSelection,
 			() => {
 				const selection = this.tool.getSelection();
@@ -23,7 +22,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		const deleteButton = new ActionButtonWidget(
 			editor, localization,
-			makeDeleteSelectionIcon,
+			() => editor.icons.makeDeleteSelectionIcon(),
 			this.localizationTable.deleteSelection,
 			() => {
 				const selection = this.tool.getSelection();
@@ -33,7 +32,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		const duplicateButton = new ActionButtonWidget(
 			editor, localization,
-			makeDuplicateSelectionIcon,
+			() => editor.icons.makeDuplicateSelectionIcon(),
 			this.localizationTable.duplicateSelection,
 			() => {
 				const selection = this.tool.getSelection();
@@ -72,6 +71,6 @@ export default class SelectionToolWidget extends BaseToolWidget {
 	}
 
 	protected createIcon(): Element {
-		return makeSelectionIcon();
+		return this.editor.icons.makeSelectionIcon();
 	}
 }
