@@ -100,4 +100,44 @@ describe('SelectionTool', () => {
 		editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'a');
 		expect(editor.viewport.visibleRect.containsPoint(selection.region.center)).toBe(true);
 	});
+
+	it('shift+click should expand an existing selection', () => {
+		const { addTestStrokeCommand: stroke1Command } = createSquareStroke(50);
+		const { addTestStrokeCommand: stroke2Command } = createSquareStroke(500);
+
+		const editor = createEditor();
+		editor.dispatch(stroke1Command);
+		editor.dispatch(stroke2Command);
+
+		// Select the first stroke
+		const selectionTool = getSelectionTool(editor);
+		selectionTool.setEnabled(true);
+
+		// Select the smaller rectangle
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(40, 40));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(100, 100));
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
+
+		// Shift key down.
+		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'Shift');
+
+		// Select the larger stroke.
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(200, 200));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(600, 600));
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(2);
+
+		editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'Shift');
+
+		// Select the larger stroke without shift pressed
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(200, 200));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(600, 600));
+		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
+
+		// Select nothing
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(200, 200));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(201, 201));
+		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
+	});
 });

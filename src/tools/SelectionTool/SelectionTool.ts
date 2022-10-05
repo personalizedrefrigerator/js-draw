@@ -23,6 +23,9 @@ export default class SelectionTool extends BaseTool {
 	private selectionBox: Selection|null;
 	private lastEvtTarget: EventTarget|null = null;
 
+	private expandingSelectionBox: boolean = false;
+	private shiftKeyPressed: boolean = false;
+
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
 
@@ -50,8 +53,11 @@ export default class SelectionTool extends BaseTool {
 		this.selectionBox = new Selection(
 			selectionStartPos, this.editor
 		);
-		// Remove any previous selection rects
-		this.handleOverlay.replaceChildren();
+
+		if (!this.expandingSelectionBox) {
+			// Remove any previous selection rects
+			this.prevSelectionBox?.cancelSelection();
+		}
 		this.selectionBox.addTo(this.handleOverlay);
 	}
 
@@ -60,7 +66,11 @@ export default class SelectionTool extends BaseTool {
 		if (event.allPointers.length === 1 && event.current.isPrimary) {
 			if (this.lastEvtTarget && this.selectionBox?.onDragStart(event.current, this.lastEvtTarget)) {
 				this.selectionBoxHandlingEvt = true;
-			} else {
+				this.expandingSelectionBox = false;
+			}
+			else {
+				// Shift key: Combine the new and old selection boxes at the end of the gesture.
+				this.expandingSelectionBox = this.shiftKeyPressed;
 				this.makeSelectionBox(event.current.canvasPos);
 			}
 
@@ -99,6 +109,7 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
+	// Called after a gestureCancel and a pointerUp
 	private onGestureEnd() {
 		this.lastEvtTarget = null;
 
@@ -127,7 +138,19 @@ export default class SelectionTool extends BaseTool {
 		if (!this.selectionBox) return;
 
 		this.selectionBox.setToPoint(event.current.canvasPos);
-		this.onGestureEnd();
+
+		// Were we expanding the previous selection?
+		if (this.expandingSelectionBox && this.prevSelectionBox) {
+			// If so, finish expanding.
+			this.expandingSelectionBox = false;
+			this.selectionBox.resolveToObjects();
+			this.setSelection([
+				...this.selectionBox.getSelectedObjects(),
+				...this.prevSelectionBox.getSelectedObjects(),
+			]);
+		} else {
+			this.onGestureEnd();
+		}
 	}
 
 	public onGestureCancel(): void {
@@ -139,6 +162,8 @@ export default class SelectionTool extends BaseTool {
 			this.selectionBox = this.prevSelectionBox;
 			this.selectionBox?.addTo(this.handleOverlay);
 		}
+
+		this.expandingSelectionBox = false;
 	}
 
 	private static handleableKeys = [
@@ -153,6 +178,10 @@ export default class SelectionTool extends BaseTool {
 		// Duplicate the selection.
 		if (this.selectionBox && event.key === 'd' && event.ctrlKey) {
 			this.editor.dispatch(this.selectionBox.duplicateSelectedObjects());
+			return true;
+		}
+		else if (event.key === 'Shift') {
+			this.shiftKeyPressed = true;
 			return true;
 		}
 
@@ -251,6 +280,11 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public onKeyUp(evt: KeyUpEvent) {
+		if (evt.key === 'Shift') {
+			this.shiftKeyPressed = false;
+			return true;
+		}
+
 		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
 			this.selectionBox.finalizeTransform();
 			return true;
@@ -313,8 +347,13 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	// Get the object responsible for displaying this' selection.
+	// @internal
 	public getSelection(): Selection|null {
 		return this.selectionBox;
+	}
+
+	public getSelectedObjects(): AbstractComponent[] {
+		return this.selectionBox?.getSelectedObjects() ?? [];
 	}
 
 	public setSelection(objects: AbstractComponent[]) {

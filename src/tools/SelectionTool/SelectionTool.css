@@ -3,6 +3,7 @@
     background-color: var(--secondary-background-color);
     opacity: 0.5;
     overflow: visible;
+    position: absolute;
 }
 
 .selection-tool-handle {
