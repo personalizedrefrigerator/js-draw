@@ -3,7 +3,7 @@ import AbstractComponent from './components/AbstractComponent';
 import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
-import Text, { TextStyle } from './components/Text';
+import TextComponent, { TextStyle } from './components/Text';
 import UnknownSVGObject from './components/UnknownSVGObject';
 import Mat33 from './math/Mat33';
 import Path from './math/Path';
@@ -210,8 +210,8 @@ export default class SVGLoader implements ImageLoader {
 		return transform;
 	}
 
-	private makeText(elem: SVGTextElement|SVGTSpanElement): Text {
-		const contentList: Array<Text|string> = [];
+	private makeText(elem: SVGTextElement|SVGTSpanElement): TextComponent {
+		const contentList: Array<TextComponent|string> = [];
 		for (const child of elem.childNodes) {
 			if (child.nodeType === Node.TEXT_NODE) {
 				contentList.push(child.nodeValue ?? '');
@@ -251,7 +251,7 @@ export default class SVGLoader implements ImageLoader {
 
 		const supportedAttrs: string[] = [];
 		const transform = this.getTransform(elem, supportedAttrs, computedStyles);
-		const result = new Text(contentList, transform, style);
+		const result = new TextComponent(contentList, transform, style);
 		this.attachUnrecognisedAttrs(
 			result,
 			elem,

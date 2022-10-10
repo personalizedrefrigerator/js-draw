@@ -1,5 +1,5 @@
 import Color4 from '../../Color4';
-import Text, { TextStyle } from '../../components/Text';
+import TextComponent, { TextStyle } from '../../components/Text';
 import Mat33 from '../../math/Mat33';
 import Rect2 from '../../math/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
@@ -153,7 +153,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		this.ctx.save();
 		transform = this.getCanvasToScreenTransform().rightMul(transform);
 		this.transformBy(transform);
-		Text.applyTextStyles(this.ctx, style);
+		TextComponent.applyTextStyles(this.ctx, style);
 
 		if (style.renderingStyle.fill.a !== 0) {
 			this.ctx.fillStyle = style.renderingStyle.fill.toHexString();

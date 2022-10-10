@@ -1,7 +1,8 @@
 import Color4 from '../Color4';
-import Text, { TextStyle } from '../components/Text';
+import TextComponent, { TextStyle } from '../components/Text';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
+import { Rect2 } from '../lib';
 import Mat33 from '../math/Mat33';
 import { Vec2 } from '../math/Vec2';
 import { PointerDevice } from '../Pointer';
@@ -14,7 +15,7 @@ export default class TextTool extends BaseTool {
 	private textStyle: TextStyle;
 
 	private textEditOverlay: HTMLElement;
-	private textInputElem: HTMLInputElement|null = null;
+	private textInputElem: HTMLTextAreaElement|null = null;
 	private textTargetPosition: Vec2|null = null;
 	private textMeasuringCtx: CanvasRenderingContext2D|null = null;
 	private textRotation: number;
@@ -50,7 +51,7 @@ export default class TextTool extends BaseTool {
 	private getTextAscent(text: string, style: TextStyle): number {
 		this.textMeasuringCtx ??= document.createElement('canvas').getContext('2d');
 		if (this.textMeasuringCtx) {
-			Text.applyTextStyles(this.textMeasuringCtx, style);
+			TextComponent.applyTextStyles(this.textMeasuringCtx, style);
 			return this.textMeasuringCtx.measureText(text).actualBoundingBoxAscent;
 		}
 
@@ -76,7 +77,7 @@ export default class TextTool extends BaseTool {
 				Mat33.zRotation(this.textRotation)
 			);
 			
-			const textComponent = new Text(
+			const textComponent = new TextComponent(
 				[ content ],
 				textTransform,
 				this.textStyle,
@@ -95,7 +96,6 @@ export default class TextTool extends BaseTool {
 
 		const viewport = this.editor.viewport;
 		const textScreenPos = viewport.canvasToScreen(this.textTargetPosition);
-		this.textInputElem.type = 'text';
 		this.textInputElem.placeholder = this.localizationTable.enterTextToInsert;
 		this.textInputElem.style.fontFamily = this.textStyle.fontFamily;
 		this.textInputElem.style.fontVariant = this.textStyle.fontVariant ?? '';
@@ -117,17 +117,15 @@ export default class TextTool extends BaseTool {
 	private startTextInput(textCanvasPos: Vec2, initialText: string) {
 		this.flushInput();
 
-		this.textInputElem = document.createElement('input');
+		this.textInputElem = document.createElement('textarea');
 		this.textInputElem.value = initialText;
+		this.textInputElem.style.wordBreak = 'pre';
+		this.textInputElem.style.width = '100vw';
+		this.textInputElem.style.height = '100vh';
 		this.textTargetPosition = textCanvasPos;
 		this.textRotation = -this.editor.viewport.getRotationAngle();
 		this.updateTextInput();
 
-		this.textInputElem.oninput = () => {
-			if (this.textInputElem) {
-				this.textInputElem.size = this.textInputElem?.value.length || 10;
-			}
-		};
 		this.textInputElem.onblur = () => {
 			// Don't remove the input within the context of a blur event handler.
 			// Doing so causes errors.
@@ -165,7 +163,20 @@ export default class TextTool extends BaseTool {
 		}
 
 		if (allPointers.length === 1) {
-			this.startTextInput(current.canvasPos, '');
+
+			// Are we clicking on a text node?
+			const canvasPos = current.canvasPos;
+			const halfTestRegionSize = Vec2.of(2.5, 2.5).times(this.editor.viewport.getSizeOfPixelOnCanvas());
+			const testRegion = Rect2.fromCorners(canvasPos.minus(halfTestRegionSize), canvasPos.plus(halfTestRegionSize));
+			const targetNodes = this.editor.image.getElementsIntersectingRegion(testRegion);
+			const targetTextNodes = targetNodes.filter(node => node instanceof TextComponent) as TextComponent[];
+
+			if (targetTextNodes.length > 0) {
+				const targetNode = targetTextNodes[targetTextNodes.length - 1];
+				this.startTextInput(targetNode.getBaselinePos(), targetNode.getText());
+			} else {
+				this.startTextInput(current.canvasPos, '');
+			}
 			return true;
 		}
 

@@ -1,3 +1,4 @@
+import Color4 from '../Color4';
 import LineSegment2 from '../math/LineSegment2';
 import Mat33 from '../math/Mat33';
 import Path from '../math/Path';
@@ -6,15 +7,17 @@ import AbstractRenderer, { RenderablePathSpec } from '../rendering/renderers/Abs
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
+import RecolorableComponent from './RecolorableComponent';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
 }
 
-export default class Stroke extends AbstractComponent {
+export default class Stroke extends RecolorableComponent {
 	private parts: StrokePart[];
 	protected contentBBox: Rect2;
 
+	// Creates a `Stroke` from the given `parts`.
 	public constructor(parts: RenderablePathSpec[]) {
 		super('stroke');
 
@@ -68,6 +71,17 @@ export default class Stroke extends AbstractComponent {
 			canvas.drawPath(part);
 		}
 		canvas.endObject(this.getLoadSaveData());
+	}
+
+	protected getRenderingStyle() {
+		return this.parts[0]?.style ?? { fill: Color4.black };
+	}
+
+	// Sets the style of **all** parts.
+	protected setRenderingStyle(style: RenderingStyle): void {
+		for (const part of this.parts) {
+			part.style = style;
+		}
 	}
 
 	// Grows the bounding box for a given stroke part based on that part's style.

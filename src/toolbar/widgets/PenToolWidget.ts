@@ -105,6 +105,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		objectSelectLabel.innerText = this.localizationTable.selectObjectType;
 		objectSelectLabel.setAttribute('for', objectTypeSelect.id);
 
+		// Use a logarithmic scale for thicknessInput (finer control over thinner strokewidths.)
 		const inverseThicknessInputFn = (t: number) => Math.log10(t);
 		const thicknessInputFn = (t: number) => 10**t;
 

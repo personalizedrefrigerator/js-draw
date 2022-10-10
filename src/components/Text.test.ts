@@ -1,7 +1,7 @@
 import Color4 from '../Color4';
 import Mat33 from '../math/Mat33';
 import AbstractComponent from './AbstractComponent';
-import Text, { TextStyle } from './Text';
+import TextComponent, { TextStyle } from './Text';
 
 
 describe('Text', () => {
@@ -11,9 +11,9 @@ describe('Text', () => {
 			fontFamily: 'serif',
 			renderingStyle: { fill: Color4.black },
 		};
-		const text = new Text([ 'Foo' ], Mat33.identity, style);
+		const text = new TextComponent([ 'Foo' ], Mat33.identity, style);
 		const serialized = text.serialize();
-		const deserialized = AbstractComponent.deserialize(serialized) as Text;
+		const deserialized = AbstractComponent.deserialize(serialized) as TextComponent;
 		expect(deserialized.getBBox()).objEq(text.getBBox());
 		expect(deserialized['getText']()).toContain('Foo');
 	});

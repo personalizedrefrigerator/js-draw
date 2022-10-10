@@ -4,6 +4,8 @@ export interface ImageComponentLocalization {
 	imageNode: (description: string)=> string;
 	stroke: string;
     svgObject: string;
+
+	setColor: (newColorString: string)=> string;
 }
 
 export const defaultComponentLocalization: ImageComponentLocalization = {
@@ -12,4 +14,6 @@ export const defaultComponentLocalization: ImageComponentLocalization = {
 	svgObject: 'SVG Object',
 	text: (text) => `Text object: ${text}`,
 	imageNode: (description: string) => `Image: ${description}`,
+
+	setColor: (newColorString: string) => `Set node color to ${newColorString}`,
 };

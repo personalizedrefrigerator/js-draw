@@ -1,10 +1,15 @@
+import Color4 from '../Color4';
+import SerializableCommand from '../commands/SerializableCommand';
+import uniteCommands from '../commands/uniteCommands';
 import LineSegment2 from '../math/LineSegment2';
 import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
+import { Vec2 } from '../math/Vec2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
+import RecolorableComponent from './RecolorableComponent';
 
 export interface TextStyle {
 	size: number;
@@ -15,13 +20,13 @@ export interface TextStyle {
 }
 
 const componentTypeId = 'text';
-export default class Text extends AbstractComponent {
+export default class TextComponent extends RecolorableComponent {
 	protected contentBBox: Rect2;
 
 	public constructor(
-		protected readonly textObjects: Array<string|Text>,
+		protected readonly textObjects: Array<string|TextComponent>,
 		private transform: Mat33,
-		private readonly style: TextStyle,
+		private style: TextStyle,
 	) {
 		super(componentTypeId);
 		this.recomputeBBox();
@@ -55,13 +60,13 @@ export default class Text extends AbstractComponent {
 
 	// Returns the bounding box of `text`. This is approximate if no Canvas is available.
 	private static getTextDimens(text: string, style: TextStyle): Rect2 {
-		Text.textMeasuringCtx ??= document.createElement('canvas').getContext('2d') ?? null;
-		if (!Text.textMeasuringCtx) {
+		TextComponent.textMeasuringCtx ??= document.createElement('canvas').getContext('2d') ?? null;
+		if (!TextComponent.textMeasuringCtx) {
 			return this.estimateTextDimens(text, style);
 		}
 
-		const ctx = Text.textMeasuringCtx;
-		Text.applyTextStyles(ctx, style);
+		const ctx = TextComponent.textMeasuringCtx;
+		TextComponent.applyTextStyles(ctx, style);
 
 		const measure = ctx.measureText(text);
 
@@ -71,9 +76,9 @@ export default class Text extends AbstractComponent {
 		return new Rect2(0, textY, measure.width, textHeight);
 	}
 
-	private computeBBoxOfPart(part: string|Text) {
+	private computeBBoxOfPart(part: string|TextComponent) {
 		if (typeof part === 'string') {
-			const textBBox = Text.getTextDimens(part, this.style);
+			const textBBox = TextComponent.getTextDimens(part, this.style);
 			return textBBox.transformedBoundingBox(this.transform);
 		} else {
 			const bbox = part.contentBBox.transformedBoundingBox(this.transform);
@@ -119,7 +124,7 @@ export default class Text extends AbstractComponent {
 
 		for (const subObject of this.textObjects) {
 			if (typeof subObject === 'string') {
-				const textBBox = Text.getTextDimens(subObject, this.style);
+				const textBBox = TextComponent.getTextDimens(subObject, this.style);
 
 				// TODO: Use a better intersection check. Perhaps draw the text onto a CanvasElement and
 				// use pixel-testing to check for intersection with its contour.
@@ -136,13 +141,36 @@ export default class Text extends AbstractComponent {
 		return false;
 	}
 
+	public getBaselinePos() {
+		return this.transform.transformVec2(Vec2.zero);
+	}
+
+	// Sets the style color of this and all strings (non-text objects) directly within this.
+	protected setRenderingStyle(renderingStyle: RenderingStyle) {
+		this.style.renderingStyle = renderingStyle;
+	}
+
+	protected getRenderingStyle(): RenderingStyle {
+		return this.style.renderingStyle;
+	}
+
+	public setColor(color: Color4): SerializableCommand {
+		const childCommands: SerializableCommand[] = this.textObjects.filter(obj => obj instanceof TextComponent).map(obj => {
+			return (obj as TextComponent).setColor(color);
+		});
+
+		return uniteCommands([
+			...childCommands, super.setColor(color),
+		]);
+	}
+
 	protected applyTransformation(affineTransfm: Mat33): void {
 		this.transform = affineTransfm.rightMul(this.transform);
 		this.recomputeBBox();
 	}
 
 	protected createClone(): AbstractComponent {
-		return new Text(this.textObjects, this.transform, this.style);
+		return new TextComponent(this.textObjects, this.transform, this.style);
 	}
 
 	public getText() {
@@ -188,7 +216,7 @@ export default class Text extends AbstractComponent {
 		};
 	}
 
-	public static deserializeFromString(json: any): Text {
+	public static deserializeFromString(json: any): TextComponent {
 		const style: TextStyle = {
 			renderingStyle: styleFromJSON(json.style.renderingStyle),
 			size: json.style.size,
@@ -197,12 +225,12 @@ export default class Text extends AbstractComponent {
 			fontFamily: json.style.fontFamily,
 		};
 
-		const textObjects: Array<string|Text> = json.textObjects.map((data: any) => {
+		const textObjects: Array<string|TextComponent> = json.textObjects.map((data: any) => {
 			if ((data.text ?? null) !== null) {
 				return data.text;
 			}
 
-			return Text.deserializeFromString(data.json);
+			return TextComponent.deserializeFromString(data.json);
 		});
 
 		json.transform = json.transform.filter((elem: any) => typeof elem === 'number');
@@ -213,8 +241,8 @@ export default class Text extends AbstractComponent {
 		const transformData = json.transform as Mat33Array;
 		const transform = new Mat33(...transformData);
 
-		return new Text(textObjects, transform, style);
+		return new TextComponent(textObjects, transform, style);
 	}
 }
 
-AbstractComponent.registerComponent(componentTypeId, (data: string) => Text.deserializeFromString(data));
+AbstractComponent.registerComponent(componentTypeId, (data: string) => TextComponent.deserializeFromString(data));
