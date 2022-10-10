@@ -46,13 +46,15 @@ export default class TextTool extends BaseTool {
 			.${overlayCssClass} textarea {
 				background-color: rgba(0, 0, 0, 0);
 
-				white-space: pre-wrap;
-				overflow-x: auto;
+				white-space: pre;
 
 				padding: 0;
 				margin: 0;
 				border: none;
 				padding: 0;
+
+				min-width: 100px;
+				min-height: 1.1em;
 			}
 		`);
 		this.editor.createHTMLOverlay(this.textEditOverlay);
@@ -72,7 +74,7 @@ export default class TextTool extends BaseTool {
 
 	private flushInput() {
 		if (this.textInputElem && this.textTargetPosition) {
-			const content = this.textInputElem.value;
+			const content = this.textInputElem.value.trimEnd();
 			this.textInputElem.remove();
 			this.textInputElem = null;
 
@@ -129,6 +131,9 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.top = `${textScreenPos.y}px`;
 		this.textInputElem.style.margin = '0';
 
+		this.textInputElem.style.width = `${this.textInputElem.scrollWidth}px`;
+		this.textInputElem.style.height = `${this.textInputElem.scrollHeight}px`;
+
 		const rotation = this.textRotation + viewport.getRotationAngle();
 		const ascent = this.getTextAscent(this.textInputElem.value || 'W', this.textStyle);
 		const scale: Mat33 = this.getTextScaleMatrix();
@@ -141,7 +146,6 @@ export default class TextTool extends BaseTool {
 
 		this.textInputElem = document.createElement('textarea');
 		this.textInputElem.value = initialText;
-		this.textInputElem.style.wordBreak = 'pre';
 		this.textInputElem.style.display = 'inline-block';
 		this.textTargetPosition = textCanvasPos;
 		this.textRotation = -this.editor.viewport.getRotationAngle();
