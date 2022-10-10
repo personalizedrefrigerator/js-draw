@@ -279,11 +279,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		// / /
 		const lowerIntersection = getIntersection(lowerCurve, this.lastUpperBezier);
 		const upperIntersection = getIntersection(upperCurve, this.lastLowerBezier);
-		if (lowerIntersection && !upperIntersection) {
-			return true;
-		}
-
-		if (upperIntersection && !lowerIntersection) {
+		if (lowerIntersection || upperIntersection) {
 			return true;
 		}
 
@@ -523,6 +519,11 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		const prevEndWidth = this.curveEndWidth;
 		this.curveEndWidth = pointRadius;
 
+		if (this.isFirstSegment) {
+			// The start of a curve often lacks accurate pressure information. Update it.
+			this.curveStartWidth = (this.curveStartWidth + pointRadius) / 2;
+		}
+
 		// recompute bbox
 		this.bbox = this.bbox.grownToPoint(newPoint.pos, pointRadius);
 
@@ -539,6 +540,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			console.assert(!isNaN(p1.magnitude()) && !isNaN(p2.magnitude()) && !isNaN(p3.magnitude()), 'Expected !NaN');
 		}
 
+		// If there isn't an entering vector (e.g. because this.isFirstCurve), approximate it.
 		let enteringVec = this.lastExitingVec;
 		if (!enteringVec) {
 			let sampleIdx = Math.ceil(this.buffer.length / 2);
