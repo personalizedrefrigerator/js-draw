@@ -11,21 +11,24 @@ import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import RenderingStyle from '../../rendering/RenderingStyle';
 
 export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	// Don't smooth if input is more than ± 7 pixels from the true curve, do smooth if
+	// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
 	// less than ±1 px from the curve.
-	const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 7;
+	const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
 	const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
 
 	return new FreehandLineBuilder(
-		initialPoint, minSmoothingDist, maxSmoothingDist
+		initialPoint, minSmoothingDist, maxSmoothingDist, viewport
 	);
 };
 
 type CurrentSegmentToPathResult = {
-	upperCurve: QuadraticBezierPathCommand,
+	upperCurveCommand: QuadraticBezierPathCommand,
 	lowerToUpperConnector: PathCommand,
 	upperToLowerConnector: PathCommand,
-	lowerCurve: QuadraticBezierPathCommand,
+	lowerCurveCommand: QuadraticBezierPathCommand,
+
+	upperCurve: Bezier,
+	lowerCurve: Bezier,
 };
 
 // Handles stroke smoothing and creates Strokes from user/stylus input.
@@ -47,8 +50,11 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	// least recent edge.
 	// The lowerSegments form a path that goes from the least recent edge to the most
 	// recent edge.
-	private upperSegments: QuadraticBezierPathCommand[];
-	private lowerSegments: QuadraticBezierPathCommand[];
+	private upperSegments: PathCommand[];
+	private lowerSegments: PathCommand[];
+	private lastUpperBezier: Bezier|null = null;
+	private lastLowerBezier: Bezier|null = null;
+	private parts: RenderablePathSpec[] = [];
 
 	private buffer: Point2[];
 	private lastPoint: StrokeDataPoint;
@@ -69,7 +75,9 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		// Note that the maximum will be smaller if the stroke width is less than
 		// [maxFitAllowed].
 		private minFitAllowed: number,
-		private maxFitAllowed: number
+		private maxFitAllowed: number,
+
+		private viewport: Viewport,
 	) {
 		this.lastPoint = this.startPoint;
 		this.upperSegments = [];
@@ -93,15 +101,19 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		};
 	}
 
-	private previewPath(): RenderablePathSpec|null {
-		let upperPath: QuadraticBezierPathCommand[];
-		let lowerPath: QuadraticBezierPathCommand[];
+	private previewCurrentPath(): RenderablePathSpec|null {
+		const upperPath = this.upperSegments.slice();
+		const lowerPath = this.lowerSegments.slice();
 		let lowerToUpperCap: PathCommand;
 		let pathStartConnector: PathCommand;
 		if (this.currentCurve) {
-			const { upperCurve, lowerToUpperConnector, upperToLowerConnector, lowerCurve } = this.currentSegmentToPath();
-			upperPath = this.upperSegments.concat(upperCurve);
-			lowerPath = this.lowerSegments.concat(lowerCurve);
+			const {
+				upperCurveCommand, lowerToUpperConnector, upperToLowerConnector, lowerCurveCommand
+			} = this.currentSegmentToPath();
+
+			upperPath.push(upperCurveCommand);
+			lowerPath.push(lowerCurveCommand);
+
 			lowerToUpperCap = lowerToUpperConnector;
 			pathStartConnector = this.pathStartConnector ?? upperToLowerConnector;
 		} else {
@@ -109,13 +121,17 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				return null;
 			}
 
-			upperPath = this.upperSegments.slice();
-			lowerPath = this.lowerSegments.slice();
 			lowerToUpperCap = this.mostRecentConnector;
 			pathStartConnector = this.pathStartConnector;
 		}
-		const startPoint = lowerPath[lowerPath.length - 1].endPoint;
 
+		let startPoint: Point2;
+		const lastLowerSegment = lowerPath[lowerPath.length - 1];
+		if (lastLowerSegment.kind === PathCommandType.LineTo || lastLowerSegment.kind === PathCommandType.MoveTo) {
+			startPoint = lastLowerSegment.point;
+		} else {
+			startPoint = lastLowerSegment.endPoint;
+		}
 
 		return {
 			// Start at the end of the lower curve:
@@ -156,24 +172,37 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		};
 	}
 
+	private previewFullPath(): RenderablePathSpec[]|null {
+		const preview = this.previewCurrentPath();
+		if (preview) {
+			return [ ...this.parts, preview ];
+		}
+		return null;
+	}
+
 	private previewStroke(): Stroke|null {
-		const pathPreview = this.previewPath();
+		const pathPreview = this.previewFullPath();
 
 		if (pathPreview) {
-			return new Stroke([ pathPreview ]);
+			return new Stroke(pathPreview);
 		}
 		return null;
 	}
 
 	public preview(renderer: AbstractRenderer) {
-		const path = this.previewPath();
-		if (path) {
-			renderer.drawPath(path);
+		const paths = this.previewFullPath();
+		if (paths) {
+			const approxBBox = this.viewport.visibleRect;
+			renderer.startObject(approxBBox);
+			for (const path of paths) {
+				renderer.drawPath(path);
+			}
+			renderer.endObject();
 		}
 	}
 
 	public build(): Stroke {
-		if (this.lastPoint && (this.lowerSegments.length === 0 || this.approxCurrentCurveLength() > this.curveStartWidth * 2)) {
+		if (this.lastPoint) {
 			this.finalizeCurrentCurve();
 		}
 		return this.previewStroke()!;
@@ -187,6 +216,78 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		}
 
 		return Viewport.roundPoint(point, minFit);
+	}
+
+	// Returns true if, due to overlap with previous segments, a new RenderablePathSpec should be created.
+	private shouldStartNewSegment(lowerCurve: Bezier, upperCurve: Bezier): boolean {
+		if (!this.lastLowerBezier || !this.lastUpperBezier) {
+			return false;
+		}
+
+		const getIntersection = (curve1: Bezier, curve2: Bezier): Point2|null => {
+			const intersection = curve1.intersects(curve2) as (string[] | null | undefined);
+			if (!intersection || intersection.length === 0) {
+				return null;
+			}
+
+			// From http://pomax.github.io/bezierjs/#intersect-curve,
+			// .intersects returns an array of 't1/t2' pairs, where curve1.at(t1) gives the point.
+			const firstTPair = intersection[0];
+			const match = /^([-0-9.eE]+)\/([-0-9.eE]+)$/.exec(firstTPair);
+
+			if (!match) {
+				throw new Error(
+					`Incorrect format returned by .intersects: ${intersection} should be array of "number/number"!`
+				);
+			}
+
+			const t = parseFloat(match[1]);
+			return Vec2.ofXY(curve1.get(t));
+		};
+
+		const getExitDirection = (curve: Bezier): Vec2 => {
+			return Vec2.ofXY(curve.points[2]).minus(Vec2.ofXY(curve.points[1])).normalized();
+		};
+
+		const getEnterDirection = (curve: Bezier): Vec2 => {
+			return Vec2.ofXY(curve.points[1]).minus(Vec2.ofXY(curve.points[0])).normalized();
+		};
+
+		// Prevent
+		//         /
+		//       / /
+		//      /  /  /| 
+		//    /    /   |
+		//  /          |
+		// where the next stroke and the previous stroke are in different directions.
+		//
+		// Are the exit/enter directions of the previous and current curves in different enough directions?
+		if (getEnterDirection(upperCurve).dot(getExitDirection(this.lastUpperBezier)) < 0.3
+			|| getEnterDirection(lowerCurve).dot(getExitDirection(this.lastLowerBezier)) < 0.3
+
+			// Also handle if the curves exit/enter directions differ
+			|| getEnterDirection(upperCurve).dot(getExitDirection(upperCurve)) < 0
+			|| getEnterDirection(lowerCurve).dot(getExitDirection(lowerCurve)) < 0) {
+			return true;
+		}
+
+		// Check whether the lower curve intersects the other wall:
+		//       /    / ← lower
+		//    / /   /
+		// /   / /
+		//   //
+		// / /
+		const lowerIntersection = getIntersection(lowerCurve, this.lastUpperBezier);
+		const upperIntersection = getIntersection(upperCurve, this.lastLowerBezier);
+		if (lowerIntersection && !upperIntersection) {
+			return true;
+		}
+
+		if (upperIntersection && !lowerIntersection) {
+			return true;
+		}
+
+		return false;
 	}
 
 	// Returns the distance between the start, control, and end points of the curve.
@@ -257,9 +358,23 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			return;
 		}
 
-		const { upperCurve, lowerToUpperConnector, upperToLowerConnector, lowerCurve } = this.currentSegmentToPath();
+		const {
+			upperCurveCommand, lowerToUpperConnector, upperToLowerConnector, lowerCurveCommand,
+			lowerCurve, upperCurve,
+		} = this.currentSegmentToPath();
 
-		if (this.isFirstSegment) {
+		const shouldStartNew = this.shouldStartNewSegment(lowerCurve, upperCurve);
+		if (shouldStartNew) {
+			const part = this.previewCurrentPath();
+
+			if (part) {
+				this.parts.push(part);
+				this.upperSegments = [];
+				this.lowerSegments = [];
+			}
+		}
+
+		if (this.isFirstSegment || shouldStartNew) {
 			// We draw the upper path (reversed), then the lower path, so we need the
 			// upperToLowerConnector to join the two paths.
 			this.pathStartConnector = upperToLowerConnector;
@@ -269,8 +384,11 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		// upperPath:
 		this.mostRecentConnector = lowerToUpperConnector;
 
-		this.upperSegments.push(upperCurve);
-		this.lowerSegments.push(lowerCurve);
+		this.lowerSegments.push(lowerCurveCommand);
+		this.upperSegments.push(upperCurveCommand);
+
+		this.lastLowerBezier = lowerCurve;
+		this.lastUpperBezier = upperCurve;
 
 		const lastPoint = this.buffer[this.buffer.length - 1];
 		this.lastExitingVec = Vec2.ofXY(
@@ -325,12 +443,14 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			);
 
 		// Each starts at startPt ± startVec
+		const lowerCurveStartPoint = this.roundPoint(startPt.plus(startVec));
 		const lowerCurveControlPoint = this.roundPoint(controlPoint.plus(halfVec));
 		const lowerCurveEndPoint = this.roundPoint(endPt.plus(endVec));
 		const upperCurveControlPoint = this.roundPoint(controlPoint.minus(halfVec));
 		const upperCurveStartPoint = this.roundPoint(endPt.minus(endVec));
+		const upperCurveEndPoint = this.roundPoint(startPt.minus(startVec));
 
-		const lowerCurve: QuadraticBezierPathCommand = {
+		const lowerCurveCommand: QuadraticBezierPathCommand = {
 			kind: PathCommandType.QuadraticBezierTo,
 			controlPoint: lowerCurveControlPoint,
 			endPoint: lowerCurveEndPoint,
@@ -339,7 +459,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		// From the end of the upperCurve to the start of the lowerCurve:
 		const upperToLowerConnector: LinePathCommand = {
 			kind: PathCommandType.LineTo,
-			point: this.roundPoint(startPt.plus(startVec)),
+			point: lowerCurveStartPoint,
 		};
 
 		// From the end of lowerCurve to the start of upperCurve:
@@ -348,13 +468,19 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			point: upperCurveStartPoint,
 		};
 
-		const upperCurve: QuadraticBezierPathCommand = {
+		const upperCurveCommand: QuadraticBezierPathCommand = {
 			kind: PathCommandType.QuadraticBezierTo,
 			controlPoint: upperCurveControlPoint,
-			endPoint: this.roundPoint(startPt.minus(startVec)),
+			endPoint: upperCurveEndPoint,
 		};
 
-		return { upperCurve, upperToLowerConnector, lowerToUpperConnector, lowerCurve };
+		const upperCurve = new Bezier(upperCurveStartPoint, upperCurveControlPoint, upperCurveEndPoint);
+		const lowerCurve = new Bezier(lowerCurveStartPoint, lowerCurveControlPoint, lowerCurveEndPoint);
+
+		return {
+			upperCurveCommand, upperToLowerConnector, lowerToUpperConnector, lowerCurveCommand,
+			upperCurve, lowerCurve,
+		};
 	}
 
 	// Compute the direction of the velocity at the end of this.buffer
