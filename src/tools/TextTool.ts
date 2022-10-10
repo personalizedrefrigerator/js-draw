@@ -17,7 +17,7 @@ export default class TextTool extends BaseTool {
 	private textStyle: TextStyle;
 
 	private textEditOverlay: HTMLElement;
-	private textInputElem: HTMLDivElement|null = null;
+	private textInputElem: HTMLTextAreaElement|null = null;
 	private textTargetPosition: Vec2|null = null;
 	private textMeasuringCtx: CanvasRenderingContext2D|null = null;
 	private textRotation: number;
@@ -43,16 +43,16 @@ export default class TextTool extends BaseTool {
 				overflow: visible;
 			}
 
-			.${overlayCssClass} div[contentEditable] {
+			.${overlayCssClass} textarea {
 				background-color: rgba(0, 0, 0, 0);
+
+				white-space: pre-wrap;
+				overflow-x: auto;
+
 				padding: 0;
 				margin: 0;
 				border: none;
 				padding: 0;
-				min-width: 40px;
-				min-height: 40px;
-	
-				outline: 1px solid var(--primary-foreground-color);
 			}
 		`);
 		this.editor.createHTMLOverlay(this.textEditOverlay);
@@ -72,7 +72,7 @@ export default class TextTool extends BaseTool {
 
 	private flushInput() {
 		if (this.textInputElem && this.textTargetPosition) {
-			const content = this.textInputElem.innerText;
+			const content = this.textInputElem.value;
 			this.textInputElem.remove();
 			this.textInputElem = null;
 
@@ -117,7 +117,7 @@ export default class TextTool extends BaseTool {
 
 		const viewport = this.editor.viewport;
 		const textScreenPos = viewport.canvasToScreen(this.textTargetPosition);
-		this.textInputElem.setAttribute('aria-placeholder', this.localizationTable.enterTextToInsert);
+		this.textInputElem.placeholder = this.localizationTable.enterTextToInsert;
 		this.textInputElem.style.fontFamily = this.textStyle.fontFamily;
 		this.textInputElem.style.fontVariant = this.textStyle.fontVariant ?? '';
 		this.textInputElem.style.fontWeight = this.textStyle.fontWeight ?? '';
@@ -130,7 +130,7 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.margin = '0';
 
 		const rotation = this.textRotation + viewport.getRotationAngle();
-		const ascent = this.getTextAscent(this.textInputElem.innerText || 'W', this.textStyle);
+		const ascent = this.getTextAscent(this.textInputElem.value || 'W', this.textStyle);
 		const scale: Mat33 = this.getTextScaleMatrix();
 		this.textInputElem.style.transform = `${scale.toCSSMatrix()} rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-ascent}px)`;
 		this.textInputElem.style.transformOrigin = 'top left';
@@ -139,10 +139,8 @@ export default class TextTool extends BaseTool {
 	private startTextInput(textCanvasPos: Vec2, initialText: string) {
 		this.flushInput();
 
-		this.textInputElem = document.createElement('div');
-		this.textInputElem.setAttribute('role', 'textarea');
-		this.textInputElem.innerText = initialText;
-		this.textInputElem.contentEditable = 'true';
+		this.textInputElem = document.createElement('textarea');
+		this.textInputElem.value = initialText;
 		this.textInputElem.style.wordBreak = 'pre';
 		this.textInputElem.style.display = 'inline-block';
 		this.textTargetPosition = textCanvasPos;
@@ -150,6 +148,12 @@ export default class TextTool extends BaseTool {
 		this.textScale = Vec2.of(1, 1).times(this.editor.viewport.getSizeOfPixelOnCanvas());
 		this.updateTextInput();
 
+		this.textInputElem.oninput = () => {
+			if (this.textInputElem) {
+				this.textInputElem.style.width = `${this.textInputElem.scrollWidth}px`;
+				this.textInputElem.style.height = `${this.textInputElem.scrollHeight}px`;
+			}
+		};
 		this.textInputElem.onblur = () => {
 			// Don't remove the input within the context of a blur event handler.
 			// Doing so causes errors.
