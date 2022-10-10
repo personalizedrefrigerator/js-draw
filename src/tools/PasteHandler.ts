@@ -8,7 +8,7 @@ import { AbstractComponent, TextComponent } from '../components/lib';
 import { Command, uniteCommands } from '../commands/lib';
 import SVGLoader from '../SVGLoader';
 import { PasteEvent } from '../types';
-import { Mat33, Rect2, Vec2 } from '../math/lib';
+import { Mat33, Rect2 } from '../math/lib';
 import BaseTool from './BaseTool';
 import EditorImage from '../EditorImage';
 import SelectionTool from './SelectionTool/SelectionTool';
@@ -125,29 +125,7 @@ export default class PasteHandler extends BaseTool {
 		const pastedTextStyle: TextStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
 
 		const lines = text.split('\n');
-		let lastComponent: TextComponent|null = null;
-		const components: TextComponent[] = [];
-
-		for (const line of lines) {
-			let position = Vec2.zero;
-			if (lastComponent) {
-				const lineMargin = Math.floor(pastedTextStyle.size);
-				position = lastComponent.getBBox().bottomLeft.plus(Vec2.unitY.times(lineMargin));
-			}
-
-			const component = new TextComponent([ line ], Mat33.translation(position), pastedTextStyle);
-			components.push(component);
-			lastComponent = component;
-		}
-
-		if (components.length === 1) {
-			await this.addComponentsFromPaste([ components[0] ]);
-		} else {
-			// Wrap the existing `TextComponent`s --- dragging one component should drag all.
-			await this.addComponentsFromPaste([
-				new TextComponent(components, Mat33.identity, pastedTextStyle)
-			]);
-		}
+		await this.addComponentsFromPaste([ TextComponent.fromLines(lines, Mat33.identity, pastedTextStyle) ]);
 	}
 
 	private async doImagePaste(dataURL: string) {

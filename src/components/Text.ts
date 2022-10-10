@@ -1,6 +1,3 @@
-import Color4 from '../Color4';
-import SerializableCommand from '../commands/SerializableCommand';
-import uniteCommands from '../commands/uniteCommands';
 import LineSegment2 from '../math/LineSegment2';
 import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
@@ -9,7 +6,6 @@ import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
-import RecolorableComponent from './RecolorableComponent';
 
 export interface TextStyle {
 	size: number;
@@ -20,7 +16,7 @@ export interface TextStyle {
 }
 
 const componentTypeId = 'text';
-export default class TextComponent extends RecolorableComponent {
+export default class TextComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	public constructor(
@@ -145,23 +141,12 @@ export default class TextComponent extends RecolorableComponent {
 		return this.transform.transformVec2(Vec2.zero);
 	}
 
-	// Sets the style color of this and all strings (non-text objects) directly within this.
-	protected setRenderingStyle(renderingStyle: RenderingStyle) {
-		this.style.renderingStyle = renderingStyle;
+	public getTextStyle() {
+		return this.style;
 	}
 
-	protected getRenderingStyle(): RenderingStyle {
-		return this.style.renderingStyle;
-	}
-
-	public setColor(color: Color4): SerializableCommand {
-		const childCommands: SerializableCommand[] = this.textObjects.filter(obj => obj instanceof TextComponent).map(obj => {
-			return (obj as TextComponent).setColor(color);
-		});
-
-		return uniteCommands([
-			...childCommands, super.setColor(color),
-		]);
+	public getTransform(): Mat33 {
+		return this.transform;
 	}
 
 	protected applyTransformation(affineTransfm: Mat33): void {
@@ -242,6 +227,25 @@ export default class TextComponent extends RecolorableComponent {
 		const transform = new Mat33(...transformData);
 
 		return new TextComponent(textObjects, transform, style);
+	}
+
+	public static fromLines(lines: string[], transform: Mat33, style: TextStyle): AbstractComponent {
+		let lastComponent: TextComponent|null = null;
+		const components: TextComponent[] = [];
+
+		for (const line of lines) {
+			let position = Vec2.zero;
+			if (lastComponent) {
+				const lineMargin = Math.floor(style.size);
+				position = lastComponent.getBBox().bottomLeft.plus(Vec2.unitY.times(lineMargin));
+			}
+
+			const component = new TextComponent([ line ], Mat33.translation(position), style);
+			components.push(component);
+			lastComponent = component;
+		}
+
+		return new TextComponent(components, transform, style);
 	}
 }
 
