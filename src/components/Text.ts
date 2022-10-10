@@ -26,6 +26,13 @@ export default class TextComponent extends AbstractComponent {
 	) {
 		super(componentTypeId);
 		this.recomputeBBox();
+
+		// If this has no direct children, choose a style representative of this' content
+		// (useful for estimating the style of the TextComponent).
+		const hasDirectContent = textObjects.some(obj => typeof obj === 'string');
+		if (!hasDirectContent && textObjects.length > 0) {
+			this.style = (textObjects[0] as TextComponent).getTextStyle();
+		}
 	}
 
 	public static applyTextStyles(ctx: CanvasRenderingContext2D, style: TextStyle) {
@@ -94,19 +101,23 @@ export default class TextComponent extends AbstractComponent {
 		this.contentBBox = bbox ?? Rect2.empty;
 	}
 
-	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+	private renderInternal(canvas: AbstractRenderer) {
 		const cursor = this.transform;
 
-		canvas.startObject(this.contentBBox);
 		for (const textObject of this.textObjects) {
 			if (typeof textObject === 'string') {
 				canvas.drawText(textObject, cursor, this.style);
 			} else {
 				canvas.pushTransform(cursor);
-				textObject.render(canvas);
+				textObject.renderInternal(canvas);
 				canvas.popTransform();
 			}
 		}
+	}
+
+	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+		canvas.startObject(this.contentBBox);
+		this.renderInternal(canvas);
 		canvas.endObject(this.getLoadSaveData());
 	}
 
