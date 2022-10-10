@@ -105,12 +105,15 @@ export default class PenToolWidget extends BaseToolWidget {
 		objectSelectLabel.innerText = this.localizationTable.selectObjectType;
 		objectSelectLabel.setAttribute('for', objectTypeSelect.id);
 
+		const inverseThicknessInputFn = (t: number) => Math.log10(t);
+		const thicknessInputFn = (t: number) => 10**t;
+
 		thicknessInput.type = 'range';
-		thicknessInput.min = '2';
-		thicknessInput.max = '20';
-		thicknessInput.step = '1';
+		thicknessInput.min = `${inverseThicknessInputFn(2)}`;
+		thicknessInput.max = `${inverseThicknessInputFn(400)}`;
+		thicknessInput.step = '0.1';
 		thicknessInput.oninput = () => {
-			this.tool.setThickness(parseFloat(thicknessInput.value) ** 2);
+			this.tool.setThickness(thicknessInputFn(parseFloat(thicknessInput.value)));
 		};
 		thicknessRow.appendChild(thicknessLabel);
 		thicknessRow.appendChild(thicknessInput);
@@ -142,7 +145,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		this.updateInputs = () => {
 			colorInput.value = this.tool.getColor().toHexString();
-			thicknessInput.value = Math.sqrt(this.tool.getThickness()).toString();
+			thicknessInput.value = inverseThicknessInputFn(this.tool.getThickness()).toString();
 
 			objectTypeSelect.replaceChildren();
 			for (let i = 0; i < this.penTypes.length; i ++) {
