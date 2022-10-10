@@ -38,6 +38,7 @@ import Rect2 from './math/Rect2';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
+import { toRoundedString } from './math/rounding';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
@@ -118,7 +119,6 @@ export class Editor {
 
 	/**
 	 * Global event dispatcher/subscriber.
-	 * @see {@link types.EditorEventType}
 	 */
 	public readonly notifier: EditorNotifier;
 
@@ -840,9 +840,9 @@ export class Editor {
 
 		// Just show the main region
 		const rect = importExportViewport.visibleRect;
-		result.setAttribute('viewBox', `${rect.x} ${rect.y} ${rect.w} ${rect.h}`);
-		result.setAttribute('width', `${rect.w}`);
-		result.setAttribute('height', `${rect.h}`);
+		result.setAttribute('viewBox', [rect.x, rect.y, rect.w, rect.h].map(part => toRoundedString(part)).join(' '));
+		result.setAttribute('width', toRoundedString(rect.w));
+		result.setAttribute('height', toRoundedString(rect.h));
 
 		// Ensure the image can be identified as an SVG if downloaded.
 		// See https://jwatt.org/svg/authoring/
