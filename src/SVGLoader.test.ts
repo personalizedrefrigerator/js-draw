@@ -34,4 +34,24 @@ describe('SVGLoader', () => {
 		expect(topLefts[4].x - topLefts[0].x).toBe(100);
 		expect(topLefts[4].y - topLefts[0].y).toBe(0);
 	});
+
+	it('should correctly load tspans within texts nodes', async () => {
+		const editor = createEditor();
+		await editor.loadFrom(SVGLoader.fromString(`
+			<svg>
+				<text>
+					Testing...
+					<tspan x=0 y=100>Test 2...</tspan>
+					<tspan x=0 y=200>Test 2...</tspan>
+				</text>
+			</svg>
+		`, true));
+		const elem = editor.image
+			.getElementsIntersectingRegion(new Rect2(-1000, -1000, 10000, 10000))
+			.filter(elem => elem instanceof TextComponent)[0];
+		expect(elem).not.toBeNull();
+		expect(elem.getBBox().topLeft.y).toBeLessThan(0);
+		expect(elem.getBBox().topLeft.x).toBe(0);
+		expect(elem.getBBox().h).toBeGreaterThan(200);
+	});
 });

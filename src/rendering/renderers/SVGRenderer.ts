@@ -100,39 +100,64 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	// Apply [elemTransform] to [elem].
-	private transformFrom(elemTransform: Mat33, elem: SVGElement) {
-		let transform = this.getCanvasToScreenTransform().rightMul(elemTransform);
+	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false) {
+		let transform = !inCanvasSpace ? this.getCanvasToScreenTransform().rightMul(elemTransform) : elemTransform;
 		const translation = transform.transformVec2(Vec2.zero);
 		transform = transform.rightMul(Mat33.translation(translation.times(-1)));
 
-		elem.style.transform = `matrix(
-			${transform.a1}, ${transform.b1},
-			${transform.a2}, ${transform.b2},
-			${transform.a3}, ${transform.b3}
-		)`;
+		if (!transform.eq(Mat33.identity)) {
+			elem.style.transform = `matrix(
+				${transform.a1}, ${transform.b1},
+				${transform.a2}, ${transform.b2},
+				${transform.a3}, ${transform.b3}
+			)`;
+		} else {
+			elem.style.transform = '';
+		}
+
 		elem.setAttribute('x', `${toRoundedString(translation.x)}`);
 		elem.setAttribute('y', `${toRoundedString(translation.y)}`);
 	}
 
+	private textContainer: SVGTextElement|null = null;
+	private textContainerTransform: Mat33|null = null;
 	public drawText(text: string, transform: Mat33, style: TextStyle): void {
-		const textElem = document.createElementNS(svgNameSpace, 'text');
-		textElem.appendChild(document.createTextNode(text));
-		this.transformFrom(transform, textElem);
+		const applyTextStyles = (elem: SVGTextElement|SVGTSpanElement, style: TextStyle) => {
+			elem.style.fontFamily = style.fontFamily;
+			elem.style.fontVariant = style.fontVariant ?? '';
+			elem.style.fontWeight = style.fontWeight ?? '';
+			elem.style.fontSize = style.size + 'px';
+			elem.style.fill = style.renderingStyle.fill.toHexString();
 
-		textElem.style.fontFamily = style.fontFamily;
-		textElem.style.fontVariant = style.fontVariant ?? '';
-		textElem.style.fontWeight = style.fontWeight ?? '';
-		textElem.style.fontSize = style.size + 'px';
-		textElem.style.fill = style.renderingStyle.fill.toHexString();
+			if (style.renderingStyle.stroke) {
+				const strokeStyle = style.renderingStyle.stroke;
+				elem.style.stroke = strokeStyle.color.toHexString();
+				elem.style.strokeWidth = strokeStyle.width + 'px';
+			}
+		};
+		transform = this.getCanvasToScreenTransform().rightMul(transform);
 
-		if (style.renderingStyle.stroke) {
-			const strokeStyle = style.renderingStyle.stroke;
-			textElem.style.stroke = strokeStyle.color.toHexString();
-			textElem.style.strokeWidth = strokeStyle.width + 'px';
+		if (!this.textContainer) {
+			const container = document.createElementNS(svgNameSpace, 'text');
+			container.appendChild(document.createTextNode(text));
+			this.transformFrom(transform, container, true);
+			applyTextStyles(container, style);
+
+			this.elem.appendChild(container);
+			this.objectElems?.push(container);
+			if (this.objectLevel > 0) {
+				this.textContainer = container;
+				this.textContainerTransform = transform;
+			}
+		} else {
+			const elem = document.createElementNS(svgNameSpace, 'tspan');
+			elem.appendChild(document.createTextNode(text));
+			this.textContainer.appendChild(elem);
+
+			transform = this.textContainerTransform!.inverse().rightMul(transform);
+			this.transformFrom(transform, elem, true);
+			applyTextStyles(elem, style);
 		}
-
-		this.elem.appendChild(textElem);
-		this.objectElems?.push(textElem);
 	}
 
 	public drawImage(image: RenderableImage) {
@@ -153,6 +178,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		// Only accumulate a path within an object
 		this.lastPathString = [];
 		this.lastPathStyle = null;
+		this.textContainer = null;
 		this.objectElems = [];
 	}
 
