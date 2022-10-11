@@ -47,6 +47,7 @@ export default class TextTool extends BaseTool {
 				background-color: rgba(0, 0, 0, 0);
 
 				white-space: pre;
+				overflow: hidden;
 
 				padding: 0;
 				margin: 0;
@@ -151,6 +152,9 @@ export default class TextTool extends BaseTool {
 		this.textRotation = -this.editor.viewport.getRotationAngle();
 		this.textScale = Vec2.of(1, 1).times(this.editor.viewport.getSizeOfPixelOnCanvas());
 		this.updateTextInput();
+
+		// Update the input size/position/etc. after the placeHolder has had time to appear.
+		setTimeout(() => this.updateTextInput(), 0);
 
 		this.textInputElem.oninput = () => {
 			if (this.textInputElem) {
