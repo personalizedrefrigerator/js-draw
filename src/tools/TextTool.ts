@@ -174,6 +174,7 @@ export default class TextTool extends BaseTool {
 				this.editor.focus();
 
 				this.removeExistingCommand?.unapply(this.editor);
+				this.removeExistingCommand = null;
 			}
 		};
 
