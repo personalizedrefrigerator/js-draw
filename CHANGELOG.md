@@ -1,3 +1,6 @@
+# 0.7.1
+ * Fix scrollbars in text tool appearing when they should not (mostly in Chrome).
+
 # 0.7.0
  * Text tool
    * Edit existing text.
