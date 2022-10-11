@@ -215,8 +215,10 @@ export default class TextTool extends BaseTool {
 
 				this.startTextInput(targetNode.getBaselinePos(), targetNode.getText());
 
-				this.textRotation = targetNode.getTransform().transformVec3(Vec2.zero).angle();
-				this.textScale = targetNode.getTransform().transformVec3(Vec2.of(1, 1));
+				const transform = targetNode.getTransform();
+				this.textRotation = transform.transformVec3(Vec2.unitX).angle();
+				const scaleFactor = transform.transformVec3(Vec2.unitX).magnitude();
+				this.textScale = Vec2.of(1, 1).times(scaleFactor);
 				this.updateTextInput();
 			} else {
 				this.removeExistingCommand = null;
