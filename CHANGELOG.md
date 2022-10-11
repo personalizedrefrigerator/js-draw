@@ -1,3 +1,11 @@
+# 0.7.0
+ * Text tool
+   * Edit existing text.
+   * Shift+enter to insert a new line.
+   * Preserve multi-line text when loading/saving
+ * Pen
+   * Decrease smoothing amount for thick strokes.
+
 # 0.6.0
  * Selection tool:
    * Shift+click extends a selection
