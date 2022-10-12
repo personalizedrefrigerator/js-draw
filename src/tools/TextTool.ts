@@ -210,6 +210,9 @@ export default class TextTool extends BaseTool {
 			const targetNodes = this.editor.image.getElementsIntersectingRegion(testRegion);
 			const targetTextNodes = targetNodes.filter(node => node instanceof TextComponent) as TextComponent[];
 
+			// End any TextNodes we're currently editing.
+			this.flushInput();
+
 			if (targetTextNodes.length > 0) {
 				const targetNode = targetTextNodes[targetTextNodes.length - 1];
 				this.setTextStyle(targetNode.getTextStyle());
@@ -290,7 +293,7 @@ export default class TextTool extends BaseTool {
 
 	private setTextStyle(style: TextStyle) {
 		// Copy the style — we may change parts of it.
-		this.textStyle = {...style};
+		this.textStyle = { ...style, renderingStyle: { ...style.renderingStyle } };
 		this.dispatchUpdateEvent();
 	}
 }
