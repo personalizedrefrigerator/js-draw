@@ -218,6 +218,7 @@ export default class SVGLoader implements ImageLoader {
 			} else if (child.nodeType === Node.ELEMENT_NODE) {
 				const subElem = child as SVGElement;
 				if (subElem.tagName.toLowerCase() === 'tspan') {
+					// FIXME: tspan's (x, y) components are absolute, not relative to the parent.
 					contentList.push(this.makeText(subElem as SVGTSpanElement));
 				} else {
 					throw new Error(`Unrecognized text child element: ${subElem}`);

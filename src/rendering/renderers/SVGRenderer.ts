@@ -99,11 +99,15 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.lastPathString.push(path.toString());
 	}
 
-	// Apply [elemTransform] to [elem].
-	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false) {
+	// Apply [elemTransform] to [elem]. Uses both a `matrix` and `.x`, `.y` properties if `setXY` is true.
+	// Otherwise, just uses a `matrix`.
+	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false, setXY: boolean = true) {
 		let transform = !inCanvasSpace ? this.getCanvasToScreenTransform().rightMul(elemTransform) : elemTransform;
 		const translation = transform.transformVec2(Vec2.zero);
-		transform = transform.rightMul(Mat33.translation(translation.times(-1)));
+
+		if (setXY) {
+			transform = transform.rightMul(Mat33.translation(translation.times(-1)));
+		}
 
 		if (!transform.eq(Mat33.identity)) {
 			elem.style.transform = `matrix(
@@ -115,8 +119,10 @@ export default class SVGRenderer extends AbstractRenderer {
 			elem.style.transform = '';
 		}
 
-		elem.setAttribute('x', `${toRoundedString(translation.x)}`);
-		elem.setAttribute('y', `${toRoundedString(translation.y)}`);
+		if (setXY) {
+			elem.setAttribute('x', `${toRoundedString(translation.x)}`);
+			elem.setAttribute('y', `${toRoundedString(translation.y)}`);
+		}
 	}
 
 	private textContainer: SVGTextElement|null = null;
@@ -140,7 +146,11 @@ export default class SVGRenderer extends AbstractRenderer {
 		if (!this.textContainer) {
 			const container = document.createElementNS(svgNameSpace, 'text');
 			container.appendChild(document.createTextNode(text));
-			this.transformFrom(transform, container, true);
+
+			// Don't set .x/.y properties (just use .style.transform).
+			// Child nodes aren't translated by .x/.y properties, but are by .style.transform.
+			const setXY = false;
+			this.transformFrom(transform, container, true, setXY);
 			applyTextStyles(container, style);
 
 			this.elem.appendChild(container);
@@ -154,8 +164,14 @@ export default class SVGRenderer extends AbstractRenderer {
 			elem.appendChild(document.createTextNode(text));
 			this.textContainer.appendChild(elem);
 
+			// Make .x/.y relative to the parent.
 			transform = this.textContainerTransform!.inverse().rightMul(transform);
-			this.transformFrom(transform, elem, true);
+
+			// .style.transform does nothing to tspan elements. As such, we need to set x/y:
+			const translation = transform.transformVec2(Vec2.zero);
+			elem.setAttribute('x', `${toRoundedString(translation.x)}`);
+			elem.setAttribute('y', `${toRoundedString(translation.y)}`);
+
 			applyTextStyles(elem, style);
 		}
 	}

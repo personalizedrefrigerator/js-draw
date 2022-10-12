@@ -148,7 +148,7 @@ export default class TextTool extends BaseTool {
 		this.textInputElem = document.createElement('textarea');
 		this.textInputElem.value = initialText;
 		this.textInputElem.style.display = 'inline-block';
-		this.textTargetPosition = textCanvasPos;
+		this.textTargetPosition = this.editor.viewport.roundPoint(textCanvasPos);
 		this.textRotation = -this.editor.viewport.getRotationAngle();
 		this.textScale = Vec2.of(1, 1).times(this.editor.viewport.getSizeOfPixelOnCanvas());
 		this.updateTextInput();
