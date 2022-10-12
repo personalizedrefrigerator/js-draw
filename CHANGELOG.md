@@ -1,3 +1,9 @@
+
+# 0.7.2
+ * Bug fixes
+   * Fix multi-line text displaying in wrong position in exported SVGs.
+   * Fix editing a different text node sometimes changing the color/font of the previous text node.
+
 # 0.7.1
  * Fix scrollbars in text tool appearing when they should not (mostly in Chrome).
 
