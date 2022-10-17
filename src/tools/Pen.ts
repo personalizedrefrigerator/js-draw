@@ -14,13 +14,13 @@ export interface PenStyle {
 
 export default class Pen extends BaseTool {
 	protected builder: ComponentBuilder|null = null;
-	protected builderFactory: ComponentBuilderFactory = makeFreehandLineBuilder;
 	private lastPoint: StrokeDataPoint|null = null;
 
 	public constructor(
 		private editor: Editor,
 		description: string,
 		private style: PenStyle,
+		private builderFactory: ComponentBuilderFactory = makeFreehandLineBuilder,
 	) {
 		super(editor.notifier, description);
 	}

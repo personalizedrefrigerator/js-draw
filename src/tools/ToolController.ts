@@ -14,6 +14,7 @@ import PipetteTool from './PipetteTool';
 import ToolSwitcherShortcut from './ToolSwitcherShortcut';
 import PasteHandler from './PasteHandler';
 import ToolbarShortcutHandler from './ToolbarShortcutHandler';
+import { makePressureSensitiveFreehandLineBuilder } from '../components/builders/PressureSensitiveFreehandLineBuilder';
 
 export default class ToolController {
 	private tools: BaseTool[];
@@ -34,7 +35,7 @@ export default class ToolController {
 			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 }),
 			
 			// Highlighter-like pen with width=64
-			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }),
+			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 64 }, makePressureSensitiveFreehandLineBuilder),
 			
 			new Eraser(editor, localization.eraserTool),
 			new SelectionTool(editor, localization.selectionTool),

@@ -1,5 +1,6 @@
 import { makeArrowBuilder } from '../../components/builders/ArrowBuilder';
 import { makeFreehandLineBuilder } from '../../components/builders/FreehandLineBuilder';
+import { makePressureSensitiveFreehandLineBuilder } from '../../components/builders/PressureSensitiveFreehandLineBuilder';
 import { makeLineBuilder } from '../../components/builders/LineBuilder';
 import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../../components/builders/RectangleBuilder';
 import { ComponentBuilderFactory } from '../../components/builders/types';
@@ -31,6 +32,10 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		// Default pen types
 		this.penTypes = [
+			{
+				name: localization.pressureSensitiveFreehandPen,
+				factory: makePressureSensitiveFreehandLineBuilder,
+			},
 			{
 				name: localization.freehandPen,
 				factory: makeFreehandLineBuilder,
@@ -72,7 +77,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 	protected createIcon(): Element {
 		const strokeFactory = this.tool.getStrokeFactory();
-		if (strokeFactory === makeFreehandLineBuilder) {
+		if (strokeFactory === makeFreehandLineBuilder || strokeFactory === makePressureSensitiveFreehandLineBuilder) {
 			// Use a square-root scale to prevent the pen's tip from overflowing.
 			const scale = Math.round(Math.sqrt(this.tool.getThickness()) * 4);
 			const color = this.tool.getColor();

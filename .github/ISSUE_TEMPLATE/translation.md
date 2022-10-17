@@ -38,6 +38,7 @@ If you're updating an existing translation, please only include the strings you'
 	touchPanning: "Touchscreen panning",
 	anyDevicePanning: "Any device panning",
 	freehandPen: "Freehand",
+	pressureSensitiveFreehandPen: "Pen (pressure sensitive)",
 	arrowPen: "Arrow",
 	linePen: "Line",
 	outlinedRectanglePen: "Outlined rectangle",

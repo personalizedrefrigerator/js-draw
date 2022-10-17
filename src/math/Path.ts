@@ -267,6 +267,36 @@ export default class Path {
 		]);
 	}
 
+	private getEndPoint() {
+		if (this.parts.length === 0) {
+			return this.startPoint;
+		}
+		const lastPart = this.parts[this.parts.length - 1];
+		if (lastPart.kind === PathCommandType.QuadraticBezierTo || lastPart.kind === PathCommandType.CubicBezierTo) {
+			return lastPart.endPoint;
+		} else {
+			return lastPart.point;
+		}
+	}
+
+	public roughlyIntersects(rect: Rect2, strokeWidth: number = 0) {
+		if (this.parts.length === 0) {
+			return rect.containsPoint(this.startPoint);
+		}
+		const isClosed = this.startPoint.eq(this.getEndPoint());
+        
+		if (isClosed && strokeWidth == 0) {
+			return this.closedRoughlyIntersects(rect);
+		}
+
+		if (rect.containsRect(this.bbox)) {
+			return true;
+		}
+
+		// TODO: This is currently a very bad approximation.
+		return rect.intersects(this.bbox);
+	}
+
 	// Treats this as a closed path and returns true if part of `rect` is roughly within
 	// this path's interior.
 	//

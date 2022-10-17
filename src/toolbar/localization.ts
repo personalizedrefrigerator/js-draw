@@ -8,6 +8,7 @@ export interface ToolbarLocalization {
 	linePen: string;
 	arrowPen: string;
 	freehandPen: string;
+	pressureSensitiveFreehandPen: string;
 	selectObjectType: string;
 	colorLabel: string;
 	pen: string;
@@ -55,6 +56,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	touchPanning: 'Touchscreen panning',
 
 	freehandPen: 'Freehand',
+	pressureSensitiveFreehandPen: 'Freehand (pressure sensitive)',
 	arrowPen: 'Arrow',
 	linePen: 'Line',
 	outlinedRectanglePen: 'Outlined rectangle',

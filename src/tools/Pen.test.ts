@@ -144,7 +144,7 @@ describe('Pen', () => {
 		const elems = editor.image.getElementsIntersectingRegion(new Rect2(0, 0, 1000, 1000));
 		expect(elems).toHaveLength(1);
 
-		expect(elems[0].getBBox().topLeft).objEq(Vec2.of(420, 24), 8); // ± 8
+		expect(elems[0].getBBox().topLeft).objEq(Vec2.of(420, 24), 32); // ± 32
 		expect(elems[0].getBBox().bottomRight).objEq(Vec2.of(420, 340), 25); // ± 25
 	});
 });
