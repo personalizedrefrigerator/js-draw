@@ -200,7 +200,7 @@ export class StrokeSmoother {
 		let exitingVec = this.computeExitingVec();
 
 		// Find the intersection between the entering vector and the exiting vector
-		const maxRelativeLength = 2;
+		const maxRelativeLength = 2.2;
 		const segmentStart = this.buffer[0];
 		const segmentEnd = newPoint.pos;
 		const startEndDist = segmentEnd.minus(segmentStart).magnitude();
@@ -238,7 +238,7 @@ export class StrokeSmoother {
 		if (!controlPoint || segmentStart.eq(controlPoint) || segmentEnd.eq(controlPoint)) {
 			// Position the control point closer to the first -- the connecting
 			// segment will be roughly a line.
-			controlPoint = segmentStart.plus(enteringVec.times(startEndDist / 4));
+			controlPoint = segmentStart.plus(enteringVec.times(startEndDist / 3));
 		}
 
 		console.assert(!segmentStart.eq(controlPoint, 1e-11), 'Start and control points are equal!');
