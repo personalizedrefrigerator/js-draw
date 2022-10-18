@@ -274,6 +274,11 @@ export default class Mat33 {
 		);
 	}
 
+	/** Estimate the scale factor of this matrix (based on the first row). */
+	public getScaleFactor() {
+		return Math.hypot(this.a1, this.a2);
+	}
+
 	/** Constructs a 3x3 translation matrix (for translating `Vec2`s) */
 	public static translation(amount: Vec2): Mat33 {
 		// When transforming Vec2s by a 3x3 matrix, we give the input

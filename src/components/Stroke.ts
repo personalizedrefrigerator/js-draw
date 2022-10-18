@@ -87,7 +87,20 @@ export default class Stroke extends AbstractComponent {
 		// Update each part
 		this.parts = this.parts.map((part) => {
 			const newPath = part.path.transformedBy(affineTransfm);
-			const newBBox = this.bboxForPart(newPath.bbox, part.style);
+			const newStyle = {
+				...part.style,
+				stroke: part.style.stroke ? {
+					...part.style.stroke,
+				} : undefined,
+			};
+
+			// Approximate the scale factor.
+			if (newStyle.stroke) {
+				const scaleFactor = affineTransfm.getScaleFactor();
+				newStyle.stroke.width *= scaleFactor;
+			}
+
+			const newBBox = this.bboxForPart(newPath.bbox, newStyle);
 
 			if (isFirstPart) {
 				this.contentBBox = newBBox;
@@ -100,7 +113,7 @@ export default class Stroke extends AbstractComponent {
 				path: newPath,
 				startPoint: newPath.startPoint,
 				commands: newPath.parts,
-				style: part.style,
+				style: newStyle,
 			};
 		});
 	}
