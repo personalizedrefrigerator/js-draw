@@ -37,6 +37,8 @@ export default class Selection {
 	private container: HTMLElement;
 	private backgroundElem: HTMLElement;
 
+	private hasParent: boolean = true;
+
 	public constructor(startPoint: Point2, private editor: Editor) {
 		this.originalRegion = new Rect2(startPoint.x, startPoint.y, 0, 0);
 		this.transformers = {
@@ -155,7 +157,7 @@ export default class Selection {
 	public setTransform(transform: Mat33, preview: boolean = true) {
 		this.transform = transform;
 
-		if (preview) {
+		if (preview && this.hasParent) {
 			this.previewTransformCmds();
 			this.scrollTo();
 		}
@@ -329,6 +331,11 @@ export default class Selection {
 
 	// @internal
 	public updateUI() {
+		// Don't update old selections.
+		if (!this.hasParent) {
+			return;
+		}
+
 		// marginLeft, marginTop: Display relative to the top left of the selection overlay.
 		// left, top don't work for this.
 		this.backgroundElem.style.marginLeft = `${this.screenRegion.topLeft.x}px`;
@@ -428,6 +435,7 @@ export default class Selection {
 		}
 
 		elem.appendChild(this.container);
+		this.hasParent = true;
 	}
 
 	public setToPoint(point: Point2) {
@@ -440,6 +448,7 @@ export default class Selection {
 			this.container.remove();
 		}
 		this.originalRegion = Rect2.empty;
+		this.hasParent = false;
 	}
 
 	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
