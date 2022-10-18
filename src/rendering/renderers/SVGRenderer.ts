@@ -23,6 +23,16 @@ export default class SVGRenderer extends AbstractRenderer {
 	public constructor(private elem: SVGSVGElement, viewport: Viewport, private sanitize: boolean = false) {
 		super(viewport);
 		this.clear();
+
+		// Default to rounded strokes.
+		const styleSheet = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+		styleSheet.innerHTML = `
+			path {
+				stroke-linecap: round;
+				stroke-linejoin: round;
+			}
+		`;
+		elem.appendChild(styleSheet);
 	}
 
 	// Sets an attribute on the root SVG element.

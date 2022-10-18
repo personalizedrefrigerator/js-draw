@@ -95,6 +95,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.ctx.strokeStyle = style.stroke.color.toHexString();
 			this.ctx.lineWidth = this.getSizeOfCanvasPixelOnScreen() * style.stroke.width;
 			this.ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
 			this.ctx.stroke();
 		}
 
