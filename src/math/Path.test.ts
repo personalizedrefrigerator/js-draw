@@ -146,4 +146,29 @@ describe('Path', () => {
 			).toBe(false);
 		});
 	});
+
+	describe('roughlyIntersects', () => {
+		it('should consider parts outside bbox of individual parts of a line as not intersecting', () => {
+			const path = Path.fromString(`
+				M10,10
+				L20,20
+				L100,21
+			`);
+			expect(
+				path.roughlyIntersects(new Rect2(0, 0, 50, 50))
+			).toBe(true);
+			expect(
+				path.roughlyIntersects(new Rect2(0, 0, 5, 5))
+			).toBe(false);
+			expect(
+				path.roughlyIntersects(new Rect2(8, 22, 1, 1))
+			).toBe(false);
+			expect(
+				path.roughlyIntersects(new Rect2(21, 11, 1, 1))
+			).toBe(false);
+			expect(
+				path.roughlyIntersects(new Rect2(50, 19, 1, 2))
+			).toBe(true);
+		});
+	});
 });

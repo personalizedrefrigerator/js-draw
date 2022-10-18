@@ -293,8 +293,23 @@ export default class Path {
 			return true;
 		}
 
-		// TODO: This is currently a very bad approximation.
-		return rect.intersects(this.bbox);
+		// Does the rectangle intersect the bounding boxes of any of this' parts?
+		let startPoint = this.startPoint;
+		for (const part of this.parts) {
+			const bbox = Path.computeBBoxForSegment(startPoint, part).grownBy(strokeWidth);
+
+			if (part.kind === PathCommandType.LineTo || part.kind === PathCommandType.MoveTo) {
+				startPoint = part.point;
+			} else {
+				startPoint = part.endPoint;
+			}
+
+			if (rect.intersects(bbox)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	// Treats this as a closed path and returns true if part of `rect` is roughly within
