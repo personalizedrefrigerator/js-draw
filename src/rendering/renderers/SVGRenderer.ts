@@ -11,6 +11,8 @@ import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
 import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
+export const renderedStylesheetId = 'js-draw-style-sheet';
+
 const svgNameSpace = 'http://www.w3.org/2000/svg';
 export default class SVGRenderer extends AbstractRenderer {
 	private lastPathStyle: RenderingStyle|null = null;
@@ -24,15 +26,22 @@ export default class SVGRenderer extends AbstractRenderer {
 		super(viewport);
 		this.clear();
 
-		// Default to rounded strokes.
-		const styleSheet = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-		styleSheet.innerHTML = `
-			path {
-				stroke-linecap: round;
-				stroke-linejoin: round;
-			}
-		`;
-		elem.appendChild(styleSheet);
+		this.addStyleSheet();
+	}
+
+	private addStyleSheet() {
+		if (!this.elem.querySelector(`#${renderedStylesheetId}`)) {
+			// Default to rounded strokes.
+			const styleSheet = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+			styleSheet.innerHTML = `
+				path {
+					stroke-linecap: round;
+					stroke-linejoin: round;
+				}
+			`.replace(/\s+/g, '');
+			styleSheet.setAttribute('id', renderedStylesheetId);
+			this.elem.appendChild(styleSheet);
+		}
 	}
 
 	// Sets an attribute on the root SVG element.
@@ -259,6 +268,11 @@ export default class SVGRenderer extends AbstractRenderer {
 	// Renders a **copy** of the given element.
 	public drawSVGElem(elem: SVGElement) {
 		if (this.sanitize) {
+			return;
+		}
+
+		// Don't add multiple copies of the default stylesheet.
+		if (elem.tagName.toLowerCase() === 'style' && elem.getAttribute('id') === renderedStylesheetId) {
 			return;
 		}
 
