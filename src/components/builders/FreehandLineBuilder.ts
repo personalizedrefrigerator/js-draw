@@ -11,15 +11,13 @@ import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
 import Color4 from '../../Color4';
 
 export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	const width = initialPoint.width;
-
 	// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
 	// less than ±1 px from the curve.
 	const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
 	const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
 
 	return new FreehandLineBuilder(
-		initialPoint, width, minSmoothingDist, maxSmoothingDist, viewport
+		initialPoint, minSmoothingDist, maxSmoothingDist, viewport
 	);
 };
 
@@ -31,11 +29,11 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	private curveFitter: StrokeSmoother;
 
 	private bbox: Rect2;
+	private averageWidth: number;
+	private widthAverageNumSamples: number = 1;
 
 	public constructor(
 		private startPoint: StrokeDataPoint,
-
-		private width: number,
 
 		private minFitAllowed: number,
 		maxFitAllowed: number,
@@ -44,6 +42,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	) {
 		this.curveFitter = new StrokeSmoother(startPoint, minFitAllowed, maxFitAllowed, (curve: Curve|null) => this.addCurve(curve));
 
+		this.averageWidth = startPoint.width;
 		this.bbox = new Rect2(this.startPoint.pos.x, this.startPoint.pos.y, 0, 0);
 	}
 
@@ -56,7 +55,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			fill: Color4.transparent,
 			stroke: {
 				color: this.startPoint.color,
-				width: this.width,
+				width: this.averageWidth,
 			}
 		};
 	}
@@ -109,7 +108,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	}
 
 	private roundPoint(point: Point2): Point2 {
-		let minFit = Math.min(this.minFitAllowed, this.width / 2);
+		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 2);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
@@ -194,5 +193,9 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 	public addPoint(newPoint: StrokeDataPoint) {
 		this.curveFitter.addPoint(newPoint);
+		this.widthAverageNumSamples ++;
+		this.averageWidth =
+			this.averageWidth * (this.widthAverageNumSamples - 1) / this.widthAverageNumSamples
+				+ newPoint.width / this.widthAverageNumSamples;
 	}
 }
