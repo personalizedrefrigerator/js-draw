@@ -1,4 +1,7 @@
 
+# 0.9.0 (unreleased)
+ * Allow saving toolbar widget state (see `HTMLToolbar#serializeState` and `HTMLToolbar#deserializeState`).
+
 # 0.8.0
  * Use non-pressure-sensitive strokes by default for most tools
    * These strokes should be have fewer bugs/issues than the pressure sensitive strokes.

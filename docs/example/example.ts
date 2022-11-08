@@ -43,7 +43,7 @@ const saveImage = (editor: Editor) => {
 
 const saveToolbarState = (toolbar: HTMLToolbar) => {
 	try {
-		localStorage.setItem(editorStateLocalStorageKey, toolbar.serializeWidgetState());
+		localStorage.setItem(editorStateLocalStorageKey, toolbar.serializeState());
 	} catch (e) {
 		console.warn('Error saving editor prefs: ', e);
 	}
@@ -54,7 +54,7 @@ const restoreToolbarState = (toolbar: HTMLToolbar) => {
 	if (toolbarState) {
 		// If the toolbar state is invalid, deserialize may throw errors.
 		try {
-			toolbar.deserializeWidgetState(toolbarState);
+			toolbar.deserializeState(toolbarState);
 		} catch(e) {
 			console.warn('Error deserializing toolbar state: ', e);
 		}

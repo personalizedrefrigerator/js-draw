@@ -134,7 +134,7 @@ export default class HTMLToolbar {
 		this.setupColorPickers();
 	}
 
-	public serializeWidgetState(): string {
+	public serializeState(): string {
 		const result: Record<string, any> = {};
 
 		for (const widgetId in this.widgets) {
@@ -146,7 +146,7 @@ export default class HTMLToolbar {
 
 	// Deserialize toolbar widgets from the given state.
 	// Assumes that toolbar widgets are in the same order as when state was serialized.
-	public deserializeWidgetState(state: string) {
+	public deserializeState(state: string) {
 		const data = JSON.parse(state);
 
 		for (const widgetId in data) {
