@@ -1,5 +1,5 @@
 // To test importing from a parent directory
-import { Editor, HTMLToolbar } from '../../src/lib';
+import { Editor, EditorEventType, HTMLToolbar } from '../../src/lib';
 import '../../src/styles';
 
 // If from an NPM package,
@@ -26,10 +26,14 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 
 	// Show a confirmation dialog when the user tries to close the page.
 	window.onbeforeunload = () => {
-		saveToolbarState(toolbar);
-
 		return 'There may be unsaved changes. Really quit?';
 	};
+
+	// Save toolbar state whenever tool state changes (which could be caused by a
+	// change in the one of the toolbar widgets).
+	editor.notifier.on(EditorEventType.ToolUpdated, () => {
+		saveToolbarState(toolbar);
+	});
 
 	// Load toolbar widget state from localStorage.
 	restoreToolbarState(toolbar);
