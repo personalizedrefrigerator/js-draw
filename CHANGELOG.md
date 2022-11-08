@@ -1,4 +1,8 @@
 
+# 0.8.0
+ * Use non-pressure-sensitive strokes by default for most tools
+   * These strokes should be have fewer bugs/issues than the pressure sensitive strokes.
+
 # 0.7.2
  * Bug fixes
    * Fix multi-line text displaying in wrong position in exported SVGs.
