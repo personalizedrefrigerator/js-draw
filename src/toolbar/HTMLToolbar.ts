@@ -24,6 +24,8 @@ type UpdateColorisCallback = ()=>void;
 export default class HTMLToolbar {
 	private container: HTMLElement;
 
+	private widgets: Record<string, BaseWidget> = {};
+
 	private static colorisStarted: boolean = false;
 	private updateColoris: UpdateColorisCallback|null = null;
 
@@ -121,8 +123,39 @@ export default class HTMLToolbar {
 	// Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
 	// (i.e. its `addTo` method should not have been called).
 	public addWidget(widget: BaseWidget) {
+		// Prevent name collisions
+		const id = widget.getUniqueIdIn(this.widgets);
+
+		// Add the widget
+		this.widgets[id] = widget;
+
+		// Add HTML elements.
 		widget.addTo(this.container);
 		this.setupColorPickers();
+	}
+
+	public serializeWidgetState(): string {
+		const result: Record<string, any> = {};
+
+		for (const widgetId in this.widgets) {
+			result[widgetId] = this.widgets[widgetId].serializeState();
+		}
+
+		return JSON.stringify(result);
+	}
+
+	// Deserialize toolbar widgets from the given state.
+	// Assumes that toolbar widgets are in the same order as when state was serialized.
+	public deserializeWidgetState(state: string) {
+		const data = JSON.parse(state);
+
+		for (const widgetId in data) {
+			if (!(widgetId in this.widgets)) {
+				console.warn(`Unable to deserialize widget ${widgetId} ­— no such widget.`);
+			}
+
+			this.widgets[widgetId].deserializeFrom(data[widgetId]);
+		}
 	}
 
 	public addActionButton(title: string|ActionButtonIcon, command: ()=> void, parent?: Element) {

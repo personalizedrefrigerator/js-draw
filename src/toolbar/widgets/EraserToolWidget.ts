@@ -1,6 +1,17 @@
+import Editor from '../../Editor';
+import Eraser from '../../tools/Eraser';
+import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 
 export default class EraserToolWidget extends BaseToolWidget {
+	public constructor(
+		editor: Editor,
+		tool: Eraser,
+		localizationTable?: ToolbarLocalization
+	) {
+		super(editor, tool, 'eraser-tool-widget', localizationTable);
+	}
+
 	protected getTitle(): string {
 		return this.localizationTable.eraser;
 	}

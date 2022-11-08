@@ -4,6 +4,8 @@ import { EditorEventType, InputEvtType, KeyPressEvent } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 
+export type SavedToolbuttonState = Record<string, any>;
+
 export default abstract class BaseWidget {
 	protected readonly container: HTMLElement;
 	private button: HTMLElement;
@@ -13,13 +15,20 @@ export default abstract class BaseWidget {
 	private label: HTMLLabelElement;
 	#hasDropdown: boolean;
 	private disabled: boolean = false;
-	private subWidgets: BaseWidget[] = [];
+
+	// Maps subWidget IDs to subWidgets.
+	private subWidgets: Record<string, BaseWidget> = {};
+
 	private toplevel: boolean = true;
+	protected readonly localizationTable: ToolbarLocalization;
 
 	public constructor(
 		protected editor: Editor,
-		protected localizationTable: ToolbarLocalization,
+		protected id: string,
+		localizationTable?: ToolbarLocalization,
 	) {
+		this.localizationTable = localizationTable ?? editor.localization;
+
 		this.icon = null;
 		this.container = document.createElement('div');
 		this.container.classList.add(`${toolbarCSSPrefix}toolContainer`);
@@ -43,17 +52,44 @@ export default abstract class BaseWidget {
 		}
 	}
 
+	public getId(): string {
+		return this.id;
+	}
+
+	/**
+	 * Returns the ID of this widget in `container`. Adds a suffix to this' ID
+	 * if an item in `container` already has this' ID.
+	 * 
+	 * For example, if `this` has ID `foo` and if
+	 * `container = { 'foo': somethingNotThis, 'foo-1': somethingElseNotThis }`, this method
+	 * returns `foo-2` because elements with IDs `foo` and `foo-1` are already present in
+	 * `container`.
+	 */
+	public getUniqueIdIn(container: Record<string, BaseWidget>): string {
+		let id = this.getId();
+		let idCounter = 0;
+
+		while (id in container && container[id] !== this) {
+			id = this.getId() + '-' + idCounter.toString();
+			idCounter ++;
+		}
+
+		return id;
+	}
+
 	protected abstract getTitle(): string;
 	protected abstract createIcon(): Element;
 
 	// Add content to the widget's associated dropdown menu.
 	// Returns true if such a menu should be created, false otherwise.
 	protected fillDropdown(dropdown: HTMLElement): boolean {
-		if (this.subWidgets.length === 0) {
+		if (Object.keys(this.subWidgets).length === 0) {
 			return false;
 		}
 
-		for (const widget of this.subWidgets) {
+		for (const widgetId in this.subWidgets) {
+			const widget = this.subWidgets[widgetId];
+
 			widget.addTo(dropdown);
 			widget.setIsToplevel(false);
 		}
@@ -118,7 +154,10 @@ export default abstract class BaseWidget {
 
 	// Add a widget to this' dropdown. Must be called before this.addTo.
 	protected addSubWidget(widget: BaseWidget) {
-		this.subWidgets.push(widget);
+		// Generate a unique ID for the widget.
+		const id = widget.getUniqueIdIn(this.subWidgets);
+
+		this.subWidgets[id] = widget;
 	}
 
 	// Adds this to [parent]. This can only be called once for each ToolbarWidget.
@@ -250,5 +289,44 @@ export default abstract class BaseWidget {
 		const icon = this.editor.icons.makeDropdownIcon();
 		icon.classList.add(`${toolbarCSSPrefix}showHideDropdownIcon`);
 		return icon;
+	}
+
+	/**
+	 * Serialize state associated with this widget.
+	 * Override this method to allow saving/restoring from state on application load.
+	 * 
+	 * Overriders should call `super` and include the output of `super.serializeState` in
+	 * the output dictionary.
+	 * 
+	 * Clients should not rely on the output from `saveState` being in any particular
+	 * format.
+	 */
+	public serializeState(): SavedToolbuttonState {
+		const subwidgetState: Record<string, any> = {};
+
+		// Save all subwidget state.
+		for (const subwidgetId in this.subWidgets) {
+			subwidgetState[subwidgetId] = this.subWidgets[subwidgetId].serializeState();
+		}
+
+		return {
+			subwidgetState,
+		};
+	}
+
+	/**
+	 * Restore widget state from serialized data. See also `saveState`.
+	 * 
+	 * Overriders must call `super`.
+	 */
+	public deserializeFrom(state: SavedToolbuttonState): void {
+		if (state.subwidgetState) {
+			// Deserialize all subwidgets.
+			for (const subwidgetId in state.subwidgetState) {
+				if (subwidgetId in this.subWidgets) {
+					this.subWidgets[subwidgetId].deserializeFrom(state.subwidgetState[subwidgetId]);
+				}
+			}
+		}
 	}
 }

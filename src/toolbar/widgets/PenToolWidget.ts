@@ -11,11 +11,16 @@ import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
+import Color4 from '../../Color4';
+import { SavedToolbuttonState } from './BaseWidget';
 
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
 	name: string;
+
+	// A unique ID for the facotory (e.g. 'chisel-tip-pen')
+	id: string;
 
 	// Creates an `AbstractComponent` from pen input.
 	factory: ComponentBuilderFactory;
@@ -26,34 +31,46 @@ export default class PenToolWidget extends BaseToolWidget {
 	protected penTypes: PenTypeRecord[];
 
 	public constructor(
-		editor: Editor, private tool: Pen, localization: ToolbarLocalization
+		editor: Editor, private tool: Pen, localization?: ToolbarLocalization
 	) {
-		super(editor, tool, localization);
+		super(editor, tool, 'pen', localization);
 
 		// Default pen types
 		this.penTypes = [
 			{
-				name: localization.pressureSensitiveFreehandPen,
+				name: this.localizationTable.pressureSensitiveFreehandPen,
+				id: 'pressure-sensitive-pen',
+
 				factory: makePressureSensitiveFreehandLineBuilder,
 			},
 			{
-				name: localization.freehandPen,
+				name: this.localizationTable.freehandPen,
+				id: 'freehand-pen',
+
 				factory: makeFreehandLineBuilder,
 			},
 			{
-				name: localization.arrowPen,
+				name: this.localizationTable.arrowPen,
+				id: 'arrow',
+
 				factory: makeArrowBuilder,
 			},
 			{
-				name: localization.linePen,
+				name: this.localizationTable.linePen,
+				id: 'line',
+
 				factory: makeLineBuilder,
 			},
 			{
-				name: localization.filledRectanglePen,
+				name: this.localizationTable.filledRectanglePen,
+				id: 'filled-rectangle',
+
 				factory: makeFilledRectangleBuilder,
 			},
 			{
-				name: localization.outlinedRectanglePen,
+				name: this.localizationTable.outlinedRectanglePen,
+				id: 'outlined-rectangle',
+
 				factory: makeOutlinedRectangleBuilder,
 			},
 		];
@@ -73,6 +90,30 @@ export default class PenToolWidget extends BaseToolWidget {
 
 	protected getTitle(): string {
 		return this.targetTool.description;
+	}
+
+	// Return the index of this tool's stroke factory in the list of
+	// all stroke factories.
+	//
+	// Returns -1 if the stroke factory is not in the list of all stroke factories.
+	private getCurrentPenTypeIdx(): number {
+		const currentFactory = this.tool.getStrokeFactory();
+
+		for (let i = 0; i < this.penTypes.length; i ++) {
+			if (this.penTypes[i].factory === currentFactory) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private getCurrentPenType(): PenTypeRecord|null {
+		for (const penType of this.penTypes) {
+			if (penType.factory === this.tool.getStrokeFactory()) {
+				return penType;
+			}
+		}
+		return null;
 	}
 
 	protected createIcon(): Element {
@@ -153,6 +194,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			colorInput.value = this.tool.getColor().toHexString();
 			thicknessInput.value = inverseThicknessInputFn(this.tool.getThickness()).toString();
 
+			// Update the list of stroke factories
 			objectTypeSelect.replaceChildren();
 			for (let i = 0; i < this.penTypes.length; i ++) {
 				const penType = this.penTypes[i];
@@ -161,10 +203,14 @@ export default class PenToolWidget extends BaseToolWidget {
 				option.innerText = penType.name;
 
 				objectTypeSelect.appendChild(option);
+			}
 
-				if (penType.factory === this.tool.getStrokeFactory()) {
-					objectTypeSelect.value = i.toString();
-				}
+			// Update the selected stroke factory.
+			const strokeFactoryIdx = this.getCurrentPenTypeIdx();
+			if (strokeFactoryIdx === -1) {
+				objectTypeSelect.value = '';
+			} else {
+				objectTypeSelect.value = strokeFactoryIdx.toString();
 			}
 		};
 		this.updateInputs();
@@ -189,5 +235,51 @@ export default class PenToolWidget extends BaseToolWidget {
 		}
 
 		return false;
+	}
+
+	public serializeState(): SavedToolbuttonState {
+		return {
+			...super.serializeState(),
+
+			color: this.tool.getColor().toHexString(),
+			thickness: this.tool.getThickness(),
+			strokeFactoryId: this.getCurrentPenType()?.id,
+		};
+	}
+
+	public deserializeFrom(state: SavedToolbuttonState) {
+		super.deserializeFrom(state);
+
+		const verifyPropertyType = (propertyName: string, expectedType: 'string'|'number'|'object') => {
+			const actualType = typeof(state[propertyName]);
+			if (actualType !== expectedType) {
+				throw new Error(
+					`Deserializing property ${propertyName}: Invalid type. Expected ${expectedType},` +
+					` was ${actualType}.`
+				);
+			}
+		};
+
+		if (state.color) {
+			verifyPropertyType('color', 'string');
+			this.tool.setColor(Color4.fromHex(state.color));
+		}
+
+		if (state.thickness) {
+			verifyPropertyType('thickness', 'number');
+			this.tool.setThickness(state.thickness);
+		}
+
+		if (state.strokeFactoryId) {
+			verifyPropertyType('strokeFactoryId', 'string');
+
+			const factoryId: string = state.strokeFactoryId;
+			for (const penType of this.penTypes) {
+				if (factoryId === penType.id) {
+					this.tool.setStrokeFactory(penType.factory);
+					break;
+				}
+			}
+		}
 	}
 }

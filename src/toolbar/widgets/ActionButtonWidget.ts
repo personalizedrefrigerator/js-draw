@@ -4,13 +4,16 @@ import BaseWidget from './BaseWidget';
 
 export default class ActionButtonWidget extends BaseWidget {
 	public constructor(
-		editor: Editor, localizationTable: ToolbarLocalization,
+		editor: Editor,
+		id: string,
+
         protected makeIcon: ()=> Element,
 		protected title: string,
-
         protected clickAction: ()=>void,
+
+        localizationTable?: ToolbarLocalization,
 	) {
-		super(editor, localizationTable);
+		super(editor, id, localizationTable);
 	}
 
 	protected handleClick() {

@@ -1,3 +1,4 @@
+import Color4 from '../../Color4';
 import Editor from '../../Editor';
 import TextTool from '../../tools/TextTool';
 import { EditorEventType } from '../../types';
@@ -5,11 +6,12 @@ import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
+import { SavedToolbuttonState } from './BaseWidget';
 
 export default class TextToolWidget extends BaseToolWidget {
 	private updateDropdownInputs: (()=>void)|null = null;
-	public constructor(editor: Editor, private tool: TextTool, localization: ToolbarLocalization) {
-		super(editor, tool, localization);
+	public constructor(editor: Editor, private tool: TextTool, localization?: ToolbarLocalization) {
+		super(editor, tool, 'text-tool-widget', localization);
 
 		editor.notifier.on(EditorEventType.ToolUpdated, evt => {
 			if (evt.kind === EditorEventType.ToolUpdated && evt.tool === tool) {
@@ -85,5 +87,28 @@ export default class TextToolWidget extends BaseToolWidget {
 
 		dropdown.replaceChildren(colorRow, fontRow);
 		return true;
+	}
+
+	public serializeState(): SavedToolbuttonState {
+		const textStyle = this.tool.getTextStyle();
+
+		return {
+			...super.serializeState(),
+
+			fontFamily: textStyle.fontFamily,
+			color: textStyle.renderingStyle.fill.toHexString(),
+		};
+	}
+
+	public deserializeFrom(state: SavedToolbuttonState) {
+		if (state.fontFamily && typeof(state.fontFamily) === 'string') {
+			this.tool.setFontFamily(state.fontFamily);
+		}
+
+		if (state.color && typeof(state.color) === 'string') {
+			this.tool.setColor(Color4.fromHex(state.color));
+		}
+
+		super.deserializeFrom(state);
 	}
 }

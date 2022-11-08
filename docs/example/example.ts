@@ -1,14 +1,16 @@
 // To test importing from a parent directory
-import Editor from '../../src/Editor';
+import { Editor, HTMLToolbar } from '../../src/lib';
 import '../../src/styles';
-import { showSavePopup, startVisualErrorLog } from './util';
 
-// To test the NPM package
-//import Editor from 'js-draw';
+// If from an NPM package,
+//import { Editor, HTMLToolbar } from 'js-draw';
 //import 'js-draw/styles';
+
+import { showSavePopup, startVisualErrorLog } from './util';
 
 // Key in window.localStorage to save the SVG as.
 export const saveLocalStorageKey = 'lastSave';
+export const editorStateLocalStorageKey = 'editorState';
 
 const createEditor = (saveCallback: ()=>void): Editor => {
 	const parentElement = document.body;
@@ -24,14 +26,39 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 
 	// Show a confirmation dialog when the user tries to close the page.
 	window.onbeforeunload = () => {
+		saveToolbarState(toolbar);
+
 		return 'There may be unsaved changes. Really quit?';
 	};
+
+	// Load toolbar widget state from localStorage.
+	restoreToolbarState(toolbar);
 
 	return editor;
 };
 
 const saveImage = (editor: Editor) => {
 	showSavePopup(editor.toSVG());
+};
+
+const saveToolbarState = (toolbar: HTMLToolbar) => {
+	try {
+		localStorage.setItem(editorStateLocalStorageKey, toolbar.serializeWidgetState());
+	} catch (e) {
+		console.warn('Error saving editor prefs: ', e);
+	}
+};
+
+const restoreToolbarState = (toolbar: HTMLToolbar) => {
+	const toolbarState = localStorage.getItem(editorStateLocalStorageKey);
+	if (toolbarState) {
+		// If the toolbar state is invalid, deserialize may throw errors.
+		try {
+			toolbar.deserializeWidgetState(toolbarState);
+		} catch(e) {
+			console.warn('Error deserializing toolbar state: ', e);
+		}
+	}
 };
 
 

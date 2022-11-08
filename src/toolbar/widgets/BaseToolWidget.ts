@@ -8,9 +8,10 @@ export default abstract class BaseToolWidget extends BaseWidget {
 	public constructor(
 		protected editor: Editor,
 		protected targetTool: BaseTool,
-		protected localizationTable: ToolbarLocalization,
+		id: string,
+		localizationTable?: ToolbarLocalization,
 	) {
-		super(editor, localizationTable);
+		super(editor, id, localizationTable);
 
 		editor.notifier.on(EditorEventType.ToolEnabled, toolEvt => {
 			if (toolEvt.kind !== EditorEventType.ToolEnabled) {

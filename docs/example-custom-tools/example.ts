@@ -109,7 +109,7 @@ const strings = {
 
 class CustomPenToolbarWidget extends jsdraw.BaseToolWidget {
 	public constructor(editor: jsdraw.Editor, private pen: CustomPenTool) {
-		super(editor, pen, editor.localization);
+		super(editor, pen, 'custom-pen-widget');
 	}
 
 	protected getTitle(): string {

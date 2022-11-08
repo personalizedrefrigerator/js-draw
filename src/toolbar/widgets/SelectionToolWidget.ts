@@ -7,20 +7,21 @@ import BaseToolWidget from './BaseToolWidget';
 
 export default class SelectionToolWidget extends BaseToolWidget {
 	public constructor(
-		editor: Editor, private tool: SelectionTool, localization: ToolbarLocalization
+		editor: Editor, private tool: SelectionTool, localization?: ToolbarLocalization
 	) {
-		super(editor, tool, localization);
+		super(editor, tool, 'selection-tool-widget', localization);
 
 		const resizeButton = new ActionButtonWidget(
-			editor, localization,
+			editor, 'resize-btn',
 			() => editor.icons.makeResizeViewportIcon(),
 			this.localizationTable.resizeImageToSelection,
 			() => {
 				this.resizeImageToSelection();
 			},
+			localization,
 		);
 		const deleteButton = new ActionButtonWidget(
-			editor, localization,
+			editor, 'delete-btn',
 			() => editor.icons.makeDeleteSelectionIcon(),
 			this.localizationTable.deleteSelection,
 			() => {
@@ -28,15 +29,17 @@ export default class SelectionToolWidget extends BaseToolWidget {
 				this.editor.dispatch(selection!.deleteSelectedObjects());
 				this.tool.clearSelection();
 			},
+			localization,
 		);
 		const duplicateButton = new ActionButtonWidget(
-			editor, localization,
+			editor, 'duplicate-btn',
 			() => editor.icons.makeDuplicateSelectionIcon(),
 			this.localizationTable.duplicateSelection,
 			() => {
 				const selection = this.tool.getSelection();
 				this.editor.dispatch(selection!.duplicateSelectedObjects());
 			},
+			localization,
 		);
 
 		this.addSubWidget(resizeButton);

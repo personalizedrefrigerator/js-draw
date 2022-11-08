@@ -7,7 +7,7 @@ import Viewport from '../../Viewport';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
-import BaseWidget from './BaseWidget';
+import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 
 const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
 	const zoomLevelRow = document.createElement('div');
@@ -74,8 +74,8 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 };
 
 class ZoomWidget extends BaseWidget {
-	public constructor(editor: Editor, localizationTable: ToolbarLocalization) {
-		super(editor, localizationTable);
+	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
+		super(editor, 'zoom-widget', localizationTable);
 
 		// Make it possible to open the dropdown, even if this widget isn't selected.
 		this.container.classList.add('dropdownShowable');
@@ -101,12 +101,14 @@ class ZoomWidget extends BaseWidget {
 
 class HandModeWidget extends BaseWidget {
 	public constructor(
-		editor: Editor, localizationTable: ToolbarLocalization,
+		editor: Editor,
 
 		protected tool: PanZoom, protected flag: PanZoomMode, protected makeIcon: ()=> Element,
 		private title: string,
+
+		localizationTable?: ToolbarLocalization,
 	) {
-		super(editor, localizationTable);
+		super(editor, `pan-mode-${flag}`, localizationTable);
 
 		editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
 			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === tool) {
@@ -162,7 +164,7 @@ export default class HandToolWidget extends BaseToolWidget {
 	) {
 		const primaryHandTool = HandToolWidget.getPrimaryHandTool(editor.toolController);
 		const tool = primaryHandTool ?? overridePanZoomTool;
-		super(editor, tool, localizationTable);
+		super(editor, tool, 'hand-tool-widget', localizationTable);
 
 		// Only allow toggling a hand tool if we're using the primary hand tool and not the override
 		// hand tool for this button.
@@ -175,12 +177,14 @@ export default class HandToolWidget extends BaseToolWidget {
 
 		// Controls for the overriding hand tool.
 		this.touchPanningWidget = new HandModeWidget(
-			editor, localizationTable,
+			editor,
 
 			overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
 			() => this.editor.icons.makeTouchPanningIcon(),
 
-			localizationTable.touchPanning
+			localizationTable.touchPanning,
+
+			localizationTable,
 		);
 
 		this.addSubWidget(this.touchPanningWidget);
@@ -215,5 +219,20 @@ export default class HandToolWidget extends BaseToolWidget {
 		if (this.allowTogglingBaseTool) {
 			super.setSelected(selected);
 		}
+	}
+
+	public serializeState(): SavedToolbuttonState {
+		return {
+			...super.serializeState(),
+			touchPanning: this.overridePanZoomTool.getMode() & PanZoomMode.OneFingerTouchGestures,
+		};
+	}
+
+	public deserializeFrom(state: SavedToolbuttonState): void {
+		if (state.touchPanning !== undefined) {
+			this.touchPanningWidget.setSelected(state.touchPanning);
+		}
+
+		super.deserializeFrom(state);
 	}
 }
