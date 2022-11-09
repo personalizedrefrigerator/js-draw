@@ -28,6 +28,9 @@ export type SVGLoaderUnknownAttribute = [ string, string ];
 // [key, value, priority]
 export type SVGLoaderUnknownStyleAttribute = { key: string, value: string, priority?: string };
 
+
+const supportedStrokeFillStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
+
 export default class SVGLoader implements ImageLoader {
 	private onAddComponent: ComponentAddedListener|null = null;
 	private onProgress: OnProgressListener|null = null;
@@ -154,11 +157,10 @@ export default class SVGLoader implements ImageLoader {
 
 			elem = new Stroke(strokeData);
 
-			const supportedStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
 			this.attachUnrecognisedAttrs(
 				elem, node,
-				new Set([ ...supportedStyleAttrs, 'd' ]),
-				new Set(supportedStyleAttrs)
+				new Set([ ...supportedStrokeFillStyleAttrs, 'd' ]),
+				new Set(supportedStrokeFillStyleAttrs)
 			);
 		} catch (e) {
 			console.error(
@@ -234,8 +236,8 @@ export default class SVGLoader implements ImageLoader {
 
 		const supportedStyleAttrs = [
 			'fontFamily',
-			'fill',
-			'transform'
+			'transform',
+			...supportedStrokeFillStyleAttrs,
 		];
 		let fontSize = 12;
 		if (fontSizeMatch) {
@@ -245,9 +247,7 @@ export default class SVGLoader implements ImageLoader {
 		const style: TextStyle = {
 			size: fontSize,
 			fontFamily: computedStyles.fontFamily || elem.style.fontFamily || 'sans-serif',
-			renderingStyle: {
-				fill: Color4.fromString(computedStyles.fill || elem.style.fill || '#000')
-			},
+			renderingStyle: this.getStyle(elem),
 		};
 
 		const supportedAttrs: string[] = [];
