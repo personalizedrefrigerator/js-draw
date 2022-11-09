@@ -4,10 +4,13 @@ import PipetteTool from '../tools/PipetteTool';
 import { EditorEventType } from '../types';
 
 type OnColorChangeListener = (color: Color4)=>void;
+type SetColorCallback = (color: Color4|string) => void;
 
+// Returns [ color input, input container, callback to change the color value ].
+export const makeColorInput = (
+	editor: Editor, onColorChange: OnColorChangeListener
+): [ HTMLInputElement, HTMLElement, SetColorCallback ] => {
 
-// Returns [ color input, input container ].
-export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListener): [ HTMLInputElement, HTMLElement ] => {
 	const colorInputContainer = document.createElement('span');
 	const colorInput = document.createElement('input');
 
@@ -31,6 +34,9 @@ export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListe
 	const handleColorInput = () => {
 		currentColor = Color4.fromHex(colorInput.value);
 	};
+
+	// Only change the pen color when we finish sending input (this limits the number of
+	// editor events triggered and accessibility announcements).
 	const onInputEnd = () => {
 		handleColorInput();
 
@@ -61,7 +67,19 @@ export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListe
 		onInputEnd();
 	});
 
-	return [ colorInput, colorInputContainer ];
+	const setColorInputValue = (color: Color4|string) => {
+		if (typeof color === 'object') {
+			color = color.toHexString();
+		}
+
+		colorInput.value = color;
+
+		// Fire all color event listeners. See
+		// https://github.com/mdbassit/Coloris#manually-updating-the-thumbnail
+		colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+	};
+
+	return [ colorInput, colorInputContainer, setColorInputValue ];
 };
 
 const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: OnColorChangeListener) => {

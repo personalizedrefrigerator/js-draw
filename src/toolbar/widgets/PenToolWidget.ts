@@ -179,7 +179,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const [ colorInput, colorInputContainer ] = makeColorInput(this.editor, color => {
+		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 
@@ -191,7 +191,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorInputContainer);
 
 		this.updateInputs = () => {
-			colorInput.value = this.tool.getColor().toHexString();
+			setColorInputValue(this.tool.getColor());
 			thicknessInput.value = inverseThicknessInputFn(this.tool.getThickness()).toString();
 
 			// Update the list of stroke factories

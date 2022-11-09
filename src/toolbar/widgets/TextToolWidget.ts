@@ -38,7 +38,7 @@ export default class TextToolWidget extends BaseToolWidget {
 		const fontInput = document.createElement('select');
 		const fontLabel = document.createElement('label');
 
-		const [ colorInput, colorInputContainer ] = makeColorInput(this.editor, color => {
+		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 		const colorLabel = document.createElement('label');
@@ -76,7 +76,7 @@ export default class TextToolWidget extends BaseToolWidget {
 
 		this.updateDropdownInputs = () => {
 			const style = this.tool.getTextStyle();
-			colorInput.value = style.renderingStyle.fill.toHexString();
+			setColorInputValue(style.renderingStyle.fill);
 
 			if (!fontsInInput.has(style.fontFamily)) {
 				addFontToInput(style.fontFamily);
