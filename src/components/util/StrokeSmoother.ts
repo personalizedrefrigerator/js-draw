@@ -238,7 +238,7 @@ export class StrokeSmoother {
 		if (!controlPoint || segmentStart.eq(controlPoint) || segmentEnd.eq(controlPoint)) {
 			// Position the control point closer to the first -- the connecting
 			// segment will be roughly a line.
-			controlPoint = segmentStart.plus(enteringVec.times(startEndDist / 3));
+			controlPoint = segmentStart.plus(enteringVec.times(startEndDist / 4));
 		}
 
 		console.assert(!segmentStart.eq(controlPoint, 1e-11), 'Start and control points are equal!');
