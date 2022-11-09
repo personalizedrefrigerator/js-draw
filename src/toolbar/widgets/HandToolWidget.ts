@@ -124,12 +124,7 @@ class HandModeWidget extends BaseWidget {
 	}
 
 	private setModeFlag(enabled: boolean) {
-		const mode = this.tool.getMode();
-		if (enabled) {
-			this.tool.setMode(mode | this.flag);
-		} else {
-			this.tool.setMode(mode & ~this.flag);
-		}
+		this.tool.setModeEnabled(this.flag, enabled);
 	}
 
 	protected handleClick() {
@@ -150,7 +145,6 @@ class HandModeWidget extends BaseWidget {
 }
 
 export default class HandToolWidget extends BaseToolWidget {
-	private touchPanningWidget: HandModeWidget;
 	private allowTogglingBaseTool: boolean;
 	
 	public constructor(
@@ -176,7 +170,7 @@ export default class HandToolWidget extends BaseToolWidget {
 		}
 
 		// Controls for the overriding hand tool.
-		this.touchPanningWidget = new HandModeWidget(
+		const touchPanningWidget = new HandModeWidget(
 			editor,
 
 			overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
@@ -186,8 +180,19 @@ export default class HandToolWidget extends BaseToolWidget {
 
 			localizationTable,
 		);
+		
+		const rotationLockWidget = new HandModeWidget(
+			editor,
 
-		this.addSubWidget(this.touchPanningWidget);
+			overridePanZoomTool, PanZoomMode.RotationLocked,
+			() => this.editor.icons.makeRotationLockIcon(),
+
+			localizationTable.lockRotation,
+			localizationTable,
+		);
+
+		this.addSubWidget(touchPanningWidget);
+		this.addSubWidget(rotationLockWidget);
 		this.addSubWidget(
 			new ZoomWidget(editor, localizationTable)
 		);
@@ -222,15 +227,22 @@ export default class HandToolWidget extends BaseToolWidget {
 	}
 
 	public serializeState(): SavedToolbuttonState {
+		const toolMode = this.overridePanZoomTool.getMode();
+
 		return {
 			...super.serializeState(),
-			touchPanning: this.overridePanZoomTool.getMode() & PanZoomMode.OneFingerTouchGestures,
+			touchPanning: toolMode & PanZoomMode.OneFingerTouchGestures,
+			rotationLocked: toolMode & PanZoomMode.RotationLocked,
 		};
 	}
 
 	public deserializeFrom(state: SavedToolbuttonState): void {
 		if (state.touchPanning !== undefined) {
-			this.touchPanningWidget.setSelected(state.touchPanning);
+			this.overridePanZoomTool.setModeEnabled(PanZoomMode.OneFingerTouchGestures, state.touchPanning);
+		}
+
+		if (state.rotationLocked !== undefined) {
+			this.overridePanZoomTool.setModeEnabled(PanZoomMode.RotationLocked, state.rotationLocked);
 		}
 
 		super.deserializeFrom(state);

@@ -21,6 +21,8 @@ export enum PanZoomMode {
 	RightClickDrags = 0x1 << 2,
 	SinglePointerGestures = 0x1 << 3,
 	Keyboard = 0x1 << 4,
+
+	RotationLocked = 0x1 << 5,
 }
 
 export default class PanZoom extends BaseTool {
@@ -90,10 +92,15 @@ export default class PanZoom extends BaseTool {
 		const { screenCenter, canvasCenter, angle, dist } = this.computePinchData(allPointers[0], allPointers[1]);
 
 		const delta = this.getCenterDelta(screenCenter);
+		let rotation = angle - this.lastAngle;
+
+		if (this.isRotationLocked()) {
+			rotation = 0;
+		}
 
 		const transformUpdate = Mat33.translation(delta)
 			.rightMul(Mat33.scaling2D(dist / this.lastDist, canvasCenter))
-			.rightMul(Mat33.zRotation(angle - this.lastAngle, canvasCenter));
+			.rightMul(Mat33.zRotation(rotation, canvasCenter));
 		this.lastScreenCenter = screenCenter;
 		this.lastDist = dist;
 		this.lastAngle = angle;
@@ -250,6 +257,10 @@ export default class PanZoom extends BaseTool {
 			rotation += 0.0001;
 		}
 
+		if (this.isRotationLocked()) {
+			rotation = 0;
+		}
+
 		const toCanvas = this.editor.viewport.screenToCanvasTransform;
 
 		// Transform without translating (treat toCanvas as a linear instead of
@@ -268,6 +279,22 @@ export default class PanZoom extends BaseTool {
 		this.updateTransform(transformUpdate, true);
 
 		return true;
+	}
+
+	private isRotationLocked(): boolean {
+		return !!(this.mode & PanZoomMode.RotationLocked);
+	}
+
+	// Sets whether the given `mode` is enabled. `mode` should be a single
+	// mode from the `PanZoomMode` enum.
+	public setModeEnabled(mode: PanZoomMode, enabled: boolean) {
+		let newMode = this.mode;
+		if (enabled) {
+			newMode |= mode;
+		} else {
+			newMode &= ~mode;
+		}
+		this.setMode(newMode);
 	}
 
 	public setMode(mode: PanZoomMode) {

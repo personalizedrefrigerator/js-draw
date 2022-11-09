@@ -3,6 +3,7 @@
 export interface ToolbarLocalization {
 	fontLabel: string;
 	touchPanning: string;
+	lockRotation: string;
 	outlinedRectanglePen: string;
 	filledRectanglePen: string;
 	linePen: string;
@@ -61,6 +62,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	linePen: 'Line',
 	outlinedRectanglePen: 'Outlined rectangle',
 	filledRectanglePen: 'Filled rectangle',
+	lockRotation: 'Lock rotation',
 
 	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
 	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,

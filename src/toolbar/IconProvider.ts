@@ -8,6 +8,9 @@ import Pen from '../tools/Pen';
 import { StrokeDataPoint } from '../types';
 import Viewport from '../Viewport';
 
+// Provides a default set of icons for the editor.
+// Many of the icons were created with Inkscape.
+
 type IconType = SVGSVGElement|HTMLImageElement;
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
@@ -138,7 +141,7 @@ export default class IconProvider {
 		const strokeColor = 'var(--icon-color)';
 		const strokeWidth = '3';
 	
-		// Draw a cursor-like shape (like some of the other icons, made with Inkscape)
+		// Draw a cursor-like shape
 		return this.makeIconFromPath(`
 			m 10,60
 				5,30
@@ -274,6 +277,47 @@ export default class IconProvider {
 		addTextNode('-', 70, 75);
 	
 		return icon;
+	}
+
+	public makeRotationLockIcon(): IconType {
+		return this.makeIconFromPath(`
+			M 40.1 25.1 
+			C 32.5 25 27.9 34.1 27.9 34.1 
+			L 25.7 30 
+			L 28 44.7 
+			L 36.6 40.3 
+			L 32.3 38.3 
+			C 33.6 28 38.1 25.2 45.1 31.8 
+			L 49.4 29.6 
+			C 45.9 26.3 42.8 25.1 40.1 25.1 
+			z
+
+			M 51.7 34.2 
+			L 43.5 39.1 
+			L 48 40.8 
+			C 47.4 51.1 43.1 54.3 35.7 48.2 
+			L 31.6 50.7 
+			C 45.5 62.1 52.6 44.6 52.6 44.6 
+			L 55.1 48.6 
+			L 51.7 34.2 
+			z
+
+			M 56.9 49.9 
+			C 49.8 49.9 49.2 57.3 49.3 60.9 
+			L 47.6 60.9 
+			L 47.6 73.7 
+			L 66.1 73.7 
+			L 66.1 60.9 
+			L 64.4 60.9 
+			C 64.5 57.3 63.9 49.9 56.9 49.9 
+			z
+
+			M 56.9 53.5 
+			C 60.8 53.5 61 58.2 60.8 60.9 
+			L 52.9 60.9 
+			C 52.7 58.2 52.9 53.5 56.9 53.5 
+			z
+		`);
 	}
 	
 	public makeTextIcon(textStyle: TextStyle): IconType {

@@ -1,6 +1,9 @@
 
 # 0.9.0 (unreleased)
  * Allow saving toolbar widget state (see `HTMLToolbar#serializeState` and `HTMLToolbar#deserializeState`).
+ * Bug fixes
+   * Fixed colors of color picker previews not matching value of the input (and thus not matching the actual color of the tool).
+   * Fixed `Path::fromRect` producing an open shape. This caused issues with collision detection (for erasing and determining whether the rectangles should be visible).
 
 # 0.8.0
  * Use non-pressure-sensitive strokes by default for most tools
