@@ -73,6 +73,8 @@ export default class Color4 {
 	public static fromString(text: string): Color4 {
 		if (text.startsWith('#')) {
 			return Color4.fromHex(text);
+		} else if (text === 'none' || text === 'transparent') {
+			return Color4.transparent;
 		} else {
 			// Otherwise, try to use an HTML5Canvas to determine the color
 			const canvas = document.createElement('canvas');
