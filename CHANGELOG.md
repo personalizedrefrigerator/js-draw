@@ -1,6 +1,7 @@
 
-# 0.9.0 (unreleased)
+# 0.9.0
  * Allow saving toolbar widget state (see `HTMLToolbar#serializeState` and `HTMLToolbar#deserializeState`).
+  * Breaking change: Toolbar widgets now require an `id`. As such, the order and number of parameters to `BaseWidget` has changed.
  * Add rotation lock button to hand toolbar widget.
  * Bug fixes
    * Fixed colors of color picker previews not matching value of the input (and thus not matching the actual color of the tool).
