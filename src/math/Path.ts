@@ -285,7 +285,7 @@ export default class Path {
 		}
 		const isClosed = this.startPoint.eq(this.getEndPoint());
         
-		if (isClosed && strokeWidth == 0) {
+		if (isClosed && strokeWidth === 0) {
 			return this.closedRoughlyIntersects(rect);
 		}
 
@@ -400,6 +400,12 @@ export default class Path {
 				point: corner,
 			});
 		}
+
+		// Close the shape
+		commands.push({
+			kind: PathCommandType.LineTo,
+			point: startPoint,
+		});
 
 		return new Path(startPoint, commands);
 	}

@@ -171,4 +171,28 @@ describe('Path', () => {
 			).toBe(true);
 		});
 	});
+
+	describe('fromRect', () => {
+		const filledRect = Path.fromRect(Rect2.unitSquare);
+		const strokedRect = Path.fromRect(Rect2.unitSquare, 0.1);
+
+		it('filled should be closed shape', () => {
+			const lastSegment = filledRect.parts[filledRect.parts.length - 1];
+
+			if (lastSegment.kind !== PathCommandType.LineTo) {
+				throw new Error('Rectangles should only be made up of lines');
+			}
+
+			expect(filledRect.startPoint).objEq(lastSegment.point);
+		});
+
+		it('stroked should be closed shape', () => {
+			const lastSegment = strokedRect.parts[strokedRect.parts.length - 1];
+			if (lastSegment.kind !== PathCommandType.LineTo) {
+				throw new Error('Rectangles should only be made up of lines');
+			}
+			
+			expect(strokedRect.startPoint).objEq(lastSegment.point);
+		});
+	});
 });
