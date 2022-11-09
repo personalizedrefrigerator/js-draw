@@ -280,7 +280,7 @@ export default class IconProvider {
 	}
 
 	public makeRotationLockIcon(): IconType {
-		return this.makeIconFromPath(`
+		const icon = this.makeIconFromPath(`
 			M 40.1 25.1 
 			C 32.5 25 27.9 34.1 27.9 34.1 
 			L 25.7 30 
@@ -318,6 +318,10 @@ export default class IconProvider {
 			C 52.7 58.2 52.9 53.5 56.9 53.5 
 			z
 		`);
+
+		icon.setAttribute('viewBox', '10 10 70 70');
+
+		return icon;
 	}
 	
 	public makeTextIcon(textStyle: TextStyle): IconType {

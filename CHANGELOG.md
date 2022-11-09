@@ -1,6 +1,7 @@
 
 # 0.9.0 (unreleased)
  * Allow saving toolbar widget state (see `HTMLToolbar#serializeState` and `HTMLToolbar#deserializeState`).
+ * Add rotation lock button to hand toolbar widget.
  * Bug fixes
    * Fixed colors of color picker previews not matching value of the input (and thus not matching the actual color of the tool).
    * Fixed `Path::fromRect` producing an open shape. This caused issues with collision detection (for erasing and determining whether the rectangles should be visible).
