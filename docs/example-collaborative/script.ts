@@ -33,13 +33,13 @@ const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessComm
 	}
 
 	let lastCommandIdx = lastUpdateIndex;
-	const commands: jsdraw.SerializableCommand[] = [];
 
 	for (const commandJSON of json.commands) {
 		if (!('id' in commandJSON) || !('data' in commandJSON) || typeof commandJSON.id !== 'number') {
 			throw new Error('Command has invalid type');
 		}
 
+		console.assert(lastCommandIdx < commandJSON.id, 'IDs must increase!!!');
 		lastCommandIdx = commandJSON.id;
 
 		if (commandJSON.data.clientId === clientId) {
@@ -48,7 +48,6 @@ const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessComm
 
 		try {
 			const command = jsdraw.SerializableCommand.deserialize(commandJSON.data.data, editor);
-			commands.push(command);
 			processCommand(command);
 		} catch(e) {
 			console.warn('Error parsing command', e);
@@ -88,7 +87,10 @@ editor.notifier.on(jsdraw.EditorEventType.CommandUndone, evt => {
 		return;
 	}
 
-	postSerializedCommand(JSON.stringify(jsdraw.invertCommand(evt.command).serialize()));
+	postSerializedCommand(JSON.stringify({
+		clientId,
+		data: jsdraw.invertCommand(evt.command).serialize()
+	}));
 });
 
 const timeout = (delay: number) => {
