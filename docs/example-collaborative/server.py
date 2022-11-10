@@ -152,4 +152,4 @@ class RequestHandler(BaseHTTPRequestHandler):
 			#       file at once.
 			self.send_text(f.read(), contentType)
 
-startServer(HandlerClass=RequestHandler, protocol="HTTP/1.1")
+startServer(HandlerClass=RequestHandler, protocol="HTTP/1.1", port=8001)
