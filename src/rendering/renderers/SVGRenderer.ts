@@ -94,7 +94,11 @@ export default class SVGRenderer extends AbstractRenderer {
 		pathElem.setAttribute('d', this.lastPathString.join(' '));
 
 		const style = this.lastPathStyle;
-		pathElem.setAttribute('fill', style.fill.toHexString());
+		if (style.fill.a > 0) {
+			pathElem.setAttribute('fill', style.fill.toHexString());
+		} else {
+			pathElem.setAttribute('fill', 'none');
+		}
 
 		if (style.stroke) {
 			pathElem.setAttribute('stroke', style.stroke.color.toHexString());
