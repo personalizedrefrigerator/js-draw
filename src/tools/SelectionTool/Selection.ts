@@ -453,7 +453,7 @@ export default class Selection {
 
 	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
 		this.originalRegion = bbox;
-		this.selectedElems = objects;
+		this.selectedElems = objects.filter(object => object.isSelectable());
 		this.updateUI();
 	}
 
