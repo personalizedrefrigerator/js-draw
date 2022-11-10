@@ -6,6 +6,8 @@ import './style.css';
 const editor = new jsdraw.Editor(document.body);
 editor.addToolbar();
 
+const clientId = `${(new Date().getTime())}-${Math.random()}`;
+
 
 let lastUpdateIdx = 0;
 const postSerializedCommand = async (data: string) => {
@@ -39,8 +41,13 @@ const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessComm
 		}
 
 		lastCommandIdx = commandJSON.id;
+
+		if (commandJSON.data.clientId === clientId) {
+			continue;
+		}
+
 		try {
-			const command = jsdraw.SerializableCommand.deserialize(commandJSON.data, editor);
+			const command = jsdraw.SerializableCommand.deserialize(commandJSON.data.data, editor);
 			commands.push(command);
 			processCommand(command);
 		} catch(e) {
@@ -60,7 +67,12 @@ editor.notifier.on(jsdraw.EditorEventType.CommandDone, evt => {
 	}
 
 	if (evt.command instanceof jsdraw.SerializableCommand) {
-		postSerializedCommand(JSON.stringify(evt.command.serialize()));
+		postSerializedCommand(JSON.stringify({
+			// Store the clientId so we don't apply commands we sent to the server
+			clientId,
+
+			data: evt.command.serialize()
+		}));
 	} else {
 		console.log('!', evt.command, 'instanceof jsdraw.SerializableCommand');
 	}
