@@ -51,6 +51,10 @@ export default class LineBuilder implements ComponentBuilder {
 						kind: PathCommandType.LineTo,
 						point: endPoint.minus(scaledEndNormal),
 					},
+					{
+						kind: PathCommandType.LineTo,
+						point: startPoint.minus(scaledStartNormal),
+					},
 				],
 				style: {
 					fill: this.startPoint.color,
