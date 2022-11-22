@@ -2,8 +2,8 @@ import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
 
 export abstract class Command {
-	public abstract apply(editor: Editor): void;
-	public abstract unapply(editor: Editor): void;
+	public abstract apply(editor: Editor): Promise<void>|void;
+	public abstract unapply(editor: Editor): Promise<void>|void;
 
 	// Called when the command is being deleted
 	public onDrop(_editor: Editor) { }

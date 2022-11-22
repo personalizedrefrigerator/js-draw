@@ -23,7 +23,7 @@ interface FetchResult {
 	lastCommandIdx: number;
 }
 
-type ProcessCommandCallback = (command: jsdraw.SerializableCommand)=> void;
+type ProcessCommandCallback = (command: jsdraw.SerializableCommand)=> Promise<void>;
 const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessCommandCallback): Promise<FetchResult> => {
 	const data = await fetch('/commandsSince/' + lastUpdateIndex);
 	const json = await data.json();
@@ -48,7 +48,7 @@ const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessComm
 
 		try {
 			const command = jsdraw.SerializableCommand.deserialize(commandJSON.data.data, editor);
-			processCommand(command);
+			await processCommand(command);
 		} catch(e) {
 			console.warn('Error parsing command', e);
 		}
@@ -102,10 +102,10 @@ const timeout = (delay: number) => {
 (async () => {
 	for (;;) {
 		try {
-			const updates = await fetchUpdates(lastUpdateIdx, command => {
+			const updates = await fetchUpdates(lastUpdateIdx, async command => {
 				console.log('Applying', command);
 				// .apply and .unapply don't dispatch CommandDone and CommandUndone events.
-				command.apply(editor);
+				await command.apply(editor);
 			});
 			lastUpdateIdx = updates.lastCommandIdx;
 		} catch(e) {

@@ -170,7 +170,7 @@ export default class Selection {
 		});
 
 		const fullTransform = this.transform;
-		const currentTransfmCommands = this.computeTransformCommands();
+		const selectedElems = this.selectedElems;
 
 		// Reset for the next drag
 		this.transformCommands = [];
@@ -179,43 +179,84 @@ export default class Selection {
 
 		// Make the commands undo-able
 		this.editor.dispatch(new Selection.ApplyTransformationCommand(
-			this, currentTransfmCommands, fullTransform
+			this, selectedElems, fullTransform
 		));
 	}
 
 	static {
-		SerializableCommand.register('selection-tool-transform', (json: any, editor) => {
+		SerializableCommand.register('selection-tool-transform', (json: any, _editor) => {
 			// The selection box is lost when serializing/deserializing. No need to store box rotation
 			const fullTransform: Mat33 = new Mat33(...(json.transform as Mat33Array));
-			const commands = (json.commands as any[]).map(data => SerializableCommand.deserialize(data, editor));
+			const elemIds: string[] = (json.elems as any[] ?? []);
 
-			return new this.ApplyTransformationCommand(null, commands, fullTransform);
+			return new this.ApplyTransformationCommand(null, elemIds, fullTransform);
 		});
 	}
 
 	private static ApplyTransformationCommand = class extends SerializableCommand {
+		private transformCommands: Command[];
+		private selectedElemIds: string[];
+
 		public constructor(
 			private selection: Selection|null,
-			private currentTransfmCommands: SerializableCommand[],
+
+			// If a `string[]`, selectedElems is a list of element IDs.
+			selectedElems: AbstractComponent[]|string[],
+
+			// Full transformation used to transform elements.
 			private fullTransform: Mat33,
 		) {
 			super('selection-tool-transform');
+
+			const isIDList = (a: AbstractComponent[]|string[]): a is string[] => {
+				return typeof a[0] === 'string';
+			};
+
+			// If a list of element IDs,
+			if (isIDList(selectedElems)) {
+				this.selectedElemIds = selectedElems as string[];
+			} else {
+				this.selectedElemIds = (selectedElems as AbstractComponent[]).map(elem => elem.getId());
+				this.transformCommands = selectedElems.map(elem => {
+					return elem.transformBy(this.fullTransform);
+				});
+			}
+		}
+
+		private resolveToElems(editor: Editor) {
+			if (this.transformCommands) {
+				return;
+			}
+
+			this.transformCommands = this.selectedElemIds.map(id => {
+				const elem = editor.image.lookupElement(id);
+
+				if (!elem) {
+					throw new Error(`Unable to find element with ID, ${id}.`);
+				}
+				
+				return elem.transformBy(this.fullTransform);
+			});
 		}
 
 		public async apply(editor: Editor) {
+			this.resolveToElems(editor);
+
 			this.selection?.setTransform(this.fullTransform, false);
 			this.selection?.updateUI();
-			await editor.asyncApplyCommands(this.currentTransfmCommands, updateChunkSize);
+			await editor.asyncApplyCommands(this.transformCommands, updateChunkSize);
 			this.selection?.setTransform(Mat33.identity, false);
 			this.selection?.recomputeRegion();
 			this.selection?.updateUI();
 		}
 
 		public async unapply(editor: Editor) {
+			this.resolveToElems(editor);
+
 			this.selection?.setTransform(this.fullTransform.inverse(), false);
 			this.selection?.updateUI();
 
-			await editor.asyncUnapplyCommands(this.currentTransfmCommands, updateChunkSize);
+			await editor.asyncUnapplyCommands(this.transformCommands, updateChunkSize);
 			this.selection?.setTransform(Mat33.identity);
 			this.selection?.recomputeRegion();
 			this.selection?.updateUI();
@@ -223,13 +264,13 @@ export default class Selection {
 
 		protected serializeToJSON() {
 			return {
-				commands: this.currentTransfmCommands.map(command => command.serialize()),
+				elems: this.selectedElemIds,
 				transform: this.fullTransform.toArray(),
 			};
 		}
 
 		public description(_editor: Editor, localizationTable: EditorLocalization) {
-			return localizationTable.transformedElements(this.currentTransfmCommands.length);
+			return localizationTable.transformedElements(this.selectedElemIds.length);
 		}
 	};
 

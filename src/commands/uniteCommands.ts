@@ -9,23 +9,34 @@ class NonSerializableUnion extends Command {
 		super();
 	}
 
+	private static waitForAll(commands: (Promise<void>|void)[]): Promise<void>|void {
+		// If any are Promises...
+		if (commands.some(command => command && command['then'])) {
+			console.log('waiting...');
+			// Wait for all commands to finish.
+			return Promise.all(commands)
+				// Ensure we return a Promise<void> and not a Promise<void[]>
+				.then(() => {});
+		}
+
+		return;
+	}
+
 	public apply(editor: Editor) {
 		if (this.applyChunkSize === undefined) {
-			for (const command of this.commands) {
-				command.apply(editor);
-			}
+			const results = this.commands.map(cmd => cmd.apply(editor));
+			return NonSerializableUnion.waitForAll(results);
 		} else {
-			editor.asyncApplyCommands(this.commands, this.applyChunkSize);
+			return editor.asyncApplyCommands(this.commands, this.applyChunkSize);
 		}
 	}
 
 	public unapply(editor: Editor) {
 		if (this.applyChunkSize === undefined) {
-			for (const command of this.commands) {
-				command.unapply(editor);
-			}
+			const results = this.commands.map(cmd => cmd.unapply(editor));
+			return NonSerializableUnion.waitForAll(results);
 		} else {
-			editor.asyncUnapplyCommands(this.commands, this.applyChunkSize);
+			return editor.asyncUnapplyCommands(this.commands, this.applyChunkSize);
 		}
 	}
 
@@ -71,11 +82,11 @@ class SerializableUnion extends SerializableCommand {
 	}
 
 	public apply(editor: Editor) {
-		this.nonserializableCommand.apply(editor);
+		return this.nonserializableCommand.apply(editor);
 	}
 
 	public unapply(editor: Editor) {
-		this.nonserializableCommand.unapply(editor);
+		return this.nonserializableCommand.unapply(editor);
 	}
 
 	public description(editor: Editor, localizationTable: EditorLocalization): string {
