@@ -2,6 +2,7 @@
 # 0.9.1
  * Bug fixes:
   * Fix line tool producing an open shape. This caused issues with erasing and zooming in on these shapes.
+  * Export SVG images with `fill='none'` instead of `fill='#00000000'` — some SVG readers ignore the transparency encoded in `#00000000`.
 
 # 0.9.0
  * Allow saving toolbar widget state (see `HTMLToolbar#serializeState` and `HTMLToolbar#deserializeState`).
