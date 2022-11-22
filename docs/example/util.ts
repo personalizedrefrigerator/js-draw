@@ -3,6 +3,7 @@
 
 import { saveLocalStorageKey } from './example';
 
+type GetDataURLCallback = () => string;
 
 // Log errors, etc. to a visible element. Useful for debugging on mobile devices.
 export const startVisualErrorLog = () => {
@@ -42,7 +43,7 @@ If enabled, errors will be logged to this textarea.
 };
 
 // Saves [editor]'s content as an SVG and displays the result.
-export const showSavePopup = (img: SVGElement) => {
+export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback) => {
 	const imgHTML = img.outerHTML;
 
 	const popupContainer = document.createElement('div');
@@ -180,9 +181,13 @@ export const showSavePopup = (img: SVGElement) => {
 	// Loading the preview can be much slower than saving the image.
 	// Only do so if requested.
 	const previewRegion = popupDoc.querySelector('#previewRegion')!;
-	const previewButton = popupDoc.createElement('button');
-	previewButton.innerText = 'View generated SVG image';
-	previewButton.onclick = () => {
+	const previewSVGButton = popupDoc.createElement('button');
+	const previewPNGButton = popupDoc.createElement('button');
+
+	previewSVGButton.innerText = 'View generated SVG image';
+	previewPNGButton.innerText = 'View generated PNG image';
+
+	previewSVGButton.onclick = () => {
 		const messageContainer = popupDoc.createElement('p');
 		const svgTextContainer = popupDoc.createElement('textarea');
 
@@ -198,6 +203,13 @@ export const showSavePopup = (img: SVGElement) => {
 		previewRegion.replaceChildren(
 			messageContainer, svgTextContainer, imagePreview
 		);
+	};
+
+	previewPNGButton.onclick = () => {
+		const imagePreview = popupDoc.createElement('img');
+		imagePreview.src = getDataURL();
+		imagePreview.style.maxWidth = '100%';
+		previewRegion.replaceChildren(imagePreview);
 	};
 
 	const filenameInput: HTMLInputElement = popupDoc.querySelector('input#filename')!;
@@ -235,7 +247,8 @@ export const showSavePopup = (img: SVGElement) => {
 
 	const popupControlsArea = popup.document.querySelector('main > #controlsArea')!;
 	popupControlsArea.appendChild(closeButton);
-	popupControlsArea.appendChild(previewButton);
+	popupControlsArea.appendChild(previewSVGButton);
+	popupControlsArea.appendChild(previewPNGButton);
 	popupControlsArea.appendChild(downloadButton);
 
 

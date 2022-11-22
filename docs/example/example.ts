@@ -42,7 +42,7 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 };
 
 const saveImage = (editor: Editor) => {
-	showSavePopup(editor.toSVG());
+	showSavePopup(editor.toSVG(), () => editor.toDataURL());
 };
 
 const saveToolbarState = (toolbar: HTMLToolbar) => {

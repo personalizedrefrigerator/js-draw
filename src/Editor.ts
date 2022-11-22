@@ -27,7 +27,7 @@ import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2 } from './math/Vec2';
 import Vec3 from './math/Vec3';
 import HTMLToolbar from './toolbar/HTMLToolbar';
-import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
+import AbstractRenderer, { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
 import Display, { RenderingMode } from './rendering/Display';
 import SVGRenderer from './rendering/renderers/SVGRenderer';
 import Color4 from './Color4';
@@ -39,6 +39,7 @@ import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
 import { toRoundedString } from './math/rounding';
+import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
@@ -823,20 +824,36 @@ export class Editor {
 		});
 	}
 
+	// Get a data URL (e.g. as produced by `HTMLCanvasElement::toDataURL`).
+	// If `format` is not `image/png`, a PNG image URL may still be returned (as in the
+	// case of `HTMLCanvasElement::toDataURL`).
+	//
+	// The export resolution is the same as the size of the drawing canvas.
+	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png'): string {
+		const canvas = document.createElement('canvas');
+		
+		const resolution = this.importExportViewport.getResolution();
+
+		canvas.width = resolution.x;
+		canvas.height = resolution.y;
+
+		const ctx = canvas.getContext('2d')!;
+		const renderer = new CanvasRenderer(ctx, this.importExportViewport);
+
+		// Render everything with no transform (0,0) should be (0,0) in the output image
+		this.renderAllWithTransform(renderer, this.importExportViewport, Mat33.identity);
+
+		const dataURL = canvas.toDataURL(format);
+		return dataURL;
+	}
+
 	public toSVG(): SVGElement {
 		const importExportViewport = this.importExportViewport;
 		const svgNameSpace = 'http://www.w3.org/2000/svg';
 		const result = document.createElementNS(svgNameSpace, 'svg');
 		const renderer = new SVGRenderer(result, importExportViewport);
 
-		const origTransform = importExportViewport.canvasToScreenTransform;
-		// Reset the transform to ensure that (0, 0) is (0, 0)
-		importExportViewport.resetTransform(Mat33.identity);
-
-		// Render **all** elements.
-		this.image.renderAll(renderer);
-
-		importExportViewport.resetTransform(origTransform);
+		this.renderAllWithTransform(renderer, importExportViewport);
 
 		// Just show the main region
 		const rect = importExportViewport.visibleRect;
@@ -852,6 +869,23 @@ export class Editor {
 
 
 		return result;
+	}
+
+	// Renders everything in this' image to `renderer`, but first transforming the given `viewport`
+	// such that its transform is `transform`. The given `viewport`'s transform is restored before this method
+	// returns.
+	//
+	// For example, rendering with `transform = Mat33.identity` *sets* `viewport`'s transform to `Mat33.identity`,
+	// renders everything in this' image to `renderer`, then restores `viewport`'s transform to whatever it was before.
+	private renderAllWithTransform(
+		renderer: AbstractRenderer, viewport: Viewport, transform: Mat33 = Mat33.identity
+	): void {
+		const origTransform = this.importExportViewport.canvasToScreenTransform;
+		viewport.resetTransform(transform);
+
+		this.image.renderAll(renderer);
+
+		viewport.resetTransform(origTransform);
 	}
 
 	public async loadFrom(loader: ImageLoader) {
