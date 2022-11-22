@@ -208,8 +208,8 @@ export default class Selection {
 		) {
 			super('selection-tool-transform');
 
-			const isIDList = (a: AbstractComponent[]|string[]): a is string[] => {
-				return typeof a[0] === 'string';
+			const isIDList = (arr: AbstractComponent[]|string[]): arr is string[] => {
+				return typeof arr[0] === 'string';
 			};
 
 			// If a list of element IDs,
