@@ -190,8 +190,8 @@ export class Viewport {
 
 		// Represent as k 10ⁿ for some n, k ∈ ℤ.
 		const decimalComponent = 10 ** Math.floor(Math.log10(Math.abs(scaleRatio)));
-		const roundAnountFactor = 2 ** roundAmount;
-		scaleRatio = Math.round(scaleRatio / decimalComponent * roundAnountFactor) / roundAnountFactor * decimalComponent;
+		const roundAmountFactor = 2 ** roundAmount;
+		scaleRatio = Math.round(scaleRatio / decimalComponent * roundAmountFactor) / roundAmountFactor * decimalComponent;
 
 		return scaleRatio;
 	}

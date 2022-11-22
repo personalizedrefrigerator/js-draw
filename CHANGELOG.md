@@ -1,4 +1,8 @@
 
+# 0.9.1
+ * Bug fixes:
+  * Fix line tool producing an open shape. This caused issues with erasing and zooming in on these shapes.
+
 # 0.9.0
  * Allow saving toolbar widget state (see `HTMLToolbar#serializeState` and `HTMLToolbar#deserializeState`).
   * Breaking change: Toolbar widgets now require an `id`. As such, the order and number of parameters to `BaseWidget` has changed.
