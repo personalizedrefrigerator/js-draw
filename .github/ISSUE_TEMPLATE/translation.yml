@@ -20,7 +20,7 @@ body:
   - type: input
     id: translation-pen
     attributes:
-      label: `pen`
+      label: pen
       description: Translate `Pen`
       placeholder: Pen
     validations:
@@ -28,7 +28,7 @@ body:
   - type: input
     id: translation-eraser
     attributes:
-      label: `eraser`
+      label: eraser
       description: Translate `Eraser`
       placeholder: Eraser
     validations:
@@ -36,7 +36,7 @@ body:
   - type: input
     id: translation-select
     attributes:
-      label: `select`
+      label: select
       description: Translate `Select`
       placeholder: Select
     validations:
@@ -44,7 +44,7 @@ body:
   - type: input
     id: translation-handTool
     attributes:
-      label: `handTool`
+      label: handTool
       description: Translate `Pan`
       placeholder: Pan
     validations:
@@ -52,7 +52,7 @@ body:
   - type: input
     id: translation-zoom
     attributes:
-      label: `zoom`
+      label: zoom
       description: Translate `Zoom`
       placeholder: Zoom
     validations:
@@ -60,7 +60,7 @@ body:
   - type: input
     id: translation-resetView
     attributes:
-      label: `resetView`
+      label: resetView
       description: Translate `Reset view`
       placeholder: Reset view
     validations:
@@ -68,7 +68,7 @@ body:
   - type: input
     id: translation-thicknessLabel
     attributes:
-      label: `thicknessLabel`
+      label: thicknessLabel
       description: Translate `Thickness: `
       placeholder: Thickness: 
     validations:
@@ -76,7 +76,7 @@ body:
   - type: input
     id: translation-colorLabel
     attributes:
-      label: `colorLabel`
+      label: colorLabel
       description: Translate `Color: `
       placeholder: Color: 
     validations:
@@ -84,7 +84,7 @@ body:
   - type: input
     id: translation-fontLabel
     attributes:
-      label: `fontLabel`
+      label: fontLabel
       description: Translate `Font: `
       placeholder: Font: 
     validations:
@@ -92,7 +92,7 @@ body:
   - type: input
     id: translation-resizeImageToSelection
     attributes:
-      label: `resizeImageToSelection`
+      label: resizeImageToSelection
       description: Translate `Resize image to selection`
       placeholder: Resize image to selection
     validations:
@@ -100,7 +100,7 @@ body:
   - type: input
     id: translation-deleteSelection
     attributes:
-      label: `deleteSelection`
+      label: deleteSelection
       description: Translate `Delete selection`
       placeholder: Delete selection
     validations:
@@ -108,7 +108,7 @@ body:
   - type: input
     id: translation-duplicateSelection
     attributes:
-      label: `duplicateSelection`
+      label: duplicateSelection
       description: Translate `Duplicate selection`
       placeholder: Duplicate selection
     validations:
@@ -116,7 +116,7 @@ body:
   - type: input
     id: translation-undo
     attributes:
-      label: `undo`
+      label: undo
       description: Translate `Undo`
       placeholder: Undo
     validations:
@@ -124,7 +124,7 @@ body:
   - type: input
     id: translation-redo
     attributes:
-      label: `redo`
+      label: redo
       description: Translate `Redo`
       placeholder: Redo
     validations:
@@ -132,7 +132,7 @@ body:
   - type: input
     id: translation-selectObjectType
     attributes:
-      label: `selectObjectType`
+      label: selectObjectType
       description: Translate `Object type: `
       placeholder: Object type: 
     validations:
@@ -140,7 +140,7 @@ body:
   - type: input
     id: translation-pickColorFromScreen
     attributes:
-      label: `pickColorFromScreen`
+      label: pickColorFromScreen
       description: Translate `Pick color from screen`
       placeholder: Pick color from screen
     validations:
@@ -148,7 +148,7 @@ body:
   - type: input
     id: translation-clickToPickColorAnnouncement
     attributes:
-      label: `clickToPickColorAnnouncement`
+      label: clickToPickColorAnnouncement
       description: Translate `Click on the screen to pick a color`
       placeholder: Click on the screen to pick a color
     validations:
@@ -156,7 +156,7 @@ body:
   - type: input
     id: translation-selectionToolKeyboardShortcuts
     attributes:
-      label: `selectionToolKeyboardShortcuts`
+      label: selectionToolKeyboardShortcuts
       description: Translate `Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.`
       placeholder: Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.
     validations:
@@ -164,7 +164,7 @@ body:
   - type: input
     id: translation-touchPanning
     attributes:
-      label: `touchPanning`
+      label: touchPanning
       description: Translate `Touchscreen panning`
       placeholder: Touchscreen panning
     validations:
@@ -172,7 +172,7 @@ body:
   - type: input
     id: translation-freehandPen
     attributes:
-      label: `freehandPen`
+      label: freehandPen
       description: Translate `Freehand`
       placeholder: Freehand
     validations:
@@ -180,7 +180,7 @@ body:
   - type: input
     id: translation-pressureSensitiveFreehandPen
     attributes:
-      label: `pressureSensitiveFreehandPen`
+      label: pressureSensitiveFreehandPen
       description: Translate `Freehand (pressure sensitive)`
       placeholder: Freehand (pressure sensitive)
     validations:
@@ -188,7 +188,7 @@ body:
   - type: input
     id: translation-arrowPen
     attributes:
-      label: `arrowPen`
+      label: arrowPen
       description: Translate `Arrow`
       placeholder: Arrow
     validations:
@@ -196,7 +196,7 @@ body:
   - type: input
     id: translation-linePen
     attributes:
-      label: `linePen`
+      label: linePen
       description: Translate `Line`
       placeholder: Line
     validations:
@@ -204,7 +204,7 @@ body:
   - type: input
     id: translation-outlinedRectanglePen
     attributes:
-      label: `outlinedRectanglePen`
+      label: outlinedRectanglePen
       description: Translate `Outlined rectangle`
       placeholder: Outlined rectangle
     validations:
@@ -212,7 +212,7 @@ body:
   - type: input
     id: translation-filledRectanglePen
     attributes:
-      label: `filledRectanglePen`
+      label: filledRectanglePen
       description: Translate `Filled rectangle`
       placeholder: Filled rectangle
     validations:
@@ -220,7 +220,7 @@ body:
   - type: input
     id: translation-lockRotation
     attributes:
-      label: `lockRotation`
+      label: lockRotation
       description: Translate `Lock rotation`
       placeholder: Lock rotation
     validations:
@@ -228,7 +228,7 @@ body:
   - type: input
     id: translation-dropdownShown
     attributes:
-      label: `dropdownShown`
+      label: dropdownShown
       description: Translate `(toolName) => \`Dropdown for ${toolName} shown\``
       placeholder: (toolName) => `Dropdown for ${toolName} shown`
     validations:
@@ -236,7 +236,7 @@ body:
   - type: input
     id: translation-dropdownHidden
     attributes:
-      label: `dropdownHidden`
+      label: dropdownHidden
       description: Translate `(toolName) => \`Dropdown for ${toolName} hidden\``
       placeholder: (toolName) => `Dropdown for ${toolName} hidden`
     validations:
@@ -244,7 +244,7 @@ body:
   - type: input
     id: translation-zoomLevel
     attributes:
-      label: `zoomLevel`
+      label: zoomLevel
       description: Translate `(zoomPercent) => \`Zoom: ${zoomPercent}%\``
       placeholder: (zoomPercent) => `Zoom: ${zoomPercent}%`
     validations:
@@ -252,7 +252,7 @@ body:
   - type: input
     id: translation-colorChangedAnnouncement
     attributes:
-      label: `colorChangedAnnouncement`
+      label: colorChangedAnnouncement
       description: Translate `(color) => \`Color changed to ${color}\``
       placeholder: (color) => `Color changed to ${color}`
     validations:
@@ -260,7 +260,7 @@ body:
   - type: input
     id: translation-penTool
     attributes:
-      label: `penTool`
+      label: penTool
       description: Translate `(penId) => \`Pen ${penId}\``
       placeholder: (penId) => `Pen ${penId}`
     validations:
@@ -268,7 +268,7 @@ body:
   - type: input
     id: translation-selectionTool
     attributes:
-      label: `selectionTool`
+      label: selectionTool
       description: Translate `Selection`
       placeholder: Selection
     validations:
@@ -276,7 +276,7 @@ body:
   - type: input
     id: translation-eraserTool
     attributes:
-      label: `eraserTool`
+      label: eraserTool
       description: Translate `Eraser`
       placeholder: Eraser
     validations:
@@ -284,7 +284,7 @@ body:
   - type: input
     id: translation-touchPanTool
     attributes:
-      label: `touchPanTool`
+      label: touchPanTool
       description: Translate `Touch panning`
       placeholder: Touch panning
     validations:
@@ -292,7 +292,7 @@ body:
   - type: input
     id: translation-twoFingerPanZoomTool
     attributes:
-      label: `twoFingerPanZoomTool`
+      label: twoFingerPanZoomTool
       description: Translate `Panning and zooming`
       placeholder: Panning and zooming
     validations:
@@ -300,7 +300,7 @@ body:
   - type: input
     id: translation-undoRedoTool
     attributes:
-      label: `undoRedoTool`
+      label: undoRedoTool
       description: Translate `Undo/Redo`
       placeholder: Undo/Redo
     validations:
@@ -308,7 +308,7 @@ body:
   - type: input
     id: translation-rightClickDragPanTool
     attributes:
-      label: `rightClickDragPanTool`
+      label: rightClickDragPanTool
       description: Translate `Right-click drag`
       placeholder: Right-click drag
     validations:
@@ -316,7 +316,7 @@ body:
   - type: input
     id: translation-pipetteTool
     attributes:
-      label: `pipetteTool`
+      label: pipetteTool
       description: Translate `Pick color from screen`
       placeholder: Pick color from screen
     validations:
@@ -324,7 +324,7 @@ body:
   - type: input
     id: translation-keyboardPanZoom
     attributes:
-      label: `keyboardPanZoom`
+      label: keyboardPanZoom
       description: Translate `Keyboard pan/zoom shortcuts`
       placeholder: Keyboard pan/zoom shortcuts
     validations:
@@ -332,7 +332,7 @@ body:
   - type: input
     id: translation-textTool
     attributes:
-      label: `textTool`
+      label: textTool
       description: Translate `Text`
       placeholder: Text
     validations:
@@ -340,7 +340,7 @@ body:
   - type: input
     id: translation-enterTextToInsert
     attributes:
-      label: `enterTextToInsert`
+      label: enterTextToInsert
       description: Translate `Text to insert`
       placeholder: Text to insert
     validations:
@@ -348,7 +348,7 @@ body:
   - type: input
     id: translation-changeTool
     attributes:
-      label: `changeTool`
+      label: changeTool
       description: Translate `Change tool`
       placeholder: Change tool
     validations:
@@ -356,7 +356,7 @@ body:
   - type: input
     id: translation-pasteHandler
     attributes:
-      label: `pasteHandler`
+      label: pasteHandler
       description: Translate `Copy paste handler`
       placeholder: Copy paste handler
     validations:
@@ -364,7 +364,7 @@ body:
   - type: input
     id: translation-anyDevicePanning
     attributes:
-      label: `anyDevicePanning`
+      label: anyDevicePanning
       description: Translate `Any device panning`
       placeholder: Any device panning
     validations:
@@ -372,7 +372,7 @@ body:
   - type: input
     id: translation-copied
     attributes:
-      label: `copied`
+      label: copied
       description: Translate `(count, description) => \`Copied ${count} ${description}\``
       placeholder: (count, description) => `Copied ${count} ${description}`
     validations:
@@ -380,7 +380,7 @@ body:
   - type: input
     id: translation-pasted
     attributes:
-      label: `pasted`
+      label: pasted
       description: Translate `(count, description) => \`Pasted ${count} ${description}\``
       placeholder: (count, description) => `Pasted ${count} ${description}`
     validations:
@@ -388,7 +388,7 @@ body:
   - type: input
     id: translation-toolEnabledAnnouncement
     attributes:
-      label: `toolEnabledAnnouncement`
+      label: toolEnabledAnnouncement
       description: Translate `(toolName) => \`${toolName} enabled\``
       placeholder: (toolName) => `${toolName} enabled`
     validations:
@@ -396,7 +396,7 @@ body:
   - type: input
     id: translation-toolDisabledAnnouncement
     attributes:
-      label: `toolDisabledAnnouncement`
+      label: toolDisabledAnnouncement
       description: Translate `(toolName) => \`${toolName} disabled\``
       placeholder: (toolName) => `${toolName} disabled`
     validations:
@@ -404,7 +404,7 @@ body:
   - type: input
     id: translation-updatedViewport
     attributes:
-      label: `updatedViewport`
+      label: updatedViewport
       description: Translate `Transformed Viewport`
       placeholder: Transformed Viewport
     validations:
@@ -412,7 +412,7 @@ body:
   - type: input
     id: translation-transformedElements
     attributes:
-      label: `transformedElements`
+      label: transformedElements
       description: Translate `(elemCount) => \`Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}\``
       placeholder: (elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`
     validations:
@@ -420,7 +420,7 @@ body:
   - type: input
     id: translation-resizeOutputCommand
     attributes:
-      label: `resizeOutputCommand`
+      label: resizeOutputCommand
       description: Translate `(newSize) => \`Resized image to ${newSize.w}x${newSize.h}\``
       placeholder: (newSize) => `Resized image to ${newSize.w}x${newSize.h}`
     validations:
@@ -428,7 +428,7 @@ body:
   - type: input
     id: translation-addElementAction
     attributes:
-      label: `addElementAction`
+      label: addElementAction
       description: Translate `(componentDescription) => \`Added ${componentDescription}\``
       placeholder: (componentDescription) => `Added ${componentDescription}`
     validations:
@@ -436,7 +436,7 @@ body:
   - type: input
     id: translation-eraseAction
     attributes:
-      label: `eraseAction`
+      label: eraseAction
       description: Translate `(componentDescription, numElems) => \`Erased ${numElems} ${componentDescription}\``
       placeholder: (componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`
     validations:
@@ -444,7 +444,7 @@ body:
   - type: input
     id: translation-duplicateAction
     attributes:
-      label: `duplicateAction`
+      label: duplicateAction
       description: Translate `(componentDescription, numElems) => \`Duplicated ${numElems} ${componentDescription}\``
       placeholder: (componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}`
     validations:
@@ -452,7 +452,7 @@ body:
   - type: input
     id: translation-unionOf
     attributes:
-      label: `unionOf`
+      label: unionOf
       description: Translate `(actionDescription, actionCount) => \`Union: ${actionCount} ${actionDescription}\``
       placeholder: (actionDescription, actionCount) => `Union: ${actionCount} ${actionDescription}`
     validations:
@@ -460,7 +460,7 @@ body:
   - type: input
     id: translation-inverseOf
     attributes:
-      label: `inverseOf`
+      label: inverseOf
       description: Translate `(actionDescription) => \`Inverse of ${actionDescription}\``
       placeholder: (actionDescription) => `Inverse of ${actionDescription}`
     validations:
@@ -468,7 +468,7 @@ body:
   - type: input
     id: translation-elements
     attributes:
-      label: `elements`
+      label: elements
       description: Translate `Elements`
       placeholder: Elements
     validations:
@@ -476,7 +476,7 @@ body:
   - type: input
     id: translation-erasedNoElements
     attributes:
-      label: `erasedNoElements`
+      label: erasedNoElements
       description: Translate `Erased nothing`
       placeholder: Erased nothing
     validations:
@@ -484,7 +484,7 @@ body:
   - type: input
     id: translation-duplicatedNoElements
     attributes:
-      label: `duplicatedNoElements`
+      label: duplicatedNoElements
       description: Translate `Duplicated nothing`
       placeholder: Duplicated nothing
     validations:
@@ -492,7 +492,7 @@ body:
   - type: input
     id: translation-rotatedBy
     attributes:
-      label: `rotatedBy`
+      label: rotatedBy
       description: Translate `(degrees) => \`Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}\``
       placeholder: (degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`
     validations:
@@ -500,7 +500,7 @@ body:
   - type: input
     id: translation-movedLeft
     attributes:
-      label: `movedLeft`
+      label: movedLeft
       description: Translate `Moved left`
       placeholder: Moved left
     validations:
@@ -508,7 +508,7 @@ body:
   - type: input
     id: translation-movedUp
     attributes:
-      label: `movedUp`
+      label: movedUp
       description: Translate `Moved up`
       placeholder: Moved up
     validations:
@@ -516,7 +516,7 @@ body:
   - type: input
     id: translation-movedDown
     attributes:
-      label: `movedDown`
+      label: movedDown
       description: Translate `Moved down`
       placeholder: Moved down
     validations:
@@ -524,7 +524,7 @@ body:
   - type: input
     id: translation-movedRight
     attributes:
-      label: `movedRight`
+      label: movedRight
       description: Translate `Moved right`
       placeholder: Moved right
     validations:
@@ -532,7 +532,7 @@ body:
   - type: input
     id: translation-zoomedOut
     attributes:
-      label: `zoomedOut`
+      label: zoomedOut
       description: Translate `Zoomed out`
       placeholder: Zoomed out
     validations:
@@ -540,7 +540,7 @@ body:
   - type: input
     id: translation-zoomedIn
     attributes:
-      label: `zoomedIn`
+      label: zoomedIn
       description: Translate `Zoomed in`
       placeholder: Zoomed in
     validations:
@@ -548,7 +548,7 @@ body:
   - type: input
     id: translation-selectedElements
     attributes:
-      label: `selectedElements`
+      label: selectedElements
       description: Translate `(count) => \`Selected ${count} element${count === 1 ? '' : 's'}\``
       placeholder: (count) => `Selected ${count} element${count === 1 ? '' : 's'}`
     validations:
@@ -556,7 +556,7 @@ body:
   - type: input
     id: translation-unlabeledImageNode
     attributes:
-      label: `unlabeledImageNode`
+      label: unlabeledImageNode
       description: Translate `Unlabeled image`
       placeholder: Unlabeled image
     validations:
@@ -564,7 +564,7 @@ body:
   - type: input
     id: translation-stroke
     attributes:
-      label: `stroke`
+      label: stroke
       description: Translate `Stroke`
       placeholder: Stroke
     validations:
@@ -572,7 +572,7 @@ body:
   - type: input
     id: translation-svgObject
     attributes:
-      label: `svgObject`
+      label: svgObject
       description: Translate `SVG Object`
       placeholder: SVG Object
     validations:
@@ -580,7 +580,7 @@ body:
   - type: input
     id: translation-text
     attributes:
-      label: `text`
+      label: text
       description: Translate `(text) => \`Text object: ${text}\``
       placeholder: (text) => `Text object: ${text}`
     validations:
@@ -588,7 +588,7 @@ body:
   - type: input
     id: translation-imageNode
     attributes:
-      label: `imageNode`
+      label: imageNode
       description: Translate `(label) => \`Image: ${label}\``
       placeholder: (label) => `Image: ${label}`
     validations:
@@ -596,7 +596,7 @@ body:
   - type: input
     id: translation-pathNodeCount
     attributes:
-      label: `pathNodeCount`
+      label: pathNodeCount
       description: Translate `(count) => \`There are ${count} visible path objects.\``
       placeholder: (count) => `There are ${count} visible path objects.`
     validations:
@@ -604,7 +604,7 @@ body:
   - type: input
     id: translation-textNodeCount
     attributes:
-      label: `textNodeCount`
+      label: textNodeCount
       description: Translate `(count) => \`There are ${count} visible text nodes.\``
       placeholder: (count) => `There are ${count} visible text nodes.`
     validations:
@@ -612,7 +612,7 @@ body:
   - type: input
     id: translation-imageNodeCount
     attributes:
-      label: `imageNodeCount`
+      label: imageNodeCount
       description: Translate `(nodeCount) => \`There are ${nodeCount} visible image nodes.\``
       placeholder: (nodeCount) => `There are ${nodeCount} visible image nodes.`
     validations:
@@ -620,7 +620,7 @@ body:
   - type: input
     id: translation-textNode
     attributes:
-      label: `textNode`
+      label: textNode
       description: Translate `(content) => \`Text: ${content}\``
       placeholder: (content) => `Text: ${content}`
     validations:
@@ -628,7 +628,7 @@ body:
   - type: input
     id: translation-rerenderAsText
     attributes:
-      label: `rerenderAsText`
+      label: rerenderAsText
       description: Translate `Re-render as text`
       placeholder: Re-render as text
     validations:
@@ -636,7 +636,7 @@ body:
   - type: input
     id: translation-accessibilityInputInstructions
     attributes:
-      label: `accessibilityInputInstructions`
+      label: accessibilityInputInstructions
       description: Translate `Press "t" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press "w" to zoom in and "s" to zoom out.`
       placeholder: Press "t" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press "w" to zoom in and "s" to zoom out.
     validations:
@@ -644,7 +644,7 @@ body:
   - type: input
     id: translation-loading
     attributes:
-      label: `loading`
+      label: loading
       description: Translate `(percentage) => \`Loading ${percentage}%...\``
       placeholder: (percentage) => `Loading ${percentage}%...`
     validations:
@@ -652,7 +652,7 @@ body:
   - type: input
     id: translation-imageEditor
     attributes:
-      label: `imageEditor`
+      label: imageEditor
       description: Translate `Image Editor`
       placeholder: Image Editor
     validations:
@@ -660,7 +660,7 @@ body:
   - type: input
     id: translation-doneLoading
     attributes:
-      label: `doneLoading`
+      label: doneLoading
       description: Translate `Done loading`
       placeholder: Done loading
     validations:
@@ -668,7 +668,7 @@ body:
   - type: input
     id: translation-undoAnnouncement
     attributes:
-      label: `undoAnnouncement`
+      label: undoAnnouncement
       description: Translate `(commandDescription) => \`Undid ${commandDescription}\``
       placeholder: (commandDescription) => `Undid ${commandDescription}`
     validations:
@@ -676,7 +676,7 @@ body:
   - type: input
     id: translation-redoAnnouncement
     attributes:
-      label: `redoAnnouncement`
+      label: redoAnnouncement
       description: Translate `(commandDescription) => \`Redid ${commandDescription}\``
       placeholder: (commandDescription) => `Redid ${commandDescription}`
     validations:
