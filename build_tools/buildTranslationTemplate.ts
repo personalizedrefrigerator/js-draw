@@ -72,6 +72,12 @@ const generateTranslationTemplate = () => {
 		Use this template to update an existing translation or to create a new translation.
 	`.replace(/\s+/g, ' '));
 
+	addLabel(`
+		(Optional) If you would like to submit a pull request that applies this translation, 
+		note that existing translations are present in
+		[src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/localizations).
+	`.replace(/\s+/g, ''));
+
 	addInput('input', 'language-name', {
 		label: 'Language',
 		description: 'The name of the language to translate to in English (e.g. Spanish)',

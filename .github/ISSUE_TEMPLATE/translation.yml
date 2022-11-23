@@ -10,6 +10,10 @@ body:
     attributes:
       value: |
          Thank you for taking the time to translate `js-draw`! If you don't have time to translate all of the strings below, feel free to submit an incomplete translation and edit it later. Use this template to update an existing translation or to create a new translation. 
+  - type: markdown
+    attributes:
+      value: |
+        (Optional)Ifyouwouldliketosubmitapullrequestthatappliesthistranslation,notethatexistingtranslationsarepresentin[src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/localizations).
   - type: input
     id: language-name
     attributes:
