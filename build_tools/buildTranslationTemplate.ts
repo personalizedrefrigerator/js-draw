@@ -18,7 +18,8 @@ const generateTranslationTemplate = () => {
 		lines.push('    attributes:');
 
 		for (const key in attrs) {
-			lines.push(`      ${key}: ${attrs[key]}`);
+			const value = `${attrs[key]}`;
+			lines.push(`      ${key}: "${value.replace(/"/g, '\\"')}"`);
 		}
 
 		lines.push('    validations:');
