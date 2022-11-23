@@ -1,7 +1,7 @@
 import Color4 from '../Color4';
 import Mat33 from '../math/Mat33';
 import AbstractComponent from './AbstractComponent';
-import TextComponent, { TextStyle } from './Text';
+import TextComponent, { TextStyle } from './TextComponent';
 
 
 describe('Text', () => {

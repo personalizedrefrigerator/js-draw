@@ -14,7 +14,7 @@ import EditorImage from '../EditorImage';
 import SelectionTool from './SelectionTool/SelectionTool';
 import TextTool from './TextTool';
 import Color4 from '../Color4';
-import { TextStyle } from '../components/Text';
+import { TextStyle } from '../components/TextComponent';
 import ImageComponent from '../components/ImageComponent';
 import Viewport from '../Viewport';
 

@@ -15,6 +15,7 @@ import ToolSwitcherShortcut from './ToolSwitcherShortcut';
 import PasteHandler from './PasteHandler';
 import ToolbarShortcutHandler from './ToolbarShortcutHandler';
 import { makePressureSensitiveFreehandLineBuilder } from '../components/builders/PressureSensitiveFreehandLineBuilder';
+import FindTool from './FindTool';
 
 export default class ToolController {
 	private tools: BaseTool[];
@@ -50,6 +51,7 @@ export default class ToolController {
 			new UndoRedoShortcut(editor),
 			new ToolbarShortcutHandler(editor),
 			new ToolSwitcherShortcut(editor),
+			new FindTool(editor),
 			new PasteHandler(editor),
 		];
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolGroup));

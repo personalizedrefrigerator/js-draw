@@ -1,4 +1,4 @@
-import { TextStyle } from '../../components/Text';
+import { TextStyle } from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
 import Rect2 from '../../math/Rect2';
 import { Vec2 } from '../../math/Vec2';
@@ -34,8 +34,8 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 	public getDescription(): string {
 		return [
 			this.localizationTable.pathNodeCount(this.pathCount),
-			...(this.textNodeCount > 0 ? this.localizationTable.textNodeCount(this.textNodeCount) : []),
-			...(this.imageNodeCount > 0 ? this.localizationTable.imageNodeCount(this.imageNodeCount) : []),
+			...(this.textNodeCount > 0 ? [this.localizationTable.textNodeCount(this.textNodeCount)] : []),
+			...(this.imageNodeCount > 0 ? [this.localizationTable.imageNodeCount(this.imageNodeCount)] : []),
 			...this.descriptionBuilder
 		].join('\n');
 	}

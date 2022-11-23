@@ -1,5 +1,5 @@
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
-import { TextStyle } from '../../components/Text';
+import { TextStyle } from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
 import Path, { PathCommand, PathCommandType } from '../../math/Path';
 import Rect2 from '../../math/Rect2';

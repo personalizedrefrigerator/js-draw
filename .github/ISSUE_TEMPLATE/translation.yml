@@ -366,6 +366,54 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-findLabel
+    attributes:
+      label: "findLabel"
+      description: "Translate `Find`."
+      placeholder: "Find"
+    validations:
+      required: false
+  - type: input
+    id: translation-toNextMatch
+    attributes:
+      label: "toNextMatch"
+      description: "Translate `Next`."
+      placeholder: "Next"
+    validations:
+      required: false
+  - type: input
+    id: translation-closeFindDialog
+    attributes:
+      label: "closeFindDialog"
+      description: "Translate `Close`."
+      placeholder: "Close"
+    validations:
+      required: false
+  - type: input
+    id: translation-findDialogShown
+    attributes:
+      label: "findDialogShown"
+      description: "Translate `Find dialog shown`."
+      placeholder: "Find dialog shown"
+    validations:
+      required: false
+  - type: input
+    id: translation-findDialogHidden
+    attributes:
+      label: "findDialogHidden"
+      description: "Translate `Find dialog hidden`."
+      placeholder: "Find dialog hidden"
+    validations:
+      required: false
+  - type: input
+    id: translation-focusedFoundText
+    attributes:
+      label: "focusedFoundText"
+      description: "Translate ``(matchIdx, totalMatches) => `Viewing match ${matchIdx} of ${totalMatches}` ``."
+      placeholder: "(matchIdx, totalMatches) => `Viewing match ${matchIdx} of ${totalMatches}`"
+    validations:
+      required: false
+  - type: input
     id: translation-anyDevicePanning
     attributes:
       label: "anyDevicePanning"

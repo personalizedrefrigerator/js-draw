@@ -223,9 +223,7 @@ export class Viewport {
 		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 1/3;
 
 		if ((largerThanTarget && allowZoomOut) || (muchSmallerThanTarget && allowZoomIn)) {
-			// If larger than the target, ensure that the longest axis is visible.
-			// If smaller, shrink the visible rectangle as much as possible
-			const multiplier = (largerThanTarget ? Math.max : Math.min)(
+			const multiplier = Math.max(
 				toMakeVisible.w / targetRect.w, toMakeVisible.h / targetRect.h
 			);
 			const visibleRectTransform = Mat33.scaling2D(multiplier, targetRect.topLeft);

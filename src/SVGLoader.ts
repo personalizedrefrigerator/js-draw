@@ -3,7 +3,7 @@ import AbstractComponent from './components/AbstractComponent';
 import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
-import TextComponent, { TextStyle } from './components/Text';
+import TextComponent, { TextStyle } from './components/TextComponent';
 import UnknownSVGObject from './components/UnknownSVGObject';
 import Mat33 from './math/Mat33';
 import Path from './math/Path';

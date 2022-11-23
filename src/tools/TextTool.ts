@@ -1,5 +1,5 @@
 import Color4 from '../Color4';
-import TextComponent, { TextStyle } from '../components/Text';
+import TextComponent, { TextStyle } from '../components/TextComponent';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Rect2 from '../math/Rect2';

@@ -1,6 +1,6 @@
 import Color4 from '../Color4';
 import { ComponentBuilderFactory } from '../components/builders/types';
-import { TextStyle } from '../components/Text';
+import { TextStyle } from '../components/TextComponent';
 import EventDispatcher from '../EventDispatcher';
 import { Vec2 } from '../math/Vec2';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';

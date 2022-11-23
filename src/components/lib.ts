@@ -6,7 +6,7 @@ export { default as StrokeSmoother, Curve as StrokeSmootherCurve } from './util/
 export * from './AbstractComponent';
 export { default as AbstractComponent } from './AbstractComponent';
 import Stroke from './Stroke';
-import TextComponent from './Text';
+import TextComponent from './TextComponent';
 import ImageComponent from './ImageComponent';
 
 export {

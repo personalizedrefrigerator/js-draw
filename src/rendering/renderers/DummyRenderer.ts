@@ -1,6 +1,6 @@
 // Renderer that outputs nothing. Useful for automated tests.
 
-import { TextStyle } from '../../components/Text';
+import { TextStyle } from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
 import Rect2 from '../../math/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';

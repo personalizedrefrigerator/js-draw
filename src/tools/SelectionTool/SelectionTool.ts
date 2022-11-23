@@ -12,7 +12,7 @@ import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
-import TextComponent from '../../components/Text';
+import TextComponent from '../../components/TextComponent';
 
 export const cssPrefix = 'selection-tool-';
 

@@ -15,6 +15,13 @@ export interface ToolLocalization {
 	changeTool: string;
 	pasteHandler: string;
 
+	findLabel: string;
+	toNextMatch: string;
+	closeFindDialog: string;
+	findDialogShown: string;
+	findDialogHidden: string;
+	focusedFoundText: (currentMatchNumber: number, totalMatches: number)=> string;
+
 	anyDevicePanning: string;
 
 	copied: (count: number, description: string) => string;
@@ -39,6 +46,13 @@ export const defaultToolLocalization: ToolLocalization = {
 	enterTextToInsert: 'Text to insert',
 	changeTool: 'Change tool',
 	pasteHandler: 'Copy paste handler',
+
+	findLabel: 'Find',
+	toNextMatch: 'Next',
+	closeFindDialog: 'Close',
+	findDialogShown: 'Find dialog shown',
+	findDialogHidden: 'Find dialog hidden',
+	focusedFoundText: (matchIdx: number, totalMatches: number) => `Viewing match ${matchIdx} of ${totalMatches}`,
 
 	anyDevicePanning: 'Any device panning',
 
