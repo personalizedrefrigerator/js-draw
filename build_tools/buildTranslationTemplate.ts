@@ -49,7 +49,7 @@ const generateTranslationTemplate = () => {
 		const englishTranslation = (defaultEditorLocalization as any)[key];
 		addInput('input', `translation-${key}`, {
 			label: `${escapeBackticks(key)}`,
-			description: `Translate \`${escapeBackticks(englishTranslation)}\``,
+			description: `Translate \`${escapeBackticks(englishTranslation)}\`.`,
 			placeholder: englishTranslation,
 		});
 	}
