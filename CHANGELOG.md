@@ -1,4 +1,7 @@
 
+# 0.9.2
+ * Added a find dialog that can be opened with `ctrl+f`
+
 # 0.9.1
  * Bug fixes:
   * Fix line tool producing an open shape. This caused issues with erasing and zooming in on these shapes.
