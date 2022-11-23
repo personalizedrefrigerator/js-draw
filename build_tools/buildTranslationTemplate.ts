@@ -19,7 +19,7 @@ const generateTranslationTemplate = () => {
 
 		for (const key in attrs) {
 			const value = `${attrs[key]}`;
-			
+
 			const escapedValue = value.replace(/[\\]/g, '\\\\').replace(/"/g, '\\"');
 			lines.push(`      ${key}: "${escapedValue}"`);
 		}
@@ -70,8 +70,7 @@ title: "[Translation]: <language>"
 labels: [localization]
 assignees: ''
 body:
-${bodyContentLines.join('\n')}
-	`;
+${bodyContentLines.join('\n')}`;
 };
 
 const template = generateTranslationTemplate();

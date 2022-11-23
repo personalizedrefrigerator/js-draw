@@ -688,4 +688,3 @@ body:
       placeholder: "Any additional information/comments on the translation can go here."
     validations:
       required: false
-	
