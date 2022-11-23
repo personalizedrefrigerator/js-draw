@@ -77,6 +77,6 @@ const template = generateTranslationTemplate();
 // be able to handle forward and back slashes (both) on Windows (so extra
 // path logic shouldn't be needed here.)
 const rootDir = path.dirname(__dirname);
-const translationTempaltePath = path.join(rootDir, '.github/ISSUE_TEMPLATE/translation.md');
+const translationTempaltePath = path.join(rootDir, '.github/ISSUE_TEMPLATE/translation.yml');
 
 fs.writeFileSync(translationTempaltePath, template);
