@@ -55,7 +55,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			fill: Color4.transparent,
 			stroke: {
 				color: this.startPoint.color,
-				width: this.averageWidth,
+				width: this.roundDistance(this.averageWidth),
 			}
 		};
 	}
@@ -107,14 +107,24 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		return this.previewStroke()!;
 	}
 
-	private roundPoint(point: Point2): Point2 {
+	private getMinFit(): number {
 		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 2);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
 		}
+		
+		return minFit;
+	}
 
+	private roundPoint(point: Point2): Point2 {
+		const minFit = this.getMinFit();
 		return Viewport.roundPoint(point, minFit);
+	}
+
+	private roundDistance(dist: number): number {
+		const minFit = this.getMinFit();
+		return Viewport.roundPoint(dist, minFit);
 	}
 
 	private curveToPathCommands(curve: Curve|null): PathCommand[] {
