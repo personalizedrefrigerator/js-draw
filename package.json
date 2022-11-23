@@ -72,6 +72,7 @@
 		"linter-precommit": "eslint --fix --ext .js --ext .ts",
 		"lint-staged": "lint-staged",
 		"lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
+		"build-translation-template": "ts-node ./build_tools/buildTranslationTemplate.ts",
 		"prepare": "husky install && yarn build",
 		"prepack": "yarn build && yarn test && pinst --disable",
 		"postpack": "pinst --enable"
