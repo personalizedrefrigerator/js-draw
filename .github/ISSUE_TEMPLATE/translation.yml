@@ -4,7 +4,7 @@ name: Translation
 description: Translate the editor to a new language!
 title: "[Translation]: <language>"
 labels: [localization]
-assignees: ''
+assignees: []
 body:
   - type: markdown
     attributes:

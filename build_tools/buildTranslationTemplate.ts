@@ -68,7 +68,7 @@ const generateTranslationTemplate = () => {
 description: Translate the editor to a new language!
 title: "[Translation]: <language>"
 labels: [localization]
-assignees: ''
+assignees: []
 body:
 ${bodyContentLines.join('\n')}`;
 };
