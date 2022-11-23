@@ -4,7 +4,36 @@ import * as path from 'path';
 
 import { defaultEditorLocalization } from '../src/localization';
 
-const escapeBackticks = (text: any) => `${text}`.replace(/[`]/g, '\\`');
+// Adds markdown formatting to format text like code.
+const codeFormat = (text: string) => {
+	let maxConsecutiveBackticks = 0;
+
+	// Find the longest number of consecutive backticks — we need to have more
+	// than that for the delimiters.
+	const backtickRuns = text.matchAll(/[`]+/g);
+	for (const backticks of backtickRuns) {
+		if (backticks.length > maxConsecutiveBackticks) {
+			maxConsecutiveBackticks = backticks.length;
+		}
+	}
+
+	let codeStartEnd = '';
+	for (let i = 0; i < maxConsecutiveBackticks + 1; i++) {
+		codeStartEnd += '`';
+	}
+
+	// If the text already starts with a `, add a space to prevent the
+	// markdown parser from treating it as part of the delimiter.
+	if (text.startsWith('`')) {
+		text = ' ' + text;
+	}
+
+	if (text.endsWith('`')) {
+		text = text + ' ';
+	}
+
+	return `${codeStartEnd}${text}${codeStartEnd}`;
+};
 
 const generateTranslationTemplate = () => {
 	const bodyContentLines: string[] = [];
@@ -49,10 +78,10 @@ const generateTranslationTemplate = () => {
 	}, true);
 
 	for (const key in defaultEditorLocalization) {
-		const englishTranslation = (defaultEditorLocalization as any)[key];
+		const englishTranslation = `${(defaultEditorLocalization as any)[key]}`;
 		addInput('input', `translation-${key}`, {
-			label: `${escapeBackticks(key)}`,
-			description: `Translate \`${escapeBackticks(englishTranslation)}\`.`,
+			label: `${key}`,
+			description: `Translate ${codeFormat(englishTranslation)}.`,
 			placeholder: englishTranslation,
 		});
 	}
