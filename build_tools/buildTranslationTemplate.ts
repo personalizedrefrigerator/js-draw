@@ -19,7 +19,9 @@ const generateTranslationTemplate = () => {
 
 		for (const key in attrs) {
 			const value = `${attrs[key]}`;
-			lines.push(`      ${key}: "${value.replace(/"/g, '\\"')}"`);
+			
+			const escapedValue = value.replace(/[\\]/g, '\\\\').replace(/"/g, '\\"');
+			lines.push(`      ${key}: "${escapedValue}"`);
 		}
 
 		lines.push('    validations:');

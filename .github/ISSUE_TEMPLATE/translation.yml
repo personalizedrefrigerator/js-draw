@@ -229,7 +229,7 @@ body:
     id: translation-dropdownShown
     attributes:
       label: "dropdownShown"
-      description: "Translate `(toolName) => \`Dropdown for ${toolName} shown\``."
+      description: "Translate `(toolName) => \\`Dropdown for ${toolName} shown\\``."
       placeholder: "(toolName) => `Dropdown for ${toolName} shown`"
     validations:
       required: false
@@ -237,7 +237,7 @@ body:
     id: translation-dropdownHidden
     attributes:
       label: "dropdownHidden"
-      description: "Translate `(toolName) => \`Dropdown for ${toolName} hidden\``."
+      description: "Translate `(toolName) => \\`Dropdown for ${toolName} hidden\\``."
       placeholder: "(toolName) => `Dropdown for ${toolName} hidden`"
     validations:
       required: false
@@ -245,7 +245,7 @@ body:
     id: translation-zoomLevel
     attributes:
       label: "zoomLevel"
-      description: "Translate `(zoomPercent) => \`Zoom: ${zoomPercent}%\``."
+      description: "Translate `(zoomPercent) => \\`Zoom: ${zoomPercent}%\\``."
       placeholder: "(zoomPercent) => `Zoom: ${zoomPercent}%`"
     validations:
       required: false
@@ -253,7 +253,7 @@ body:
     id: translation-colorChangedAnnouncement
     attributes:
       label: "colorChangedAnnouncement"
-      description: "Translate `(color) => \`Color changed to ${color}\``."
+      description: "Translate `(color) => \\`Color changed to ${color}\\``."
       placeholder: "(color) => `Color changed to ${color}`"
     validations:
       required: false
@@ -261,7 +261,7 @@ body:
     id: translation-penTool
     attributes:
       label: "penTool"
-      description: "Translate `(penId) => \`Pen ${penId}\``."
+      description: "Translate `(penId) => \\`Pen ${penId}\\``."
       placeholder: "(penId) => `Pen ${penId}`"
     validations:
       required: false
@@ -373,7 +373,7 @@ body:
     id: translation-copied
     attributes:
       label: "copied"
-      description: "Translate `(count, description) => \`Copied ${count} ${description}\``."
+      description: "Translate `(count, description) => \\`Copied ${count} ${description}\\``."
       placeholder: "(count, description) => `Copied ${count} ${description}`"
     validations:
       required: false
@@ -381,7 +381,7 @@ body:
     id: translation-pasted
     attributes:
       label: "pasted"
-      description: "Translate `(count, description) => \`Pasted ${count} ${description}\``."
+      description: "Translate `(count, description) => \\`Pasted ${count} ${description}\\``."
       placeholder: "(count, description) => `Pasted ${count} ${description}`"
     validations:
       required: false
@@ -389,7 +389,7 @@ body:
     id: translation-toolEnabledAnnouncement
     attributes:
       label: "toolEnabledAnnouncement"
-      description: "Translate `(toolName) => \`${toolName} enabled\``."
+      description: "Translate `(toolName) => \\`${toolName} enabled\\``."
       placeholder: "(toolName) => `${toolName} enabled`"
     validations:
       required: false
@@ -397,7 +397,7 @@ body:
     id: translation-toolDisabledAnnouncement
     attributes:
       label: "toolDisabledAnnouncement"
-      description: "Translate `(toolName) => \`${toolName} disabled\``."
+      description: "Translate `(toolName) => \\`${toolName} disabled\\``."
       placeholder: "(toolName) => `${toolName} disabled`"
     validations:
       required: false
@@ -413,7 +413,7 @@ body:
     id: translation-transformedElements
     attributes:
       label: "transformedElements"
-      description: "Translate `(elemCount) => \`Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}\``."
+      description: "Translate `(elemCount) => \\`Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}\\``."
       placeholder: "(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`"
     validations:
       required: false
@@ -421,7 +421,7 @@ body:
     id: translation-resizeOutputCommand
     attributes:
       label: "resizeOutputCommand"
-      description: "Translate `(newSize) => \`Resized image to ${newSize.w}x${newSize.h}\``."
+      description: "Translate `(newSize) => \\`Resized image to ${newSize.w}x${newSize.h}\\``."
       placeholder: "(newSize) => `Resized image to ${newSize.w}x${newSize.h}`"
     validations:
       required: false
@@ -429,7 +429,7 @@ body:
     id: translation-addElementAction
     attributes:
       label: "addElementAction"
-      description: "Translate `(componentDescription) => \`Added ${componentDescription}\``."
+      description: "Translate `(componentDescription) => \\`Added ${componentDescription}\\``."
       placeholder: "(componentDescription) => `Added ${componentDescription}`"
     validations:
       required: false
@@ -437,7 +437,7 @@ body:
     id: translation-eraseAction
     attributes:
       label: "eraseAction"
-      description: "Translate `(componentDescription, numElems) => \`Erased ${numElems} ${componentDescription}\``."
+      description: "Translate `(componentDescription, numElems) => \\`Erased ${numElems} ${componentDescription}\\``."
       placeholder: "(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`"
     validations:
       required: false
@@ -445,7 +445,7 @@ body:
     id: translation-duplicateAction
     attributes:
       label: "duplicateAction"
-      description: "Translate `(componentDescription, numElems) => \`Duplicated ${numElems} ${componentDescription}\``."
+      description: "Translate `(componentDescription, numElems) => \\`Duplicated ${numElems} ${componentDescription}\\``."
       placeholder: "(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}`"
     validations:
       required: false
@@ -453,7 +453,7 @@ body:
     id: translation-unionOf
     attributes:
       label: "unionOf"
-      description: "Translate `(actionDescription, actionCount) => \`Union: ${actionCount} ${actionDescription}\``."
+      description: "Translate `(actionDescription, actionCount) => \\`Union: ${actionCount} ${actionDescription}\\``."
       placeholder: "(actionDescription, actionCount) => `Union: ${actionCount} ${actionDescription}`"
     validations:
       required: false
@@ -461,7 +461,7 @@ body:
     id: translation-inverseOf
     attributes:
       label: "inverseOf"
-      description: "Translate `(actionDescription) => \`Inverse of ${actionDescription}\``."
+      description: "Translate `(actionDescription) => \\`Inverse of ${actionDescription}\\``."
       placeholder: "(actionDescription) => `Inverse of ${actionDescription}`"
     validations:
       required: false
@@ -493,7 +493,7 @@ body:
     id: translation-rotatedBy
     attributes:
       label: "rotatedBy"
-      description: "Translate `(degrees) => \`Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}\``."
+      description: "Translate `(degrees) => \\`Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}\\``."
       placeholder: "(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`"
     validations:
       required: false
@@ -549,7 +549,7 @@ body:
     id: translation-selectedElements
     attributes:
       label: "selectedElements"
-      description: "Translate `(count) => \`Selected ${count} element${count === 1 ? '' : 's'}\``."
+      description: "Translate `(count) => \\`Selected ${count} element${count === 1 ? '' : 's'}\\``."
       placeholder: "(count) => `Selected ${count} element${count === 1 ? '' : 's'}`"
     validations:
       required: false
@@ -581,7 +581,7 @@ body:
     id: translation-text
     attributes:
       label: "text"
-      description: "Translate `(text) => \`Text object: ${text}\``."
+      description: "Translate `(text) => \\`Text object: ${text}\\``."
       placeholder: "(text) => `Text object: ${text}`"
     validations:
       required: false
@@ -589,7 +589,7 @@ body:
     id: translation-imageNode
     attributes:
       label: "imageNode"
-      description: "Translate `(label) => \`Image: ${label}\``."
+      description: "Translate `(label) => \\`Image: ${label}\\``."
       placeholder: "(label) => `Image: ${label}`"
     validations:
       required: false
@@ -597,7 +597,7 @@ body:
     id: translation-pathNodeCount
     attributes:
       label: "pathNodeCount"
-      description: "Translate `(count) => \`There are ${count} visible path objects.\``."
+      description: "Translate `(count) => \\`There are ${count} visible path objects.\\``."
       placeholder: "(count) => `There are ${count} visible path objects.`"
     validations:
       required: false
@@ -605,7 +605,7 @@ body:
     id: translation-textNodeCount
     attributes:
       label: "textNodeCount"
-      description: "Translate `(count) => \`There are ${count} visible text nodes.\``."
+      description: "Translate `(count) => \\`There are ${count} visible text nodes.\\``."
       placeholder: "(count) => `There are ${count} visible text nodes.`"
     validations:
       required: false
@@ -613,7 +613,7 @@ body:
     id: translation-imageNodeCount
     attributes:
       label: "imageNodeCount"
-      description: "Translate `(nodeCount) => \`There are ${nodeCount} visible image nodes.\``."
+      description: "Translate `(nodeCount) => \\`There are ${nodeCount} visible image nodes.\\``."
       placeholder: "(nodeCount) => `There are ${nodeCount} visible image nodes.`"
     validations:
       required: false
@@ -621,7 +621,7 @@ body:
     id: translation-textNode
     attributes:
       label: "textNode"
-      description: "Translate `(content) => \`Text: ${content}\``."
+      description: "Translate `(content) => \\`Text: ${content}\\``."
       placeholder: "(content) => `Text: ${content}`"
     validations:
       required: false
@@ -645,7 +645,7 @@ body:
     id: translation-loading
     attributes:
       label: "loading"
-      description: "Translate `(percentage) => \`Loading ${percentage}%...\``."
+      description: "Translate `(percentage) => \\`Loading ${percentage}%...\\``."
       placeholder: "(percentage) => `Loading ${percentage}%...`"
     validations:
       required: false
@@ -669,7 +669,7 @@ body:
     id: translation-undoAnnouncement
     attributes:
       label: "undoAnnouncement"
-      description: "Translate `(commandDescription) => \`Undid ${commandDescription}\``."
+      description: "Translate `(commandDescription) => \\`Undid ${commandDescription}\\``."
       placeholder: "(commandDescription) => `Undid ${commandDescription}`"
     validations:
       required: false
@@ -677,7 +677,7 @@ body:
     id: translation-redoAnnouncement
     attributes:
       label: "redoAnnouncement"
-      description: "Translate `(commandDescription) => \`Redid ${commandDescription}\``."
+      description: "Translate `(commandDescription) => \\`Redid ${commandDescription}\\``."
       placeholder: "(commandDescription) => `Redid ${commandDescription}`"
     validations:
       required: false
