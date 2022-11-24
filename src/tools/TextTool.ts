@@ -135,8 +135,11 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.width = `${this.textInputElem.scrollWidth}px`;
 		this.textInputElem.style.height = `${this.textInputElem.scrollHeight}px`;
 
+		// Get the ascent based on the font, using a character that is tall in most fonts.
+		const tallCharacter = '⎢';
+		const ascent = this.getTextAscent(tallCharacter, this.textStyle);
+
 		const rotation = this.textRotation + viewport.getRotationAngle();
-		const ascent = this.getTextAscent(this.textInputElem.value || 'W', this.textStyle);
 		const scale: Mat33 = this.getTextScaleMatrix();
 		this.textInputElem.style.transform = `${scale.toCSSMatrix()} rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-ascent}px)`;
 		this.textInputElem.style.transformOrigin = 'top left';
