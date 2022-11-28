@@ -94,6 +94,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-textSize
+    attributes:
+      label: "textSize"
+      description: "Translate `Size: `."
+      placeholder: "Size: "
+    validations:
+      required: false
+  - type: input
     id: translation-resizeImageToSelection
     attributes:
       label: "resizeImageToSelection"
