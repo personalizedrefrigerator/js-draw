@@ -2,6 +2,7 @@
 
 export interface ToolbarLocalization {
 	fontLabel: string;
+	textSize: string;
 	touchPanning: string;
 	lockRotation: string;
 	outlinedRectanglePen: string;
@@ -44,6 +45,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	thicknessLabel: 'Thickness: ',
 	colorLabel: 'Color: ',
 	fontLabel: 'Font: ',
+	textSize: 'Size: ',
 	resizeImageToSelection: 'Resize image to selection',
 	deleteSelection: 'Delete selection',
 	duplicateSelection: 'Duplicate selection',

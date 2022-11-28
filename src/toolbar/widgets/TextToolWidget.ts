@@ -34,9 +34,13 @@ export default class TextToolWidget extends BaseToolWidget {
 	protected fillDropdown(dropdown: HTMLElement): boolean {
 		const fontRow = document.createElement('div');
 		const colorRow = document.createElement('div');
+		const sizeRow = document.createElement('div');
 
 		const fontInput = document.createElement('select');
 		const fontLabel = document.createElement('label');
+
+		const sizeInput = document.createElement('input');
+		const sizeLabel = document.createElement('label');
 
 		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
@@ -52,11 +56,19 @@ export default class TextToolWidget extends BaseToolWidget {
 			fontsInInput.add(fontName);
 		};
 
+		sizeInput.setAttribute('type', 'number');
+		sizeInput.min = '1';
+		sizeInput.max = '128';
+
 		fontLabel.innerText = this.localizationTable.fontLabel;
 		colorLabel.innerText = this.localizationTable.colorLabel;
+		sizeLabel.innerText = this.localizationTable.textSize;
 
 		colorInput.id = `${toolbarCSSPrefix}-text-color-input-${TextToolWidget.idCounter++}`;
 		colorLabel.setAttribute('for', colorInput.id);
+
+		sizeInput.id = `${toolbarCSSPrefix}-text-size-input-${TextToolWidget.idCounter++}`;
+		sizeLabel.setAttribute('for', sizeInput.id);
 
 		addFontToInput('monospace');
 		addFontToInput('serif');
@@ -68,11 +80,21 @@ export default class TextToolWidget extends BaseToolWidget {
 			this.tool.setFontFamily(fontInput.value);
 		};
 
+		sizeInput.onchange = () => {
+			const size = parseInt(sizeInput.value);
+			if (!isNaN(size) && size > 0) {
+				this.tool.setFontSize(size);
+			}
+		};
+
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
 		fontRow.appendChild(fontLabel);
 		fontRow.appendChild(fontInput);
+
+		sizeRow.appendChild(sizeLabel);
+		sizeRow.appendChild(sizeInput);
 
 		this.updateDropdownInputs = () => {
 			const style = this.tool.getTextStyle();
@@ -82,10 +104,11 @@ export default class TextToolWidget extends BaseToolWidget {
 				addFontToInput(style.fontFamily);
 			}
 			fontInput.value = style.fontFamily;
+			sizeInput.value = `${style.size}`;
 		};
 		this.updateDropdownInputs();
 
-		dropdown.replaceChildren(colorRow, fontRow);
+		dropdown.replaceChildren(colorRow, fontRow, sizeRow);
 		return true;
 	}
 
@@ -96,6 +119,7 @@ export default class TextToolWidget extends BaseToolWidget {
 			...super.serializeState(),
 
 			fontFamily: textStyle.fontFamily,
+			textSize: textStyle.size,
 			color: textStyle.renderingStyle.fill.toHexString(),
 		};
 	}
@@ -107,6 +131,10 @@ export default class TextToolWidget extends BaseToolWidget {
 
 		if (state.color && typeof(state.color) === 'string') {
 			this.tool.setColor(Color4.fromHex(state.color));
+		}
+
+		if (state.textSize && typeof(state.textSize) === 'number') {
+			this.tool.setFontSize(state.textSize);
 		}
 
 		super.deserializeFrom(state);
