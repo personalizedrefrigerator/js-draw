@@ -1,4 +1,8 @@
 
+# 0.9.3
+ * Decrease amount text shifts by when editing.
+ * Text toolbar widget: Added a font size option.
+
 # 0.9.2
  * Added a find dialog that can be opened with `ctrl+f`
 

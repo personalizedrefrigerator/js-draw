@@ -108,7 +108,7 @@ export default class TextToolWidget extends BaseToolWidget {
 		};
 		this.updateDropdownInputs();
 
-		dropdown.replaceChildren(colorRow, fontRow, sizeRow);
+		dropdown.replaceChildren(colorRow, sizeRow, fontRow);
 		return true;
 	}
 
