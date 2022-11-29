@@ -35,6 +35,8 @@ const codeFormat = (text: string) => {
 	return `${codeStartEnd}${text}${codeStartEnd}`;
 };
 
+const collapseSpaces = (text: string) => text.replace(/\s+/g, ' ');
+
 const generateTranslationTemplate = () => {
 	const bodyContentLines: string[] = [];
 
@@ -66,17 +68,17 @@ const generateTranslationTemplate = () => {
 		bodyContentLines.push('        ' + text);
 	};
 
-	addLabel(`
+	addLabel(collapseSpaces(`
 		Thank you for taking the time to translate \`js-draw\`! If you don't have time to translate
 		all of the strings below, feel free to submit an incomplete translation and edit it later.
 		Use this template to update an existing translation or to create a new translation.
-	`.replace(/\s+/g, ' '));
+	`));
 
-	addLabel(`
+	addLabel(collapseSpaces(`
 		(Optional) If you would like to submit a pull request that applies this translation, 
 		note that existing translations are present in
 		[src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/localizations).
-	`.replace(/\s+/g, ''));
+	`));
 
 	addInput('input', 'language-name', {
 		label: 'Language',
