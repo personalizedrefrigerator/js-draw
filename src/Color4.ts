@@ -73,26 +73,51 @@ export default class Color4 {
 	public static fromString(text: string): Color4 {
 		if (text.startsWith('#')) {
 			return Color4.fromHex(text);
-		} else if (text === 'none' || text === 'transparent') {
+		} 
+		
+		if (text === 'none' || text === 'transparent') {
 			return Color4.transparent;
-		} else {
-			// Otherwise, try to use an HTML5Canvas to determine the color
-			const canvas = document.createElement('canvas');
-			canvas.width = 1;
-			canvas.height = 1;
-
-			const ctx = canvas.getContext('2d')!;
-			ctx.fillStyle = text;
-			ctx.fillRect(0, 0, 1, 1);
-
-			const data = ctx.getImageData(0, 0, 1, 1);
-			const red = data.data[0] / 255;
-			const green = data.data[1] / 255;
-			const blue = data.data[2] / 255;
-			const alpha = data.data[3] / 255;
-
-			return Color4.ofRGBA(red, green, blue, alpha);
 		}
+
+		// rgba?: Match both rgb and rgba strings.
+		// ([,0-9.]+): Match any string of only numeric, '.' and ',' characters.
+		const rgbRegex = /^rgba?\(([,0-9.]+)\)$/i;
+		const rgbMatch = text.replace(/\s*/g, '').match(rgbRegex);
+
+		if (rgbMatch) {
+			const componentsListStr = rgbMatch[1];
+			const componentsList = JSON.parse(`[ ${componentsListStr} ]`);
+
+			if (componentsList.length === 3) {
+				return Color4.ofRGB(
+					componentsList[0] / 255, componentsList[1] / 255, componentsList[2] / 255
+				);
+			} else if (componentsList.length === 4) {
+				return Color4.ofRGBA(
+					componentsList[0] / 255, componentsList[1] / 255, componentsList[2] / 255, componentsList[3]
+				);
+			} else {
+				throw new Error(`RGB string, ${text}, has wrong number of components: ${componentsList.length}`);
+			}
+		}
+		
+		// Otherwise, try to use an HTMLCanvasElement to determine the color.
+		// Note: We may be unable to create an HTMLCanvasElement if running as a unit test.
+		const canvas = document.createElement('canvas');
+		canvas.width = 1;
+		canvas.height = 1;
+
+		const ctx = canvas.getContext('2d')!;
+		ctx.fillStyle = text;
+		ctx.fillRect(0, 0, 1, 1);
+
+		const data = ctx.getImageData(0, 0, 1, 1);
+		const red = data.data[0] / 255;
+		const green = data.data[1] / 255;
+		const blue = data.data[2] / 255;
+		const alpha = data.data[3] / 255;
+
+		return Color4.ofRGBA(red, green, blue, alpha);
 	}
 
 	/** @returns true if `this` and `other` are approximately equal. */
@@ -137,6 +162,10 @@ export default class Color4 {
 		}
 		this.hexString = `#${red}${green}${blue}${alpha}`;
 		return this.hexString;
+	}
+
+	public toString() {
+		return this.toHexString();
 	}
 
 	public static transparent = Color4.ofRGBA(0, 0, 0, 0);
