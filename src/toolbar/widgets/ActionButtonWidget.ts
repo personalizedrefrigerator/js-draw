@@ -7,7 +7,7 @@ export default class ActionButtonWidget extends BaseWidget {
 		editor: Editor,
 		id: string,
 
-        protected makeIcon: ()=> Element,
+        protected makeIcon: ()=> Element|null,
 		protected title: string,
         protected clickAction: ()=>void,
 
@@ -24,7 +24,7 @@ export default class ActionButtonWidget extends BaseWidget {
 		return this.title;
 	}
 
-	protected createIcon(): Element {
+	protected createIcon(): Element|null {
 		return this.makeIcon();
 	}
 

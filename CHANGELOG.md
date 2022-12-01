@@ -1,3 +1,13 @@
+# 1.0.0 (WIP)
+ * Bug fixes
+   * Fixed keyboard shortcuts broken when undo/redo buttons are selected.
+ * Breaking changes
+   * `HTMLToolbar::addActionButton` no longer takes a `parent` argument and returns a `BaseWidget`.
+ * To-do before release
+   - [ ] (Consider) Switch SVG loader and renderer to string-based (rather than using HTML/a DOM).
+   - [ ] Fix memory usage bug when editing large images.
+   - [ ] Add a way to re-style components (e.g. color/font changes).
+   - [ ] Add a way to paste from a touch screen.
 
 # 0.9.3
  * Decrease amount text shifts by when editing.

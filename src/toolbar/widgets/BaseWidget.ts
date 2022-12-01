@@ -78,7 +78,7 @@ export default abstract class BaseWidget {
 	}
 
 	protected abstract getTitle(): string;
-	protected abstract createIcon(): Element;
+	protected abstract createIcon(): Element|null;
 
 	// Add content to the widget's associated dropdown menu.
 	// Returns true if such a menu should be created, false otherwise.
@@ -200,9 +200,14 @@ export default abstract class BaseWidget {
 
 	protected updateIcon() {
 		const newIcon = this.createIcon();
-		this.icon?.replaceWith(newIcon);
-		this.icon = newIcon;
-		this.icon.classList.add(`${toolbarCSSPrefix}icon`);
+
+		if (newIcon) {
+			this.icon?.replaceWith(newIcon);
+			this.icon = newIcon;
+			this.icon.classList.add(`${toolbarCSSPrefix}icon`);
+		} else {
+			this.icon?.remove();
+		}
 	}
 
 	public setDisabled(disabled: boolean) {
