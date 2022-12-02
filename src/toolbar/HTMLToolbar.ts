@@ -158,6 +158,11 @@ export default class HTMLToolbar {
 		}
 	}
 
+	/**
+	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).
+	 * 
+	 * @return The added button. Using this return value is deprecated.
+	 */
 	public addActionButton(title: string|ActionButtonIcon, command: ()=> void, parent?: Element) {
 		const button = document.createElement('button');
 		button.classList.add(`${toolbarCSSPrefix}button`);
