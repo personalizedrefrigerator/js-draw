@@ -354,6 +354,9 @@ export default class SVGLoader implements ImageLoader {
 			this.updateViewBox(node as SVGSVGElement);
 			this.updateSVGAttrs(node as SVGSVGElement);
 			break;
+		case 'style':
+			this.addUnknownNode(node as SVGStyleElement);
+			break;
 		default:
 			console.warn('Unknown SVG element,', node);
 			if (!(node instanceof SVGElement)) {
@@ -432,6 +435,8 @@ export default class SVGLoader implements ImageLoader {
 			<html>
 				<head>
 					<title>SVG Loading Sandbox</title>
+					<meta name='viewport' conent='width=device-width,initial-scale=1.0'/>
+					<meta charset='utf-8'/>
 				</head>
 				<body>
 					<script>
