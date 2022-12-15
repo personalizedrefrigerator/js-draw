@@ -27,6 +27,36 @@ describe('Editor.toSVG', () => {
 		expect(allTSpans[0].style.transform).toBe('');
 	});
 
+	it('should preserve empty tspans', async () => {
+		const editor = createEditor();
+		await editor.loadFrom(SVGLoader.fromString(`
+			<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+				<style id="js-draw-style-sheet">
+					path {
+						stroke-linecap:round;
+						stroke-linejoin:round;
+					}
+				</style>
+				<text style="transform: matrix(1, 0, 0, 1, 12, 35); font-family: sans-serif; font-size: 32px; fill: rgb(128, 51, 128);">Testing...<tspan x="3" y="40" style="font-family: sans-serif; font-size: 33px; fill: rgb(128, 51, 128);"></tspan><tspan x="3" y="70">Test 2. ☺</tspan></text>
+			</svg>
+		`, true));
+
+		const textNodesInImage = editor.image.getAllElements().filter(elem => elem instanceof TextComponent);
+		expect(
+			textNodesInImage
+		).toHaveLength(1);
+
+		const asSVG = editor.toSVG();
+		const textObject = asSVG.querySelector('text');
+
+		if (!textObject) {
+			throw new Error('No text object found');
+		}
+
+		const childTextNodes = textObject.querySelectorAll('tspan');
+		expect(childTextNodes).toHaveLength(2);
+	});
+
 	it('should preserve text child size/placement while not saving additional properties', async () => {
 		const secondLineText = 'This is a test of a thing that has been known to break. Will this test catch the issue?';
 		const thirdLineText = 'This is a test of saving/loading multi-line text...';

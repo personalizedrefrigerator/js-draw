@@ -1,6 +1,9 @@
-# 0.10.0 (WIP)
+# 0.10.0
+ * Inertial touchscreen scrolling.
  * Bug fixes
    * Fixed keyboard shortcuts broken when undo/redo buttons are selected.
+   * Fixed text objects saving with duplicate properties.
+   * Fixed blank lines disappearing from text objects when attempting to edit a loaded-from-file text object.
  * Breaking changes
    * `HTMLToolbar::addActionButton` no longer takes a `parent` argument and returns a `BaseWidget`.
 

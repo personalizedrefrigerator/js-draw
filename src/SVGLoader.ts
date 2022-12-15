@@ -236,6 +236,11 @@ export default class SVGLoader implements ImageLoader {
 			}
 		}
 
+		// If no content, the content is an empty string.
+		if (contentList.length === 0) {
+			contentList.push('');
+		}
+
 		// Compute styles.
 		const computedStyles = window.getComputedStyle(elem);
 		const fontSizeMatch = /^([-0-9.e]+)px/i.exec(computedStyles.fontSize);
