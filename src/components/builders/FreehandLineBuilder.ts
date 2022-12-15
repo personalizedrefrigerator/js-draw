@@ -135,7 +135,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				return [];
 			}
 
-			const width = Viewport.roundPoint(this.startPoint.width / 3.5, Math.min(this.minFitAllowed, this.startPoint.width / 4));
+			const width = Viewport.roundPoint(this.startPoint.width / 9, Math.min(this.minFitAllowed, this.startPoint.width / 5));
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
