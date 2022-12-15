@@ -40,6 +40,7 @@ import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
 import { toRoundedString } from './math/rounding';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
+import untilNextAnimationFrame from './util/untilNextAnimationFrame';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
@@ -888,9 +889,7 @@ export class Editor {
 			if (countProcessed % 500 === 0) {
 				this.showLoadingWarning(countProcessed / totalToProcess);
 				this.rerender();
-				return new Promise(resolve => {
-					requestAnimationFrame(() => resolve());
-				});
+				return untilNextAnimationFrame();
 			}
 
 			return null;

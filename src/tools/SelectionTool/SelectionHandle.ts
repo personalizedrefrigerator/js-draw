@@ -1,4 +1,4 @@
-import { assertUnreachable } from '../../language/assertions';
+import { assertUnreachable } from '../../util/assertions';
 import { Point2, Vec2 } from '../../math/Vec2';
 import { cssPrefix } from './SelectionTool';
 import Selection from './Selection';

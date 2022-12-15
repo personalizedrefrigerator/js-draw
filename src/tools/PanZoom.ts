@@ -5,6 +5,7 @@ import { Point2, Vec2 } from '../math/Vec2';
 import Vec3 from '../math/Vec3';
 import Pointer, { PointerDevice } from '../Pointer';
 import { EditorEventType, KeyPressEvent, PointerEvt, WheelEvt } from '../types';
+import untilNextAnimationFrame from '../util/untilNextAnimationFrame';
 import { Viewport, ViewportTransform } from '../Viewport';
 import BaseTool from './BaseTool';
 
@@ -25,12 +26,68 @@ export enum PanZoomMode {
 	RotationLocked = 0x1 << 5,
 }
 
+type ScrollByCallback = (delta: Vec2) => void;
+
+class InertialScroller {
+	private running: boolean = false;
+
+	public constructor(
+		private initialVelocity: Vec2,
+		private scrollBy: ScrollByCallback,
+		private onComplete: ()=> void
+	) {
+		this.start();
+	}
+
+	private async start() {
+		if (this.running) {
+			return;
+		}
+
+		let currentVelocity = this.initialVelocity;
+		let lastTime = (new Date()).getTime();
+		this.running = true;
+
+		const maxSpeed = 8000; // units/s
+		const minSpeed = 200; // units/s
+		if (currentVelocity.magnitude() > maxSpeed) {
+			currentVelocity = currentVelocity.normalized().times(maxSpeed);
+		}
+
+		while (this.running && currentVelocity.magnitude() > minSpeed) {
+			const nowTime = (new Date()).getTime();
+			const dt = (nowTime - lastTime) / 1000;
+
+			currentVelocity = currentVelocity.times(Math.pow(1/8, dt));
+			this.scrollBy(currentVelocity.times(dt));
+
+			await untilNextAnimationFrame();
+			lastTime = nowTime;
+		}
+
+		if (this.running) {
+			this.stop();
+		}
+	}
+
+	public stop(): void {
+		if (this.running) {
+			this.running = false;
+			this.onComplete();
+		}
+	}
+}
+
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;
 
 	private lastAngle: number;
 	private lastDist: number;
 	private lastScreenCenter: Point2;
+	private lastTimestamp: number;
+
+	private inertialScroller: InertialScroller|null = null;
+	private velocity: Vec2|null = null;
 
 	public constructor(private editor: Editor, private mode: PanZoomMode, description: string) {
 		super(editor.notifier, description);
@@ -54,6 +111,8 @@ export default class PanZoom extends BaseTool {
 	public onPointerDown({ allPointers: pointers }: PointerEvt): boolean {
 		let handlingGesture = false;
 
+		this.inertialScroller?.stop();
+
 		const allAreTouch = this.allPointersAreOfType(pointers, PointerDevice.Touch);
 		const isRightClick = this.allPointersAreOfType(pointers, PointerDevice.RightButtonMouse);
 
@@ -73,11 +132,29 @@ export default class PanZoom extends BaseTool {
 		}
 
 		if (handlingGesture) {
+			this.lastTimestamp = (new Date()).getTime();
 			this.transform ??= Viewport.transformBy(Mat33.identity);
 			this.editor.display.setDraftMode(true);
 		}
 
 		return handlingGesture;
+	}
+
+	private updateVelocity(currentCenter: Point2) {
+		const deltaPos = currentCenter.minus(this.lastScreenCenter);
+		const deltaTime = ((new Date()).getTime() - this.lastTimestamp) / 1000;
+		const currentVelocity = deltaPos.times(1 / deltaTime);
+		let smoothedVelocity = currentVelocity;
+
+		if (deltaTime === 0) {
+			return;
+		}
+
+		if (this.velocity) {
+			smoothedVelocity = this.velocity.lerp(smoothedVelocity, 0.5);
+		}
+
+		this.velocity = smoothedVelocity;
 	}
 
 	// Returns the change in position of the center of the given group of pointers.
@@ -98,6 +175,8 @@ export default class PanZoom extends BaseTool {
 			rotation = 0;
 		}
 
+		this.updateVelocity(screenCenter);
+
 		const transformUpdate = Mat33.translation(delta)
 			.rightMul(Mat33.scaling2D(dist / this.lastDist, canvasCenter))
 			.rightMul(Mat33.zRotation(rotation, canvasCenter));
@@ -116,6 +195,7 @@ export default class PanZoom extends BaseTool {
 				Mat33.translation(delta)
 			)
 		);
+		this.updateVelocity(pointer.screenPos);
 		this.lastScreenCenter = pointer.screenPos;
 	}
 
@@ -130,19 +210,52 @@ export default class PanZoom extends BaseTool {
 		}
 		lastTransform.unapply(this.editor);
 		this.transform.apply(this.editor);
+
+		this.lastTimestamp = (new Date()).getTime();
 	}
 
-	public onPointerUp(_event: PointerEvt): void {
-		if (this.transform) {
-			this.transform.unapply(this.editor);
-			this.editor.dispatch(this.transform, false);
-		}
+	public onPointerUp(event: PointerEvt): void {
+		const onComplete = () => {
+			if (this.transform) {
+				this.transform.unapply(this.editor);
+				this.editor.dispatch(this.transform, false);
+			}
 
-		this.editor.display.setDraftMode(false);
-		this.transform = null;
+			this.editor.display.setDraftMode(false);
+			this.transform = null;
+			this.velocity = Vec2.zero;
+		};
+
+		const shouldInertialScroll =
+				event.current.device === PointerDevice.Touch && event.allPointers.length === 1;
+
+		if (shouldInertialScroll && this.velocity !== null) {
+			this.inertialScroller?.stop();
+
+			this.inertialScroller = new InertialScroller(this.velocity, (scrollDelta: Vec2) => {
+				if (!this.transform) {
+					return;
+				}
+
+				const canvasDelta = this.editor.viewport.screenToCanvasTransform.transformVec3(scrollDelta);
+
+				// Scroll by scrollDelta
+				this.transform.unapply(this.editor);
+				this.transform = Viewport.transformBy(
+					this.transform.transform.rightMul(
+						Mat33.translation(canvasDelta)
+					)
+				);
+				this.transform.apply(this.editor);
+			}, onComplete);
+		} else {
+			onComplete();
+		}
 	}
 
 	public onGestureCancel(): void {
+		this.inertialScroller?.stop();
+		this.velocity = Vec2.zero;
 		this.transform?.unapply(this.editor);
 		this.editor.display.setDraftMode(false);
 		this.transform = null;
@@ -166,6 +279,8 @@ export default class PanZoom extends BaseTool {
 	}
 
 	public onWheel({ delta, screenPos }: WheelEvt): boolean {
+		this.inertialScroller?.stop();
+
 		// Reset the transformation -- wheel events are individual events, so we don't
 		// need to unapply/reapply.
 		this.transform = Viewport.transformBy(Mat33.identity);
@@ -190,6 +305,8 @@ export default class PanZoom extends BaseTool {
 	}
 
 	public onKeyPress({ key, ctrlKey, altKey }: KeyPressEvent): boolean {
+		this.inertialScroller?.stop();
+
 		if (!(this.mode & PanZoomMode.Keyboard)) {
 			return false;
 		}
