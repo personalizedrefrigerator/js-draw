@@ -205,7 +205,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 	}
 
 	private roundPoint(point: Point2): Point2 {
-		let minFit = Math.min(this.minFitAllowed, this.curveStartWidth / 2);
+		let minFit = Math.min(this.minFitAllowed, this.curveStartWidth / 3);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;

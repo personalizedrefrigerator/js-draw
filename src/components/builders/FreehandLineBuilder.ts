@@ -55,7 +55,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			fill: Color4.transparent,
 			stroke: {
 				color: this.startPoint.color,
-				width: this.roundDistance(this.averageWidth),
+				width: this.roundDistance(this.averageWidth / 2),
 			}
 		};
 	}
@@ -108,7 +108,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	}
 
 	private getMinFit(): number {
-		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 2);
+		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 5);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
