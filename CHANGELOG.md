@@ -1,3 +1,8 @@
+# 0.10.0 (WIP)
+ * Bug fixes
+   * Fixed keyboard shortcuts broken when undo/redo buttons are selected.
+ * Breaking changes
+   * `HTMLToolbar::addActionButton` no longer takes a `parent` argument and returns a `BaseWidget`.
 
 # 0.9.3
  * Decrease amount text shifts by when editing.

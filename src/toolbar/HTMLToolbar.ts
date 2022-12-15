@@ -16,6 +16,7 @@ import SelectionToolWidget from './widgets/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget from './widgets/BaseWidget';
+import { ActionButtonWidget } from './lib';
 
 export const toolbarCSSPrefix = 'toolbar-';
 
@@ -161,59 +162,56 @@ export default class HTMLToolbar {
 	/**
 	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).
 	 * 
-	 * @return The added button. Using this return value is deprecated.
+	 * @return The added button.
 	 */
-	public addActionButton(title: string|ActionButtonIcon, command: ()=> void, parent?: Element) {
-		const button = document.createElement('button');
-		button.classList.add(`${toolbarCSSPrefix}button`);
+	public addActionButton(title: string|ActionButtonIcon, command: ()=> void): BaseWidget {
+		const titleString = typeof title === 'string' ? title : title.label;
+		const widgetId = 'action-button';
 
-		if (typeof title === 'string') {
-			button.innerText = title;
-		} else {
-			const iconElem = title.icon.cloneNode(true) as HTMLElement;
-			const labelElem = document.createElement('label');
+		const makeIcon = () => {
+			if (typeof title === 'string') {
+				return null;
+			}
 
-			// Use the label to describe the icon -- no additional description should be necessary.
-			iconElem.setAttribute('alt', '');
-			labelElem.innerText = title.label;
-			iconElem.classList.add('toolbar-icon');
+			return title.icon;
+		};
 
-			button.replaceChildren(iconElem, labelElem);
-		}
+		const widget = new ActionButtonWidget(
+			this.editor,
+			widgetId,
+			makeIcon,
+			titleString,
+			command,
+			this.editor.localization
+		);
 
-		button.onclick = command;
-		(parent ?? this.container).appendChild(button);
-
-		return button;
+		this.addWidget(widget);
+		return widget;
 	}
 
 	public addUndoRedoButtons() {
-		const undoRedoGroup = document.createElement('div');
-		undoRedoGroup.classList.add(`${toolbarCSSPrefix}buttonGroup`);
-
 		const undoButton = this.addActionButton({
 			label: this.localizationTable.undo,
 			icon: this.editor.icons.makeUndoIcon()
 		}, () => {
 			this.editor.history.undo();
-		}, undoRedoGroup);
+		});
 		const redoButton = this.addActionButton({
 			label: this.localizationTable.redo,
 			icon: this.editor.icons.makeRedoIcon(),
 		}, () => {
 			this.editor.history.redo();
-		}, undoRedoGroup);
-		this.container.appendChild(undoRedoGroup);
+		});
 
-		undoButton.disabled = true;
-		redoButton.disabled = true;
+		undoButton.setDisabled(true);
+		redoButton.setDisabled(true);
 		this.editor.notifier.on(EditorEventType.UndoRedoStackUpdated, event => {
 			if (event.kind !== EditorEventType.UndoRedoStackUpdated) {
 				throw new Error('Wrong event type!');
 			}
 
-			undoButton.disabled = event.undoStackSize === 0;
-			redoButton.disabled = event.redoStackSize === 0;
+			undoButton.setDisabled(event.undoStackSize === 0);
+			redoButton.setDisabled(event.redoStackSize === 0);
 		});
 	}
 
