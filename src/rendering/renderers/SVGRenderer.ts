@@ -150,13 +150,29 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	private textContainer: SVGTextElement|null = null;
 	private textContainerTransform: Mat33|null = null;
+	private textParentStyle: TextStyle|null = null;
 	public drawText(text: string, transform: Mat33, style: TextStyle): void {
 		const applyTextStyles = (elem: SVGTextElement|SVGTSpanElement, style: TextStyle) => {
-			elem.style.fontFamily = style.fontFamily;
-			elem.style.fontVariant = style.fontVariant ?? '';
-			elem.style.fontWeight = style.fontWeight ?? '';
-			elem.style.fontSize = style.size + 'px';
-			elem.style.fill = style.renderingStyle.fill.toHexString();
+			if (style.fontFamily !== this.textParentStyle?.fontFamily) {
+				elem.style.fontFamily = style.fontFamily;
+			}
+			if (style.fontVariant !== this.textParentStyle?.fontVariant) {
+				elem.style.fontVariant = style.fontVariant ?? '';
+			}
+			if (style.fontWeight !== this.textParentStyle?.fontWeight) {
+				elem.style.fontWeight = style.fontWeight ?? '';
+			}
+			if (style.size !== this.textParentStyle?.size) {
+				elem.style.fontSize = style.size + 'px';
+			}
+			
+			const fillString = style.renderingStyle.fill.toHexString();
+			// TODO: Uncomment at some future major version release --- currently causes incompatibility due
+			//       to an SVG parsing bug in older versions.
+			//const parentFillString = this.textParentStyle?.renderingStyle?.fill?.toHexString();
+			//if (fillString !== parentFillString) {
+			elem.style.fill = fillString;
+			//}
 
 			if (style.renderingStyle.stroke) {
 				const strokeStyle = style.renderingStyle.stroke;
@@ -181,6 +197,7 @@ export default class SVGRenderer extends AbstractRenderer {
 			if (this.objectLevel > 0) {
 				this.textContainer = container;
 				this.textContainerTransform = transform;
+				this.textParentStyle = style;
 			}
 		} else {
 			const elem = document.createElementNS(svgNameSpace, 'tspan');
@@ -218,6 +235,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.lastPathString = [];
 		this.lastPathStyle = null;
 		this.textContainer = null;
+		this.textParentStyle = null;
 		this.objectElems = [];
 	}
 

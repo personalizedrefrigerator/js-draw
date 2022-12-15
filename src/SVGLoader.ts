@@ -44,12 +44,14 @@ export default class SVGLoader implements ImageLoader {
 		private source: SVGSVGElement, private onFinish?: OnFinishListener, private readonly storeUnknown: boolean = true) {
 	}
 
-	private getStyle(node: SVGElement) {
+	// If [computedStyles] is given, it is preferred to directly accessing node's style object.
+	private getStyle(node: SVGElement, computedStyles?: CSSStyleDeclaration) {
 		const style: RenderingStyle = {
 			fill: Color4.transparent,
 		};
 
-		const fillAttribute = node.getAttribute('fill') ?? node.style.fill;
+		// If possible, use computedStyles (allows property inheritance).
+		const fillAttribute = node.getAttribute('fill') ?? computedStyles?.fill ?? node.style.fill;
 		if (fillAttribute) {
 			try {
 				style.fill = Color4.fromString(fillAttribute);
@@ -58,19 +60,23 @@ export default class SVGLoader implements ImageLoader {
 			}
 		}
 
-		const strokeAttribute = node.getAttribute('stroke') ?? node.style.stroke;
-		const strokeWidthAttr = node.getAttribute('stroke-width') ?? node.style.strokeWidth;
-		if (strokeAttribute) {
+		const strokeAttribute = node.getAttribute('stroke') ?? computedStyles?.stroke ?? node.style.stroke;
+		const strokeWidthAttr = node.getAttribute('stroke-width') ?? computedStyles?.strokeWidth ?? node.style.strokeWidth;
+		if (strokeAttribute && strokeWidthAttr) {
 			try {
 				let width = parseFloat(strokeWidthAttr ?? '1');
 				if (!isFinite(width)) {
 					width = 0;
 				}
 
-				style.stroke = {
-					width,
-					color: Color4.fromString(strokeAttribute),
-				};
+				const strokeColor = Color4.fromString(strokeAttribute);
+
+				if (strokeColor.a > 0) {
+					style.stroke = {
+						width,
+						color: strokeColor,
+					};
+				}
 			} catch (e) {
 				console.error('Error parsing stroke data:', e);
 			}
@@ -247,7 +253,7 @@ export default class SVGLoader implements ImageLoader {
 		const style: TextStyle = {
 			size: fontSize,
 			fontFamily: computedStyles.fontFamily || elem.style.fontFamily || 'sans-serif',
-			renderingStyle: this.getStyle(elem),
+			renderingStyle: this.getStyle(elem, computedStyles),
 		};
 
 		const supportedAttrs: string[] = [];
