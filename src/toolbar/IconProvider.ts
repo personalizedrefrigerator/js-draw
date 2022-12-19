@@ -365,8 +365,8 @@ export default class IconProvider {
 		let tipCenterBackgroundPath = `L${penTipLeft},85 L${penTipRight},83`;
 
 		if (roundedTip) {
-			tipCenterPrimaryPath = `L${penTipLeft},95 q${halfThickness},10 ${2 * halfThickness},0`;
-			tipCenterBackgroundPath = `L${penTipLeft},87 q${halfThickness},10 ${2 * halfThickness},0`;
+			tipCenterPrimaryPath = `L${penTipLeft},95 q${halfThickness},10 ${2 * halfThickness},-5`;
+			tipCenterBackgroundPath = `L${penTipLeft},87 q${halfThickness},10 ${2 * halfThickness},-3`;
 		}
 
 		const primaryStrokeTipPath = `M14,63 ${tipCenterPrimaryPath} L88,60 Z`;
