@@ -290,7 +290,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 				return;
 			}
 
-			const width = Viewport.roundPoint(this.startPoint.width / 3.5, Math.min(this.minFitAllowed, this.startPoint.width / 4));
+			const width = Viewport.roundPoint(this.startPoint.width / 2.2, Math.min(this.minFitAllowed, this.startPoint.width / 4));
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
