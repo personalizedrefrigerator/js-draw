@@ -143,15 +143,22 @@ export default class PanZoom extends BaseTool {
 	private updateVelocity(currentCenter: Point2) {
 		const deltaPos = currentCenter.minus(this.lastScreenCenter);
 		const deltaTime = ((new Date()).getTime() - this.lastTimestamp) / 1000;
-		const currentVelocity = deltaPos.times(1 / deltaTime);
-		let smoothedVelocity = currentVelocity;
 
+		// We divide by deltaTime. Don't divide by zero.
 		if (deltaTime === 0) {
 			return;
 		}
 
+		// Ignore duplicate events, unless there has been enough time between them.
+		if (deltaPos.magnitude() === 0 && deltaTime < 0.1) {
+			return;
+		}
+
+		const currentVelocity = deltaPos.times(1 / deltaTime);
+		let smoothedVelocity = currentVelocity;
+
 		if (this.velocity) {
-			smoothedVelocity = this.velocity.lerp(smoothedVelocity, 0.5);
+			smoothedVelocity = this.velocity.lerp(currentVelocity, 0.5);
 		}
 
 		this.velocity = smoothedVelocity;
@@ -230,6 +237,12 @@ export default class PanZoom extends BaseTool {
 				event.current.device === PointerDevice.Touch && event.allPointers.length === 1;
 
 		if (shouldInertialScroll && this.velocity !== null) {
+			// If the user drags the screen, then stops, then lifts the pointer,
+			// we want the final velocity to reflect the stop at the end (so the velocity
+			// should be near zero). Handle this:
+			this.updateVelocity(event.current.screenPos);
+
+			// Cancel any ongoing inertial scrolling.
 			this.inertialScroller?.stop();
 
 			this.inertialScroller = new InertialScroller(this.velocity, (scrollDelta: Vec2) => {
