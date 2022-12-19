@@ -161,7 +161,7 @@ export class StrokeSmoother {
 		this.lastPoint = newPoint;
 
 		this.buffer.push(newPoint.pos);
-		const pointRadius = newPoint.width / 2;
+		const pointRadius = newPoint.width;
 		const prevEndWidth = this.curveEndWidth;
 		this.curveEndWidth = pointRadius;
 
@@ -182,7 +182,7 @@ export class StrokeSmoother {
 			this.currentCurve = new Bezier(
 				p1.xy, p2.xy, p3.xy
 			);
-			this.curveStartWidth = lastPoint.width / 2;
+			this.curveStartWidth = lastPoint.width;
 			console.assert(!isNaN(p1.magnitude()) && !isNaN(p2.magnitude()) && !isNaN(p3.magnitude()), 'Expected !NaN');
 		}
 
@@ -271,7 +271,7 @@ export class StrokeSmoother {
 			return true;
 		};
 
-		if (this.buffer.length > 3 && this.approxCurrentCurveLength() > this.curveStartWidth) {
+		if (this.buffer.length > 3 && this.approxCurrentCurveLength() > this.curveStartWidth / 2) {
 			if (!curveMatchesPoints(this.currentCurve)) {
 				// Use a curve that better fits the points
 				this.currentCurve = prevCurve;

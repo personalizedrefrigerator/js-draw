@@ -55,7 +55,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			fill: Color4.transparent,
 			stroke: {
 				color: this.startPoint.color,
-				width: this.roundDistance(this.averageWidth / 2),
+				width: this.roundDistance(this.averageWidth),
 			}
 		};
 	}
@@ -108,7 +108,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	}
 
 	private getMinFit(): number {
-		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 5);
+		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 3);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
@@ -135,7 +135,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				return [];
 			}
 
-			const width = Viewport.roundPoint(this.startPoint.width / 9, Math.min(this.minFitAllowed, this.startPoint.width / 5));
+			const width = Viewport.roundPoint(this.startPoint.width / 3.5, Math.min(this.minFitAllowed, this.startPoint.width / 4));
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
