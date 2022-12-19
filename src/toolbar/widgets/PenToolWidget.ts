@@ -122,7 +122,9 @@ export default class PenToolWidget extends BaseToolWidget {
 			// Use a square-root scale to prevent the pen's tip from overflowing.
 			const scale = Math.round(Math.sqrt(this.tool.getThickness()) * 4);
 			const color = this.tool.getColor();
-			return this.editor.icons.makePenIcon(scale, color.toHexString());
+			const roundedTip = strokeFactory === makeFreehandLineBuilder;
+
+			return this.editor.icons.makePenIcon(scale, color.toHexString(), roundedTip);
 		} else {
 			const strokeFactory = this.tool.getStrokeFactory();
 			return this.editor.icons.makeIconFromFactory(this.tool, strokeFactory);

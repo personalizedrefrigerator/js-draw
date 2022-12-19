@@ -347,7 +347,7 @@ export default class IconProvider {
 		return icon;
 	}
 	
-	public makePenIcon(tipThickness: number, color: string|Color4): IconType {
+	public makePenIcon(tipThickness: number, color: string|Color4, roundedTip?: boolean): IconType {
 		if (color instanceof Color4) {
 			color = color.toHexString();
 		}
@@ -358,8 +358,20 @@ export default class IconProvider {
 		const halfThickness = tipThickness / 2;
 	
 		// Draw a pen-like shape
-		const primaryStrokeTipPath = `M14,63 L${50 - halfThickness},95 L${50 + halfThickness},90 L88,60 Z`;
-		const backgroundStrokeTipPath = `M14,63 L${50 - halfThickness},85 L${50 + halfThickness},83 L88,60 Z`;
+		const penTipLeft = 50 - halfThickness;
+		const penTipRight = 50 + halfThickness;
+
+		let tipCenterPrimaryPath = `L${penTipLeft},95 L${penTipRight},90`;
+		let tipCenterBackgroundPath = `L${penTipLeft},85 L${penTipRight},83`;
+
+		if (roundedTip) {
+			tipCenterPrimaryPath = `L${penTipLeft},95 q${halfThickness},10 ${2 * halfThickness},0`;
+			tipCenterBackgroundPath = `L${penTipLeft},87 q${halfThickness},10 ${2 * halfThickness},0`;
+		}
+
+		const primaryStrokeTipPath = `M14,63 ${tipCenterPrimaryPath} L88,60 Z`;
+		const backgroundStrokeTipPath = `M14,63 ${tipCenterBackgroundPath} L88,60 Z`;
+
 		icon.innerHTML = `
 		<defs>
 			${checkerboardPatternDef}
