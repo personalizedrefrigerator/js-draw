@@ -167,7 +167,6 @@ export class StrokeSmoother {
 		const prevEndWidth = this.curveEndWidth;
 		this.curveEndWidth = pointRadius;
 
-
 		// recompute bbox
 		this.bbox = this.bbox.grownToPoint(newPoint.pos, pointRadius);
 
@@ -186,7 +185,7 @@ export class StrokeSmoother {
 				this.curveStartWidth = (this.curveStartWidth + pointRadius) / 2;
 			}
 			else {
-				this.curveStartWidth = this.curveEndWidth;
+				this.curveStartWidth = prevEndWidth;
 			}
 		}
 
