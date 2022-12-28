@@ -15,7 +15,6 @@ const postSerializedCommand = async (data: string) => {
 		method: 'POST',
 		body: data,
 	});
-	lastUpdateIdx ++;
 	console.log('Posted', data);
 };
 
