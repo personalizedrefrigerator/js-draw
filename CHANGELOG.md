@@ -1,3 +1,9 @@
+# 0.10.1
+ * Different icons for rounded pens.
+ * Bug fixes
+   * Different pen types, for the same size, previously had different actual widths.
+   * Inertial touchscreen scrolling previously sometimes started even if the initiating gesture was, just before stopping, stationary for several seconds.
+
 # 0.10.0
  * Inertial touchscreen scrolling.
  * Bug fixes
