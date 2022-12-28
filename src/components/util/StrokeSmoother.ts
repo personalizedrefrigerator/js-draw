@@ -98,6 +98,8 @@ export class StrokeSmoother {
 			this.buffer[this.buffer.length - 2], lastPoint,
 		];
 		this.currentCurve = null;
+
+		this.isFirstSegment = false;
 	}
 
 	// Returns [upper curve, connector, lower curve]
@@ -165,25 +167,27 @@ export class StrokeSmoother {
 		const prevEndWidth = this.curveEndWidth;
 		this.curveEndWidth = pointRadius;
 
-		if (this.isFirstSegment) {
-			// The start of a curve often lacks accurate pressure information. Update it.
-			this.curveStartWidth = (this.curveStartWidth + pointRadius) / 2;
-		}
 
 		// recompute bbox
 		this.bbox = this.bbox.grownToPoint(newPoint.pos, pointRadius);
 
+		// If the last curve just ended or it's the first curve,
 		if (this.currentCurve === null) {
 			const p1 = lastPoint.pos;
 			const p2 = lastPoint.pos.plus(this.lastExitingVec ?? Vec2.unitX);
 			const p3 = newPoint.pos;
 
 			// Quadratic Bézier curve
-			this.currentCurve = new Bezier(
-				p1.xy, p2.xy, p3.xy
-			);
-			this.curveStartWidth = lastPoint.width;
+			this.currentCurve = new Bezier(p1.xy, p2.xy, p3.xy);
 			console.assert(!isNaN(p1.magnitude()) && !isNaN(p2.magnitude()) && !isNaN(p3.magnitude()), 'Expected !NaN');
+
+			if (this.isFirstSegment) {
+				// The start of a curve often lacks accurate pressure information. Update it.
+				this.curveStartWidth = (this.curveStartWidth + pointRadius) / 2;
+			}
+			else {
+				this.curveStartWidth = this.curveEndWidth;
+			}
 		}
 
 		// If there isn't an entering vector (e.g. because this.isFirstCurve), approximate it.
