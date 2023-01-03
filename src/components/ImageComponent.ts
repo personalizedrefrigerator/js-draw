@@ -88,6 +88,11 @@ export default class ImageComponent extends AbstractComponent {
 		canvas.drawImage(this.image);
 	}
 
+	public getProportionalRenderingTime(): number {
+		// Estimate: Equivalent to a stroke with 10 segments.
+		return 10;
+	}
+
 	public intersects(lineSegment: LineSegment2): boolean {
 		const rect = this.getImageRect();
 		const edges = rect.getEdges().map(edge => edge.transformedBy(this.image.transform));

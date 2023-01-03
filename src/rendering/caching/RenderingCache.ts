@@ -48,8 +48,16 @@ export default class RenderingCache {
 
 		this.rootNode = this.rootNode!.smallestChildContaining(visibleRect) ?? this.rootNode;
 
-		const visibleLeaves = image.getLeavesIntersectingRegion(viewport.visibleRect, rect => screenRenderer.isTooSmallToRender(rect));
-		if (visibleLeaves.length > this.sharedState.props.minComponentsToUseCache) {
+		const visibleLeaves = image.getLeavesIntersectingRegion(
+			viewport.visibleRect, rect => screenRenderer.isTooSmallToRender(rect)
+		);
+
+		let approxVisibleRenderTime = 0;
+		for (const leaf of visibleLeaves) {
+			approxVisibleRenderTime += leaf.getContent()!.getProportionalRenderingTime();
+		}
+
+		if (approxVisibleRenderTime > this.sharedState.props.minProportionalRenderTimeToUseCache) {
 			this.rootNode!.renderItems(screenRenderer, [ image ], viewport);
 		} else {
 			image.render(screenRenderer, visibleRect);

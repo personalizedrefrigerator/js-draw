@@ -121,6 +121,10 @@ export default class TextComponent extends AbstractComponent {
 		canvas.endObject(this.getLoadSaveData());
 	}
 
+	public getProportionalRenderingTime(): number {
+		return this.textObjects.length;
+	}
+
 	public intersects(lineSegment: LineSegment2): boolean {
 
 		// Convert canvas space to internal space.

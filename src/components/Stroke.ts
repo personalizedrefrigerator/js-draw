@@ -15,11 +15,16 @@ export default class Stroke extends AbstractComponent {
 	private parts: StrokePart[];
 	protected contentBBox: Rect2;
 
+	// See `getProportionalRenderingTime`
+	private approximateRenderingTime: number;
+
 	// Creates a `Stroke` from the given `parts`.
 	public constructor(parts: RenderablePathSpec[]) {
 		super('stroke');
 
+		this.approximateRenderingTime = 0;
 		this.parts = [];
+
 		for (const section of parts) {
 			const path = Path.fromRenderable(section);
 			const pathBBox = this.bboxForPart(path.bbox, section.style);
@@ -38,6 +43,8 @@ export default class Stroke extends AbstractComponent {
 				style: section.style,
 				commands: path.parts,
 			});
+
+			this.approximateRenderingTime += path.parts.length;
 		}
 		this.contentBBox ??= Rect2.empty;
 	}
@@ -69,6 +76,10 @@ export default class Stroke extends AbstractComponent {
 			canvas.drawPath(part);
 		}
 		canvas.endObject(this.getLoadSaveData());
+	}
+
+	public getProportionalRenderingTime(): number {
+		return this.approximateRenderingTime;
 	}
 
 	// Grows the bounding box for a given stroke part based on that part's style.

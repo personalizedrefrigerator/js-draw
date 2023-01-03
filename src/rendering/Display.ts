@@ -78,8 +78,13 @@ export default class Display {
 			blockResolution: cacheBlockResolution,
 			cacheSize: 600 * 600 * 4 * 90,
 			maxScale: 1.4,
-			minComponentsPerCache: 20,
-			minComponentsToUseCache: 105,
+
+			// Require about 20 strokes with 4 parts each to cache an image in one of the
+			// parts of the cache grid.
+			minProportionalRenderTimePerCache: 20 * 4,
+
+			// Require about 105 strokes with 4 parts each to use the cache at all.
+			minProportionalRenderTimeToUseCache: 105 * 4,
 		});
 
 		this.editor.notifier.on(EditorEventType.DisplayResized, event => {

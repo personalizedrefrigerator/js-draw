@@ -23,8 +23,8 @@ export const createCache = (onRenderAlloc?: RenderAllocCallback, cacheOptions?: 
 		blockResolution: Vec2.of(500, 500),
 		cacheSize: 500 * 10 * 4,
 		maxScale: 2,
-		minComponentsPerCache: 0,
-		minComponentsToUseCache: 0,
+		minProportionalRenderTimePerCache: 0,
+		minProportionalRenderTimeToUseCache: 0,
 		...cacheOptions
 	});
 

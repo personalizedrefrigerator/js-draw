@@ -70,6 +70,7 @@ export default abstract class AbstractComponent {
 	public getZIndex(): number {
 		return this.zIndex;
 	}
+
 	public getBBox(): Rect2 {
 		return this.contentBBox;
 	}
@@ -92,6 +93,13 @@ export default abstract class AbstractComponent {
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
 	public isSelectable(): boolean {
 		return true;
+	}
+
+	// @returns an approximation of the proportional time it takes to render this component.
+	// This is intended to be a rough estimate, but, for example, a stroke with two points sould have
+	// a renderingWeight approximately twice that of a stroke with one point.
+	public getProportionalRenderingTime(): number {
+		return 1;
 	}
 
 	private static transformElementCommandId = 'transform-element';

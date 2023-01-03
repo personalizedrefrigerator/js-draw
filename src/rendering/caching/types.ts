@@ -20,11 +20,11 @@ export interface CacheProps {
     maxScale: number;
 
     // Minimum component count to cache, rather than just re-render each time.
-    minComponentsPerCache: number;
+    minProportionalRenderTimePerCache: number;
 
     // Minimum number of strokes/etc. to use the cache to render, isntead of
     // rendering directly.
-    minComponentsToUseCache: number;
+    minProportionalRenderTimeToUseCache: number;
 }
 
 export interface CacheState {

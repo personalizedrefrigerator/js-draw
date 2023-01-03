@@ -250,9 +250,13 @@ export default class RenderingCacheNode {
 					return;
 				}
 
+				let leafApproxRenderTime = 0;
+				for (const leaf of leavesByIds) {
+					leafApproxRenderTime += leaf.getContent()!.getProportionalRenderingTime();
+				}
+
 				// Is it worth it to render the items?
-				// TODO: Consider replacing this with something performace based.
-				if (leavesByIds.length > this.cacheState.props.minComponentsPerCache) {
+				if (leafApproxRenderTime > this.cacheState.props.minProportionalRenderTimePerCache) {
 					let fullRerenderNeeded = true;
 					if (!this.cachedRenderer) {
 						this.cachedRenderer = this.cacheState.recordManager.allocCanvas(
