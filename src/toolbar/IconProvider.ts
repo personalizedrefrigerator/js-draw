@@ -502,6 +502,19 @@ export default class IconProvider {
 			M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z 
 		`);
 	}
+
+	public makePasteIcon(): IconType {
+		const icon = this.makeIconFromPath(`
+			M 50 0 L 50 5 L 35 5 L 40 24.75 L 20 25 L 20 100 L 85 100 L 100 90 L 100 24 L 75.1 24.3 L 80 5 L 65 5 L 65 0 L 50 0 z
+			M 10 15 L 10 115 L 110 115 L 110 15 L 85 15 L 83 20 L 105 20 L 105 110 L 15 110 L 15 20 L 32 20 L 30 15 L 10 15 z
+			M 25 35 L 90 35 L 90 40 L 25 40 L 25 35 z
+			M 25 45 L 90 45 L 90 50 L 25 50 L 25 45 z
+			M 25 55 L 85 55 L 85 60 L 25 60 L 25 55 z
+			M 25 65 L 90 65 L 90 70 L 25 70 L 25 65 z 
+		`);
+		icon.setAttribute('viewBox', '0 0 120 120');
+		return icon;
+	}
 	
 	public makeDeleteSelectionIcon(): IconType {
 		const strokeWidth = '5px';

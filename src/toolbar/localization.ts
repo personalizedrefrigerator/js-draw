@@ -28,6 +28,7 @@ export interface ToolbarLocalization {
 	zoom: string;
 	resetView: string;
 	selectionToolKeyboardShortcuts: string;
+	paste: string;
 
 	dropdownShown: (toolName: string)=> string;
 	dropdownHidden: (toolName: string)=> string;
@@ -65,6 +66,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	outlinedRectanglePen: 'Outlined rectangle',
 	filledRectanglePen: 'Filled rectangle',
 	lockRotation: 'Lock rotation',
+
+	paste: 'Paste',
 
 	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
 	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
