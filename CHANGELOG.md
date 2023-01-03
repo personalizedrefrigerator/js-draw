@@ -1,3 +1,6 @@
+# 0.10.2
+ * Performance improvements
+
 # 0.10.1
  * Different icons for rounded pens.
  * Bug fixes
