@@ -248,6 +248,10 @@ export default class Path {
 	}
 
 	public transformedBy(affineTransfm: Mat33): Path {
+		if (affineTransfm.isIdentity()) {
+			return this;
+		}
+
 		return this.mapPoints(point => affineTransfm.transformVec2(point));
 	}
 

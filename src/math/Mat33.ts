@@ -219,6 +219,15 @@ export default class Mat33 {
 		);
 	}
 
+	/** @returns true iff this is the identity matrix. */
+	public isIdentity(): boolean {
+		if (this === Mat33.identity) {
+			return true;
+		}
+
+		return this.eq(Mat33.identity);
+	}
+
 	/** Returns true iff this = other ± fuzz */
 	public eq(other: Mat33, fuzz: number = 0): boolean {
 		for (let i = 0; i < 3; i++) {
