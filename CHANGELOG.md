@@ -1,3 +1,6 @@
+# 0.10.3
+ * Inertial scrolling: Don't start inertial scroll if a gesture was, in total, shorter than roughly 30 ms. Such gestures can be caused accidentally. For example, by resting/lifting a hand from a device screen.
+
 # 0.10.2
  * Performance improvements
 

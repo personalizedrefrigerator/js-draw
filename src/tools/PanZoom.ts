@@ -30,6 +30,7 @@ type ScrollByCallback = (delta: Vec2) => void;
 
 class InertialScroller {
 	private running: boolean = false;
+	private currentVelocity: Vec2;
 
 	public constructor(
 		private initialVelocity: Vec2,
@@ -44,22 +45,22 @@ class InertialScroller {
 			return;
 		}
 
-		let currentVelocity = this.initialVelocity;
+		this.currentVelocity = this.initialVelocity;
 		let lastTime = (new Date()).getTime();
 		this.running = true;
 
 		const maxSpeed = 5000; // units/s
 		const minSpeed = 200; // units/s
-		if (currentVelocity.magnitude() > maxSpeed) {
-			currentVelocity = currentVelocity.normalized().times(maxSpeed);
+		if (this.currentVelocity.magnitude() > maxSpeed) {
+			this.currentVelocity = this.currentVelocity.normalized().times(maxSpeed);
 		}
 
-		while (this.running && currentVelocity.magnitude() > minSpeed) {
+		while (this.running && this.currentVelocity.magnitude() > minSpeed) {
 			const nowTime = (new Date()).getTime();
 			const dt = (nowTime - lastTime) / 1000;
 
-			currentVelocity = currentVelocity.times(Math.pow(1/8, dt));
-			this.scrollBy(currentVelocity.times(dt));
+			this.currentVelocity = this.currentVelocity.times(Math.pow(1/8, dt));
+			this.scrollBy(this.currentVelocity.times(dt));
 
 			await untilNextAnimationFrame();
 			lastTime = nowTime;
@@ -68,6 +69,14 @@ class InertialScroller {
 		if (this.running) {
 			this.stop();
 		}
+	}
+
+	public getCurrentVelocity(): Vec2|null {
+		if (!this.running) {
+			return null;
+		}
+
+		return this.currentVelocity;
 	}
 
 	public stop(): void {
@@ -112,8 +121,10 @@ export default class PanZoom extends BaseTool {
 	public onPointerDown({ allPointers: pointers, current: currentPointer }: PointerEvt): boolean {
 		let handlingGesture = false;
 
+		const inertialScrollerVelocity = this.inertialScroller?.getCurrentVelocity() ?? Vec2.zero;
 		this.inertialScroller?.stop();
-		this.velocity = Vec2.zero;
+		this.velocity = inertialScrollerVelocity;
+
 		this.lastPointerDownTimestamp = currentPointer.timeStamp;
 
 		const allAreTouch = this.allPointersAreOfType(pointers, PointerDevice.Touch);
