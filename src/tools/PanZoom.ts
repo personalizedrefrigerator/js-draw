@@ -48,7 +48,7 @@ class InertialScroller {
 		let lastTime = (new Date()).getTime();
 		this.running = true;
 
-		const maxSpeed = 8000; // units/s
+		const maxSpeed = 5000; // units/s
 		const minSpeed = 200; // units/s
 		if (currentVelocity.magnitude() > maxSpeed) {
 			currentVelocity = currentVelocity.normalized().times(maxSpeed);
@@ -85,6 +85,7 @@ export default class PanZoom extends BaseTool {
 	private lastDist: number;
 	private lastScreenCenter: Point2;
 	private lastTimestamp: number;
+	private lastPointerDownTimestamp: number = 0;
 
 	private inertialScroller: InertialScroller|null = null;
 	private velocity: Vec2|null = null;
@@ -108,11 +109,12 @@ export default class PanZoom extends BaseTool {
 		return pointers.every(pointer => pointer.device === kind);
 	}
 
-	public onPointerDown({ allPointers: pointers }: PointerEvt): boolean {
+	public onPointerDown({ allPointers: pointers, current: currentPointer }: PointerEvt): boolean {
 		let handlingGesture = false;
 
 		this.inertialScroller?.stop();
 		this.velocity = Vec2.zero;
+		this.lastPointerDownTimestamp = currentPointer.timeStamp;
 
 		const allAreTouch = this.allPointersAreOfType(pointers, PointerDevice.Touch);
 		const isRightClick = this.allPointersAreOfType(pointers, PointerDevice.RightButtonMouse);
@@ -143,17 +145,19 @@ export default class PanZoom extends BaseTool {
 
 	private updateVelocity(currentCenter: Point2) {
 		const deltaPos = currentCenter.minus(this.lastScreenCenter);
-		const deltaTime = ((new Date()).getTime() - this.lastTimestamp) / 1000;
-
-		// We divide by deltaTime. Don't divide by zero.
-		if (deltaTime === 0) {
-			return;
-		}
+		let deltaTime = ((new Date()).getTime() - this.lastTimestamp) / 1000;
 
 		// Ignore duplicate events, unless there has been enough time between them.
 		if (deltaPos.magnitude() === 0 && deltaTime < 0.1) {
 			return;
 		}
+		// We divide by deltaTime. Don't divide by zero.
+		if (deltaTime === 0) {
+			return;
+		}
+
+		// Don't divide by almost zero, either
+		deltaTime = Math.max(deltaTime, 0.01);
 
 		const currentVelocity = deltaPos.times(1 / deltaTime);
 		let smoothedVelocity = currentVelocity;
@@ -234,8 +238,12 @@ export default class PanZoom extends BaseTool {
 			this.velocity = Vec2.zero;
 		};
 
+		const minInertialScrollDt = 30;
 		const shouldInertialScroll =
-				event.current.device === PointerDevice.Touch && event.allPointers.length === 1;
+				event.current.device === PointerDevice.Touch
+				&& event.allPointers.length === 1
+				&& this.velocity !== null
+				&& event.current.timeStamp - this.lastPointerDownTimestamp > minInertialScrollDt;
 
 		if (shouldInertialScroll && this.velocity !== null) {
 			// If the user drags the screen, then stops, then lifts the pointer,
