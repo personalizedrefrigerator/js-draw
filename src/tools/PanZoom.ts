@@ -112,6 +112,7 @@ export default class PanZoom extends BaseTool {
 		let handlingGesture = false;
 
 		this.inertialScroller?.stop();
+		this.velocity = Vec2.zero;
 
 		const allAreTouch = this.allPointersAreOfType(pointers, PointerDevice.Touch);
 		const isRightClick = this.allPointersAreOfType(pointers, PointerDevice.RightButtonMouse);
