@@ -41,6 +41,10 @@ import IconProvider from './toolbar/IconProvider';
 import { toRoundedString } from './math/rounding';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 import untilNextAnimationFrame from './util/untilNextAnimationFrame';
+import fileToBase64 from './util/fileToBase64';
+import uniteCommands from './commands/uniteCommands';
+import SelectionTool from './tools/SelectionTool/SelectionTool';
+import AbstractComponent from './components/AbstractComponent';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
@@ -513,20 +517,14 @@ export class Editor {
 		for (const file of clipboardData.files) {
 			const fileType = file.type.toLowerCase();
 			if (fileType === 'image/png' || fileType === 'image/jpg') {
-				const reader = new FileReader();
-
 				this.showLoadingWarning(0);
-				try {
-					const data = await new Promise((resolve: (result: string|null)=>void, reject) => {
-						reader.onload = () => resolve(reader.result as string|null);
-						reader.onerror = reject;
-						reader.onabort = reject;
-						reader.onprogress = (evt) => {
-							this.showLoadingWarning(evt.loaded / evt.total);
-						};
+				const onprogress = (evt: ProgressEvent<FileReader>) => {
+					this.showLoadingWarning(evt.loaded / evt.total);
+				};
 
-						reader.readAsDataURL(file);
-					});
+				try {
+					const data = await fileToBase64(file, onprogress);
+
 					if (data && this.toolController.dispatchInputEvent({
 						kind: InputEvtType.PasteEvent,
 						mime: fileType,
@@ -629,13 +627,14 @@ export class Editor {
 	/** `apply` a command. `command` will be announced for accessibility. */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		if (addToHistory) {
-			// .push applies [command] to this
-			this.history.push(command);
-		} else {
-			command.apply(this);
+			const apply = false; // Don't double-apply
+			this.history.push(command, apply);
 		}
 
+		const applyResult = command.apply(this);
 		this.announceForAccessibility(command.description(this, this.localization));
+
+		return applyResult;
 	}
 
 	/**
@@ -823,6 +822,57 @@ export class Editor {
 			],
 			current: mainPointer,
 		});
+	}
+
+	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true) {
+		let bbox: Rect2|null = null;
+		for (const component of components) {
+			if (bbox) {
+				bbox = bbox.union(component.getBBox());
+			} else {
+				bbox = component.getBBox();
+			}
+		}
+
+		if (!bbox) {
+			return;
+		}
+
+		// Find a transform that scales/moves bbox onto the screen.
+		const visibleRect = this.viewport.visibleRect;
+		const scaleRatioX = visibleRect.width / bbox.width;
+		const scaleRatioY = visibleRect.height / bbox.height;
+
+		let scaleRatio = scaleRatioX;
+		if (bbox.width * scaleRatio > visibleRect.width || bbox.height * scaleRatio > visibleRect.height) {
+			scaleRatio = scaleRatioY;
+		}
+		scaleRatio *= 2 / 3;
+
+		scaleRatio = Viewport.roundScaleRatio(scaleRatio);
+
+		const transfm = Mat33.translation(
+			visibleRect.center.minus(bbox.center)
+		).rightMul(
+			Mat33.scaling2D(scaleRatio, bbox.center)
+		);
+
+		const commands: Command[] = [];
+		for (const component of components) {
+			// To allow deserialization, we need to add first, then transform.
+			commands.push(EditorImage.addElement(component));
+			commands.push(component.transformBy(transfm));
+		}
+
+		const applyChunkSize = 100;
+		await this.dispatch(uniteCommands(commands, applyChunkSize), true);
+
+		if (selectComponents) {
+			for (const selectionTool of this.toolController.getMatchingTools(SelectionTool)) {
+				selectionTool.setEnabled(true);
+				selectionTool.setSelection(components);
+			}
+		}
 	}
 
 	// Get a data URL (e.g. as produced by `HTMLCanvasElement::toDataURL`).

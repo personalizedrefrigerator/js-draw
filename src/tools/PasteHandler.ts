@@ -5,18 +5,14 @@
 
 import Editor from '../Editor';
 import { AbstractComponent, TextComponent } from '../components/lib';
-import { Command, uniteCommands } from '../commands/lib';
 import SVGLoader from '../SVGLoader';
 import { PasteEvent } from '../types';
-import { Mat33, Rect2 } from '../math/lib';
+import { Mat33 } from '../math/lib';
 import BaseTool from './BaseTool';
-import EditorImage from '../EditorImage';
-import SelectionTool from './SelectionTool/SelectionTool';
 import TextTool from './TextTool';
 import Color4 from '../Color4';
 import { TextStyle } from '../components/TextComponent';
 import ImageComponent from '../components/ImageComponent';
-import Viewport from '../Viewport';
 
 // { @inheritDoc PasteHandler! }
 export default class PasteHandler extends BaseTool {
@@ -44,52 +40,7 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	private async addComponentsFromPaste(components: AbstractComponent[]) {
-		let bbox: Rect2|null = null;
-		for (const component of components) {
-			if (bbox) {
-				bbox = bbox.union(component.getBBox());
-			} else {
-				bbox = component.getBBox();
-			}
-		}
-
-		if (!bbox) {
-			return;
-		}
-
-		// Find a transform that scales/moves bbox onto the screen.
-		const visibleRect = this.editor.viewport.visibleRect;
-		const scaleRatioX = visibleRect.width / bbox.width;
-		const scaleRatioY = visibleRect.height / bbox.height;
-
-		let scaleRatio = scaleRatioX;
-		if (bbox.width * scaleRatio > visibleRect.width || bbox.height * scaleRatio > visibleRect.height) {
-			scaleRatio = scaleRatioY;
-		}
-		scaleRatio *= 2 / 3;
-
-		scaleRatio = Viewport.roundScaleRatio(scaleRatio);
-
-		const transfm = Mat33.translation(
-			visibleRect.center.minus(bbox.center)
-		).rightMul(
-			Mat33.scaling2D(scaleRatio, bbox.center)
-		);
-
-		const commands: Command[] = [];
-		for (const component of components) {
-			// To allow deserialization, we need to add first, then transform.
-			commands.push(EditorImage.addElement(component));
-			commands.push(component.transformBy(transfm));
-		}
-
-		const applyChunkSize = 100;
-		this.editor.dispatch(uniteCommands(commands, applyChunkSize), true);
-
-		for (const selectionTool of this.editor.toolController.getMatchingTools(SelectionTool)) {
-			selectionTool.setEnabled(true);
-			selectionTool.setSelection(components);
-		}
+		await this.editor.addAndCenterComponents(components);
 	}
 
 	private async doSVGPaste(data: string) {

@@ -9,6 +9,11 @@ export interface ToolbarLocalization {
 	filledRectanglePen: string;
 	linePen: string;
 	arrowPen: string;
+	image: string;
+	inputAltText: string;
+	chooseFile: string;
+	cancel: string;
+	submit: string;
 	freehandPen: string;
 	pressureSensitiveFreehandPen: string;
 	selectObjectType: string;
@@ -42,6 +47,11 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	select: 'Select',
 	handTool: 'Pan',
 	zoom: 'Zoom',
+	image: 'Image',
+	inputAltText: 'Alt text: ',
+	chooseFile: 'Choose file: ',
+	submit: 'Submit',
+	cancel: 'Cancel',
 	resetView: 'Reset view',
 	thicknessLabel: 'Thickness: ',
 	colorLabel: 'Color: ',

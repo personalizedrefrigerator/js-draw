@@ -16,7 +16,7 @@ import SelectionToolWidget from './widgets/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget from './widgets/BaseWidget';
-import { ActionButtonWidget } from './lib';
+import { ActionButtonWidget, InsertImageWidget } from './lib';
 
 export const toolbarCSSPrefix = 'toolbar-';
 
@@ -235,6 +235,8 @@ export default class HTMLToolbar {
 		for (const tool of toolController.getMatchingTools(TextTool)) {
 			this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
 		}
+
+		this.addWidget(new InsertImageWidget(this.editor, this.localizationTable));
 
 		const panZoomTool = toolController.getMatchingTools(PanZoomTool)[0];
 		if (panZoomTool) {

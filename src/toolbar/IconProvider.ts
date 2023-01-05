@@ -323,6 +323,14 @@ export default class IconProvider {
 
 		return icon;
 	}
+
+	public makeInsertImageIcon(): IconType {
+		return this.makeIconFromPath(`
+			M 5 10 L 5 90 L 95 90 L 95 10 L 5 10 z
+			M 10 15 L 90 15 L 90 50 L 70 75 L 40 50 L 10 75 L 10 15 z
+			M 22.5 25 A 7.5 7.5 0 0 0 15 32.5 A 7.5 7.5 0 0 0 22.5 40 A 7.5 7.5 0 0 0 30 32.5 A 7.5 7.5 0 0 0 22.5 25 z 
+		`);
+	}
 	
 	public makeTextIcon(textStyle: TextStyle): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
