@@ -326,6 +326,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-errorImageHasZeroSize
+    attributes:
+      label: "errorImageHasZeroSize"
+      description: "Translate `Error: Image has zero size`."
+      placeholder: "Error: Image has zero size"
+    validations:
+      required: false
+  - type: input
     id: translation-imageLoadError
     attributes:
       label: "imageLoadError"
