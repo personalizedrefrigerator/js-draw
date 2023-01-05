@@ -58,6 +58,9 @@ const localization: EditorLocalization = {
 	textTool: 'Texto',
 	enterTextToInsert: 'Entra texto',
 	rerenderAsText: 'Redibuja la pantalla al texto',
+	image: 'Imagen',
+	imageSize: (size: number, units: string) => `Tamaño del imagen: ${size} ${units}`,
+	imageLoadError: (message: string)=> `Error cargando imagen: ${message}`,
 };
 
 export default localization;

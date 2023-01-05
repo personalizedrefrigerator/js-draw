@@ -62,6 +62,46 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-image
+    attributes:
+      label: "image"
+      description: "Translate `Image`."
+      placeholder: "Image"
+    validations:
+      required: false
+  - type: input
+    id: translation-inputAltText
+    attributes:
+      label: "inputAltText"
+      description: "Translate `Alt text: `."
+      placeholder: "Alt text: "
+    validations:
+      required: false
+  - type: input
+    id: translation-chooseFile
+    attributes:
+      label: "chooseFile"
+      description: "Translate `Choose file: `."
+      placeholder: "Choose file: "
+    validations:
+      required: false
+  - type: input
+    id: translation-submit
+    attributes:
+      label: "submit"
+      description: "Translate `Submit`."
+      placeholder: "Submit"
+    validations:
+      required: false
+  - type: input
+    id: translation-cancel
+    attributes:
+      label: "cancel"
+      description: "Translate `Cancel`."
+      placeholder: "Cancel"
+    validations:
+      required: false
+  - type: input
     id: translation-resetView
     attributes:
       label: "resetView"
@@ -238,6 +278,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-paste
+    attributes:
+      label: "paste"
+      description: "Translate `Paste`."
+      placeholder: "Paste"
+    validations:
+      required: false
+  - type: input
     id: translation-dropdownShown
     attributes:
       label: "dropdownShown"
@@ -267,6 +315,22 @@ body:
       label: "colorChangedAnnouncement"
       description: "Translate ``(color) => `Color changed to ${color}` ``."
       placeholder: "(color) => `Color changed to ${color}`"
+    validations:
+      required: false
+  - type: input
+    id: translation-imageSize
+    attributes:
+      label: "imageSize"
+      description: "Translate ``(size, units) => `Image size: ${size} ${units}` ``."
+      placeholder: "(size, units) => `Image size: ${size} ${units}`"
+    validations:
+      required: false
+  - type: input
+    id: translation-imageLoadError
+    attributes:
+      label: "imageLoadError"
+      description: "Translate ``(message) => `Error loading image: ${message}` ``."
+      placeholder: "(message) => `Error loading image: ${message}`"
     validations:
       required: false
   - type: input
