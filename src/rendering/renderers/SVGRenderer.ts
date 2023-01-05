@@ -217,11 +217,16 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	public drawImage(image: RenderableImage) {
+		let label = image.label ?? image.image.getAttribute('aria-label') ?? '';
+		if (label === '') {
+			label = image.image.getAttribute('alt') ?? '';
+		}
+
 		const svgImgElem = document.createElementNS(svgNameSpace, 'image');
 		svgImgElem.setAttribute('href', image.base64Url);
 		svgImgElem.setAttribute('width', image.image.getAttribute('width') ?? '');
 		svgImgElem.setAttribute('height', image.image.getAttribute('height') ?? '');
-		svgImgElem.setAttribute('aria-label', image.image.getAttribute('aria-label') ?? image.image.getAttribute('alt') ?? '');
+		svgImgElem.setAttribute('aria-label', label);
 		this.transformFrom(image.transform, svgImgElem);
 
 		this.elem.appendChild(svgImgElem);

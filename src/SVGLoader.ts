@@ -287,6 +287,7 @@ export default class SVGLoader implements ImageLoader {
 	private async addImage(elem: SVGImageElement) {
 		const image = new Image();
 		image.src = elem.getAttribute('xlink:href') ?? elem.href.baseVal;
+		image.setAttribute('alt', elem.getAttribute('aria-label') ?? '');
 
 		try {
 			const supportedAttrs: string[] = [];

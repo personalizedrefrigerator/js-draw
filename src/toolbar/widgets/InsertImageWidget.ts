@@ -1,5 +1,8 @@
 import ImageComponent from '../../components/ImageComponent';
 import Editor from '../../Editor';
+import Erase from '../../commands/Erase';
+import EditorImage from '../../EditorImage';
+import { SelectionTool, uniteCommands } from '../../lib';
 import Mat33 from '../../math/Mat33';
 import fileToBase64 from '../../util/fileToBase64';
 import { ToolbarLocalization } from '../localization';
@@ -10,6 +13,7 @@ export default class InsertImageWidget extends ActionButtonWidget {
 	private imagePreview: HTMLImageElement;
 	private imageFileInput: HTMLInputElement;
 	private imageAltTextInput: HTMLInputElement;
+	private statusView: HTMLElement;
 	private imageBase64URL: string|null;
 	private submitButton: HTMLButtonElement;
 
@@ -24,6 +28,7 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		);
 
 		this.imageSelectionOverlay = document.createElement('div');
+		this.imageSelectionOverlay.classList.add('toolbar-image-selection-overlay');
 		this.fillOverlay();
 
 		this.editor.createHTMLOverlay(this.imageSelectionOverlay);
@@ -33,9 +38,12 @@ export default class InsertImageWidget extends ActionButtonWidget {
 	private static nextInputId = 0;
 
 	private fillOverlay() {
+		const container = document.createElement('div');
+
 		const chooseImageRow = document.createElement('div');
 		const altTextRow = document.createElement('div');
 		this.imagePreview = document.createElement('img');
+		this.statusView = document.createElement('div');
 		const actionButtonsRow = document.createElement('div');
 
 		this.submitButton = document.createElement('button');
@@ -60,13 +68,7 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		this.imageFileInput.type = 'file';
 		this.imageAltTextInput.type = 'text';
 
-		chooseImageRow.replaceChildren(imageFileInputLabel, this.imageFileInput);
-		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
-		actionButtonsRow.replaceChildren(cancelButton, this.submitButton);
-
-		this.imageSelectionOverlay.replaceChildren(
-			chooseImageRow, altTextRow, this.imagePreview, actionButtonsRow
-		);
+		this.statusView.setAttribute('aria-live', 'polite');
 
 		cancelButton.innerText = this.localizationTable.cancel;
 		this.submitButton.innerText = this.localizationTable.submit;
@@ -82,12 +84,21 @@ export default class InsertImageWidget extends ActionButtonWidget {
 
 			const image = this.imageFileInput.files[0];
 
-			const data = await fileToBase64(image);
+			let data: string|null = null;
+
+			try {
+				data = await fileToBase64(image);
+			} catch(e) {
+				this.statusView.innerText = this.localizationTable.imageLoadError(e);
+			}
+
 			if (data) {
 				this.imagePreview.src = data;
 				this.submitButton.disabled = false;
+				this.updateImageSizeDisplay();
 			} else {
 				this.submitButton.disabled = true;
+				this.statusView.innerText = '';
 			}
 
 			this.imageBase64URL = data;
@@ -96,6 +107,23 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		cancelButton.onclick = () => {
 			this.imageSelectionOverlay.style.display = 'none';
 		};
+
+		chooseImageRow.replaceChildren(imageFileInputLabel, this.imageFileInput);
+		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
+		actionButtonsRow.replaceChildren(cancelButton, this.submitButton);
+
+		container.replaceChildren(
+			chooseImageRow, altTextRow, this.imagePreview, this.statusView, actionButtonsRow
+		);
+
+		this.imageSelectionOverlay.replaceChildren(container);
+	}
+
+	private updateImageSizeDisplay() {
+		const imageData = this.imageBase64URL ?? '';
+		this.statusView.innerText = this.localizationTable.imageSize(
+			Math.round(imageData.length / 1024), 'KiB'
+		);
 	}
 
 	private clearInputs() {
@@ -103,13 +131,32 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		this.imageAltTextInput.value = '';
 		this.imagePreview.style.display = 'none';
 		this.submitButton.disabled = true;
+		this.statusView.innerText = '';
 	}
 
 	private onClicked() {
-		this.imageSelectionOverlay.style.display = 'block';
+		this.imageSelectionOverlay.style.display = '';
 		this.clearInputs();
+		this.imageFileInput.focus();
 
-		// TODO: Replace selected image with something else if there is a selected image.
+		const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
+		const selectedObjects = selectionTools.map(tool => tool.getSelectedObjects()).flat();
+
+		let editingImage: ImageComponent|null = null;
+		if (selectedObjects.length === 1 && selectedObjects[0] instanceof ImageComponent) {
+			editingImage = selectedObjects[0];
+
+			this.imageAltTextInput.value = editingImage.getAltText() ?? '';
+			this.imagePreview.style.display = 'block';
+			this.submitButton.disabled = false;
+
+			this.imageBase64URL = editingImage.getURL();
+			this.imagePreview.src = this.imageBase64URL;
+
+			this.updateImageSizeDisplay();
+		} else {
+			selectionTools.forEach(tool => tool.clearSelection());
+		}
 
 		this.submitButton.onclick = async () => {
 			if (!this.imageBase64URL) {
@@ -122,7 +169,21 @@ export default class InsertImageWidget extends ActionButtonWidget {
 			image.setAttribute('alt', this.imageAltTextInput.value);
 
 			const component = await ImageComponent.fromImage(image, Mat33.identity);
-			await this.editor.addAndCenterComponents([ component ]);
+
+			if (editingImage) {
+				const eraseCommand = new Erase([ editingImage ]);
+
+				await this.editor.dispatch(uniteCommands([
+					EditorImage.addElement(component),
+					component.transformBy(editingImage.getTransformation()),
+					component.setZIndex(editingImage.getZIndex()),
+					eraseCommand,
+				]));
+
+				selectionTools[0]?.setSelection([ component ]);
+			} else {
+				await this.editor.addAndCenterComponents([ component ]);
+			}
 		};
 	}
 }

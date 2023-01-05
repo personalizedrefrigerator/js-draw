@@ -77,6 +77,9 @@ export default class ImageComponent extends AbstractComponent {
 			image.height = height;
 		}
 
+		image.setAttribute('alt', elem.getAttribute('alt') ?? '');
+		image.setAttribute('aria-label', elem.getAttribute('aria-label') ?? '');
+
 		return new ImageComponent({
 			image,
 			base64Url: url,
@@ -124,6 +127,18 @@ export default class ImageComponent extends AbstractComponent {
 
 	public description(localizationTable: ImageComponentLocalization): string {
 		return this.image.label ? localizationTable.imageNode(this.image.label) : localizationTable.unlabeledImageNode;
+	}
+
+	public getAltText() {
+		return this.image.label;
+	}
+
+	public getURL() {
+		return this.image.base64Url;
+	}
+
+	public getTransformation(): Mat33 {
+		return this.image.transform;
 	}
 
 	protected createClone(): AbstractComponent {

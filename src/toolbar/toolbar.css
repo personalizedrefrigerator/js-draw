@@ -1,3 +1,5 @@
+@import url(./widgets/InsertImageWidget.css);
+
 .toolbar-root {
 	background-color: var(--primary-background-color);
 	--icon-color: var(--primary-foreground-color);

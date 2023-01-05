@@ -39,6 +39,8 @@ export interface ToolbarLocalization {
 	dropdownHidden: (toolName: string)=> string;
 	zoomLevel: (zoomPercentage: number)=> string;
 	colorChangedAnnouncement: (color: string)=> string;
+	imageSize: (size: number, units: string)=> string;
+	imageLoadError: (message: string)=> string;
 }
 
 export const defaultToolbarLocalization: ToolbarLocalization = {
@@ -82,5 +84,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
 	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
 	zoomLevel: (zoomPercent: number) => `Zoom: ${zoomPercent}%`,
-	colorChangedAnnouncement: (color: string)=> `Color changed to ${color}`,
+	colorChangedAnnouncement: (color: string) => `Color changed to ${color}`,
+	imageSize: (size: number, units: string) => `Image size: ${size} ${units}`,
+	imageLoadError: (message: string)=> `Error loading image: ${message}`,
 };

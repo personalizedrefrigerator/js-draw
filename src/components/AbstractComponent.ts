@@ -90,6 +90,11 @@ export default abstract class AbstractComponent {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this);
 	}
 
+	// Returns a command that updates this component's z-index.
+	public setZIndex(newZIndex: number): SerializableCommand {
+		return new AbstractComponent.TransformElementCommand(Mat33.identity, this, newZIndex);
+	}
+
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
 	public isSelectable(): boolean {
 		return true;
@@ -110,6 +115,7 @@ export default abstract class AbstractComponent {
 		public constructor(
 			private affineTransfm: Mat33,
 			private componentID: string,
+			private targetZIndex?: number,
 		) {
 			super(AbstractComponent.transformElementCommandId);
 		}
@@ -123,7 +129,9 @@ export default abstract class AbstractComponent {
 			if (!component) {
 				throw new Error(`Unable to resolve component with ID ${this.componentID}`);
 			}
-			this.command = new AbstractComponent.TransformElementCommand(this.affineTransfm, component);
+			this.command = new AbstractComponent.TransformElementCommand(
+				this.affineTransfm, component, this.targetZIndex
+			);
 		}
 
 		public apply(editor: Editor) {
@@ -144,19 +152,23 @@ export default abstract class AbstractComponent {
 			return {
 				id: this.componentID,
 				transfm: this.affineTransfm.toArray(),
+				targetZIndex: this.targetZIndex,
 			};
 		}
 	};
 
 	private static TransformElementCommand = class extends SerializableCommand {
 		private origZIndex: number;
+		private targetZIndex: number;
 
 		public constructor(
 			private affineTransfm: Mat33,
 			private component: AbstractComponent,
+			targetZIndex?: number,
 		) {
 			super(AbstractComponent.transformElementCommandId);
 			this.origZIndex = component.zIndex;
+			this.targetZIndex = targetZIndex ?? AbstractComponent.zIndexCounter++;
 		}
 
 		private updateTransform(editor: Editor, newTransfm: Mat33) {
@@ -177,7 +189,7 @@ export default abstract class AbstractComponent {
 		}
 
 		public apply(editor: Editor) {
-			this.component.zIndex = AbstractComponent.zIndexCounter++;
+			this.component.zIndex = this.targetZIndex;
 			this.updateTransform(editor, this.affineTransfm);
 			editor.queueRerender();
 		}
@@ -195,16 +207,17 @@ export default abstract class AbstractComponent {
 		static {
 			SerializableCommand.register(AbstractComponent.transformElementCommandId, (json: any, editor: Editor) => {
 				const elem = editor.image.lookupElement(json.id);
-
 				const transform = new Mat33(...(json.transfm as Mat33Array));
+				const targetZIndex = json.targetZIndex;
 
 				if (!elem) {
-					return new AbstractComponent.UnresolvedTransformElementCommand(transform, json.id);
+					return new AbstractComponent.UnresolvedTransformElementCommand(transform, json.id, targetZIndex);
 				}
 
 				return new AbstractComponent.TransformElementCommand(
 					transform,
 					elem,
+					targetZIndex,
 				);
 			});
 		}
@@ -213,6 +226,7 @@ export default abstract class AbstractComponent {
 			return {
 				id: this.component.getId(),
 				transfm: this.affineTransfm.toArray(),
+				targetZIndex: this.targetZIndex,
 			};
 		}
 	};
