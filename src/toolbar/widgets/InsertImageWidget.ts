@@ -62,6 +62,8 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		imageAltTextLabel.htmlFor = altTextInputId;
 		imageFileInputLabel.htmlFor = fileInputId;
 
+		this.imageFileInput.accept = 'image/*';
+
 		imageAltTextLabel.innerText = this.localizationTable.inputAltText;
 		imageFileInputLabel.innerText = this.localizationTable.chooseFile;
 
@@ -162,13 +164,19 @@ export default class InsertImageWidget extends ActionButtonWidget {
 			if (!this.imageBase64URL) {
 				return;
 			}
-			this.imageSelectionOverlay.style.display = 'none';
 
 			const image = new Image();
 			image.src = this.imageBase64URL;
 			image.setAttribute('alt', this.imageAltTextInput.value);
 
 			const component = await ImageComponent.fromImage(image, Mat33.identity);
+
+			if (component.getBBox().area === 0) {
+				this.statusView.innerText = this.localizationTable.errorImageHasZeroSize;
+				return;
+			}
+
+			this.imageSelectionOverlay.style.display = 'none';
 
 			if (editingImage) {
 				const eraseCommand = new Erase([ editingImage ]);

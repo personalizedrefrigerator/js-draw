@@ -35,6 +35,8 @@ export interface ToolbarLocalization {
 	selectionToolKeyboardShortcuts: string;
 	paste: string;
 
+	errorImageHasZeroSize: string;
+
 	dropdownShown: (toolName: string)=> string;
 	dropdownHidden: (toolName: string)=> string;
 	zoomLevel: (zoomPercentage: number)=> string;
@@ -86,5 +88,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	zoomLevel: (zoomPercent: number) => `Zoom: ${zoomPercent}%`,
 	colorChangedAnnouncement: (color: string) => `Color changed to ${color}`,
 	imageSize: (size: number, units: string) => `Image size: ${size} ${units}`,
+
+	errorImageHasZeroSize: 'Error: Image has zero size',
 	imageLoadError: (message: string)=> `Error loading image: ${message}`,
 };
