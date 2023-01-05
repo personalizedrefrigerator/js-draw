@@ -92,6 +92,8 @@ export default class InsertImageWidget extends ActionButtonWidget {
 				this.statusView.innerText = this.localizationTable.imageLoadError(e);
 			}
 
+			this.imageBase64URL = data;
+
 			if (data) {
 				this.imagePreview.src = data;
 				this.submitButton.disabled = false;
@@ -100,8 +102,6 @@ export default class InsertImageWidget extends ActionButtonWidget {
 				this.submitButton.disabled = true;
 				this.statusView.innerText = '';
 			}
-
-			this.imageBase64URL = data;
 		};
 
 		cancelButton.onclick = () => {
