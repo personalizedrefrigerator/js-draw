@@ -13,7 +13,7 @@
 
 .toolbar-image-selection-overlay > div {
 	background: var(--primary-background-color);
-	box-shadow: 1px 2px 0px var(--primary-shadow-color);
+	box-shadow: 1px 1px 3px var(--primary-shadow-color);
 
 	padding: 18px;
 	border-radius: 3px;
