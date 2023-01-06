@@ -15,17 +15,30 @@
 	background: var(--primary-background-color);
 	box-shadow: 1px 2px 0px var(--primary-shadow-color);
 
-	padding: 22px;
+	padding: 18px;
 	border-radius: 3px;
 }
 
+.toolbar-image-selection-overlay > div > div {
+	padding: 5px;
+}
+
 .toolbar-image-selection-overlay img {
-	width: 75%;
-	max-width: 50vw;
+	max-width: min(50vw, 75%);
 	max-height: 50vh;
 
 	/* Center */
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.toolbar-image-selection-overlay .action-button-row {
+	margin-top: 4px;
+	display: flex;
+	flex-direction: row;
+}
+
+.toolbar-image-selection-overlay .action-button-row > button {
+	flex-grow: 1;
 }

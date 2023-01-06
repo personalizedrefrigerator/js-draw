@@ -44,7 +44,9 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		const altTextRow = document.createElement('div');
 		this.imagePreview = document.createElement('img');
 		this.statusView = document.createElement('div');
-		const actionButtonsRow = document.createElement('div');
+		const actionButtonRow = document.createElement('div');
+
+		actionButtonRow.classList.add('action-button-row');
 
 		this.submitButton = document.createElement('button');
 		const cancelButton = document.createElement('button');
@@ -107,18 +109,29 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		};
 
 		cancelButton.onclick = () => {
-			this.imageSelectionOverlay.style.display = 'none';
+			this.hideDialog();
+		};
+
+		this.imageSelectionOverlay.onclick = (evt: MouseEvent) => {
+			// If clicking on the backdrop
+			if (evt.target === this.imageSelectionOverlay) {
+				this.hideDialog();
+			}
 		};
 
 		chooseImageRow.replaceChildren(imageFileInputLabel, this.imageFileInput);
 		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
-		actionButtonsRow.replaceChildren(cancelButton, this.submitButton);
+		actionButtonRow.replaceChildren(cancelButton, this.submitButton);
 
 		container.replaceChildren(
-			chooseImageRow, altTextRow, this.imagePreview, this.statusView, actionButtonsRow
+			chooseImageRow, altTextRow, this.imagePreview, this.statusView, actionButtonRow
 		);
 
 		this.imageSelectionOverlay.replaceChildren(container);
+	}
+
+	private hideDialog() {
+		this.imageSelectionOverlay.style.display = 'none';
 	}
 
 	private updateImageSizeDisplay() {
