@@ -1,3 +1,7 @@
+# 0.11.0
+ * Added a dialog for inserting images and changing existing image alt text.
+ * Inertial scrolling: Workaround issue on some devices on touch gesture cancel.
+
 # 0.10.3
  * Inertial scrolling: Don't start inertial scroll if a gesture was, in total, shorter than roughly 30 ms. Such gestures can be caused accidentally. For example, by resting/lifting a hand from a device screen.
 
