@@ -136,8 +136,20 @@ export default class InsertImageWidget extends ActionButtonWidget {
 
 	private updateImageSizeDisplay() {
 		const imageData = this.imageBase64URL ?? '';
+
+		const sizeInKiB = imageData.length / 1024;
+		const sizeInMiB = sizeInKiB / 1024;
+
+		let units = 'KiB';
+		let size = sizeInKiB;
+
+		if (sizeInMiB >= 1) {
+			size = sizeInMiB;
+			units = 'MiB';
+		}
+
 		this.statusView.innerText = this.localizationTable.imageSize(
-			Math.round(imageData.length / 1024), 'KiB'
+			Math.round(size), units
 		);
 	}
 
