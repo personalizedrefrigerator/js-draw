@@ -257,10 +257,22 @@ export default class PanZoom extends BaseTool {
 				&& event.current.timeStamp - this.lastPointerDownTimestamp > minInertialScrollDt;
 
 		if (shouldInertialScroll && this.velocity !== null) {
+			const oldVelocity = this.velocity;
+
 			// If the user drags the screen, then stops, then lifts the pointer,
 			// we want the final velocity to reflect the stop at the end (so the velocity
 			// should be near zero). Handle this:
 			this.updateVelocity(event.current.screenPos);
+
+			// Work around an input issue. Some devices that disable the touchscreen when a stylus
+			// comes near the screen fire a touch-end event at the position of the stylus when a
+			// touch gesture is canceled. Because the stylus is often far away from the last touch,
+			// this causes a great displacement between the second-to-last (from the touchscreen) and
+			// last (from the pen that is now near the screen) events. Only allow velocity to decrease
+			// to work around this:
+			if (oldVelocity.magnitude() < this.velocity.magnitude()) {
+				this.velocity = oldVelocity;
+			}
 
 			// Cancel any ongoing inertial scrolling.
 			this.inertialScroller?.stop();
