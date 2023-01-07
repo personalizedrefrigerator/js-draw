@@ -1,3 +1,8 @@
+# 0.11.1
+ * Performance: Faster eraser and selection tools.
+ * Bug fixes
+   * Selection tool: Don't allow components to be in the selection multiple times.
+
 # 0.11.0
  * Added a dialog for inserting images and changing existing image alt text.
  * Inertial scrolling: Workaround issue on some devices on touch gesture cancel.
