@@ -57,6 +57,7 @@ export default class Eraser extends BaseTool {
 		if (this.toRemove.length > 0) {
 			// Undo commands for each individual component and unite into a single command.
 			this.partialCommands.forEach(cmd => cmd.unapply(this.editor));
+			this.partialCommands = [];
 
 			const command = new Erase(this.toRemove);
 			this.editor.dispatch(command); // dispatch: Makes undo-able.
@@ -65,5 +66,6 @@ export default class Eraser extends BaseTool {
 
 	public onGestureCancel(): void {
 		this.partialCommands.forEach(cmd => cmd.unapply(this.editor));
+		this.partialCommands = [];
 	}
 }

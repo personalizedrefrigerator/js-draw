@@ -1,3 +1,6 @@
+# 0.11.2
+ * Fix eraser regression: Erasing multiple strokes, one after another, caused strokes to un-erase.
+
 # 0.11.1
  * Performance: Faster eraser and selection tools.
  * Bug fixes
