@@ -407,18 +407,20 @@ export default class IconProvider {
 	}
 	
 	public makeIconFromFactory(pen: Pen, factory: ComponentBuilderFactory): IconType {
-		const toolThickness = pen.getThickness();
+		// Increase the thickness we use to generate the icon less with larger actual thicknesses.
+		// We want the icon to be recognisable with a large range of thicknesses.
+		const thickness = Math.sqrt(pen.getThickness()) * 3;
 	
 		const nowTime = (new Date()).getTime();
 		const startPoint: StrokeDataPoint = {
 			pos: Vec2.of(10, 10),
-			width: toolThickness / 5,
+			width: thickness,
 			color: pen.getColor(),
 			time: nowTime - 100,
 		};
 		const endPoint: StrokeDataPoint = {
 			pos: Vec2.of(90, 90),
-			width: toolThickness / 5,
+			width: thickness,
 			color: pen.getColor(),
 			time: nowTime,
 		};
