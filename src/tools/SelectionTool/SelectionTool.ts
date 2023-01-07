@@ -381,6 +381,18 @@ export default class SelectionTool extends BaseTool {
 		// Only select selectable objects.
 		objects = objects.filter(obj => obj.isSelectable());
 
+		// Sort by z-index
+		objects.sort((a, b) => a.getZIndex() - b.getZIndex());
+
+		// Remove duplicates
+		objects = objects.filter((current, idx) => {
+			if (idx > 0) {
+				return current !== objects[idx - 1];
+			}
+
+			return true;
+		});
+
 		let bbox: Rect2|null = null;
 		for (const object of objects) {
 			if (bbox) {

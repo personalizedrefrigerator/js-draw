@@ -7,7 +7,7 @@ import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';
 
-// @internal
+// @internal Sort by z-index, low to high
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 	leaves.sort((a, b) => a.getContent()!.getZIndex() - b.getContent()!.getZIndex());
 };
