@@ -9,8 +9,10 @@ import { PointerDevice } from '../Pointer';
 
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2;
-	private command: Erase|null = null;
 	private toRemove: AbstractComponent[];
+
+	// Commands that each remove one element
+	private partialCommands: Erase[] = [];
 
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
@@ -35,31 +37,33 @@ export default class Eraser extends BaseTool {
 		const line = new LineSegment2(this.lastPoint, currentPoint);
 		const region = line.bbox;
 
-		// Remove any intersecting elements.
-		this.toRemove.push(...this.editor.image
-			.getElementsIntersectingRegion(region).filter(component => {
-				return component.intersects(line);
-			}));
+		const intersectingElems = this.editor.image.getElementsIntersectingRegion(region).filter(component => {
+			return component.intersects(line);
+		});
 
-		this.command?.unapply(this.editor);
-		this.command = new Erase(this.toRemove);
-		this.command.apply(this.editor);
+		// Remove any intersecting elements.
+		this.toRemove.push(...intersectingElems);
+
+		// Create new Erase commands for the now-to-be-erased elements and apply them.
+		const newPartialCommands = intersectingElems.map(elem => new Erase([ elem ]));
+		newPartialCommands.forEach(cmd => cmd.apply(this.editor));
+
+		this.partialCommands.push(...newPartialCommands);
 
 		this.lastPoint = currentPoint;
 	}
 
 	public onPointerUp(_event: PointerEvt): void {
-		if (this.command && this.toRemove.length > 0) {
-			this.command?.unapply(this.editor);
+		if (this.toRemove.length > 0) {
+			// Undo commands for each individual component and unite into a single command.
+			this.partialCommands.forEach(cmd => cmd.unapply(this.editor));
 
-			// Dispatch the command to make it undo-able
-			this.editor.dispatch(this.command);
+			const command = new Erase(this.toRemove);
+			this.editor.dispatch(command); // dispatch: Makes undo-able.
 		}
-		this.command = null;
 	}
 
 	public onGestureCancel(): void {
-		this.command?.unapply(this.editor);
-		this.command = null;
+		this.partialCommands.forEach(cmd => cmd.unapply(this.editor));
 	}
 }
