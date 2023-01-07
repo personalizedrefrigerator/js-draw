@@ -626,15 +626,10 @@ export class Editor {
 
 	/** `apply` a command. `command` will be announced for accessibility. */
 	public dispatch(command: Command, addToHistory: boolean = true) {
-		if (addToHistory) {
-			const apply = false; // Don't double-apply
-			this.history.push(command, apply);
-		}
-
-		const applyResult = command.apply(this);
+		const dispatchResult = this.dispatchNoAnnounce(command, addToHistory);
 		this.announceForAccessibility(command.description(this, this.localization));
 
-		return applyResult;
+		return dispatchResult;
 	}
 
 	/**
@@ -654,10 +649,11 @@ export class Editor {
 	 */
 	public dispatchNoAnnounce(command: Command, addToHistory: boolean = false) {
 		if (addToHistory) {
-			this.history.push(command);
-		} else {
-			command.apply(this);
+			const apply = false; // Don't double-apply
+			this.history.push(command, apply);
 		}
+
+		return command.apply(this);
 	}
 
 	/**
@@ -721,8 +717,12 @@ export class Editor {
 		if (!this.rerenderQueued) {
 			this.rerenderQueued = true;
 			requestAnimationFrame(() => {
-				this.rerender();
-				this.rerenderQueued = false;
+				// If .rerender was called manually, we might not need to
+				// re-render.
+				if (this.rerenderQueued) {
+					this.rerender();
+					this.rerenderQueued = false;
+				}
 			});
 		}
 	}

@@ -19,8 +19,10 @@ import Duplicate from '../../commands/Duplicate';
 import Command from '../../commands/Command';
 import { DragTransformer, ResizeTransformer, RotateTransformer } from './TransformMode';
 import { ResizeMode } from './types';
+import EditorImage from '../../EditorImage';
 
 const updateChunkSize = 100;
+const maxPreviewElemCount = 500;
 
 // @internal
 export default class Selection {
@@ -28,9 +30,7 @@ export default class Selection {
 	private originalRegion: Rect2;
 
 	private transformers;
-
 	private transform: Mat33 = Mat33.identity;
-	private transformCommands: SerializableCommand[] = [];
 
 	private selectedElems: AbstractComponent[] = [];
 
@@ -147,33 +147,22 @@ export default class Selection {
 		return this.regionRotation + this.editor.viewport.getRotationAngle();
 	}
 
-	private computeTransformCommands(): SerializableCommand[] {
-		return this.selectedElems.map(elem => {
-			return elem.transformBy(this.transform);
-		});
-	}
-
 	// Applies, previews, but doesn't finalize the given transformation.
 	public setTransform(transform: Mat33, preview: boolean = true) {
 		this.transform = transform;
 
 		if (preview && this.hasParent) {
-			this.previewTransformCmds();
 			this.scrollTo();
+			this.previewTransformCmds();
 		}
 	}
 
 	// Applies the current transformation to the selection
 	public finalizeTransform() {
-		this.transformCommands.forEach(cmd => {
-			cmd.unapply(this.editor);
-		});
-
 		const fullTransform = this.transform;
 		const selectedElems = this.selectedElems;
 
 		// Reset for the next drag
-		this.transformCommands = [];
 		this.originalRegion = this.originalRegion.transformedBoundingBox(this.transform);
 		this.transform = Mat33.identity;
 
@@ -277,14 +266,23 @@ export default class Selection {
 	// Preview the effects of the current transformation on the selection
 	private previewTransformCmds() {
 		// Don't render what we're moving if it's likely to be slow.
-		if (this.selectedElems.length > updateChunkSize) {
+		if (this.selectedElems.length > maxPreviewElemCount) {
 			this.updateUI();
 			return;
 		}
 
-		this.transformCommands.forEach(cmd => cmd.unapply(this.editor));
-		this.transformCommands = this.computeTransformCommands();
-		this.transformCommands.forEach(cmd => cmd.apply(this.editor));
+		const wetInkRenderer = this.editor.display.getWetInkRenderer();
+		wetInkRenderer.clear();
+		wetInkRenderer.pushTransform(this.transform);
+
+		const viewportVisibleRect = this.editor.viewport.visibleRect;
+		const visibleRect = viewportVisibleRect.transformedBoundingBox(this.transform.inverse());
+
+		for (const elem of this.selectedElems) {
+			elem.render(wetInkRenderer, visibleRect);
+		}
+
+		wetInkRenderer.popTransform();
 
 		this.updateUI();
 	}
@@ -394,9 +392,37 @@ export default class Selection {
 		}
 	}
 
+	// Add/remove the contents of this' seleciton from the editor.
+	// Used to prevent previewed content from looking like duplicate content
+	// while dragging.
+	private setSelectedElemsVisible(visible: boolean) {
+		// Don't hide elements if doing so will be slow.
+		if (!visible && this.selectedElems.length > maxPreviewElemCount) {
+			return;
+		}
+
+		for (const elem of this.selectedElems) {
+			const parent = this.editor.image.findParent(elem);
+
+			if (!visible) {
+				parent?.remove();
+			}
+			// If we're making things visible and the selected object wasn't previously
+			// visible,
+			else if (!parent) {
+				EditorImage.addElement(elem).apply(this.editor);
+			}
+		}
+
+		this.editor.queueRerender();
+		this.previewTransformCmds();
+	}
+
 	private targetHandle: SelectionHandle|null = null;
 	private backgroundDragging: boolean = false;
 	public onDragStart(pointer: Pointer, target: EventTarget): boolean {
+		this.setSelectedElemsVisible(false);
+
 		for (const handle of this.handles) {
 			if (handle.isTarget(target)) {
 				handle.handleDragStart(pointer);
@@ -434,6 +460,8 @@ export default class Selection {
 			this.targetHandle.handleDragEnd();
 		}
 
+		this.setSelectedElemsVisible(true);
+
 		this.backgroundDragging = false;
 		this.targetHandle = null;
 		this.updateUI();
@@ -443,10 +471,12 @@ export default class Selection {
 		this.backgroundDragging = false;
 		this.targetHandle = null;
 		this.setTransform(Mat33.identity);
+
+		this.setSelectedElemsVisible(true);
 	}
 
 	// Scroll the viewport to this. Does not zoom
-	public scrollTo() {
+	public async scrollTo() {
 		if (this.selectedElems.length === 0) {
 			return;
 		}
@@ -456,9 +486,12 @@ export default class Selection {
 			const closestPoint = screenRect.getClosestPointOnBoundaryTo(this.screenRegion.center);
 			const screenDelta = this.screenRegion.center.minus(closestPoint);
 			const delta = this.editor.viewport.screenToCanvasTransform.transformVec3(screenDelta);
-			this.editor.dispatchNoAnnounce(
+			await this.editor.dispatchNoAnnounce(
 				Viewport.transformBy(Mat33.translation(delta.times(-1))), false
 			);
+
+			this.editor.rerender(true);
+			this.previewTransformCmds();
 		}
 	}
 
