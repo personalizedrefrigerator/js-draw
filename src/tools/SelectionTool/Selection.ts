@@ -395,16 +395,21 @@ export default class Selection {
 	// Add/remove the contents of this' seleciton from the editor.
 	// Used to prevent previewed content from looking like duplicate content
 	// while dragging.
-	private setSelectedElemsVisible(visible: boolean) {
+	//
+	// Does nothing if a large number of elements are selected (and so modifying
+	// the editor image is likely to be slow.)
+	//
+	// If removed from the image, selected elements are drawn as wet ink.
+	private async addRemoveSelectionFromImage(inImage: boolean) {
 		// Don't hide elements if doing so will be slow.
-		if (!visible && this.selectedElems.length > maxPreviewElemCount) {
+		if (!inImage && this.selectedElems.length > maxPreviewElemCount) {
 			return;
 		}
 
 		for (const elem of this.selectedElems) {
 			const parent = this.editor.image.findParent(elem);
 
-			if (!visible) {
+			if (!inImage) {
 				parent?.remove();
 			}
 			// If we're making things visible and the selected object wasn't previously
@@ -414,14 +419,16 @@ export default class Selection {
 			}
 		}
 
-		this.editor.queueRerender();
-		this.previewTransformCmds();
+		await this.editor.queueRerender();
+		if (!inImage) {
+			this.previewTransformCmds();
+		}
 	}
 
 	private targetHandle: SelectionHandle|null = null;
 	private backgroundDragging: boolean = false;
 	public onDragStart(pointer: Pointer, target: EventTarget): boolean {
-		this.setSelectedElemsVisible(false);
+		void this.addRemoveSelectionFromImage(false);
 
 		for (const handle of this.handles) {
 			if (handle.isTarget(target)) {
@@ -448,8 +455,6 @@ export default class Selection {
 		if (this.targetHandle) {
 			this.targetHandle.handleDragUpdate(pointer);
 		}
-
-		this.updateUI();
 	}
 
 	public onDragEnd() {
@@ -460,7 +465,7 @@ export default class Selection {
 			this.targetHandle.handleDragEnd();
 		}
 
-		this.setSelectedElemsVisible(true);
+		this.addRemoveSelectionFromImage(true);
 
 		this.backgroundDragging = false;
 		this.targetHandle = null;
@@ -472,7 +477,7 @@ export default class Selection {
 		this.targetHandle = null;
 		this.setTransform(Mat33.identity);
 
-		this.setSelectedElemsVisible(true);
+		this.addRemoveSelectionFromImage(true);
 	}
 
 	// Scroll the viewport to this. Does not zoom
@@ -490,7 +495,9 @@ export default class Selection {
 				Viewport.transformBy(Mat33.translation(delta.times(-1))), false
 			);
 
-			this.editor.rerender(true);
+			// Re-renders clear wet ink, so we need to re-draw the preview
+			// after the full re-render.
+			await this.editor.queueRerender();
 			this.previewTransformCmds();
 		}
 	}

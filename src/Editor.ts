@@ -710,10 +710,17 @@ export class Editor {
 		this.announceForAccessibility(this.localization.redoAnnouncement(command.description(this, this.localization)));
 	};
 
+	// Listeners to be called once at the end of the next re-render.
+	private nextRerenderListeners: Array<()=> void> = [];
 	private rerenderQueued: boolean = false;
-	// Schedule a re-render for some time in the near future. Does not schedule an additional
-	// re-render if a re-render is already queued.
-	public queueRerender() {
+
+	/**
+	 * Schedule a re-render for some time in the near future. Does not schedule an additional
+	 * re-render if a re-render is already queued.
+	 *
+	 * @returns a promise that resolves when 
+	 */
+	public queueRerender(): Promise<void> {
 		if (!this.rerenderQueued) {
 			this.rerenderQueued = true;
 			requestAnimationFrame(() => {
@@ -725,6 +732,10 @@ export class Editor {
 				}
 			});
 		}
+
+		return new Promise(resolve => {
+			this.nextRerenderListeners.push(() => resolve());
+		});
 	}
 
 	public rerender(showImageBounds: boolean = true) {
@@ -751,6 +762,8 @@ export class Editor {
 		}
 
 		this.rerenderQueued = false;
+		this.nextRerenderListeners.forEach(listener => listener());
+		this.nextRerenderListeners = [];
 	}
 
 	public drawWetInk(...path: RenderablePathSpec[]) {
