@@ -278,6 +278,32 @@ export default class Rect2 {
 		);
 	}
 
+	// @returns a rectangle that contains all of the given rectangles, the bounding box
+	//     of the given rectangles.
+	public static union(...rects: Rect2[]): Rect2 {
+		if (rects.length === 0) {
+			return Rect2.empty;
+		}
+
+		const firstRect = rects[0];
+		let minX: number = firstRect.topLeft.x;
+		let minY: number = firstRect.topLeft.y;
+		let maxX: number = firstRect.bottomRight.x;
+		let maxY: number = firstRect.bottomRight.y;
+
+		for (let i = 1; i < rects.length; i++) {
+			const rect = rects[i];
+			minX = Math.min(minX, rect.topLeft.x);
+			minY = Math.min(minY, rect.topLeft.y);
+			maxX = Math.max(maxX, rect.bottomRight.x);
+			maxY = Math.max(maxY, rect.bottomRight.y);
+		}
+
+		return new Rect2(
+			minX, minY, maxX - minX, maxY - minY,
+		);
+	}
+
 	public static of(template: RectTemplate) {
 		const width = template.width ?? template.w ?? 0;
 		const height = template.height ?? template.h ?? 0;

@@ -46,6 +46,28 @@ describe('Rect2', () => {
 		expect(Rect2.empty.union(Rect2.empty)).objEq(Rect2.empty);
 	});
 
+	it('should handle empty unions', () => {
+		expect(Rect2.union()).toStrictEqual(Rect2.empty);
+	});
+
+	it('should correctly union multiple rectangles', () => {
+		expect(Rect2.union(new Rect2(0, 0, 1, 1), new Rect2(1, 1, 2, 2))).objEq(
+			new Rect2(0, 0, 3, 3)
+		);
+
+		expect(
+			Rect2.union(new Rect2(-1, 0, 1, 1), new Rect2(1, 1, 2, 2), new Rect2(1, 10, 1, 0.1))
+		).objEq(
+			new Rect2(-1, 0, 4, 10.1)
+		);
+
+		expect(
+			Rect2.union(new Rect2(-1, 0, 1, 1), new Rect2(1, -11.1, 2, 2), new Rect2(1, 10, 1, 0.1))
+		).objEq(
+			new Rect2(-1, -11.1, 4, 21.2)
+		);
+	});
+
 	it('should contain points that are within a rectangle', () => {
 		expect(new Rect2(-1, -1, 2, 2).containsPoint(Vec2.zero)).toBe(true);
 		expect(new Rect2(-1, -1, 0, 0).containsPoint(Vec2.zero)).toBe(false);

@@ -1,3 +1,9 @@
+# 0.11.3
+ * Adjust default pen sizes.
+ * Fix arrow/line icons being difficult to see with very thin stroke sizes.
+ * Potential fix for content of current text input being discarded when clicking "save".
+ * Loading images: Minor performance improvement.
+
 # 0.11.2
  * Fix eraser regression: Erasing multiple strokes, one after another, caused strokes to un-erase.
 

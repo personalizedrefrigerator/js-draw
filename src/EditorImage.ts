@@ -320,17 +320,7 @@ export class ImageNode {
 		if (this.content !== null) {
 			this.bbox = this.content.getBBox();
 		} else {
-			this.bbox = Rect2.empty;
-			let isFirst = true;
-
-			for (const child of this.children) {
-				if (isFirst) {
-					this.bbox = child.getBBox();
-					isFirst = false;
-				} else {
-					this.bbox = this.bbox.union(child.getBBox());
-				}
-			}
+			this.bbox = Rect2.union(...this.children.map(child => child.getBBox()));
 		}
 
 		if (bubbleUp && !oldBBox.eq(this.bbox)) {
