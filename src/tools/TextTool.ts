@@ -73,11 +73,19 @@ export default class TextTool extends BaseTool {
 		return style.size * 2 / 3;
 	}
 
-	private flushInput() {
+	// Take input from this' textInputElem and add it to the EditorImage.
+	// If [removeInput], the HTML input element is removed. Otherwise, its value
+	// is cleared.
+	private flushInput(removeInput: boolean = true) {
 		if (this.textInputElem && this.textTargetPosition) {
 			const content = this.textInputElem.value.trimEnd();
-			this.textInputElem.remove();
-			this.textInputElem = null;
+
+			if (removeInput) {
+				this.textInputElem.remove();
+				this.textInputElem = null;
+			} else {
+				this.textInputElem.value = '';
+			}
 
 			if (content === '') {
 				return;
@@ -166,9 +174,13 @@ export default class TextTool extends BaseTool {
 			}
 		};
 		this.textInputElem.onblur = () => {
-			// Don't remove the input within the context of a blur event handler.
-			// Doing so causes errors.
-			setTimeout(() => this.flushInput(), 0);
+			// Delay removing the input -- flushInput may be called within a blur()
+			// event handler
+			const removeInput = false;
+			this.flushInput(removeInput);
+
+			const input = this.textInputElem;
+			setTimeout(() => input?.remove(), 0);
 		};
 		this.textInputElem.onkeyup = (evt) => {
 			if (evt.key === 'Enter' && !evt.shiftKey) {
