@@ -727,11 +727,9 @@ jest-worker@^27.4.5:
     merge-stream "^2.0.0"
     supports-color "^8.0.0"
 
-js-draw@../../:
-  version "0.4.0"
-  dependencies:
-    "@melloware/coloris" "^0.16.1"
-    bezier-js "^6.1.0"
+"js-draw@link:../..":
+  version "0.0.0"
+  uid ""
 
 js-tokens@^4.0.0:
   version "4.0.0"

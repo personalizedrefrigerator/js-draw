@@ -12,7 +12,7 @@
 		"lint": "eslint ."
 	},
 	"dependencies": {
-		"js-draw": "../../"
+		"js-draw": "link:../../"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.0.3",
