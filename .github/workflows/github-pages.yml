@@ -42,6 +42,8 @@ jobs:
         run: yarn doc
       - name: Build
         run: cd docs/example && yarn install && yarn build
+      - name: Remove flies that don't need to be uploaded
+        run: cd docs/ && rm -rf example*/node_modules/
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
