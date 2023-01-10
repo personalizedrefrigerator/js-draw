@@ -143,6 +143,7 @@ declare let launchQueue: any;
 		}
 
 		const editor = createEditor(() => saveImage(editor));
+		editor.focus();
 
 		sourceText ??= textareaData;
 		if (sourceText === loadFromLastSaveText) {
