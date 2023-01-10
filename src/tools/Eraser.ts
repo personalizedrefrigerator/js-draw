@@ -25,19 +25,26 @@ export default class Eraser extends BaseTool {
 		this.editor.clearWetInk();
 	}
 
+	private getSizeOnCanvas() {
+		return this.thickness / this.editor.viewport.getScaleFactor();
+	}
+
 	private drawPreviewAt(point: Point2) {
 		this.clearPreview();
+
+		const size = this.getSizeOnCanvas();
 
 		const renderer = this.editor.display.getWetInkRenderer();
 		const rect = this.getEraserRect(point);
 		const fill: RenderingStyle = {
 			fill: Color4.gray,
 		};
-		renderer.drawRect(rect, this.thickness / 4, fill);
+		renderer.drawRect(rect, size / 4, fill);
 	}
 
 	private getEraserRect(centerPoint: Point2) {
-		const halfSize = Vec2.of(this.thickness / 2, this.thickness / 2);
+		const size = this.getSizeOnCanvas();
+		const halfSize = Vec2.of(size / 2, size / 2);
 		return Rect2.fromCorners(centerPoint.minus(halfSize), centerPoint.plus(halfSize));
 	}
 
