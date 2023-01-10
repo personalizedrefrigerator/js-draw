@@ -16,7 +16,8 @@ import SelectionToolWidget from './widgets/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget from './widgets/BaseWidget';
-import { ActionButtonWidget, InsertImageWidget } from './lib';
+import ActionButtonWidget from './widgets/ActionButtonWidget';
+import InsertImageWidget from './widgets/InsertImageWidget';
 
 export const toolbarCSSPrefix = 'toolbar-';
 

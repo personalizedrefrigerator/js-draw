@@ -6,7 +6,8 @@ import LineSegment2 from '../math/LineSegment2';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import { PointerDevice } from '../Pointer';
-import { Color4, Rect2 } from '../lib';
+import Color4 from '../Color4';
+import Rect2 from '../math/Rect2';
 import RenderingStyle from '../rendering/RenderingStyle';
 
 export default class Eraser extends BaseTool {
