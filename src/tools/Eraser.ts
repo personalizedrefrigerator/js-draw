@@ -11,7 +11,8 @@ import Rect2 from '../math/Rect2';
 import RenderingStyle from '../rendering/RenderingStyle';
 
 export default class Eraser extends BaseTool {
-	private lastPoint: Point2;
+	private lastPoint: Point2|null = null;
+	private isFirstEraseEvt: boolean = true;
 	private toRemove: AbstractComponent[];
 	private thickness: number = 10;
 
@@ -49,29 +50,17 @@ export default class Eraser extends BaseTool {
 		return Rect2.fromCorners(centerPoint.minus(halfSize), centerPoint.plus(halfSize));
 	}
 
-	public onPointerDown(event: PointerEvt): boolean {
-		if (event.allPointers.length === 1 || event.current.device === PointerDevice.Eraser) {
-			this.lastPoint = event.current.canvasPos;
-			this.toRemove = [];
-
-			this.drawPreviewAt(event.current.canvasPos);
-			return true;
-		}
-
-		return false;
-	}
-
-	public onPointerMove(event: PointerEvt): void {
-		const currentPoint = event.current.canvasPos;
-		if (currentPoint.minus(this.lastPoint).magnitude() === 0) {
+	private eraseTo(currentPoint: Point2) {
+		if (!this.isFirstEraseEvt && currentPoint.minus(this.lastPoint!).magnitude() === 0) {
 			return;
 		}
+		this.isFirstEraseEvt = false;
 
 		// Currently only objects within eraserRect or that intersect a straight line
 		// from the center of the current rect to the previous are erased. TODO: Erase
 		// all objects as if there were pointerMove events between the two points.
 		const eraserRect = this.getEraserRect(currentPoint);
-		const line = new LineSegment2(this.lastPoint, currentPoint);
+		const line = new LineSegment2(this.lastPoint!, currentPoint);
 		const region = Rect2.union(line.bbox, eraserRect);
 
 		const intersectingElems = this.editor.image.getElementsIntersectingRegion(region).filter(component => {
@@ -91,7 +80,28 @@ export default class Eraser extends BaseTool {
 		this.lastPoint = currentPoint;
 	}
 
-	public onPointerUp(_event: PointerEvt): void {
+	public onPointerDown(event: PointerEvt): boolean {
+		if (event.allPointers.length === 1 || event.current.device === PointerDevice.Eraser) {
+			this.lastPoint = event.current.canvasPos;
+			this.toRemove = [];
+			this.isFirstEraseEvt = true;
+
+			this.drawPreviewAt(event.current.canvasPos);
+			return true;
+		}
+
+		return false;
+	}
+
+	public onPointerMove(event: PointerEvt): void {
+		const currentPoint = event.current.canvasPos;
+
+		this.eraseTo(currentPoint);
+	}
+
+	public onPointerUp(event: PointerEvt): void {
+		this.eraseTo(event.current.canvasPos);
+
 		if (this.toRemove.length > 0) {
 			// Undo commands for each individual component and unite into a single command.
 			this.partialCommands.forEach(cmd => cmd.unapply(this.editor));

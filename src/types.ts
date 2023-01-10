@@ -198,9 +198,9 @@ export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
 // Returns null to continue loading without pause.
 // [totalToProcess] can be an estimate and may change if a better estimate becomes available.
 export type OnProgressListener =
-	(amountProcessed: number, totalToProcess: number)=> Promise<void>|null;
+	(amountProcessed: number, totalToProcess: number)=> Promise<void>|null|void;
 
-export type ComponentAddedListener = (component: AbstractComponent)=> void;
+export type ComponentAddedListener = (component: AbstractComponent)=> Promise<void>|void;
 
 // Called when a new estimate for the import/export rect has been generated. This can be called multiple times.
 // Only the last call to this listener must be accurate.

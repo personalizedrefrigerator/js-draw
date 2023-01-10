@@ -156,7 +156,7 @@ export default class SVGLoader implements ImageLoader {
 	}
 
 	// Adds a stroke with a single path
-	private addPath(node: SVGPathElement) {
+	private async addPath(node: SVGPathElement) {
 		let elem: AbstractComponent;
 		try {
 			const strokeData = this.strokeDataFromElem(node);
@@ -181,7 +181,7 @@ export default class SVGLoader implements ImageLoader {
 				return;
 			}
 		}
-		this.onAddComponent?.(elem);
+		await this.onAddComponent?.(elem);
 	}
 
 	// If given, 'supportedAttrs' will have x, y, etc. attributes that were used in computing the transform added to it,
@@ -274,10 +274,10 @@ export default class SVGLoader implements ImageLoader {
 		return result;
 	}
 
-	private addText(elem: SVGTextElement|SVGTSpanElement) {
+	private async addText(elem: SVGTextElement|SVGTSpanElement) {
 		try {
 			const textElem = this.makeText(elem);
-			this.onAddComponent?.(textElem);
+			await this.onAddComponent?.(textElem);
 		} catch (e) {
 			console.error('Invalid text object in node', elem, '. Continuing.... Error:', e);
 			this.addUnknownNode(elem);
@@ -300,17 +300,17 @@ export default class SVGLoader implements ImageLoader {
 				new Set([ 'transform' ])
 			);
 
-			this.onAddComponent?.(imageElem);
+			await this.onAddComponent?.(imageElem);
 		} catch (e) {
 			console.error('Error loading image:', e, '. Element: ', elem, '. Continuing...');
-			this.addUnknownNode(elem);
+			await this.addUnknownNode(elem);
 		}
 	}
 
-	private addUnknownNode(node: SVGElement) {
+	private async addUnknownNode(node: SVGElement) {
 		if (this.storeUnknown) {
 			const component = new UnknownSVGObject(node);
-			this.onAddComponent?.(component);
+			await this.onAddComponent?.(component);
 		}
 	}
 
@@ -335,9 +335,9 @@ export default class SVGLoader implements ImageLoader {
 		this.onDetermineExportRect?.(this.rootViewBox);
 	}
 
-	private updateSVGAttrs(node: SVGSVGElement) {
+	private async updateSVGAttrs(node: SVGSVGElement) {
 		if (this.storeUnknown) {
-			this.onAddComponent?.(new SVGGlobalAttributesObject(this.getSourceAttrs(node)));
+			await this.onAddComponent?.(new SVGGlobalAttributesObject(this.getSourceAttrs(node)));
 		}
 	}
 
@@ -350,10 +350,10 @@ export default class SVGLoader implements ImageLoader {
 			// Continue -- visit the node's children.
 			break;
 		case 'path':
-			this.addPath(node as SVGPathElement);
+			await this.addPath(node as SVGPathElement);
 			break;
 		case 'text':
-			this.addText(node as SVGTextElement);
+			await this.addText(node as SVGTextElement);
 			visitChildren = false;
 			break;
 		case 'image':
@@ -367,7 +367,7 @@ export default class SVGLoader implements ImageLoader {
 			this.updateSVGAttrs(node as SVGSVGElement);
 			break;
 		case 'style':
-			this.addUnknownNode(node as SVGStyleElement);
+			await this.addUnknownNode(node as SVGStyleElement);
 			break;
 		default:
 			console.warn('Unknown SVG element,', node);
@@ -377,7 +377,7 @@ export default class SVGLoader implements ImageLoader {
 				);
 			}
 
-			this.addUnknownNode(node as SVGElement);
+			await this.addUnknownNode(node as SVGElement);
 			return;
 		}
 
