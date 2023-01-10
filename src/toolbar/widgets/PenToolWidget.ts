@@ -145,8 +145,8 @@ export default class PenToolWidget extends BaseToolWidget {
 		const objectTypeSelect = document.createElement('select');
 
 		// Give inputs IDs so we can label them with a <label for=...>Label text</label>
-		thicknessInput.id = `${toolbarCSSPrefix}thicknessInput${PenToolWidget.idCounter++}`;
-		objectTypeSelect.id = `${toolbarCSSPrefix}builderSelect${PenToolWidget.idCounter++}`;
+		thicknessInput.id = `${toolbarCSSPrefix}penThicknessInput${PenToolWidget.idCounter++}`;
+		objectTypeSelect.id = `${toolbarCSSPrefix}penBuilderSelect${PenToolWidget.idCounter++}`;
 
 		thicknessLabel.innerText = this.localizationTable.thicknessLabel;
 		thicknessLabel.setAttribute('for', thicknessInput.id);

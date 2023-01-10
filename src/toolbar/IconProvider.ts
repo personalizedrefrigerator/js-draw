@@ -84,18 +84,31 @@ export default class IconProvider {
 	
 	public makeEraserIcon(): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
+
+		const eraserColor = '#ff70af';
 	
-		// Draw an eraser-like shape
+		// Draw an eraser-like shape. Created with Inkscape
 		icon.innerHTML = `
 		<g>
-			<rect x=10 y=50 width=80 height=30 rx=10 fill='pink' />
+			<path
+				style="fill:${eraserColor}"
+				stroke="black"
+				transform="rotate(41.35)"
+				d="M 52.5 27 C 50 28.9 48.9 31.7 48.9 34.8 L 48.9 39.8 C 48.9 45.3 53.4 49.8 58.9 49.8 L 103.9 49.8 C 105.8 49.8 107.6 49.2 109.1 48.3 L 110.2 49.5 L 159.7 7.3 L 157.7 5.2 L 112.4 45 C 113.4 43.5 113.9 41.7 113.9 39.8 L 113.9 34.8 C 113.9 29.3 109.4 24.8 103.9 24.8 L 58.9 24.8 C 56.5 24.8 54.3 25.7 52.5 27 z "
+				id="path438" />
+
 			<rect
-				x=10 y=10 width=80 height=50
+				stroke="#cc8077"
 				${iconColorFill}
-			/>
+				id="rect218"
+				width="65"
+				height="75"
+				x="48.9"
+				y="-38.7"
+				transform="rotate(41.35)" />
 		</g>
 		`;
-		icon.setAttribute('viewBox', '0 0 100 100');
+		icon.setAttribute('viewBox', '0 0 120 120');
 		return icon;
 	}
 	

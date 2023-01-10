@@ -78,6 +78,25 @@ export default abstract class AbstractComponent {
 	public abstract render(canvas: AbstractRenderer, visibleRect?: Rect2): void;
 	public abstract intersects(lineSegment: LineSegment2): boolean;
 
+	public intersectsRect(rect: Rect2): boolean {
+		// If this component intersects rect,
+		// it is either contained entirely within rect or intersects one of rect's edges.
+
+		// If contained within,
+		if (rect.containsRect(this.getBBox())) {
+			return true;
+		}
+
+		// Calculated bounding boxes can be slightly larger than their actual contents' bounding box.
+		// As such, test with more lines than just the rect's edges.
+		const testLines = [];
+		for (const subregion of rect.divideIntoGrid(2, 2)) {
+			testLines.push(...subregion.getEdges());
+		}
+
+		return testLines.some(edge => this.intersects(edge));
+	}
+
 	// Return null iff this object cannot be safely serialized/deserialized.
 	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
 

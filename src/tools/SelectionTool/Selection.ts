@@ -304,18 +304,7 @@ export default class Selection {
 		}
 
 		this.selectedElems = this.editor.image.getElementsIntersectingRegion(this.region).filter(elem => {
-			if (this.region.containsRect(elem.getBBox())) {
-				return true;
-			}
-
-			// Calculated bounding boxes can be slightly larger than their actual contents' bounding box.
-			// As such, test with more lines than just this' edges.
-			const testLines = [];
-			for (const subregion of this.region.divideIntoGrid(2, 2)) {
-				testLines.push(...subregion.getEdges());
-			}
-
-			return testLines.some(edge => elem.intersects(edge));
+			return elem.intersectsRect(this.region);
 		});
 
 		if (singleItemSelectionMode && this.selectedElems.length > 0) {
