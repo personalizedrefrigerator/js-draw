@@ -522,6 +522,7 @@ export default class Selection {
 	}
 
 	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
+		this.addRemoveSelectionFromImage(true);
 		this.originalRegion = bbox;
 		this.selectedElems = objects.filter(object => object.isSelectable());
 		this.updateUI();

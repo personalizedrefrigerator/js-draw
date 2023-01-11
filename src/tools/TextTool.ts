@@ -80,11 +80,14 @@ export default class TextTool extends BaseTool {
 		if (this.textInputElem && this.textTargetPosition) {
 			const content = this.textInputElem.value.trimEnd();
 
+			this.textInputElem.value = '';
+
 			if (removeInput) {
-				this.textInputElem.remove();
+				// In some browsers, .remove() triggers a .blur event (synchronously).
+				// Clear this.textInputElem before removal
+				const input = this.textInputElem;
 				this.textInputElem = null;
-			} else {
-				this.textInputElem.value = '';
+				input.remove();
 			}
 
 			if (content === '') {
@@ -100,14 +103,14 @@ export default class TextTool extends BaseTool {
 			).rightMul(
 				Mat33.zRotation(this.textRotation)
 			);
-			
+
 			const textComponent = TextComponent.fromLines(content.split('\n'), textTransform, this.textStyle);
 
 			const action = EditorImage.addElement(textComponent);
 			if (this.removeExistingCommand) {
 				// Unapply so that `removeExistingCommand` can be added to the undo stack.
 				this.removeExistingCommand.unapply(this.editor);
-	
+
 				this.editor.dispatch(uniteCommands([ this.removeExistingCommand, action ]));
 				this.removeExistingCommand = null;
 			} else {
@@ -177,10 +180,13 @@ export default class TextTool extends BaseTool {
 			// Delay removing the input -- flushInput may be called within a blur()
 			// event handler
 			const removeInput = false;
-			this.flushInput(removeInput);
-
 			const input = this.textInputElem;
-			setTimeout(() => input?.remove(), 0);
+
+			this.flushInput(removeInput);
+			this.textInputElem = null;
+			setTimeout(() => {
+				input?.remove();
+			}, 0);
 		};
 		this.textInputElem.onkeyup = (evt) => {
 			if (evt.key === 'Enter' && !evt.shiftKey) {
