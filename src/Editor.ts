@@ -292,8 +292,7 @@ export class Editor {
 		const toolbar = new HTMLToolbar(this, this.container, this.localization);
 
 		if (defaultLayout) {
-			toolbar.addDefaultToolWidgets();
-			toolbar.addDefaultActionButtons();
+			toolbar.addDefaults();
 		}
 
 		return toolbar;

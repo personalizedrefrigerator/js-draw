@@ -23,6 +23,18 @@ export const toolbarCSSPrefix = 'toolbar-';
 
 type UpdateColorisCallback = ()=>void;
 
+interface SpacerOptions {
+	// Defaults to 0. If a non-zero number, determines the rate at which the
+	// spacer should grow (like flexGrow).
+	grow: number;
+
+	// Minimum size (e.g. "23px")
+	minSize: string;
+
+	// Maximum size (e.g. "50px")
+	maxSize: string;
+}
+
 export default class HTMLToolbar {
 	private container: HTMLElement;
 
@@ -122,8 +134,17 @@ export default class HTMLToolbar {
 		});
 	}
 
-	// Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
-	// (i.e. its `addTo` method should not have been called).
+	/**
+	 * Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
+	 * (i.e. its `addTo` method should not have been called).
+	 * 
+	 * @example
+	 * ```ts
+	 * const toolbar = editor.addToolbar();
+	 * const insertImageWidget = new InsertImageWidget(editor);
+	 * toolbar.addWidget(insertImageWidget);
+	 * ```
+	 */
 	public addWidget(widget: BaseWidget) {
 		// Prevent name collisions
 		const id = widget.getUniqueIdIn(this.widgets);
@@ -136,6 +157,46 @@ export default class HTMLToolbar {
 		this.setupColorPickers();
 	}
 
+	/**
+	 * Adds a spacer.
+	 * 
+	 * @example
+	 * Adding a save button that moves to the very right edge of the toolbar
+	 * while keeping the other buttons centered:
+	 * ```ts
+	 * const toolbar = editor.addToolbar(false);
+	 *
+	 * toolbar.addSpacer({ grow: 1 });
+	 * toolbar.addDefaults();
+	 * toolbar.addSpacer({ grow: 1 });
+ 	 * 
+	 * toolbar.addActionButton({
+	 * 	label: 'Save',
+	 * 	icon: editor.icons.makeSaveIcon(),
+	 * }, () => {
+	 * 	  saveCallback();
+	 * });
+	 * ```
+	 */
+	public addSpacer(options: Partial<SpacerOptions> = {}) {
+		const spacer = document.createElement('div');
+		spacer.classList.add(`${toolbarCSSPrefix}spacer`);
+
+		if (options.grow) {
+			spacer.style.flexGrow = `${options.grow}`;
+		}
+
+		if (options.minSize) {
+			spacer.style.minWidth = options.minSize;
+		}
+
+		if (options.maxSize) {
+			spacer.style.maxWidth = options.maxSize;
+		}
+
+		this.container.appendChild(spacer);
+	}
+
 	public serializeState(): string {
 		const result: Record<string, any> = {};
 
@@ -146,8 +207,10 @@ export default class HTMLToolbar {
 		return JSON.stringify(result);
 	}
 
-	// Deserialize toolbar widgets from the given state.
-	// Assumes that toolbar widgets are in the same order as when state was serialized.
+	/**
+	 * Deserialize toolbar widgets from the given state.
+	 * Assumes that toolbar widgets are in the same order as when state was serialized.
+	 */
 	public deserializeState(state: string) {
 		const data = JSON.parse(state);
 
@@ -247,5 +310,17 @@ export default class HTMLToolbar {
 
 	public addDefaultActionButtons() {
 		this.addUndoRedoButtons();
+	}
+
+	/**
+	 * Adds both the default tool widgets and action buttons. Equivalent to
+	 * ```ts
+	 * toolbar.addDefaultToolWidgets();
+	 * toolbar.addDefaultActionButtons();
+	 * ```
+	 */
+	public addDefaults() {
+		this.addDefaultToolWidgets();
+		this.addDefaultActionButtons();
 	}
 }
