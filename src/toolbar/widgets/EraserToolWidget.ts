@@ -18,6 +18,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
 			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === this.tool) {
 				this.updateInputs();
+				this.updateIcon();
 			}
 		});
 	}
@@ -27,7 +28,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 	}
 
 	protected createIcon(): Element {
-		return this.editor.icons.makeEraserIcon();
+		return this.editor.icons.makeEraserIcon(this.tool.getThickness());
 	}
 
 	private updateInputs() {
