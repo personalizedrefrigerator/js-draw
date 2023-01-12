@@ -75,6 +75,11 @@ export default class EditorImage {
 		delete this.componentsById[elem.getId()];
 	}
 
+	/**
+	 * @returns the AbstractComponent with `id`, if it exists.
+	 * 
+	 * @see {@link AbstractComponent.getId}
+	 */
 	public lookupElement(id: string): AbstractComponent|null {
 		return this.componentsById[id] ?? null;
 	}
@@ -84,6 +89,13 @@ export default class EditorImage {
 		return this.root.addLeaf(elem);
 	}
 
+	/**
+	 * Returns a command that adds the given element to the `EditorImage`.
+	 * If `applyByFlattening` is true, the content of the wet ink renderer is
+	 * rendered onto the main rendering canvas instead of doing a full re-render.
+	 * 
+	 * @see {@link Display.flatten}
+	 */
 	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {
 		return new EditorImage.AddElementCommand(elem, applyByFlattening);
 	}

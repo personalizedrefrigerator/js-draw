@@ -13,9 +13,20 @@ export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
 export type DeserializeCallback = (data: string)=>AbstractComponent;
 type ComponentId = string;
 
+/**
+ * A base class for everything that can be added to an {@link EditorImage}.
+ */
 export default abstract class AbstractComponent {
+	// The timestamp (milliseconds) at which the component was
+	// last changed (i.e. created/translated).
+	// @deprecated
 	protected lastChangedTime: number;
+
+	// The bounding box of this component.
+	// {@link getBBox}, by default, returns `contentBBox`.
+	// This must be set by components.
 	protected abstract contentBBox: Rect2;
+
 	private zIndex: number;
 	private id: string;
 
@@ -55,14 +66,22 @@ export default abstract class AbstractComponent {
 		this.deserializationCallbacks[componentKind] = deserialize ?? null;
 	}
 
-	// Get and manage data attached by a loader.
+	// Stores data attached by a loader.
 	private loadSaveData: LoadSaveDataTable = {};
+
+	/**
+	 * Attach data that can be used while exporting the component (e.g. to SVG).
+	 * 
+	 * This is intended for use by a {@link ImageLoader}.
+	 */
 	public attachLoadSaveData(key: string, data: LoadSaveData) {
 		if (!this.loadSaveData[key]) {
 			this.loadSaveData[key] = [];
 		}
 		this.loadSaveData[key].push(data);
 	}
+
+	/** See {@link attachLoadSaveData} */
 	public getLoadSaveData(): LoadSaveDataTable {
 		return this.loadSaveData;
 	}
@@ -71,13 +90,20 @@ export default abstract class AbstractComponent {
 		return this.zIndex;
 	}
 
+	/** @returns the bounding box of  */
 	public getBBox(): Rect2 {
 		return this.contentBBox;
 	}
 
 	public abstract render(canvas: AbstractRenderer, visibleRect?: Rect2): void;
+
+	/** @return true if `lineSegment` intersects this component. */
 	public abstract intersects(lineSegment: LineSegment2): boolean;
 
+	/**
+	 * @returns true if this component intersects `rect` -- it is entirely contained
+	 *  within the rectangle or one of the rectangle's edges intersects this component.
+	 */
 	public intersectsRect(rect: Rect2): boolean {
 		// If this component intersects rect,
 		// it is either contained entirely within rect or intersects one of rect's edges.
@@ -200,6 +226,7 @@ export default abstract class AbstractComponent {
 			}
 
 			this.component.applyTransformation(newTransfm);
+			this.component.lastChangedTime = (new Date()).getTime();
 
 			// Add the element back to the document.
 			if (hadParent) {
@@ -250,6 +277,10 @@ export default abstract class AbstractComponent {
 		}
 	};
 
+	/**
+	 * @return a description that could be read by a screen reader
+	 *     (e.g. when adding/erasing the component)
+	 */
 	public abstract description(localizationTable: ImageComponentLocalization): string;
 
 	// Component-specific implementation of {@link clone}.

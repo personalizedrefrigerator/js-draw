@@ -43,7 +43,7 @@ export default class IconProvider {
 		return this.makeRedoIcon(true);
 	}
 
-	// @param mirror - reflect across the x-axis @internal
+	// @param mirror - reflect across the x-axis. This parameter is internal.
 	// @returns a redo icon.
 	public makeRedoIcon(mirror: boolean = false): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');

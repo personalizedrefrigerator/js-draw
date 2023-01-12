@@ -1,5 +1,3 @@
-// Renderer that outputs nothing. Useful for automated tests.
-
 import { TextStyle } from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
 import Rect2 from '../../math/Rect2';
@@ -9,6 +7,7 @@ import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
 import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
 
+// Renderer that outputs almost nothing. Useful for automated tests.
 export default class DummyRenderer extends AbstractRenderer {
 	// Variables that track the state of what's been rendered
 	public clearedCount: number = 0;
@@ -28,7 +27,7 @@ export default class DummyRenderer extends AbstractRenderer {
 
 	public displaySize(): Vec2 {
 		// Do we have a stored viewport size?
-		const viewportSize = this.getViewport().getResolution();
+		const viewportSize = this.getViewport().getScreenRectSize();
 
 		// Don't use a 0x0 viewport — DummyRenderer is often used
 		// for tests that run without a display, so pretend we have a

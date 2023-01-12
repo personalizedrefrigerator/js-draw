@@ -3,7 +3,7 @@ import { EditorLocalization } from '../localization';
 import Command from './Command';
 import SerializableCommand from './SerializableCommand';
 
-// Returns a command taht does the opposite of the given command --- `result.apply()` calls
+// Returns a command that does the opposite of the given command --- `result.apply()` calls
 // `command.unapply()` and `result.unapply()` calls `command.apply()`.
 const invertCommand = <T extends Command> (command: T): T extends SerializableCommand ? SerializableCommand : Command => {
 	if (command instanceof SerializableCommand) {

@@ -1,18 +1,3 @@
-/**
- * Handles `HTMLCanvasElement`s (or other drawing surfaces if being used) used to display the editor's contents.
- *
- * @example
- * ```
- * const editor = new Editor(document.body);
- * const w = editor.display.width;
- * const h = editor.display.height;
- * const center = Vec2.of(w / 2, h / 2);
- * const colorAtCenter = editor.display.getColorAt(center);
- * ```
- * 
- * @packageDocumentation
- */
-
 import AbstractRenderer from './renderers/AbstractRenderer';
 import CanvasRenderer from './renderers/CanvasRenderer';
 import { Editor } from '../Editor';
@@ -29,6 +14,18 @@ export enum RenderingMode {
 	// SVGRenderer is not supported by the main display
 }
 
+/**
+ * Handles `HTMLCanvasElement`s (or other drawing surfaces if being used) used to display the editor's contents.
+ *
+ * @example
+ * ```
+ * const editor = new Editor(document.body);
+ * const w = editor.display.width;
+ * const h = editor.display.height;
+ * const center = Vec2.of(w / 2, h / 2);
+ * const colorAtCenter = editor.display.getColorAt(center);
+ * ```
+ */
 export default class Display {
 	private dryInkRenderer: AbstractRenderer;
 	private wetInkRenderer: AbstractRenderer;

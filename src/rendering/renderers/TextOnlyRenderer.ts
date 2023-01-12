@@ -9,7 +9,6 @@ import RenderingStyle from '../RenderingStyle';
 import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
 
 // Outputs a description of what was rendered.
-
 export default class TextOnlyRenderer extends AbstractRenderer {
 	private descriptionBuilder: string[] = [];
 	private pathCount: number = 0;

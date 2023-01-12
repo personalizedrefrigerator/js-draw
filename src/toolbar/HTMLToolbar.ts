@@ -169,7 +169,7 @@ export default class HTMLToolbar {
 	 * toolbar.addSpacer({ grow: 1 });
 	 * toolbar.addDefaults();
 	 * toolbar.addSpacer({ grow: 1 });
- 	 * 
+	 *
 	 * toolbar.addActionButton({
 	 * 	label: 'Save',
 	 * 	icon: editor.icons.makeSaveIcon(),

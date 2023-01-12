@@ -92,26 +92,30 @@ export class Viewport {
 		this.screenRect = this.screenRect.resizedTo(screenSize);
 	}
 
-	// Get the screen's visible region transformed into canvas space.
+	/** Get the screen's visible region transformed into canvas space. */
 	public get visibleRect(): Rect2 {
 		return this.screenRect.transformedBoundingBox(this.inverseTransform);
 	}
 
-	// the given point, but in canvas coordinates
+	/** @returns the given point, but in canvas coordinates */
 	public screenToCanvas(screenPoint: Point2): Point2 {
 		return this.inverseTransform.transformVec2(screenPoint);
 	}
 
+	/** @returns the given point transformed into screen coordinates. */
 	public canvasToScreen(canvasPoint: Point2): Point2 {
 		return this.transform.transformVec2(canvasPoint);
 	}
 
+	/** @returns a command that transforms the canvas by `transform`. */
 	public static transformBy(transform: Mat33): ViewportTransform {
 		return new Viewport.ViewportTransform(transform);
 	}
 
-	// Updates the transformation directly. Using `transformBy` is preferred.
-	// [newTransform] should map from canvas coordinates to screen coordinates.
+	/**
+	 * Updates the transformation directly. Using `transformBy` is preferred.
+	 * @param newTransform - should map from canvas coordinates to screen coordinates.
+	 */
 	public resetTransform(newTransform: Mat33 = Mat33.identity) {
 		const oldTransform = this.transform;
 		this.transform = newTransform;
@@ -131,29 +135,39 @@ export class Viewport {
 		return this.transform;
 	}
 
-	public getResolution(): Vec2 {
+	/** @returns the size of the visible region in pixels. */
+	public getScreenRectSize(): Vec2 {
 		return this.screenRect.size;
 	}
 
-	// Returns the amount a vector on the canvas is scaled to become a vector on the screen.
+	/** Alias for `getScreenRectSize`. @deprecated */
+	public getResolution() {
+		return this.getScreenRectSize();
+	}
+
+	/** @returns the amount a vector on the canvas is scaled to become a vector on the screen. */
 	public getScaleFactor(): number {
 		// Use transformVec3 to avoid translating the vector
 		return this.transform.transformVec3(Vec3.unitX).magnitude();
 	}
 
-	// Returns the size of one screen pixel in canvas units.
+	/** Returns the size of one screen pixel in canvas units. */
 	public getSizeOfPixelOnCanvas(): number {
 		return 1/this.getScaleFactor();
 	}
 
-	// Returns the angle of the canvas in radians.
-	// This is the angle by which the canvas is rotated relative to the screen.
+	/**
+	 * @returns the angle of the canvas in radians.
+	 * This is the angle by which the canvas is rotated relative to the screen.
+	 */
 	public getRotationAngle(): number {
 		return this.transform.transformVec3(Vec3.unitX).angle();
 	}
 
-	// Rounds the given `point` to a multiple of 10 such that it is within `tolerance` of
-	// its original location. This is useful for preparing data for base-10 conversion.
+	/**
+	 * Rounds the given `point` to a multiple of 10 such that it is within `tolerance` of
+	 * its original location. This is useful for preparing data for base-10 conversion.
+	 */
 	public static roundPoint<T extends Point2|number>(
 		point: T, tolerance: number,
 	): PointDataType<T>;

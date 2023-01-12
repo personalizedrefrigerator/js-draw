@@ -31,6 +31,7 @@ export type SVGLoaderUnknownStyleAttribute = { key: string, value: string, prior
 
 const supportedStrokeFillStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
 
+// Handles loading images from SVG.
 export default class SVGLoader implements ImageLoader {
 	private onAddComponent: ComponentAddedListener|null = null;
 	private onProgress: OnProgressListener|null = null;
@@ -422,7 +423,11 @@ export default class SVGLoader implements ImageLoader {
 		this.onFinish?.();
 	}
 
-	// @param sanitize - if `true`, don't store unknown attributes.
+	/**
+	 * @see {@link Editor.loadFrom}
+	 * @param text - Textual representation of the SVG (e.g. `<svg viewbox='...'>...</svg>`).
+	 * @param sanitize - if `true`, don't store unknown attributes.
+	 */
 	public static fromString(text: string, sanitize: boolean = false): SVGLoader {
 		const sandbox = document.createElement('iframe');
 		sandbox.src = 'about:blank';

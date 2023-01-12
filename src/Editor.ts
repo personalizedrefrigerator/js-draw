@@ -71,6 +71,7 @@ export class Editor {
 	private container: HTMLElement;
 	private renderingRegion: HTMLElement;
 
+	/** Manages drawing surfaces/{@link lib!AbstractRenderer}s. */
 	public display: Display;
 
 	/**
@@ -111,11 +112,17 @@ export class Editor {
 	/** Viewport for the exported/imported image. */
 	private importExportViewport: Viewport;
 
+	/**
+	 * Allows transforming the view and querying information about
+	 * what is currently visible.
+	 */
+	public readonly viewport: Viewport;
+
 	/** @internal */
 	public readonly localization: EditorLocalization;
 
+	/** {@link lib!EditorSettings.iconProvider} */
 	public readonly icons: IconProvider;
-	public readonly viewport: Viewport;
 
 	/**
 	 * Controls the list of tools. See
@@ -766,12 +773,18 @@ export class Editor {
 		this.nextRerenderListeners = [];
 	}
 
+	/**
+	 * @see {@link Display.getWetInkRenderer} {@link Display.flatten}
+	 */
 	public drawWetInk(...path: RenderablePathSpec[]) {
 		for (const part of path) {
 			this.display.getWetInkRenderer().drawPath(part);
 		}
 	}
 
+	/**
+	 * @see {@link Display.getWetInkRenderer}
+	 */
 	public clearWetInk() {
 		this.display.getWetInkRenderer().clear();
 	}
@@ -896,7 +909,7 @@ export class Editor {
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png'): string {
 		const canvas = document.createElement('canvas');
 
-		const resolution = this.importExportViewport.getResolution();
+		const resolution = this.importExportViewport.getScreenRectSize();
 
 		canvas.width = resolution.x;
 		canvas.height = resolution.y;
