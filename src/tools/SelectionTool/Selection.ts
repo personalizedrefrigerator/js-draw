@@ -100,6 +100,11 @@ export default class Selection {
 		}
 	}
 
+	// @internal Intended for unit tests
+	public getBackgroundElem(): HTMLElement {
+		return this.backgroundElem;
+	}
+
 	public getTransform(): Mat33 {
 		return this.transform;
 	}
@@ -381,6 +386,9 @@ export default class Selection {
 		}
 	}
 
+	// Maps IDs to whether we removed the component from the image
+	private removedFromImage: Record<string, boolean> = {};
+
 	// Add/remove the contents of this' seleciton from the editor.
 	// Used to prevent previewed content from looking like duplicate content
 	// while dragging.
@@ -389,7 +397,7 @@ export default class Selection {
 	// the editor image is likely to be slow.)
 	//
 	// If removed from the image, selected elements are drawn as wet ink.
-	private async addRemoveSelectionFromImage(inImage: boolean) {
+	private addRemoveSelectionFromImage(inImage: boolean) {
 		// Don't hide elements if doing so will be slow.
 		if (!inImage && this.selectedElems.length > maxPreviewElemCount) {
 			return;
@@ -398,26 +406,46 @@ export default class Selection {
 		for (const elem of this.selectedElems) {
 			const parent = this.editor.image.findParent(elem);
 
-			if (!inImage) {
-				parent?.remove();
+			if (!inImage && parent) {
+				this.removedFromImage[elem.getId()] = true;
+				parent.remove();
 			}
 			// If we're making things visible and the selected object wasn't previously
 			// visible,
-			else if (!parent) {
+			else if (!parent && this.removedFromImage[elem.getId()]) {
 				EditorImage.addElement(elem).apply(this.editor);
+
+				this.removedFromImage[elem.getId()] = false;
+				delete this.removedFromImage[elem.getId()];
 			}
 		}
 
-		await this.editor.queueRerender();
-		if (!inImage) {
-			this.previewTransformCmds();
-		}
+		// Don't await queueRerender. If we're running in a test, the re-render might never
+		// happen.
+		this.editor.queueRerender().then(() => {
+			if (!inImage) {
+				this.previewTransformCmds();
+			}
+		});
+	}
+
+	private removeDeletedElemsFromSelection() {
+		// Remove any deleted elements from the selection.
+		this.selectedElems = this.selectedElems.filter(elem => {
+			const hasParent = !!this.editor.image.findParent(elem);
+
+			// If we removed the element and haven't added it back yet, don't remove it
+			// from the selection.
+			const weRemoved = this.removedFromImage[elem.getId()];
+			return hasParent || weRemoved;
+		});
 	}
 
 	private targetHandle: SelectionHandle|null = null;
 	private backgroundDragging: boolean = false;
 	public onDragStart(pointer: Pointer, target: EventTarget): boolean {
-		void this.addRemoveSelectionFromImage(false);
+		this.removeDeletedElemsFromSelection();
+		this.addRemoveSelectionFromImage(false);
 
 		for (const handle of this.handles) {
 			if (handle.isTarget(target)) {
@@ -492,11 +520,43 @@ export default class Selection {
 	}
 
 	public deleteSelectedObjects(): Command {
+		if (this.backgroundDragging || this.targetHandle) {
+			this.onDragEnd();
+		}
+
 		return new Erase(this.selectedElems);
 	}
 
-	public duplicateSelectedObjects(): Command {
-		return new Duplicate(this.selectedElems);
+	public async duplicateSelectedObjects(): Promise<Command> {
+		const wasTransforming = this.backgroundDragging || this.targetHandle;
+		let tmpApplyCommand: Command|null = null;
+
+		if (wasTransforming) {
+			// Don't update the selection's focus when redoing/undoing
+			const selectionToUpdate: Selection|null = null;
+			tmpApplyCommand = new Selection.ApplyTransformationCommand(
+				selectionToUpdate, this.selectedElems, this.transform
+			);
+
+			// Transform to ensure that the duplicates are in the correct location
+			await tmpApplyCommand.apply(this.editor);
+
+			// Show items again
+			this.addRemoveSelectionFromImage(true);
+		}
+
+		const duplicateCommand = new Duplicate(this.selectedElems);
+
+		if (wasTransforming) {
+			// Move the selected objects back to the correct location.
+			await tmpApplyCommand?.unapply(this.editor);
+			this.addRemoveSelectionFromImage(false);
+
+			this.previewTransformCmds();
+			this.updateUI();
+		}
+
+		return duplicateCommand;
 	}
 
 	public addTo(elem: HTMLElement) {

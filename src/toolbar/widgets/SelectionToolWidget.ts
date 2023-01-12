@@ -35,9 +35,9 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			editor, 'duplicate-btn',
 			() => editor.icons.makeDuplicateSelectionIcon(),
 			this.localizationTable.duplicateSelection,
-			() => {
+			async () => {
 				const selection = this.tool.getSelection();
-				this.editor.dispatch(selection!.duplicateSelectedObjects());
+				this.editor.dispatch(await selection!.duplicateSelectedObjects());
 			},
 			localization,
 		);

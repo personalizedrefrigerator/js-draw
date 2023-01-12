@@ -296,7 +296,9 @@ export default class SelectionTool extends BaseTool {
 		}
 		else if (evt.ctrlKey) {
 			if (this.selectionBox && evt.key === 'd') {
-				this.editor.dispatch(this.selectionBox.duplicateSelectedObjects());
+				this.selectionBox.duplicateSelectedObjects().then(command => {
+					this.editor.dispatch(command);
+				});
 				return true;
 			}
 			else if (evt.key === 'a') {
