@@ -126,7 +126,7 @@ export class Editor {
 
 	/**
 	 * Controls the list of tools. See
-	 * ![the custom tool example](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/example-custom-tools)
+	 * [the custom tool example](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/example-custom-tools)
 	 * for more.
 	 */
 	public readonly toolController: ToolController;
