@@ -1,3 +1,9 @@
+# 0.12.0
+ * Make the eraser's size adjustable.
+ * Bug fixes:
+   * Fixed a regression with the selection tool where pressing `Ctrl+D` while dragging the selection wouldn't duplicate at the selection's current location.
+   * Fixed a regression where, in some browsers (Chrome, but not Firefox), editing a text component would duplicate that component.
+
 # 0.11.3
  * Adjust default pen sizes.
  * Fix arrow/line icons being difficult to see with very thin stroke sizes.
