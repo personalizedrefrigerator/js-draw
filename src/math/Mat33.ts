@@ -338,7 +338,7 @@ export default class Mat33 {
 		return result.rightMul(Mat33.translation(center.times(-1)));
 	}
 
-	/** @see {@link !fromCSSMatrix} */
+	/** @see {@link fromCSSMatrix} */
 	public toCSSMatrix(): string {
 		return `matrix(${this.a1},${this.b1},${this.a2},${this.b2},${this.a3},${this.b3})`;
 	}

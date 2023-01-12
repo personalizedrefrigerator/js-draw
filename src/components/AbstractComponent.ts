@@ -38,7 +38,7 @@ export default abstract class AbstractComponent {
 	}
 
 	// Returns a unique ID for this element.
-	// @see { @link EditorImage!default.lookupElement }
+	// @see { @link lib!EditorImage.lookupElement }
 	public getId() {
 		return this.id;
 	}

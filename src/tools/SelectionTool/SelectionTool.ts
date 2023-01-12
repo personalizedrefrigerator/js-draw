@@ -1,7 +1,3 @@
-// Allows users to select/transform portions of the `EditorImage`.
-// With respect to `extend`ing, `SelectionTool` is not stable.
-// @packageDocumentation
-
 import AbstractComponent from '../../components/AbstractComponent';
 import Editor from '../../Editor';
 import Mat33 from '../../math/Mat33';
@@ -16,7 +12,8 @@ import TextComponent from '../../components/TextComponent';
 
 export const cssPrefix = 'selection-tool-';
 
-// {@inheritDoc SelectionTool!}
+// Allows users to select/transform portions of the `EditorImage`.
+// With respect to `extend`ing, `SelectionTool` is not stable.
 export default class SelectionTool extends BaseTool {
 	private handleOverlay: HTMLElement;
 	private prevSelectionBox: Selection|null;

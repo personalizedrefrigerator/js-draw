@@ -8,7 +8,7 @@
  * ```
  * 
  * @see
- * {@link Editor!}
+ * {@link Editor}
  * 
  * @packageDocumentation
  */

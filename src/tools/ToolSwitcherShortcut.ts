@@ -1,16 +1,21 @@
-// Handles ctrl+1, ctrl+2, ctrl+3, ..., shortcuts for switching tools.
-// @packageDocumentation
-
 import Editor from '../Editor';
 import { KeyPressEvent } from '../types';
 import BaseTool from './BaseTool';
 
-// {@inheritDoc ToolSwitcherShortcut!}
+/**
+ * Handles keyboard events used, by default, to select tools. By default,
+ * 1 maps to the first primary tool, 2 to the second primary tool, ... .
+ *
+ * This is in the default set of {@link ToolController} tools.
+ * 
+ * @deprecated This may be replaced in the future.
+ */
 export default class ToolSwitcherShortcut extends BaseTool {
 	public constructor(private editor: Editor) {
 		super(editor.notifier, editor.localization.changeTool);
 	}
-	
+
+	// @internal
 	public onKeyPress({ key }: KeyPressEvent): boolean {
 		const toolController = this.editor.toolController;
 		const primaryTools = toolController.getPrimaryTools();

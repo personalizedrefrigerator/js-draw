@@ -1,22 +1,3 @@
-/**
- * The main entrypoint for the full editor.
- *
- * @example
- * To create an editor with a toolbar,
- * ```
- * const editor = new Editor(document.body);
- *
- * const toolbar = editor.addToolbar();
- * toolbar.addActionButton('Save', () => {
- *   const saveData = editor.toSVG().outerHTML;
- *   // Do something with saveData...
- * });
- * ```
- *
- * @packageDocumentation
- */
-
-
 import EditorImage from './EditorImage';
 import ToolController from './tools/ToolController';
 import { InputEvtType, PointerEvt, EditorNotifier, EditorEventType, ImageLoader } from './types';
@@ -70,7 +51,21 @@ export interface EditorSettings {
 	iconProvider: IconProvider,
 }
 
-// { @inheritDoc Editor! }
+/**
+ * The main entrypoint for the full editor.
+ *
+ * @example
+ * To create an editor with a toolbar,
+ * ```
+ * const editor = new Editor(document.body);
+ *
+ * const toolbar = editor.addToolbar();
+ * toolbar.addActionButton('Save', () => {
+ *   const saveData = editor.toSVG().outerHTML;
+ *   // Do something with saveData...
+ * });
+ * ```
+ */
 export class Editor {
 	// Wrapper around the viewport and toolbar
 	private container: HTMLElement;
@@ -121,6 +116,12 @@ export class Editor {
 
 	public readonly icons: IconProvider;
 	public readonly viewport: Viewport;
+
+	/**
+	 * Controls the list of tools. See
+	 * ![the custom tool example](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/example-custom-tools)
+	 * for more.
+	 */
 	public readonly toolController: ToolController;
 
 	/**

@@ -1,8 +1,3 @@
-/**
- * A tool that handles paste events.
- * @packageDocumentation
- */
-
 import Editor from '../Editor';
 import { AbstractComponent, TextComponent } from '../components/lib';
 import SVGLoader from '../SVGLoader';
@@ -14,12 +9,23 @@ import Color4 from '../Color4';
 import { TextStyle } from '../components/TextComponent';
 import ImageComponent from '../components/ImageComponent';
 
-// { @inheritDoc PasteHandler! }
+/**
+ * A tool that handles paste events (e.g. as triggered by ctrl+V).
+ * 
+ * @example
+ * While `ToolController` has a `PasteHandler` in its default list of tools,
+ * if a non-default set is being used, `PasteHandler` can be added as follows:
+ * ```ts
+ * const toolController = editor.toolController;
+ * toolController.addTool(new PasteHandler(editor));
+ * ```
+ */
 export default class PasteHandler extends BaseTool {
 	public constructor(private editor: Editor) {
 		super(editor.notifier, editor.localization.pasteHandler);
 	}
 
+	// @internal
 	public onPaste(event: PasteEvent): boolean {
 		const mime = event.mime.toLowerCase();
 
