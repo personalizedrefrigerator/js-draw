@@ -453,6 +453,16 @@ export default class IconProvider {
 				fill="rgba(100, 100, 100, 0.2)"
 				d="${gripShadow2Path}"
 			/>
+
+			<!-- color bubble -->
+			<path
+				fill="${color}"
+				d="
+					M 72.45,35.67
+					A 10,15 41.8 0 1 55,40.2 10,15 41.8 0 1 57.55,22.3 10,15 41.8 0 1 75,17.8 10,15 41.8 0 1 72.5,35.67
+					Z
+				"
+			/>
 		`;
 
 		icon.innerHTML = `
