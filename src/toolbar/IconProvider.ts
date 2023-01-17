@@ -401,6 +401,12 @@ export default class IconProvider {
 			C 80.47,98.32 50.5,93.5 20,${trailStartEndY} Z
 		`;
 
+		const colorBubblePath = `
+			M 72.45,35.67
+			A 10,15 41.8 0 1 55,40.2 10,15 41.8 0 1 57.55,22.3 10,15 41.8 0 1 75,17.8 10,15 41.8 0 1 72.5,35.67
+			Z
+		`;
+
 		let gripMainPath = 'M 85,-25 25,35 h 10 v 10 h 10 v 10 h 10 v 10 h 10 l -5,10 60,-60 z';
 		let gripShadow1Path = 'M 25,35 H 35 L 90,-15 85,-25 Z';
 		let gripShadow2Path = 'M 60,75 65,65 H 55 l 55,-55 10,5 z';
@@ -456,12 +462,12 @@ export default class IconProvider {
 
 			<!-- color bubble -->
 			<path
+				fill="${checkerboardPatternRef}"
+				d="${colorBubblePath}"
+			/>
+			<path
 				fill="${color}"
-				d="
-					M 72.45,35.67
-					A 10,15 41.8 0 1 55,40.2 10,15 41.8 0 1 57.55,22.3 10,15 41.8 0 1 75,17.8 10,15 41.8 0 1 72.5,35.67
-					Z
-				"
+				d="${colorBubblePath}"
 			/>
 		`;
 
