@@ -129,6 +129,28 @@ export default class Color4 {
 		return this.toHexString() === other.toHexString();
 	}
 
+	/**
+	 * If `fractionTo` is not in the range [0, 1], it will be clamped to the nearest number
+	 * in that range. For example, `a.mix(b, -1)` is equivalent to `a.mix(b, 0)`.
+	 * 
+	 * @returns a color `fractionTo` of the way from this color to `other`.
+	 * 
+	 * @example
+	 * ```ts
+	 * Color4.ofRGB(1, 0, 0).mix(Color4.ofRGB(0, 1, 0), 0.1) // -> Color4(0.9, 0.1, 0)
+	 * ```
+	 */
+	public mix(other: Color4, fractionTo: number): Color4 {
+		fractionTo = Math.min(Math.max(fractionTo, 0), 1);
+		const fractionOfThis = 1 - fractionTo;
+		return new Color4(
+			this.r * fractionOfThis + other.r * fractionTo,
+			this.g * fractionOfThis + other.g * fractionTo,
+			this.b * fractionOfThis + other.b * fractionTo,
+			this.a * fractionOfThis + other.a * fractionTo,
+		);
+	}
+
 	private hexString: string|null = null;
 
 	/**

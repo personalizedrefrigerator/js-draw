@@ -16,4 +16,15 @@ describe('Color4', () => {
 		expect(Color4.fromString('rgba ( 255, 0,\t 0, 0.5)')).objEq(Color4.ofRGBA(1, 0, 0, 0.5));
 		expect(Color4.fromString('rgba( 0, 0, 128, 0)')).objEq(Color4.ofRGBA(0, 0, 128/255, 0));
 	});
+
+	it('should mix blue and red to get dark purple', () => {
+		expect(Color4.ofRGB(1, 0, 0).mix(Color4.ofRGB(0, 0, 1), 0.5)).objEq(Color4.ofRGB(0.5, 0, 0.5));
+		expect(Color4.ofRGB(1, 0, 0).mix(Color4.ofRGB(0, 0, 1), 0.1)).objEq(Color4.ofRGB(0.9, 0, 0.1));
+	});
+
+	it('should mix red and green to get yellow', () => {
+		expect(Color4.ofRGB(1, 0, 0).mix(Color4.ofRGB(0, 1, 0), 0.3)).objEq(
+			Color4.ofRGB(0.7, 0.3, 0)
+		);
+	});
 });

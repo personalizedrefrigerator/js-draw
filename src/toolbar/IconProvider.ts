@@ -390,15 +390,21 @@ export default class IconProvider {
 	
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
-		const tipThickness = Math.sqrt(strokeSize / 2);
+		const tipThickness = strokeSize / 2;
 
-		const inkTipPath = `M ${15 - tipThickness},${80 - tipThickness} 15,${80 + tipThickness} 30,83 15,65 Z`;
-		const trailStartEndY = 82 + tipThickness / 3;
+		const inkTipPath = `
+			M ${15 - tipThickness},${80 - tipThickness}
+			  ${15 - tipThickness},${80 + tipThickness}
+			  30,83
+			  15,65
+			Z
+		`;
+		const trailStartEndY = 80 + tipThickness;
 		const inkTrailPath = `
-			m ${15 - tipThickness},${trailStartEndY}
+			m ${15 - tipThickness * 1.1},${trailStartEndY}
 			c 35,10 55,15 60,30
-			l ${35 + tipThickness},${-10 - tipThickness}
-			C 80.47,98.32 50.5,93.5 20,${trailStartEndY} Z
+			l ${35 + tipThickness * 1.2},${-10 - tipThickness}
+			C 80.47,98.32 50.5,${90 + tipThickness} 20,${trailStartEndY} Z
 		`;
 
 		const colorBubblePath = `
@@ -416,6 +422,13 @@ export default class IconProvider {
 			gripShadow1Path = 'm 25,35 c 3.92361,0.384473 7.644275,0.980572 10,3 l 55,-53 -5,-10 z';
 			gripShadow2Path = 'M 60,75 C 61,66 59,65 56,59 l 54,-54 10,10 z';
 		}
+
+		const penTipPath = `M 25,35 ${10 - tipThickness / 4},${70 - tipThickness / 2} 20,75 25,85 60,75 70,55 45,25 Z`;
+
+		const pencilTipColor = Color4.fromHex('#f4d7d7');
+		const tipColor = pencilTipColor.mix(
+			Color4.fromString(color), tipThickness / 40 - 0.1
+		).toHexString();
 
 		const ink = `
 			<path
@@ -438,9 +451,13 @@ export default class IconProvider {
 
 		const penTip = `
 			<path
-				fill="#f4d7d7"
+				fill="${checkerboardPatternRef}"
+				d="${penTipPath}"
+			/>
+			<path
+				fill="${tipColor}"
 				stroke="${color}"
-				d="M 25,35 ${10 - tipThickness / 4},${70 - tipThickness / 2} 20,75 25,85 60,75 70,55 45,25 Z"
+				d="${penTipPath}"
 			/>
 		`;
 
