@@ -383,52 +383,119 @@ export default class IconProvider {
 		return icon;
 	}
 	
-	public makePenIcon(tipThickness: number, color: string|Color4, roundedTip?: boolean): IconType {
+	public makePenIcon(strokeSize: number, color: string|Color4, rounded?: boolean): IconType {
 		if (color instanceof Color4) {
 			color = color.toHexString();
 		}
 	
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
-	
-		const halfThickness = tipThickness / 2;
-	
-		// Draw a pen-like shape
-		const penTipLeft = 50 - halfThickness;
-		const penTipRight = 50 + halfThickness;
+		const tipThickness = strokeSize / 2;
 
-		let tipCenterPrimaryPath = `L${penTipLeft},95 L${penTipRight},90`;
-		let tipCenterBackgroundPath = `L${penTipLeft},85 L${penTipRight},83`;
+		const inkTipPath = `
+			M ${15 - tipThickness},${80 - tipThickness}
+			  ${15 - tipThickness},${80 + tipThickness}
+			  30,83
+			  15,65
+			Z
+		`;
+		const trailStartEndY = 80 + tipThickness;
+		const inkTrailPath = `
+			m ${15 - tipThickness * 1.1},${trailStartEndY}
+			c 35,10 55,15 60,30
+			l ${35 + tipThickness * 1.2},${-10 - tipThickness}
+			C 80.47,98.32 50.5,${90 + tipThickness} 20,${trailStartEndY} Z
+		`;
 
-		if (roundedTip) {
-			tipCenterPrimaryPath = `L${penTipLeft},95 q${halfThickness},10 ${2 * halfThickness},-5`;
-			tipCenterBackgroundPath = `L${penTipLeft},87 q${halfThickness},10 ${2 * halfThickness},-3`;
+		const colorBubblePath = `
+			M 72.45,35.67
+			A 10,15 41.8 0 1 55,40.2 10,15 41.8 0 1 57.55,22.3 10,15 41.8 0 1 75,17.8 10,15 41.8 0 1 72.5,35.67
+			Z
+		`;
+
+		let gripMainPath = 'M 85,-25 25,35 h 10 v 10 h 10 v 10 h 10 v 10 h 10 l -5,10 60,-60 z';
+		let gripShadow1Path = 'M 25,35 H 35 L 90,-15 85,-25 Z';
+		let gripShadow2Path = 'M 60,75 65,65 H 55 l 55,-55 10,5 z';
+
+		if (rounded) {
+			gripMainPath = 'M 85,-25 25,35 c 15,0 40,30 35,40 l 60,-60 z';
+			gripShadow1Path = 'm 25,35 c 3.92361,0.384473 7.644275,0.980572 10,3 l 55,-53 -5,-10 z';
+			gripShadow2Path = 'M 60,75 C 61,66 59,65 56,59 l 54,-54 10,10 z';
 		}
 
-		const primaryStrokeTipPath = `M14,63 ${tipCenterPrimaryPath} L88,60 Z`;
-		const backgroundStrokeTipPath = `M14,63 ${tipCenterBackgroundPath} L88,60 Z`;
+		const penTipPath = `M 25,35 ${10 - tipThickness / 4},${70 - tipThickness / 2} 20,75 25,85 60,75 70,55 45,25 Z`;
+
+		const pencilTipColor = Color4.fromHex('#f4d7d7');
+		const tipColor = pencilTipColor.mix(
+			Color4.fromString(color), tipThickness / 40 - 0.1
+		).toHexString();
+
+		const ink = `
+			<path
+				fill="${checkerboardPatternRef}"
+				d="${inkTipPath}"
+			/>
+			<path
+				fill="${checkerboardPatternRef}"
+				d="${inkTrailPath}"
+			/>
+			<path
+				fill="${color}"
+				d="${inkTipPath}"
+			/>
+			<path
+				fill="${color}"
+				d="${inkTrailPath}"
+			/>
+		`;
+
+		const penTip = `
+			<path
+				fill="${checkerboardPatternRef}"
+				d="${penTipPath}"
+			/>
+			<path
+				fill="${tipColor}"
+				stroke="${color}"
+				d="${penTipPath}"
+			/>
+		`;
+
+		const grip = `
+			<path
+				${iconColorStrokeFill}
+				d="${gripMainPath}"
+			/>
+
+			<!-- shadows -->
+			<path
+				fill="rgba(150, 150, 150, 0.3)"
+				d="${gripShadow1Path}"
+			/>
+			<path
+				fill="rgba(100, 100, 100, 0.2)"
+				d="${gripShadow2Path}"
+			/>
+
+			<!-- color bubble -->
+			<path
+				fill="${checkerboardPatternRef}"
+				d="${colorBubblePath}"
+			/>
+			<path
+				fill="${color}"
+				d="${colorBubblePath}"
+			/>
+		`;
 
 		icon.innerHTML = `
 		<defs>
 			${checkerboardPatternDef}
 		</defs>
 		<g>
-			<!-- Pen grip -->
-			<path
-				d='M10,10 L90,10 L90,60 L${50 + halfThickness},80 L${50 - halfThickness},80 L10,60 Z'
-				${iconColorStrokeFill}
-			/>
-		</g>
-		<g>
-			<!-- Checkerboard background for slightly transparent pens -->
-			<path d='${backgroundStrokeTipPath}' fill='${checkerboardPatternRef}'/>
-	
-			<!-- Actual pen tip -->
-			<path
-				d='${primaryStrokeTipPath}'
-				fill='${color}'
-				stroke='${color}'
-			/>
+			${ink}
+			${penTip}
+			${grip}
 		</g>
 		`;
 		return icon;
