@@ -59,18 +59,44 @@ export default class SelectionTool extends BaseTool {
 		this.selectionBox.addTo(this.handleOverlay);
 	}
 
+	private snapSelectionToGrid() {
+		if (!this.selectionBox) throw new Error('No selection to snap!');
+
+		const topLeftOfBBox = this.selectionBox.region.topLeft;
+		const snapDistance =
+				this.editor.viewport.snapToGrid(topLeftOfBBox).minus(topLeftOfBBox);
+		
+		const oldTransform = this.selectionBox.getTransform();
+		this.selectionBox.setTransform(oldTransform.rightMul(Mat33.translation(snapDistance)));
+		this.selectionBox.finalizeTransform();
+	}
+
 	private selectionBoxHandlingEvt: boolean = false;
 	public onPointerDown({ allPointers, current }: PointerEvt): boolean {
-		if (this.ctrlKeyPressed) {
+		const snapToGrid = this.ctrlKeyPressed;
+		if (snapToGrid) {
 			current = current.snappedToGrid(this.editor.viewport);
 		}
 
 		if (allPointers.length === 1 && current.isPrimary) {
-			if (this.lastEvtTarget && this.selectionBox?.onDragStart(current, this.lastEvtTarget)) {
-				this.selectionBoxHandlingEvt = true;
-				this.expandingSelectionBox = false;
+			let transforming = false;
+
+			if (this.lastEvtTarget && this.selectionBox) {
+				if (snapToGrid) {
+					this.snapSelectionToGrid();
+				}
+
+				const dragStartResult = this.selectionBox.onDragStart(current, this.lastEvtTarget);
+
+				if (dragStartResult) {
+					transforming = true;
+
+					this.selectionBoxHandlingEvt = true;
+					this.expandingSelectionBox = false;
+				}
 			}
-			else {
+
+			if (!transforming) {
 				// Shift key: Combine the new and old selection boxes at the end of the gesture.
 				this.expandingSelectionBox = this.shiftKeyPressed;
 				this.makeSelectionBox(current.canvasPos);

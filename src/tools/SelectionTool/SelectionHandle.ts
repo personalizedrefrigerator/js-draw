@@ -18,6 +18,7 @@ export type DragEndCallback = ()=> void;
 
 export default class SelectionHandle {
 	private element: HTMLElement;
+	private snapToGrid: boolean;
 
 	// Bounding box in screen coordinates.
 
@@ -95,5 +96,13 @@ export default class SelectionHandle {
 			return;
 		}
 		this.onDragEnd();
+	}
+
+	public setSnapToGrid(snap: boolean) {
+		this.snapToGrid = snap;
+	}
+
+	public isSnappingToGrid() {
+		return this.snapToGrid;
 	}
 }

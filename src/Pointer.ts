@@ -40,19 +40,7 @@ export default class Pointer {
 	// pointer based on the current zoom). Returns a new Pointer and does not modify
 	// this.
 	public snappedToGrid(viewport: Viewport): Pointer {
-		const snapCoordinate = (coordinate: number) => {
-			const scaleFactor = viewport.getScaleFactorToNearestPowerOfTen();
-			const roundFactor = scaleFactor / 100;
-			const snapped = Math.round(coordinate * roundFactor) / roundFactor;
-
-			return snapped;
-		};
-
-		const origCanvasPos = this.canvasPos;
-		const snappedCanvasPos = Vec2.of(
-			snapCoordinate(origCanvasPos.x), snapCoordinate(origCanvasPos.y)
-		);
-
+		const snappedCanvasPos = viewport.snapToGrid(this.canvasPos);
 		const snappedScreenPos = viewport.canvasToScreen(snappedCanvasPos);
 
 		return new Pointer(

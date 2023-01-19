@@ -1,3 +1,11 @@
+# 0.13.0
+ * Ctrl key: Snap to grid
+ * New pen icons
+ * Bug fixes:
+   * Styling in output SVG: Prevent other renderers from collapsing multiple
+     spaces into a single space.
+
+
 # 0.12.0
  * Make the eraser's size adjustable.
  * Bug fixes:

@@ -161,6 +161,21 @@ export class Viewport {
 		return Math.pow(10, Math.round(Math.log10(scaleFactor)));
 	}
 
+	public snapToGrid(canvasPos: Point2) {
+		const snapCoordinate = (coordinate: number) => {
+			const scaleFactor = this.getScaleFactorToNearestPowerOfTen();
+			const roundFactor = scaleFactor / 100;
+			const snapped = Math.round(coordinate * roundFactor) / roundFactor;
+
+			return snapped;
+		};
+
+		const snappedCanvasPos = Vec2.of(
+			snapCoordinate(canvasPos.x), snapCoordinate(canvasPos.y)
+		);
+		return snappedCanvasPos;
+	}
+
 	/** Returns the size of one screen pixel in canvas units. */
 	public getSizeOfPixelOnCanvas(): number {
 		return 1/this.getScaleFactor();
