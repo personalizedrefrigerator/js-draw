@@ -36,6 +36,37 @@ export default class Pointer {
 	) {
 	}
 
+	// Snaps this pointer to the nearest grid point (rounds the coordinates of this
+	// pointer based on the current zoom). Returns a new Pointer and does not modify
+	// this.
+	public snappedToGrid(viewport: Viewport): Pointer {
+		const snapCoordinate = (coordinate: number) => {
+			const scaleFactor = viewport.getScaleFactorToNearestPowerOfTen();
+			const roundFactor = scaleFactor / 100;
+			const snapped = Math.round(coordinate * roundFactor) / roundFactor;
+
+			return snapped;
+		};
+
+		const origCanvasPos = this.canvasPos;
+		const snappedCanvasPos = Vec2.of(
+			snapCoordinate(origCanvasPos.x), snapCoordinate(origCanvasPos.y)
+		);
+
+		const snappedScreenPos = viewport.canvasToScreen(snappedCanvasPos);
+
+		return new Pointer(
+			snappedScreenPos,
+			snappedCanvasPos,
+			this.pressure,
+			this.isPrimary,
+			this.down,
+			this.device,
+			this.id,
+			this.timeStamp,
+		);
+	}
+
 	// Creates a Pointer from a DOM event. If `relativeTo` is given, (0, 0) in screen coordinates is
 	// considered the top left of `relativeTo`.
 	public static ofEvent(evt: PointerEvent, isDown: boolean, viewport: Viewport, relativeTo?: HTMLElement): Pointer {

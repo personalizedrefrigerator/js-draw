@@ -22,6 +22,7 @@ export default class SelectionTool extends BaseTool {
 
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
+	private ctrlKeyPressed: boolean = false;
 
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
@@ -59,16 +60,20 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	private selectionBoxHandlingEvt: boolean = false;
-	public onPointerDown(event: PointerEvt): boolean {
-		if (event.allPointers.length === 1 && event.current.isPrimary) {
-			if (this.lastEvtTarget && this.selectionBox?.onDragStart(event.current, this.lastEvtTarget)) {
+	public onPointerDown({ allPointers, current }: PointerEvt): boolean {
+		if (this.ctrlKeyPressed) {
+			current = current.snappedToGrid(this.editor.viewport);
+		}
+
+		if (allPointers.length === 1 && current.isPrimary) {
+			if (this.lastEvtTarget && this.selectionBox?.onDragStart(current, this.lastEvtTarget)) {
 				this.selectionBoxHandlingEvt = true;
 				this.expandingSelectionBox = false;
 			}
 			else {
 				// Shift key: Combine the new and old selection boxes at the end of the gesture.
 				this.expandingSelectionBox = this.shiftKeyPressed;
-				this.makeSelectionBox(event.current.canvasPos);
+				this.makeSelectionBox(current.canvasPos);
 			}
 
 			return true;
@@ -79,10 +84,15 @@ export default class SelectionTool extends BaseTool {
 	public onPointerMove(event: PointerEvt): void {
 		if (!this.selectionBox) return;
 
+		let currentPointer = event.current;
+		if (this.ctrlKeyPressed) {
+			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
+		}
+
 		if (this.selectionBoxHandlingEvt) {
-			this.selectionBox.onDragUpdate(event.current);
+			this.selectionBox.onDragUpdate(currentPointer);
 		} else {
-			this.selectionBox!.setToPoint(event.current.canvasPos);
+			this.selectionBox!.setToPoint(currentPointer.canvasPos);
 		}
 	}
 
@@ -134,7 +144,12 @@ export default class SelectionTool extends BaseTool {
 	public onPointerUp(event: PointerEvt): void {
 		if (!this.selectionBox) return;
 
-		this.selectionBox.setToPoint(event.current.canvasPos);
+		let currentPointer = event.current;
+		if (this.ctrlKeyPressed) {
+			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
+		}
+
+		this.selectionBox.setToPoint(currentPointer.canvasPos);
 
 		// Were we expanding the previous selection?
 		if (this.expandingSelectionBox && this.prevSelectionBox) {
@@ -170,8 +185,14 @@ export default class SelectionTool extends BaseTool {
 		'e', 'j', 'ArrowDown',
 		'r', 'R',
 		'i', 'I', 'o', 'O',
+		'Control',
 	];
 	public onKeyPress(event: KeyPressEvent): boolean {
+		if (event.key === 'Control') {
+			this.ctrlKeyPressed = true;
+			return true;
+		}
+
 		if (this.selectionBox && event.ctrlKey && event.key === 'd') {
 			// Handle duplication on key up — we don't want to accidentally duplicate
 			// many times.
@@ -287,6 +308,11 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public onKeyUp(evt: KeyUpEvent) {
+		if (evt.key === 'Control') {
+			this.ctrlKeyPressed = false;
+			return true;
+		}
+
 		if (evt.key === 'Shift') {
 			this.shiftKeyPressed = false;
 			return true;
@@ -354,6 +380,9 @@ export default class SelectionTool extends BaseTool {
 		// Clear the selection
 		this.handleOverlay.replaceChildren();
 		this.selectionBox = null;
+
+		this.shiftKeyPressed = false;
+		this.ctrlKeyPressed = false;
 
 		this.handleOverlay.style.display = enabled ? 'block' : 'none';
 

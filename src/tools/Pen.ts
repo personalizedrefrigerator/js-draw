@@ -3,7 +3,7 @@ import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Pointer, { PointerDevice } from '../Pointer';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
-import { EditorEventType, KeyPressEvent, PointerEvt, StrokeDataPoint } from '../types';
+import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt, StrokeDataPoint } from '../types';
 import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 
@@ -15,6 +15,7 @@ export interface PenStyle {
 export default class Pen extends BaseTool {
 	protected builder: ComponentBuilder|null = null;
 	private lastPoint: StrokeDataPoint|null = null;
+	private ctrlKeyPressed: boolean = false;
 
 	public constructor(
 		private editor: Editor,
@@ -31,6 +32,10 @@ export default class Pen extends BaseTool {
 
 	// Converts a `pointer` to a `StrokeDataPoint`.
 	protected toStrokePoint(pointer: Pointer): StrokeDataPoint {
+		if (this.isSnappingToGrid()) {
+			pointer = pointer.snappedToGrid(this.editor.viewport);
+		}
+
 		const minPressure = 0.3;
 		let pressure = Math.max(pointer.pressure ?? 1.0, minPressure);
 
@@ -42,8 +47,10 @@ export default class Pen extends BaseTool {
 		console.assert(isFinite(pointer.screenPos.length()), 'Non-finite screen position!');
 		console.assert(isFinite(pointer.timeStamp), 'Non-finite timeStamp on pointer!');
 
+		const pos = pointer.canvasPos;
+
 		return {
-			pos: pointer.canvasPos,
+			pos,
 			width: pressure * this.getPressureMultiplier(),
 			color: this.style.color,
 			time: pointer.timeStamp,
@@ -160,6 +167,14 @@ export default class Pen extends BaseTool {
 	public getColor() { return this.style.color; }
 	public getStrokeFactory() { return this.builderFactory; }
 
+	public setEnabled(enabled: boolean): void {
+		super.setEnabled(enabled);
+
+		this.ctrlKeyPressed = false;
+	}
+
+	private isSnappingToGrid() { return this.ctrlKeyPressed; }
+
 	public onKeyPress({ key }: KeyPressEvent): boolean {
 		key = key.toLowerCase();
 
@@ -173,6 +188,22 @@ export default class Pen extends BaseTool {
 		if (newThickness !== undefined) {
 			newThickness = Math.min(Math.max(1, newThickness), 256);
 			this.setThickness(newThickness);
+			return true;
+		}
+
+		if (key === 'control') {
+			this.ctrlKeyPressed = true;
+			return true;
+		}
+
+		return false;
+	}
+
+	public onKeyUp({ key }: KeyUpEvent): boolean {
+		key = key.toLowerCase();
+
+		if (key === 'control') {
+			this.ctrlKeyPressed = false;
 			return true;
 		}
 

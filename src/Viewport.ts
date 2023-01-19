@@ -151,6 +151,16 @@ export class Viewport {
 		return this.transform.transformVec3(Vec3.unitX).magnitude();
 	}
 
+	/**
+	 * @returns `getScaleFactor()` rounded to the nearest power of 10.
+	 * For example, if `getScaleFactor()` returns 101, `getScaleFactorToNearestPowerOfTen()`
+	 * should return `100` because `100` is the nearest power of 10 to 101.
+	 */
+	public getScaleFactorToNearestPowerOfTen() {
+		const scaleFactor = this.getScaleFactor();
+		return Math.pow(10, Math.round(Math.log10(scaleFactor)));
+	}
+
 	/** Returns the size of one screen pixel in canvas units. */
 	public getSizeOfPixelOnCanvas(): number {
 		return 1/this.getScaleFactor();
