@@ -38,6 +38,10 @@ export default class SVGRenderer extends AbstractRenderer {
 					stroke-linecap: round;
 					stroke-linejoin: round;
 				}
+
+				text {
+					white-space: pre;
+				}
 			`.replace(/\s+/g, '');
 			styleSheet.setAttribute('id', renderedStylesheetId);
 			this.elem.appendChild(styleSheet);
