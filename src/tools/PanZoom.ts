@@ -90,11 +90,12 @@ class InertialScroller {
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;
 
-	private lastAngle: number;
 	private lastDist: number;
 	private lastScreenCenter: Point2;
 	private lastTimestamp: number;
 	private lastPointerDownTimestamp: number = 0;
+	private initialTouchAngle: number = 0;
+	private initialViewportRotation: number = 0;
 
 	private inertialScroller: InertialScroller|null = null;
 	private velocity: Vec2|null = null;
@@ -132,9 +133,11 @@ export default class PanZoom extends BaseTool {
 
 		if (allAreTouch && pointers.length === 2 && this.mode & PanZoomMode.TwoFingerTouchGestures) {
 			const { screenCenter, angle, dist } = this.computePinchData(pointers[0], pointers[1]);
-			this.lastAngle = angle;
 			this.lastDist = dist;
 			this.lastScreenCenter = screenCenter;
+			this.initialTouchAngle = angle;
+			this.initialViewportRotation = this.editor.viewport.getRotationAngle();
+
 			handlingGesture = true;
 		} else if (pointers.length === 1 && (
 			(this.mode & PanZoomMode.OneFingerTouchGestures && allAreTouch)
@@ -188,24 +191,51 @@ export default class PanZoom extends BaseTool {
 		return delta;
 	}
 
+	//  Snaps `angle` to common desired rotations. For example, if `touchAngle` corresponds
+	// to a viewport rotation of 90.1 degrees, this function returns a rotation delta that,
+	// when applied to the viewport, rotates the viewport to 90.0 degrees.
+	//
+	// Returns a snapped rotation delta that, when applied to the viewport, rotates the viewport,
+	// from its position on the last touchDown event, by `touchAngle - initialTouchAngle`.
+	private toSnappedRotationDelta(touchAngle: number) {
+		const deltaAngle = touchAngle - this.initialTouchAngle;
+		let fullRotation = deltaAngle + this.initialViewportRotation;
+
+		const snapToMultipleOf = Math.PI / 2;
+		const roundedFullRotation = Math.round(fullRotation / snapToMultipleOf) * snapToMultipleOf;
+
+		// The maximum angle for which we snap the given angle to a multiple of
+		// `snapToMultipleOf`.
+		const maxSnapAngle = 0.05;
+
+		// Snap the rotation
+		if (Math.abs(fullRotation - roundedFullRotation) < maxSnapAngle) {
+			fullRotation = roundedFullRotation;
+		}
+
+		return fullRotation - this.editor.viewport.getRotationAngle();
+	}
+
 	private handleTwoFingerMove(allPointers: Pointer[]) {
 		const { screenCenter, canvasCenter, angle, dist } = this.computePinchData(allPointers[0], allPointers[1]);
 
 		const delta = this.getCenterDelta(screenCenter);
-		let rotation = angle - this.lastAngle;
+		let deltaRotation;
 
 		if (this.isRotationLocked()) {
-			rotation = 0;
+			deltaRotation = 0;
+		} else {
+			deltaRotation = this.toSnappedRotationDelta(angle); 
 		}
+
 
 		this.updateVelocity(screenCenter);
 
 		const transformUpdate = Mat33.translation(delta)
 			.rightMul(Mat33.scaling2D(dist / this.lastDist, canvasCenter))
-			.rightMul(Mat33.zRotation(rotation, canvasCenter));
+			.rightMul(Mat33.zRotation(deltaRotation, canvasCenter));
 		this.lastScreenCenter = screenCenter;
 		this.lastDist = dist;
-		this.lastAngle = angle;
 		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(transformUpdate)
 		);
