@@ -206,7 +206,7 @@ export default class PanZoom extends BaseTool {
 
 		// The maximum angle for which we snap the given angle to a multiple of
 		// `snapToMultipleOf`.
-		const maxSnapAngle = 0.05;
+		const maxSnapAngle = 0.07;
 
 		// Snap the rotation
 		if (Math.abs(fullRotation - roundedFullRotation) < maxSnapAngle) {
