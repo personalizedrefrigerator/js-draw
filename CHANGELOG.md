@@ -1,3 +1,8 @@
+# 0.13.1
+ * Touchscreen panning: Rotation snapping
+ * Bug fixes
+   * Snap viewport rotation to multiples of 90° when touchscreen panning (and near a multiple of 90°).
+
 # 0.13.0
  * Ctrl key: Snap to grid
  * New pen icons
