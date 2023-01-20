@@ -157,14 +157,18 @@ export class Viewport {
 	 * should return `100` because `100` is the nearest power of 10 to 101.
 	 */
 	public getScaleFactorToNearestPowerOfTen() {
+		return this.getScaleFactorToNearestPowerOf(10);
+	}
+
+	private getScaleFactorToNearestPowerOf(powerOf: number) {
 		const scaleFactor = this.getScaleFactor();
-		return Math.pow(10, Math.round(Math.log10(scaleFactor)));
+		return Math.pow(powerOf, Math.round(Math.log(scaleFactor) / Math.log(powerOf)));
 	}
 
 	public snapToGrid(canvasPos: Point2) {
 		const snapCoordinate = (coordinate: number) => {
-			const scaleFactor = this.getScaleFactorToNearestPowerOfTen();
-			const roundFactor = scaleFactor / 100;
+			const scaleFactor = this.getScaleFactorToNearestPowerOf(2);
+			const roundFactor = scaleFactor / 50;
 			const snapped = Math.round(coordinate * roundFactor) / roundFactor;
 
 			return snapped;

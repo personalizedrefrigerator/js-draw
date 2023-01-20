@@ -121,6 +121,21 @@ export default class Selection {
 		return this.originalRegion.transformedBoundingBox(scaleAndTranslateMat);
 	}
 
+	/**
+	 * Computes and returns the bounding box of the selection without
+	 * any additional padding. Computes directly from the elements that are selected.
+	 * @internal
+	 */
+	public computeTightBoundingBox() {
+		const bbox = this.selectedElems.reduce((
+			accumulator: Rect2|null, elem: AbstractComponent
+		): Rect2 => {
+			return (accumulator ?? elem.getBBox()).union(elem.getBBox());
+		}, null);
+
+		return bbox ?? Rect2.empty;
+	}
+
 	public get regionRotation(): number {
 		return this.transform.transformVec3(Vec2.unitX).angle();
 	}
@@ -328,11 +343,7 @@ export default class Selection {
 	// Recompute this' region from the selected elements.
 	// Returns false if the selection is empty.
 	public recomputeRegion(): boolean {
-		const newRegion = this.selectedElems.reduce((
-			accumulator: Rect2|null, elem: AbstractComponent
-		): Rect2 => {
-			return (accumulator ?? elem.getBBox()).union(elem.getBBox());
-		}, null);
+		const newRegion = this.computeTightBoundingBox();
 
 		if (!newRegion) {
 			this.cancelSelection();

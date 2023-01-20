@@ -62,12 +62,13 @@ export default class SelectionTool extends BaseTool {
 	private snapSelectionToGrid() {
 		if (!this.selectionBox) throw new Error('No selection to snap!');
 
-		const topLeftOfBBox = this.selectionBox.region.topLeft;
-		const snapDistance =
-				this.editor.viewport.snapToGrid(topLeftOfBBox).minus(topLeftOfBBox);
+		// Snap the top left corner of what we have selected.
+		const topLeftOfBBox = this.selectionBox.computeTightBoundingBox().topLeft;
+		const snappedTopLeft = this.editor.viewport.snapToGrid(topLeftOfBBox);
+		const snapDelta = snappedTopLeft.minus(topLeftOfBBox);
 		
 		const oldTransform = this.selectionBox.getTransform();
-		this.selectionBox.setTransform(oldTransform.rightMul(Mat33.translation(snapDistance)));
+		this.selectionBox.setTransform(oldTransform.rightMul(Mat33.translation(snapDelta)));
 		this.selectionBox.finalizeTransform();
 	}
 
