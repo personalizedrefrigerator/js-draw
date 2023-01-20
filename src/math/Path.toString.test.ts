@@ -64,4 +64,14 @@ describe('Path.toString', () => {
 
 		expect(path.toString(true)).toBe(path1.toString(true));
 	});
+
+	it('should remove no-op move-tos', () => {
+		const path1 = Path.fromString('M50,75m0,0q0,12.5 0,50q0,6.3 25,0');
+		path1['cachedStringVersion'] = null;
+		const path2 = Path.fromString('M150,175M150,175q0,12.5 0,50q0,6.3 25,0');
+		path2['cachedStringVersion'] = null;
+
+		expect(path1.toString()).toBe('M50,75q0,12.5 0,50q0,6.3 25,0');
+		expect(path2.toString()).toBe('M150,175q0,12.5 0,50q0,6.3 25,0');
+	});
 });

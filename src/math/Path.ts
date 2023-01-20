@@ -493,7 +493,7 @@ export default class Path {
 			}
 
 			// Don't add no-ops.
-			if (commandString === 'l0,0') {
+			if (commandString === 'l0,0' || commandString === 'm0,0') {
 				return;
 			}
 			result.push(commandString);
@@ -503,9 +503,17 @@ export default class Path {
 			}
 		};
 
-		addCommand('M', startPoint);
+		// Don't add two moveTos in a row (this can happen if
+		// the start point corresponds to a moveTo _and_ the first command is
+		// also a moveTo)
+		if (parts[0]?.kind !== PathCommandType.MoveTo) {
+			addCommand('M', startPoint);
+		}
+
 		let exhaustivenessCheck: never;
-		for (const part of parts) {
+		for (let i = 0; i < parts.length; i++) {
+			const part = parts[i];
+
 			switch (part.kind) {
 			case PathCommandType.MoveTo:
 				addCommand('M', part.point);
