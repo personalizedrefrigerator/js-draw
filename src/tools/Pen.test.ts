@@ -1,8 +1,12 @@
 
-import { Rect2 } from '../lib';
+import PenTool from './Pen';
 import { Vec2 } from '../math/Vec2';
 import createEditor from '../testing/createEditor';
 import { InputEvtType } from '../types';
+import Rect2 from '../math/Rect2';
+import StrokeComponent from '../components/Stroke';
+import Mat33 from '../math/Mat33';
+import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 
 describe('Pen', () => {
 	it('should draw horizontal lines', () => {
@@ -146,5 +150,44 @@ describe('Pen', () => {
 
 		expect(elems[0].getBBox().topLeft).objEq(Vec2.of(420, 24), 32); // ± 32
 		expect(elems[0].getBBox().bottomRight).objEq(Vec2.of(420, 340), 25); // ± 25
+	});
+
+	it('ctrl+z should finalize then undo the current stroke', async () => {
+		const editor = createEditor();
+
+		expect(editor.history.undoStackSize).toBe(0);
+
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(10, 10)); 
+		jest.advanceTimersByTime(100);
+		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(20, 10));
+
+		const ctrlKeyDown = true;
+		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'z', ctrlKeyDown);
+
+		// Stroke should have been undone
+		expect(editor.history.redoStackSize).toBe(1);
+
+		// Lifting the pointer up shouldn't clear the redo stack.
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(420, 340));
+		expect(editor.history.redoStackSize).toBe(1);
+	});
+
+	it('holding ctrl should snap the stroke to grid', () => {
+		const editor = createEditor();
+		editor.viewport.resetTransform(Mat33.identity);
+
+		const penTool = editor.toolController.getMatchingTools(PenTool)[0];
+		penTool.setStrokeFactory(makeFreehandLineBuilder);
+
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0.1, 0.1)); 
+		jest.advanceTimersByTime(100);
+		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10.1, 10.1));
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(10.1, 10.1));
+
+		const allElems = editor.image.getAllElements();
+		expect(allElems).toHaveLength(1);
+
+		const firstStroke = allElems[0] as StrokeComponent;
+		expect(firstStroke.getPath().bbox).objEq(new Rect2(0, 0, 10, 10));
 	});
 });

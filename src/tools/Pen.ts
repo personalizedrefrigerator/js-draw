@@ -93,6 +93,8 @@ export default class Pen extends BaseTool {
 	}
 
 	public onPointerMove({ current }: PointerEvt): void {
+		if (!this.builder) return;
+
 		this.addPointToStroke(this.toStrokePoint(current));
 	}
 
@@ -109,7 +111,18 @@ export default class Pen extends BaseTool {
 		};
 
 		this.addPointToStroke(strokePoint);
-		if (this.builder && current.isPrimary) {
+
+		if (current.isPrimary) {
+			this.finalizeStroke();
+		}
+	}
+
+	public onGestureCancel() {
+		this.editor.clearWetInk();
+	}
+
+	private finalizeStroke() {
+		if (this.builder) {
 			const stroke = this.builder.build();
 			this.previewStroke();
 
@@ -122,10 +135,6 @@ export default class Pen extends BaseTool {
 			}
 		}
 		this.builder = null;
-		this.editor.clearWetInk();
-	}
-
-	public onGestureCancel() {
 		this.editor.clearWetInk();
 	}
 
@@ -175,7 +184,7 @@ export default class Pen extends BaseTool {
 
 	private isSnappingToGrid() { return this.ctrlKeyPressed; }
 
-	public onKeyPress({ key }: KeyPressEvent): boolean {
+	public onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
 		key = key.toLowerCase();
 
 		let newThickness: number|undefined;
@@ -194,6 +203,11 @@ export default class Pen extends BaseTool {
 		if (key === 'control') {
 			this.ctrlKeyPressed = true;
 			return true;
+		}
+
+		// Ctrl+Z: End the stroke so that it can be undone/redone.
+		if (key === 'z' && ctrlKey && this.builder) {
+			this.finalizeStroke();
 		}
 
 		return false;
