@@ -19,7 +19,7 @@ export const makeColorInput = (
 	colorInputContainer.classList.add('color-input-container');
 
 	colorInputContainer.appendChild(colorInput);
-	addPipetteTool(editor, colorInputContainer, (color: Color4) => {
+	const pipetteController = addPipetteTool(editor, colorInputContainer, (color: Color4) => {
 		colorInput.value = color.toHexString();
 		onInputEnd();
 
@@ -58,6 +58,7 @@ export const makeColorInput = (
 			kind: EditorEventType.ColorPickerToggled,
 			open: true,
 		});
+		pipetteController.cancel();
 	});
 	colorInput.addEventListener('close', () => {
 		editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
@@ -132,6 +133,13 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	};
 
 	container.appendChild(pipetteButton);
+
+	return {
+		// Cancel a pipette color selection if one is in progress.
+		cancel: () => {
+			endColorSelectMode();
+		},
+	};
 };
 
 export default makeColorInput;
