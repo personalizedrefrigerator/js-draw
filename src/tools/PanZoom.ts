@@ -338,7 +338,7 @@ export default class PanZoom extends BaseTool {
 			toCanvas.transformVec3(
 				Vec3.of(-delta.x, -delta.y, 0)
 			);
-		const pinchZoomScaleFactor = 1.04;
+		const pinchZoomScaleFactor = 1.03;
 		const transformUpdate = Mat33.scaling2D(
 			Math.max(0.25, Math.min(Math.pow(pinchZoomScaleFactor, -delta.z), 4)), canvasPos
 		).rightMul(
