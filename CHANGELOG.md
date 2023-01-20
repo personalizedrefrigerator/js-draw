@@ -4,6 +4,7 @@
  * Bug fixes:
    * Styling in output SVG: Prevent other renderers from collapsing multiple
      spaces into a single space.
+   * Ends an in-progress stroke and adds it to the redo stack if ctrl+z is pressed while drawing a stroke.
 
 
 # 0.12.0
