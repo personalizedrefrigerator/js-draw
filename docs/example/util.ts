@@ -191,11 +191,11 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback) =
 		const messageContainer = popupDoc.createElement('p');
 		const svgTextContainer = popupDoc.createElement('textarea');
 
-		const imagePreview = popupDoc.createElementNS(
-			'http://www.w3.org/2000/svg', 'svg'
-		);
-		imagePreview.innerHTML = img.innerHTML;
-		imagePreview.setAttribute('viewBox', img.getAttribute('viewBox') ?? '');
+		const imagePreview = popupDoc.createElement('img');
+		imagePreview.src = 'data:image/svg+xml;base64,' + window.btoa(img.outerHTML);
+		imagePreview.style.width = '150px';
+		imagePreview.style.flexGrow = '4';
+		imagePreview.style.flexShrink = '4';
 
 		messageContainer.innerText = 'Preview: ';
 		svgTextContainer.value = imgHTML;
