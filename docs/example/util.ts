@@ -197,7 +197,13 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback) =
 		imagePreview.style.flexShrink = '1';
 
 		const updatePreview = (content: string) => {
-			imagePreview.src = 'data:image/svg+xml;base64,' + window.btoa(content);
+			// Convert unicode characters to base64. See https://stackoverflow.com/a/75155959
+			// TODO: simplify
+			const encoded = window.btoa(
+				String.fromCharCode(...new TextEncoder().encode(content))
+			);
+
+			imagePreview.src = 'data:image/svg+xml;base64,' + encoded;
 		};
 		updatePreview(img.outerHTML);
 
