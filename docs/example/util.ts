@@ -192,13 +192,21 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback) =
 		const svgTextContainer = popupDoc.createElement('textarea');
 
 		const imagePreview = popupDoc.createElement('img');
-		imagePreview.src = 'data:image/svg+xml;base64,' + window.btoa(img.outerHTML);
 		imagePreview.style.width = '150px';
 		imagePreview.style.flexGrow = '4';
-		imagePreview.style.flexShrink = '4';
+		imagePreview.style.flexShrink = '1';
+
+		const updatePreview = (content: string) => {
+			imagePreview.src = 'data:image/svg+xml;base64,' + window.btoa(content);
+		};
+		updatePreview(img.outerHTML);
 
 		messageContainer.innerText = 'Preview: ';
 		svgTextContainer.value = imgHTML;
+
+		svgTextContainer.oninput = () => {
+			updatePreview(svgTextContainer.value);
+		};
 
 		previewRegion.replaceChildren(
 			messageContainer, svgTextContainer, imagePreview
