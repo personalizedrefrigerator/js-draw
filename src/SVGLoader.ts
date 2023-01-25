@@ -244,7 +244,14 @@ export default class SVGLoader implements ImageLoader {
 
 		// Compute styles.
 		const computedStyles = window.getComputedStyle(elem);
-		const fontSizeMatch = /^([-0-9.e]+)px/i.exec(computedStyles.fontSize);
+		const fontSizeExp = /^([-0-9.e]+)px/i;
+
+		// In some environments, computedStyles.fontSize can be increased by the system.
+		// Thus, to prevent text from growing on load/save, prefer .style.fontSize.
+		let fontSizeMatch = fontSizeExp.exec(elem.style.fontSize);
+		if (!fontSizeMatch) {
+			fontSizeMatch = fontSizeExp.exec(computedStyles.fontSize);
+		}
 
 		const supportedStyleAttrs = [
 			'fontFamily',
@@ -455,7 +462,7 @@ export default class SVGLoader implements ImageLoader {
 					<meta name='viewport' conent='width=device-width,initial-scale=1.0'/>
 					<meta charset='utf-8'/>
 				</head>
-				<body>
+				<body style='font-size: 12px;'>
 					<script>
 						console.error('JavaScript should not be able to run here!');
 						throw new Error(
