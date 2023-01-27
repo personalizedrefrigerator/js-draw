@@ -8,10 +8,7 @@ import Pen from '../tools/Pen';
 import { StrokeDataPoint } from '../types';
 import Viewport from '../Viewport';
 
-// Provides a default set of icons for the editor.
-// Many of the icons were created with Inkscape.
-
-type IconType = SVGSVGElement|HTMLImageElement;
+export type IconType = HTMLImageElement|SVGElement;
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
 const iconColorFill = `
@@ -35,8 +32,33 @@ const checkerboardPatternDef = `
 `;
 const checkerboardPatternRef = 'url(#checkerboard)';
 
-// Provides icons that can be used in the toolbar, etc.
-// Extend this class and override methods to customize icons.
+/**
+ * Provides icons that can be used in the toolbar, etc.
+ * Extend this class and override methods to customize icons.
+ * 
+ * @example
+ * ```ts
+ * class CustomIconProvider extends jsdraw.IconProvider {
+ *     // Use '☺' instead of the default dropdown symbol.
+ *     public makeDropdownIcon() {
+ *         const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ *         icon.innerHTML = `
+ *             <text x='5' y='55' style='fill: var(--icon-color); font-size: 50pt;'>☺</text>
+ *         `;
+ *         icon.setAttribute('viewBox', '0 0 100 100');
+ *         return icon;
+ *     }
+ * }
+ * 
+ * const icons = new CustomIconProvider();
+ * const editor = new jsdraw.Editor(document.body, {
+ *     iconProvider: icons,
+ * });
+ * 
+ * // Add a toolbar that uses these icons
+ * editor.addToolbar();
+ * ```
+ */
 export default class IconProvider {
 	
 	public makeUndoIcon(): IconType {
