@@ -62,7 +62,7 @@ export class ResizeTransformer {
 		//    long decimal representations => large file sizes.
 		scale = scale.map(component => Viewport.roundScaleRatio(component, 2));
 
-		if (scale.x > 0 && scale.y > 0) {
+		if (scale.x !== 0 && scale.y !== 0) {
 			const origin = this.editor.viewport.roundPoint(this.selection.preTransformRegion.topLeft);
 			this.selection.setTransform(Mat33.scaling2D(scale, origin));
 		}
