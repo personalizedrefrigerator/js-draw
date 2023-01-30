@@ -315,7 +315,7 @@ export class Editor {
 
 			// Process wheel events if the ctrl key is down, even if disabled -- we do want to handle
 			// pinch-zooming.
-			if (!evt.ctrlKey) {
+			if (!evt.ctrlKey && !evt.metaKey) {
 				if (!this.settings.wheelEventsEnabled) {
 					return;
 				} else if (this.settings.wheelEventsEnabled === 'only-if-focused') {
@@ -333,7 +333,7 @@ export class Editor {
 				delta = delta.times(100);
 			}
 
-			if (evt.ctrlKey) {
+			if (evt.ctrlKey || evt.metaKey) {
 				delta = Vec3.of(0, 0, evt.deltaY);
 			}
 
@@ -598,7 +598,7 @@ export class Editor {
 			} else if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.KeyPressEvent,
 				key: evt.key,
-				ctrlKey: evt.ctrlKey,
+				ctrlKey: evt.ctrlKey || evt.metaKey,
 				altKey: evt.altKey,
 			})) {
 				evt.preventDefault();
@@ -611,7 +611,7 @@ export class Editor {
 			if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.KeyUpEvent,
 				key: evt.key,
-				ctrlKey: evt.ctrlKey,
+				ctrlKey: evt.ctrlKey || evt.metaKey,
 				altKey: evt.altKey,
 			})) {
 				evt.preventDefault();
