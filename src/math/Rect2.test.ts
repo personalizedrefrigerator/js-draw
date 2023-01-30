@@ -77,13 +77,23 @@ describe('Rect2', () => {
 		expect(new Rect2(-2, -2, 4, 4).containsRect(new Rect2(-1, 0, 10, 1))).toBe(false);
 	});
 
-	it('a rectangle should contain itself', () => {
-		const rect = new Rect2(1 / 3, 1 / 4, 1 / 5, 1 / 6);
-		expect(rect.containsRect(rect)).toBe(true);
-	});
+	describe('containsRect', () => {
+		it('a rectangle should contain itself', () => {
+			const rect = new Rect2(1 / 3, 1 / 4, 1 / 5, 1 / 6);
+			expect(rect.containsRect(rect)).toBe(true);
+		});
 
-	it('empty rect should not contain a larger rect', () => {
-		expect(Rect2.empty.containsRect(new Rect2(-1, -1, 3, 3))).toBe(false);
+		it('empty rect should not contain a larger rect', () => {
+			expect(Rect2.empty.containsRect(new Rect2(-1, -1, 3, 3))).toBe(false);
+		});
+
+		it('should correctly contain rectangles', () => {
+			const testRect = new Rect2(4, -10, 50, 100);
+			expect(testRect.containsRect(new Rect2(4.1, 0, 1, 1))).toBe(true);
+			expect(testRect.containsRect(new Rect2(48, 0, 1, 1))).toBe(true);
+			expect(testRect.containsRect(new Rect2(48, -9, 1, 1))).toBe(true);
+			expect(testRect.containsRect(new Rect2(48, -9, 1, 91))).toBe(true);
+		});
 	});
 
 	it('intersecting rectangles should be identified as intersecting', () => {
@@ -92,6 +102,8 @@ describe('Rect2', () => {
 		expect(new Rect2(-1, -1, 2, 2).intersects(new Rect2(0, 0, 10, 10))).toBe(true);
 		expect(new Rect2(-1, -1, 2, 2).intersects(new Rect2(3, 3, 10, 10))).toBe(false);
 		expect(new Rect2(-1, -1, 2, 2).intersects(new Rect2(0.2, 0.1, 0, 0))).toBe(true);
+		expect(new Rect2(-100, -1, 200, 2).intersects(new Rect2(-5, -5, 10, 30))).toBe(true);
+		expect(new Rect2(-100, -1, 200, 2).intersects(new Rect2(-5, 50, 10, 30))).toBe(false);
 	});
 
 	it('intersecting rectangles should have their intersections correctly computed', () => {
