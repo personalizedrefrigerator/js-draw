@@ -1,3 +1,11 @@
+# 0.14.0
+ * Adjust default snap distance.
+ * Allow selection tool to mirror objects.
+ * Bug fixes
+   * Allow the meta key (cmd) to activate keyboard shortcuts. (E.g. cmd+a on MacOS should select all).
+   * Fix extra moveTo command being converted to a string with some strokes.
+   * Increase size of icons in newer versions of Safari (they had decreased in size).
+
 # 0.13.1
  * Touchscreen panning: Rotation snapping
  * Bug fixes
