@@ -33,6 +33,7 @@
 
 .toolbar-dropdown .toolbar-button > .toolbar-icon {
 	max-width: 50px;
+	width: 100%;
 }
 
 .toolbar-button.disabled {
@@ -89,6 +90,8 @@
 
 .toolbar-root .toolbar-icon {
 	flex-shrink: 1;
+
+	width: 100%;
 	min-width: 30px;
 	min-height: 30px;
 }

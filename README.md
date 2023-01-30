@@ -1,6 +1,6 @@
 # js-draw
 
-[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
+[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
 
 ![](docs/img/js-draw.jpg)
 
