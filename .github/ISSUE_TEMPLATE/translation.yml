@@ -358,6 +358,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-selectAllTool
+    attributes:
+      label: "selectAllTool"
+      description: "Translate `Select all shortcut`."
+      placeholder: "Select all shortcut"
+    validations:
+      required: false
+  - type: input
     id: translation-eraserTool
     attributes:
       label: "eraserTool"
