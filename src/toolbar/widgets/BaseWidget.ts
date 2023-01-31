@@ -110,12 +110,16 @@ export default abstract class BaseWidget {
 
 			// If we didn't do anything with the event, send it to the editor.
 			if (!handled) {
-				this.editor.toolController.dispatchInputEvent({
+				handled = this.editor.toolController.dispatchInputEvent({
 					kind: InputEvtType.KeyPressEvent,
 					key: evt.key,
-					ctrlKey: evt.ctrlKey,
+					ctrlKey: evt.ctrlKey || evt.metaKey,
 					altKey: evt.altKey,
 				});
+			}
+
+			if (handled) {
+				evt.preventDefault();
 			}
 		};
 
@@ -124,12 +128,16 @@ export default abstract class BaseWidget {
 				return;
 			}
 
-			this.editor.toolController.dispatchInputEvent({
+			const handled = this.editor.toolController.dispatchInputEvent({
 				kind: InputEvtType.KeyUpEvent,
 				key: evt.key,
-				ctrlKey: evt.ctrlKey,
+				ctrlKey: evt.ctrlKey || evt.metaKey,
 				altKey: evt.altKey,
 			});
+
+			if (handled) {
+				evt.preventDefault();
+			}
 		};
 
 		button.onclick = () => {
