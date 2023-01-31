@@ -16,6 +16,7 @@ import PasteHandler from './PasteHandler';
 import ToolbarShortcutHandler from './ToolbarShortcutHandler';
 import { makePressureSensitiveFreehandLineBuilder } from '../components/builders/PressureSensitiveFreehandLineBuilder';
 import FindTool from './FindTool';
+import SelectAllShortcutHandler from './SelectionTool/SelectAllShortcutHandler';
 
 export default class ToolController {
 	private tools: BaseTool[];
@@ -53,6 +54,7 @@ export default class ToolController {
 			new ToolSwitcherShortcut(editor),
 			new FindTool(editor),
 			new PasteHandler(editor),
+			new SelectAllShortcutHandler(editor),
 		];
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolGroup));
 		panZoomTool.setEnabled(true);

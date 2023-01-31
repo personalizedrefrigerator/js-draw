@@ -3,6 +3,7 @@ export interface ToolLocalization {
 	keyboardPanZoom: string;
     penTool: (penId: number)=>string;
     selectionTool: string;
+	selectAllTool: string;
     eraserTool: string;
     touchPanTool: string;
     twoFingerPanZoomTool: string;
@@ -34,6 +35,7 @@ export interface ToolLocalization {
 export const defaultToolLocalization: ToolLocalization = {
 	penTool: (penId) => `Pen ${penId}`,
 	selectionTool: 'Selection',
+	selectAllTool: 'Select all shortcut',
 	eraserTool: 'Eraser',
 	touchPanTool: 'Touch panning',
 	twoFingerPanZoomTool: 'Panning and zooming',
