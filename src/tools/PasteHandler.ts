@@ -6,8 +6,8 @@ import { Mat33 } from '../math/lib';
 import BaseTool from './BaseTool';
 import TextTool from './TextTool';
 import Color4 from '../Color4';
-import { TextStyle } from '../components/TextComponent';
 import ImageComponent from '../components/ImageComponent';
+import TextStyle from '../rendering/TextRenderingStyle';
 
 /**
  * A tool that handles paste events (e.g. as triggered by ctrl+V).

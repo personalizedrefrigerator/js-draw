@@ -745,6 +745,11 @@ export class Editor {
 		});
 	}
 
+	// @internal
+	public isRerenderQueued() {
+		return this.rerenderQueued;
+	}
+
 	public rerender(showImageBounds: boolean = true) {
 		this.display.startRerender();
 

@@ -8,12 +8,15 @@ export { default as AbstractComponent } from './AbstractComponent';
 import Stroke from './Stroke';
 import TextComponent from './TextComponent';
 import ImageComponent from './ImageComponent';
+import RestyleableComponent, { createRestyleComponentCommand } from './RestylableComponent';
 
 export {
 	Stroke,
 	TextComponent as Text,
+	RestyleableComponent,
+	createRestyleComponentCommand,
 
-	TextComponent as TextComponent,
+	TextComponent,
 	Stroke as StrokeComponent,
 	ImageComponent,
 };

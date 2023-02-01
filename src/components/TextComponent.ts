@@ -1,22 +1,17 @@
+import { SerializableCommand } from '../lib';
 import LineSegment2 from '../math/LineSegment2';
 import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
+import Editor from '../Editor';
 import { Vec2 } from '../math/Vec2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
+import { TextStyle, textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
-
-export interface TextStyle {
-	size: number;
-	fontFamily: string;
-	fontWeight?: string;
-	fontVariant?: string;
-	renderingStyle: RenderingStyle;
-}
+import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 
 const componentTypeId = 'text';
-export default class TextComponent extends AbstractComponent {
+export default class TextComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 
 	public constructor(
@@ -152,12 +147,55 @@ export default class TextComponent extends AbstractComponent {
 		return false;
 	}
 
-	public getBaselinePos() {
-		return this.transform.transformVec2(Vec2.zero);
+	public getStyle(): ComponentStyle {
+		return {
+			color: this.style.renderingStyle.fill,
+
+			// Make a copy
+			textStyle: {
+				...this.style,
+				renderingStyle: {
+					...this.style.renderingStyle,
+				},
+			},
+		};
 	}
 
+	public updateStyle(style: ComponentStyle): SerializableCommand {
+		return createRestyleComponentCommand(this.getStyle(), style, this);
+	}
+
+	public forceStyle(style: ComponentStyle, editor: Editor|null): void {
+		if (style.textStyle) {
+			this.style = style.textStyle;
+		} else if (style.color) {
+			this.style.renderingStyle = {
+				...this.style.renderingStyle,
+				fill: style.color,
+			};
+		} else {
+			return;
+		}
+
+		for (const child of this.textObjects) {
+			if (child instanceof TextComponent) {
+				child.forceStyle(style, editor);
+			}
+		}
+
+		if (editor) {
+			editor.image.queueRerenderOf(this);
+			editor.queueRerender();
+		}
+	}
+
+	// See this.getStyle
 	public getTextStyle() {
 		return this.style;
+	}
+
+	public getBaselinePos() {
+		return this.transform.transformVec2(Vec2.zero);
 	}
 
 	public getTransform(): Mat33 {
@@ -191,13 +229,11 @@ export default class TextComponent extends AbstractComponent {
 		return localizationTable.text(this.getText());
 	}
 
+	// Do not rely on the output of `serializeToJSON` taking any particular format.
 	protected serializeToJSON(): Record<string, any> {
-		const serializableStyle = {
-			...this.style,
-			renderingStyle: styleToJSON(this.style.renderingStyle),
-		};
+		const serializableStyle = textStyleToJSON(this.style);
 
-		const textObjects = this.textObjects.map(text => {
+		const serializedTextObjects = this.textObjects.map(text => {
 			if (typeof text === 'string') {
 				return {
 					text,
@@ -210,20 +246,19 @@ export default class TextComponent extends AbstractComponent {
 		});
 
 		return {
-			textObjects,
+			textObjects: serializedTextObjects,
 			transform: this.transform.toArray(),
 			style: serializableStyle,
 		};
 	}
 
+	// @internal
 	public static deserializeFromString(json: any): TextComponent {
-		const style: TextStyle = {
-			renderingStyle: styleFromJSON(json.style.renderingStyle),
-			size: json.style.size,
-			fontWeight: json.style.fontWeight,
-			fontVariant: json.style.fontVariant,
-			fontFamily: json.style.fontFamily,
-		};
+		if (typeof json === 'string') {
+			json = JSON.parse(json);
+		}
+
+		const style = textStyleFromJSON(json.style);
 
 		const textObjects: Array<string|TextComponent> = json.textObjects.map((data: any) => {
 			if ((data.text ?? null) !== null) {

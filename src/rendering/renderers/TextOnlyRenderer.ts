@@ -1,4 +1,3 @@
-import { TextStyle } from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
 import Rect2 from '../../math/Rect2';
 import { Vec2 } from '../../math/Vec2';
@@ -6,6 +5,7 @@ import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import { TextRendererLocalization } from '../localization';
 import RenderingStyle from '../RenderingStyle';
+import TextStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
 
 // Outputs a description of what was rendered.

@@ -7,6 +7,7 @@ import Rect2 from '../math/Rect2';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
+import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 
 export type LoadSaveData = (string[]|Record<symbol, string|number>);
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
@@ -132,12 +133,12 @@ export default abstract class AbstractComponent {
 	// Returns a command that, when applied, transforms this by [affineTransfm] and
 	// updates the editor.
 	public transformBy(affineTransfm: Mat33): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(affineTransfm, this);
+		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);
 	}
 
 	// Returns a command that updates this component's z-index.
 	public setZIndex(newZIndex: number): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(Mat33.identity, this, newZIndex);
+		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex);
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
@@ -154,69 +155,37 @@ export default abstract class AbstractComponent {
 
 	private static transformElementCommandId = 'transform-element';
 
-	private static UnresolvedTransformElementCommand = class extends SerializableCommand {
-		private command: SerializableCommand|null = null;
-
-		public constructor(
-			private affineTransfm: Mat33,
-			private componentID: string,
-			private targetZIndex?: number,
-		) {
-			super(AbstractComponent.transformElementCommandId);
-		}
-
-		private resolveCommand(editor: Editor) {
-			if (this.command) {
-				return;
-			}
-
-			const component = editor.image.lookupElement(this.componentID);
-			if (!component) {
-				throw new Error(`Unable to resolve component with ID ${this.componentID}`);
-			}
-			this.command = new AbstractComponent.TransformElementCommand(
-				this.affineTransfm, component, this.targetZIndex
-			);
-		}
-
-		public apply(editor: Editor) {
-			this.resolveCommand(editor);
-			this.command!.apply(editor);
-		}
-
-		public unapply(editor: Editor) {
-			this.resolveCommand(editor);
-			this.command!.unapply(editor);
-		}
-
-		public description(_editor: Editor, localizationTable: EditorLocalization) {
-			return localizationTable.transformedElements(1);
-		}
-
-		protected serializeToJSON() {
-			return {
-				id: this.componentID,
-				transfm: this.affineTransfm.toArray(),
-				targetZIndex: this.targetZIndex,
-			};
-		}
-	};
-
-	private static TransformElementCommand = class extends SerializableCommand {
-		private origZIndex: number;
+	private static TransformElementCommand = class extends UnresolvedSerializableCommand {
+		private origZIndex: number|null = null;
 		private targetZIndex: number;
 
+		// Construct a new TransformElementCommand. `component`, while optional, should
+		// be provided if available. If not provided, it will be fetched from the editor's
+		// document when the command is applied.
 		public constructor(
 			private affineTransfm: Mat33,
-			private component: AbstractComponent,
+			componentID: string,
+			component?: AbstractComponent,
 			targetZIndex?: number,
 		) {
-			super(AbstractComponent.transformElementCommandId);
-			this.origZIndex = component.zIndex;
+			super(AbstractComponent.transformElementCommandId, componentID, component);
 			this.targetZIndex = targetZIndex ?? AbstractComponent.zIndexCounter++;
 		}
 
+		protected resolveComponent(image: EditorImage): void {
+			if (this.component) {
+				return;
+			}
+
+			super.resolveComponent(image);
+			this.origZIndex = this.component!.getZIndex();
+		}
+
 		private updateTransform(editor: Editor, newTransfm: Mat33) {
+			if (!this.component) {
+				throw new Error('this.component is undefined or null!');
+			}
+
 			// Any parent should have only one direct child.
 			const parent = editor.image.findParent(this.component);
 			let hadParent = false;
@@ -235,13 +204,17 @@ export default abstract class AbstractComponent {
 		}
 
 		public apply(editor: Editor) {
-			this.component.zIndex = this.targetZIndex;
+			this.resolveComponent(editor.image);
+
+			this.component!.zIndex = this.targetZIndex;
 			this.updateTransform(editor, this.affineTransfm);
 			editor.queueRerender();
 		}
 
 		public unapply(editor: Editor) {
-			this.component.zIndex = this.origZIndex;
+			this.resolveComponent(editor.image);
+
+			this.component!.zIndex = this.origZIndex!;
 			this.updateTransform(editor, this.affineTransfm.inverse());
 			editor.queueRerender();
 		}
@@ -252,16 +225,13 @@ export default abstract class AbstractComponent {
 
 		static {
 			SerializableCommand.register(AbstractComponent.transformElementCommandId, (json: any, editor: Editor) => {
-				const elem = editor.image.lookupElement(json.id);
+				const elem = editor.image.lookupElement(json.id) ?? undefined;
 				const transform = new Mat33(...(json.transfm as Mat33Array));
 				const targetZIndex = json.targetZIndex;
 
-				if (!elem) {
-					return new AbstractComponent.UnresolvedTransformElementCommand(transform, json.id, targetZIndex);
-				}
-
 				return new AbstractComponent.TransformElementCommand(
 					transform,
+					json.id,
 					elem,
 					targetZIndex,
 				);
@@ -270,7 +240,7 @@ export default abstract class AbstractComponent {
 
 		protected serializeToJSON() {
 			return {
-				id: this.component.getId(),
+				id: this.componentID,
 				transfm: this.affineTransfm.toArray(),
 				targetZIndex: this.targetZIndex,
 			};

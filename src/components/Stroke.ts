@@ -1,24 +1,28 @@
+import { SerializableCommand } from '../lib';
 import LineSegment2 from '../math/LineSegment2';
 import Mat33 from '../math/Mat33';
 import Path from '../math/Path';
 import Rect2 from '../math/Rect2';
+import Editor from '../Editor';
 import AbstractRenderer, { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
+import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
 }
 
-export default class Stroke extends AbstractComponent {
+export default class Stroke extends AbstractComponent implements RestyleableComponent {
 	private parts: StrokePart[];
 	protected contentBBox: Rect2;
 
 	// See `getProportionalRenderingTime`
 	private approximateRenderingTime: number;
 
-	// Creates a `Stroke` from the given `parts`.
+	// Creates a `Stroke` from the given `parts`. All parts should have the
+	// same color.
 	public constructor(parts: RenderablePathSpec[]) {
 		super('stroke');
 
@@ -47,6 +51,65 @@ export default class Stroke extends AbstractComponent {
 			this.approximateRenderingTime += path.parts.length;
 		}
 		this.contentBBox ??= Rect2.empty;
+	}
+
+	public getStyle(): ComponentStyle {
+		if (this.parts.length === 0) {
+			return { };
+		}
+		const firstPart = this.parts[0];
+
+		if (
+			firstPart.style.stroke === undefined
+			|| firstPart.style.stroke.width === 0
+		) {
+			return {
+				color: firstPart.style.fill,
+			};
+		}
+
+		return {
+			color: firstPart.style.stroke.color,
+		};
+	}
+
+	public updateStyle(style: ComponentStyle): SerializableCommand {
+		return createRestyleComponentCommand(this.getStyle(), style, this);
+	}
+
+	public forceStyle(style: ComponentStyle, editor: Editor|null): void {
+		if (!style.color) {
+			return;
+		}
+
+		this.parts = this.parts.map((part) => {
+			const newStyle = {
+				...part.style,
+				stroke: part.style.stroke ? {
+					...part.style.stroke,
+				} : undefined,
+			};
+
+			// Change the stroke color if a stroked shape. Else,
+			// change the fill.
+			if (newStyle.stroke && newStyle.stroke.width > 0) {
+				newStyle.stroke.color = style.color!;
+			} else {
+				newStyle.fill = style.color!;
+			}
+
+			return {
+				path: part.path,
+				startPoint: part.startPoint,
+				commands: part.commands,
+				style: newStyle,
+			};
+		});
+
+		if (editor) {
+			editor.image.queueRerenderOf(this);
+			editor.queueRerender();
+		}
 	}
 
 	public intersects(line: LineSegment2): boolean {

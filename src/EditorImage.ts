@@ -34,6 +34,19 @@ export default class EditorImage {
 		return null;
 	}
 
+	// Forces a re-render of `elem` when the image is next re-rendered as a whole.
+	// Does nothing if `elem` is not in this.
+	public queueRerenderOf(elem: AbstractComponent) {
+		// TODO: Make more efficient (e.g. increase IDs of all parents,
+		// make cache take into account last modified time instead of IDs, etc.)
+		const parent = this.findParent(elem);
+
+		if (parent) {
+			parent.remove();
+			this.addElementDirectly(elem);
+		}
+	}
+
 	/** @internal */
 	public renderWithCache(screenRenderer: AbstractRenderer, cache: RenderingCache, viewport: Viewport) {
 		cache.render(screenRenderer, this.root, viewport);

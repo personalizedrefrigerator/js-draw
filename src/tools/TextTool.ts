@@ -1,5 +1,5 @@
 import Color4 from '../Color4';
-import TextComponent, { TextStyle } from '../components/TextComponent';
+import TextComponent from '../components/TextComponent';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Rect2 from '../math/Rect2';
@@ -11,6 +11,7 @@ import BaseTool from './BaseTool';
 import { ToolLocalization } from './localization';
 import Erase from '../commands/Erase';
 import uniteCommands from '../commands/uniteCommands';
+import TextStyle from '../rendering/TextRenderingStyle';
 
 const overlayCssClass = 'textEditorOverlay';
 export default class TextTool extends BaseTool {

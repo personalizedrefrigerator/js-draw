@@ -1,11 +1,12 @@
 import Color4 from '../../Color4';
-import TextComponent, { TextStyle } from '../../components/TextComponent';
+import TextComponent from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
 import Rect2 from '../../math/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
+import TextStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
 export default class CanvasRenderer extends AbstractRenderer {

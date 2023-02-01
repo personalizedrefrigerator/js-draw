@@ -3,7 +3,7 @@ import AbstractComponent from './components/AbstractComponent';
 import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
-import TextComponent, { TextStyle } from './components/TextComponent';
+import TextComponent from './components/TextComponent';
 import UnknownSVGObject from './components/UnknownSVGObject';
 import Mat33 from './math/Mat33';
 import Path from './math/Path';
@@ -11,6 +11,7 @@ import Rect2 from './math/Rect2';
 import { Vec2 } from './math/Vec2';
 import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
 import RenderingStyle from './rendering/RenderingStyle';
+import TextStyle from './rendering/TextRenderingStyle';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 
 type OnFinishListener = ()=> void;

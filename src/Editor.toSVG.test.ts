@@ -1,5 +1,5 @@
-import { TextStyle } from './components/TextComponent';
 import { Color4, Mat33, Rect2, TextComponent, EditorImage, Vec2 } from './lib';
+import TextStyle from './rendering/TextRenderingStyle';
 import SVGLoader from './SVGLoader';
 import createEditor from './testing/createEditor';
 
