@@ -170,6 +170,11 @@ export default abstract class AbstractComponent {
 		) {
 			super(AbstractComponent.transformElementCommandId, componentID, component);
 			this.targetZIndex = targetZIndex ?? AbstractComponent.zIndexCounter++;
+
+			// Ensure that we keep drawing on top even after changing the z-index.
+			if (this.targetZIndex >= AbstractComponent.zIndexCounter) {
+				AbstractComponent.zIndexCounter = this.targetZIndex + 1;
+			}
 		}
 
 		protected resolveComponent(image: EditorImage): void {
