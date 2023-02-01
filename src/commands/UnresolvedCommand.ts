@@ -1,5 +1,5 @@
 import EditorImage from '../EditorImage';
-import { AbstractComponent } from '../lib';
+import AbstractComponent from '../components/AbstractComponent';
 import SerializableCommand from './SerializableCommand';
 
 export type ResolveFromComponentCallback = () => SerializableCommand;

@@ -1,4 +1,4 @@
-import { SerializableCommand } from '../lib';
+import SerializableCommand from '../commands/SerializableCommand';
 import LineSegment2 from '../math/LineSegment2';
 import Mat33 from '../math/Mat33';
 import Path from '../math/Path';
