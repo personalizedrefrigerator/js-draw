@@ -212,10 +212,10 @@ export default class SelectionTool extends BaseTool {
 		'e', 'j', 'ArrowDown',
 		'r', 'R',
 		'i', 'I', 'o', 'O',
-		'Control',
+		'Control', 'Meta',
 	];
 	public onKeyPress(event: KeyPressEvent): boolean {
-		if (event.key === 'Control') {
+		if (event.key === 'Control' || event.key === 'Meta') {
 			this.ctrlKeyPressed = true;
 			return true;
 		}
@@ -226,8 +226,7 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 		else if (event.key === 'a' && event.ctrlKey) {
-			// Handle ctrl+A on key up.
-			// Return early to prevent 'a' from moving the selection/view.
+			this.setSelection(this.editor.image.getAllElements());
 			return true;
 		}
 		else if (event.ctrlKey) {
@@ -335,7 +334,7 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public onKeyUp(evt: KeyUpEvent) {
-		if (evt.key === 'Control') {
+		if (evt.key === 'Control' || evt.key === 'Meta') {
 			this.ctrlKeyPressed = false;
 			return true;
 		}
@@ -349,10 +348,6 @@ export default class SelectionTool extends BaseTool {
 				this.selectionBox.duplicateSelectedObjects().then(command => {
 					this.editor.dispatch(command);
 				});
-				return true;
-			}
-			else if (evt.key === 'a') {
-				this.setSelection(this.editor.image.getAllElements());
 				return true;
 			}
 		}

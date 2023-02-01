@@ -200,7 +200,7 @@ export default class Pen extends BaseTool {
 			return true;
 		}
 
-		if (key === 'control') {
+		if (key === 'control' || key === 'meta') {
 			this.ctrlKeyPressed = true;
 			return true;
 		}
@@ -216,7 +216,7 @@ export default class Pen extends BaseTool {
 	public onKeyUp({ key }: KeyUpEvent): boolean {
 		key = key.toLowerCase();
 
-		if (key === 'control') {
+		if (key === 'control' || key === 'meta') {
 			this.ctrlKeyPressed = false;
 			return true;
 		}
