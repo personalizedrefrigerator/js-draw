@@ -125,6 +125,13 @@
 	padding: 15px;
 	padding-top: 5px;
 
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	max-height: 80vh;
+
+	max-width: fit-content;
+
 	/* Prevent overlap/being displayed under the undo/redo buttons */
 	z-index: 2;
 	background-color: var(--primary-background-color);
