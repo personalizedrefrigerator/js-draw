@@ -609,6 +609,17 @@ export default class IconProvider {
 		icon.setAttribute('viewBox', '0 0 100 100');
 		return icon;
 	}
+
+	public makeFormatSelectionIcon(): IconType {
+		return this.makeIconFromPath(`
+			M 5 10
+			L 5 20 L 10 20 L 10 15 L 20 15 L 20 40 L 15 40 L 15 45 L 35 45 L 35 40 L 30 40 L 30 15 L 40 15 L 40 20 L 45 20 L 45 15 L 45 10 L 5 10 z
+			M 90 10 C 90 10 86.5 13.8 86 14 C 86 14 76.2 24.8 76 25 L 60 25 L 60 65 C 75 70 85 70 90 65 L 90 25 L 80 25 L 76.7 25 L 90 10 z
+			M 60 25 L 55 25 L 50 30 L 60 25 z
+			M 10 55 L 10 90 L 41 90 L 41 86 L 45 86 L 45 55 L 10 55 z
+			M 42 87 L 42 93 L 48 93 L 48 87 L 42 87 z 
+		`);
+	}
 	
 	public makeResizeViewportIcon(): IconType {
 		return this.makeIconFromPath(`

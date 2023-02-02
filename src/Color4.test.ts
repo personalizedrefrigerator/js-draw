@@ -27,4 +27,8 @@ describe('Color4', () => {
 			Color4.ofRGB(0.7, 0.3, 0)
 		);
 	});
+
+	it('should mix red with nothing and get red', () => {
+		expect(Color4.average([ Color4.red ])).objEq(Color4.red);
+	});
 });

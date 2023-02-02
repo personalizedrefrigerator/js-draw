@@ -17,6 +17,9 @@ interface StrokePart extends RenderablePathSpec {
 export default class Stroke extends AbstractComponent implements RestyleableComponent {
 	private parts: StrokePart[];
 	protected contentBBox: Rect2;
+	
+	// eslint-disable-next-line @typescript-eslint/prefer-as-const
+	readonly isRestylableComponent: true = true;
 
 	// See `getProportionalRenderingTime`
 	private approximateRenderingTime: number;

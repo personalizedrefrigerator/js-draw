@@ -46,6 +46,21 @@ export const createRestyleComponentCommand = (
 	);
 };
 
+
+// Returns true if `component` is a `RestylableComponent`.
+export const isRestylableComponent = (component: AbstractComponent): component is RestyleableComponent => {
+	const hasMethods = 'getStyle' in component && 'updateStyle' in component && 'forceStyle' in component;
+	if (!hasMethods) {
+		return false;
+	}
+
+	if (!('isRestylableComponent' in component) || !(component as any)['isRestylableComponent']) {
+		return false;
+	}
+
+	return true;
+};
+
 export interface RestyleableComponent extends AbstractComponent {
 	getStyle(): ComponentStyle;
 
@@ -58,6 +73,8 @@ export interface RestyleableComponent extends AbstractComponent {
 	 * Prefer `updateStyle(style).apply(editor)`.
 	 */
 	forceStyle(style: ComponentStyle, editor: Editor|null): void;
+
+	isRestylableComponent: true;
 }
 
 export default RestyleableComponent;

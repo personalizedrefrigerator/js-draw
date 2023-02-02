@@ -14,6 +14,9 @@ const componentTypeId = 'text';
 export default class TextComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 
+	// eslint-disable-next-line @typescript-eslint/prefer-as-const
+	readonly isRestylableComponent: true = true;
+
 	public constructor(
 		protected readonly textObjects: Array<string|TextComponent>,
 		private transform: Mat33,

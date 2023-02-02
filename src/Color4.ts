@@ -151,6 +151,32 @@ export default class Color4 {
 		);
 	}
 
+	/**
+	 * @returns the component-wise average of `colors`, or `Color4.transparent` if `colors` is empty.
+	 */
+	public static average(colors: Color4[]) {
+		let averageA = 0;
+		let averageR = 0;
+		let averageG = 0;
+		let averageB = 0;
+
+		for (const color of colors) {
+			averageA += color.a;
+			averageR += color.r;
+			averageG += color.g;
+			averageB += color.b;
+		}
+
+		if (colors.length > 0) {
+			averageA /= colors.length;
+			averageR /= colors.length;
+			averageG /= colors.length;
+			averageB /= colors.length;
+		}
+
+		return new Color4(averageR, averageG, averageB, averageA);
+	}
+
 	private hexString: string|null = null;
 
 	/**

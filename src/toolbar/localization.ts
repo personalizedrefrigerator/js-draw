@@ -28,6 +28,7 @@ export interface ToolbarLocalization {
 	duplicateSelection: string;
 	pickColorFromScreen: string;
 	clickToPickColorAnnouncement: string;
+	reformatSelection: string;
 	undo: string;
 	redo: string;
 	zoom: string;
@@ -52,6 +53,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	handTool: 'Pan',
 	zoom: 'Zoom',
 	image: 'Image',
+	reformatSelection: 'Format selection',
 	inputAltText: 'Alt text: ',
 	chooseFile: 'Choose file: ',
 	submit: 'Submit',
