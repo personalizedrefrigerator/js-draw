@@ -70,6 +70,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-reformatSelection
+    attributes:
+      label: "reformatSelection"
+      description: "Translate `Format selection`."
+      placeholder: "Format selection"
+    validations:
+      required: false
+  - type: input
     id: translation-inputAltText
     attributes:
       label: "inputAltText"
@@ -715,6 +723,14 @@ body:
       label: "svgObject"
       description: "Translate `SVG Object`."
       placeholder: "SVG Object"
+    validations:
+      required: false
+  - type: input
+    id: translation-restyledElements
+    attributes:
+      label: "restyledElements"
+      description: "Translate `Restyled elements`."
+      placeholder: "Restyled elements"
     validations:
       required: false
   - type: input
