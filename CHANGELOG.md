@@ -1,3 +1,10 @@
+# 0.15.0
+ * Adds a "reformat selection" button that allows changing the color of the selection.
+ * Bug fixes:
+   * Fix ctrl+A not selecting when the selection tool isn't active.
+   * Fix ctrl+A selecting text when a toolbar button has focus.
+   * Fix incorrect z-order on undo of many-object transform (e.g. dragging objects on top of a background, then undoing, could leave the objects below the background).
+
 # 0.14.0
  * Adjust default snap distance.
  * Allow selection tool to mirror objects.
