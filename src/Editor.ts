@@ -704,8 +704,14 @@ export class Editor {
 		return this.asyncApplyOrUnapplyCommands(commands, true, chunkSize);
 	}
 
+	// If `unapplyInReverseOrder`, commands are reversed before unapplying.
 	// @see {@link #asyncApplyOrUnapplyCommands }
-	public asyncUnapplyCommands(commands: Command[], chunkSize: number) {
+	public asyncUnapplyCommands(commands: Command[], chunkSize: number, unapplyInReverseOrder: boolean = false) {
+		if (unapplyInReverseOrder) {
+			commands = [ ...commands ]; // copy
+			commands.reverse();
+		}
+
 		return this.asyncApplyOrUnapplyCommands(commands, false, chunkSize);
 	}
 

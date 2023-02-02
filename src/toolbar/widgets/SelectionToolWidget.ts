@@ -41,10 +41,20 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			},
 			localization,
 		);
+		// const restyleButton = new ActionButtonWidget(
+		// 	editor, 'restyle-btn',
+		// 	() => editor.icons.makeRestyleIcon(),
+		// 	this.localizationTable.restyleSelection,
+		// 	async () => {
+
+		// 	},
+		// 	localization,
+		// );
 
 		this.addSubWidget(resizeButton);
 		this.addSubWidget(deleteButton);
 		this.addSubWidget(duplicateButton);
+		//this.addSubWidget(restyleButton);
 
 		const updateDisabled = (disabled: boolean) => {
 			resizeButton.setDisabled(disabled);

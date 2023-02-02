@@ -32,11 +32,14 @@ class NonSerializableUnion extends Command {
 	}
 
 	public unapply(editor: Editor) {
+		const commands = [ ...this.commands ];
+		commands.reverse();
+
 		if (this.applyChunkSize === undefined) {
-			const results = this.commands.map(cmd => cmd.unapply(editor));
+			const results = commands.map(cmd => cmd.unapply(editor));
 			return NonSerializableUnion.waitForAll(results);
 		} else {
-			return editor.asyncUnapplyCommands(this.commands, this.applyChunkSize);
+			return editor.asyncUnapplyCommands(commands, this.applyChunkSize, false);
 		}
 	}
 

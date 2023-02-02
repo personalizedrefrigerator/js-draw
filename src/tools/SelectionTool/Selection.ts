@@ -265,7 +265,7 @@ export default class Selection {
 			this.selection?.setTransform(this.fullTransform.inverse(), false);
 			this.selection?.updateUI();
 
-			await editor.asyncUnapplyCommands(this.transformCommands, updateChunkSize);
+			await editor.asyncUnapplyCommands(this.transformCommands, updateChunkSize, true);
 			this.selection?.setTransform(Mat33.identity);
 			this.selection?.recomputeRegion();
 			this.selection?.updateUI();
