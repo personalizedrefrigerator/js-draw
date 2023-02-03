@@ -200,6 +200,8 @@ export default class SelectionTool extends BaseTool {
 			this.selectionBox?.cancelSelection();
 			this.selectionBox = this.prevSelectionBox;
 			this.selectionBox?.addTo(this.handleOverlay);
+			this.selectionBox?.recomputeRegion();
+			this.prevSelectionBox = null;
 		}
 
 		this.expandingSelectionBox = false;
