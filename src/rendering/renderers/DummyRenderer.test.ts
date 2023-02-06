@@ -1,12 +1,11 @@
 
-import EventDispatcher from '../../EventDispatcher';
 import Mat33 from '../../math/Mat33';
 import { Vec2 } from '../../math/Vec2';
 import Viewport from '../../Viewport';
 import DummyRenderer from './DummyRenderer';
 
 const makeRenderer = (): [DummyRenderer, Viewport] => {
-	const viewport = new Viewport(new EventDispatcher());
+	const viewport = new Viewport(() => {});
 	return [ new DummyRenderer(viewport), viewport ];
 };
 

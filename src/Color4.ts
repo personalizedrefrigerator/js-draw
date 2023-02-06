@@ -126,6 +126,11 @@ export default class Color4 {
 			return false;
 		}
 
+		// If both completely transparent,
+		if (this.a === 0 && other.a === 0) {
+			return true;
+		}
+
 		return this.toHexString() === other.toHexString();
 	}
 

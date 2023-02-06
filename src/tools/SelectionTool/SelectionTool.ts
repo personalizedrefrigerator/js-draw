@@ -372,7 +372,7 @@ export default class SelectionTool extends BaseTool {
 			return false;
 		}
 
-		const exportViewport = new Viewport(this.editor.notifier);
+		const exportViewport = new Viewport(() => {});
 		exportViewport.updateScreenSize(Vec2.of(bbox.w, bbox.h));
 		exportViewport.resetTransform(Mat33.translation(bbox.topLeft));
 

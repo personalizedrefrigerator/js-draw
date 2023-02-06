@@ -6,7 +6,6 @@ import Rect2 from './math/Rect2';
 import { Point2, Vec2 } from './math/Vec2';
 import Vec3 from './math/Vec3';
 import { StrokeDataPoint } from './types';
-import { EditorEventType, EditorNotifier } from './types';
 
 // Returns the base type of some type of point/number
 type PointDataType<T extends Point2|StrokeDataPoint|number> = T extends Point2 ? Point2 : number;
@@ -14,6 +13,8 @@ type PointDataType<T extends Point2|StrokeDataPoint|number> = T extends Point2 ?
 export abstract class ViewportTransform extends Command {
 	public abstract readonly transform: Mat33;
 }
+
+type TransformChangeCallback = (oldTransform: Mat33, newTransform: Mat33)=> void;
 
 export class Viewport {
 	// Command that translates/scales the viewport.
@@ -82,7 +83,7 @@ export class Viewport {
 	private screenRect: Rect2;
 
 	// @internal
-	public constructor(private notifier: EditorNotifier) {
+	public constructor(private onTransformChangeCallback: TransformChangeCallback) {
 		this.resetTransform(Mat33.identity);
 		this.screenRect = Rect2.empty;
 	}
@@ -120,11 +121,7 @@ export class Viewport {
 		const oldTransform = this.transform;
 		this.transform = newTransform;
 		this.inverseTransform = newTransform.inverse();
-		this.notifier.dispatch(EditorEventType.ViewportChanged, {
-			kind: EditorEventType.ViewportChanged,
-			newTransform,
-			oldTransform,
-		});
+		this.onTransformChangeCallback?.(oldTransform, newTransform);
 	}
 
 	public get screenToCanvasTransform(): Mat33 {

@@ -20,6 +20,9 @@
 
 type Listener<Value> = (data: Value)=> void;
 type CallbackHandler<EventType> = (data: EventType)=> void;
+export interface DispatcherEventListener {
+	remove: ()=>void;
+}
 
 // { @inheritDoc EventDispatcher! }
 export default class EventDispatcher<EventKeyType extends string|symbol|number, EventMessageType> {
@@ -38,7 +41,7 @@ export default class EventDispatcher<EventKeyType extends string|symbol|number, 
 		}
 	}
 
-	public on(eventName: EventKeyType, callback: CallbackHandler<EventMessageType>) {
+	public on(eventName: EventKeyType, callback: CallbackHandler<EventMessageType>): DispatcherEventListener {
 		if (!this.listeners[eventName]) this.listeners[eventName] = [];
 		this.listeners[eventName]!.push(callback);
 

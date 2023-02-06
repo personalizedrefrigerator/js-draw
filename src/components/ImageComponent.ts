@@ -88,7 +88,9 @@ export default class ImageComponent extends AbstractComponent {
 	}
 
 	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+		canvas.startObject(this.contentBBox);
 		canvas.drawImage(this.image);
+		canvas.endObject(this.getLoadSaveData());
 	}
 
 	public getProportionalRenderingTime(): number {

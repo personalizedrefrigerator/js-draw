@@ -37,9 +37,15 @@ export default abstract class AbstractComponent {
 	protected constructor(
 		// A unique identifier for the type of component
 		private readonly componentKind: string,
+		initialZIndex?: number,
 	) {
 		this.lastChangedTime = (new Date()).getTime();
-		this.zIndex = AbstractComponent.zIndexCounter++;
+
+		if (initialZIndex !== undefined) {
+			this.zIndex = initialZIndex;
+		} else {
+			this.zIndex = AbstractComponent.zIndexCounter++;
+		}
 
 		// Create a unique ID.
 		this.id = `${new Date().getTime()}-${Math.random()}`;
@@ -95,6 +101,10 @@ export default abstract class AbstractComponent {
 	public getBBox(): Rect2 {
 		return this.contentBBox;
 	}
+
+	/** Called when this component is added to the given image. */
+	public onAddToImage(_image: EditorImage): void { }
+	public onRemoveFromImage(): void { }
 
 	public abstract render(canvas: AbstractRenderer, visibleRect?: Rect2): void;
 

@@ -181,7 +181,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	private clipLevels: number[] = [];
-	public startObject(boundingBox: Rect2, clip: boolean) {
+	public startObject(boundingBox: Rect2, clip?: boolean) {
 		if (this.isTooSmallToRender(boundingBox)) {
 			this.ignoreObjectsAboveLevel = this.getNestingLevel();
 			this.ignoringObject = true;

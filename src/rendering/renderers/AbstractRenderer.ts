@@ -1,3 +1,4 @@
+import Color4 from '../../Color4';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Mat33 from '../../math/Mat33';
 import Path, { PathCommand, PathCommandType } from '../../math/Path';
@@ -122,21 +123,37 @@ export default abstract class AbstractRenderer {
 		}
 	}
 
-	// Draw a rectangle. Boundary lines have width [lineWidth] and are filled with [lineFill].
+	// Strokes a rectangle. Boundary lines have width [lineWidth] and are filled with [lineFill].
 	// This is equivalent to `drawPath(Path.fromRect(...).toRenderable(...))`.
 	public drawRect(rect: Rect2, lineWidth: number, lineFill: RenderingStyle) {
 		const path = Path.fromRect(rect, lineWidth);
 		this.drawPath(path.toRenderable(lineFill));
 	}
 
-	// Note the start/end of an object with the given bounding box.
+	// Fills a rectangle.
+	public fillRect(rect: Rect2, fill: Color4) {
+		const path = Path.fromRect(rect);
+		this.drawPath(path.toRenderable({ fill }));
+	}
+
+	// Note the start of an object with the given bounding box.
 	// Renderers are not required to support [clip]
 	public startObject(_boundingBox: Rect2, _clip?: boolean) {
 		this.currentPaths = [];
 		this.objectLevel ++;
 	}
 
-	public endObject(_loaderData?: LoadSaveDataTable) {
+	/**
+	 * Notes the end of an object.
+	 * @param _loaderData - a map from strings to JSON-ifyable objects
+	 * and contains properties attached to the object by whatever loader loaded the image. This
+	 * is used to preserve attributes not supported by js-draw when loading/saving an image.
+	 * Renderers may ignore this.
+	 *
+	 * @param _objectTags - a list of labels (e.g. `className`s) to be attached to the object.
+	 * Renderers may ignore this.
+	 */
+	public endObject(_loaderData?: LoadSaveDataTable, _objectTags?: string[]) {
 		// Render the paths all at once
 		this.flushPath();
 		this.currentPaths = null;

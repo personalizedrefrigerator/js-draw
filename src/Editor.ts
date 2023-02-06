@@ -109,9 +109,6 @@ export class Editor {
 	 */
 	public readonly image: EditorImage;
 
-	/** Viewport for the exported/imported image. */
-	private importExportViewport: Viewport;
-
 	/**
 	 * Allows transforming the view and querying information about
 	 * what is currently visible.
@@ -215,17 +212,19 @@ export class Editor {
 		this.renderingRegion.setAttribute('alt', '');
 
 		this.notifier = new EventDispatcher();
-		this.importExportViewport = new Viewport(this.notifier);
-		this.viewport = new Viewport(this.notifier);
+		this.viewport = new Viewport((oldTransform, newTransform) => {
+			this.notifier.dispatch(EditorEventType.ViewportChanged, {
+				kind: EditorEventType.ViewportChanged,
+				newTransform,
+				oldTransform,
+			});
+		});
 		this.display = new Display(this, this.settings.renderingMode, this.renderingRegion);
 		this.image = new EditorImage();
 		this.history = new UndoRedoHistory(this, this.announceRedoCallback, this.announceUndoCallback);
 		this.toolController = new ToolController(this, this.localization);
 
 		parent.appendChild(this.container);
-
-		// Default to a 500x500 image
-		this.importExportViewport.updateScreenSize(Vec2.of(500, 500));
 
 		this.viewport.updateScreenSize(
 			Vec2.of(this.display.width, this.display.height)
@@ -773,7 +772,7 @@ export class Editor {
 			const exportRectFill = { fill: Color4.fromHex('#44444455') };
 			const exportRectStrokeWidth = 5 * this.viewport.getSizeOfPixelOnCanvas();
 			renderer.drawRect(
-				this.importExportViewport.visibleRect,
+				this.getImportExportRect(),
 				exportRectStrokeWidth,
 				exportRectFill
 			);
@@ -920,13 +919,14 @@ export class Editor {
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png'): string {
 		const canvas = document.createElement('canvas');
 
-		const resolution = this.importExportViewport.getScreenRectSize();
+		const importExportViewport = this.image.getImportExportViewport();
+		const resolution = importExportViewport.getScreenRectSize();
 
 		canvas.width = resolution.x;
 		canvas.height = resolution.y;
 
 		const ctx = canvas.getContext('2d')!;
-		const renderer = new CanvasRenderer(ctx, this.importExportViewport);
+		const renderer = new CanvasRenderer(ctx, importExportViewport);
 
 		this.image.renderAll(renderer);
 
@@ -935,12 +935,12 @@ export class Editor {
 	}
 
 	public toSVG(): SVGElement {
-		const importExportViewport = this.importExportViewport;
+		const importExportViewport = this.image.getImportExportViewport();
 		const svgNameSpace = 'http://www.w3.org/2000/svg';
 		const result = document.createElementNS(svgNameSpace, 'svg');
 		const renderer = new SVGRenderer(result, importExportViewport);
 
-		const origTransform = this.importExportViewport.canvasToScreenTransform;
+		const origTransform = importExportViewport.canvasToScreenTransform;
 		// Render with (0,0) at (0,0) — we'll handle translation with
 		// the viewBox property.
 		importExportViewport.resetTransform(Mat33.identity);
@@ -992,33 +992,12 @@ export class Editor {
 
 	// Returns the size of the visible region of the output SVG
 	public getImportExportRect(): Rect2 {
-		return this.importExportViewport.visibleRect;
+		return this.image.getImportExportViewport().visibleRect;
 	}
 
 	// Resize the output SVG to match `imageRect`.
 	public setImportExportRect(imageRect: Rect2): Command {
-		const origSize = this.importExportViewport.visibleRect.size;
-		const origTransform = this.importExportViewport.canvasToScreenTransform;
-
-		return new class extends Command {
-			public apply(editor: Editor) {
-				const viewport = editor.importExportViewport;
-				viewport.updateScreenSize(imageRect.size);
-				viewport.resetTransform(Mat33.translation(imageRect.topLeft.times(-1)));
-				editor.queueRerender();
-			}
-
-			public unapply(editor: Editor) {
-				const viewport = editor.importExportViewport;
-				viewport.updateScreenSize(origSize);
-				viewport.resetTransform(origTransform);
-				editor.queueRerender();
-			}
-
-			public description(_editor: Editor, localizationTable: EditorLocalization) {
-				return localizationTable.resizeOutputCommand(imageRect);
-			}
-		};
+		return this.image.setImportExportRect(imageRect);
 	}
 
 	/**

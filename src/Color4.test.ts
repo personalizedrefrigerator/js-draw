@@ -31,4 +31,10 @@ describe('Color4', () => {
 	it('should mix red with nothing and get red', () => {
 		expect(Color4.average([ Color4.red ])).objEq(Color4.red);
 	});
+
+	it('different colors should be different', () => {
+		expect(Color4.red.eq(Color4.red)).toBe(true);
+		expect(Color4.red.eq(Color4.green)).toBe(false);
+		expect(Color4.fromString('#ff000000').eq(Color4.transparent)).toBe(true);
+	});
 });

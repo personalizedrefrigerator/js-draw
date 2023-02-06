@@ -1,6 +1,5 @@
 import Color4 from '../Color4';
 import { ComponentBuilderFactory } from '../components/builders/types';
-import EventDispatcher from '../EventDispatcher';
 import { Vec2 } from '../math/Vec2';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import TextStyle from '../rendering/TextRenderingStyle';
@@ -542,7 +541,7 @@ export default class IconProvider {
 			time: nowTime,
 		};
 	
-		const viewport = new Viewport(new EventDispatcher());
+		const viewport = new Viewport(() => {});
 		const builder = factory(startPoint, viewport);
 		builder.addPoint(endPoint);
 	

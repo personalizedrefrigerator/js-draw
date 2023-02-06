@@ -94,7 +94,7 @@ class ZoomWidget extends BaseWidget {
 	}
 
 	protected fillDropdown(dropdown: HTMLElement): boolean {
-		dropdown.appendChild(makeZoomControl(this.localizationTable, this.editor));
+		dropdown.replaceChildren(makeZoomControl(this.localizationTable, this.editor));
 		return true;
 	}
 }

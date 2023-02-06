@@ -133,6 +133,7 @@ export enum EditorEventType {
 type EditorToolEventType = EditorEventType.ToolEnabled
 	| EditorEventType.ToolDisabled
 	| EditorEventType.ToolUpdated;
+
 export interface EditorToolEvent {
 	readonly kind: EditorToolEventType;
 	readonly tool: BaseTool;

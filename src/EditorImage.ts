@@ -6,21 +6,80 @@ import Rect2 from './math/Rect2';
 import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';
+import EventDispatcher from './EventDispatcher';
+import { Vec2 } from './math/Vec2';
+import Command from './commands/Command';
+import Mat33 from './math/Mat33';
 
 // @internal Sort by z-index, low to high
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 	leaves.sort((a, b) => a.getContent()!.getZIndex() - b.getContent()!.getZIndex());
 };
 
+export enum EditorImageEventType {
+	ExportViewportChanged
+}
+
+export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image: EditorImage }>;
+
 // Handles lookup/storage of elements in the image
 export default class EditorImage {
 	private root: ImageNode;
 	private componentsById: Record<string, AbstractComponent>;
 
+	/** Viewport for the exported/imported image. */
+	private importExportViewport: Viewport;
+
+	// @internal
+	public readonly notifier: EditorImageNotifier;
+
 	// @internal
 	public constructor() {
 		this.root = new ImageNode();
 		this.componentsById = {};
+
+		this.notifier = new EventDispatcher();
+		this.importExportViewport = new Viewport(() => {
+			this.notifier.dispatch(EditorImageEventType.ExportViewportChanged, {
+				image: this,
+			});
+		});
+
+		// Default to a 500x500 image
+		this.importExportViewport.updateScreenSize(Vec2.of(500, 500));
+	}
+
+	/**
+	 * @returns a `Viewport` for rendering the image when importing/exporting.
+	 */
+	public getImportExportViewport() {
+		return this.importExportViewport;
+	}
+
+	public setImportExportRect(imageRect: Rect2) {
+		const importExportViewport = this.getImportExportViewport();
+		const origSize = importExportViewport.visibleRect.size;
+		const origTransform = importExportViewport.canvasToScreenTransform;
+
+		return new class extends Command {
+			public apply(editor: Editor) {
+				const viewport = editor.image.getImportExportViewport();
+				viewport.updateScreenSize(imageRect.size);
+				viewport.resetTransform(Mat33.translation(imageRect.topLeft.times(-1)));
+				editor.queueRerender();
+			}
+
+			public unapply(editor: Editor) {
+				const viewport = editor.image.getImportExportViewport();
+				viewport.updateScreenSize(origSize);
+				viewport.resetTransform(origTransform);
+				editor.queueRerender();
+			}
+
+			public description(_editor: Editor, localizationTable: EditorLocalization) {
+				return localizationTable.resizeOutputCommand(imageRect);
+			}
+		};
 	}
 
 	// Returns the parent of the given element, if it exists.
@@ -98,8 +157,15 @@ export default class EditorImage {
 	}
 
 	private addElementDirectly(elem: AbstractComponent): ImageNode {
+		elem.onAddToImage(this);
+
 		this.componentsById[elem.getId()] = elem;
 		return this.root.addLeaf(elem);
+	}
+
+	private removeElementDirectly(element: AbstractComponent) {
+		const container = this.findParent(element);
+		container?.remove();
 	}
 
 	/**
@@ -111,6 +177,11 @@ export default class EditorImage {
 	 */
 	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {
 		return new EditorImage.AddElementCommand(elem, applyByFlattening);
+	}
+
+	/** @see EditorImage.addElement */
+	public addElement(elem: AbstractComponent, applyByFlattening: boolean = true) {
+		return EditorImage.addElement(elem, applyByFlattening);
 	}
 
 	// A Command that can access private [EditorImage] functionality
@@ -147,8 +218,7 @@ export default class EditorImage {
 		}
 
 		public unapply(editor: Editor) {
-			const container = editor.image.findParent(this.element);
-			container?.remove();
+			editor.image.removeElementDirectly(this.element);
 			editor.queueRerender();
 		}
 
@@ -394,6 +464,8 @@ export class ImageNode {
 
 			return;
 		}
+
+		this.content?.onRemoveFromImage();
 
 		const oldChildCount = this.parent.children.length;
 		this.parent.children = this.parent.children.filter(node => {

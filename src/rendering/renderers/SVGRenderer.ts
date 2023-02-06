@@ -248,7 +248,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.objectElems = [];
 	}
 
-	public endObject(loaderData?: LoadSaveDataTable) {
+	public endObject(loaderData?: LoadSaveDataTable, elemClassNames?: string[]) {
 		super.endObject(loaderData);
 
 		// Don't extend paths across objects
@@ -271,6 +271,13 @@ export default class SVGRenderer extends AbstractRenderer {
 						elem.style.setProperty(attr.key, attr.value, attr.priority);
 					}
 				}
+			}
+		}
+
+		// Add class names to the object, if given.
+		if (elemClassNames) {
+			for (const elem of this.objectElems ?? []) {
+				elem.classList.add(...elemClassNames);
 			}
 		}
 	}

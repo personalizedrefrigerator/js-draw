@@ -1,5 +1,6 @@
 import Color4 from './Color4';
 import AbstractComponent from './components/AbstractComponent';
+import ImageBackground, { BackgroundType, imageBackgroundCSSClassName } from './components/ImageBackground';
 import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
@@ -186,6 +187,12 @@ export default class SVGLoader implements ImageLoader {
 		await this.onAddComponent?.(elem);
 	}
 
+	private async addBackground(node: SVGPathElement) {
+		const fill = Color4.fromString(node.getAttribute('fill') ?? node.style.fill ?? 'black');
+		const elem = new ImageBackground(BackgroundType.SolidColor, fill);
+		await this.onAddComponent?.(elem);
+	}
+
 	// If given, 'supportedAttrs' will have x, y, etc. attributes that were used in computing the transform added to it,
 	// to prevent storing duplicate transform information when saving the component.
 	private getTransform(elem: SVGElement, supportedAttrs?: string[], computedStyles?: CSSStyleDeclaration): Mat33 {
@@ -359,7 +366,11 @@ export default class SVGLoader implements ImageLoader {
 			// Continue -- visit the node's children.
 			break;
 		case 'path':
-			await this.addPath(node as SVGPathElement);
+			if (node.classList.contains(imageBackgroundCSSClassName)) {
+				await this.addBackground(node as SVGPathElement);
+			} else {
+				await this.addPath(node as SVGPathElement);
+			}
 			break;
 		case 'text':
 			await this.addText(node as SVGTextElement);

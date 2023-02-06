@@ -9,6 +9,7 @@ import Stroke from './Stroke';
 import TextComponent from './TextComponent';
 import ImageComponent from './ImageComponent';
 import RestyleableComponent, { createRestyleComponentCommand } from './RestylableComponent';
+import ImageBackground from './ImageBackground';
 
 export {
 	Stroke,
@@ -18,5 +19,6 @@ export {
 
 	TextComponent,
 	Stroke as StrokeComponent,
+	ImageBackground as BackgroundComponent,
 	ImageComponent,
 };
