@@ -1,3 +1,9 @@
+# 0.15.1
+ * Bug fixes
+   * Correctly restore the z-index of components on undo.
+   * Fix selection collapsing to a point on two-finger pan gesture.
+   * Move buttons into view when they don't fit on the screen
+
 # 0.15.0
  * Adds a "reformat selection" button that allows changing the color of the selection.
  * Bug fixes:

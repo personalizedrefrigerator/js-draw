@@ -138,7 +138,7 @@ export default abstract class AbstractComponent {
 
 	// Returns a command that updates this component's z-index.
 	public setZIndex(newZIndex: number): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex);
+		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex, this.getZIndex());
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
@@ -156,7 +156,6 @@ export default abstract class AbstractComponent {
 	private static transformElementCommandId = 'transform-element';
 
 	private static TransformElementCommand = class extends UnresolvedSerializableCommand {
-		private origZIndex: number|null = null;
 		private targetZIndex: number;
 
 		// Construct a new TransformElementCommand. `component`, while optional, should
@@ -167,6 +166,7 @@ export default abstract class AbstractComponent {
 			componentID: string,
 			component?: AbstractComponent,
 			targetZIndex?: number,
+			private origZIndex?: number,
 		) {
 			super(AbstractComponent.transformElementCommandId, componentID, component);
 			this.targetZIndex = targetZIndex ?? AbstractComponent.zIndexCounter++;
@@ -174,6 +174,10 @@ export default abstract class AbstractComponent {
 			// Ensure that we keep drawing on top even after changing the z-index.
 			if (this.targetZIndex >= AbstractComponent.zIndexCounter) {
 				AbstractComponent.zIndexCounter = this.targetZIndex + 1;
+			}
+
+			if (component && origZIndex === undefined) {
+				this.origZIndex = component.getZIndex();
 			}
 		}
 
@@ -183,7 +187,7 @@ export default abstract class AbstractComponent {
 			}
 
 			super.resolveComponent(image);
-			this.origZIndex = this.component!.getZIndex();
+			this.origZIndex ??= this.component!.getZIndex();
 		}
 
 		private updateTransform(editor: Editor, newTransfm: Mat33) {
@@ -233,12 +237,14 @@ export default abstract class AbstractComponent {
 				const elem = editor.image.lookupElement(json.id) ?? undefined;
 				const transform = new Mat33(...(json.transfm as Mat33Array));
 				const targetZIndex = json.targetZIndex;
+				const origZIndex = json.origZIndex ?? undefined;
 
 				return new AbstractComponent.TransformElementCommand(
 					transform,
 					json.id,
 					elem,
 					targetZIndex,
+					origZIndex,
 				);
 			});
 		}
@@ -248,6 +254,7 @@ export default abstract class AbstractComponent {
 				id: this.componentID,
 				transfm: this.affineTransfm.toArray(),
 				targetZIndex: this.targetZIndex,
+				origZIndex: this.origZIndex,
 			};
 		}
 	};
