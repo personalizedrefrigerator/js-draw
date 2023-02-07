@@ -324,7 +324,7 @@ export default class Selection {
 		}
 
 		this.selectedElems = this.editor.image.getElementsIntersectingRegion(this.region).filter(elem => {
-			return elem.intersectsRect(this.region);
+			return elem.intersectsRect(this.region) && elem.isSelectable();
 		});
 
 		if (singleItemSelectionMode && this.selectedElems.length > 0) {
