@@ -1,5 +1,6 @@
+import UnknownSVGObject from '../components/UnknownSVGObject';
 import Editor from '../Editor';
-import { Rect2, StrokeComponent } from '../lib';
+import { EditorImage, Rect2, StrokeComponent } from '../lib';
 import { Vec2 } from '../math/Vec2';
 import createEditor from '../testing/createEditor';
 import { InputEvtType } from '../types';
@@ -75,5 +76,27 @@ describe('Eraser', () => {
 		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(47, 47));
 
 		expect(getAllStrokes(editor)).toHaveLength(0);
+	});
+
+	it('should not erase unselectable objects', () => {
+		const editor = createEditor();
+		const unerasableObj = new UnknownSVGObject(document.createElementNS('http://www.w3.org/2000/svg', 'arc'));
+
+		// Add to the image
+		expect(editor.image.getAllElements()).toHaveLength(0);
+		editor.dispatch(EditorImage.addElement(unerasableObj));
+		expect(editor.image.getAllElements()).toHaveLength(1);
+
+
+		const eraser = selectEraser(editor);
+		eraser.setThickness(100);
+
+		// Try to erase it.
+		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		jest.advanceTimersByTime(100);
+		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(3, 0));
+
+		// Should not have been erased
+		expect(editor.image.getAllElements()).toHaveLength(1);
 	});
 });

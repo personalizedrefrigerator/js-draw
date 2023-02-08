@@ -67,11 +67,15 @@ export default class Eraser extends BaseTool {
 			return component.intersects(line) || component.intersectsRect(eraserRect);
 		});
 
+		// Only erase components that could be selected (and thus interacted with)
+		// by the user.
+		const toErase = intersectingElems.filter(elem => elem.isSelectable());
+
 		// Remove any intersecting elements.
-		this.toRemove.push(...intersectingElems);
+		this.toRemove.push(...toErase);
 
 		// Create new Erase commands for the now-to-be-erased elements and apply them.
-		const newPartialCommands = intersectingElems.map(elem => new Erase([ elem ]));
+		const newPartialCommands = toErase.map(elem => new Erase([ elem ]));
 		newPartialCommands.forEach(cmd => cmd.apply(this.editor));
 
 		this.partialCommands.push(...newPartialCommands);
