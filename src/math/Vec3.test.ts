@@ -31,6 +31,10 @@ describe('Vec3', () => {
 		expect(Vec3.zero.orthog().dot(Vec3.zero)).toBe(0);
 	});
 
+	it('.minus should return the difference between two vectors', () => {
+		expect(Vec3.of(1, 2, 3).minus(Vec3.of(4, 5, 6))).objEq(Vec3.of(1 - 4, 2 - 5, 3 - 6));
+	});
+
 	it('.orthog should return a unit vector', () => {
 		expect(Vec3.zero.orthog().magnitude()).toBe(1);
 		expect(Vec3.unitZ.orthog().magnitude()).toBe(1);

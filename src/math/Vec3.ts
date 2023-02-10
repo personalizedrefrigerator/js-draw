@@ -77,7 +77,7 @@ export default class Vec3 {
 	}
 
 	public minus(v: Vec3): Vec3 {
-		return this.plus(v.times(-1));
+		return Vec3.of(this.x - v.x, this.y - v.y, this.z - v.z);
 	}
 
 	public dot(other: Vec3): number {
