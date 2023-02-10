@@ -1,4 +1,4 @@
-import { PathCommandType } from '../../math/Path';
+import Path, { PathCommandType } from '../../math/Path';
 import Rect2 from '../../math/Rect2';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { StrokeDataPoint } from '../../types';
@@ -7,14 +7,14 @@ import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 
-export const makeLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, _viewport: Viewport) => {
-	return new LineBuilder(initialPoint);
+export const makeLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
+	return new LineBuilder(initialPoint, viewport);
 };
 
 export default class LineBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;
 
-	public constructor(private readonly startPoint: StrokeDataPoint) {
+	public constructor(private readonly startPoint: StrokeDataPoint, private readonly viewport: Viewport) {
 		this.endPoint = startPoint;
 	}
 
@@ -35,31 +35,29 @@ export default class LineBuilder implements ComponentBuilder {
 		const scaledStartNormal = lineNormal.times(startSize);
 		const scaledEndNormal = lineNormal.times(endSize);
 
-		const preview = new Stroke([
+		const strokeStartPoint = startPoint.minus(scaledStartNormal);
+
+		const path = new Path(strokeStartPoint, [
 			{
-				startPoint: startPoint.minus(scaledStartNormal),
-				commands: [
-					{
-						kind: PathCommandType.LineTo,
-						point: startPoint.plus(scaledStartNormal),
-					},
-					{
-						kind: PathCommandType.LineTo,
-						point: endPoint.plus(scaledEndNormal),
-					},
-					{
-						kind: PathCommandType.LineTo,
-						point: endPoint.minus(scaledEndNormal),
-					},
-					{
-						kind: PathCommandType.LineTo,
-						point: startPoint.minus(scaledStartNormal),
-					},
-				],
-				style: {
-					fill: this.startPoint.color,
-				}
-			}
+				kind: PathCommandType.LineTo,
+				point: startPoint.plus(scaledStartNormal),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: endPoint.plus(scaledEndNormal),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: endPoint.minus(scaledEndNormal),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: startPoint.minus(scaledStartNormal),
+			},
+		]).mapPoints(point => this.viewport.roundPoint(point));
+
+		const preview = new Stroke([
+			path.toRenderable({ fill: this.startPoint.color })
 		]);
 
 		return preview;

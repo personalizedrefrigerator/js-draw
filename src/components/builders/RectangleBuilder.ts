@@ -49,7 +49,7 @@ export default class RectangleBuilder implements ComponentBuilder {
 		).transformedBy(
 			// Rotate the canvas rectangle so that its rotation matches the screen
 			rotationMat
-		);
+		).mapPoints(point => this.viewport.roundPoint(point));
 
 		const preview = new Stroke([
 			path.toRenderable({
