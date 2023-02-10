@@ -240,11 +240,49 @@ export default class Mat33 {
 	}
 
 	public toString(): string {
-		return `
-⎡ ${this.a1},\t ${this.a2},\t ${this.a3}\t ⎤
-⎢ ${this.b1},\t ${this.b2},\t ${this.b3}\t ⎥
-⎣ ${this.c1},\t ${this.c2},\t ${this.c3}\t ⎦
-		`.trimEnd().trimStart();
+		let result = '';
+		const maxColumnLens = [ 0, 0, 0 ];
+
+		// Determine the longest item in each column so we can pad the others to that
+		// length.
+		for (const row of this.rows) {
+			for (let i = 0; i < 3; i++) {
+				maxColumnLens[i] = Math.max(maxColumnLens[0], `${row.at(i)}`.length);
+			}
+		}
+
+		for (let i = 0; i < 3; i++) {
+			if (i === 0) {
+				result += '⎡ ';
+			} else if (i === 1) {
+				result += '⎢ ';
+			} else {
+				result += '⎣ ';
+			}
+
+			// Add each component of the ith row (after padding it)
+			for (let j = 0; j < 3; j++) {
+				const val = this.rows[i].at(j).toString();
+
+				let padding = '';
+				for (let i = val.length; i < maxColumnLens[j]; i++) {
+					padding += ' ';
+				}
+
+				result += val + ', ' + padding;
+			}
+
+			if (i === 0) {
+				result += ' ⎤';
+			} else if (i === 1) {
+				result += ' ⎥';
+			} else {
+				result += ' ⎦';
+			}
+			result += '\n';
+		}
+
+		return result.trimEnd();
 	}
 
 	/**
@@ -302,6 +340,10 @@ export default class Mat33 {
 	}
 
 	public static zRotation(radians: number, center: Point2 = Vec2.zero): Mat33 {
+		if (radians === 0) {
+			return Mat33.identity;
+		}
+
 		const cos = Math.cos(radians);
 		const sin = Math.sin(radians);
 

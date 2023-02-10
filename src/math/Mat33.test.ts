@@ -72,12 +72,24 @@ describe('Mat33 tests', () => {
 	});
 
 	it('90 degree z-rotation matricies should rotate 90 degrees counter clockwise', () => {
-		const fuzz = 0.01;
+		const fuzz = 0.001;
 
 		const M = Mat33.zRotation(Math.PI / 2);
 		const rotated = M.transformVec2(Vec2.unitX);
 		expect(rotated).objEq(Vec2.unitY, fuzz);
 		expect(M.transformVec2(rotated)).objEq(Vec2.unitX.times(-1), fuzz);
+	});
+
+	it('z-rotation matricies should preserve the given origin', () => {
+		const testPairs: Array<[number, Vec2]> = [
+			[ Math.PI / 2, Vec2.zero ],
+			[ -Math.PI / 2, Vec2.zero ],
+			[ -Math.PI / 2, Vec2.of(10, 10) ],
+		];
+
+		for (const [ angle, center ] of testPairs) {
+			expect(Mat33.zRotation(angle, center).transformVec2(center)).objEq(center);
+		}
 	});
 
 	it('translation matricies should translate Vec2s', () => {
@@ -138,6 +150,13 @@ describe('Mat33 tests', () => {
 		expect(
 			fullTransformInverse.transformVec2(fullTransform.transformVec2(Vec2.unitX))
 		).objEq(Vec2.unitX, fuzz);
+	});
+
+	it('z-rotation should preserve given origin', () => {
+		const rotationOrigin = Vec2.of(75.16363373235318, 104.29870408043762);
+		const angle = 6.205048847547065;
+
+		expect(Mat33.zRotation(angle, rotationOrigin).transformVec2(rotationOrigin)).objEq(rotationOrigin);
 	});
 
 	it('should correctly apply a mapping to all components', () => {

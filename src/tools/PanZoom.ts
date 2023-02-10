@@ -218,6 +218,13 @@ export default class PanZoom extends BaseTool {
 		// Snap the rotation
 		if (Math.abs(fullRotation - roundedFullRotation) < maxSnapAngle) {
 			fullRotation = roundedFullRotation;
+
+			// Work around a rotation/matrix multiply bug.
+			// (See commit after 4abe27ff8e7913155828f98dee77b09c57c51d30).
+			// TODO: Fix the underlying issue and remove this.
+			if (fullRotation !== 0) {
+				fullRotation += 0.0001;
+			}
 		}
 
 		return fullRotation - this.editor.viewport.getRotationAngle();
@@ -240,6 +247,7 @@ export default class PanZoom extends BaseTool {
 		const transformUpdate = Mat33.translation(delta)
 			.rightMul(Mat33.scaling2D(dist / this.lastDist, canvasCenter))
 			.rightMul(Mat33.zRotation(deltaRotation, canvasCenter));
+
 		this.lastScreenCenter = screenCenter;
 		this.lastDist = dist;
 		this.transform = Viewport.transformBy(
