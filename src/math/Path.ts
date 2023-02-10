@@ -209,39 +209,42 @@ export default class Path {
 		return result;
 	}
 
+	private static mapPathCommand(part: PathCommand, mapping: (point: Point2)=> Point2): PathCommand {
+		switch (part.kind) {
+		case PathCommandType.MoveTo:
+		case PathCommandType.LineTo:
+			return {
+				kind: part.kind,
+				point: mapping(part.point),
+			};
+			break;
+		case PathCommandType.CubicBezierTo:
+			return {
+				kind: part.kind,
+				controlPoint1: mapping(part.controlPoint1),
+				controlPoint2: mapping(part.controlPoint2),
+				endPoint: mapping(part.endPoint),
+			};
+			break;
+		case PathCommandType.QuadraticBezierTo:
+			return {
+				kind: part.kind,
+				controlPoint: mapping(part.controlPoint),
+				endPoint: mapping(part.endPoint),
+			};
+			break;
+		}
+
+		const exhaustivenessCheck: never = part;
+		return exhaustivenessCheck;
+	}
+
 	public mapPoints(mapping: (point: Point2)=>Point2): Path {
 		const startPoint = mapping(this.startPoint);
 		const newParts: PathCommand[] = [];
 
-		let exhaustivenessCheck: never;
 		for (const part of this.parts) {
-			switch (part.kind) {
-			case PathCommandType.MoveTo:
-			case PathCommandType.LineTo:
-				newParts.push({
-					kind: part.kind,
-					point: mapping(part.point),
-				});
-				break;
-			case PathCommandType.CubicBezierTo:
-				newParts.push({
-					kind: part.kind,
-					controlPoint1: mapping(part.controlPoint1),
-					controlPoint2: mapping(part.controlPoint2),
-					endPoint: mapping(part.endPoint),
-				});
-				break;
-			case PathCommandType.QuadraticBezierTo:
-				newParts.push({
-					kind: part.kind,
-					controlPoint: mapping(part.controlPoint),
-					endPoint: mapping(part.endPoint),
-				});
-				break;
-			default:
-				exhaustivenessCheck = part;
-				return exhaustivenessCheck;
-			}
+			newParts.push(Path.mapPathCommand(part, mapping));
 		}
 
 		return new Path(startPoint, newParts);
@@ -429,6 +432,62 @@ export default class Path {
 			commands: this.parts,
 			path: this,
 		};
+	}
+
+	/**
+	 * @returns a Path that, when rendered, looks roughly equivalent to the given path.
+	 */
+	public static visualEquivalent(renderablePath: RenderablePathSpec, visibleRect: Rect2): RenderablePathSpec {
+		const path = Path.fromRenderable(renderablePath);
+		const strokeWidth = renderablePath.style.stroke?.width ?? 0;
+		const onlyStroked = strokeWidth > 0 && renderablePath.style.fill.a === 0;
+
+		// Scale the expanded rect --- the visual equivalent is only close for huge strokes.
+		const expandedRect = visibleRect.grownBy(strokeWidth)
+			.transformedBoundingBox(Mat33.scaling2D(200, visibleRect.center));
+
+		// TODO: Handle simplifying very small paths.
+		if (expandedRect.containsRect(path.bbox.grownBy(strokeWidth))) {
+			return renderablePath;
+		}
+		const parts: PathCommand[] = [];
+		const startPoint = path.startPoint;
+
+		for (const part of path.parts) {
+			const partBBox = Path.computeBBoxForSegment(startPoint, part).grownBy(strokeWidth);
+			let endPoint;
+
+			if (part.kind === PathCommandType.LineTo || part.kind === PathCommandType.MoveTo) {
+				endPoint = part.point;
+			} else {
+				endPoint = part.endPoint;
+			}
+
+			const intersectsVisible = partBBox.intersects(visibleRect);
+
+			if (onlyStroked && intersectsVisible) {
+				parts.push(Path.mapPathCommand(part, point => {
+					if (expandedRect.containsPoint(point)) {
+						return point;
+					} else {
+						return expandedRect.getClosestPointOnBoundaryTo(point);
+					}
+				}));
+			} else if (onlyStroked) {
+				// We're stroking (not filling) and the path doesn't intersect the bounding box.
+				// Don't draw it, but preserve the endpoints.
+				parts.push({
+					kind: PathCommandType.MoveTo,
+					point: endPoint,
+				});
+			}
+			else {
+				// TODO: Handle case where we're filling
+				parts.push(part);
+			}
+		}
+
+		return new Path(path.startPoint, parts).toRenderable(renderablePath.style);
 	}
 
 	private cachedStringVersion: string|null = null;

@@ -1,6 +1,7 @@
 import Color4 from '../../Color4';
 import TextComponent from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
+import Path from '../../math/Path';
 import Rect2 from '../../math/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
@@ -12,6 +13,7 @@ import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './Abstrac
 export default class CanvasRenderer extends AbstractRenderer {
 	private ignoreObjectsAboveLevel: number|null = null;
 	private ignoringObject: boolean = false;
+	private currentObjectBBox: Rect2|null = null;
 
 	// Minimum square distance of a control point from the line between the end points
 	// for the curve not to be drawn as a line.
@@ -149,6 +151,15 @@ export default class CanvasRenderer extends AbstractRenderer {
 			return;
 		}
 
+		// If part of a huge object, it might be worth trimming the path
+		if (this.currentObjectBBox?.containsRect(this.getViewport().visibleRect)) {
+			// Try to trim/remove parts of the path outside of the bounding box.
+			path = Path.visualEquivalent(
+				path,
+				this.getViewport().visibleRect
+			);
+		}
+
 		super.drawPath(path);
 	}
 
@@ -188,6 +199,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 
 		super.startObject(boundingBox);
+		this.currentObjectBBox = boundingBox;
 
 		if (!this.ignoringObject && clip) {
 			this.clipLevels.push(this.objectLevel);
@@ -209,6 +221,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 			}
 		}
 
+		this.currentObjectBBox = null;
 		super.endObject();
 
 		// If exiting an object with a too-small-to-draw bounding box,

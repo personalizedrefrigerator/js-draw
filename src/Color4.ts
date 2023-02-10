@@ -10,7 +10,7 @@ export default class Color4 {
 		/** Blue component. `b` ∈ [0, 1] */
 		public readonly b: number,
 
-		/** Alpha/transparent component. `a` ∈ [0, 1] */
+		/** Alpha/transparent component. `a` ∈ [0, 1]. 0 = transparent */
 		public readonly a: number
 	) {
 	}
