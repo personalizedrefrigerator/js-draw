@@ -444,7 +444,7 @@ export default class Path {
 
 		// Scale the expanded rect --- the visual equivalent is only close for huge strokes.
 		const expandedRect = visibleRect.grownBy(strokeWidth)
-			.transformedBoundingBox(Mat33.scaling2D(1000, visibleRect.center));
+			.transformedBoundingBox(Mat33.scaling2D(10, visibleRect.center));
 
 		// TODO: Handle simplifying very small paths.
 		if (expandedRect.containsRect(path.bbox.grownBy(strokeWidth))) {
@@ -477,17 +477,10 @@ export default class Path {
 				});
 			}
 			else {
-				// Otherwise, we may be filling. Preserve the filled region, if possible.
-				let point;
-				if (expandedRect.containsPoint(endPoint)) {
-					point = endPoint;
-				} else {
-					point = visibleRect.getClosestPointOnBoundaryTo(endPoint);
-				}
-
+				// Otherwise, we may be filling. Try to roughly preserve the filled region.
 				parts.push({
 					kind: PathCommandType.LineTo,
-					point,
+					point: endPoint,
 				});
 			}
 
