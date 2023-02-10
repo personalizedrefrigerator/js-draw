@@ -106,6 +106,13 @@ export default class PanZoom extends BaseTool {
 
 	// Returns information about the pointers in a gesture
 	public computePinchData(p1: Pointer, p2: Pointer): PinchData {
+		// Swap the pointers to ensure consistent ordering.
+		if (p1.id < p2.id) {
+			const tmp = p1;
+			p1 = p2;
+			p2 = tmp;
+		}
+
 		const screenBetween = p2.screenPos.minus(p1.screenPos);
 		const angle = screenBetween.angle();
 		const dist = screenBetween.magnitude();
@@ -227,7 +234,6 @@ export default class PanZoom extends BaseTool {
 		} else {
 			deltaRotation = this.toSnappedRotationDelta(angle); 
 		}
-
 
 		this.updateVelocity(screenCenter);
 
