@@ -352,6 +352,11 @@ export default class SelectionTool extends BaseTool {
 				});
 				return true;
 			}
+
+			if (evt.key === 'a') {
+				// Selected all in onKeyDown. Don't finalizeTransform.
+				return true;
+			}
 		}
 
 		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
