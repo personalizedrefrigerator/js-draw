@@ -444,14 +444,14 @@ export default class Path {
 
 		// Scale the expanded rect --- the visual equivalent is only close for huge strokes.
 		const expandedRect = visibleRect.grownBy(strokeWidth)
-			.transformedBoundingBox(Mat33.scaling2D(200, visibleRect.center));
+			.transformedBoundingBox(Mat33.scaling2D(40, visibleRect.center));
 
 		// TODO: Handle simplifying very small paths.
 		if (expandedRect.containsRect(path.bbox.grownBy(strokeWidth))) {
 			return renderablePath;
 		}
 		const parts: PathCommand[] = [];
-		const startPoint = path.startPoint;
+		let startPoint = path.startPoint;
 
 		for (const part of path.parts) {
 			const partBBox = Path.computeBBoxForSegment(startPoint, part).grownBy(strokeWidth);
@@ -465,14 +465,9 @@ export default class Path {
 
 			const intersectsVisible = partBBox.intersects(visibleRect);
 
-			if (onlyStroked && intersectsVisible) {
-				parts.push(Path.mapPathCommand(part, point => {
-					if (expandedRect.containsPoint(point)) {
-						return point;
-					} else {
-						return expandedRect.getClosestPointOnBoundaryTo(point);
-					}
-				}));
+			if (intersectsVisible) {
+				// TODO: Can we trim parts of paths that intersect the visible rectangle?
+				parts.push(part);
 			} else if (onlyStroked) {
 				// We're stroking (not filling) and the path doesn't intersect the bounding box.
 				// Don't draw it, but preserve the endpoints.
@@ -482,9 +477,16 @@ export default class Path {
 				});
 			}
 			else {
-				// TODO: Handle case where we're filling
-				parts.push(part);
+				parts.push(Path.mapPathCommand(part, point => {
+					if (expandedRect.containsPoint(point)) {
+						return point;
+					} else {
+						return expandedRect.getClosestPointOnBoundaryTo(point);
+					}
+				}));
 			}
+
+			startPoint = endPoint;
 		}
 
 		return new Path(path.startPoint, parts).toRenderable(renderablePath.style);
