@@ -4,6 +4,7 @@
      - Previously, some objects used to store information about the image (e.g. attributes on the root `svg` object) could be selected and erased.
    * Round points created by rectangle, arrow, and line tools to prevent unnecessary decimal places in the output.
    * Performance improvement while zooming in on strokes.
+   * Fix view jumping while zooming in/rotating with touchscreen pan tool.
 
 # 0.15.1
  * Bug fixes
