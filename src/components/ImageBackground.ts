@@ -50,7 +50,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	}
 
 	// @internal
-	public forceStyle(style: ComponentStyle, _editor: Editor | null): void {
+	public forceStyle(style: ComponentStyle, editor: Editor | null): void {
 		const fill = style.color;
 
 		if (!fill) {
@@ -62,6 +62,11 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 			this.backgroundType = BackgroundType.None;
 		} else {
 			this.backgroundType = BackgroundType.SolidColor;
+		}
+
+		if (editor) {
+			editor.image.queueRerenderOf(this);
+			editor.queueRerender();
 		}
 	}
 
@@ -122,6 +127,10 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 
 	public isSelectable(): boolean {
 		return false;
+	}
+
+	public isBackground(): boolean {
+		return true;
 	}
 
 	protected serializeToJSON() {

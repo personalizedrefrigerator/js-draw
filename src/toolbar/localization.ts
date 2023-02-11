@@ -35,6 +35,10 @@ export interface ToolbarLocalization {
 	resetView: string;
 	selectionToolKeyboardShortcuts: string;
 	paste: string;
+	documentProperties: string;
+	backgroundColor: string;
+	imageWidthOption: string;
+	imageHeightOption: string;
 
 	errorImageHasZeroSize: string;
 
@@ -72,6 +76,10 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
 	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
+	documentProperties: 'Document',
+	backgroundColor: 'Background Color: ',
+	imageWidthOption: 'Width: ',
+	imageHeightOption: 'Height: ',
 
 	touchPanning: 'Touchscreen panning',
 

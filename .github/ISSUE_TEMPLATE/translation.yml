@@ -222,6 +222,38 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-documentProperties
+    attributes:
+      label: "documentProperties"
+      description: "Translate `Document`."
+      placeholder: "Document"
+    validations:
+      required: false
+  - type: input
+    id: translation-backgroundColor
+    attributes:
+      label: "backgroundColor"
+      description: "Translate `Background Color: `."
+      placeholder: "Background Color: "
+    validations:
+      required: false
+  - type: input
+    id: translation-imageWidthOption
+    attributes:
+      label: "imageWidthOption"
+      description: "Translate `Width: `."
+      placeholder: "Width: "
+    validations:
+      required: false
+  - type: input
+    id: translation-imageHeightOption
+    attributes:
+      label: "imageHeightOption"
+      description: "Translate `Height: `."
+      placeholder: "Height: "
+    validations:
+      required: false
+  - type: input
     id: translation-touchPanning
     attributes:
       label: "touchPanning"
@@ -731,6 +763,22 @@ body:
       label: "restyledElements"
       description: "Translate `Restyled elements`."
       placeholder: "Restyled elements"
+    validations:
+      required: false
+  - type: input
+    id: translation-emptyBackground
+    attributes:
+      label: "emptyBackground"
+      description: "Translate `Empty background`."
+      placeholder: "Empty background"
+    validations:
+      required: false
+  - type: input
+    id: translation-filledBackgroundWithColor
+    attributes:
+      label: "filledBackgroundWithColor"
+      description: "Translate ``(color) => `Filled background (${color})` ``."
+      placeholder: "(color) => `Filled background (${color})`"
     validations:
       required: false
   - type: input

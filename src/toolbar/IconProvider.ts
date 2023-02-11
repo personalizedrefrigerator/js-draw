@@ -686,5 +686,38 @@ export default class IconProvider {
 		svg.setAttribute('viewBox', '0 0 100 100');
 		return svg;
 	}
+
+	public makeConfigureDocumentIcon(): IconType {
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.innerHTML = `
+			<path
+				d='
+					M 5,5 V 95 H 95 V 5 Z m 5,5 H 90 V 90 H 10 Z
+					m 5,10 V 30 H 50 V 25 H 20 v -5 z
+					m 40,0 V 50 H 85 V 20 Z
+					m 2,2 H 83 V 39 L 77,28 70,42 64,35 57,45 Z
+					m 8.5,5 C 64.67,27 64,27.67 64,28.5 64,29.33 64.67,30 65.5,30 66.33,30 67,29.33 67,28.5 67,27.67 66.33,27 65.5,27 Z
+					M 15,40 v 5 h 35 v -5 z
+					m 0,15 v 5 h 70 v -5 z
+					m 0,15 v 5 h 70 v -5 z
+				'
+				style='fill: var(--icon-color);'
+			/>
+			<path
+				d='
+					M 85,110 70,85 55,80 V 65 l 5,10 10,-5 -5,-10 10,5 v 15 l 20,30 z
+				'
+				style='
+					fill: gray;
+					stroke: var(--icon-color);
+					stroke-width: 2px;
+					transform: scale(2, 2) translate(-10px, -20px);
+					transform-origin: center;
+				'
+			/>
+		`;
+		svg.setAttribute('viewBox', '0 0 100 100');
+		return svg;
+	}
 	
 }

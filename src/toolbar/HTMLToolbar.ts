@@ -18,6 +18,7 @@ import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget from './widgets/BaseWidget';
 import ActionButtonWidget from './widgets/ActionButtonWidget';
 import InsertImageWidget from './widgets/InsertImageWidget';
+import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
 
 export const toolbarCSSPrefix = 'toolbar-';
 
@@ -309,6 +310,7 @@ export default class HTMLToolbar {
 	}
 
 	public addDefaultActionButtons() {
+		this.addWidget(new DocumentPropertiesWidget(this.editor, this.localizationTable));
 		this.addUndoRedoButtons();
 	}
 

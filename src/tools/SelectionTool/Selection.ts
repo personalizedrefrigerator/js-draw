@@ -5,7 +5,8 @@
 
 import SerializableCommand from '../../commands/SerializableCommand';
 import Editor from '../../Editor';
-import { Mat33, Rect2 } from '../../math/lib';
+import Mat33 from '../../math/Mat33';
+import Rect2 from '../../math/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Pointer from '../../Pointer';
 import SelectionHandle, { HandleShape, handleSize } from './SelectionHandle';

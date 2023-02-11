@@ -10,3 +10,4 @@ export { default as SelectionToolWidget } from './SelectionToolWidget';
 export { default as EraserToolWidget } from './EraserToolWidget';
 
 export { default as InsertImageWidget } from './InsertImageWidget';
+export { default as DocumentPropertiesWidget } from './DocumentPropertiesWidget';

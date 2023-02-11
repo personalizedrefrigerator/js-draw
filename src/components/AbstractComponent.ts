@@ -156,6 +156,12 @@ export default abstract class AbstractComponent {
 		return true;
 	}
 
+	// @returns true iff this component should be added to the background, rather than the
+	// foreground of the image.
+	public isBackground(): boolean {
+		return false;
+	}
+
 	// @returns an approximation of the proportional time it takes to render this component.
 	// This is intended to be a rough estimate, but, for example, a stroke with two points sould have
 	// a renderingWeight approximately twice that of a stroke with one point.

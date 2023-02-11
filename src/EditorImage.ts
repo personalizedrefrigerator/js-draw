@@ -25,6 +25,7 @@ export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image:
 // Handles lookup/storage of elements in the image
 export default class EditorImage {
 	private root: ImageNode;
+	private background: ImageNode;
 	private componentsById: Record<string, AbstractComponent>;
 
 	/** Viewport for the exported/imported image. */
@@ -36,6 +37,7 @@ export default class EditorImage {
 	// @internal
 	public constructor() {
 		this.root = new ImageNode();
+		this.background = new ImageNode();
 		this.componentsById = {};
 
 		this.notifier = new EventDispatcher();
@@ -56,7 +58,7 @@ export default class EditorImage {
 		return this.importExportViewport;
 	}
 
-	public setImportExportRect(imageRect: Rect2) {
+	public setImportExportRect(imageRect: Rect2): Command {
 		const importExportViewport = this.getImportExportViewport();
 		const origSize = importExportViewport.visibleRect.size;
 		const origTransform = importExportViewport.canvasToScreenTransform;
@@ -82,15 +84,27 @@ export default class EditorImage {
 		};
 	}
 
-	// Returns the parent of the given element, if it exists.
-	public findParent(elem: AbstractComponent): ImageNode|null {
-		const candidates = this.root.getLeavesIntersectingRegion(elem.getBBox());
-		for (const candidate of candidates) {
-			if (candidate.getContent() === elem) {
-				return candidate;
+	// Returns all components that make up the background of this image. These
+	// components are rendered below all other components.
+	public getBackgroundComponents(): AbstractComponent[] {
+		const result = [];
+
+		const leaves = this.background.getLeaves();
+		sortLeavesByZIndex(leaves);
+
+		for (const leaf of leaves) {
+			const content = leaf.getContent();
+
+			if (content) {
+				result.push(content);
 			}
 		}
-		return null;
+		return result;
+	}
+
+	// Returns the parent of the given element, if it exists.
+	public findParent(elem: AbstractComponent): ImageNode|null {
+		return this.background.getChildWithContent(elem) ?? this.root.getChildWithContent(elem);
 	}
 
 	// Forces a re-render of `elem` when the image is next re-rendered as a whole.
@@ -108,22 +122,22 @@ export default class EditorImage {
 
 	/** @internal */
 	public renderWithCache(screenRenderer: AbstractRenderer, cache: RenderingCache, viewport: Viewport) {
+		this.background.render(screenRenderer, viewport.visibleRect);
 		cache.render(screenRenderer, this.root, viewport);
 	}
 
-	/** @internal */
-	public render(renderer: AbstractRenderer, viewport: Viewport) {
-		this.root.render(renderer, viewport.visibleRect);
+	/**
+	 * Renders all nodes visible from `viewport` (or all nodes if `viewport = null`)
+	 * @internal
+	 */
+	public render(renderer: AbstractRenderer, viewport: Viewport|null) {
+		this.background.render(renderer, viewport?.visibleRect);
+		this.root.render(renderer, viewport?.visibleRect);
 	}
 
 	/** Renders all nodes, even ones not within the viewport. @internal */
 	public renderAll(renderer: AbstractRenderer) {
-		const leaves = this.root.getLeaves();
-		sortLeavesByZIndex(leaves);
-
-		for (const leaf of leaves) {
-			leaf.getContent()!.render(renderer, leaf.getBBox());
-		}
+		this.render(renderer, null);
 	}
 
 	/** @returns all elements in the image, sorted by z-index. This can be slow for large images. */
@@ -160,12 +174,23 @@ export default class EditorImage {
 		elem.onAddToImage(this);
 
 		this.componentsById[elem.getId()] = elem;
-		return this.root.addLeaf(elem);
+
+		// If a background component, add to the background. Else,
+		// add to the normal component tree.
+		const parentTree = elem.isBackground() ? this.background : this.root;
+		return parentTree.addLeaf(elem);
 	}
 
 	private removeElementDirectly(element: AbstractComponent) {
 		const container = this.findParent(element);
 		container?.remove();
+
+		if (container) {
+			this.onDestroyElement(element);
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -325,6 +350,19 @@ export class ImageNode {
 		return result;
 	}
 
+	// Returns the child of this with the target content or `null` if no
+	// such child exists.
+	public getChildWithContent(target: AbstractComponent): ImageNode|null {
+		const candidates = this.getLeavesIntersectingRegion(target.getBBox());
+		for (const candidate of candidates) {
+			if (candidate.getContent() === target) {
+				return candidate;
+			}
+		}
+
+		return null;
+	}
+
 	// Returns a list of leaves with this as an ancestor.
 	// Like getLeavesInRegion, but does not check whether ancestors are in a given rectangle
 	public getLeaves(): ImageNode[] {
@@ -458,14 +496,14 @@ export class ImageNode {
 
 	// Remove this node and all of its children
 	public remove() {
+		this.content?.onRemoveFromImage();
+
 		if (!this.parent) {
 			this.content = null;
 			this.children = [];
 
 			return;
 		}
-
-		this.content?.onRemoveFromImage();
 
 		const oldChildCount = this.parent.children.length;
 		this.parent.children = this.parent.children.filter(node => {
@@ -489,8 +527,13 @@ export class ImageNode {
 		this.children = [];
 	}
 
-	public render(renderer: AbstractRenderer, visibleRect: Rect2) {
-		const leaves = this.getLeavesIntersectingRegion(visibleRect, rect => renderer.isTooSmallToRender(rect));
+	public render(renderer: AbstractRenderer, visibleRect?: Rect2) {
+		let leaves;
+		if (visibleRect) {
+			leaves = this.getLeavesIntersectingRegion(visibleRect, rect => renderer.isTooSmallToRender(rect));
+		} else {
+			leaves = this.getLeaves();
+		}
 		sortLeavesByZIndex(leaves);
 
 		for (const leaf of leaves) {

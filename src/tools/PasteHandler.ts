@@ -1,8 +1,9 @@
 import Editor from '../Editor';
-import { AbstractComponent, TextComponent } from '../components/lib';
+import AbstractComponent from '../components/AbstractComponent';
+import TextComponent from '../components/TextComponent';
 import SVGLoader from '../SVGLoader';
 import { PasteEvent } from '../types';
-import { Mat33 } from '../math/lib';
+import Mat33 from '../math/Mat33';
 import BaseTool from './BaseTool';
 import TextTool from './TextTool';
 import Color4 from '../Color4';
