@@ -935,7 +935,7 @@ export class Editor {
 	}
 
 	public toSVG(): SVGElement {
-		const importExportViewport = this.image.getImportExportViewport();
+		const importExportViewport = this.image.getImportExportViewport().getTemporaryClone();
 		const svgNameSpace = 'http://www.w3.org/2000/svg';
 		const result = document.createElementNS(svgNameSpace, 'svg');
 		const renderer = new SVGRenderer(result, importExportViewport);

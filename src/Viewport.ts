@@ -88,6 +88,19 @@ export class Viewport {
 		this.screenRect = Rect2.empty;
 	}
 
+	/**
+	 * @returns a temporary copy of `this` that does not notify when modified. This is
+	 * useful when rendering with a temporarily different viewport.
+	 */
+	public getTemporaryClone(): Viewport {
+		const result = new Viewport(() => {});
+		result.transform = this.transform;
+		result.inverseTransform = this.inverseTransform;
+		result.screenRect = this.screenRect;
+
+		return result;
+	}
+
 	// @internal
 	public updateScreenSize(screenSize: Vec2) {
 		this.screenRect = this.screenRect.resizedTo(screenSize);
