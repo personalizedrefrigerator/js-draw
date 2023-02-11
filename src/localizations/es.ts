@@ -57,10 +57,17 @@ const localization: EditorLocalization = {
 	eraserTool: 'Borrador',
 	textTool: 'Texto',
 	enterTextToInsert: 'Entra texto',
+	textSize: 'Tamaño',
 	rerenderAsText: 'Redibuja la pantalla al texto',
+	lockRotation: 'Bloquea rotación',
 	image: 'Imagen',
 	imageSize: (size: number, units: string) => `Tamaño del imagen: ${size} ${units}`,
 	imageLoadError: (message: string)=> `Error cargando imagen: ${message}`,
+
+	documentProperties: 'Fondo',
+	imageWidthOption: 'Ancho: ',
+	imageHeightOption: 'Alto: ',
+	backgroundColor: 'Color de fondo: '
 };
 
 export default localization;
