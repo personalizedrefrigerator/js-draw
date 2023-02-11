@@ -1,3 +1,10 @@
+# 0.15.2
+ * Bug fixes
+   * Don't select/erase objects that have `isSelectable` set to `false`.
+     - Previously, some objects used to store information about the image (e.g. attributes on the root `svg` object) could be selected and erased.
+   * Round points created by rectangle, arrow, and line tools to prevent unnecessary decimal places in the output.
+   * Performance improvement while zooming in on strokes.
+
 # 0.15.1
  * Bug fixes
    * Correctly restore the z-index of components on undo.
