@@ -1,5 +1,5 @@
 import Mat33 from './Mat33';
-import { Vec2 } from './Vec2';
+import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
 
 
@@ -130,7 +130,7 @@ describe('Mat33 tests', () => {
 
 		const starterTransform = new Mat33(
 			-0.2588190451025205, -0.9659258262890688, 923.7645204565603,
-			0.9659258262890688, -0.2588190451025205, -49.829447083761465,
+			0.9659258262890688,  -0.2588190451025205, -49.829447083761465,
 			0, 0, 1
 		);
 		expect(starterTransform.invertable()).toBe(true);
@@ -152,11 +152,36 @@ describe('Mat33 tests', () => {
 		).objEq(Vec2.unitX, fuzz);
 	});
 
-	it('z-rotation should preserve given origin', () => {
-		const rotationOrigin = Vec2.of(75.16363373235318, 104.29870408043762);
-		const angle = 6.205048847547065;
+	it('z-rotation matrix inverses should undo the z-rotation', () => {
+		const testCases: Array<[ number, Point2 ]> = [
+			[ Math.PI / 2, Vec2.zero ],
+			[ Math.PI, Vec2.of(1, 1) ],
+			[ -Math.PI, Vec2.of(1, 1) ],
+			[ -Math.PI * 2, Vec2.of(1, 1) ],
+			[ -Math.PI * 2, Vec2.of(123, 456) ],
+			[ -Math.PI / 4, Vec2.of(123, 456) ],
+			[ 0.1, Vec2.of(1, 2) ],
+		];
 
-		expect(Mat33.zRotation(angle, rotationOrigin).transformVec2(rotationOrigin)).objEq(rotationOrigin);
+		const fuzz = 0.00001;
+		for (const [ angle, center ] of testCases) {
+			const mat = Mat33.zRotation(angle, center);
+			expect(mat.inverse().rightMul(mat)).objEq(Mat33.identity, fuzz);
+			expect(mat.rightMul(mat.inverse())).objEq(Mat33.identity, fuzz);
+		}
+	});
+
+	it('z-rotation should preserve given origin', () => {
+		const testCases: Array<[ number, Point2 ]> = [
+			[ 6.205048847547065, Vec2.of(75.16363373235318, 104.29870408043762) ],
+			[ 1.234, Vec2.of(-56, 789) ],
+			[ -Math.PI, Vec2.of(-56, 789) ],
+			[ -Math.PI / 2, Vec2.of(-0.001, 1.0002) ],
+		];
+
+		for (const [angle, rotationOrigin] of testCases) {
+			expect(Mat33.zRotation(angle, rotationOrigin).transformVec2(rotationOrigin)).objEq(rotationOrigin);
+		}
 	});
 
 	it('should correctly apply a mapping to all components', () => {
