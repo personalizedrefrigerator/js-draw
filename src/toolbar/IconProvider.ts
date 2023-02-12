@@ -703,18 +703,6 @@ export default class IconProvider {
 				'
 				style='fill: var(--icon-color);'
 			/>
-			<path
-				d='
-					M 85,110 70,85 55,80 V 65 l 5,10 10,-5 -5,-10 10,5 v 15 l 20,30 z
-				'
-				style='
-					fill: gray;
-					stroke: var(--icon-color);
-					stroke-width: 2px;
-					transform: scale(2, 2) translate(-10px, -20px);
-					transform-origin: center;
-				'
-			/>
 		`;
 		svg.setAttribute('viewBox', '0 0 100 100');
 		return svg;
