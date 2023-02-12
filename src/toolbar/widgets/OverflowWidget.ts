@@ -10,6 +10,9 @@ export default class OverflowWidget extends BaseWidget {
 	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
 		super(editor, 'overflow-widget', localizationTable);
 
+
+		this.container.classList.add('toolbar-overflow-widget');
+
 		// Make the dropdown openable
 		this.container.classList.add('dropdownShowable');
 		this.overflowContainer ??= document.createElement('div');

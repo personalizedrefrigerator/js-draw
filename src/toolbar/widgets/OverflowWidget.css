@@ -1,9 +1,21 @@
 
 .toolbar-overflow-widget-overflow-list {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	flex-wrap: wrap;
+	justify-content: center;
 
 	overflow-x: auto;
-	max-height: 100%;
+}
+
+.toolbar-overflow-widget-overflow-list > .toolbar-toolContainer > .toolbar-button {
+	height: var(--toolbar-button-height);
+}
+
+.toolbar-overflow-widget > .toolbar-dropdown {
+	max-width: 100%;
+	left: 15px;
+	right: 15px;
+
+	padding: 4px;
 }

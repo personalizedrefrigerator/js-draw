@@ -18,6 +18,8 @@
 	flex-direction: row;
 	justify-content: center;
 
+	--toolbar-button-height: min(20vh, 60px);
+
 	/* Display above selection dialogs, etc. */
 	z-index: 2;
 
@@ -30,7 +32,7 @@
 .toolbar-root > .toolbar-button {
 	width: min-content;
 	white-space: pre;
-	height: min(20vh, 60px);
+	height: var(--toolbar-button-height);
 }
 
 .toolbar-dropdown .toolbar-button > .toolbar-icon {
