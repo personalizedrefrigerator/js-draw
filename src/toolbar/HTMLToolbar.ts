@@ -185,7 +185,7 @@ export default class HTMLToolbar {
 		// If on a device that has enough vertical space, allow
 		// showing two rows of buttons.
 		// TODO: Fix magic numbers
-		if (window.innerHeight > availableWidth * 2) {
+		if (window.innerHeight > availableWidth * 1.75) {
 			availableWidth *= 1.75;
 		}
 
