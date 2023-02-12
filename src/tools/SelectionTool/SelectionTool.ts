@@ -353,7 +353,7 @@ export default class SelectionTool extends BaseTool {
 				return true;
 			}
 
-			if (evt.key === 'a') {
+			if (evt.key === 'a' || evt.key === 'r') {
 				// Selected all in onKeyDown. Don't finalizeTransform.
 				return true;
 			}
