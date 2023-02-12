@@ -54,4 +54,61 @@ describe('SVGLoader', () => {
 		expect(elem.getBBox().topLeft.x).toBe(0);
 		expect(elem.getBBox().h).toBeGreaterThan(200);
 	});
+
+	it('tspans without specified font-sizes should inherit their font size from their parent element', async () => {
+		const editor = createEditor();
+		await editor.loadFrom(SVGLoader.fromString(`
+			<svg>
+				<text style='font-size: 22px;'>
+					Testing...
+					<tspan>Test 2...</tspan>
+					<tspan>Test 3...</tspan>
+					<tspan style='font-size: 3px;'>Test 4...</tspan>
+				</text>
+			</svg>
+		`, true));
+		const elem = editor.image
+			.getAllElements()
+			.filter(elem => elem instanceof TextComponent)[0] as TextComponent;
+		expect(elem).not.toBeNull();
+
+		// Ensure each child object has the correct size
+		expect(elem.serialize().data).toMatchObject({
+			'textObjects': [
+				{ },
+				{
+					'json':
+					{
+						'textObjects': [{ 'text': 'Test 2...' }],
+						'style': {
+							'size': 22,
+						}
+					}
+				},
+				{ },
+				{
+					'json': {
+						'textObjects': [{ 'text': 'Test 3...' }],
+						'style': {
+							'size': 22
+						}
+					}
+				},
+				{ },
+				{
+					'json': {
+						'textObjects': [{ 'text': 'Test 4...' }],
+						'style': {
+							'size': 3,
+						}
+					}
+				},
+				{ }
+			],
+
+			'style': {
+				'size': 22,
+			}
+		});
+	});
 });
