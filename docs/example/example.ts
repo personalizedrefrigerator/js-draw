@@ -16,16 +16,10 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement);
 
-	// Don't start with the default toolbar layout — we want
-	// to be able to push the 'save' button to the right.
-	const defaultLayout = false;
-	const toolbar = editor.addToolbar(defaultLayout);
+	const toolbar = editor.addToolbar();
 
-	// Center the default action buttons and push the save button
-	// to the right.
-	toolbar.addSpacer({ grow: 1 });
-	toolbar.addDefaults();
-	toolbar.addSpacer({ grow: 1 });
+	// Add space between the save button and the other buttons.
+	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
 
 	toolbar.addActionButton({
 		label: 'Save',
