@@ -75,7 +75,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	public displaySize(): Vec2 {
 		return Vec2.of(
 			this.ctx.canvas.clientWidth,
-			this.ctx.canvas.clientHeight
+			this.ctx.canvas.clientHeight,
 		);
 	}
 

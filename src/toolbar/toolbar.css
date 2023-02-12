@@ -1,4 +1,6 @@
 @import url(./widgets/InsertImageWidget.css);
+@import url(./widgets/OverflowWidget.css);
+
 
 .toolbar-root {
 	background-color: var(--primary-background-color);

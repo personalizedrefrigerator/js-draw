@@ -355,9 +355,10 @@ export class Editor {
 			this.viewport.updateScreenSize(
 				Vec2.of(this.display.width, this.display.height)
 			);
+			this.queueRerender();
 		});
 
-		window.addEventListener('resize', () => {
+		const handleResize = () => {
 			this.notifier.dispatch(EditorEventType.DisplayResized, {
 				kind: EditorEventType.DisplayResized,
 				newSize: Vec2.of(
@@ -365,8 +366,14 @@ export class Editor {
 					this.display.height
 				),
 			});
-			this.queueRerender();
-		});
+		};
+
+		if ('ResizeObserver' in (window as any)) {
+			const resizeObserver = new ResizeObserver(handleResize);
+			resizeObserver.observe(this.container);
+		} else {
+			addEventListener('resize', handleResize);
+		}
 
 		this.accessibilityControlArea.addEventListener('input', () => {
 			this.accessibilityControlArea.value = '';

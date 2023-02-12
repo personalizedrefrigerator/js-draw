@@ -19,6 +19,8 @@ import BaseWidget from './widgets/BaseWidget';
 import ActionButtonWidget from './widgets/ActionButtonWidget';
 import InsertImageWidget from './widgets/InsertImageWidget';
 import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
+import OverflowWidget from './widgets/OverflowWidget';
+import { DispatcherEventListener } from '../EventDispatcher';
 
 export const toolbarCSSPrefix = 'toolbar-';
 
@@ -38,8 +40,14 @@ interface SpacerOptions {
 
 export default class HTMLToolbar {
 	private container: HTMLElement;
+	private resizeObserver: ResizeObserver;
+	private listeners: DispatcherEventListener[] = [];
 
-	private widgets: Record<string, BaseWidget> = {};
+	private widgetsById: Record<string, BaseWidget> = {};
+	private widgetList: Array<BaseWidget> = [];
+
+	// Widget to toggle overflow menu.
+	private overflowWidget: OverflowWidget|null = null;
 
 	private static colorisStarted: boolean = false;
 	private updateColoris: UpdateColorisCallback|null = null;
@@ -59,6 +67,15 @@ export default class HTMLToolbar {
 			HTMLToolbar.colorisStarted = true;
 		}
 		this.setupColorPickers();
+
+		if ('ResizeObserver' in window) {
+			this.resizeObserver = new ResizeObserver((_entries) => {
+				this.reLayout();
+			});
+			this.resizeObserver.observe(this.container);
+		} else {
+			console.warn('ResizeObserver not supported. Toolbar will not resize.');
+		}
 	}
 
 	// @internal
@@ -117,7 +134,7 @@ export default class HTMLToolbar {
 			}
 		};
 
-		this.editor.notifier.on(EditorEventType.ColorPickerToggled, event => {
+		this.listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerToggled, event => {
 			if (event.kind !== EditorEventType.ColorPickerToggled) {
 				return;
 			}
@@ -125,14 +142,102 @@ export default class HTMLToolbar {
 			// Show/hide the overlay. Making the overlay visible gives users a surface to click
 			// on that shows/hides the color picker.
 			closePickerOverlay.style.display = event.open ? 'block' : 'none';
-		});
+		}));
 
 		// Add newly-selected colors to the swatch.
-		this.editor.notifier.on(EditorEventType.ColorPickerColorSelected, event => {
+		this.listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerColorSelected, event => {
 			if (event.kind === EditorEventType.ColorPickerColorSelected) {
 				addColorToSwatch(event.color.toHexString());
 			}
-		});
+		}));
+	}
+
+	private reLayoutQueued: boolean = false;
+	private queueReLayout() {
+		if (!this.reLayoutQueued) {
+			this.reLayoutQueued = true;
+			requestAnimationFrame(() => this.reLayout());
+		}
+	}
+
+	private reLayout() {
+		this.reLayoutQueued = false;
+
+		if (!this.overflowWidget) {
+			return;
+		}
+
+		const getTotalWidth = (widgetList: Array<BaseWidget>) => {
+			let totalWidth = 0;
+			for (const widget of widgetList) {
+				if (!widget.isHidden()) {
+					totalWidth += widget.getButtonWidth();
+				}
+			}
+
+			return totalWidth;
+		};
+
+		let overflowWidgetsWidth = getTotalWidth(this.overflowWidget.getChildWidgets());
+		let shownWidgetWidth = getTotalWidth(this.widgetList) - overflowWidgetsWidth;
+		let availableWidth = this.container.clientWidth * 0.87;
+
+		// If on a device that has enough vertical space, allow
+		// showing two rows of buttons.
+		// TODO: Fix magic numbers
+		if (window.innerHeight > availableWidth * 2) {
+			availableWidth *= 1.75;
+		}
+
+		let updatedChildren = false;
+
+		if (shownWidgetWidth + overflowWidgetsWidth <= availableWidth) {
+			// Move widgets to the main menu.
+			const overflowChildren = this.overflowWidget.clearChildren();
+
+			for (const child of overflowChildren) {
+				child.addTo(this.container);
+				child.setIsToplevel(true);
+
+				if (!child.isHidden()) {
+					shownWidgetWidth += child.getButtonWidth();
+				}
+			}
+
+			this.overflowWidget.setHidden(true);
+			overflowWidgetsWidth = 0;
+
+			updatedChildren = true;
+		}
+
+		if (shownWidgetWidth >= availableWidth) {
+			// Move widgets to the overflow menu.
+			this.overflowWidget.setHidden(false);
+
+			// Start with the rightmost widget, move to the leftmost
+			for (
+				let i = this.widgetList.length - 1;
+				i >= 0 && shownWidgetWidth >= availableWidth;
+				i--
+			) {
+				const child = this.widgetList[i];
+
+				if (this.overflowWidget.hasAsChild(child)) {
+					continue;
+				}
+
+				if (child.canBeInOverflowMenu()) {
+					shownWidgetWidth -= child.getButtonWidth();
+					this.overflowWidget.addToOverflow(child);
+				}
+			}
+
+			updatedChildren = true;
+		}
+
+		if (updatedChildren) {
+			this.setupColorPickers();
+		}
 	}
 
 	/**
@@ -148,14 +253,21 @@ export default class HTMLToolbar {
 	 */
 	public addWidget(widget: BaseWidget) {
 		// Prevent name collisions
-		const id = widget.getUniqueIdIn(this.widgets);
+		const id = widget.getUniqueIdIn(this.widgetsById);
 
 		// Add the widget
-		this.widgets[id] = widget;
+		this.widgetsById[id] = widget;
+		this.widgetList.push(widget);
 
 		// Add HTML elements.
-		widget.addTo(this.container);
+		const container = widget.addTo(this.container);
 		this.setupColorPickers();
+
+		// Ensure that the widget gets displayed in the correct
+		// place in the toolbar, even if it's removed and re-added.
+		container.style.order = `${this.widgetList.length}`;
+
+		this.queueReLayout();
 	}
 
 	/**
@@ -201,8 +313,8 @@ export default class HTMLToolbar {
 	public serializeState(): string {
 		const result: Record<string, any> = {};
 
-		for (const widgetId in this.widgets) {
-			result[widgetId] = this.widgets[widgetId].serializeState();
+		for (const widgetId in this.widgetsById) {
+			result[widgetId] = this.widgetsById[widgetId].serializeState();
 		}
 
 		return JSON.stringify(result);
@@ -216,11 +328,11 @@ export default class HTMLToolbar {
 		const data = JSON.parse(state);
 
 		for (const widgetId in data) {
-			if (!(widgetId in this.widgets)) {
+			if (!(widgetId in this.widgetsById)) {
 				console.warn(`Unable to deserialize widget ${widgetId} ­— no such widget.`);
 			}
 
-			this.widgets[widgetId].deserializeFrom(data[widgetId]);
+			this.widgetsById[widgetId].deserializeFrom(data[widgetId]);
 		}
 	}
 
@@ -229,7 +341,11 @@ export default class HTMLToolbar {
 	 * 
 	 * @return The added button.
 	 */
-	public addActionButton(title: string|ActionButtonIcon, command: ()=> void): BaseWidget {
+	public addActionButton(
+		title: string|ActionButtonIcon,
+		command: ()=> void,
+		mustBeToplevel: boolean = true
+	): BaseWidget {
 		const titleString = typeof title === 'string' ? title : title.label;
 		const widgetId = 'action-button';
 
@@ -247,7 +363,8 @@ export default class HTMLToolbar {
 			makeIcon,
 			titleString,
 			command,
-			this.editor.localization
+			this.editor.localization,
+			mustBeToplevel,
 		);
 
 		this.addWidget(widget);
@@ -301,12 +418,12 @@ export default class HTMLToolbar {
 			this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
 		}
 
-		this.addWidget(new InsertImageWidget(this.editor, this.localizationTable));
-
 		const panZoomTool = toolController.getMatchingTools(PanZoomTool)[0];
 		if (panZoomTool) {
 			this.addWidget(new HandToolWidget(this.editor, panZoomTool, this.localizationTable));
 		}
+
+		this.addWidget(new InsertImageWidget(this.editor, this.localizationTable));
 	}
 
 	public addDefaultActionButtons() {
@@ -315,14 +432,43 @@ export default class HTMLToolbar {
 	}
 
 	/**
+	 * Adds a widget that toggles the overflow menu. Call `addOverflowWidget` to ensure
+	 * that this widget is in the correct space (if shown).
+	 * 
+	 * @example
+	 * ```ts
+	 * toolbar.addDefaultToolWidgets();
+	 * toolbar.addOverflowWidget();
+	 * toolbar.addDefaultActionButtons();
+	 * ```
+	 * shows the overflow widget between the default tool widgets and the default action buttons,
+	 * if shown.
+	 */
+	public addOverflowWidget() {
+		this.overflowWidget = new OverflowWidget(this.editor, this.localizationTable);
+		this.addWidget(this.overflowWidget);
+	}
+
+	/**
 	 * Adds both the default tool widgets and action buttons. Equivalent to
 	 * ```ts
 	 * toolbar.addDefaultToolWidgets();
+	 * toolbar.addOverflowWidget();
 	 * toolbar.addDefaultActionButtons();
 	 * ```
 	 */
 	public addDefaults() {
 		this.addDefaultToolWidgets();
+		this.addOverflowWidget();
 		this.addDefaultActionButtons();
+	}
+
+	public remove() {
+		this.container.remove();
+		this.resizeObserver.disconnect();
+
+		for (const listener of this.listeners) {
+			listener.remove();
+		}
 	}
 }

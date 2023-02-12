@@ -39,6 +39,7 @@ export interface ToolbarLocalization {
 	backgroundColor: string;
 	imageWidthOption: string;
 	imageHeightOption: string;
+	toggleOverflow: 'More',
 
 	errorImageHasZeroSize: string;
 
@@ -80,6 +81,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	backgroundColor: 'Background Color: ',
 	imageWidthOption: 'Width: ',
 	imageHeightOption: 'Height: ',
+	toggleOverflow: 'More',
 
 	touchPanning: 'Touchscreen panning',
 

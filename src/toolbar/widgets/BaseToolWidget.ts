@@ -48,7 +48,9 @@ export default abstract class BaseToolWidget extends BaseWidget {
 	}
 
 	public addTo(parent: HTMLElement) {
-		super.addTo(parent);
+		const result = super.addTo(parent);
 		this.setSelected(this.targetTool.isEnabled());
+
+		return result;
 	}
 }

@@ -719,5 +719,30 @@ export default class IconProvider {
 		svg.setAttribute('viewBox', '0 0 100 100');
 		return svg;
 	}
+
+	public makeOverflowIcon(): IconType {
+		return this.makeIconFromPath(`
+			M 15 40
+			A 12.5 12.5 0 0 0 2.5 52.5
+			A 12.5 12.5 0 0 0 15 65
+			A 12.5 12.5 0 0 0 27.5 52.5
+			A 12.5 12.5 0 0 0 15 40
+			z
+	
+			M 50 40
+			A 12.5 12.5 0 0 0 37.5 52.5
+			A 12.5 12.5 0 0 0 50 65
+			A 12.5 12.5 0 0 0 62.5 52.5
+			A 12.5 12.5 0 0 0 50 40
+			z
+			
+			M 85 40
+			A 12.5 12.5 0 0 0 72.5 52.5
+			A 12.5 12.5 0 0 0 85 65
+			A 12.5 12.5 0 0 0 97.5 52.5
+			A 12.5 12.5 0 0 0 85 40
+			z
+		`);
+	}
 	
 }

@@ -12,6 +12,7 @@ export default class ActionButtonWidget extends BaseWidget {
         protected clickAction: ()=>void,
 
         localizationTable?: ToolbarLocalization,
+		protected mustBeToplevel: boolean = false,
 	) {
 		super(editor, id, localizationTable);
 	}
@@ -30,5 +31,9 @@ export default class ActionButtonWidget extends BaseWidget {
 
 	protected fillDropdown(_dropdown: HTMLElement): boolean {
 		return false;
+	}
+
+	public canBeInOverflowMenu(): boolean {
+		return !this.mustBeToplevel;
 	}
 }

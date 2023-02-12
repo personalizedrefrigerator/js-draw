@@ -1,0 +1,9 @@
+
+.toolbar-overflow-widget-overflow-list {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+
+	overflow-x: auto;
+	max-height: 100%;
+}

@@ -1,4 +1,5 @@
 import Editor from '../../Editor';
+import { DispatcherEventListener } from '../../EventDispatcher';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
 import { EditorEventType, InputEvtType, KeyPressEvent } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
@@ -168,7 +169,10 @@ export default abstract class BaseWidget {
 		this.subWidgets[id] = widget;
 	}
 
+	private toolbarWidgetToggleListener: DispatcherEventListener|null = null;
+
 	// Adds this to [parent]. This can only be called once for each ToolbarWidget.
+	// Returns the element that was just added to `parent`.
 	// @internal
 	public addTo(parent: HTMLElement) {
 		this.label.innerText = this.getTitle();
@@ -177,6 +181,8 @@ export default abstract class BaseWidget {
 
 		this.icon = null;
 		this.updateIcon();
+
+		this.container.replaceChildren();
 
 		this.button.replaceChildren(this.icon!, this.label);
 		this.container.appendChild(this.button);
@@ -187,7 +193,11 @@ export default abstract class BaseWidget {
 			this.button.appendChild(this.dropdownIcon);
 			this.container.appendChild(this.dropdownContainer);
 
-			this.editor.notifier.on(EditorEventType.ToolbarDropdownShown, (evt) => {
+			if (this.toolbarWidgetToggleListener) {
+				this.toolbarWidgetToggleListener.remove();
+			}
+
+			this.toolbarWidgetToggleListener = this.editor.notifier.on(EditorEventType.ToolbarDropdownShown, (evt) => {
 				if (
 					evt.kind === EditorEventType.ToolbarDropdownShown
 					&& evt.parentWidget !== this
@@ -202,7 +212,13 @@ export default abstract class BaseWidget {
 		}
 
 		this.setDropdownVisible(false);
+
+		if (this.container.parentElement) {
+			this.container.remove();
+		}
+
 		parent.appendChild(this.container);
+		return this.container;
 	}
 
 
@@ -272,6 +288,22 @@ export default abstract class BaseWidget {
 		this.repositionDropdown();
 	}
 
+	public canBeInOverflowMenu(): boolean {
+		return true;
+	}
+
+	public getButtonWidth(): number {
+		return this.button.clientWidth;
+	}
+
+	public isHidden(): boolean {
+		return this.container.style.display === 'none';
+	}
+
+	public setHidden(hidden: boolean) {
+		this.container.style.display = hidden ? 'none' : '';
+	}
+
 	protected repositionDropdown() {
 		const dropdownBBox = this.dropdownContainer.getBoundingClientRect();
 		const screenWidth = document.body.clientWidth;
@@ -286,7 +318,7 @@ export default abstract class BaseWidget {
 	}
 
 	/** Set whether the widget is contained within another. @internal */
-	protected setIsToplevel(toplevel: boolean) {
+	public setIsToplevel(toplevel: boolean) {
 		this.toplevel = toplevel;
 	}
 
