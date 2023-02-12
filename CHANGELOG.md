@@ -1,3 +1,9 @@
+# 0.16.1
+ * Bug fixes
+   - Fix editor not shrinking vertically in Chromium-based browsers with its container.
+   - Fixes an issue where (on some devices), `tspan`s could grow in font-size when loading from an SVG.
+   - Fix spacers not added in the correct locations in the toolbar.
+
 # 0.16.0
  * Configurable background color.
  * Toolbar buttons are moved to an overflow menu instead of creating a second (or third) line of buttons.
