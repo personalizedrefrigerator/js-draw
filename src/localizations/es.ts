@@ -63,6 +63,7 @@ const localization: EditorLocalization = {
 	image: 'Imagen',
 	imageSize: (size: number, units: string) => `Tamaño del imagen: ${size} ${units}`,
 	imageLoadError: (message: string)=> `Error cargando imagen: ${message}`,
+	toggleOverflow: 'Más',
 
 	documentProperties: 'Fondo',
 	imageWidthOption: 'Ancho: ',

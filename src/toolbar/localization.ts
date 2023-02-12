@@ -39,7 +39,7 @@ export interface ToolbarLocalization {
 	backgroundColor: string;
 	imageWidthOption: string;
 	imageHeightOption: string;
-	toggleOverflow: 'More',
+	toggleOverflow: string,
 
 	errorImageHasZeroSize: string;
 
