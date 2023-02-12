@@ -1,5 +1,5 @@
 import Color4 from '../../Color4';
-import ImageBackground, { BackgroundType } from '../../components/ImageBackground';
+import ImageBackground from '../../components/ImageBackground';
 import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
 import Rect2 from '../../math/Rect2';
@@ -74,15 +74,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 	}
 
 	private setBackgroundColor(color: Color4) {
-		let background = this.getBackgroundElem();
-
-		if (!background) {
-			background = new ImageBackground(BackgroundType.SolidColor, color);
-			this.editor.dispatch(this.editor.image.addElement(background));
-			this.editor.queueRerender();
-		} else {
-			this.editor.dispatch(background.updateStyle({ color }));
-		}
+		this.editor.dispatch(this.editor.setBackgroundColor(color));
 	}
 
 	private getBackgroundColor() {

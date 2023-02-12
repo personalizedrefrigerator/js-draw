@@ -26,6 +26,8 @@ import fileToBase64 from './util/fileToBase64';
 import uniteCommands from './commands/uniteCommands';
 import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
+import Erase from './commands/Erase';
+import ImageBackground, { BackgroundType } from './components/ImageBackground';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
@@ -973,9 +975,17 @@ export class Editor {
 		return result;
 	}
 
+	/**
+	 * Load editor data from an `ImageLoader` (e.g. an {@link SVGLoader}).
+	 * 
+	 * @see loadFromSVG
+	 */
 	public async loadFrom(loader: ImageLoader) {
 		this.showLoadingWarning(0);
 		this.display.setDraftMode(true);
+
+		const originalBackgrounds = this.image.getBackgroundComponents();
+		const eraseBackgroundCommand = new Erase(originalBackgrounds);
 
 		await loader.start(async (component) => {
 			await this.dispatchNoAnnounce(EditorImage.addElement(component));
@@ -991,10 +1001,48 @@ export class Editor {
 			this.dispatchNoAnnounce(this.setImportExportRect(importExportRect), false);
 			this.dispatchNoAnnounce(this.viewport.zoomTo(importExportRect), false);
 		});
+
+		// Ensure that we don't have multiple overlapping BackgroundComponents. Remove
+		// old BackgroundComponents.
+		// Overlapping BackgroundComponents may cause changing the background color to
+		// not work properly.
+		if (this.image.getBackgroundComponents().length !== originalBackgrounds.length) {
+			await this.dispatchNoAnnounce(eraseBackgroundCommand);
+		}
+
 		this.hideLoadingWarning();
 
 		this.display.setDraftMode(false);
 		this.queueRerender();
+	}
+
+	private getTopmostBackgroundComponent(): ImageBackground|null {
+		let background: ImageBackground|null = null;
+
+		// Find a background component, if one exists.
+		// Use the last (topmost) background component if there are multiple.
+		for (const component of this.image.getBackgroundComponents()) {
+			if (component instanceof ImageBackground) {
+				background = component;
+			}
+		}
+
+		return background;
+	}
+
+	/**
+	 * Set the background color of the image.
+	 */
+	public setBackgroundColor(color: Color4): Command {
+		let background = this.getTopmostBackgroundComponent();
+
+		if (!background) {
+			const backgroundType = color.eq(Color4.transparent) ? BackgroundType.None : BackgroundType.SolidColor;
+			background = new ImageBackground(backgroundType, color);
+			return this.image.addElement(background);
+		} else {
+			return background.updateStyle({ color });
+		}
 	}
 
 	// Returns the size of the visible region of the output SVG
