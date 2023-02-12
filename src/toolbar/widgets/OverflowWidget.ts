@@ -47,6 +47,7 @@ export default class OverflowWidget extends BaseWidget {
 	 */
 	public clearChildren(): BaseWidget[] {
 		this.overflowContainer.replaceChildren();
+		this.container.classList.remove('horizontal');
 
 		const overflowChildren = this.overflowChildren;
 		this.overflowChildren = [];
@@ -76,6 +77,11 @@ export default class OverflowWidget extends BaseWidget {
 		this.overflowChildren.push(widget);
 		widget.addTo(this.overflowContainer);
 		widget.setIsToplevel(false);
+
+		// Switch to a horizontal layout if enough children
+		if (this.overflowChildren.length > 2) {
+			this.container.classList.add('horizontal');
+		}
 	}
 
 	// This always returns false.

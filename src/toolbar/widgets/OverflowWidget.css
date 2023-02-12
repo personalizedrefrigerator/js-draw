@@ -1,7 +1,7 @@
 
 .toolbar-overflow-widget-overflow-list {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	flex-wrap: wrap;
 	justify-content: center;
 
@@ -12,10 +12,18 @@
 	height: var(--toolbar-button-height);
 }
 
-.toolbar-overflow-widget > .toolbar-dropdown {
+.toolbar-overflow-widget.horizontal .toolbar-overflow-widget-overflow-list {
+	flex-direction: row;
+}
+
+.toolbar-overflow-widget.horizontal > .toolbar-dropdown {
 	max-width: 100%;
 	left: 15px;
 	right: 15px;
+
+	/* Override the default transform and margin-left */
+	margin-left: 0 !important;
+	transform: none !important;
 
 	padding: 4px;
 }
