@@ -257,6 +257,13 @@ export default class SVGLoader implements ImageLoader {
 		// In some environments, computedStyles.fontSize can be increased by the system.
 		// Thus, to prevent text from growing on load/save, prefer .style.fontSize.
 		let fontSizeMatch = fontSizeExp.exec(elem.style.fontSize);
+		if (!fontSizeMatch && elem.tagName.toLowerCase() === 'tspan' && elem.parentElement) {
+			// Try to inherit the font size of the parent text element.
+			fontSizeMatch = fontSizeExp.exec(elem.parentElement.style.fontSize);
+		}
+
+		// If we still couldn't find a font size, try to use computedStyles (which can be
+		// wrong).
 		if (!fontSizeMatch) {
 			fontSizeMatch = fontSizeExp.exec(computedStyles.fontSize);
 		}
