@@ -1,3 +1,8 @@
+# 0.16.0
+ * Configurable background color.
+ * Toolbar buttons are moved to an overflow menu instead of creating a second (or third) line of buttons.
+   - Buttons are still moved to a second row on tall screens.
+
 # 0.15.2
  * Bug fixes
    * Don't select/erase objects that have `isSelectable` set to `false`.
