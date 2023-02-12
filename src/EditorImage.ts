@@ -205,7 +205,7 @@ export default class EditorImage {
 	}
 
 	/** @see EditorImage.addElement */
-	public addElement(elem: AbstractComponent, applyByFlattening: boolean = true) {
+	public addElement(elem: AbstractComponent, applyByFlattening?: boolean) {
 		return EditorImage.addElement(elem, applyByFlattening);
 	}
 
