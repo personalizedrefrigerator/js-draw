@@ -43,6 +43,9 @@ export default class HTMLToolbar {
 	private resizeObserver: ResizeObserver;
 	private listeners: DispatcherEventListener[] = [];
 
+	// Flex-order of the next widget to be added.
+	private widgetOrderCounter: number = 0;
+
 	private widgetsById: Record<string, BaseWidget> = {};
 	private widgetList: Array<BaseWidget> = [];
 
@@ -240,6 +243,7 @@ export default class HTMLToolbar {
 		}
 	}
 
+
 	/**
 	 * Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
 	 * (i.e. its `addTo` method should not have been called).
@@ -265,7 +269,7 @@ export default class HTMLToolbar {
 
 		// Ensure that the widget gets displayed in the correct
 		// place in the toolbar, even if it's removed and re-added.
-		container.style.order = `${this.widgetList.length}`;
+		container.style.order = `${this.widgetOrderCounter++}`;
 
 		this.queueReLayout();
 	}
@@ -307,6 +311,7 @@ export default class HTMLToolbar {
 			spacer.style.maxWidth = options.maxSize;
 		}
 
+		spacer.style.order = `${this.widgetOrderCounter++}`;
 		this.container.appendChild(spacer);
 	}
 
