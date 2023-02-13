@@ -4,8 +4,6 @@
 	flex-direction: column;
 	flex-wrap: wrap;
 	justify-content: center;
-
-	overflow-x: auto;
 }
 
 .toolbar-overflow-widget-overflow-list > .toolbar-toolContainer > .toolbar-button {
