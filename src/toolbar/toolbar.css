@@ -78,6 +78,10 @@
 	font-size: 1em;
 }
 
+.toolbar-button > label {
+	cursor: inherit;
+}
+
 .toolbar-dropdown > .toolbar-toolContainer > button,
 .toolbar-dropdown > .toolbar-toolContainer > .toolbar-button {
 	width: 6em;
