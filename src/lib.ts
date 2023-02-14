@@ -30,6 +30,7 @@ export * from './toolbar/lib';
 export * from './rendering/lib';
 export { default as Pointer, PointerDevice } from './Pointer';
 export { default as HTMLToolbar } from './toolbar/HTMLToolbar';
+export { default as UndoRedoHistory } from './UndoRedoHistory';
 
 export { Editor, EditorSettings };
 export default Editor;

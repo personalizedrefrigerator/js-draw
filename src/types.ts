@@ -111,7 +111,6 @@ export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt 
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
-
 export enum EditorEventType {
 	ToolEnabled,
 	ToolDisabled,
@@ -128,6 +127,13 @@ export enum EditorEventType {
 	ColorPickerToggled,
 	ColorPickerColorSelected,
 	ToolbarDropdownShown,
+}
+
+// Types of `EditorUndoStackUpdated` events.
+export enum UndoEventType {
+	CommandDone,
+	CommandUndone,
+	CommandRedone,
 }
 
 type EditorToolEventType = EditorEventType.ToolEnabled
@@ -159,8 +165,12 @@ export interface DisplayResizedEvent {
 
 export interface EditorUndoStackUpdated {
 	readonly kind: EditorEventType.UndoRedoStackUpdated;
+
 	readonly undoStackSize: number;
 	readonly redoStackSize: number;
+
+	readonly command?: Command;
+	readonly stackUpdateType: UndoEventType;
 }
 
 export interface CommandDoneEvent {

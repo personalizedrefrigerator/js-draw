@@ -663,12 +663,14 @@ export class Editor {
 	 * ```
 	 */
 	public dispatchNoAnnounce(command: Command, addToHistory: boolean = false) {
+		const result = command.apply(this);
+
 		if (addToHistory) {
 			const apply = false; // Don't double-apply
 			this.history.push(command, apply);
 		}
 
-		return command.apply(this);
+		return result;
 	}
 
 	/**
