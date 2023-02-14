@@ -211,7 +211,7 @@ export default class EditorImage {
 
 	// A Command that can access private [EditorImage] functionality
 	private static AddElementCommand = class extends SerializableCommand {
-		private serializedElem: any;
+		private serializedElem: any|null = null;
 
 		// If [applyByFlattening], then the rendered content of this element
 		// is present on the display's wet ink canvas. As such, no re-render is necessary
@@ -222,9 +222,12 @@ export default class EditorImage {
 		) {
 			super('add-element');
 
-			// Store the element's serialization --- .serializeToJSON may be called on this
-			// even when this is not at the top of the undo/redo stack.
-			this.serializedElem = element.serialize();
+			// FIXME: The serialized version of this command may be inaccurate if this is
+			//        serialized when this command is not on the top of the undo stack.
+			//
+			// Caching the element's serialized data leads to additional memory usage *and*
+			// sometimes incorrect behavior in collaborative editing.
+			this.serializedElem = null;
 
 			if (isNaN(element.getBBox().area)) {
 				throw new Error('Elements in the image cannot have NaN bounding boxes');
@@ -253,7 +256,7 @@ export default class EditorImage {
 
 		protected serializeToJSON() {
 			return {
-				elemData: this.serializedElem,
+				elemData: this.serializedElem ?? this.element.serialize(),
 			};
 		}
 
@@ -262,7 +265,9 @@ export default class EditorImage {
 				const id = json.elemData.id;
 				const foundElem = editor.image.lookupElement(id);
 				const elem = foundElem ?? AbstractComponent.deserialize(json.elemData);
-				return new EditorImage.AddElementCommand(elem);
+				const result = new EditorImage.AddElementCommand(elem);
+				result.serializedElem = json.elemData;
+				return result;
 			});
 		}
 	};
