@@ -1,3 +1,12 @@
+# 0.17.0
+ * Breaking changes
+   - `SerializableCommand::serialize` may no longer serialize accurately when the command to serialize is not on top of the undo/redo stack. (This change was made to improve performance.)
+ * Toolbar overflow menu:
+   - Prefer horizontal menu to veritcal for only 1-2 overflow items.
+   - Prefer wrapping to scrolling.
+ * Bug fixes
+   - Undo/redo events are now consistently fired after the command is initially applied.
+
 # 0.16.1
  * Bug fixes
    - Fix editor not shrinking vertically in Chromium-based browsers with its container.
