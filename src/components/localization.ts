@@ -7,16 +7,16 @@ export interface ImageComponentLocalization {
 	emptyBackground: string;
 	filledBackgroundWithColor: (color: string)=> string;
 
-	restyledElements: string;
+	restyledElement: (elementDescription: string) => string;
 }
 
 export const defaultComponentLocalization: ImageComponentLocalization = {
 	unlabeledImageNode: 'Unlabeled image node',
 	stroke: 'Stroke',
 	svgObject: 'SVG Object',
-	restyledElements: 'Restyled elements',
 	emptyBackground: 'Empty background',
 	filledBackgroundWithColor: (color) => `Filled background (${color})`,
 	text: (text) => `Text object: ${text}`,
 	imageNode: (description: string) => `Image: ${description}`,
+	restyledElement: (elementDescription: string) => `Restyled ${elementDescription}`,
 };

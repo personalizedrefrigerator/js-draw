@@ -111,8 +111,8 @@ class DefaultRestyleComponentCommand extends UnresolvedSerializableCommand {
 		this.getComponent(editor).forceStyle(this.originalStyle, editor);
 	}
 
-	public description(_editor: Editor, localizationTable: EditorLocalization): string {
-		return localizationTable.restyledElements;
+	public description(editor: Editor, localizationTable: EditorLocalization): string {
+		return localizationTable.restyledElement(this.getComponent(editor).description(localizationTable));
 	}
 
 	protected serializeToJSON() {
