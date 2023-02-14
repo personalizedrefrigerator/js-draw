@@ -71,4 +71,29 @@ describe('TextComponent', () => {
 		editor.history.undo();
 		expect(text.getStyle().color).objEq(Color4.green);
 	});
+
+	it('restyling the duplicate of a TextComponent should preserve the original\'s style', () => {
+		const originalStyle: TextStyle = {
+			size: 11,
+			fontFamily: 'sans-serif',
+			renderingStyle: { fill: Color4.purple, },
+		};
+
+		const text1 = new TextComponent([ 'Test' ], Mat33.identity, originalStyle);
+		const text2 = text1.clone() as TextComponent;
+
+		text1.forceStyle({
+			color: Color4.red,
+		}, null);
+
+		expect(text2.getStyle().color).objEq(Color4.purple);
+		expect(text1.getStyle().color).objEq(Color4.red);
+
+		text2.forceStyle({
+			textStyle: originalStyle,
+		}, null);
+
+		expect(text1.getStyle().color).objEq(Color4.red);
+		expect(text2.getTextStyle()).toMatchObject(originalStyle);
+	});
 });

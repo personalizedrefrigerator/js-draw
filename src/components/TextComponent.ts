@@ -172,9 +172,12 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		if (style.textStyle) {
 			this.style = style.textStyle;
 		} else if (style.color) {
-			this.style.renderingStyle = {
-				...this.style.renderingStyle,
-				fill: style.color,
+			this.style = {
+				...this.style,
+				renderingStyle: {
+					...this.style.renderingStyle,
+					fill: style.color,
+				},
 			};
 		} else {
 			return;
@@ -194,7 +197,12 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 	// See this.getStyle
 	public getTextStyle() {
-		return this.style;
+		return {
+			...this.style,
+			renderingStyle: {
+				...this.style.renderingStyle,
+			},
+		};
 	}
 
 	public getBaselinePos() {
