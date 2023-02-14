@@ -121,19 +121,25 @@ declare let launchQueue: any;
 	if ('launchQueue' in window) {
 		// Create the editor and load files.
 		launchQueue.setConsumer(async ({ files }: { files: any[] }) => {
-			optionsScreen.remove();	
+			if (!files) {
+				return;
+			}
+			if (files.length > 1) {
+				alert('Too many files!');
+				return;
+			}
+
+			optionsScreen.remove();
+			const file = files[0];
 			const editor = createEditor(() => saveImage(editor));
 
-			if (files && files.length > 0) {
-				for (const file of files) {
-					const blob = await file.getFile();
-					blob.handle = file;
-					const data = blob.text();
+			const blob = await file.getFile();
+			blob.handle = file;
+			(window as any).blob = blob;
+			const data = await blob.text();
 
-					// Load the SVG data
-					editor.loadFromSVG(data);
-				}
-			}
+			// Load the SVG data
+			editor.loadFromSVG(data);
 		});
 	}
 

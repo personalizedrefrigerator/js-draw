@@ -1,5 +1,5 @@
 # Examples of usage
- * [Full progressive web app with saving/loading](./example/index.md)
+ * [Full progressive web app with saving/loading](./example/README.md)
  * [Example collaborative editor](./example-collaborative/index.md)
  * [Example custom tool and toolbar button](./example-custom-tools/index.md)
 

@@ -1,6 +1,6 @@
 {
     "short_name": "JS-Draw",
-    "name": "JS-Draw: Demo page",
+    "name": "JS-Draw: Demo",
     "icons": [
         {
             "src": "./icons/js-draw-icon-vector-large.svg",
@@ -31,7 +31,7 @@
     ],
     "file_handlers": [
         {
-            "action": "./example.html",
+            "action": "./",
             "accept": {
                 "image/svg+xml": [
                     ".svg"
@@ -39,7 +39,7 @@
             }
         }
     ],
-    "start_url": "./example.html",
+    "start_url": "./",
     "background_color": "#853360",
     "theme_color": "#803380",
     "display": "standalone",
