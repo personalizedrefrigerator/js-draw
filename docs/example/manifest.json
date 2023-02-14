@@ -31,7 +31,7 @@
     ],
     "file_handlers": [
         {
-            "action": "/",
+            "action": "./example.html",
             "accept": {
                 "image/svg+xml": [
                     ".svg"
