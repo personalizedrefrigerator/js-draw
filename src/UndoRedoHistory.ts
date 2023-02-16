@@ -47,7 +47,7 @@ class UndoRedoHistory {
 		this.#redoStack = [];
 
 		if (this.#undoStack.length > this.maxUndoRedoStackSize) {
-			const removeAtOnceCount = 10;
+			const removeAtOnceCount = Math.ceil(this.maxUndoRedoStackSize / 100);
 			const removedElements = this.#undoStack.splice(0, removeAtOnceCount);
 			removedElements.forEach(elem => elem.onDrop(this.editor));
 		}
