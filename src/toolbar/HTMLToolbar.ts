@@ -181,6 +181,18 @@ export default class HTMLToolbar {
 			return totalWidth;
 		};
 
+		// Returns true if there is enough empty space to move the first child
+		// from the overflow menu to the main menu.
+		const canRemoveFirstChildFromOverflow = (freeSpaceInMainMenu: number) => {
+			const overflowChildren = this.overflowWidget?.getChildWidgets() ?? [];
+
+			if (overflowChildren.length === 0) {
+				return false;
+			}
+
+			return overflowChildren[0].getButtonWidth() <= freeSpaceInMainMenu;
+		};
+
 		let overflowWidgetsWidth = getTotalWidth(this.overflowWidget.getChildWidgets());
 		let shownWidgetWidth = getTotalWidth(this.widgetList) - overflowWidgetsWidth;
 		let availableWidth = this.container.clientWidth * 0.87;
@@ -194,7 +206,8 @@ export default class HTMLToolbar {
 
 		let updatedChildren = false;
 
-		if (shownWidgetWidth + overflowWidgetsWidth <= availableWidth) {
+		// If we can remove at least one child from the overflow menu,
+		if (canRemoveFirstChildFromOverflow(availableWidth - shownWidgetWidth)) {
 			// Move widgets to the main menu.
 			const overflowChildren = this.overflowWidget.clearChildren();
 
@@ -207,15 +220,12 @@ export default class HTMLToolbar {
 				}
 			}
 
-			this.overflowWidget.setHidden(true);
 			overflowWidgetsWidth = 0;
-
 			updatedChildren = true;
 		}
 
 		if (shownWidgetWidth >= availableWidth) {
 			// Move widgets to the overflow menu.
-			this.overflowWidget.setHidden(false);
 
 			// Start with the rightmost widget, move to the leftmost
 			for (
@@ -237,6 +247,9 @@ export default class HTMLToolbar {
 
 			updatedChildren = true;
 		}
+
+		// Hide/show the overflow widget.
+		this.overflowWidget.setHidden(this.overflowWidget.getChildWidgets().length === 0);
 
 		if (updatedChildren) {
 			this.setupColorPickers();
