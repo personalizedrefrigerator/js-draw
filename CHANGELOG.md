@@ -1,3 +1,8 @@
+# 0.17.1
+ * Bug fixes
+   - Fix restyling duplicated TextComponents also restyling the original.
+   - Fix contents of overflow menu not changing on screen resize if the overflow menu was open.
+
 # 0.17.0
  * Breaking changes
    - `SerializableCommand::serialize` may no longer serialize accurately when the command to serialize is not on top of the undo/redo stack. (This change was made to improve performance.)
