@@ -10,6 +10,15 @@ interface RenderingStyle {
 
 export default RenderingStyle;
 
+export const cloneStyle = (style: RenderingStyle) => {
+	return {
+		fill: style.fill,
+		stroke: style.stroke ? {
+			...style.stroke
+		} : undefined,
+	};
+};
+
 export const stylesEqual = (a: RenderingStyle, b: RenderingStyle): boolean => {
 	const result = a === b || (a.fill.eq(b.fill)
 		&& (a.stroke == undefined) === (b.stroke == undefined)

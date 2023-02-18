@@ -72,7 +72,7 @@ describe('TextComponent', () => {
 		expect(text.getStyle().color).objEq(Color4.green);
 	});
 
-	it('restyling the duplicate of a TextComponent should preserve the original\'s style', () => {
+	it('calling forceStyle on the duplicate of a TextComponent should preserve the original\'s style', () => {
 		const originalStyle: TextStyle = {
 			size: 11,
 			fontFamily: 'sans-serif',

@@ -1,4 +1,4 @@
-import RenderingStyle, { styleFromJSON, styleToJSON } from './RenderingStyle';
+import RenderingStyle, { cloneStyle, styleFromJSON, styleToJSON } from './RenderingStyle';
 
 export interface TextStyle {
 	size: number;
@@ -9,6 +9,13 @@ export interface TextStyle {
 }
 
 export default TextStyle;
+
+export const cloneTextStyle = (style: TextStyle) => {
+	return {
+		...style,
+		renderingStyle: cloneStyle(style.renderingStyle),
+	};
+};
 
 export const textStyleFromJSON = (json: any) => {
 	if (typeof json === 'string') {

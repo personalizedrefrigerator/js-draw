@@ -5,7 +5,7 @@ import Rect2 from '../math/Rect2';
 import Editor from '../Editor';
 import { Vec2 } from '../math/Vec2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import { TextStyle, textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
+import { cloneTextStyle, TextStyle, textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
@@ -170,7 +170,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 	public forceStyle(style: ComponentStyle, editor: Editor|null): void {
 		if (style.textStyle) {
-			this.style = style.textStyle;
+			this.style = cloneTextStyle(style.textStyle);
 		} else if (style.color) {
 			this.style = {
 				...this.style,
@@ -197,12 +197,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 	// See this.getStyle
 	public getTextStyle() {
-		return {
-			...this.style,
-			renderingStyle: {
-				...this.style.renderingStyle,
-			},
-		};
+		return cloneTextStyle(this.style);
 	}
 
 	public getBaselinePos() {
@@ -219,7 +214,14 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	}
 
 	protected createClone(): AbstractComponent {
-		return new TextComponent(this.textObjects, this.transform, this.style);
+		const clonedTextObjects = this.textObjects.map(obj => {
+			if (typeof obj === 'string') {
+				return obj;
+			} else {
+				return obj.createClone() as TextComponent;
+			}
+		});
+		return new TextComponent(clonedTextObjects, this.transform, this.style);
 	}
 
 	public getText() {
