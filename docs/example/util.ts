@@ -3,7 +3,6 @@
 
 import { saveLocalStorageKey } from './example';
 
-type GetDataURLCallback = () => string;
 
 // Log errors, etc. to a visible element. Useful for debugging on mobile devices.
 export const startVisualErrorLog = () => {
@@ -42,8 +41,35 @@ If enabled, errors will be logged to this textarea.
 	};
 };
 
+// Represents a method of saving an image (e.g. to localStorage).
+export interface ImageSaver {
+	// Estimated maximum size of the image that can be saved.
+	estimatedMaxSaveSize: number|null;
+
+	// Returns a message describing whether the image was saved
+	saveImage(svgData: string): Promise<string>;
+
+	saveTargetName: string;
+}
+
+type GetDataURLCallback = () => string;
+
+const localStorageSaver: ImageSaver = {
+	estimatedMaxSaveSize: 2.5 * 1024 * 1024, // 2.5 MiB
+	saveTargetName: 'localStorage',
+	saveImage: async (svgData: string) => {
+		try {
+			window.localStorage.setItem(saveLocalStorageKey, svgData);
+		} catch(e) {
+			return `Error saving to localStorage: ${e}`;
+		}
+
+		return 'Saved to localStorage!';
+	},
+};
+
 // Saves [editor]'s content as an SVG and displays the result.
-export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback) => {
+export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, imageSaver: ImageSaver = localStorageSaver) => {
 	const imgHTML = img.outerHTML;
 
 	const popupContainer = document.createElement('div');
@@ -164,10 +190,17 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback) =
 			</style>
 			<main>
 				<p>
-					⚠ Warning ⚠: Some browsers won't save images over 2.5-ish MiB!
+					${
+	imageSaver.estimatedMaxSaveSize !== null
+		? `⚠ Warning ⚠: Some browsers won't save images over
+								roughly ${imageSaver.estimatedMaxSaveSize} MiB!`
+		: ''
+}
 				</p>
 				<div id='previewRegion'>
-					<p>Saving to <code>localStorage</code>...</p>
+					<p>Saving to
+						<code>${imageSaver.saveTargetName.replace(/[<>&]/g, '')}</code>...
+					</p>
 				</div>
 				<div><label for='filename'>Download as: </label><input id='filename' type='text' value='editor-save.svg'/></div>
 				<div id='controlsArea'>
@@ -265,27 +298,39 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback) =
 	popupControlsArea.appendChild(previewPNGButton);
 	popupControlsArea.appendChild(downloadButton);
 
-
-	let localStorageSaveStatus = 'Unable to save to localStorage. ';
-	if (window.localStorage) {
-		// Save
-		try {
-			window.localStorage.setItem(saveLocalStorageKey, imgHTML);
-			localStorageSaveStatus = 'Saved to localStorage! ';
-		} catch(e) {
-			localStorageSaveStatus = `Error saving to localStorage: ${e} `;
-		}
-	}
-
 	let imageSize = `${Math.round(imgHTML.length / 1024 * 10) / 10} KiB`;
 	if (imgHTML.length > 1024 * 1024) {
 		imageSize = `${Math.round(imgHTML.length / 1024 * 10 / 1024) / 10} MiB`;
 	}
 
-	previewRegion.replaceChildren(
-		popup.document.createTextNode(localStorageSaveStatus),
-		popup.document.createTextNode(
-			`Image size: ${imageSize}.`
-		),
-	);
+	void (async () => {
+		const saveStatus = await imageSaver.saveImage(imgHTML);
+		previewRegion.replaceChildren(
+			popup.document.createTextNode(saveStatus),
+			popup.document.createTextNode(' '),
+			popup.document.createTextNode(
+				`Image size: ${imageSize}.`
+			),
+		);
+	})();
+};
+
+export const createFileSaver = (fileName: string, file: FileSystemHandle): ImageSaver => {
+	return {
+		estimatedMaxSaveSize: null,
+		saveTargetName: fileName,
+		saveImage: async (svgData: string): Promise<string> => {
+			try {
+				// As of 2/21/2023, TypeScript does not recognise createWritable
+				// as a property of FileSystemHandle.
+				const writable = await (file as any).createWritable();
+				await writable.write(svgData);
+				await writable.close();
+
+				return `Saved to file system as ${fileName}!`;
+			} catch(e) {
+				return `Error saving to filesystem: ${e}`;
+			}
+		},
+	};
 };

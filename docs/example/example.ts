@@ -6,7 +6,7 @@ import '../../src/styles';
 //import { Editor, HTMLToolbar } from 'js-draw';
 //import 'js-draw/styles';
 
-import { showSavePopup, startVisualErrorLog } from './util';
+import { showSavePopup, startVisualErrorLog, createFileSaver, ImageSaver } from './util';
 
 // Key in window.localStorage to save the SVG as.
 export const saveLocalStorageKey = 'lastSave';
@@ -45,8 +45,10 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 	return editor;
 };
 
-const saveImage = (editor: Editor) => {
-	showSavePopup(editor.toSVG(), () => editor.toDataURL());
+const saveImage = (editor: Editor, saveMethod?: ImageSaver) => {
+	// saveMethod defaults to saving to localStorage. Thus, if no saveMethod is given,
+	// we save to localStorage.
+	showSavePopup(editor.toSVG(), () => editor.toDataURL(), saveMethod);
 };
 
 const saveToolbarState = (toolbar: HTMLToolbar) => {
@@ -60,7 +62,9 @@ const saveToolbarState = (toolbar: HTMLToolbar) => {
 const restoreToolbarState = (toolbar: HTMLToolbar) => {
 	const toolbarState = localStorage.getItem(editorStateLocalStorageKey);
 	if (toolbarState) {
-		// If the toolbar state is invalid, deserialize may throw errors.
+		// If the toolbar state is invalid, deserialize may throw errors. To prevent a change in
+		// how toolbar state is stored from stopping the app, print a warning and continue if
+		// we fail to deserialize the toolbar state.
 		try {
 			toolbar.deserializeState(toolbarState);
 		} catch(e) {
@@ -131,11 +135,12 @@ declare let launchQueue: any;
 
 			optionsScreen.remove();
 			const file = files[0];
-			const editor = createEditor(() => saveImage(editor));
-
 			const blob = await file.getFile();
 			blob.handle = file;
-			(window as any).blob = blob;
+
+			const fileSaver = createFileSaver(blob.name, file);
+			const editor = createEditor(() => saveImage(editor, fileSaver));
+
 			const data = await blob.text();
 
 			// Load the SVG data
