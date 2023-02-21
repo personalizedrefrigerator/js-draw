@@ -1,6 +1,14 @@
+# 0.17.2
+ * Bug fixes
+   - TextComponent: Fix sub-components not cloning when cloning a parent `TextComponent`
+     - This was causing duplicated `TextComponent`s to have, in part, the same styles as the original, even after attempting to restyle them with the restyle tool.
+   - Find tool: Don't add viewport transformations to the undo stack.
+   - Collaborative editing: Fix changing background size/location not synced between editors.
+   - Upgrade dependencies to latest versions ([see commit for details](https://github.com/personalizedrefrigerator/js-draw/commit/427a64037320ca96232d47f268258206398f3796))
+
 # 0.17.1
  * Bug fixes
-   - Fix restyling duplicated TextComponents also restyling the original.
+   - [Only partially fixed] Fix restyling duplicated TextComponents also restyling the original.
    - Fix contents of overflow menu not changing on screen resize if the overflow menu was open.
 
 # 0.17.0
