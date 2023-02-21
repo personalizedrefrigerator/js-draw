@@ -8,8 +8,8 @@ import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';
 import EventDispatcher from './EventDispatcher';
 import { Vec2 } from './math/Vec2';
-import Command from './commands/Command';
-import Mat33 from './math/Mat33';
+import Mat33, { Mat33Array } from './math/Mat33';
+import { assertIsNumber, assertIsNumberArray } from './util/assertions';
 
 // @internal Sort by z-index, low to high
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
@@ -49,39 +49,6 @@ export default class EditorImage {
 
 		// Default to a 500x500 image
 		this.importExportViewport.updateScreenSize(Vec2.of(500, 500));
-	}
-
-	/**
-	 * @returns a `Viewport` for rendering the image when importing/exporting.
-	 */
-	public getImportExportViewport() {
-		return this.importExportViewport;
-	}
-
-	public setImportExportRect(imageRect: Rect2): Command {
-		const importExportViewport = this.getImportExportViewport();
-		const origSize = importExportViewport.visibleRect.size;
-		const origTransform = importExportViewport.canvasToScreenTransform;
-
-		return new class extends Command {
-			public apply(editor: Editor) {
-				const viewport = editor.image.getImportExportViewport();
-				viewport.updateScreenSize(imageRect.size);
-				viewport.resetTransform(Mat33.translation(imageRect.topLeft.times(-1)));
-				editor.queueRerender();
-			}
-
-			public unapply(editor: Editor) {
-				const viewport = editor.image.getImportExportViewport();
-				viewport.updateScreenSize(origSize);
-				viewport.resetTransform(origTransform);
-				editor.queueRerender();
-			}
-
-			public description(_editor: Editor, localizationTable: EditorLocalization) {
-				return localizationTable.resizeOutputCommand(imageRect);
-			}
-		};
 	}
 
 	// Returns all components that make up the background of this image. These
@@ -268,6 +235,91 @@ export default class EditorImage {
 				const result = new EditorImage.AddElementCommand(elem);
 				result.serializedElem = json.elemData;
 				return result;
+			});
+		}
+	};
+
+
+
+	/**
+	 * @returns a `Viewport` for rendering the image when importing/exporting.
+	 */
+	public getImportExportViewport() {
+		return this.importExportViewport;
+	}
+
+	public setImportExportRect(imageRect: Rect2): SerializableCommand {
+		const importExportViewport = this.getImportExportViewport();
+		const origSize = importExportViewport.visibleRect.size;
+		const origTransform = importExportViewport.canvasToScreenTransform;
+
+		return new EditorImage.SetImportExportRectCommand(origSize, origTransform, imageRect);
+	}
+
+	// Handles resizing the background import/export region of the image.
+	private static SetImportExportRectCommand = class extends SerializableCommand {
+		private static commandId = 'set-import-export-rect';
+
+		public constructor(
+			private originalSize: Vec2,
+			private originalTransform: Mat33,
+			private finalRect: Rect2,
+		) {
+			super(EditorImage.SetImportExportRectCommand.commandId);
+		}
+
+		public apply(editor: Editor) {
+			const viewport = editor.image.getImportExportViewport();
+			viewport.updateScreenSize(this.finalRect.size);
+			viewport.resetTransform(Mat33.translation(this.finalRect.topLeft.times(-1)));
+			editor.queueRerender();
+		}
+
+		public unapply(editor: Editor) {
+			const viewport = editor.image.getImportExportViewport();
+			viewport.updateScreenSize(this.originalSize);
+			viewport.resetTransform(this.originalTransform);
+			editor.queueRerender();
+		}
+
+		public description(_editor: Editor, localization: EditorLocalization) {
+			return localization.resizeOutputCommand(this.finalRect);
+		}
+
+		protected serializeToJSON() {
+			return {
+				originalSize: this.originalSize.xy,
+				originalTransform: this.originalTransform.toArray(),
+				newRegion: {
+					x: this.finalRect.x,
+					y: this.finalRect.y,
+					w: this.finalRect.w,
+					h: this.finalRect.h,
+				},
+			};
+		}
+
+		static {
+			const commandId = this.commandId;
+			SerializableCommand.register(commandId, (json: any, _editor: Editor) => {
+				assertIsNumber(json.originalSize.x);
+				assertIsNumber(json.originalSize.y);
+				assertIsNumberArray(json.originalTransform);
+				assertIsNumberArray([
+					json.newRegion.x,
+					json.newRegion.y,
+					json.newRegion.w,
+					json.newRegion.h,
+				]);
+
+				const originalSize = Vec2.ofXY(json.originalSize);
+				const originalTransform = new Mat33(...(json.originalTransform as Mat33Array));
+				const finalRect = new Rect2(
+					json.newRegion.x, json.newRegion.y, json.newRegion.w, json.newRegion.h
+				);
+				return new EditorImage.SetImportExportRectCommand(
+					originalSize, originalTransform, finalRect
+				);
 			});
 		}
 	};

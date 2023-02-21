@@ -6,6 +6,9 @@ import Color4 from './Color4';
 import DummyRenderer from './rendering/renderers/DummyRenderer';
 import createEditor from './testing/createEditor';
 import RenderingStyle from './rendering/RenderingStyle';
+import Rect2 from './math/Rect2';
+import Mat33 from './math/Mat33';
+import { SerializableCommand } from './lib';
 
 describe('EditorImage', () => {
 	const testStroke = new Stroke([
@@ -83,5 +86,35 @@ describe('EditorImage', () => {
 		expect(firstParent).not.toStrictEqual(secondParent);
 		expect(firstParent?.getParent()).toStrictEqual(secondParent?.getParent());
 		expect(firstParent?.getParent()?.getParent()).toBeNull();
+	});
+
+	it('setImportExportRect should return a serializable command', () => {
+		const editor = createEditor();
+		const image = editor.image;
+
+		const originalRect = editor.getImportExportRect();
+		const newRect = new Rect2(3, 4, 5, 6);
+		const command = image.setImportExportRect(newRect);
+		expect(command.serialize().data).toMatchObject({
+			originalSize: originalRect.size.xy,
+			originalTransform: Mat33.identity.toArray(),
+			newRegion: {
+				x: 3,
+				y: 4,
+				w: 5,
+				h: 6,
+			},
+		});
+
+		expect(editor.getImportExportRect()).objEq(originalRect);
+		command.apply(editor);
+		expect(editor.getImportExportRect()).objEq(newRect);
+
+		const deserializedCommand = SerializableCommand.deserialize(command.serialize(), editor);
+
+		deserializedCommand.unapply(editor);
+		expect(editor.getImportExportRect()).objEq(originalRect);
+		deserializedCommand.apply(editor);
+		expect(editor.getImportExportRect()).objEq(newRect);
 	});
 });
