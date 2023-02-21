@@ -1,7 +1,7 @@
 # Examples of usage
  * [Full progressive web app with saving/loading](./example/README.md)
- * [Example collaborative editor](./example-collaborative/index.md)
- * [Example custom tool and toolbar button](./example-custom-tools/index.md)
+ * [Example collaborative editor](./example-collaborative/README.md)
+ * [Example custom tool and toolbar button](./example-custom-tools/README.md)
 
 # Sample images created with `js-draw`
  * [![Drawing: Hot air balloon with js-draw written to the left.](./img/sample/sample-1.svg)](./img/sample/sample-1.svg)
