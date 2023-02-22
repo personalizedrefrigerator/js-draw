@@ -1,5 +1,4 @@
 import Color4 from '../../Color4';
-import ImageBackground from '../../components/ImageBackground';
 import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
 import Rect2 from '../../math/Rect2';
@@ -56,31 +55,12 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		}
 	}
 
-	private getBackgroundElem() {
-		const backgroundComponents = [];
-
-		for (const component of this.editor.image.getBackgroundComponents()) {
-			if (component instanceof ImageBackground) {
-				backgroundComponents.push(component);
-			}
-		}
-
-		if (backgroundComponents.length === 0) {
-			return null;
-		}
-
-		// Return the last background component in the list — the component with highest z-index.
-		return backgroundComponents[backgroundComponents.length - 1];
-	}
-
 	private setBackgroundColor(color: Color4) {
 		this.editor.dispatch(this.editor.setBackgroundColor(color));
 	}
 
 	private getBackgroundColor() {
-		const background = this.getBackgroundElem();
-
-		return background?.getStyle()?.color ?? Color4.transparent;
+		return this.editor.estimateBackgroundColor();
 	}
 
 	private updateImportExportRectSize(size: { width?: number, height?: number }) {

@@ -1,3 +1,7 @@
+# 0.17.3
+ * Fix `isRestylableComponent` not exported.
+ * Add a method to get the `Editor`'s average background color.
+
 # 0.17.2
  * Bug fixes
    - TextComponent: Fix sub-components not cloning when cloning a parent `TextComponent`

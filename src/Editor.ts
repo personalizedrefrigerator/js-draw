@@ -1047,6 +1047,22 @@ export class Editor {
 		}
 	}
 
+	/**
+	 * @returns the average of the colors of all background components. Use this to get the current background
+	 * color.
+	 */
+	public estimateBackgroundColor(): Color4 {
+		const backgroundColors = [];
+
+		for (const component of this.image.getBackgroundComponents()) {
+			if (component instanceof ImageBackground) {
+				backgroundColors.push(component.getStyle().color ?? Color4.transparent);
+			}
+		}
+
+		return Color4.average(backgroundColors);
+	}
+
 	// Returns the size of the visible region of the output SVG
 	public getImportExportRect(): Rect2 {
 		return this.image.getImportExportViewport().visibleRect;
