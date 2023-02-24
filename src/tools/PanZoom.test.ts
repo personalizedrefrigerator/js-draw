@@ -68,7 +68,7 @@ describe('PanZoom', () => {
 			firstPointer = sendTouchEvent(editor, eventType, point1, [ secondPointer ]);
 			secondPointer = sendTouchEvent(editor, eventType, point2, [ firstPointer ]);
 			expectedScale = point1.minus(point2).magnitude() / 100;
-			Vec2.zero;
+
 			if (i === maxIterations - 1) {
 				jest.advanceTimersByTime(10);
 

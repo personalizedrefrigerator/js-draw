@@ -10,6 +10,7 @@ import SelectionTool from './SelectionTool';
 import createEditor from '../../testing/createEditor';
 import Pointer from '../../Pointer';
 import { Rect2 } from '../../lib';
+import sendPenEvent from '../../testing/sendPenEvent';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(SelectionTool)[0];
@@ -33,9 +34,9 @@ const createEditorWithSingleObjectSelection = (objectSize: number = 50) => {
 	// Select the object
 	const selectionTool = getSelectionTool(editor);
 	selectionTool.setEnabled(true);
-	editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
-	editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
-	editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(5, 5));
+	sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+	sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+	sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(5, 5));
 
 	return { editor, testStroke, selectionTool };
 };
@@ -61,9 +62,9 @@ describe('SelectionTool', () => {
 
 		const selectionTool = getSelectionTool(editor);
 		selectionTool.setEnabled(true);
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(0.1, 0.1));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(0.1, 0.1));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(0.1, 0.1));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(0.1, 0.1));
 
 		// Should surround the selected object (which has bbox = (0, 0, 1, 1))
 		// with extra space.
@@ -125,8 +126,8 @@ describe('SelectionTool', () => {
 		selectionTool.setEnabled(true);
 
 		// Select the smaller rectangle
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(40, 40));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(100, 100));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(40, 40));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 100));
 
 		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
 
@@ -134,21 +135,21 @@ describe('SelectionTool', () => {
 		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'Shift');
 
 		// Select the larger stroke.
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(200, 200));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(600, 600));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 200));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(600, 600));
 
 		expect(selectionTool.getSelectedObjects()).toHaveLength(2);
 
 		editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'Shift');
 
 		// Select the larger stroke without shift pressed
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(200, 200));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(600, 600));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 200));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(600, 600));
 		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
 
 		// Select nothing
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(200, 200));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(201, 201));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 200));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(201, 201));
 		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
 	});
 

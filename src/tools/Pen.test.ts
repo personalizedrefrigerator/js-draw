@@ -7,16 +7,17 @@ import Rect2 from '../math/Rect2';
 import StrokeComponent from '../components/Stroke';
 import Mat33 from '../math/Mat33';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
+import sendPenEvent from '../testing/sendPenEvent';
 
 describe('Pen', () => {
 	it('should draw horizontal lines', () => {
 		const editor = createEditor();
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
 		for (let i = 0; i < 10; i++) {
-			editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(i, 0));
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(i, 0));
 			jest.advanceTimersByTime(200);
 		}
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(200, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(200, 0));
 
 		const elems = editor.image.getElementsIntersectingRegion(new Rect2(0, 10, 10, -10));
 		expect(elems).toHaveLength(1);
@@ -29,12 +30,12 @@ describe('Pen', () => {
 
 	it('should draw vertical line', () => {
 		const editor = createEditor();
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
 		for (let i = 0; i < 10; i++) {
-			editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(0, i * 20));
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(0, i * 20));
 			jest.advanceTimersByTime(200);
 		}
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(0, 150));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(0, 150));
 
 		const elems = editor.image.getElementsIntersectingRegion(Rect2.unitSquare);
 		expect(elems).toHaveLength(1);
@@ -46,104 +47,104 @@ describe('Pen', () => {
 	it('should draw vertical line with slight bend', () => {
 		const editor = createEditor();
 
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(417, 24)); 
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(417, 24)); 
 		jest.advanceTimersByTime(245);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 197));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 197));
 		jest.advanceTimersByTime(20);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 199));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 199));
 		jest.advanceTimersByTime(12);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 201));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 201));
 		jest.advanceTimersByTime(40);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 203));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 203));
 		jest.advanceTimersByTime(14);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 206));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 206));
 		jest.advanceTimersByTime(35);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 208));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 208));
 		jest.advanceTimersByTime(16);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 211));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 211));
 		jest.advanceTimersByTime(51);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 215));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 215));
 		jest.advanceTimersByTime(32);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 218));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 218));
 		jest.advanceTimersByTime(30);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 220));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 220));
 		jest.advanceTimersByTime(24);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 222));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 222));
 		jest.advanceTimersByTime(14);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 224));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 224));
 		jest.advanceTimersByTime(32);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 227));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 227));
 		jest.advanceTimersByTime(17);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 229));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 229));
 		jest.advanceTimersByTime(53);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 234));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 234));
 		jest.advanceTimersByTime(34);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 236));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 236));
 		jest.advanceTimersByTime(17);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 238));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 238));
 		jest.advanceTimersByTime(39);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 240));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 240));
 		jest.advanceTimersByTime(10);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 243));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 243));
 		jest.advanceTimersByTime(34);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 250));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 250));
 		jest.advanceTimersByTime(57);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(423, 252));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 252));
 		jest.advanceTimersByTime(8);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(422, 256));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(422, 256));
 		jest.advanceTimersByTime(28);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(422, 258));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(422, 258));
 		jest.advanceTimersByTime(21);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(421, 262));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(421, 262));
 		jest.advanceTimersByTime(34);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 264));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 264));
 		jest.advanceTimersByTime(5);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 266));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 266));
 		jest.advanceTimersByTime(22);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 268));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 268));
 		jest.advanceTimersByTime(22);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 271));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 271));
 		jest.advanceTimersByTime(18);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 274));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 274));
 		jest.advanceTimersByTime(33);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 277));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 277));
 		jest.advanceTimersByTime(16);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 279));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 279));
 		jest.advanceTimersByTime(36);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 282));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 282));
 		jest.advanceTimersByTime(15);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 284));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 284));
 		jest.advanceTimersByTime(48);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 289));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 289));
 		jest.advanceTimersByTime(16);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 291));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 291));
 		jest.advanceTimersByTime(31);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 295));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 295));
 		jest.advanceTimersByTime(23);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 301));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 301));
 		jest.advanceTimersByTime(31);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 306));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 306));
 		jest.advanceTimersByTime(18);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 308));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 308));
 		jest.advanceTimersByTime(20);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 310));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 310));
 		jest.advanceTimersByTime(13);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 313));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 313));
 		jest.advanceTimersByTime(17);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 317));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 317));
 		jest.advanceTimersByTime(33);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 321));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 321));
 		jest.advanceTimersByTime(15);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 324));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 324));
 		jest.advanceTimersByTime(23);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 326));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 326));
 		jest.advanceTimersByTime(14);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(419, 329));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(419, 329));
 		jest.advanceTimersByTime(36);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 333));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 333));
 		jest.advanceTimersByTime(8);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(420, 340));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(420, 340));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 340));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(420, 340));
 
 		const elems = editor.image.getElementsIntersectingRegion(new Rect2(0, 0, 1000, 1000));
 		expect(elems).toHaveLength(1);
@@ -157,9 +158,9 @@ describe('Pen', () => {
 
 		expect(editor.history.undoStackSize).toBe(0);
 
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(10, 10)); 
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(10, 10)); 
 		jest.advanceTimersByTime(100);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(20, 10));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(20, 10));
 
 		const ctrlKeyDown = true;
 		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'z', ctrlKeyDown);
@@ -168,7 +169,7 @@ describe('Pen', () => {
 		expect(editor.history.redoStackSize).toBe(1);
 
 		// Lifting the pointer up shouldn't clear the redo stack.
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(420, 340));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(420, 340));
 		expect(editor.history.redoStackSize).toBe(1);
 	});
 
@@ -179,10 +180,10 @@ describe('Pen', () => {
 		const penTool = editor.toolController.getMatchingTools(PenTool)[0];
 		penTool.setStrokeFactory(makeFreehandLineBuilder);
 
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0.1, 0.1)); 
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0.1, 0.1)); 
 		jest.advanceTimersByTime(100);
-		editor.sendPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(10.1, 10.1));
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(10.1, 10.1));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10.1, 10.1));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(10.1, 10.1));
 
 		const allElems = editor.image.getAllElements();
 		expect(allElems).toHaveLength(1);

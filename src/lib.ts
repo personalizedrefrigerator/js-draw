@@ -1,6 +1,6 @@
 /**
  * The main entrypoint for the NPM package. Everything exported by this file
- * is available through the `js-draw` package.
+ * is available through the [`js-draw` package](https://www.npmjs.com/package/js-draw).
  * 
  * @example
  * ```
@@ -28,6 +28,7 @@ export * from './commands/lib';
 export * from './tools/lib';
 export * from './toolbar/lib';
 export * from './rendering/lib';
+export * from './testing/lib';
 export { default as Pointer, PointerDevice } from './Pointer';
 export { default as HTMLToolbar } from './toolbar/HTMLToolbar';
 export { default as UndoRedoHistory } from './UndoRedoHistory';

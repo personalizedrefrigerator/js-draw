@@ -450,6 +450,10 @@ export default class SVGLoader implements ImageLoader {
 	}
 
 	/**
+	 * Create an `SVGLoader` from the content of an SVG image. SVGs are loaded within a sandboxed
+	 * iframe with `sandbox="allow-same-origin"`
+	 * [thereby disabling JavaScript](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox).
+	 * 
 	 * @see {@link Editor.loadFrom}
 	 * @param text - Textual representation of the SVG (e.g. `<svg viewbox='...'>...</svg>`).
 	 * @param sanitize - if `true`, don't store unknown attributes.

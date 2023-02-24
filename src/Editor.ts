@@ -28,6 +28,7 @@ import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
 import Erase from './commands/Erase';
 import ImageBackground, { BackgroundType } from './components/ImageBackground';
+import sendPenEvent from './testing/sendPenEvent';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
@@ -67,6 +68,9 @@ export interface EditorSettings {
  *   // Do something with saveData...
  * });
  * ```
+ * 
+ * See also
+ * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/example/example.ts#L15).
  */
 export class Editor {
 	// Wrapper around the viewport and toolbar
@@ -156,6 +160,8 @@ export class Editor {
 	 *
 	 * // Add the default toolbar
 	 * const toolbar = editor.addToolbar();
+	 * 
+	 * // Add a save button
 	 * toolbar.addActionButton({
 	 *   label: 'Save'
 	 *   icon: createSaveIcon(),
@@ -260,6 +266,7 @@ export class Editor {
 	 *
 	 * @example
 	 * ```
+	 *   // Set the editor's height to 500px
 	 *   editor.getRootElement().style.height = '500px';
 	 * ```
 	 */
@@ -282,8 +289,10 @@ export class Editor {
 
 	private previousAccessibilityAnnouncement: string = '';
 
-	// Announce `message` for screen readers. If `message` is the same as the previous
-	// message, it is re-announced.
+	/**
+	 * Announce `message` for screen readers. If `message` is the same as the previous
+	 * message, it is re-announced.
+	 */
 	public announceForAccessibility(message: string) {
 		// Force re-announcing an announcement if announced again.
 		if (message === this.previousAccessibilityAnnouncement) {
@@ -576,6 +585,25 @@ export class Editor {
 		}
 	}
 
+	/**
+	 * Forward pointer events from `elem` to this editor. Such that right-click/right-click drag
+	 * events are also forwarded, `elem`'s contextmenu is disabled.
+	 * 
+	 * @example
+	 * ```ts
+	 * const overlay = document.createElement('div');
+	 * editor.createHTMLOverlay(overlay);
+	 * 
+	 * // Send all pointer events that don't have the control key pressed
+	 * // to the editor.
+	 * editor.handlePointerEventsFrom(overlay, (event) => {
+	 *   if (event.ctrlKey) {
+	 *     return false;
+	 *   }
+	 *   return true;
+	 * });
+	 * ```
+	 */
 	public handlePointerEventsFrom(elem: HTMLElement, filter?: HTMLPointerEventFilter) {
 		// May be required to prevent text selection on iOS/Safari:
 		// See https://stackoverflow.com/a/70992717/17055750
@@ -741,7 +769,7 @@ export class Editor {
 	 * Schedule a re-render for some time in the near future. Does not schedule an additional
 	 * re-render if a re-render is already queued.
 	 *
-	 * @returns a promise that resolves when 
+	 * @returns a promise that resolves when re-rendering has completed.
 	 */
 	public queueRerender(): Promise<void> {
 		if (!this.rerenderQueued) {
@@ -766,6 +794,11 @@ export class Editor {
 		return this.rerenderQueued;
 	}
 
+	/**
+	 * Re-renders the entire image.
+	 * 
+	 * @see {@link Editor.queueRerender}
+	 */
 	public rerender(showImageBounds: boolean = true) {
 		this.display.startRerender();
 
@@ -795,6 +828,9 @@ export class Editor {
 	}
 
 	/**
+	 * Draws the given path onto the wet ink renderer. The given path will
+	 * be displayed on top of the main image.
+	 * 
 	 * @see {@link Display.getWetInkRenderer} {@link Display.flatten}
 	 */
 	public drawWetInk(...path: RenderablePathSpec[]) {
@@ -804,19 +840,28 @@ export class Editor {
 	}
 
 	/**
+	 * Clears the wet ink display.
+	 * 
 	 * @see {@link Display.getWetInkRenderer}
 	 */
 	public clearWetInk() {
 		this.display.getWetInkRenderer().clear();
 	}
 
-	// Focuses the region used for text input/key commands.
+	/**
+	 * Focuses the region used for text input/key commands.
+	 */
 	public focus() {
 		this.renderingRegion.focus();
 	}
 
-	// Creates an element that will be positioned on top of the dry/wet ink
-	// renderers.
+	/**
+	 * Creates an element that will be positioned on top of the dry/wet ink
+	 * renderers.
+	 * 
+	 * This is useful for displaying content on top of the rendered content
+	 * (e.g. a selection box).
+	 */
 	public createHTMLOverlay(overlay: HTMLElement) {
 		overlay.classList.add('overlay');
 		this.container.appendChild(overlay);
@@ -850,8 +895,13 @@ export class Editor {
 		});
 	}
 
-	// Dispatch a pen event to the currently selected tool.
-	// Intended primarially for unit tests.
+	/**
+	 * Dispatch a pen event to the currently selected tool.
+	 * Intended primarially for unit tests.
+	 * 
+	 * @deprecated
+	 * @see {@link sendPenEvent} {@link sendTouchEvent}
+	 */
 	public sendPenEvent(
 		eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
 		point: Point2,
@@ -859,16 +909,7 @@ export class Editor {
 		// @deprecated
 		allPointers?: Pointer[]
 	) {
-		const mainPointer = Pointer.ofCanvasPoint(
-			point, eventType !== InputEvtType.PointerUpEvt, this.viewport
-		);
-		this.toolController.dispatchInputEvent({
-			kind: eventType,
-			allPointers: allPointers ?? [
-				mainPointer,
-			],
-			current: mainPointer,
-		});
+		sendPenEvent(this, eventType, point, allPointers);
 	}
 
 	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true) {

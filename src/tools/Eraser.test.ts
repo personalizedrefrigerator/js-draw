@@ -3,6 +3,7 @@ import Editor from '../Editor';
 import { EditorImage, Rect2, StrokeComponent } from '../lib';
 import { Vec2 } from '../math/Vec2';
 import createEditor from '../testing/createEditor';
+import sendPenEvent from '../testing/sendPenEvent';
 import { InputEvtType } from '../types';
 import Eraser from './Eraser';
 
@@ -23,9 +24,9 @@ describe('Eraser', () => {
 		const editor = createEditor();
 
 		// Draw a line
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
 		jest.advanceTimersByTime(100);
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(200, 200));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(200, 200));
 
 		// Should have drawn a line
 		const strokes = getAllStrokes(editor);
@@ -35,9 +36,9 @@ describe('Eraser', () => {
 		selectEraser(editor);
 
 		// Erase the line.
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(200, 0));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 0));
 		jest.advanceTimersByTime(400);
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(0, 200));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(0, 200));
 
 		// Should have erased the line
 		expect(getAllStrokes(editor)).toHaveLength(0);
@@ -64,16 +65,16 @@ describe('Eraser', () => {
 		eraser.setThickness(10);
 
 		// Erase the first stroke
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(3, 0));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(3, 0));
 		jest.advanceTimersByTime(100);
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(3, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3, 0));
 
 		expect(getAllStrokes(editor)).toHaveLength(1);
 
 		// Erase the remaining stroke
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(47, 47));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(47, 47));
 		jest.advanceTimersByTime(100);
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(47, 47));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(47, 47));
 
 		expect(getAllStrokes(editor)).toHaveLength(0);
 	});
@@ -92,9 +93,9 @@ describe('Eraser', () => {
 		eraser.setThickness(100);
 
 		// Try to erase it.
-		editor.sendPenEvent(InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
 		jest.advanceTimersByTime(100);
-		editor.sendPenEvent(InputEvtType.PointerUpEvt, Vec2.of(3, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3, 0));
 
 		// Should not have been erased
 		expect(editor.image.getAllElements()).toHaveLength(1);
