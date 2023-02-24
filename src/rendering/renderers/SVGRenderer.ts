@@ -14,6 +14,12 @@ import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './Abstrac
 export const renderedStylesheetId = 'js-draw-style-sheet';
 
 const svgNameSpace = 'http://www.w3.org/2000/svg';
+
+/**
+ * Renders onto an `SVGElement`.
+ * 
+ * @see {@link Editor.toSVG}
+ */
 export default class SVGRenderer extends AbstractRenderer {
 	private lastPathStyle: RenderingStyle|null = null;
 	private lastPathString: string[] = [];
@@ -21,7 +27,12 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	private overwrittenAttrs: Record<string, string|null> = {};
 
-	// Renders onto `elem`. If `sanitize`, don't render potentially untrusted data.
+	/**
+	 * Creates a renderer that renders onto `elem`. If `sanitize`, don't render potentially untrusted data.
+	 * 
+	 * `viewport` is used to determine the translation/rotation/scaling/output size of the rendered
+	 * data.
+	 */
 	public constructor(private elem: SVGSVGElement, viewport: Viewport, private sanitize: boolean = false) {
 		super(viewport);
 		this.clear();

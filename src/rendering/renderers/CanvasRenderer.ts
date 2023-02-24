@@ -10,6 +10,26 @@ import RenderingStyle from '../RenderingStyle';
 import TextStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
+/**
+ * Renders onto a `CanvasRenderingContext2D`.
+ * 
+ * @example
+ * ```ts
+ * const editor = new Editor(document.body);
+ * 
+ * const canvas = document.createElement('canvas');
+ * const ctx = canvas.getContext('2d');
+ * 
+ * // Ensure that the canvas can fit the entire rendering
+ * const viewport = editor.image.getImportExportViewport();
+ * canvas.width = viewport.getScreenRectSize().x;
+ * canvas.height = viewport.getScreenRectSize().y;
+ * 
+ * // Render editor.image onto the renderer
+ * const renderer = new CanvasRenderer(ctx, viewport);
+ * editor.image.render(renderer, viewport);
+ * ```
+ */
 export default class CanvasRenderer extends AbstractRenderer {
 	private ignoreObjectsAboveLevel: number|null = null;
 	private ignoringObject: boolean = false;
@@ -26,6 +46,11 @@ export default class CanvasRenderer extends AbstractRenderer {
 	private minRenderSizeAnyDimen: number;
 	private minRenderSizeBothDimens: number;
 
+	/**
+	 * Creates a new `CanvasRenderer` that renders to the given rendering context.
+	 * The `viewport` is used to determine the translation/rotation/scaling of the content
+	 * to draw.
+	 */
 	public constructor(private ctx: CanvasRenderingContext2D, viewport: Viewport) {
 		super(viewport);
 		this.setDraftMode(false);
@@ -231,6 +256,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 	}
 
+	// @internal
 	public drawPoints(...points: Point2[]) {
 		const pointRadius = 10;
 
@@ -255,6 +281,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 	}
 
+	// @internal
 	public isTooSmallToRender(rect: Rect2): boolean {
 		// Should we ignore all objects within this object's bbox?
 		const diagonal = this.getCanvasToScreenTransform().transformVec3(rect.size);

@@ -94,8 +94,10 @@ export default class EditorImage {
 	}
 
 	/**
-	 * Renders all nodes visible from `viewport` (or all nodes if `viewport = null`)
-	 * @internal
+	 * Renders all nodes visible from `viewport` (or all nodes if `viewport = null`).
+	 * 
+	 * `viewport` is used to improve rendering performance. If given, it must match
+	 * the viewport used by the `renderer` (if any).
 	 */
 	public render(renderer: AbstractRenderer, viewport: Viewport|null) {
 		this.background.render(renderer, viewport?.visibleRect);
