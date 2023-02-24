@@ -379,24 +379,22 @@ export default class SelectionTool extends BaseTool {
 
 		const exportViewport = new Viewport(() => {});
 		exportViewport.updateScreenSize(Vec2.of(bbox.w, bbox.h));
-		exportViewport.resetTransform(Mat33.translation(bbox.topLeft));
-
-		const svgNameSpace = 'http://www.w3.org/2000/svg';
-		const exportElem = document.createElementNS(svgNameSpace, 'svg');
+		exportViewport.resetTransform(Mat33.translation(bbox.topLeft.times(-1)));
 
 		const sanitize = true;
-		const renderer = new SVGRenderer(exportElem, exportViewport, sanitize);
+		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, sanitize);
 
 		const text: string[] = [];
 		for (const elem of selectedElems) {
-			elem.render(renderer);
+			elem.render(svgRenderer);
 
 			if (elem instanceof TextComponent) {
 				text.push(elem.getText());
 			}
 		}
 
-		event.setData('image/svg+xml', exportElem.outerHTML);
+		event.setData('image/svg+xml', svgExportElem.outerHTML);
+		event.setData('text/html', svgExportElem.outerHTML);
 		if (text.length > 0) {
 			event.setData('text/plain', text.join('\n'));
 		}

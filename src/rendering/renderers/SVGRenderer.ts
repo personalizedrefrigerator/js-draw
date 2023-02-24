@@ -331,4 +331,24 @@ export default class SVGRenderer extends AbstractRenderer {
 	public isTooSmallToRender(_rect: Rect2): boolean {
 		return false;
 	}
+
+	// Creates a new SVG element and SVGRenerer with attributes set for the given Viewport.
+	public static fromViewport(viewport: Viewport, sanitize: boolean = true) {
+		const svgNameSpace = 'http://www.w3.org/2000/svg';
+		const result = document.createElementNS(svgNameSpace, 'svg');
+
+		const rect = viewport.getScreenRectSize();
+		// rect.x -> size of rect in x direction, rect.y -> size of rect in y direction.
+		result.setAttribute('viewBox', [0, 0, rect.x, rect.y].map(part => toRoundedString(part)).join(' '));
+		result.setAttribute('width', toRoundedString(rect.x));
+		result.setAttribute('height', toRoundedString(rect.y));
+
+		// Ensure the image can be identified as an SVG if downloaded.
+		// See https://jwatt.org/svg/authoring/
+		result.setAttribute('version', '1.1');
+		result.setAttribute('baseProfile', 'full');
+		result.setAttribute('xmlns', svgNameSpace);
+
+		return { element: result, renderer: new SVGRenderer(result, viewport, sanitize) };
+	}
 }

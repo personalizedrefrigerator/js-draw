@@ -988,9 +988,9 @@ export class Editor {
 
 	public toSVG(): SVGElement {
 		const importExportViewport = this.image.getImportExportViewport().getTemporaryClone();
-		const svgNameSpace = 'http://www.w3.org/2000/svg';
-		const result = document.createElementNS(svgNameSpace, 'svg');
-		const renderer = new SVGRenderer(result, importExportViewport);
+
+		const sanitize = false;
+		const { element: result, renderer } = SVGRenderer.fromViewport(importExportViewport, sanitize);
 
 		const origTransform = importExportViewport.canvasToScreenTransform;
 		// Render with (0,0) at (0,0) — we'll handle translation with
@@ -1007,13 +1007,6 @@ export class Editor {
 		result.setAttribute('viewBox', [rect.x, rect.y, rect.w, rect.h].map(part => toRoundedString(part)).join(' '));
 		result.setAttribute('width', toRoundedString(rect.w));
 		result.setAttribute('height', toRoundedString(rect.h));
-
-		// Ensure the image can be identified as an SVG if downloaded.
-		// See https://jwatt.org/svg/authoring/
-		result.setAttribute('version', '1.1');
-		result.setAttribute('baseProfile', 'full');
-		result.setAttribute('xmlns', svgNameSpace);
-
 
 		return result;
 	}
