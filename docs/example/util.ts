@@ -193,7 +193,7 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 					${
 	imageSaver.estimatedMaxSaveSize !== null
 		? `⚠ Warning ⚠: Some browsers won't save images over
-								roughly ${imageSaver.estimatedMaxSaveSize} MiB!`
+								roughly ${imageSaver.estimatedMaxSaveSize / 1024 / 1024} MiB!`
 		: ''
 }
 				</p>
