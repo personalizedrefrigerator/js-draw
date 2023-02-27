@@ -7,7 +7,7 @@ import { toRoundedString } from '../../math/rounding';
 import { Point2, Vec2 } from '../../math/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
-import RenderingStyle from '../RenderingStyle';
+import RenderingStyle, { stylesEqual } from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
@@ -129,7 +129,9 @@ export default class SVGRenderer extends AbstractRenderer {
 		const path = Path.fromRenderable(pathSpec).transformedBy(this.getCanvasToScreenTransform());
 
 		// Try to extend the previous path, if possible
-		if (!style.fill.eq(this.lastPathStyle?.fill) || this.lastPathString.length === 0) {
+		if (
+			this.lastPathString.length === 0 || !this.lastPathStyle || !stylesEqual(this.lastPathStyle, style)
+		) {
 			this.addPathToSVG();
 			this.lastPathStyle = style;
 			this.lastPathString = [];
@@ -286,9 +288,19 @@ export default class SVGRenderer extends AbstractRenderer {
 		}
 
 		// Add class names to the object, if given.
-		if (elemClassNames) {
-			for (const elem of this.objectElems ?? []) {
-				elem.classList.add(...elemClassNames);
+		if (elemClassNames && this.objectElems) {
+			if (this.objectElems.length === 1) {
+				this.objectElems[0].classList.add(...elemClassNames);
+			} else {
+				const wrapper = document.createElementNS(svgNameSpace, 'g');
+				wrapper.classList.add(...elemClassNames);
+
+				for (const elem of this.objectElems) {
+					elem.remove();
+					wrapper.appendChild(elem);
+				}
+
+				this.elem.appendChild(wrapper);
 			}
 		}
 	}

@@ -1,4 +1,8 @@
 import Color4 from '../../Color4';
+import Erase from '../../commands/Erase';
+import SerializableCommand from '../../commands/SerializableCommand';
+import uniteCommands from '../../commands/uniteCommands';
+import ImageBackground, { BackgroundType } from '../../components/ImageBackground';
 import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
 import Rect2 from '../../math/Rect2';
@@ -12,7 +16,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 	private updateDropdownContent: ()=>void = () => {};
 
 	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
-		super(editor, 'zoom-widget', localizationTable);
+		super(editor, 'document-properties-widget', localizationTable);
 
 		// Make it possible to open the dropdown, even if this widget isn't selected.
 		this.container.classList.add('dropdownShowable');
@@ -20,7 +24,6 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		this.editor.notifier.on(EditorEventType.UndoRedoStackUpdated, () => {
 			this.queueDropdownUpdate();
 		});
-
 
 		this.editor.image.notifier.on(EditorImageEventType.ExportViewportChanged, () => {
 			this.queueDropdownUpdate();
@@ -62,6 +65,39 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 	private getBackgroundColor() {
 		return this.editor.estimateBackgroundColor();
+	}
+
+	private removeBackgroundComponents(): SerializableCommand {
+		const previousBackgrounds = [];
+		for (const component of this.editor.image.getBackgroundComponents()) {
+			if (component instanceof ImageBackground) {
+				previousBackgrounds.push(component);
+			}
+		}
+
+		return new Erase(previousBackgrounds);
+	}
+
+	/** Replace existing background components with a background of the given type. */
+	private setBackgroundType(backgroundType: BackgroundType): SerializableCommand {
+		const prevBackgroundColor = this.editor.estimateBackgroundColor();
+		const newBackground = new ImageBackground(backgroundType, prevBackgroundColor);
+		const addBackgroundCommand = this.editor.image.addElement(newBackground);
+
+		return uniteCommands([ this.removeBackgroundComponents(), addBackgroundCommand ]);
+	}
+
+	/** Returns the type of the topmost background component */
+	private getBackgroundType(): BackgroundType {
+		const backgroundComponents = this.editor.image.getBackgroundComponents();
+		for (let i = backgroundComponents.length - 1; i >= 0; i--) {
+			const component = backgroundComponents[i];
+			if (component instanceof ImageBackground) {
+				return component.getBackgroundType();
+			}
+		}
+
+		return BackgroundType.None;
 	}
 
 	private updateImportExportRectSize(size: { width?: number, height?: number }) {
@@ -108,6 +144,35 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 		backgroundColorRow.replaceChildren(backgroundColorLabel, backgroundColorInputContainer);
 
+		const useGridRow = document.createElement('div');
+		const useGridLabel = document.createElement('label');
+		const useGridCheckbox = document.createElement('input');
+
+		useGridCheckbox.id = `${toolbarCSSPrefix}docPropertiesUseGridCheckbox-${DocumentPropertiesWidget.idCounter++}`;
+		useGridLabel.htmlFor = useGridCheckbox.id;
+
+		useGridCheckbox.type = 'checkbox';
+		useGridLabel.innerText = this.localizationTable.useGridOption;
+
+		useGridCheckbox.oninput = () => {
+			const prevBackgroundType = this.getBackgroundType();
+			const wasGrid = prevBackgroundType === BackgroundType.Grid;
+
+			if (wasGrid === useGridCheckbox.checked) {
+				// Already the requested background type.
+				return;
+			}
+
+			let newBackgroundType = BackgroundType.SolidColor;
+			if (useGridCheckbox.checked) {
+				newBackgroundType = BackgroundType.Grid;
+			}
+
+			this.editor.dispatch(this.setBackgroundType(newBackgroundType));
+		};
+
+		useGridRow.replaceChildren(useGridLabel, useGridCheckbox);
+
 		const addDimensionRow = (labelContent: string, onChange: (value: number)=>void) => {
 			const row = document.createElement('div');
 			const label = document.createElement('label');
@@ -153,12 +218,14 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			const importExportRect = this.editor.getImportExportRect();
 			imageWidthRow.setValue(importExportRect.width);
 			imageHeightRow.setValue(importExportRect.height);
+
+			useGridCheckbox.checked = this.getBackgroundType() === BackgroundType.Grid;
 		};
 		this.updateDropdownContent();
 
 
 		container.replaceChildren(
-			backgroundColorRow, imageWidthRow.element, imageHeightRow.element
+			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element
 		);
 		dropdown.replaceChildren(container);
 

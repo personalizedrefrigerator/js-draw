@@ -175,10 +175,16 @@ export class Viewport {
 		return Math.pow(powerOf, Math.round(Math.log(scaleFactor) / Math.log(powerOf)));
 	}
 
+	/** Returns the size of a grid cell (in canvas units) as used by {@link snapToGrid}. */
+	public static getGridSize(scaleFactor: number) {
+		return 50 / scaleFactor;
+	}
+
 	public snapToGrid(canvasPos: Point2) {
+		const scaleFactor = this.getScaleFactorToNearestPowerOf(2);
+
 		const snapCoordinate = (coordinate: number) => {
-			const scaleFactor = this.getScaleFactorToNearestPowerOf(2);
-			const roundFactor = scaleFactor / 50;
+			const roundFactor = 1 / Viewport.getGridSize(scaleFactor);
 			const snapped = Math.round(coordinate * roundFactor) / roundFactor;
 
 			return snapped;

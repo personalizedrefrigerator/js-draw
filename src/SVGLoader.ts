@@ -1,6 +1,6 @@
 import Color4 from './Color4';
 import AbstractComponent from './components/AbstractComponent';
-import ImageBackground, { BackgroundType, imageBackgroundCSSClassName } from './components/ImageBackground';
+import ImageBackground, { BackgroundType, backgroundTypeToClassNameMap, imageBackgroundCSSClassName, imageBackgroundGridSizeCSSPrefix, imageBackgroundNonAutomaticSecondaryColorCSSClassName } from './components/ImageBackground';
 import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
@@ -190,10 +190,70 @@ export default class SVGLoader implements ImageLoader {
 		await this.onAddComponent?.(elem);
 	}
 
-	private async addBackground(node: SVGPathElement) {
-		const fill = Color4.fromString(node.getAttribute('fill') ?? node.style.fill ?? 'black');
-		const elem = new ImageBackground(BackgroundType.SolidColor, fill);
-		await this.onAddComponent?.(elem);
+	private async addBackground(node: SVGElement) {
+		// If a grid background,
+		if (node.classList.contains(backgroundTypeToClassNameMap[BackgroundType.Grid])) {
+			let foregroundStr: string|null;
+			let backgroundStr: string|null;
+
+			// If a group,
+			if (node.tagName.toLowerCase() === 'g') {
+				// We expect exactly two children. One of these is the solid
+				// background of the grid
+				if (node.children.length !== 2) {
+					await this.addUnknownNode(node);
+					return;
+				}
+
+				const background = node.children[0];
+				const grid = node.children[1];
+
+				backgroundStr = background.getAttribute('fill');
+				foregroundStr = grid.getAttribute('stroke');
+
+			} else {
+				backgroundStr = node.getAttribute('fill');
+				foregroundStr = node.getAttribute('stroke');
+			}
+
+			// Default to a transparent background.
+			backgroundStr ??= Color4.transparent.toHexString();
+
+			// A grid must have a foreground color specified.
+			if (!foregroundStr) {
+				await this.addUnknownNode(node);
+				return;
+			}
+
+			// Extract the grid size from the class name	
+			let gridSize: number|undefined = undefined;
+			for (const className of node.classList) {
+				if (className.startsWith(imageBackgroundGridSizeCSSPrefix)) {
+					const sizeStr = className.substring(imageBackgroundGridSizeCSSPrefix.length);
+					gridSize = parseFloat(sizeStr.replace(/p/g, '.'));
+				}
+			}
+
+			const backgroundColor = Color4.fromString(backgroundStr);
+			let foregroundColor: Color4|undefined = Color4.fromString(foregroundStr);
+
+			// Should the foreground color be determined automatically?
+			if (node.classList.contains(imageBackgroundNonAutomaticSecondaryColorCSSClassName)) {
+				foregroundColor = undefined;
+			}
+			
+			const elem = ImageBackground.ofGrid(backgroundColor, gridSize, foregroundColor);
+			await this.onAddComponent?.(elem);
+		}
+		// Otherwise, if just a <path/>, it's a solid color background.
+		else if (node.tagName.toLowerCase() === 'path') {
+			const fill = Color4.fromString(node.getAttribute('fill') ?? node.style.fill ?? 'black');
+			const elem = new ImageBackground(BackgroundType.SolidColor, fill);
+			await this.onAddComponent?.(elem);
+		}
+		else {
+			await this.addUnknownNode(node);
+		}
 	}
 
 	// If given, 'supportedAttrs' will have x, y, etc. attributes that were used in computing the transform added to it,
@@ -373,11 +433,15 @@ export default class SVGLoader implements ImageLoader {
 
 		switch (node.tagName.toLowerCase()) {
 		case 'g':
-			// Continue -- visit the node's children.
+			if (node.classList.contains(imageBackgroundCSSClassName)) {
+				await this.addBackground(node as SVGElement);
+				visitChildren = false;
+			}
+			// Otherwise, continue -- visit the node's children.
 			break;
 		case 'path':
 			if (node.classList.contains(imageBackgroundCSSClassName)) {
-				await this.addBackground(node as SVGPathElement);
+				await this.addBackground(node as SVGElement);
 			} else {
 				await this.addPath(node as SVGPathElement);
 			}

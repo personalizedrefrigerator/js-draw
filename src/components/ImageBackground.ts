@@ -10,18 +10,39 @@ import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
+import Path, { PathCommand, PathCommandType } from '../math/Path';
+import { Vec2 } from '../math/Vec2';
+import Viewport from '../Viewport';
+import { toRoundedString } from '../math/rounding';
 
 export enum BackgroundType {
 	SolidColor,
+	Grid,
 	None,
 }
 
 export const imageBackgroundCSSClassName = 'js-draw-image-background';
 
+// Class name prefix indicating the size of the background's grid cells (if present).
+export const imageBackgroundGridSizeCSSPrefix = 'js-draw-image-background-grid-';
+
+// Flag included in rendered SVGs (etc) that indicates that the secondary color of the
+// background has been manually set.
+export const imageBackgroundNonAutomaticSecondaryColorCSSClassName = 'js-draw-image-background-non-automatic-secondary-color';
+
+export const backgroundTypeToClassNameMap = {
+	[BackgroundType.Grid]: 'js-draw-image-background-grid',
+	[BackgroundType.SolidColor]: imageBackgroundCSSClassName,
+	[BackgroundType.None]: '',
+};
+
 // Represents the background of the editor's canvas.
 export default class ImageBackground extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 	private viewportSizeChangeListener: DispatcherEventListener|null = null;
+
+	private gridSize: number = Viewport.getGridSize(2);
+	private secondaryColor: Color4|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/prefer-as-const
 	readonly isRestylableComponent: true = true;
@@ -31,6 +52,39 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	) {
 		super('image-background', 0);
 		this.contentBBox = Rect2.empty;
+	}
+
+	public static ofGrid(backgroundColor: Color4, gridSize?: number, gridColor?: Color4) {
+		const background = new ImageBackground(BackgroundType.Grid, backgroundColor);
+
+		if (gridSize !== undefined) {
+			background.gridSize = gridSize;
+		}
+
+		if (gridColor !== undefined) {
+			background.secondaryColor = gridColor;
+		}
+
+		return background;
+	}
+
+	public getBackgroundType() {
+		return this.backgroundType;
+	}
+
+	// @internal
+	public getMainColor() {
+		return this.mainColor;
+	}
+
+	// @internal
+	public getSecondaryColor() {
+		return this.secondaryColor;
+	}
+
+	// @internal
+	public getGridSize() {
+		return this.gridSize;
 	}
 	
 	public getStyle(): ComponentStyle {
@@ -60,7 +114,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		this.mainColor = fill;
 		if (fill.eq(Color4.transparent)) {
 			this.backgroundType = BackgroundType.None;
-		} else {
+		} else if (this.backgroundType === BackgroundType.None) {
 			this.backgroundType = BackgroundType.SolidColor;
 		}
 
@@ -98,13 +152,52 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		}
 	}
 
+	private generateGridPath(visibleRect?: Rect2) {
+		const targetRect = visibleRect?.intersection(this.contentBBox) ?? this.contentBBox;
+
+		const roundDownToGrid = (coord: number) => Math.floor(coord / this.gridSize) * this.gridSize;
+		const roundUpToGrid = (coord: number) => Math.ceil(coord / this.gridSize) * this.gridSize;
+
+		const startY = roundUpToGrid(targetRect.y);
+		const endY = roundDownToGrid(targetRect.y + targetRect.h);
+		const startX = roundUpToGrid(targetRect.x);
+		const endX = roundDownToGrid(targetRect.x + targetRect.w);
+
+		const result: PathCommand[] = [];
+
+		const startPoint = Vec2.of(targetRect.x, startY);
+		for (let y = startY; y <= endY; y += this.gridSize) {
+			result.push({
+				kind: PathCommandType.MoveTo,
+				point: Vec2.of(targetRect.x, y),
+			});
+			result.push({
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(targetRect.x + targetRect.w, y),
+			});
+		}
+
+		for (let x = startX; x <= endX; x += this.gridSize) {
+			result.push({
+				kind: PathCommandType.MoveTo,
+				point: Vec2.of(x, targetRect.y),
+			});
+			result.push({
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(x, targetRect.y + targetRect.h)
+			});
+		}
+
+		return new Path(startPoint, result);
+	}
+
 	public render(canvas: AbstractRenderer, visibleRect?: Rect2) {
 		if (this.backgroundType === BackgroundType.None) {
 			return;
 		}
 		canvas.startObject(this.contentBBox);
 
-		if (this.backgroundType === BackgroundType.SolidColor) {
+		if (this.backgroundType === BackgroundType.SolidColor || this.backgroundType === BackgroundType.Grid) {
 			// If the rectangle for this region contains the visible rect,
 			// we can fill the entire visible rectangle (which may be more efficient than
 			// filling the entire region for this.)
@@ -118,7 +211,27 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 			}
 		}
 
-		canvas.endObject(this.getLoadSaveData(), [ imageBackgroundCSSClassName ]);
+		if (this.backgroundType === BackgroundType.Grid) {
+			const gridColor = this.secondaryColor ?? Color4.ofRGBA(1 - this.mainColor.r, 1 - this.mainColor.g, 1 - this.mainColor.b, 0.2);
+			const style = { fill: Color4.transparent, stroke: { width: 0.5, color: gridColor } };
+			canvas.drawPath(this.generateGridPath(visibleRect).toRenderable(style));
+		}
+
+		const backgroundTypeCSSClass = backgroundTypeToClassNameMap[this.backgroundType];
+		const classNames = [ imageBackgroundCSSClassName ];
+
+		if (backgroundTypeCSSClass !== imageBackgroundCSSClassName) {
+			classNames.push(backgroundTypeCSSClass);
+
+			const gridSizeStr = toRoundedString(this.gridSize).replace(/[.]/g, 'p');
+			classNames.push(imageBackgroundGridSizeCSSPrefix + gridSizeStr);
+		}
+
+		if (this.secondaryColor !== null) {
+			classNames.push(imageBackgroundNonAutomaticSecondaryColorCSSClassName);
+		}
+
+		canvas.endObject(this.getLoadSaveData(), classNames);
 	}
 
 	public intersects(lineSegment: LineSegment2): boolean {
@@ -136,7 +249,9 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	protected serializeToJSON() {
 		return {
 			mainColor: this.mainColor.toHexString(),
+			secondaryColor: this.secondaryColor?.toHexString(),
 			backgroundType: this.backgroundType,
+			gridSize: this.gridSize,
 		};
 	}
 
@@ -166,10 +281,30 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 			throw new Error('Error deserializing — mainColor must be of type string.');
 		}
 
-		const backgroundType = json.backgroundType === BackgroundType.SolidColor ? BackgroundType.SolidColor : BackgroundType.None;
-		const mainColor = Color4.fromHex(json.mainColor);
+		let backgroundType;
+		const jsonBackgroundType = json.backgroundType as BackgroundType;
 
-		return new ImageBackground(backgroundType, mainColor);
+		if (
+			jsonBackgroundType === BackgroundType.None || jsonBackgroundType === BackgroundType.Grid
+			|| jsonBackgroundType === BackgroundType.SolidColor
+		) {
+			backgroundType = jsonBackgroundType;
+		} else {
+			const exhaustivenessCheck: never = jsonBackgroundType;
+			return exhaustivenessCheck;
+		}
+
+		const mainColor = Color4.fromHex(json.mainColor);
+		const secondaryColor = json.secondaryColor ? Color4.fromHex(json.secondaryColor) : null;
+		const gridSize: number|undefined = json.gridSize ?? undefined;
+
+		const result = new ImageBackground(backgroundType, mainColor);
+		result.secondaryColor = secondaryColor;
+		if (gridSize) {
+			result.gridSize = gridSize;
+		}
+
+		return result;
 	}
 }
 

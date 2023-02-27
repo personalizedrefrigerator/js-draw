@@ -1,15 +1,14 @@
 import Color4 from '../Color4';
 import { Path, Rect2 } from '../math/lib';
 import createEditor from '../testing/createEditor';
+import AbstractComponent from './AbstractComponent';
 import ImageBackground, { BackgroundType, imageBackgroundCSSClassName } from './ImageBackground';
 
 describe('ImageBackground', () => {
 	it('should render to fill exported SVG', () => {
 		const editor = createEditor();
 		const background = new ImageBackground(BackgroundType.SolidColor, Color4.green);
-		editor.image.addElement(
-			background
-		).apply(editor);
+		editor.image.addElement(background).apply(editor);
 
 		const expectedImportExportRect = new Rect2(-10, 10, 15, 20);
 		editor.setImportExportRect(expectedImportExportRect).apply(editor);
@@ -31,5 +30,16 @@ describe('ImageBackground', () => {
 
 		const path = Path.fromString(pathString);
 		expect(path.bbox).objEq(editor.getImportExportRect());
+	});
+
+	it('should be serializable', () => {
+		const background = ImageBackground.ofGrid(Color4.red, 10, Color4.purple);
+
+		const deserializedBackground = AbstractComponent.deserialize(background.serialize()) as ImageBackground;
+		expect(deserializedBackground.getBackgroundType()).toBe(BackgroundType.Grid);
+		expect(deserializedBackground.getStyle().color).objEq(Color4.red);
+		expect(deserializedBackground.getMainColor()).objEq(Color4.red);
+		expect(deserializedBackground.getGridSize()).toBe(background.getGridSize());
+		expect(deserializedBackground.getSecondaryColor()).objEq(Color4.purple);
 	});
 });
