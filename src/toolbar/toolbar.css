@@ -206,3 +206,8 @@
 	background-color: var(--secondary-background-color);
 	--icon-color: var(--secondary-foreground-color);
 }
+
+.toolbar-spacedList > * {
+	padding-bottom: 5px;
+	padding-top: 5px;
+}

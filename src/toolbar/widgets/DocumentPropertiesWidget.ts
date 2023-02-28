@@ -3,6 +3,7 @@ import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
 import Rect2 from '../../math/Rect2';
 import { EditorEventType } from '../../types';
+import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseWidget from './BaseWidget';
@@ -89,6 +90,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 	protected fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
+		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 
 		const backgroundColorRow = document.createElement('div');
 		const backgroundColorLabel = document.createElement('label');
@@ -101,7 +103,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			}
 		});
 
-		colorInput.id = `document-properties-color-input-${DocumentPropertiesWidget.idCounter++}`;
+		colorInput.id = `${toolbarCSSPrefix}docPropertiesColorInput-${DocumentPropertiesWidget.idCounter++}`;
 		backgroundColorLabel.htmlFor = colorInput.id;
 
 		backgroundColorRow.replaceChildren(backgroundColorLabel, backgroundColorInputContainer);
@@ -115,7 +117,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			label.innerText = labelContent;
 			input.type = 'number';
 			input.min = '0';
-			input.id = `document-properties-dimension-row-${DocumentPropertiesWidget.idCounter++}`;
+			input.id = `${toolbarCSSPrefix}docPropertiesDimensionRow-${DocumentPropertiesWidget.idCounter++}`;
 			label.htmlFor = input.id;
 
 			spacer.style.flexGrow = '1';

@@ -134,6 +134,7 @@ export default class PenToolWidget extends BaseToolWidget {
 	private static idCounter: number = 0;
 	protected fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
+		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 
 		const thicknessRow = document.createElement('div');
 		const objectTypeRow = document.createElement('div');

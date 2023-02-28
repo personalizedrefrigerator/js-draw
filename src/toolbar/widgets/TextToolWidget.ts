@@ -32,6 +32,8 @@ export default class TextToolWidget extends BaseToolWidget {
 
 	private static idCounter: number = 0;
 	protected fillDropdown(dropdown: HTMLElement): boolean {
+		const container = document.createElement('div');
+		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 		const fontRow = document.createElement('div');
 		const colorRow = document.createElement('div');
 		const sizeRow = document.createElement('div');
@@ -108,7 +110,8 @@ export default class TextToolWidget extends BaseToolWidget {
 		};
 		this.updateDropdownInputs();
 
-		dropdown.replaceChildren(colorRow, sizeRow, fontRow);
+		container.replaceChildren(colorRow, sizeRow, fontRow);
+		dropdown.appendChild(container);
 		return true;
 	}
 
