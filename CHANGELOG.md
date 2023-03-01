@@ -1,3 +1,8 @@
+# 0.17.4
+ * Fix `CanvasRenderer` and `SVGRenderer` not exported.
+ * Fix pasting images copied from js-draw into some external apps.
+     * Pasting selected items from `js-draw` still doesn't work for many apps.
+
 # 0.17.3
  * Fix `isRestylableComponent` not exported.
  * Add a method to get the `Editor`'s average background color.
