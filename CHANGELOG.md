@@ -1,3 +1,7 @@
+# 0.18.0
+ * Publish both CommonJS and ES Modules
+ * Fix ES module imports.
+
 # 0.17.4
  * Fix `CanvasRenderer` and `SVGRenderer` not exported.
  * Fix pasting images copied from js-draw into some external apps.
