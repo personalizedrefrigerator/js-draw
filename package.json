@@ -1,6 +1,6 @@
 {
 	"name": "js-draw",
-	"version": "0.18.0",
+	"version": "0.18.1",
 	"description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
 	"types": "./dist/cjs/src/lib.d.ts",
 	"main": "./dist/cjs/src/lib.js",
@@ -79,9 +79,9 @@
 		"postpack": "pinst --enable"
 	},
 	"dependencies": {
+		"@babel/runtime": "^7.21.0",
 		"@melloware/coloris": "^0.18.0",
-		"bezier-js": "^6.1.3",
-		"@babel/runtime": "^7.21.0"
+		"bezier-js": "^6.1.3"
 	},
 	"devDependencies": {
 		"@types/bezier-js": "^4.1.0",

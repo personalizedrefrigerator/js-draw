@@ -1,3 +1,7 @@
+# 0.18.1
+ * Fix CommonJS module imports for some usecases.
+   - Adds `@babel/runtime` as a dependency, which seems to be required to process some `require` calls.
+
 # 0.18.0
  * Publish both CommonJS and ES Modules
  * Fix ES module imports.
