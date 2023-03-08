@@ -5,7 +5,6 @@ dist/**/*.test.d.ts
 dist/**/*.test.js
 dist/testing/
 dist-test/
-src/
 .github/
 .husky/
 build_tools/

@@ -1,3 +1,6 @@
+# 0.18.2
+ * Fix essential files missing from NPM.
+
 # 0.18.1
  * Fix CommonJS module imports for some usecases.
    - Adds `@babel/runtime` as a dependency, which seems to be required to process some `require` calls.
