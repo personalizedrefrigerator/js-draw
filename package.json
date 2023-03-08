@@ -2,58 +2,58 @@
 	"name": "js-draw",
 	"version": "0.17.4",
 	"description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
-	"main": "./dist/src/lib.d.ts",
-	"types": "./dist/src/lib.js",
+	"types": "./dist/cjs/src/lib.d.ts",
+	"main": "./dist/cjs/src/lib.mjs",
 	"exports": {
 		".": {
-			"types": "./dist/src/lib.d.ts",
-			"default": "./dist/src/lib.js"
-		},
-		"./getLocalizationTable": {
-			"types": "./dist/src/localizations/getLocalizationTable.d.ts",
-			"default": "./dist/src/localizations/getLocalizationTable.js"
+			"types": "./dist/cjs/src/lib.d.ts",
+			"import": "./dist/mjs/src/lib.mjs",
+			"require": "./dist/cjs/src/lib.js"
 		},
 		"./styles": {
 			"default": "./src/styles.js"
 		},
-		"./Editor": {
-			"types": "./dist/src/Editor.d.ts",
-			"default": "./dist/src/Editor.js"
-		},
-		"./types": {
-			"types": "./dist/src/types.d.ts",
-			"default": "./dist/src/types.js"
-		},
-		"./localization": {
-			"types": "./dist/src/localization.d.ts",
-			"default": "./dist/src/localization.js"
-		},
-		"./toolbar/HTMLToolbar": {
-			"types": "./dist/src/toolbar/HTMLToolbar.d.ts",
-			"default": "./dist/src/toolbar/HTMLToolbar.js"
-		},
 		"./Editor.css": {
 			"default": "./src/Editor.css"
 		},
+		"./bundle": {
+			"types": "./dist/mjs/src/bundle/bundled.d.ts",
+			"default": "./dist/bundle.js"
+		},
+
+		"./Editor": {
+			"types": "./dist/mjs/src/Editor.d.ts",
+			"default": "./dist/mjs/src/Editor.mjs"
+		},
+		"./types": {
+			"types": "./dist/mjs/src/types.d.ts",
+			"default": "./dist/mjs/src/types.mjs"
+		},
+		"./localization": {
+			"types": "./dist/mjs/src/localization.d.ts",
+			"default": "./dist/mjs/src/localization.mjs"
+		},
+		"./toolbar/HTMLToolbar": {
+			"types": "./dist/mjs/src/toolbar/HTMLToolbar.d.ts",
+			"default": "./dist/mjs/src/toolbar/HTMLToolbar.mjs"
+		},
 		"./math": {
-			"types": "./dist/src/math/lib.d.ts",
-			"default": "./dist/src/math/lib.js"
+			"types": "./dist/mjs/src/math/lib.d.ts",
+			"import": "./dist/mjs/src/math/lib.mjs",
+			"require": "./dist/cjs/src/math/lib.js"
 		},
 		"./Color4": {
-			"types": "./dist/src/Color4.d.ts",
-			"default": "./dist/src/Color4.js"
+			"types": "./dist/mjs/src/Color4.d.ts",
+			"import": "./dist/mjs/src/Color4.mjs",
+			"require": "./dist/cjs/src/Color4.js"
 		},
 		"./components": {
-			"types": "./dist/src/components/lib.d.ts",
-			"default": "./dist/src/components/lib.js"
+			"types": "./dist/mjs/src/components/lib.d.ts",
+			"default": "./dist/mjs/src/components/lib.mjs"
 		},
 		"./commands": {
-			"types": "./dist/src/commands/lib.d.ts",
-			"default": "./dist/src/commands/lib.js"
-		},
-		"./bundle": {
-			"types": "./dist/src/bundle/bundled.d.ts",
-			"default": "./dist/bundle.js"
+			"types": "./dist/mjs/src/commands/lib.d.ts",
+			"default": "./dist/mjs/src/commands/lib.mjs"
 		}
 	},
 	"repository": {
@@ -65,7 +65,9 @@
 	"private": false,
 	"scripts": {
 		"test": "jest",
-		"build": "rm -rf ./dist; mkdir dist && yarn tsc && ts-node ./build_tools/bundle.ts",
+		"dist-test": "cd dist-test/test_imports && yarn install && yarn test",
+		"dist": "yarn build && yarn dist-test",
+		"build": "rm -rf ./dist; mkdir dist && tsc -p tsconfig.mjs.json && tsc && ts-node ./build_tools/postDist.ts && ts-node ./build_tools/bundle.ts",
 		"doc": "typedoc --options typedoc.json",
 		"watch-docs": "typedoc --watch --options typedoc.json",
 		"lint": "eslint .",

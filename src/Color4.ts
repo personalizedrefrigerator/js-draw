@@ -232,3 +232,5 @@ export default class Color4 {
 	public static gray = Color4.ofRGB(0.5, 0.5, 0.5);
 	public static white = Color4.ofRGB(1, 1, 1);
 }
+
+export { Color4 };

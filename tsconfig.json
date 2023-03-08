@@ -1,7 +1,8 @@
 {
 	"compilerOptions": {
 		"alwaysStrict": true,
-		"target": "ES2015",
+		"target": "ES6",
+		"module": "CommonJS",
 		"forceConsistentCasingInFileNames": true,
 		"listEmittedFiles": false,
 		"noFallthroughCasesInSwitch": true,
@@ -14,7 +15,7 @@
 		"esModuleInterop": true,
 		"moduleResolution": "Node",
 		"declaration": true,
-		"outDir": "dist/",
+		"outDir": "dist/cjs",
 	},
 	"include": [
 		"**/*.ts",

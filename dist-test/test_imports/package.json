@@ -1,0 +1,15 @@
+{
+	"name": "js-draw-test-imports",
+	"version": "0.0.1",
+	"description": "Test module and CommonJS imports",
+	"author": "Henry Heino",
+	"license": "MIT",
+	"private": true,
+    "type": "module",
+	"scripts": {
+		"test": "node test-imports.js && node test-require.cjs"
+	},
+	"devDependencies": {
+		"js-draw": "link:../../"
+	}
+}
