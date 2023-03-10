@@ -347,8 +347,8 @@ export class Editor {
 				delta = Vec3.of(0, 0, evt.deltaY);
 			}
 
-			// Ensure that `pos` is relative to `this.container`
-			const bbox = this.container.getBoundingClientRect();
+			// Ensure that `pos` is relative to `this.renderingRegion`
+			const bbox = this.renderingRegion.getBoundingClientRect();
 			const pos = Vec2.of(evt.clientX, evt.clientY).minus(Vec2.of(bbox.left, bbox.top));
 
 			if (this.toolController.dispatchInputEvent({
