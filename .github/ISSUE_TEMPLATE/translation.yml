@@ -225,8 +225,8 @@ body:
     id: translation-documentProperties
     attributes:
       label: "documentProperties"
-      description: "Translate `Document`."
-      placeholder: "Document"
+      description: "Translate `Page`."
+      placeholder: "Page"
     validations:
       required: false
   - type: input
@@ -502,6 +502,30 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-soundExplorer
+    attributes:
+      label: "soundExplorer"
+      description: "Translate `Sound-based image exploration`."
+      placeholder: "Sound-based image exploration"
+    validations:
+      required: false
+  - type: input
+    id: translation-disableAccessibilityExploreTool
+    attributes:
+      label: "disableAccessibilityExploreTool"
+      description: "Translate `Disable sound-based exploration`."
+      placeholder: "Disable sound-based exploration"
+    validations:
+      required: false
+  - type: input
+    id: translation-enableAccessibilityExploreTool
+    attributes:
+      label: "enableAccessibilityExploreTool"
+      description: "Translate `Enable sound-based exploration`."
+      placeholder: "Enable sound-based exploration"
+    validations:
+      required: false
+  - type: input
     id: translation-findLabel
     attributes:
       label: "findLabel"
@@ -766,14 +790,6 @@ body:
     validations:
       required: false
   - type: input
-    id: translation-restyledElements
-    attributes:
-      label: "restyledElements"
-      description: "Translate `Restyled elements`."
-      placeholder: "Restyled elements"
-    validations:
-      required: false
-  - type: input
     id: translation-emptyBackground
     attributes:
       label: "emptyBackground"
@@ -803,6 +819,14 @@ body:
       label: "imageNode"
       description: "Translate ``(label) => `Image: ${label}` ``."
       placeholder: "(label) => `Image: ${label}`"
+    validations:
+      required: false
+  - type: input
+    id: translation-restyledElement
+    attributes:
+      label: "restyledElement"
+      description: "Translate ``(elementDescription) => `Restyled ${elementDescription}` ``."
+      placeholder: "(elementDescription) => `Restyled ${elementDescription}`"
     validations:
       required: false
   - type: input

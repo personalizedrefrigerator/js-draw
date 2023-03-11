@@ -1,3 +1,4 @@
+import Vec3 from './math/Vec3';
 
 export default class Color4 {
 	private constructor(
@@ -180,6 +181,73 @@ export default class Color4 {
 		}
 
 		return new Color4(averageR, averageG, averageB, averageA);
+	}
+
+	/**
+	 * Converts to (hue, saturation, value).
+	 * See also https://en.wikipedia.org/wiki/HSL_and_HSV#General_approach
+	 * 
+	 * The resultant hue is represented in radians and is thus in [0, 2pi].
+	 */
+	public asHSV(): Vec3 {
+		// Ref: https://en.wikipedia.org/wiki/HSL_and_HSV#General_approach
+		//
+		// HUE:
+		// First, consider the unit cube. Rotate it such that one vertex is at the origin
+		// of a plane and its three neighboring vertices are equidistant from that plane:
+		//
+		//         /\
+		//       /  | \
+		//   2 /    3   \ 1
+		//     \    |   /
+		//       \  | /
+		//   .     \/      .
+		//                 
+		//        .        
+		//
+		// Let z be up and (x, y, 0) be in the plane.
+		//
+		// Label vectors 1,2,3 with R, G, and B, respectively. Let R's projection into the plane
+		// lie along the x axis.
+		//
+		// Because R is a unit vector and R, G, B are equidistant from the plane, they must
+		// form 30-60-90 triangles, which have side lengths proportional to (1, √3, 2)
+		//
+		//       /|
+		//    1/  | (√3)/2
+		//    /   |
+		//      1/2   
+		//
+		const minComponent = Math.min(this.r, this.g, this.b);
+		const maxComponent = Math.max(this.r, this.g, this.b);
+		const chroma = maxComponent - minComponent;
+
+		let hue;
+
+		// See https://en.wikipedia.org/wiki/HSL_and_HSV#General_approach
+		if (chroma === 0) {
+			hue = 0;
+		} else if (this.r >= this.g && this.r >= this.b) {
+			hue = ((this.g - this.b) / chroma) % 6;
+		} else if (this.g >= this.r && this.g >= this.b) {
+			hue = (this.b - this.r) / chroma + 2;
+		} else {
+			hue = (this.r - this.g) / chroma + 4;
+		}
+
+		// Convert to degree representation, then to radians.
+		hue *= 60;
+		hue *= Math.PI / 180;
+
+		// Ensure positivity.
+		if (hue < 0) {
+			hue += Math.PI * 2;
+		}
+
+		const value = maxComponent;
+		const saturation = value > 0 ? chroma / value : 0;
+
+		return Vec3.of(hue, saturation, value);
 	}
 
 	private hexString: string|null = null;

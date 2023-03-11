@@ -17,6 +17,7 @@ import ToolbarShortcutHandler from './ToolbarShortcutHandler';
 import { makePressureSensitiveFreehandLineBuilder } from '../components/builders/PressureSensitiveFreehandLineBuilder';
 import FindTool from './FindTool';
 import SelectAllShortcutHandler from './SelectionTool/SelectAllShortcutHandler';
+import SoundUITool from './SoundUITool';
 
 export default class ToolController {
 	private tools: BaseTool[];
@@ -44,7 +45,13 @@ export default class ToolController {
 			new TextTool(editor, localization.textTool, localization),
 			new PanZoom(editor, PanZoomMode.SinglePointerGestures, localization.anyDevicePanning)
 		];
+
+		// Accessibility tools
+		const soundExplorer = new SoundUITool(editor, localization.soundExplorer);
+		soundExplorer.setEnabled(false);
+
 		this.tools = [
+			soundExplorer,
 			new PipetteTool(editor, localization.pipetteTool),
 			panZoomTool,
 			...primaryTools,

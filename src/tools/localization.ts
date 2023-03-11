@@ -16,6 +16,10 @@ export interface ToolLocalization {
 	changeTool: string;
 	pasteHandler: string;
 
+	soundExplorer: string;
+	disableAccessibilityExploreTool: string;
+	enableAccessibilityExploreTool: string;
+
 	findLabel: string;
 	toNextMatch: string;
 	closeFindDialog: string;
@@ -48,6 +52,10 @@ export const defaultToolLocalization: ToolLocalization = {
 	enterTextToInsert: 'Text to insert',
 	changeTool: 'Change tool',
 	pasteHandler: 'Copy paste handler',
+
+	soundExplorer: 'Sound-based image exploration',
+	disableAccessibilityExploreTool: 'Disable sound-based exploration',
+	enableAccessibilityExploreTool: 'Enable sound-based exploration',
 
 	findLabel: 'Find',
 	toNextMatch: 'Next',

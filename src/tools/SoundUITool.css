@@ -1,0 +1,10 @@
+
+.js-draw-sound-ui-toggle {
+    width: 0px;
+    height: 0px;
+    overflow: hidden;    
+}
+
+.js-draw-sound-ui-toggle:focus-within {
+    overflow: visible;
+}

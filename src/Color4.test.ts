@@ -1,4 +1,5 @@
 import Color4 from './Color4';
+import Vec3 from './math/Vec3';
 
 describe('Color4', () => {
 	it('should convert to #RRGGBB-format hex strings (when no alpha)', () => {
@@ -36,5 +37,11 @@ describe('Color4', () => {
 		expect(Color4.red.eq(Color4.red)).toBe(true);
 		expect(Color4.red.eq(Color4.green)).toBe(false);
 		expect(Color4.fromString('#ff000000').eq(Color4.transparent)).toBe(true);
+	});
+
+	it('should correctly convert to hsv', () => {
+		expect(Color4.red.asHSV()).objEq(Vec3.of(0, 1, 1));
+		expect(Color4.ofRGB(0.5, 0.5, 0.5).asHSV()).objEq(Vec3.of(0, 0, 0.5));
+		expect(Color4.ofRGB(0.5, 0.25, 0.5).asHSV()).objEq(Vec3.of(Math.PI * 5 / 3, 0.5, 0.5), 0.1);
 	});
 });
