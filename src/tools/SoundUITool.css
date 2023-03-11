@@ -7,4 +7,5 @@
 
 .js-draw-sound-ui-toggle:focus-within {
     overflow: visible;
+    z-index: 5;
 }

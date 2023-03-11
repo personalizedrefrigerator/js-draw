@@ -82,4 +82,5 @@
 
 .imageEditorContainer .textRendererOutputContainer:focus-within {
 	overflow: visible;
+	z-index: 5;
 }
