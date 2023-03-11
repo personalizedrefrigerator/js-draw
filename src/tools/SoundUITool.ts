@@ -20,6 +20,13 @@ class SoundFeedback {
 	private closed: boolean = false;
 
 	public constructor() {
+		// No AudioContext? Exit!
+		if (!window.AudioContext) {
+			console.warn('Accessibility sound UI: Unable to open AudioContext.');
+			this.closed = true;
+			return;
+		}
+
 		this.ctx = new AudioContext();
 
 		// Color oscillator and gain
