@@ -71,7 +71,7 @@ class SoundFeedback {
 
 	public setColor(color: Color4) {
 		const hsv = color.asHSV();
-		const hueFrequency = Math.sin(hsv.x) * 100 + hsv.y * 10 + 440;
+		const hueFrequency = Math.cos(hsv.x / 2) * 100 + hsv.y * 10 + 440;
 		const valueFrequency = hsv.y * 440 + 220;
 
 		// Sigmoid with maximum 0.25 * alpha.
@@ -86,7 +86,7 @@ class SoundFeedback {
 	public announceBoundaryCross(boundaryCrossCount: number) {
 		this.boundaryGain.gain.cancelScheduledValues(this.ctx.currentTime);
 		this.boundaryGain.gain.setValueAtTime(0, this.ctx.currentTime);
-		this.boundaryGain.gain.linearRampToValueAtTime(0.04, this.ctx.currentTime + 0.1);
+		this.boundaryGain.gain.linearRampToValueAtTime(0.02, this.ctx.currentTime + 0.1);
 		this.boundaryOsc.frequency.setValueAtTime(440 + Math.atan(boundaryCrossCount / 2) * 100, this.ctx.currentTime);
 		this.boundaryGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
 	}
