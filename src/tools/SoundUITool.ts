@@ -9,7 +9,8 @@ class SoundFeedback {
 	private ctx: AudioContext;
 
 	// Feedback for the current color under the cursor
-	private colorOsc: OscillatorNode;
+	private colorOscHue: OscillatorNode;
+	private colorOscValue: OscillatorNode;
 	private colorGain: GainNode;
 
 	// Feedback for when the cursor crosses the boundary of some
@@ -30,12 +31,15 @@ class SoundFeedback {
 		this.ctx = new AudioContext();
 
 		// Color oscillator and gain
-		this.colorOsc = this.ctx.createOscillator();
-		this.colorOsc.type = 'triangle';
+		this.colorOscHue = this.ctx.createOscillator();
+		this.colorOscValue = this.ctx.createOscillator();
+		this.colorOscHue.type = 'triangle';
+		this.colorOscValue.type = 'sine';
 
 		this.colorGain = this.ctx.createGain();
 
-		this.colorOsc.connect(this.colorGain);
+		this.colorOscHue.connect(this.colorGain);
+		this.colorOscValue.connect(this.colorGain);
 		this.colorGain.connect(this.ctx.destination);
 
 		// Boundary oscillator and gain
@@ -48,7 +52,8 @@ class SoundFeedback {
 		this.boundaryGain.connect(this.ctx.destination);
 
 		// Prepare for the first announcement/feedback.
-		this.colorOsc.start();
+		this.colorOscHue.start();
+		this.colorOscValue.start();
 		this.boundaryOsc.start();
 		this.pause();
 	}
@@ -66,13 +71,15 @@ class SoundFeedback {
 
 	public setColor(color: Color4) {
 		const hsv = color.asHSV();
-		const frequency = Math.sin(hsv.x) * 100 + hsv.y * 10 + 440;
+		const hueFrequency = Math.sin(hsv.x) * 100 + hsv.y * 10 + 440;
+		const valueFrequency = hsv.y * 440 + 220;
 
-		// Sigmoid with maximum 0.5 * alpha.
+		// Sigmoid with maximum 0.25 * alpha.
 		// Louder for greater value.
-		const gain = 0.5 * Math.min(1, color.a) / (1 + Math.exp(-(hsv.z - 1) * 2));
+		const gain = 0.25 * Math.min(1, color.a) / (1 + Math.exp(-(hsv.z - 1) * 2));
 
-		this.colorOsc.frequency.setValueAtTime(frequency, this.ctx.currentTime);
+		this.colorOscHue.frequency.setValueAtTime(hueFrequency, this.ctx.currentTime);
+		this.colorOscValue.frequency.setValueAtTime(valueFrequency, this.ctx.currentTime);
 		this.colorGain.gain.setValueAtTime(gain, this.ctx.currentTime);
 	}
 
