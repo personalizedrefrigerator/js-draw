@@ -101,7 +101,7 @@ class SoundFeedback {
 	public announceBoundaryCross(boundaryCrossCount: number) {
 		this.boundaryGain.gain.cancelScheduledValues(this.ctx.currentTime);
 		this.boundaryGain.gain.setValueAtTime(0, this.ctx.currentTime);
-		this.boundaryGain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+		this.boundaryGain.gain.linearRampToValueAtTime(0.018, this.ctx.currentTime + 0.1);
 		this.boundaryOsc.frequency.setValueAtTime(440 + Math.atan(boundaryCrossCount / 2) * 100, this.ctx.currentTime);
 		this.boundaryGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
 	}
