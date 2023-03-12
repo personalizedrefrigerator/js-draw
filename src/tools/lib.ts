@@ -17,5 +17,6 @@ export { default as SelectionTool } from './SelectionTool/SelectionTool';
 export { default as SelectAllShortcutHandler } from './SelectionTool/SelectAllShortcutHandler';
 export { default as EraserTool } from './Eraser';
 export { default as PasteHandler } from './PasteHandler';
+export { default as SoundUITool } from './SoundUITool';
 
 export { default as ToolbarShortcutHandler } from './ToolbarShortcutHandler';
