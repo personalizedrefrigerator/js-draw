@@ -1,3 +1,10 @@
+# 0.19.0
+ * (Experimental) Sound-based image browsing.
+   - Pressing tab repeatedly shows an "Enable sound-based exploration" button. Clicking this button plays a sound when a user subsequently clicks on the canvas. The sound is based on the color under the cursor.
+ * Fixed
+   - Pinch-zooming on a trackpad would zoom in to a point roughly 50px below the cursor.
+   - Buttons accessible only by pressing "tab" repeatedly were hidden behind the editor's canvas in some browsers.
+
 # 0.18.2
  * Fix essential files missing from NPM.
 

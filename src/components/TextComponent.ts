@@ -204,8 +204,8 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		}
 	}
 
-	// See this.getStyle
-	public getTextStyle() {
+	// See {@link getStyle}
+	public getTextStyle(): TextRenderingStyle {
 		return cloneTextStyle(this.style);
 	}
 
