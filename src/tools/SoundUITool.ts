@@ -11,6 +11,8 @@ class SoundFeedback {
 	// Feedback for the current color under the cursor
 	private colorOscHue: OscillatorNode;
 	private colorOscValue: OscillatorNode;
+	private colorOscSaturation: OscillatorNode;
+	private valueGain: GainNode;
 	private colorGain: GainNode;
 
 	// Feedback for when the cursor crosses the boundary of some
@@ -33,13 +35,20 @@ class SoundFeedback {
 		// Color oscillator and gain
 		this.colorOscHue = this.ctx.createOscillator();
 		this.colorOscValue = this.ctx.createOscillator();
+		this.colorOscSaturation = this.ctx.createOscillator();
 		this.colorOscHue.type = 'triangle';
-		this.colorOscValue.type = 'sine';
+		this.colorOscSaturation.type = 'sine';
+		this.colorOscValue.type = 'sawtooth';
+
+		this.valueGain = this.ctx.createGain();
+		this.colorOscValue.connect(this.valueGain);
+		this.valueGain.gain.setValueAtTime(0.18, this.ctx.currentTime); 
 
 		this.colorGain = this.ctx.createGain();
 
 		this.colorOscHue.connect(this.colorGain);
-		this.colorOscValue.connect(this.colorGain);
+		this.valueGain.connect(this.colorGain);
+		this.colorOscSaturation.connect(this.colorGain);
 		this.colorGain.connect(this.ctx.destination);
 
 		// Boundary oscillator and gain
@@ -53,6 +62,7 @@ class SoundFeedback {
 
 		// Prepare for the first announcement/feedback.
 		this.colorOscHue.start();
+		this.colorOscSaturation.start();
 		this.colorOscValue.start();
 		this.boundaryOsc.start();
 		this.pause();
@@ -71,22 +81,27 @@ class SoundFeedback {
 
 	public setColor(color: Color4) {
 		const hsv = color.asHSV();
-		const hueFrequency = Math.cos(hsv.x / 2) * 100 + hsv.y * 10 + 440;
-		const valueFrequency = hsv.y * 440 + 220;
+
+		// Choose frequencies that roughly correspond to hue, saturation, and value.
+		const hueFrequency = (-Math.cos(hsv.x / 2)) * 220 + 440;
+		const saturationFrequency = hsv.y * 440 + 220;
+		const valueFrequency = (hsv.z + 0.1) * 440;
 
 		// Sigmoid with maximum 0.25 * alpha.
 		// Louder for greater value.
-		const gain = 0.25 * Math.min(1, color.a) / (1 + Math.exp(-(hsv.z - 1) * 2));
+		const gain = 0.25 * Math.min(1, color.a) / (1 + Math.exp(-(hsv.z - 0.5) * 3));
 
 		this.colorOscHue.frequency.setValueAtTime(hueFrequency, this.ctx.currentTime);
+		this.colorOscSaturation.frequency.setValueAtTime(saturationFrequency, this.ctx.currentTime);
 		this.colorOscValue.frequency.setValueAtTime(valueFrequency, this.ctx.currentTime);
+		this.valueGain.gain.setValueAtTime((1 - hsv.z) * 0.4, this.ctx.currentTime);
 		this.colorGain.gain.setValueAtTime(gain, this.ctx.currentTime);
 	}
 
 	public announceBoundaryCross(boundaryCrossCount: number) {
 		this.boundaryGain.gain.cancelScheduledValues(this.ctx.currentTime);
 		this.boundaryGain.gain.setValueAtTime(0, this.ctx.currentTime);
-		this.boundaryGain.gain.linearRampToValueAtTime(0.02, this.ctx.currentTime + 0.1);
+		this.boundaryGain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
 		this.boundaryOsc.frequency.setValueAtTime(440 + Math.atan(boundaryCrossCount / 2) * 100, this.ctx.currentTime);
 		this.boundaryGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
 	}
@@ -106,6 +121,7 @@ class SoundFeedback {
 export default class SoundUITool extends BaseTool {
 	private soundFeedback: SoundFeedback|null = null;
 	private toggleButton: HTMLElement;
+	private toggleButtonContainer: HTMLElement;
 
 	public constructor(
 		private editor: Editor,
@@ -115,25 +131,27 @@ export default class SoundUITool extends BaseTool {
 
 
 		// Create a screen-reader-usable method of toggling the tool:
-		const toggleButtonContainer = document.createElement('div');
-		toggleButtonContainer.classList.add('js-draw-sound-ui-toggle');
+		this.toggleButtonContainer = document.createElement('div');
+		this.toggleButtonContainer.classList.add('js-draw-sound-ui-toggle');
 
 		this.toggleButton = document.createElement('button');
 		this.toggleButton.onclick = () => {
 			this.setEnabled(!this.isEnabled());
 		};
-		toggleButtonContainer.appendChild(this.toggleButton);
+		this.toggleButtonContainer.appendChild(this.toggleButton);
 		this.updateToggleButtonText();
 
-		editor.createHTMLOverlay(toggleButtonContainer);
+		editor.createHTMLOverlay(this.toggleButtonContainer);
 	}
 
 	private updateToggleButtonText() {
+		const containerEnabledClass = 'sound-ui-tool-enabled';
 		if (this.isEnabled()) {
 			this.toggleButton.innerText = this.editor.localization.disableAccessibilityExploreTool;
-
+			this.toggleButtonContainer.classList.add(containerEnabledClass);
 		} else {
 			this.toggleButton.innerText = this.editor.localization.enableAccessibilityExploreTool;
+			this.toggleButtonContainer.classList.remove(containerEnabledClass);
 		}
 	}
 
@@ -150,9 +168,14 @@ export default class SoundUITool extends BaseTool {
 
 	private lastPointerPos: Point2;
 
-	public onPointerDown({ current }: PointerEvt): boolean {
+	public onPointerDown({ current, allPointers }: PointerEvt): boolean {
 		if (!this.soundFeedback) {
 			this.soundFeedback = new SoundFeedback();
+		}
+
+		// Allow two-finger gestures to move the screen.
+		if (allPointers.length >= 2) {
+			return false;
 		}
 
 		// Accept multiple cursors -- some screen readers require multiple (touch) pointers to interact with

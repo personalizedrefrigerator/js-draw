@@ -43,7 +43,7 @@ export default class ToolController {
 			new Eraser(editor, localization.eraserTool),
 			new SelectionTool(editor, localization.selectionTool),
 			new TextTool(editor, localization.textTool, localization),
-			new PanZoom(editor, PanZoomMode.SinglePointerGestures, localization.anyDevicePanning)
+			new PanZoom(editor, PanZoomMode.SinglePointerGestures, localization.anyDevicePanning),
 		];
 
 		// Accessibility tools
@@ -51,8 +51,8 @@ export default class ToolController {
 		soundExplorer.setEnabled(false);
 
 		this.tools = [
-			soundExplorer,
 			new PipetteTool(editor, localization.pipetteTool),
+			soundExplorer,
 			panZoomTool,
 			...primaryTools,
 			keyboardPanZoomTool,
