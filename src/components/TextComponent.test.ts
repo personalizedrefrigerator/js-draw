@@ -1,7 +1,7 @@
 import Color4 from '../Color4';
 import EditorImage from '../EditorImage';
 import Mat33 from '../math/Mat33';
-import TextStyle from '../rendering/TextRenderingStyle';
+import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import createEditor from '../testing/createEditor';
 import AbstractComponent from './AbstractComponent';
 import TextComponent from './TextComponent';
@@ -9,7 +9,7 @@ import TextComponent from './TextComponent';
 
 describe('TextComponent', () => {
 	it('should be serializable', () => {
-		const style: TextStyle = {
+		const style: TextRenderingStyle = {
 			size: 12,
 			fontFamily: 'serif',
 			renderingStyle: { fill: Color4.black },
@@ -39,7 +39,7 @@ describe('TextComponent', () => {
 	});
 
 	it('should be restylable', () => {
-		const style: TextStyle = {
+		const style: TextRenderingStyle = {
 			size: 10,
 			fontFamily: 'sans',
 			renderingStyle: { fill: Color4.red },
@@ -73,7 +73,7 @@ describe('TextComponent', () => {
 	});
 
 	it('calling forceStyle on the duplicate of a TextComponent should preserve the original\'s style', () => {
-		const originalStyle: TextStyle = {
+		const originalStyle: TextRenderingStyle = {
 			size: 11,
 			fontFamily: 'sans-serif',
 			renderingStyle: { fill: Color4.purple, },

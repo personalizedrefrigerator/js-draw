@@ -12,7 +12,7 @@ import Rect2 from './math/Rect2';
 import { Vec2 } from './math/Vec2';
 import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
 import RenderingStyle from './rendering/RenderingStyle';
-import TextStyle from './rendering/TextRenderingStyle';
+import TextRenderingStyle from './rendering/TextRenderingStyle';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 
 type OnFinishListener = ()=> void;
@@ -49,15 +49,14 @@ export default class SVGLoader implements ImageLoader {
 
 	// If [computedStyles] is given, it is preferred to directly accessing node's style object.
 	private getStyle(node: SVGElement, computedStyles?: CSSStyleDeclaration) {
-		const style: RenderingStyle = {
-			fill: Color4.transparent,
-		};
+		let fill = Color4.transparent;
+		let stroke;
 
 		// If possible, use computedStyles (allows property inheritance).
 		const fillAttribute = node.getAttribute('fill') ?? computedStyles?.fill ?? node.style.fill;
 		if (fillAttribute) {
 			try {
-				style.fill = Color4.fromString(fillAttribute);
+				fill = Color4.fromString(fillAttribute);
 			} catch (e) {
 				console.error('Unknown fill color,', fillAttribute);
 			}
@@ -75,7 +74,7 @@ export default class SVGLoader implements ImageLoader {
 				const strokeColor = Color4.fromString(strokeAttribute);
 
 				if (strokeColor.a > 0) {
-					style.stroke = {
+					stroke = {
 						width,
 						color: strokeColor,
 					};
@@ -85,6 +84,10 @@ export default class SVGLoader implements ImageLoader {
 			}
 		}
 
+		const style: RenderingStyle = {
+			fill,
+			stroke,
+		};
 		return style;
 	}
 
@@ -278,7 +281,7 @@ export default class SVGLoader implements ImageLoader {
 			supportedStyleAttrs.push('fontSize');
 			fontSize = parseFloat(fontSizeMatch[1]);
 		}
-		const style: TextStyle = {
+		const style: TextRenderingStyle = {
 			size: fontSize,
 			fontFamily: computedStyles.fontFamily || elem.style.fontFamily || 'sans-serif',
 			renderingStyle: this.getStyle(elem, computedStyles),

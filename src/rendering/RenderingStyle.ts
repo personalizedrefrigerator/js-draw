@@ -1,10 +1,10 @@
 import Color4 from '../Color4';
 
 interface RenderingStyle {
-	fill: Color4;
-	stroke?: {
-		color: Color4;
-		width: number;
+	readonly fill: Color4;
+	readonly stroke?: {
+		readonly color: Color4;
+		readonly width: number;
 	};
 }
 

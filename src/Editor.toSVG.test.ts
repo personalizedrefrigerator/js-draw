@@ -1,12 +1,12 @@
 import { Color4, Mat33, Rect2, TextComponent, EditorImage, Vec2 } from './lib';
-import TextStyle from './rendering/TextRenderingStyle';
+import TextRenderingStyle from './rendering/TextRenderingStyle';
 import SVGLoader from './SVGLoader';
 import createEditor from './testing/createEditor';
 
 describe('Editor.toSVG', () => {
 	it('should correctly nest text objects', async () => {
 		const editor = createEditor();
-		const textStyle: TextStyle = {
+		const textStyle: TextRenderingStyle = {
 			fontFamily: 'sans', size: 12, renderingStyle: { fill: Color4.black }
 		};
 		const text = new TextComponent([

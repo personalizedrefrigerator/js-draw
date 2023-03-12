@@ -4,7 +4,7 @@ import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
-import TextStyle from '../TextRenderingStyle';
+import TextRenderingStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
 
 // Renderer that outputs almost nothing. Useful for automated tests.
@@ -94,7 +94,7 @@ export default class DummyRenderer extends AbstractRenderer {
 	}
 
 
-	public drawText(text: string, _transform: Mat33, _style: TextStyle): void {
+	public drawText(text: string, _transform: Mat33, _style: TextRenderingStyle): void {
 		this.lastText = text;
 	}
 	public drawImage(image: RenderableImage) {

@@ -56,7 +56,7 @@ export default abstract class AbstractComponent {
 	}
 
 	// Returns a unique ID for this element.
-	// @see { @link lib!EditorImage.lookupElement }
+	// @see { @link EditorImage.lookupElement }
 	public getId() {
 		return this.id;
 	}
@@ -79,7 +79,7 @@ export default abstract class AbstractComponent {
 	/**
 	 * Attach data that can be used while exporting the component (e.g. to SVG).
 	 * 
-	 * This is intended for use by a {@link ImageLoader}.
+	 * This is intended for use by an {@link ImageLoader}.
 	 */
 	public attachLoadSaveData(key: string, data: LoadSaveData) {
 		if (!this.loadSaveData[key]) {
@@ -97,7 +97,7 @@ export default abstract class AbstractComponent {
 		return this.zIndex;
 	}
 
-	/** @returns the bounding box of  */
+	/** @returns the bounding box of this. */
 	public getBBox(): Rect2 {
 		return this.contentBBox;
 	}

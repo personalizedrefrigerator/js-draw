@@ -8,7 +8,7 @@ import { Point2, Vec2 } from '../../math/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
-import TextStyle from '../TextRenderingStyle';
+import TextRenderingStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
 export const renderedStylesheetId = 'js-draw-style-sheet';
@@ -165,9 +165,9 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	private textContainer: SVGTextElement|null = null;
 	private textContainerTransform: Mat33|null = null;
-	private textParentStyle: TextStyle|null = null;
-	public drawText(text: string, transform: Mat33, style: TextStyle): void {
-		const applyTextStyles = (elem: SVGTextElement|SVGTSpanElement, style: TextStyle) => {
+	private textParentStyle: TextRenderingStyle|null = null;
+	public drawText(text: string, transform: Mat33, style: TextRenderingStyle): void {
+		const applyTextStyles = (elem: SVGTextElement|SVGTSpanElement, style: TextRenderingStyle) => {
 			if (style.fontFamily !== this.textParentStyle?.fontFamily) {
 				elem.style.fontFamily = style.fontFamily;
 			}

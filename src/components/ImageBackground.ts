@@ -18,7 +18,7 @@ export enum BackgroundType {
 
 export const imageBackgroundCSSClassName = 'js-draw-image-background';
 
-// Represents the background of an image in the editor.
+// Represents the background of the editor's canvas.
 export default class ImageBackground extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 	private viewportSizeChangeListener: DispatcherEventListener|null = null;

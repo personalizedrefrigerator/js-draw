@@ -77,7 +77,7 @@ export class Editor {
 	private container: HTMLElement;
 	private renderingRegion: HTMLElement;
 
-	/** Manages drawing surfaces/{@link lib!AbstractRenderer}s. */
+	/** Manages drawing surfaces/{@link AbstractRenderer}s. */
 	public display: Display;
 
 	/**
@@ -124,7 +124,7 @@ export class Editor {
 	/** @internal */
 	public readonly localization: EditorLocalization;
 
-	/** {@link lib!EditorSettings.iconProvider} */
+	/** {@link EditorSettings.iconProvider} */
 	public readonly icons: IconProvider;
 
 	/**

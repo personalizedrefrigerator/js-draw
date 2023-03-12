@@ -5,22 +5,31 @@ import Rect2 from '../math/Rect2';
 import Editor from '../Editor';
 import { Vec2 } from '../math/Vec2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import { cloneTextStyle, TextStyle, textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
+import { cloneTextStyle, TextRenderingStyle, textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 
 const componentTypeId = 'text';
+
+/**
+ * Displays text.
+ */
 export default class TextComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 
 	// eslint-disable-next-line @typescript-eslint/prefer-as-const
 	readonly isRestylableComponent: true = true;
 
+	/**
+	 * Creates a new text object from a list of component text or child TextComponents.
+	 * 
+	 * @see {@link fromLines}
+	 */
 	public constructor(
 		protected readonly textObjects: Array<string|TextComponent>,
 		private transform: Mat33,
-		private style: TextStyle,
+		private style: TextRenderingStyle,
 	) {
 		super(componentTypeId);
 		this.recomputeBBox();
@@ -33,7 +42,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		}
 	}
 
-	public static applyTextStyles(ctx: CanvasRenderingContext2D, style: TextStyle) {
+	public static applyTextStyles(ctx: CanvasRenderingContext2D, style: TextRenderingStyle) {
 		// Quote the font family if necessary.
 		const fontFamily = style.fontFamily.match(/\s/) ? style.fontFamily.replace(/["]/g, '\\"') : style.fontFamily;
 
@@ -50,7 +59,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	private static textMeasuringCtx: CanvasRenderingContext2D|null = null;
 
 	// Roughly estimate the bounding box of `text`. Use if no CanvasRenderingContext2D is available.
-	private static estimateTextDimens(text: string, style: TextStyle): Rect2 {
+	private static estimateTextDimens(text: string, style: TextRenderingStyle): Rect2 {
 		const widthEst = text.length * style.size;
 		const heightEst = style.size;
 
@@ -60,7 +69,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	}
 
 	// Returns the bounding box of `text`. This is approximate if no Canvas is available.
-	private static getTextDimens(text: string, style: TextStyle): Rect2 {
+	private static getTextDimens(text: string, style: TextRenderingStyle): Rect2 {
 		TextComponent.textMeasuringCtx ??= document.createElement('canvas').getContext('2d') ?? null;
 		if (!TextComponent.textMeasuringCtx) {
 			return this.estimateTextDimens(text, style);
@@ -292,7 +301,21 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		return new TextComponent(textObjects, transform, style);
 	}
 
-	public static fromLines(lines: string[], transform: Mat33, style: TextStyle): AbstractComponent {
+	/**
+	 * Creates a `TextComponent` from `lines`.
+	 * 
+	 * @example
+	 * ```ts
+	 * const textStyle = {
+	 *   size: 12,
+	 *   fontFamily: 'serif',
+	 *   renderingStyle: { fill: Color4.black },
+	 * };
+	 * 
+	 * const text = TextComponent.fromLines('foo\nbar'.split('\n'), Mat33.identity, textStyle);
+	 * ```
+	 */
+	public static fromLines(lines: string[], transform: Mat33, style: TextRenderingStyle): AbstractComponent {
 		let lastComponent: TextComponent|null = null;
 		const components: TextComponent[] = [];
 

@@ -1,16 +1,16 @@
 import RenderingStyle, { cloneStyle, styleFromJSON, styleToJSON } from './RenderingStyle';
 
-export interface TextStyle {
-	size: number;
-	fontFamily: string;
-	fontWeight?: string;
-	fontVariant?: string;
-	renderingStyle: RenderingStyle;
+export interface TextRenderingStyle {
+	readonly size: number;
+	readonly fontFamily: string;
+	readonly fontWeight?: string;
+	readonly fontVariant?: string;
+	readonly renderingStyle: RenderingStyle;
 }
 
-export default TextStyle;
+export default TextRenderingStyle;
 
-export const cloneTextStyle = (style: TextStyle) => {
+export const cloneTextStyle = (style: TextRenderingStyle) => {
 	return {
 		...style,
 		renderingStyle: cloneStyle(style.renderingStyle),
@@ -26,7 +26,7 @@ export const textStyleFromJSON = (json: any) => {
 		throw new Error('Serialized textStyle missing string fontFamily attribute!');
 	}
 
-	const style: TextStyle = {
+	const style: TextRenderingStyle = {
 		renderingStyle: styleFromJSON(json.renderingStyle),
 		size: json.size,
 		fontWeight: json.fontWeight,
@@ -37,7 +37,7 @@ export const textStyleFromJSON = (json: any) => {
 	return style;
 };
 
-export const textStyleToJSON = (style: TextStyle) => {
+export const textStyleToJSON = (style: TextRenderingStyle) => {
 	return {
 		...style,
 		renderingStyle: styleToJSON(style.renderingStyle),

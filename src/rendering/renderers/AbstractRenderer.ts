@@ -6,7 +6,7 @@ import Rect2 from '../../math/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';
-import TextStyle from '../TextRenderingStyle';
+import TextRenderingStyle from '../TextRenderingStyle';
 
 export interface RenderablePathSpec {
 	startPoint: Point2;
@@ -56,7 +56,7 @@ export default abstract class AbstractRenderer {
 	protected abstract traceQuadraticBezierCurve(
 		controlPoint: Point2, endPoint: Point2,
 	): void;
-	public abstract drawText(text: string, transform: Mat33, style: TextStyle): void;
+	public abstract drawText(text: string, transform: Mat33, style: TextRenderingStyle): void;
 	public abstract drawImage(image: RenderableImage): void;
 
 	// Returns true iff the given rectangle is so small, rendering anything within

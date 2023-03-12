@@ -2,7 +2,7 @@ import Color4 from '../Color4';
 import { ComponentBuilderFactory } from '../components/builders/types';
 import { Vec2 } from '../math/Vec2';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
-import TextStyle from '../rendering/TextRenderingStyle';
+import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import Pen from '../tools/Pen';
 import { StrokeDataPoint } from '../types';
 import Viewport from '../Viewport';
@@ -381,7 +381,7 @@ export default class IconProvider {
 		`);
 	}
 	
-	public makeTextIcon(textStyle: TextStyle): IconType {
+	public makeTextIcon(textStyle: TextRenderingStyle): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
 	

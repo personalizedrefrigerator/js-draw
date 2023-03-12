@@ -150,7 +150,7 @@ export default abstract class BaseWidget {
 
 	// Add a listener that is triggered when a key is pressed.
 	// Listeners will fire regardless of whether this widget is selected and require that
-	// {@link lib!Editor.toolController} to have an enabled {@link lib!ToolbarShortcutHandler} tool.
+	// {@link Editor.toolController} to have an enabled {@link ToolbarShortcutHandler} tool.
 	protected onKeyPress(_event: KeyPressEvent): boolean {
 		return false;
 	}

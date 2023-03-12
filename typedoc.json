@@ -1,6 +1,6 @@
 {
 	"entryPoints": [
-		"./src/lib.ts", "./src/bundle/bundled.ts"
+		"./src/lib.ts"
 	],
 	"exclude": [
 		"**/*.test.ts",

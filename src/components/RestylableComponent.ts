@@ -3,12 +3,12 @@ import SerializableCommand from '../commands/SerializableCommand';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
-import TextStyle, { textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
+import TextRenderingStyle, { textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
 import AbstractComponent from './AbstractComponent';
 
 export interface ComponentStyle {
 	color?: Color4;
-	textStyle?: TextStyle;
+	textStyle?: TextRenderingStyle;
 }
 
 const serializeComponentStyle = (style: ComponentStyle) => {
@@ -61,9 +61,28 @@ export const isRestylableComponent = (component: AbstractComponent): component i
 	return true;
 };
 
+/**
+ * An interface to be implemented by components with a changable color or {@link TextRenderingStyle}.
+ * 
+ * All such classes must have a member variable, `isRestylableComponent` that is set to `true`
+ * to allow testing whether the class is a `RestylableComponent` (see {@link isRestylableComponent}).
+ */
 export interface RestyleableComponent extends AbstractComponent {
+	/**
+	 * @returns a partial representation of this component's style.
+	 */
 	getStyle(): ComponentStyle;
 
+	/**
+	 * Returns a {@link Command} that updates portions of this component's style
+	 * to the given `style`.
+	 * 
+	 * @example
+	 * For some component and editor,
+	 * ```ts
+	 * editor.dispatch(component.updateStyle({ color: Color4.red }));
+	 * ```
+	 */
 	updateStyle(style: ComponentStyle): SerializableCommand;
 
 	/**

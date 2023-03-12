@@ -7,7 +7,7 @@ import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
-import TextStyle from '../TextRenderingStyle';
+import TextRenderingStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
 
 /**
@@ -188,7 +188,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		super.drawPath(path);
 	}
 
-	public drawText(text: string, transform: Mat33, style: TextStyle): void {
+	public drawText(text: string, transform: Mat33, style: TextRenderingStyle): void {
 		this.ctx.save();
 		transform = this.getCanvasToScreenTransform().rightMul(transform);
 		this.transformBy(transform);

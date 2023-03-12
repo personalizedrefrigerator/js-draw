@@ -5,7 +5,7 @@ import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';
 import { TextRendererLocalization } from '../localization';
 import RenderingStyle from '../RenderingStyle';
-import TextStyle from '../TextRenderingStyle';
+import TextRenderingStyle from '../TextRenderingStyle';
 import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
 
 // Outputs a description of what was rendered.
@@ -52,7 +52,7 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 	}
 	protected traceQuadraticBezierCurve(_controlPoint: Vec3, _endPoint: Vec3): void {
 	}
-	public drawText(text: string, _transform: Mat33, _style: TextStyle): void {
+	public drawText(text: string, _transform: Mat33, _style: TextRenderingStyle): void {
 		this.descriptionBuilder.push(this.localizationTable.textNode(text));
 		this.textNodeCount ++;
 	}

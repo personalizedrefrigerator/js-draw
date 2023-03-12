@@ -11,11 +11,11 @@ import BaseTool from './BaseTool';
 import { ToolLocalization } from './localization';
 import Erase from '../commands/Erase';
 import uniteCommands from '../commands/uniteCommands';
-import TextStyle from '../rendering/TextRenderingStyle';
+import TextRenderingStyle from '../rendering/TextRenderingStyle';
 
 const overlayCssClass = 'textEditorOverlay';
 export default class TextTool extends BaseTool {
-	private textStyle: TextStyle;
+	private textStyle: TextRenderingStyle;
 
 	private textEditOverlay: HTMLElement;
 	private textInputElem: HTMLTextAreaElement|null = null;
@@ -63,7 +63,7 @@ export default class TextTool extends BaseTool {
 		this.editor.notifier.on(EditorEventType.ViewportChanged, () => this.updateTextInput());
 	}
 
-	private getTextAscent(text: string, style: TextStyle): number {
+	private getTextAscent(text: string, style: TextRenderingStyle): number {
 		this.textMeasuringCtx ??= document.createElement('canvas').getContext('2d');
 		if (this.textMeasuringCtx) {
 			TextComponent.applyTextStyles(this.textMeasuringCtx, style);
@@ -314,11 +314,11 @@ export default class TextTool extends BaseTool {
 		}
 	}
 
-	public getTextStyle(): TextStyle {
+	public getTextStyle(): TextRenderingStyle {
 		return this.textStyle;
 	}
 
-	private setTextStyle(style: TextStyle) {
+	private setTextStyle(style: TextRenderingStyle) {
 		// Copy the style — we may change parts of it.
 		this.textStyle = { ...style, renderingStyle: { ...style.renderingStyle } };
 		this.dispatchUpdateEvent();

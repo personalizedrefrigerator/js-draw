@@ -8,7 +8,7 @@ import BaseTool from './BaseTool';
 import TextTool from './TextTool';
 import Color4 from '../Color4';
 import ImageComponent from '../components/ImageComponent';
-import TextStyle from '../rendering/TextRenderingStyle';
+import TextRenderingStyle from '../rendering/TextRenderingStyle';
 
 /**
  * A tool that handles paste events (e.g. as triggered by ctrl+V).
@@ -79,8 +79,8 @@ export default class PasteHandler extends BaseTool {
 			return 0;
 		});
 
-		const defaultTextStyle: TextStyle = { size: 12, fontFamily: 'sans', renderingStyle: { fill: Color4.red } };
-		const pastedTextStyle: TextStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
+		const defaultTextStyle: TextRenderingStyle = { size: 12, fontFamily: 'sans', renderingStyle: { fill: Color4.red } };
+		const pastedTextStyle: TextRenderingStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
 
 		const lines = text.split('\n');
 		await this.addComponentsFromPaste([ TextComponent.fromLines(lines, Mat33.identity, pastedTextStyle) ]);
