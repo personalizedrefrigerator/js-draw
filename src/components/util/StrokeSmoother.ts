@@ -1,8 +1,8 @@
-import { Bezier } from 'bezier-js';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Rect2 from '../../math/Rect2';
 import LineSegment2 from '../../math/LineSegment2';
 import { StrokeDataPoint } from '../../types';
+import QuadraticBezier from '../../math/polynomial/QuadraticBezier';
 
 export interface Curve {
     startPoint: Vec2;
@@ -23,7 +23,7 @@ export class StrokeSmoother {
 	private buffer: Point2[];
 	private lastPoint: StrokeDataPoint;
 	private lastExitingVec: Vec2|null = null;
-	private currentCurve: Bezier|null = null;
+	private currentCurve: QuadraticBezier|null = null;
 	private curveStartWidth: number;
 	private curveEndWidth: number;
 
@@ -70,9 +70,9 @@ export class StrokeSmoother {
 		if (!this.currentCurve) {
 			return 0;
 		}
-		const startPt = Vec2.ofXY(this.currentCurve.points[0]);
-		const controlPt = Vec2.ofXY(this.currentCurve.points[1]);
-		const endPt = Vec2.ofXY(this.currentCurve.points[2]);
+		const startPt = this.currentCurve.p0;
+		const controlPt = this.currentCurve.p1;
+		const endPt = this.currentCurve.p2;
 		const toControlDist = startPt.minus(controlPt).length();
 		const toEndDist = endPt.minus(controlPt).length();
 		return toControlDist + toEndDist;
@@ -87,9 +87,7 @@ export class StrokeSmoother {
 		this.onCurveAdded(this.currentSegmentToPath());
 
 		const lastPoint = this.buffer[this.buffer.length - 1];
-		this.lastExitingVec = Vec2.ofXY(
-			this.currentCurve.points[2]
-		).minus(Vec2.ofXY(this.currentCurve.points[1]));
+		this.lastExitingVec = this.currentCurve.p2.minus(this.currentCurve.p1);
 		console.assert(this.lastExitingVec.magnitude() !== 0, 'lastExitingVec has zero length!');
 
 		// Use the last two points to start a new curve (the last point isn't used
@@ -108,15 +106,15 @@ export class StrokeSmoother {
 			throw new Error('Invalid State: currentCurve is null!');
 		}
 
-		const startVec = Vec2.ofXY(this.currentCurve.normal(0)).normalized();
+		const startVec = this.currentCurve.normal(0).normalized();
 
 		if (!isFinite(startVec.magnitude())) {
 			throw new Error(`startVec(${startVec}) is NaN or ∞`);
 		}
 
-		const startPt = Vec2.ofXY(this.currentCurve.get(0));
-		const endPt = Vec2.ofXY(this.currentCurve.get(1));
-		const controlPoint = Vec2.ofXY(this.currentCurve.points[1]);
+		const startPt = this.currentCurve.at(0);
+		const endPt = this.currentCurve.at(1);
+		const controlPoint = this.currentCurve.p1;
 
 		return {
 			startPoint: startPt,
@@ -177,7 +175,7 @@ export class StrokeSmoother {
 			const p3 = newPoint.pos;
 
 			// Quadratic Bézier curve
-			this.currentCurve = new Bezier(p1.xy, p2.xy, p3.xy);
+			this.currentCurve = new QuadraticBezier(p1, p2, p3);
 			console.assert(!isNaN(p1.magnitude()) && !isNaN(p2.magnitude()) && !isNaN(p3.magnitude()), 'Expected !NaN');
 
 			if (this.isFirstSegment) {
@@ -248,26 +246,39 @@ export class StrokeSmoother {
 		console.assert(!controlPoint.eq(segmentEnd, 1e-11), 'Control and end points are equal!');
 
 		const prevCurve = this.currentCurve;
-		this.currentCurve = new Bezier(segmentStart.xy, controlPoint.xy, segmentEnd.xy);
+		this.currentCurve = new QuadraticBezier(segmentStart, controlPoint, segmentEnd);
 
-		if (isNaN(Vec2.ofXY(this.currentCurve.normal(0)).magnitude())) {
+		if (isNaN(this.currentCurve.normal(0).magnitude())) {
 			console.error('NaN normal at 0. Curve:', this.currentCurve);
 			this.currentCurve = prevCurve;
 		}
 
 		// Should we start making a new curve? Check whether all buffer points are within
 		// ±strokeWidth of the curve.
-		const curveMatchesPoints = (curve: Bezier): boolean => {
-			for (const point of this.buffer) {
-				const proj =
-					Vec2.ofXY(curve.project(point.xy));
-				const dist = proj.minus(point).magnitude();
+		const curveMatchesPoints = (curve: QuadraticBezier): boolean => {
+			let nonMatching = 0;
+			const maxNonMatching = 2;
 
-				const minFit = Math.max(
-					Math.min(this.curveStartWidth, this.curveEndWidth) / 3,
-					this.minFitAllowed
-				);
+			const minFit = Math.max(
+				Math.min(this.curveStartWidth, this.curveEndWidth) / 3,
+				this.minFitAllowed
+			);
+
+			for (const point of this.buffer) {
+				let dist = curve.approximateDistance(point);
+
 				if (dist > minFit || dist > this.maxFitAllowed) {
+					// Avoid using the slower .distance
+					if (nonMatching >= maxNonMatching - 1) {
+						dist = curve.distance(point);
+					}
+
+					if (dist > minFit || dist > this.maxFitAllowed) {
+						nonMatching ++;
+					}
+				}
+
+				if (nonMatching >= maxNonMatching) {
 					return false;
 				}
 			}
