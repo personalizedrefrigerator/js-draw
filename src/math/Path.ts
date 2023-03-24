@@ -444,7 +444,7 @@ export default class Path {
 
 		// Scale the expanded rect --- the visual equivalent is only close for huge strokes.
 		const expandedRect = visibleRect.grownBy(strokeWidth)
-			.transformedBoundingBox(Mat33.scaling2D(2, visibleRect.center));
+			.transformedBoundingBox(Mat33.scaling2D(4, visibleRect.center));
 
 		// TODO: Handle simplifying very small paths.
 		if (expandedRect.containsRect(path.bbox.grownBy(strokeWidth))) {

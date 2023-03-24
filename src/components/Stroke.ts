@@ -164,7 +164,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 					continue;
 				}
 
-				const muchBiggerThanVisible = bbox.size.x > visibleRect.size.x * 2 || bbox.size.y > visibleRect.size.y * 2;
+				const muchBiggerThanVisible = bbox.size.x > visibleRect.size.x * 3 || bbox.size.y > visibleRect.size.y * 3;
 				if (muchBiggerThanVisible && !part.path.roughlyIntersects(visibleRect, part.style.stroke?.width ?? 0)) {
 					continue;
 				}
