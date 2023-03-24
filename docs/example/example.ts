@@ -125,7 +125,7 @@ declare let launchQueue: any;
 	if ('launchQueue' in window) {
 		// Create the editor and load files.
 		launchQueue.setConsumer(async ({ files }: { files: any[] }) => {
-			if (!files) {
+			if (!files || files.length === 0) {
 				return;
 			}
 			if (files.length > 1) {
@@ -133,10 +133,11 @@ declare let launchQueue: any;
 				return;
 			}
 
-			optionsScreen.remove();
 			const file = files[0];
 			const blob = await file.getFile();
 			blob.handle = file;
+
+			optionsScreen.remove();
 
 			const fileSaver = createFileSaver(blob.name, file);
 			const editor = createEditor(() => saveImage(editor, fileSaver));
