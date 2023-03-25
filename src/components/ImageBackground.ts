@@ -55,7 +55,9 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		this.contentBBox = Rect2.empty;
 	}
 
-	public static ofGrid(backgroundColor: Color4, gridSize?: number, gridColor?: Color4) {
+	public static ofGrid(
+		backgroundColor: Color4, gridSize?: number, gridColor?: Color4, gridStrokeWidth?: number
+	) {
 		const background = new ImageBackground(BackgroundType.Grid, backgroundColor);
 
 		if (gridSize !== undefined) {
@@ -64,6 +66,10 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 
 		if (gridColor !== undefined) {
 			background.secondaryColor = gridColor;
+		}
+
+		if (gridStrokeWidth !== undefined) {
+			background.gridStrokeWidth = gridStrokeWidth;
 		}
 
 		return background;
@@ -256,6 +262,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 			secondaryColor: this.secondaryColor?.toHexString(),
 			backgroundType: this.backgroundType,
 			gridSize: this.gridSize,
+			gridStrokeWidth: this.gridStrokeWidth,
 		};
 	}
 
@@ -301,11 +308,15 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		const mainColor = Color4.fromHex(json.mainColor);
 		const secondaryColor = json.secondaryColor ? Color4.fromHex(json.secondaryColor) : null;
 		const gridSize: number|undefined = json.gridSize ?? undefined;
+		const gridStrokeWidth: number|undefined = json.gridStrokeWidth ?? undefined;
 
 		const result = new ImageBackground(backgroundType, mainColor);
 		result.secondaryColor = secondaryColor;
 		if (gridSize) {
 			result.gridSize = gridSize;
+		}
+		if (gridStrokeWidth) {
+			result.gridStrokeWidth = gridStrokeWidth;
 		}
 
 		return result;

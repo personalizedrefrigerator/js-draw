@@ -195,6 +195,7 @@ export default class SVGLoader implements ImageLoader {
 		if (node.classList.contains(backgroundTypeToClassNameMap[BackgroundType.Grid])) {
 			let foregroundStr: string|null;
 			let backgroundStr: string|null;
+			let gridStrokeWidthStr: string|null;
 
 			// If a group,
 			if (node.tagName.toLowerCase() === 'g') {
@@ -210,10 +211,11 @@ export default class SVGLoader implements ImageLoader {
 
 				backgroundStr = background.getAttribute('fill');
 				foregroundStr = grid.getAttribute('stroke');
-
+				gridStrokeWidthStr = grid.getAttribute('stroke-width');
 			} else {
 				backgroundStr = node.getAttribute('fill');
 				foregroundStr = node.getAttribute('stroke');
+				gridStrokeWidthStr = node.getAttribute('stroke-width');
 			}
 
 			// Default to a transparent background.
@@ -234,6 +236,11 @@ export default class SVGLoader implements ImageLoader {
 				}
 			}
 
+			let gridStrokeWidth: number|undefined = undefined;
+			if (gridStrokeWidthStr) {
+				gridStrokeWidth = parseFloat(gridStrokeWidthStr);
+			}
+
 			const backgroundColor = Color4.fromString(backgroundStr);
 			let foregroundColor: Color4|undefined = Color4.fromString(foregroundStr);
 
@@ -242,7 +249,9 @@ export default class SVGLoader implements ImageLoader {
 				foregroundColor = undefined;
 			}
 
-			const elem = ImageBackground.ofGrid(backgroundColor, gridSize, foregroundColor);
+			const elem = ImageBackground.ofGrid(
+				backgroundColor, gridSize, foregroundColor, gridStrokeWidth
+			);
 			await this.onAddComponent?.(elem);
 		}
 		// Otherwise, if just a <path/>, it's a solid color background.
