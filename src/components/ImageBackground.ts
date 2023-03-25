@@ -42,6 +42,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	private viewportSizeChangeListener: DispatcherEventListener|null = null;
 
 	private gridSize: number = Viewport.getGridSize(2);
+	private gridStrokeWidth: number = 0.5;
 	private secondaryColor: Color4|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/prefer-as-const
@@ -153,7 +154,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	}
 
 	private generateGridPath(visibleRect?: Rect2) {
-		const targetRect = visibleRect?.intersection(this.contentBBox) ?? this.contentBBox;
+		const targetRect = visibleRect?.grownBy(this.gridStrokeWidth)?.intersection(this.contentBBox) ?? this.contentBBox;
 
 		const roundDownToGrid = (coord: number) => Math.floor(coord / this.gridSize) * this.gridSize;
 		const roundUpToGrid = (coord: number) => Math.ceil(coord / this.gridSize) * this.gridSize;
@@ -213,7 +214,10 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 
 		if (this.backgroundType === BackgroundType.Grid) {
 			const gridColor = this.secondaryColor ?? Color4.ofRGBA(1 - this.mainColor.r, 1 - this.mainColor.g, 1 - this.mainColor.b, 0.2);
-			const style = { fill: Color4.transparent, stroke: { width: 0.5, color: gridColor } };
+			const style = {
+				fill: Color4.transparent,
+				stroke: { width: this.gridStrokeWidth, color: gridColor }
+			};
 			canvas.drawPath(this.generateGridPath(visibleRect).toRenderable(style));
 		}
 
