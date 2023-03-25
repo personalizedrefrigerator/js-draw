@@ -42,7 +42,7 @@ class SoundFeedback {
 
 		this.valueGain = this.ctx.createGain();
 		this.colorOscValue.connect(this.valueGain);
-		this.valueGain.gain.setValueAtTime(0.18, this.ctx.currentTime); 
+		this.valueGain.gain.setValueAtTime(0.18, this.ctx.currentTime);
 
 		this.colorGain = this.ctx.createGain();
 
@@ -116,7 +116,7 @@ class SoundFeedback {
  * This tool, when enabled, plays a sound representing the color of the portion of the display
  * currently under the cursor. This tool adds a button that can be navigated to with the tab key
  * that enables/disables the tool.
- * 
+ *
  * This allows the user to explore the content of the display without a working screen.
  */
 export default class SoundUITool extends BaseTool {
@@ -196,7 +196,7 @@ export default class SoundUITool extends BaseTool {
 			component => component.intersects(pointerMotionLine)
 		);
 		this.lastPointerPos = current.canvasPos;
-		
+
 		if (collisions.length > 0) {
 			this.soundFeedback?.announceBoundaryCross(collisions.length);
 		}

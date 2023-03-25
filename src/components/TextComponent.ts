@@ -23,7 +23,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 	/**
 	 * Creates a new text object from a list of component text or child TextComponents.
-	 * 
+	 *
 	 * @see {@link fromLines}
 	 */
 	public constructor(
@@ -303,7 +303,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 	/**
 	 * Creates a `TextComponent` from `lines`.
-	 * 
+	 *
 	 * @example
 	 * ```ts
 	 * const textStyle = {
@@ -311,7 +311,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	 *   fontFamily: 'serif',
 	 *   renderingStyle: { fill: Color4.black },
 	 * };
-	 * 
+	 *
 	 * const text = TextComponent.fromLines('foo\nbar'.split('\n'), Mat33.identity, textStyle);
 	 * ```
 	 */

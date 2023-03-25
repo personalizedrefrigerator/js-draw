@@ -86,7 +86,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	public getGridSize() {
 		return this.gridSize;
 	}
-	
+
 	public getStyle(): ComponentStyle {
 		let color: Color4|undefined = this.mainColor;
 

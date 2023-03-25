@@ -85,7 +85,7 @@ export default class Pointer {
 			} else if (!(evt.buttons & 0x1)) {
 				device = PointerDevice.Other;
 			}
-		} 
+		}
 
 		return new Pointer(
 			screenPos,

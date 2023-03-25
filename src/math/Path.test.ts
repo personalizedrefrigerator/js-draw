@@ -191,7 +191,7 @@ describe('Path', () => {
 			if (lastSegment.kind !== PathCommandType.LineTo) {
 				throw new Error('Rectangles should only be made up of lines');
 			}
-			
+
 			expect(strokedRect.startPoint).objEq(lastSegment.point);
 		});
 	});

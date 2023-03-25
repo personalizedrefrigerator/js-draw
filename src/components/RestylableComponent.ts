@@ -13,7 +13,7 @@ export interface ComponentStyle {
 
 const serializeComponentStyle = (style: ComponentStyle) => {
 	const result: Record<string, any> = { };
-	
+
 	if (style.color) {
 		result.color = style.color.toHexString();
 	}
@@ -63,7 +63,7 @@ export const isRestylableComponent = (component: AbstractComponent): component i
 
 /**
  * An interface to be implemented by components with a changable color or {@link TextRenderingStyle}.
- * 
+ *
  * All such classes must have a member variable, `isRestylableComponent` that is set to `true`
  * to allow testing whether the class is a `RestylableComponent` (see {@link isRestylableComponent}).
  */
@@ -76,7 +76,7 @@ export interface RestyleableComponent extends AbstractComponent {
 	/**
 	 * Returns a {@link Command} that updates portions of this component's style
 	 * to the given `style`.
-	 * 
+	 *
 	 * @example
 	 * For some component and editor,
 	 * ```ts
@@ -88,7 +88,7 @@ export interface RestyleableComponent extends AbstractComponent {
 	/**
 	 * Set the style of this component in a way that can't be undone/redone
 	 * (does not create a command).
-	 * 
+	 *
 	 * Prefer `updateStyle(style).apply(editor)`.
 	 */
 	forceStyle(style: ComponentStyle, editor: Editor|null): void;

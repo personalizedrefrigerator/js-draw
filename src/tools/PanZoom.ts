@@ -239,7 +239,7 @@ export default class PanZoom extends BaseTool {
 		if (this.isRotationLocked()) {
 			deltaRotation = 0;
 		} else {
-			deltaRotation = this.toSnappedRotationDelta(angle); 
+			deltaRotation = this.toSnappedRotationDelta(angle);
 		}
 
 		this.updateVelocity(screenCenter);

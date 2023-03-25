@@ -2,7 +2,7 @@
 
 /**
  * A vector with three components. Can also be used to represent a two-component vector.
- * 
+ *
  * A `Vec3` is immutable.
  */
 export default class Vec3 {
@@ -50,7 +50,7 @@ export default class Vec3 {
 
 	/**
 	 * Return this' angle in the XY plane (treats this as a Vec2).
-	 * 
+	 *
 	 * This is equivalent to `Math.atan2(vec.y, vec.x)`.
 	 */
 	public angle(): number {
@@ -59,7 +59,7 @@ export default class Vec3 {
 
 	/**
 	 * Returns a unit vector in the same direction as this.
-	 * 
+	 *
 	 * If `this` has zero length, the resultant vector has `NaN` components.
 	 */
 	public normalized(): Vec3 {
@@ -98,7 +98,7 @@ export default class Vec3 {
 	/**
 	 * If `other` is a `Vec3`, multiplies `this` component-wise by `other`. Otherwise,
 	 * if `other is a `number`, returns the result of scalar multiplication.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * Vec3.of(1, 2, 3).scale(Vec3.of(2, 4, 6)); // → Vec3(2, 8, 18)
@@ -142,16 +142,16 @@ export default class Vec3 {
 	/**
 	 * `zip` Maps a component of this and a corresponding component of
 	 * `other` to a component of the output vector.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * const a = Vec3.of(1, 2, 3);
 	 * const b = Vec3.of(0.5, 2.1, 2.9);
-	 * 
+	 *
 	 * const zipped = a.zip(b, (aComponent, bComponent) => {
 	 *   return Math.min(aComponent, bComponent);
 	 * });
-	 * 
+	 *
 	 * console.log(zipped.toString()); // → Vec(0.5, 2, 2.9)
 	 * ```
 	 */
@@ -167,7 +167,7 @@ export default class Vec3 {
 
 	/**
 	 * Returns a vector with each component acted on by `fn`.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * console.log(Vec3.of(1, 2, 3).map(val => val + 1)); // → Vec(2, 3, 4)
@@ -186,7 +186,7 @@ export default class Vec3 {
 	/**
 	 * [fuzz] The maximum difference between two components for this and [other]
 	 * to be considered equal.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * Vec3.of(1, 2, 3).eq(Vec3.of(4, 5, 6), 100);  // → true

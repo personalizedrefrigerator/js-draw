@@ -12,7 +12,7 @@ import TextRenderingStyle from '../rendering/TextRenderingStyle';
 
 /**
  * A tool that handles paste events (e.g. as triggered by ctrl+V).
- * 
+ *
  * @example
  * While `ToolController` has a `PasteHandler` in its default list of tools,
  * if a non-default set is being used, `PasteHandler` can be added as follows:

@@ -260,7 +260,7 @@ export default class HTMLToolbar {
 	/**
 	 * Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
 	 * (i.e. its `addTo` method should not have been called).
-	 * 
+	 *
 	 * @example
 	 * ```ts
 	 * const toolbar = editor.addToolbar();
@@ -289,7 +289,7 @@ export default class HTMLToolbar {
 
 	/**
 	 * Adds a spacer.
-	 * 
+	 *
 	 * @example
 	 * Adding a save button that moves to the very right edge of the toolbar
 	 * while keeping the other buttons centered:
@@ -356,7 +356,7 @@ export default class HTMLToolbar {
 
 	/**
 	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).
-	 * 
+	 *
 	 * @return The added button.
 	 */
 	public addActionButton(
@@ -452,7 +452,7 @@ export default class HTMLToolbar {
 	/**
 	 * Adds a widget that toggles the overflow menu. Call `addOverflowWidget` to ensure
 	 * that this widget is in the correct space (if shown).
-	 * 
+	 *
 	 * @example
 	 * ```ts
 	 * toolbar.addDefaultToolWidgets();

@@ -6,7 +6,7 @@ import BaseWidget from './BaseWidget';
 export default class OverflowWidget extends BaseWidget {
 	private overflowChildren: BaseWidget[] = [];
 	private overflowContainer: HTMLElement;
-	
+
 	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
 		super(editor, 'overflow-widget', localizationTable);
 

@@ -84,7 +84,7 @@ class ZoomWidget extends BaseWidget {
 	protected getTitle(): string {
 		return this.localizationTable.zoom;
 	}
-	
+
 	protected createIcon(): Element {
 		return this.editor.icons.makeZoomIcon();
 	}
@@ -146,7 +146,7 @@ class HandModeWidget extends BaseWidget {
 
 export default class HandToolWidget extends BaseToolWidget {
 	private allowTogglingBaseTool: boolean;
-	
+
 	public constructor(
 		editor: Editor,
 
@@ -180,7 +180,7 @@ export default class HandToolWidget extends BaseToolWidget {
 
 			localizationTable,
 		);
-		
+
 		const rotationLockWidget = new HandModeWidget(
 			editor,
 

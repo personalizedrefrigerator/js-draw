@@ -47,7 +47,7 @@ describe('Pen', () => {
 	it('should draw vertical line with slight bend', () => {
 		const editor = createEditor();
 
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(417, 24)); 
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(417, 24));
 		jest.advanceTimersByTime(245);
 		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 197));
 		jest.advanceTimersByTime(20);
@@ -158,7 +158,7 @@ describe('Pen', () => {
 
 		expect(editor.history.undoStackSize).toBe(0);
 
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(10, 10)); 
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(10, 10));
 		jest.advanceTimersByTime(100);
 		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(20, 10));
 
@@ -180,7 +180,7 @@ describe('Pen', () => {
 		const penTool = editor.toolController.getMatchingTools(PenTool)[0];
 		penTool.setStrokeFactory(makeFreehandLineBuilder);
 
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0.1, 0.1)); 
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0.1, 0.1));
 		jest.advanceTimersByTime(100);
 		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10.1, 10.1));
 		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(10.1, 10.1));

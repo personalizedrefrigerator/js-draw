@@ -7,7 +7,7 @@ import BaseTool from './BaseTool';
  * 1 maps to the first primary tool, 2 to the second primary tool, ... .
  *
  * This is in the default set of {@link ToolController} tools.
- * 
+ *
  * @deprecated This may be replaced in the future.
  */
 export default class ToolSwitcherShortcut extends BaseTool {

@@ -291,7 +291,7 @@ export default class Path {
 			return rect.containsPoint(this.startPoint);
 		}
 		const isClosed = this.startPoint.eq(this.getEndPoint());
-        
+
 		if (isClosed && strokeWidth === 0) {
 			return this.closedRoughlyIntersects(rect);
 		}
@@ -738,7 +738,7 @@ export default class Path {
 
 				return newPos;
 			});
-	
+
 			if (allArgs.length % commandArgCount !== 0) {
 				throw new Error([
 					`Incorrect number of arguments: got ${JSON.stringify(allArgs)} with a length of ${allArgs.length} ≠ ${commandArgCount}k, k ∈ ℤ.`,

@@ -24,7 +24,7 @@ export const stylesEqual = (a: RenderingStyle, b: RenderingStyle): boolean => {
 		&& (a.stroke == undefined) === (b.stroke == undefined)
 		&& (a.stroke?.color?.eq(b.stroke?.color) ?? true)
 		&& a.stroke?.width === b.stroke?.width);
-    
+
 	// Map undefined/null -> false
 	return result ?? false;
 };

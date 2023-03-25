@@ -4,7 +4,7 @@ import solveQuadratic from './solveQuadratic';
 
 export default class QuadraticBezier {
 	private bezierJs: Bezier|null = null;
-    
+
 	public constructor(
         public readonly p0: Point2,
         public readonly p1: Point2,

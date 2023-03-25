@@ -1,4 +1,4 @@
-// Displays a find dialog that allows the user to search for and focus text. 
+// Displays a find dialog that allows the user to search for and focus text.
 //
 // @packageDocumentation
 
@@ -32,7 +32,7 @@ export default class FindTool extends BaseTool {
 			.filter(
 				elem => elem instanceof TextComponent
 			) as TextComponent[];
-		
+
 		const matches = allTextComponents.filter(
 			text => text.getText().toLocaleLowerCase().indexOf(searchFor) !== -1
 		);
@@ -102,7 +102,7 @@ export default class FindTool extends BaseTool {
 		nextBtn.onclick = () => {
 			this.toNextMatch();
 		};
-		
+
 		closeBtn.onclick = () => {
 			this.setVisible(false);
 		};

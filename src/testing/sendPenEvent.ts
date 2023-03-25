@@ -6,7 +6,7 @@ import { InputEvtType } from '../types';
 /**
  * Dispatch a pen event to the currently selected tool.
  * Intended for unit tests.
- * 
+ *
  * @see {@link sendTouchEvent}
  */
 const sendPenEvent = (

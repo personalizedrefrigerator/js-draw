@@ -12,19 +12,19 @@ import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './Abstrac
 
 /**
  * Renders onto a `CanvasRenderingContext2D`.
- * 
+ *
  * @example
  * ```ts
  * const editor = new Editor(document.body);
- * 
+ *
  * const canvas = document.createElement('canvas');
  * const ctx = canvas.getContext('2d');
- * 
+ *
  * // Ensure that the canvas can fit the entire rendering
  * const viewport = editor.image.getImportExportViewport();
  * canvas.width = viewport.getScreenRectSize().x;
  * canvas.height = viewport.getScreenRectSize().y;
- * 
+ *
  * // Render editor.image onto the renderer
  * const renderer = new CanvasRenderer(ctx, viewport);
  * editor.image.render(renderer, viewport);
@@ -65,7 +65,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		this.ctx.transform(
 			transformBy.a1, transformBy.b1, // a, b
 			transformBy.a2, transformBy.b2, // c, d
-			transformBy.a3, transformBy.b3, // e, f 
+			transformBy.a3, transformBy.b3, // e, f
 		);
 	}
 
@@ -290,7 +290,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;
 		const anyDimenMinSize = this.minRenderSizeAnyDimen;
 		const anyTooSmall = Math.abs(diagonal.x) < anyDimenMinSize || Math.abs(diagonal.y) < anyDimenMinSize;
-		
+
 		return bothTooSmall || anyTooSmall;
 	}
 }

@@ -7,7 +7,7 @@ export default class UndoRedoShortcut extends BaseTool {
 	public constructor(private editor: Editor) {
 		super(editor.notifier, editor.localization.undoRedoTool);
 	}
-    
+
 	// @internal
 	public onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
 		if (ctrlKey) {

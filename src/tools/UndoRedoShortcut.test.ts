@@ -22,7 +22,7 @@ describe('UndoRedoShortcut', () => {
 			altKey: false,
 			key: 'z',
 		});
-		
+
 		expect(editor.history.undoStackSize).toBe(0);
 		expect(editor.history.redoStackSize).toBe(1);
 	});

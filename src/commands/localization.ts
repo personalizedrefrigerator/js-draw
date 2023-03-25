@@ -35,7 +35,7 @@ export const defaultCommandLocalization: CommandLocalization = {
 	elements: 'Elements',
 	erasedNoElements: 'Erased nothing',
 	duplicatedNoElements: 'Duplicated nothing',
-	
+
 	rotatedBy: (degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`,
 	movedLeft: 'Moved left',
 	movedUp: 'Moved up',

@@ -16,15 +16,15 @@ interface StrokePart extends RenderablePathSpec {
 
 /**
  * Represents an {@link AbstractComponent} made up of one or more {@link Path}s.
- * 
+ *
  * @example
  * For some {@link Editor} editor and `Stroke` stroke,
- * 
+ *
  * **Restyling**:
  * ```ts
  * editor.dispatch(stroke.updateStyle({ color: Color4.red }));
  * ```
- * 
+ *
  * **Transforming**:
  * ```ts
  * editor.dispatch(stroke.transformBy(Mat33.translation(Vec2.of(10, 0))));
@@ -44,13 +44,13 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	/**
 	 * Creates a `Stroke` from the given `parts`. All parts should have the
 	 * same color.
-	 * 
+	 *
 	 * @example
 	 * ```ts
 	 * // A path that starts at (1,1), moves to the right by (2, 0),
 	 * // then moves down and right by (3, 3)
 	 * const path = Path.fromString('m1,1 2,0 3,3');
-	 * 
+	 *
 	 * const stroke = new Stroke([
 	 *     // Fill with red
 	 *     path.toRenderable({ fill: Color4.red })

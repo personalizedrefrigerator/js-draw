@@ -11,16 +11,16 @@ export const assertUnreachable = (key: never): never => {
 
 /**
  * Throws an exception if the typeof given value is not a number or `value` is NaN.
- * 
+ *
  * @example
  * ```ts
  * const foo: unknown = 3;
  * assertIsNumber(foo);
- * 
+ *
  * assertIsNumber('hello, world'); // throws an Error.
  * ```
- * 
- * 
+ *
+ *
  */
 export const assertIsNumber = (value: any, allowNaN: boolean = false): value is number => {
 	if (typeof value !== 'number' || (!allowNaN && isNaN(value))) {

@@ -202,7 +202,7 @@ export default class Display {
 	public rerenderAsText() {
 		this.textRenderer.clear();
 		this.editor.image.render(this.textRenderer, this.editor.viewport);
-		
+
 		if (this.textRerenderOutput) {
 			this.textRerenderOutput.innerText = this.textRenderer.getDescription();
 		}
@@ -210,7 +210,7 @@ export default class Display {
 
 	/**
 	 * Clears the drawing surfaces and otherwise prepares for a rerender.
-	 * 
+	 *
 	 * @returns the dry ink renderer.
 	 */
 	public startRerender(): AbstractRenderer {

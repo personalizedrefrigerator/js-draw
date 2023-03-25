@@ -5,9 +5,9 @@ import { InputEvtType } from '../types';
 
 /**
  * Dispatch a touch event to the currently selected tool. Intended for unit tests.
- * 
+ *
  * @see {@link sendPenEvent}
- * 
+ *
  * @example
  * **Simulating a horizontal swipe gesture:**
  * ```ts
@@ -17,23 +17,23 @@ import { InputEvtType } from '../types';
  *   sendTouchEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(i * 10, 0));
  * }
  * ```
- * 
+ *
  * @example
  * **Simulating a pinch gesture.** This example assumes that you're using [Jest with timer mocks enabled](https://jestjs.io/docs/timer-mocks).
  * ```ts
  * let firstPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
  * let secondPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(100, 0), [ firstPointer ]);
- * 
+ *
  * // Simulate a pinch
  * const maxIterations = 10;
  * for (let i = 0; i < maxIterations; i++) {
  *   // Use the unit testing framework's tool for increasing the current time
  *   // returned by (new Date()).getTime(), etc.
  *   jest.advanceTimersByTime(100);
- * 
+ *
  *   const point1 = Vec2.of(-i * 5, 0);
  *   const point2 = Vec2.of(i * 5 + 100, 0);
- * 
+ *
  *   firstPointer = sendTouchEvent(editor, InputEvtType.PointerMoveEvt, point1, [ secondPointer ]);
  *   secondPointer = sendTouchEvent(editor, InputEvtType.PointerMoveEvt, point2, [ firstPointer ]);
  * }

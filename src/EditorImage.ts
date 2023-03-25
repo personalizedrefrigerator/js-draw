@@ -95,7 +95,7 @@ export default class EditorImage {
 
 	/**
 	 * Renders all nodes visible from `viewport` (or all nodes if `viewport = null`).
-	 * 
+	 *
 	 * `viewport` is used to improve rendering performance. If given, it must match
 	 * the viewport used by the `renderer` (if any).
 	 */
@@ -132,7 +132,7 @@ export default class EditorImage {
 
 	/**
 	 * @returns the AbstractComponent with `id`, if it exists.
-	 * 
+	 *
 	 * @see {@link AbstractComponent.getId}
 	 */
 	public lookupElement(id: string): AbstractComponent|null {
@@ -166,7 +166,7 @@ export default class EditorImage {
 	 * Returns a command that adds the given element to the `EditorImage`.
 	 * If `applyByFlattening` is true, the content of the wet ink renderer is
 	 * rendered onto the main rendering canvas instead of doing a full re-render.
-	 * 
+	 *
 	 * @see {@link Display.flatten}
 	 */
 	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {

@@ -48,7 +48,7 @@ describe('PanZoom', () => {
 		const editor = createEditor();
 		selectPanZom(editor);
 		editor.viewport.resetTransform(Mat33.identity);
-		
+
 		let firstPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
 		let secondPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(100, 0), [ firstPointer ]);
 
@@ -271,7 +271,7 @@ describe('PanZoom', () => {
 			{ touch1Point: {'x':683.8515625,'y':245.546875}, touch2Point: {'x':844.54296875,'y':236.65625}, },
 			{ touch1Point: {'x':683.8515625,'y':245.546875}, touch2Point: {'x':844.54296875,'y':234.5625}, },
 			{ touch1Point: {'x':685.9296875,'y':246.0703125}, touch2Point: {'x':844.54296875,'y':234.5625}, },
-			{ touch1Point: {'x':685.9296875,'y':246.0703125}, touch2Point: {'x':844.54296875,'y':232.46875}, },			
+			{ touch1Point: {'x':685.9296875,'y':246.0703125}, touch2Point: {'x':844.54296875,'y':232.46875}, },
 		].map(touchPoints => {
 			return [
 				Vec2.ofXY(touchPoints.touch1Point),

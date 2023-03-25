@@ -320,7 +320,7 @@ export default class RenderingCacheNode {
 							const content = leaf.getContent()!;
 							this.renderedMaxZIndex ??= content.getZIndex();
 							this.renderedMaxZIndex = Math.max(this.renderedMaxZIndex, content.getZIndex());
-		
+
 							leaf.render(thisRenderer, this.region);
 						}
 

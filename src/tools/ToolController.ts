@@ -23,12 +23,12 @@ export default class ToolController {
 	private tools: BaseTool[];
 	private activeTool: BaseTool|null = null;
 	private primaryToolGroup: ToolEnabledGroup;
-	
+
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
 		const primaryToolGroup = new ToolEnabledGroup();
 		this.primaryToolGroup = primaryToolGroup;
-		
+
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 8 });
@@ -36,10 +36,10 @@ export default class ToolController {
 			// Three pens
 			primaryPenTool,
 			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 }),
-			
+
 			// Highlighter-like pen with width=40
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 40 }, makePressureSensitiveFreehandLineBuilder),
-			
+
 			new Eraser(editor, localization.eraserTool),
 			new SelectionTool(editor, localization.selectionTool),
 			new TextTool(editor, localization.textTool, localization),
@@ -66,7 +66,7 @@ export default class ToolController {
 		primaryTools.forEach(tool => tool.setToolGroup(primaryToolGroup));
 		panZoomTool.setEnabled(true);
 		primaryPenTool.setEnabled(true);
-		
+
 		editor.notifier.on(EditorEventType.ToolEnabled, event => {
 			if (event.kind === EditorEventType.ToolEnabled) {
 				editor.announceForAccessibility(localization.toolEnabledAnnouncement(event.tool.description));
@@ -77,17 +77,17 @@ export default class ToolController {
 				editor.announceForAccessibility(localization.toolDisabledAnnouncement(event.tool.description));
 			}
 		});
-		
+
 		this.activeTool = null;
 	}
-	
+
 	// Replaces the current set of tools with `tools`. This should only be done before
 	// the creation of the app's toolbar (if using `HTMLToolbar`).
 	public setTools(tools: BaseTool[], primaryToolGroup?: ToolEnabledGroup) {
 		this.tools = tools;
 		this.primaryToolGroup = primaryToolGroup ?? new ToolEnabledGroup();
 	}
-	
+
 	// Add a tool that acts like one of the primary tools (only one primary tool can be enabled at a time).
 	// This should be called before creating the app's toolbar.
 	public addPrimaryTool(tool: BaseTool) {
@@ -95,22 +95,22 @@ export default class ToolController {
 		if (tool.isEnabled()) {
 			this.primaryToolGroup.notifyEnabled(tool);
 		}
-		
+
 		this.addTool(tool);
 	}
-	
+
 	public getPrimaryTools(): BaseTool[] {
 		return this.tools.filter(tool => {
 			return tool.getToolGroup() === this.primaryToolGroup;
 		});
 	}
-	
+
 	// Add a tool to the end of this' tool list (the added tool receives events after tools already added to this).
 	// This should be called before creating the app's toolbar.
 	public addTool(tool: BaseTool) {
 		this.tools.push(tool);
 	}
-	
+
 	// Returns true if the event was handled
 	public dispatchInputEvent(event: InputEvt): boolean {
 		let handled = false;
@@ -120,7 +120,7 @@ export default class ToolController {
 					if (this.activeTool !== tool) {
 						this.activeTool?.onGestureCancel();
 					}
-					
+
 					this.activeTool = tool;
 					handled = true;
 					break;
@@ -138,7 +138,7 @@ export default class ToolController {
 		} else if (event.kind === InputEvtType.GestureCancelEvt) {
 			if (this.activeTool !== null) {
 				this.activeTool.onGestureCancel();
-				this.activeTool = null;	
+				this.activeTool = null;
 			}
 		} else {
 			let allCasesHandledGuard: never;
@@ -147,7 +147,7 @@ export default class ToolController {
 				if (!tool.isEnabled()) {
 					continue;
 				}
-				
+
 				switch (event.kind) {
 				case InputEvtType.KeyPressEvent:
 					handled = tool.onKeyPress(event);
@@ -174,10 +174,10 @@ export default class ToolController {
 				}
 			}
 		}
-		
+
 		return handled;
 	}
-	
+
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
 		return this.tools.filter(tool => tool instanceof type) as Type[];
 	}

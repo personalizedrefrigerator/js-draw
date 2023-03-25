@@ -60,7 +60,7 @@ export default abstract class BaseWidget {
 	/**
 	 * Returns the ID of this widget in `container`. Adds a suffix to this' ID
 	 * if an item in `container` already has this' ID.
-	 * 
+	 *
 	 * For example, if `this` has ID `foo` and if
 	 * `container = { 'foo': somethingNotThis, 'foo-1': somethingElseNotThis }`, this method
 	 * returns `foo-2` because elements with IDs `foo` and `foo-1` are already present in
@@ -339,10 +339,10 @@ export default abstract class BaseWidget {
 	/**
 	 * Serialize state associated with this widget.
 	 * Override this method to allow saving/restoring from state on application load.
-	 * 
+	 *
 	 * Overriders should call `super` and include the output of `super.serializeState` in
 	 * the output dictionary.
-	 * 
+	 *
 	 * Clients should not rely on the output from `saveState` being in any particular
 	 * format.
 	 */
@@ -361,7 +361,7 @@ export default abstract class BaseWidget {
 
 	/**
 	 * Restore widget state from serialized data. See also `saveState`.
-	 * 
+	 *
 	 * Overriders must call `super`.
 	 */
 	public deserializeFrom(state: SavedToolbuttonState): void {

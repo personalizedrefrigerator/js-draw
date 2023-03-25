@@ -68,7 +68,7 @@ export interface EditorSettings {
  *   // Do something with saveData...
  * });
  * ```
- * 
+ *
  * See also
  * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/example/example.ts#L15).
  */
@@ -160,7 +160,7 @@ export class Editor {
 	 *
 	 * // Add the default toolbar
 	 * const toolbar = editor.addToolbar();
-	 * 
+	 *
 	 * // Add a save button
 	 * toolbar.addActionButton({
 	 *   label: 'Save'
@@ -588,12 +588,12 @@ export class Editor {
 	/**
 	 * Forward pointer events from `elem` to this editor. Such that right-click/right-click drag
 	 * events are also forwarded, `elem`'s contextmenu is disabled.
-	 * 
+	 *
 	 * @example
 	 * ```ts
 	 * const overlay = document.createElement('div');
 	 * editor.createHTMLOverlay(overlay);
-	 * 
+	 *
 	 * // Send all pointer events that don't have the control key pressed
 	 * // to the editor.
 	 * editor.handlePointerEventsFrom(overlay, (event) => {
@@ -796,7 +796,7 @@ export class Editor {
 
 	/**
 	 * Re-renders the entire image.
-	 * 
+	 *
 	 * @see {@link Editor.queueRerender}
 	 */
 	public rerender(showImageBounds: boolean = true) {
@@ -830,7 +830,7 @@ export class Editor {
 	/**
 	 * Draws the given path onto the wet ink renderer. The given path will
 	 * be displayed on top of the main image.
-	 * 
+	 *
 	 * @see {@link Display.getWetInkRenderer} {@link Display.flatten}
 	 */
 	public drawWetInk(...path: RenderablePathSpec[]) {
@@ -841,7 +841,7 @@ export class Editor {
 
 	/**
 	 * Clears the wet ink display.
-	 * 
+	 *
 	 * @see {@link Display.getWetInkRenderer}
 	 */
 	public clearWetInk() {
@@ -858,7 +858,7 @@ export class Editor {
 	/**
 	 * Creates an element that will be positioned on top of the dry/wet ink
 	 * renderers.
-	 * 
+	 *
 	 * This is useful for displaying content on top of the rendered content
 	 * (e.g. a selection box).
 	 */
@@ -898,7 +898,7 @@ export class Editor {
 	/**
 	 * Dispatch a pen event to the currently selected tool.
 	 * Intended primarially for unit tests.
-	 * 
+	 *
 	 * @deprecated
 	 * @see {@link sendPenEvent} {@link sendTouchEvent}
 	 */
@@ -1013,7 +1013,7 @@ export class Editor {
 
 	/**
 	 * Load editor data from an `ImageLoader` (e.g. an {@link SVGLoader}).
-	 * 
+	 *
 	 * @see loadFromSVG
 	 */
 	public async loadFrom(loader: ImageLoader) {

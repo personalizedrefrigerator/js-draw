@@ -66,7 +66,7 @@ export default class SelectionTool extends BaseTool {
 		const topLeftOfBBox = this.selectionBox.computeTightBoundingBox().topLeft;
 		const snappedTopLeft = this.editor.viewport.snapToGrid(topLeftOfBBox);
 		const snapDelta = snappedTopLeft.minus(topLeftOfBBox);
-		
+
 		const oldTransform = this.selectionBox.getTransform();
 		this.selectionBox.setTransform(oldTransform.rightMul(Mat33.translation(snapDelta)));
 		this.selectionBox.finalizeTransform();

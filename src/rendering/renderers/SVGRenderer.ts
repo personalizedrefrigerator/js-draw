@@ -17,7 +17,7 @@ const svgNameSpace = 'http://www.w3.org/2000/svg';
 
 /**
  * Renders onto an `SVGElement`.
- * 
+ *
  * @see {@link Editor.toSVG}
  */
 export default class SVGRenderer extends AbstractRenderer {
@@ -29,7 +29,7 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	/**
 	 * Creates a renderer that renders onto `elem`. If `sanitize`, don't render potentially untrusted data.
-	 * 
+	 *
 	 * `viewport` is used to determine the translation/rotation/scaling/output size of the rendered
 	 * data.
 	 */
@@ -64,7 +64,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		if (this.sanitize) {
 			return;
 		}
-	
+
 		// Make the original value of the attribute restorable on clear
 		if (!(name in this.overwrittenAttrs)) {
 			this.overwrittenAttrs[name] = this.elem.getAttribute(name);
@@ -182,7 +182,7 @@ export default class SVGRenderer extends AbstractRenderer {
 			if (style.size !== this.textParentStyle?.size) {
 				elem.style.fontSize = style.size + 'px';
 			}
-			
+
 			const fillString = style.renderingStyle.fill.toHexString();
 			// TODO: Uncomment at some future major version release --- currently causes incompatibility due
 			//       to an SVG parsing bug in older versions.

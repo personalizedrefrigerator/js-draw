@@ -34,7 +34,7 @@ const checkerboardPatternRef = 'url(#checkerboard)';
 /**
  * Provides icons that can be used in the toolbar, etc.
  * Extend this class and override methods to customize icons.
- * 
+ *
  * @example
  * ```ts
  * class CustomIconProvider extends jsdraw.IconProvider {
@@ -48,18 +48,18 @@ const checkerboardPatternRef = 'url(#checkerboard)';
  *         return icon;
  *     }
  * }
- * 
+ *
  * const icons = new CustomIconProvider();
  * const editor = new jsdraw.Editor(document.body, {
  *     iconProvider: icons,
  * });
- * 
+ *
  * // Add a toolbar that uses these icons
  * editor.addToolbar();
  * ```
  */
 export default class IconProvider {
-	
+
 	public makeUndoIcon(): IconType {
 		return this.makeRedoIcon(true);
 	}
@@ -88,7 +88,7 @@ export default class IconProvider {
 		icon.setAttribute('viewBox', '0 0 100 100');
 		return icon;
 	}
-	
+
 	public makeDropdownIcon(): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.innerHTML = `
@@ -102,14 +102,14 @@ export default class IconProvider {
 		icon.setAttribute('viewBox', '0 0 100 100');
 		return icon;
 	}
-	
+
 	public makeEraserIcon(eraserSize?: number): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		eraserSize ??= 10;
 
 		const scaledSize = eraserSize / 4;
 		const eraserColor = '#ff70af';
-	
+
 		// Draw an eraser-like shape. Created with Inkscape
 		icon.innerHTML = `
 		<g>
@@ -147,10 +147,10 @@ export default class IconProvider {
 		icon.setAttribute('viewBox', '0 0 120 120');
 		return icon;
 	}
-	
+
 	public makeSelectionIcon(): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
-	
+
 		// Draw a cursor-like shape
 		icon.innerHTML = `
 		<g>
@@ -159,17 +159,17 @@ export default class IconProvider {
 		</g>
 		`;
 		icon.setAttribute('viewBox', '0 0 100 100');
-	
+
 		return icon;
 	}
-	
+
 	/**
 	 * @param pathData - SVG path data (e.g. `m10,10l30,30z`)
 	 * @param fill - A valid CSS color (e.g. `var(--icon-color)` or `#f0f`). This can be `none`.
 	 */
 	protected makeIconFromPath(
 		pathData: string,
-		fill: string = 'var(--icon-color)', 
+		fill: string = 'var(--icon-color)',
 		strokeColor: string = 'none',
 		strokeWidth: string = '0px',
 	): IconType {
@@ -181,15 +181,15 @@ export default class IconProvider {
 		path.style.strokeWidth = strokeWidth;
 		icon.appendChild(path);
 		icon.setAttribute('viewBox', '0 0 100 100');
-	
+
 		return icon;
 	}
-	
+
 	public makeHandToolIcon(): IconType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
 		const strokeWidth = '3';
-	
+
 		// Draw a cursor-like shape
 		return this.makeIconFromPath(`
 			m 10,60
@@ -213,12 +213,12 @@ export default class IconProvider {
 			Z
 		`, fill, strokeColor, strokeWidth);
 	}
-	
+
 	public makeTouchPanningIcon(): IconType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
 		const strokeWidth = '3';
-	
+
 		return this.makeIconFromPath(`
 			M 5,5.5
 			V 17.2
@@ -247,7 +247,7 @@ export default class IconProvider {
 			Z
 		`, fill, strokeColor, strokeWidth);
 	}
-	
+
 	public makeAllDevicePanningIcon(): IconType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
@@ -303,11 +303,11 @@ export default class IconProvider {
 			z
 		`, fill, strokeColor, strokeWidth);
 	}
-	
+
 	public makeZoomIcon(): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
-	
+
 		const addTextNode = (text: string, x: number, y: number) => {
 			const textNode = document.createElementNS(svgNamespace, 'text');
 			textNode.appendChild(document.createTextNode(text));
@@ -318,13 +318,13 @@ export default class IconProvider {
 			textNode.style.fontSize = '55px';
 			textNode.style.fill = 'var(--icon-color)';
 			textNode.style.fontFamily = 'monospace';
-	
+
 			icon.appendChild(textNode);
 		};
-	
+
 		addTextNode('+', 40, 45);
 		addTextNode('-', 70, 75);
-	
+
 		return icon;
 	}
 
@@ -380,35 +380,35 @@ export default class IconProvider {
 			M 22.5 25 A 7.5 7.5 0 0 0 15 32.5 A 7.5 7.5 0 0 0 22.5 40 A 7.5 7.5 0 0 0 30 32.5 A 7.5 7.5 0 0 0 22.5 25 z 
 		`);
 	}
-	
+
 	public makeTextIcon(textStyle: TextRenderingStyle): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
-	
+
 		const textNode = document.createElementNS(svgNamespace, 'text');
 		textNode.appendChild(document.createTextNode('T'));
-	
+
 		textNode.style.fontFamily = textStyle.fontFamily;
 		textNode.style.fontWeight = textStyle.fontWeight ?? '';
 		textNode.style.fontVariant = textStyle.fontVariant ?? '';
 		textNode.style.fill = textStyle.renderingStyle.fill.toHexString();
-	
+
 		textNode.style.textAnchor = 'middle';
 		textNode.setAttribute('x', '50');
 		textNode.setAttribute('y', '75');
 		textNode.style.fontSize = '65px';
 		textNode.style.filter = 'drop-shadow(0px 0px 10px var(--primary-shadow-color))';
-	
+
 		icon.appendChild(textNode);
-	
+
 		return icon;
 	}
-	
+
 	public makePenIcon(strokeSize: number, color: string|Color4, rounded?: boolean): IconType {
 		if (color instanceof Color4) {
 			color = color.toHexString();
 		}
-	
+
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
 		const tipThickness = strokeSize / 2;
@@ -521,12 +521,12 @@ export default class IconProvider {
 		`;
 		return icon;
 	}
-	
+
 	public makeIconFromFactory(pen: Pen, factory: ComponentBuilderFactory): IconType {
 		// Increase the thickness we use to generate the icon less with larger actual thicknesses.
 		// We want the icon to be recognisable with a large range of thicknesses.
 		const thickness = Math.sqrt(pen.getThickness()) * 3;
-	
+
 		const nowTime = (new Date()).getTime();
 		const startPoint: StrokeDataPoint = {
 			pos: Vec2.of(10, 10),
@@ -540,25 +540,25 @@ export default class IconProvider {
 			color: pen.getColor(),
 			time: nowTime,
 		};
-	
+
 		const viewport = new Viewport(() => {});
 		const builder = factory(startPoint, viewport);
 		builder.addPoint(endPoint);
-	
+
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
 		viewport.updateScreenSize(Vec2.of(100, 100));
-	
+
 		const renderer = new SVGRenderer(icon, viewport);
 		builder.preview(renderer);
-	
+
 		return icon;
 	}
-	
+
 	public makePipetteIcon(color?: Color4): IconType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		const pipette = document.createElementNS(svgNamespace, 'path');
-	
+
 		pipette.setAttribute('d', `
 			M 47,6
 			C 35,5 25,15 35,30
@@ -581,30 +581,30 @@ export default class IconProvider {
 			Z
 		`);
 		pipette.style.fill = 'var(--icon-color)';
-	
+
 		if (color) {
 			const defs = document.createElementNS(svgNamespace, 'defs');
 			defs.innerHTML = checkerboardPatternDef;
 			icon.appendChild(defs);
-	
+
 			const fluidBackground = document.createElementNS(svgNamespace, 'path');
 			const fluid = document.createElementNS(svgNamespace, 'path');
-	
+
 			const fluidPathData = `
 				m 40,50 c 5,5 10,0 15,-5 V 80 L 50,90 H 45 L 40,80 Z
 			`;
-	
+
 			fluid.setAttribute('d', fluidPathData);
 			fluidBackground.setAttribute('d', fluidPathData);
-	
+
 			fluid.style.fill = color.toHexString();
 			fluidBackground.style.fill = checkerboardPatternRef;
-	
+
 			icon.appendChild(fluidBackground);
 			icon.appendChild(fluid);
 		}
 		icon.appendChild(pipette);
-	
+
 		icon.setAttribute('viewBox', '0 0 100 100');
 		return icon;
 	}
@@ -619,7 +619,7 @@ export default class IconProvider {
 			M 42 87 L 42 93 L 48 93 L 48 87 L 42 87 z 
 		`);
 	}
-	
+
 	public makeResizeViewportIcon(): IconType {
 		return this.makeIconFromPath(`
 			M 75 5 75 10 90 10 90 25 95 25 95 5 75 5 z
@@ -632,7 +632,7 @@ export default class IconProvider {
 			M 81 81 81 85 82 84 84 86 86 84 84 82 85 81 81 81 z
 		`);
 	}
-	
+
 	public makeDuplicateSelectionIcon(): IconType {
 		return this.makeIconFromPath(`
 			M 45,10 45,55 90,55 90,10 45,10 z
@@ -652,12 +652,12 @@ export default class IconProvider {
 		icon.setAttribute('viewBox', '0 0 120 120');
 		return icon;
 	}
-	
+
 	public makeDeleteSelectionIcon(): IconType {
 		const strokeWidth = '5px';
 		const strokeColor = 'var(--icon-color)';
 		const fillColor = 'none';
-	
+
 		return this.makeIconFromPath(`
 			M 10,10 90,90
 			M 10,90 90,10
@@ -732,5 +732,5 @@ export default class IconProvider {
 			z
 		`);
 	}
-	
+
 }

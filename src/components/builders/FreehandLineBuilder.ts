@@ -113,7 +113,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
 		}
-		
+
 		return minFit;
 	}
 

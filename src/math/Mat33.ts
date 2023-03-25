@@ -68,7 +68,7 @@ export default class Mat33 {
 	/**
 	 * Either returns the inverse of this, or, if this matrix is singular/uninvertable,
 	 * returns Mat33.identity.
-	 * 
+	 *
 	 * This may cache the computed inverse and return the cached version instead of recomputing
 	 * it.
 	 */
@@ -387,7 +387,7 @@ export default class Mat33 {
 
 	/**
 	 * Converts a CSS-form `matrix(a, b, c, d, e, f)` to a Mat33.
-	 * 
+	 *
 	 * Note that such a matrix has the form,
 	 * ```
 	 * ⎡ a c e ⎤

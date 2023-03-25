@@ -78,7 +78,7 @@ export default abstract class AbstractComponent {
 
 	/**
 	 * Attach data that can be used while exporting the component (e.g. to SVG).
-	 * 
+	 *
 	 * This is intended for use by an {@link ImageLoader}.
 	 */
 	public attachLoadSaveData(key: string, data: LoadSaveData) {
@@ -353,7 +353,7 @@ export default abstract class AbstractComponent {
 		const instance = this.deserializationCallbacks[json.name]!(json.data);
 		instance.zIndex = json.zIndex;
 		instance.id = json.id;
-		
+
 		// TODO: What should we do with json.loadSaveData?
 		//       If we attach it to [instance], we create a potential security risk — loadSaveData
 		//       is often used to store unrecognised attributes so they can be preserved on output.

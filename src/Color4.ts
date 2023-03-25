@@ -18,7 +18,7 @@ export default class Color4 {
 
 	/**
 	 * Create a color from red, green, blue components. The color is fully opaque (`a = 1.0`).
-	 * 
+	 *
 	 * Each component should be in the range [0, 1].
 	 */
 	public static ofRGB(red: number, green: number, blue: number): Color4 {
@@ -74,8 +74,8 @@ export default class Color4 {
 	public static fromString(text: string): Color4 {
 		if (text.startsWith('#')) {
 			return Color4.fromHex(text);
-		} 
-		
+		}
+
 		if (text === 'none' || text === 'transparent') {
 			return Color4.transparent;
 		}
@@ -101,7 +101,7 @@ export default class Color4 {
 				throw new Error(`RGB string, ${text}, has wrong number of components: ${componentsList.length}`);
 			}
 		}
-		
+
 		// Otherwise, try to use an HTMLCanvasElement to determine the color.
 		// Note: We may be unable to create an HTMLCanvasElement if running as a unit test.
 		const canvas = document.createElement('canvas');
@@ -138,9 +138,9 @@ export default class Color4 {
 	/**
 	 * If `fractionTo` is not in the range [0, 1], it will be clamped to the nearest number
 	 * in that range. For example, `a.mix(b, -1)` is equivalent to `a.mix(b, 0)`.
-	 * 
+	 *
 	 * @returns a color `fractionTo` of the way from this color to `other`.
-	 * 
+	 *
 	 * @example
 	 * ```ts
 	 * Color4.ofRGB(1, 0, 0).mix(Color4.ofRGB(0, 1, 0), 0.1) // -> Color4(0.9, 0.1, 0)
@@ -186,7 +186,7 @@ export default class Color4 {
 	/**
 	 * Converts to (hue, saturation, value).
 	 * See also https://en.wikipedia.org/wiki/HSL_and_HSV#General_approach
-	 * 
+	 *
 	 * The resultant hue is represented in radians and is thus in [0, 2pi].
 	 */
 	public asHSV(): Vec3 {
@@ -202,8 +202,8 @@ export default class Color4 {
 		//     \    |   /
 		//       \  | /
 		//   .     \/      .
-		//                 
-		//        .        
+		//
+		//        .
 		//
 		// Let z be up and (x, y, 0) be in the plane.
 		//
@@ -216,7 +216,7 @@ export default class Color4 {
 		//       /|
 		//    1/  | (√3)/2
 		//    /   |
-		//      1/2   
+		//      1/2
 		//
 		const minComponent = Math.min(this.r, this.g, this.b);
 		const maxComponent = Math.max(this.r, this.g, this.b);
@@ -254,7 +254,7 @@ export default class Color4 {
 
 	/**
 	 * @returns a hexadecimal color string representation of `this`, in the form `#rrggbbaa`.
-	 * 
+	 *
 	 * @example
 	 * ```
 	 * Color4.red.toHexString(); // -> #ff0000ff

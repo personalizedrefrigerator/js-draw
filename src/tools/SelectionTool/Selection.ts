@@ -244,7 +244,7 @@ export default class Selection {
 				if (!elem) {
 					throw new Error(`Unable to find element with ID, ${id}.`);
 				}
-				
+
 				return elem.transformBy(this.fullTransform);
 			});
 		}

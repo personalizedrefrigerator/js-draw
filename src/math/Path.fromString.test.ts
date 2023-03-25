@@ -159,7 +159,7 @@ describe('Path.fromString', () => {
 		//  l 5,10 5,4 3,2,
 		// should be interpreted as multiple commands. Our example, is therefore equivalent to,
 		//  l 5,10 l 5,4 l 3,2
-		
+
 		const path = Path.fromString(`
 			L5,10 1,1
 			 2,2 -3,-1

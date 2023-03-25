@@ -150,7 +150,7 @@ export default class SVGLoader implements ImageLoader {
 				}
 
 				// TODO: Do we need special logic for !important properties?
-				elem.attachLoadSaveData(svgStyleAttributesDataKey, 
+				elem.attachLoadSaveData(svgStyleAttributesDataKey,
 					{
 						key: attr,
 						value: node.style.getPropertyValue(attr),
@@ -225,7 +225,7 @@ export default class SVGLoader implements ImageLoader {
 				return;
 			}
 
-			// Extract the grid size from the class name	
+			// Extract the grid size from the class name
 			let gridSize: number|undefined = undefined;
 			for (const className of node.classList) {
 				if (className.startsWith(imageBackgroundGridSizeCSSPrefix)) {
@@ -241,7 +241,7 @@ export default class SVGLoader implements ImageLoader {
 			if (node.classList.contains(imageBackgroundNonAutomaticSecondaryColorCSSClassName)) {
 				foregroundColor = undefined;
 			}
-			
+
 			const elem = ImageBackground.ofGrid(backgroundColor, gridSize, foregroundColor);
 			await this.onAddComponent?.(elem);
 		}
@@ -260,7 +260,7 @@ export default class SVGLoader implements ImageLoader {
 	// to prevent storing duplicate transform information when saving the component.
 	private getTransform(elem: SVGElement, supportedAttrs?: string[], computedStyles?: CSSStyleDeclaration): Mat33 {
 		computedStyles ??= window.getComputedStyle(elem);
-		
+
 		let transformProperty = computedStyles.transform;
 		if (transformProperty === '' || transformProperty === 'none') {
 			transformProperty = elem.style.transform || 'none';
@@ -520,7 +520,7 @@ export default class SVGLoader implements ImageLoader {
 	 * Create an `SVGLoader` from the content of an SVG image. SVGs are loaded within a sandboxed
 	 * iframe with `sandbox="allow-same-origin"`
 	 * [thereby disabling JavaScript](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox).
-	 * 
+	 *
 	 * @see {@link Editor.loadFrom}
 	 * @param text - Textual representation of the SVG (e.g. `<svg viewbox='...'>...</svg>`).
 	 * @param sanitize - if `true`, don't store unknown attributes.
