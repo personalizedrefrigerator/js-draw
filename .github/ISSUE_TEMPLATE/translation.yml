@@ -254,6 +254,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-useGridOption
+    attributes:
+      label: "useGridOption"
+      description: "Translate `Grid: `."
+      placeholder: "Grid: "
+    validations:
+      required: false
+  - type: input
     id: translation-toggleOverflow
     attributes:
       label: "toggleOverflow"
