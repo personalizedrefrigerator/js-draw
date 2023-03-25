@@ -42,7 +42,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	private viewportSizeChangeListener: DispatcherEventListener|null = null;
 
 	private gridSize: number = Viewport.getGridSize(2);
-	private gridStrokeWidth: number = 0.5;
+	private gridStrokeWidth: number = 0.7;
 	private secondaryColor: Color4|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/prefer-as-const
@@ -119,7 +119,9 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		}
 
 		this.mainColor = fill;
-		if (fill.eq(Color4.transparent)) {
+
+		// A solid background and transparent fill is equivalent to no background.
+		if (fill.eq(Color4.transparent) && this.backgroundType === BackgroundType.SolidColor) {
 			this.backgroundType = BackgroundType.None;
 		} else if (this.backgroundType === BackgroundType.None) {
 			this.backgroundType = BackgroundType.SolidColor;
@@ -220,7 +222,15 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		}
 
 		if (this.backgroundType === BackgroundType.Grid) {
-			const gridColor = this.secondaryColor ?? Color4.ofRGBA(1 - this.mainColor.r, 1 - this.mainColor.g, 1 - this.mainColor.b, 0.2);
+			let gridColor = this.secondaryColor;
+			gridColor ??= Color4.ofRGBA(1 - this.mainColor.r, 1 - this.mainColor.g, 1 - this.mainColor.b, 0.2);
+
+			// If the background fill is completely transparent, ensure visibility on otherwise light
+			// and dark backgrounds.
+			if (this.mainColor.a === 0) {
+				gridColor = Color4.ofRGBA(0.5, 0.5, 0.5, 0.2);
+			}
+
 			const style = {
 				fill: Color4.transparent,
 				stroke: { width: this.gridStrokeWidth, color: gridColor }
