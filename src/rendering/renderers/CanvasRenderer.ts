@@ -239,15 +239,18 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	public endObject() {
+		// Cache this.objectLevel — it may be decremented by super.endObject.
+		const objectLevel = this.objectLevel;
+
+		this.currentObjectBBox = null;
+		super.endObject();
+
 		if (!this.ignoringObject && this.clipLevels.length > 0) {
-			if (this.clipLevels[this.clipLevels.length - 1] === this.objectLevel) {
+			if (this.clipLevels[this.clipLevels.length - 1] === objectLevel) {
 				this.ctx.restore();
 				this.clipLevels.pop();
 			}
 		}
-
-		this.currentObjectBBox = null;
-		super.endObject();
 
 		// If exiting an object with a too-small-to-draw bounding box,
 		if (this.ignoreObjectsAboveLevel !== null && this.getNestingLevel() <= this.ignoreObjectsAboveLevel) {

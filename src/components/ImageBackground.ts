@@ -202,7 +202,8 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		if (this.backgroundType === BackgroundType.None) {
 			return;
 		}
-		canvas.startObject(this.contentBBox);
+		const clip = true;
+		canvas.startObject(this.contentBBox, clip);
 
 		if (this.backgroundType === BackgroundType.SolidColor || this.backgroundType === BackgroundType.Grid) {
 			// If the rectangle for this region contains the visible rect,
