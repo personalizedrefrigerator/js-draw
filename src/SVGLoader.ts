@@ -1,6 +1,6 @@
 import Color4 from './Color4';
 import AbstractComponent from './components/AbstractComponent';
-import ImageBackground, { BackgroundType, backgroundTypeToClassNameMap, imageBackgroundCSSClassName, imageBackgroundGridSizeCSSPrefix, imageBackgroundNonAutomaticSecondaryColorCSSClassName } from './components/ImageBackground';
+import BackgroundComponent, { BackgroundType, backgroundTypeToClassNameMap, imageBackgroundCSSClassName, imageBackgroundGridSizeCSSPrefix, imageBackgroundNonAutomaticSecondaryColorCSSClassName } from './components/BackgroundComponent';
 import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
@@ -249,7 +249,7 @@ export default class SVGLoader implements ImageLoader {
 				foregroundColor = undefined;
 			}
 
-			const elem = ImageBackground.ofGrid(
+			const elem = BackgroundComponent.ofGrid(
 				backgroundColor, gridSize, foregroundColor, gridStrokeWidth
 			);
 			await this.onAddComponent?.(elem);
@@ -257,7 +257,7 @@ export default class SVGLoader implements ImageLoader {
 		// Otherwise, if just a <path/>, it's a solid color background.
 		else if (node.tagName.toLowerCase() === 'path') {
 			const fill = Color4.fromString(node.getAttribute('fill') ?? node.style.fill ?? 'black');
-			const elem = new ImageBackground(BackgroundType.SolidColor, fill);
+			const elem = new BackgroundComponent(BackgroundType.SolidColor, fill);
 			await this.onAddComponent?.(elem);
 		}
 		else {

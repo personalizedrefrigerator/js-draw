@@ -2,7 +2,7 @@ import Color4 from '../../Color4';
 import Erase from '../../commands/Erase';
 import SerializableCommand from '../../commands/SerializableCommand';
 import uniteCommands from '../../commands/uniteCommands';
-import ImageBackground, { BackgroundType } from '../../components/ImageBackground';
+import BackgroundComponent, { BackgroundType } from '../../components/BackgroundComponent';
 import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
 import Rect2 from '../../math/Rect2';
@@ -70,7 +70,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 	private removeBackgroundComponents(): SerializableCommand {
 		const previousBackgrounds = [];
 		for (const component of this.editor.image.getBackgroundComponents()) {
-			if (component instanceof ImageBackground) {
+			if (component instanceof BackgroundComponent) {
 				previousBackgrounds.push(component);
 			}
 		}
@@ -81,7 +81,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 	/** Replace existing background components with a background of the given type. */
 	private setBackgroundType(backgroundType: BackgroundType): SerializableCommand {
 		const prevBackgroundColor = this.editor.estimateBackgroundColor();
-		const newBackground = new ImageBackground(backgroundType, prevBackgroundColor);
+		const newBackground = new BackgroundComponent(backgroundType, prevBackgroundColor);
 		const addBackgroundCommand = this.editor.image.addElement(newBackground);
 
 		return uniteCommands([ this.removeBackgroundComponents(), addBackgroundCommand ]);
@@ -92,7 +92,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		const backgroundComponents = this.editor.image.getBackgroundComponents();
 		for (let i = backgroundComponents.length - 1; i >= 0; i--) {
 			const component = backgroundComponents[i];
-			if (component instanceof ImageBackground) {
+			if (component instanceof BackgroundComponent) {
 				return component.getBackgroundType();
 			}
 		}

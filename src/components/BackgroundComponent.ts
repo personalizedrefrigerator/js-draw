@@ -37,7 +37,7 @@ export const backgroundTypeToClassNameMap = {
 };
 
 // Represents the background of the editor's canvas.
-export default class ImageBackground extends AbstractComponent implements RestyleableComponent {
+export default class BackgroundComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 	private viewportSizeChangeListener: DispatcherEventListener|null = null;
 
@@ -58,7 +58,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	public static ofGrid(
 		backgroundColor: Color4, gridSize?: number, gridColor?: Color4, gridStrokeWidth?: number
 	) {
-		const background = new ImageBackground(BackgroundType.Grid, backgroundColor);
+		const background = new BackgroundComponent(BackgroundType.Grid, backgroundColor);
 
 		if (gridSize !== undefined) {
 			background.gridSize = gridSize;
@@ -290,7 +290,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	}
 
 	protected createClone(): AbstractComponent {
-		return new ImageBackground(this.backgroundType, this.mainColor);
+		return new BackgroundComponent(this.backgroundType, this.mainColor);
 	}
 
 	// @internal
@@ -321,7 +321,7 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 		const gridSize: number|undefined = json.gridSize ?? undefined;
 		const gridStrokeWidth: number|undefined = json.gridStrokeWidth ?? undefined;
 
-		const result = new ImageBackground(backgroundType, mainColor);
+		const result = new BackgroundComponent(backgroundType, mainColor);
 		result.secondaryColor = secondaryColor;
 		if (gridSize) {
 			result.gridSize = gridSize;
@@ -334,4 +334,4 @@ export default class ImageBackground extends AbstractComponent implements Restyl
 	}
 }
 
-AbstractComponent.registerComponent('image-background', ImageBackground.deserializeFromJSON);
+AbstractComponent.registerComponent('image-background', BackgroundComponent.deserializeFromJSON);

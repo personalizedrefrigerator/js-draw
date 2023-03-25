@@ -27,7 +27,7 @@ import uniteCommands from './commands/uniteCommands';
 import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
 import Erase from './commands/Erase';
-import ImageBackground, { BackgroundType } from './components/ImageBackground';
+import BackgroundComponent, { BackgroundType } from './components/BackgroundComponent';
 import sendPenEvent from './testing/sendPenEvent';
 
 type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
@@ -1052,13 +1052,13 @@ export class Editor {
 		this.queueRerender();
 	}
 
-	private getTopmostBackgroundComponent(): ImageBackground|null {
-		let background: ImageBackground|null = null;
+	private getTopmostBackgroundComponent(): BackgroundComponent|null {
+		let background: BackgroundComponent|null = null;
 
 		// Find a background component, if one exists.
 		// Use the last (topmost) background component if there are multiple.
 		for (const component of this.image.getBackgroundComponents()) {
-			if (component instanceof ImageBackground) {
+			if (component instanceof BackgroundComponent) {
 				background = component;
 			}
 		}
@@ -1074,7 +1074,7 @@ export class Editor {
 
 		if (!background) {
 			const backgroundType = color.eq(Color4.transparent) ? BackgroundType.None : BackgroundType.SolidColor;
-			background = new ImageBackground(backgroundType, color);
+			background = new BackgroundComponent(backgroundType, color);
 			return this.image.addElement(background);
 		} else {
 			return background.updateStyle({ color });
@@ -1089,7 +1089,7 @@ export class Editor {
 		const backgroundColors = [];
 
 		for (const component of this.image.getBackgroundComponents()) {
-			if (component instanceof ImageBackground) {
+			if (component instanceof BackgroundComponent) {
 				backgroundColors.push(component.getStyle().color ?? Color4.transparent);
 			}
 		}

@@ -1,5 +1,5 @@
 import Color4 from './Color4';
-import { imageBackgroundCSSClassName } from './components/ImageBackground';
+import { imageBackgroundCSSClassName } from './components/BackgroundComponent';
 import { RestyleableComponent } from './lib';
 import SVGLoader from './SVGLoader';
 import createEditor from './testing/createEditor';
