@@ -29,7 +29,7 @@ const localization: EditorLocalization = {
 	touchPanning: 'Ansicht mit Touchscreen verschieben',
 	anyDevicePanning: 'Ansicht mit jedem Eingabegerät verschieben',
 
-	selectObjectType: 'Objekt-Typ: ',
+	selectPenType: 'Objekt-Typ: ',
 	freehandPen: 'Freihand',
 	arrowPen: 'Pfeil',
 	linePen: 'Linie',

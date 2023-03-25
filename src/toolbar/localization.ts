@@ -16,7 +16,7 @@ export interface ToolbarLocalization {
 	submit: string;
 	freehandPen: string;
 	pressureSensitiveFreehandPen: string;
-	selectObjectType: string;
+	selectPenType: string;
 	colorLabel: string;
 	pen: string;
 	eraser: string;
@@ -74,7 +74,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	duplicateSelection: 'Duplicate selection',
 	undo: 'Undo',
 	redo: 'Redo',
-	selectObjectType: 'Object type: ',
+	selectPenType: 'Pen type: ',
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
 	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',

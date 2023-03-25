@@ -151,7 +151,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		thicknessLabel.innerText = this.localizationTable.thicknessLabel;
 		thicknessLabel.setAttribute('for', thicknessInput.id);
-		objectSelectLabel.innerText = this.localizationTable.selectObjectType;
+		objectSelectLabel.innerText = this.localizationTable.selectPenType;
 		objectSelectLabel.setAttribute('for', objectTypeSelect.id);
 
 		// Use a logarithmic scale for thicknessInput (finer control over thinner strokewidths.)

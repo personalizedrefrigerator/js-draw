@@ -190,11 +190,11 @@ body:
     validations:
       required: false
   - type: input
-    id: translation-selectObjectType
+    id: translation-selectPenType
     attributes:
-      label: "selectObjectType"
-      description: "Translate `Object type: `."
-      placeholder: "Object type: "
+      label: "selectPenType"
+      description: "Translate `Pen type: `."
+      placeholder: "Pen type: "
     validations:
       required: false
   - type: input
