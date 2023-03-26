@@ -174,6 +174,17 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 
 		const result: PathCommand[] = [];
 
+		// Don't generate grids with a huge number of rows/columns -- such grids
+		// take a long time to render and are likely invisible due to the number of
+		// cells.
+		const rowCount = (endY - startY) / this.gridSize;
+		const colCount = (endX - startX) / this.gridSize;
+		const maxGridCols = 1500;
+		const maxGridRows = 1500;
+		if (rowCount > maxGridRows || colCount > maxGridCols) {
+			return Path.empty;
+		}
+
 		const startPoint = Vec2.of(targetRect.x, startY);
 		for (let y = startY; y <= endY; y += this.gridSize) {
 			result.push({
