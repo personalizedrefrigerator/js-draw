@@ -245,7 +245,7 @@ export default class SVGLoader implements ImageLoader {
 			let foregroundColor: Color4|undefined = Color4.fromString(foregroundStr);
 
 			// Should the foreground color be determined automatically?
-			if (node.classList.contains(imageBackgroundNonAutomaticSecondaryColorCSSClassName)) {
+			if (!node.classList.contains(imageBackgroundNonAutomaticSecondaryColorCSSClassName)) {
 				foregroundColor = undefined;
 			}
 
