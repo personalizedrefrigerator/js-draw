@@ -179,8 +179,8 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		// cells.
 		const rowCount = (endY - startY) / this.gridSize;
 		const colCount = (endX - startX) / this.gridSize;
-		const maxGridCols = 1500;
-		const maxGridRows = 1500;
+		const maxGridCols = 1000;
+		const maxGridRows = 1000;
 		if (rowCount > maxGridRows || colCount > maxGridCols) {
 			return Path.empty;
 		}
