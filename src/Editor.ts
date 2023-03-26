@@ -987,16 +987,22 @@ export class Editor {
 	// case of `HTMLCanvasElement::toDataURL`).
 	//
 	// The export resolution is the same as the size of the drawing canvas.
-	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png'): string {
+	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png', outputSize?: Vec2): string {
 		const canvas = document.createElement('canvas');
 
 		const importExportViewport = this.image.getImportExportViewport();
-		const resolution = importExportViewport.getScreenRectSize();
+		const exportRectSize = importExportViewport.getScreenRectSize();
+		const resolution = outputSize ?? exportRectSize;
 
 		canvas.width = resolution.x;
 		canvas.height = resolution.y;
 
 		const ctx = canvas.getContext('2d')!;
+
+		// Scale to ensure that the entire output is visible.
+		const scaleFactor = Math.min(resolution.x / exportRectSize.x, resolution.y / exportRectSize.y);
+		ctx.scale(scaleFactor, scaleFactor);
+
 		const renderer = new CanvasRenderer(ctx, importExportViewport);
 
 		this.image.renderAll(renderer);

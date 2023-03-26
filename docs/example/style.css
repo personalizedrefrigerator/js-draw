@@ -1,0 +1,109 @@
+
+@import "ui/FloatingActionButton.css";
+
+.main-header {
+	display: flex;
+	flex-direction: row;
+	font-family: sans-serif;
+}
+
+.spacer {
+	flex-grow: 1;
+}
+
+#editorOptions {
+	max-width: 400px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #ddd;
+	border-radius: 4px;
+	padding: 14px;
+
+	font-family: sans-serif;
+}
+
+#editorOptions > ul > li {
+	border-bottom: 1px solid gray;
+}
+
+#logOutput {
+	display: none;
+	width: 100vw;
+	height: 90vh;
+	z-index: 9999;
+
+	color: orange;
+	text-shadow: 0px 0px 3px black;
+	background-color: rgba(0, 0, 0, 0.0);
+	border: none;
+	pointer-events: none;
+	border-bottom: 1px solid red;
+
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		background-color: black;
+		color: white;
+	}
+
+	a {
+		color: pink;
+	}
+
+	a:visited {
+		color: #cc7e6a;
+	}
+
+	#editorOptions {
+		background-color: #222;
+	}
+}
+
+#startButton {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+
+	width: 100%;
+	font-weight: bold;
+}
+
+.imageEditorContainer {
+	width: 100vw;
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+
+/* Container for the save popup. */
+.popupContainer iframe {
+	width: 100vw;
+	height: 100vh;
+
+	border: none;
+	padding: 0;
+	margin: 0;
+
+	background-color: rgba(0, 0, 0, 0.0);
+}
+
+.popupContainer {
+	position: fixed;
+	z-index: 100;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+
+	padding: 0;
+
+	--backdrop-filter: blur(6px) contrast(150%);
+	backdrop-filter: var(--backdrop-filter);
+	-webkit-backdrop-filter: var(--backdrop-filter);
+}

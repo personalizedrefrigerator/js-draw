@@ -2,11 +2,20 @@
 import { Editor, EditorEventType, HTMLToolbar } from '../../src/lib';
 import '../../src/styles';
 
+import { getLocalizationTable } from './localization';
+import makeLoadFromSaveList from './makeLoadFromSaveList';
+import { StoreEntry } from './storage/AbstractStore';
+import ImageSaver from './storage/ImageSaver';
+import { IndexedDBStore } from './storage/IndexedDBStore';
+import { LocalStorageStore } from './storage/LocalStorageStore';
+
 // If from an NPM package,
 //import { Editor, HTMLToolbar } from 'js-draw';
 //import 'js-draw/styles';
 
-import { showSavePopup, startVisualErrorLog, createFileSaver, ImageSaver } from './util';
+import { showSavePopup, createFileSaver } from './util';
+import FloatingActionButton from './ui/FloatingActionButton';
+import { makeIconFromText } from './icons';
 
 // Key in window.localStorage to save the SVG as.
 export const saveLocalStorageKey = 'lastSave';
@@ -45,10 +54,10 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 	return editor;
 };
 
-const saveImage = (editor: Editor, saveMethod?: ImageSaver) => {
+const saveImage = (editor: Editor, saveMethod: ImageSaver) => {
 	// saveMethod defaults to saving to localStorage. Thus, if no saveMethod is given,
 	// we save to localStorage.
-	showSavePopup(editor.toSVG(), () => editor.toDataURL(), saveMethod);
+	showSavePopup(editor.toSVG(), editor, saveMethod);
 };
 
 const saveToolbarState = (toolbar: HTMLToolbar) => {
@@ -73,10 +82,83 @@ const restoreToolbarState = (toolbar: HTMLToolbar) => {
 	}
 };
 
+const hideLaunchOptions = () => {
+	document.querySelector('#launchOptions')?.remove();
+};
 
 // PWA file access. At the time of this writing, TypeScript does not recognise window.launchQueue.
 declare let launchQueue: any;
 
+const handlePWALaunching = () => {
+	// PWA: Handle files on launch.
+	// Ref: https://docs.microsoft.com/en-us/microsoft-edge/progressive-web-apps-chromium/how-to/handle-files#:~:text=Progressive%20Web%20Apps%20that%20can%20handle%20files%20feel,register%20as%20file%20handlers%20on%20the%20operating%20system.
+	if ('launchQueue' in window) {
+		// Create the editor and load files.
+		launchQueue.setConsumer(async ({ files }: { files: any[] }) => {
+			if (!files || files.length === 0) {
+				return;
+			}
+			if (files.length > 1) {
+				alert('Too many files!');
+				return;
+			}
+			const file = files[0];
+			const blob = await file.getFile();
+			blob.handle = file;
+
+			hideLaunchOptions();
+
+			const fileSaver = createFileSaver(blob.name, file);
+			const editor = createEditor(() => saveImage(editor, fileSaver));
+
+			const data = await blob.text();
+
+			// Load the SVG data
+			editor.loadFromSVG(data);
+		});
+	}
+};
+
+const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
+	const editor = createEditor(() => saveImage(editor, storeEntry));
+
+	// Load the SVG data
+	editor.loadFromSVG(await storeEntry.read());
+};
+
+(async () => {
+	handlePWALaunching();
+	const launchButtonContainer = document.querySelector('#launchOptions');
+
+	const localization = getLocalizationTable();
+	const dataStore = new LocalStorageStore(localization);
+
+	const loadSaveList = await makeLoadFromSaveList(dataStore, loadFromStoreEntry);
+	launchButtonContainer?.appendChild(loadSaveList);
+
+	const dbStore = await IndexedDBStore.create(localization);
+
+	const newImageFAB = new FloatingActionButton({
+		title: 'New',
+		icon: makeIconFromText('+')
+	}, document.body);
+
+	newImageFAB.addClickListener(async () => {
+		const entry = await dbStore.createNewEntry();
+
+		if (entry === null) {
+			alert('Unable to create new item!');
+			return;
+		}
+
+		await loadFromStoreEntry(entry);
+	});
+
+	const dbLoadSaveList = await makeLoadFromSaveList(dbStore, loadFromStoreEntry);
+	launchButtonContainer?.appendChild(dbLoadSaveList);
+})();
+
+/*
 (() => {
 	const showErrorsCheckbox: HTMLInputElement = document.querySelector('#alertOnError')!;
 	const loadFromTextarea: HTMLTextAreaElement = document.querySelector('#initialData')!;
@@ -120,34 +202,6 @@ declare let launchQueue: any;
 		reader.readAsText(files[0]);
 	};
 
-	// PWA: Handle files on launch.
-	// Ref: https://docs.microsoft.com/en-us/microsoft-edge/progressive-web-apps-chromium/how-to/handle-files#:~:text=Progressive%20Web%20Apps%20that%20can%20handle%20files%20feel,register%20as%20file%20handlers%20on%20the%20operating%20system.
-	if ('launchQueue' in window) {
-		// Create the editor and load files.
-		launchQueue.setConsumer(async ({ files }: { files: any[] }) => {
-			if (!files || files.length === 0) {
-				return;
-			}
-			if (files.length > 1) {
-				alert('Too many files!');
-				return;
-			}
-
-			const file = files[0];
-			const blob = await file.getFile();
-			blob.handle = file;
-
-			optionsScreen.remove();
-
-			const fileSaver = createFileSaver(blob.name, file);
-			const editor = createEditor(() => saveImage(editor, fileSaver));
-
-			const data = await blob.text();
-
-			// Load the SVG data
-			editor.loadFromSVG(data);
-		});
-	}
 
 	startButton.onclick = () => {
 		const textareaData = loadFromTextarea.value;
@@ -174,3 +228,4 @@ declare let launchQueue: any;
 		}
 	};
 })();
+*/

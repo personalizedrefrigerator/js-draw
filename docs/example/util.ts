@@ -1,7 +1,9 @@
 // Functions that are specific to this particular example (e.g.
 // functions helpful for debugging, etc.)
 
-import { saveLocalStorageKey } from './example';
+import Editor from '../../src/Editor';
+import { Vec2 } from '../../src/lib';
+import ImageSaver from './storage/ImageSaver';
 
 
 // Log errors, etc. to a visible element. Useful for debugging on mobile devices.
@@ -41,35 +43,8 @@ If enabled, errors will be logged to this textarea.
 	};
 };
 
-// Represents a method of saving an image (e.g. to localStorage).
-export interface ImageSaver {
-	// Estimated maximum size of the image that can be saved.
-	estimatedMaxSaveSize: number|null;
-
-	// Returns a message describing whether the image was saved
-	saveImage(svgData: string): Promise<string>;
-
-	saveTargetName: string;
-}
-
-type GetDataURLCallback = () => string;
-
-const localStorageSaver: ImageSaver = {
-	estimatedMaxSaveSize: 2.5 * 1024 * 1024, // 2.5 MiB
-	saveTargetName: 'localStorage',
-	saveImage: async (svgData: string) => {
-		try {
-			window.localStorage.setItem(saveLocalStorageKey, svgData);
-		} catch(e) {
-			return `Error saving to localStorage: ${e}`;
-		}
-
-		return 'Saved to localStorage!';
-	},
-};
-
 // Saves [editor]'s content as an SVG and displays the result.
-export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, imageSaver: ImageSaver = localStorageSaver) => {
+export const showSavePopup = (img: SVGElement, editor: Editor, imageSaver: ImageSaver) => {
 	const imgHTML = img.outerHTML;
 
 	const popupContainer = document.createElement('div');
@@ -193,20 +168,12 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 				}
 			</style>
 			<main>
-				<p>
-					${
-	imageSaver.estimatedMaxSaveSize !== null
-		? `⚠ Warning ⚠: Some browsers won't save images over
-								roughly ${imageSaver.estimatedMaxSaveSize / 1024 / 1024} MiB!`
-		: ''
-}
-				</p>
 				<div id='previewRegion'>
 					<p>Saving to
-						<code>${imageSaver.saveTargetName.replace(/[<>&]/g, '')}</code>...
+						<code>${imageSaver.title.replace(/[<>&]/g, '')}</code>...
 					</p>
 				</div>
-				<div><label for='filename'>Download as: </label><input id='filename' type='text' value='editor-save.svg'/></div>
+				<div><label for='filename'>Title: </label><input id='filename' type='text'/></div>
 				<div id='controlsArea'>
 				</div>
 			</main>
@@ -258,12 +225,14 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 
 	previewPNGButton.onclick = () => {
 		const imagePreview = popupDoc.createElement('img');
-		imagePreview.src = getDataURL();
+		imagePreview.src = editor.toDataURL();
 		imagePreview.style.maxWidth = '100%';
 		previewRegion.replaceChildren(imagePreview);
 	};
 
 	const filenameInput: HTMLInputElement = popupDoc.querySelector('input#filename')!;
+	filenameInput.value = imageSaver.title;
+
 	const downloadButton = popup.document.createElement('button');
 	downloadButton.innerText = 'Download';
 	downloadButton.onclick = () => {
@@ -273,8 +242,14 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 		const link = popup.document.createElement('a');
 		link.href = objectURL;
 		link.innerText = 'Download';
+
+		let downloadAs = filenameInput.value;
+		if (!downloadAs.endsWith('.svg')) {
+			downloadAs += '.svg';
+		}
+
 		// Download as (Ref: https://stackoverflow.com/a/52814195/17055750)
-		link.setAttribute('download', filenameInput.value);
+		link.setAttribute('download', downloadAs);
 
 		downloadButton.style.display = 'none';
 		popupControlsArea.appendChild(link);
@@ -286,19 +261,40 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 		URL.revokeObjectURL(objectURL);
 	};
 
-	filenameInput.oninput = () => {
+	let updateTitleQueued = false;
+	const updateTitle = async () => {
+		if (imageSaver.updateTitle && imageSaver.title !== filenameInput.value) {
+			await imageSaver.updateTitle(filenameInput.value);
+
+			updateTitleQueued = false;
+		}
+	};
+	const queueUpdateTitle = () => {
+		if (!updateTitleQueued) {
+			updateTitleQueued = true;
+			setTimeout(updateTitle, 500);
+		}
+	};
+
+	filenameInput.oninput = async () => {
 		downloadButton.style.display = 'block';
+		queueUpdateTitle();
 	};
 
 	const closeButton = popup.document.createElement('button');
 	closeButton.innerText = 'Close';
 
-	closeButton.onclick = () => {
+	const closePopup = () => {
+		updateTitle();
 		popupContainer.remove();
+	};
+
+	closeButton.onclick = () => {
+		closePopup();
 	};
 	popupDoc.documentElement.onclick = (event) => {
 		if (event.target === popupDoc.documentElement) {
-			popupContainer.remove();
+			closePopup();
 		}
 	};
 
@@ -314,7 +310,19 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 	}
 
 	void (async () => {
-		const saveStatus = await imageSaver.saveImage(imgHTML);
+		let saveStatus = 'Saved to ' + imageSaver.title;
+		try {
+			await imageSaver.write(imgHTML);
+
+			if (imageSaver.updatePreview) {
+				const format = undefined;
+				const size = Vec2.of(80, 80);
+				await imageSaver.updatePreview(editor.toDataURL(format, size));
+			}
+		} catch (e) {
+			saveStatus = 'Error: ' + e;
+		}
+
 		previewRegion.replaceChildren(
 			popup.document.createTextNode(saveStatus),
 			popup.document.createTextNode(' '),
@@ -327,20 +335,21 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 
 export const createFileSaver = (fileName: string, file: FileSystemHandle): ImageSaver => {
 	return {
-		estimatedMaxSaveSize: null,
-		saveTargetName: fileName,
-		saveImage: async (svgData: string): Promise<string> => {
+		title: fileName,
+		write: async (svgData: string): Promise<void> => {
 			try {
 				// As of 2/21/2023, TypeScript does not recognise createWritable
 				// as a property of FileSystemHandle.
 				const writable = await (file as any).createWritable();
 				await writable.write(svgData);
 				await writable.close();
-
-				return `Saved to file system as ${fileName}!`;
 			} catch(e) {
-				return `Error saving to filesystem: ${e}`;
+				throw `Error saving to filesystem: ${e}`;
 			}
 		},
+
+		// Doesn't support updating the title/preview.
+		updateTitle: null,
+		updatePreview: null,
 	};
 };
