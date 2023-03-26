@@ -29,18 +29,18 @@ The `import js-draw/styles` step requires a bundler that can import `.css` files
 Import the pre-bundled version of the editor to apply CSS after loading the page.
 ```ts
 import Editor from 'js-draw';
-import 'js-draw/bundle';
+import 'js-draw/bundledStyles';
 
 const editor = new Editor(document.body);
 ```
-`js-draw/bundle` is a version of the editor pre-processed by `Webpack`. As such, `import`ing or including it with a `<script src="..."></script>` tag applies editor-specific CSS to the document.
+`js-draw/bundledStyles` is a version of the editor's stylesheets pre-processed by `Webpack`. As such, `import`ing or including it with a `<script src="..."></script>` tag applies editor-specific CSS to the document.
 
 ### Without a bundler
 
 If you're not using a bundler, consider using the pre-bundled editor:
 ```html
-<!-- Replace 0.17.3 with the latest version of js-draw -->
-<script src="https://cdn.jsdelivr.net/npm/js-draw@0.17.3/dist/bundle.js"></script>
+<!-- Replace 0.20.0 with the latest version of js-draw -->
+<script src="https://cdn.jsdelivr.net/npm/js-draw@0.20.0/dist/bundle.js"></script>
 <script>
     const editor = new jsdraw.Editor(document.body);
     editor.addToolbar();
