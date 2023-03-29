@@ -256,8 +256,8 @@ export class StrokeSmoother {
 		// Should we start making a new curve? Check whether all buffer points are within
 		// ±strokeWidth of the curve.
 		const curveMatchesPoints = (curve: QuadraticBezier): boolean => {
-			let nonMatching = 0;
-			const maxNonMatching = 2;
+			let nonMatchingDistSum = 0;
+			const maxNonMatchingDistSum = 2 * this.maxFitAllowed;
 
 			const minFit = Math.max(
 				Math.min(this.curveStartWidth, this.curveEndWidth) / 3,
@@ -268,18 +268,13 @@ export class StrokeSmoother {
 				let dist = curve.approximateDistance(point);
 
 				if (dist > minFit || dist > this.maxFitAllowed) {
-					// Avoid using the slower .distance
-					if (nonMatching >= maxNonMatching - 1) {
-						dist = curve.distance(point);
-					}
+					// Use the more accurate distance function
+					dist = curve.distance(point);
 
-					if (dist > minFit || dist > this.maxFitAllowed) {
-						nonMatching ++;
+					nonMatchingDistSum += Math.max(0, dist - this.maxFitAllowed);
+					if (nonMatchingDistSum > maxNonMatchingDistSum) {
+						return false;
 					}
-				}
-
-				if (nonMatching >= maxNonMatching) {
-					return false;
 				}
 			}
 			return true;
