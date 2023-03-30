@@ -283,7 +283,7 @@ export class StrokeSmoother {
 			return true;
 		};
 
-		if (this.buffer.length > 2 && this.approxCurrentCurveLength() > this.curveStartWidth / 2) {
+		if (this.buffer.length > 3 && this.approxCurrentCurveLength() > this.curveStartWidth / 2) {
 			if (!curveMatchesPoints(this.currentCurve)) {
 				// Use a curve that better fits the points
 				this.currentCurve = prevCurve;
