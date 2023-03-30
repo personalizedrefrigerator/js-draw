@@ -59,39 +59,76 @@ describe('Path', () => {
 		);
 	});
 
-	it('should give all intersections for a path made up of lines', () => {
-		const lineStart = Vec2.of(100, 100);
-		const path = new Path(lineStart, [
-			{
-				kind: PathCommandType.LineTo,
-				point: Vec2.of(-100, 100),
-			},
-			{
-				kind: PathCommandType.LineTo,
-				point: Vec2.of(0, 0),
-			},
-			{
-				kind: PathCommandType.LineTo,
-				point: Vec2.of(100, -100),
-			},
-		]);
+	describe('intersection', () => {
+		it('should give all intersections for a path made up of lines', () => {
+			const lineStart = Vec2.of(100, 100);
+			const path = new Path(lineStart, [
+				{
+					kind: PathCommandType.LineTo,
+					point: Vec2.of(-100, 100),
+				},
+				{
+					kind: PathCommandType.LineTo,
+					point: Vec2.of(0, 0),
+				},
+				{
+					kind: PathCommandType.LineTo,
+					point: Vec2.of(100, -100),
+				},
+			]);
 
-		const intersections = path.intersection(
-			new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200))
-		);
+			const intersections = path.intersection(
+				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200))
+			);
 
-		// Should only have intersections in quadrants II and III.
-		expect(intersections.length).toBe(2);
+			// Should only have intersections in quadrants II and III.
+			expect(intersections.length).toBe(2);
 
-		// First intersection should be with the first curve
-		const firstIntersection = intersections[0];
-		expect(firstIntersection.point.xy).toMatchObject({
-			x: -50,
-			y: 100,
+			// First intersection should be with the first curve
+			const firstIntersection = intersections[0];
+			expect(firstIntersection.point.xy).toMatchObject({
+				x: -50,
+				y: 100,
+			});
+			expect(firstIntersection.curve.get(firstIntersection.parameterValue)).toMatchObject({
+				x: -50,
+				y: 100,
+			});
 		});
-		expect(firstIntersection.curve.get(firstIntersection.parameterValue)).toMatchObject({
-			x: -50,
-			y: 100,
+
+		it('should give all intersections for a stroked path', () => {
+			const lineStart = Vec2.of(100, 100);
+			const path = new Path(lineStart, [
+				{
+					kind: PathCommandType.LineTo,
+					point: Vec2.of(-100, 100),
+				},
+				{
+					kind: PathCommandType.LineTo,
+					point: Vec2.of(0, 0),
+				},
+				{
+					kind: PathCommandType.LineTo,
+					point: Vec2.of(100, -100),
+				},
+			]);
+
+			const strokeWidth = 5;
+			let intersections = path.intersection(
+				new LineSegment2(Vec2.of(2000, 200), Vec2.of(2000, 400)), strokeWidth,
+			);
+			expect(intersections.length).toBe(0);
+
+			intersections = path.intersection(
+				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200)), strokeWidth,
+			);
+			expect(intersections.length).toBe(2);
+
+			const firstIntersection = intersections[0];
+			expect(firstIntersection.point.xy).toMatchObject({
+				x: -50,
+				y: 95,
+			});
 		});
 	});
 

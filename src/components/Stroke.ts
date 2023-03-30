@@ -148,7 +148,10 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 	public intersects(line: LineSegment2): boolean {
 		for (const part of this.parts) {
-			if (part.path.intersection(line).length > 0) {
+			const strokeWidth = part.style.stroke?.width;
+			const strokeRadius = strokeWidth ? strokeWidth / 2 : undefined;
+
+			if (part.path.intersection(line, strokeRadius).length > 0) {
 				return true;
 			}
 		}

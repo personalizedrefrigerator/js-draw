@@ -150,6 +150,11 @@ export default class LineSegment2 {
 		}
 	}
 
+	/** Returns the distance from this line segment to `target`. */
+	public distance(target: Point2) {
+		return this.closestPointTo(target).minus(target).magnitude();
+	}
+
 	public transformedBy(affineTransfm: Mat33): LineSegment2 {
 		return new LineSegment2(affineTransfm.transformVec2(this.p1), affineTransfm.transformVec2(this.p2));
 	}

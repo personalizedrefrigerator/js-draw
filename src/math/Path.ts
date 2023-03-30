@@ -40,8 +40,13 @@ export interface MoveToPathCommand {
 export type PathCommand = CubicBezierPathCommand | LinePathCommand | QuadraticBezierPathCommand | MoveToPathCommand;
 
 interface IntersectionResult {
+	// @internal
 	curve: LineSegment2|Bezier;
+
+	// @internal
 	parameterValue: number;
+
+	// Point at which the intersection occured.
 	point: Point2;
 }
 
@@ -162,12 +167,103 @@ export default class Path {
 		return Rect2.bboxOf(points);
 	}
 
-	public intersection(line: LineSegment2): IntersectionResult[] {
+	private raymarchIntersectionWith(line: LineSegment2, strokeRadius: number): IntersectionResult[] {
+		if (!line.bbox.intersects(this.bbox.grownBy(strokeRadius))) {
+			return [];
+		}
+
+		// Returns the bounding box of one segment of this' path.
+		const getPartBBox = (part: LineSegment2|Bezier) => {
+			let partBBox;
+			if (part instanceof LineSegment2) {
+				partBBox = part.bbox;
+			} else {
+				const bbox = part.bbox();
+				partBBox = new Rect2(bbox.x.min, bbox.y.min, bbox.x.max, bbox.y.max);
+			}
+
+			return partBBox;
+		};
+
+		const result = [];
+
+		for (const part of this.geometry) {
+			if (!getPartBBox(part).grownBy(strokeRadius).intersects(line.bbox)) {
+				continue;
+			}
+
+			// Signed distance function
+			let sdf: (point: Point2) => number;
+
+			if (part instanceof LineSegment2) {
+				sdf = (point: Point2) => part.distance(point) - strokeRadius;
+			} else {
+				sdf = (point: Point2) => {
+					const projection = Vec2.ofXY(part.project(point));
+					const distance = projection.minus(point).magnitude();
+					return distance - strokeRadius;
+				};
+			}
+
+			// Raymarch:
+			const maxRaymarchSteps = 10;
+			let currentPoint = line.p2;
+			let lastDist = sdf(currentPoint);
+			let direction = line.direction;
+
+			for (let i = 0; i < maxRaymarchSteps; i++) {
+				// Step in the direction of the edge of the shape.
+				const step = lastDist;
+				currentPoint = currentPoint.plus(direction.times(step));
+
+				let signedDist = sdf(currentPoint);
+
+				// Ensure we're stepping in the correct direction.
+				if (signedDist > lastDist) {
+					direction = direction.times(-1);
+					currentPoint = currentPoint.plus(direction.times(2 * step));
+					signedDist = sdf(currentPoint);
+				}
+
+				lastDist = signedDist;
+			}
+
+			const isOnLineSegment = currentPoint.minus(line.p1).magnitude() < line.length
+					&& currentPoint.minus(line.p2).magnitude() < line.length;
+
+			if (isOnLineSegment && Math.abs(lastDist) < strokeRadius / 100) {
+				result.push({
+					point: currentPoint,
+					parameterValue: NaN,
+					curve: part
+				});
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Returns a list of intersections with this path. If `strokeRadius` is given,
+	 * intersections are approximated with the surface `strokeRadius` away from this.
+	 *
+	 * If `strokeRadius > 0`, the resultant `parameterValue` has no defined value.
+	 */
+	public intersection(line: LineSegment2, strokeRadius?: number): IntersectionResult[] {
+		const result: IntersectionResult[] = [];
+
+		// If given a non-zero strokeWidth, attempt to raymarch.
+		if (strokeRadius && strokeRadius > 1e-5) {
+			return this.raymarchIntersectionWith(line, strokeRadius);
+		}
+
+		// Otherwise, compute standard intersection.
+
+		// Is it possible to skip intersection checks?
 		if (!line.bbox.intersects(this.bbox)) {
 			return [];
 		}
 
-		const result: IntersectionResult[] = [];
 		for (const part of this.geometry) {
 			if (part instanceof LineSegment2) {
 				const intersection = part.intersection(line);
