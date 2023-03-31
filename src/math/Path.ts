@@ -270,7 +270,7 @@ export default class Path {
 
 
 		// Raymarch:
-		const maxRaymarchSteps = 6;
+		const maxRaymarchSteps = 7;
 
 		// Start raymarching from each of these points. This allows detection of multiple
 		// intersections.
@@ -280,7 +280,12 @@ export default class Path {
 
 		// Converts a point ON THE LINE to a parameter
 		const pointToParameter = (point: Point2) => {
-			return point.minus(line.p1).length();
+			// Because line.direction is a unit vector, this computes the length
+			// of the projection of the vector(line.p1->point) onto line.direction.
+			//
+			// Note that this can be negative if the given point is outside of the given
+			// line segment.
+			return point.minus(line.p1).dot(line.direction);
 		};
 
 		// Sort start points by parameter on the line.
@@ -296,6 +301,9 @@ export default class Path {
 
 		const result: IntersectionResult[] = [];
 
+		const stoppingThreshold = strokeRadius / 1000;
+
+		// Returns the maximum x value explored
 		const raymarchFrom = (
 			startPoint: Point2,
 
@@ -305,12 +313,13 @@ export default class Path {
 			// Terminate if the current point corresponds to a parameter
 			// below this.
 			minimumLineParameter: number,
-		) => {
+		): number|null => {
 			let currentPoint = startPoint;
 			let [lastPart, lastDist] = sdf(currentPoint);
+			let lastParameter = pointToParameter(currentPoint);
 
 			if (lastDist > lineLength) {
-				return pointToParameter(currentPoint);
+				return lastParameter;
 			}
 
 			const direction = line.direction.times(directionMultiplier);
@@ -319,11 +328,12 @@ export default class Path {
 				// Step in the direction of the edge of the shape.
 				const step = lastDist;
 				currentPoint = currentPoint.plus(direction.times(step));
-				const parameterForCurrent = pointToParameter(currentPoint);
+				lastParameter = pointToParameter(currentPoint);
 
-				// If we're below the minimum parameter, stop.
-				if (parameterForCurrent <= minimumLineParameter) {
-					return parameterForCurrent;
+				// If we're below the minimum parameter, stop. We've already tried
+				// this.
+				if (lastParameter <= minimumLineParameter) {
+					return lastParameter;
 				}
 
 				const [currentPart, signedDist] = sdf(currentPoint);
@@ -333,18 +343,22 @@ export default class Path {
 				// positive distance, we need absolute values here.
 				if (Math.abs(signedDist) > Math.abs(lastDist)) {
 					// If not, stop.
-					return parameterForCurrent;
+					return null;
 				}
 
 				lastDist = signedDist;
 				lastPart = currentPart;
+
+				// Is the distance close enough that we can stop early?
+				if (Math.abs(lastDist) < stoppingThreshold) {
+					break;
+				}
 			}
 
 			// Ensure that the point we ended with is on the line.
-			const isOnLineSegment = currentPoint.minus(line.p1).magnitude() < lineLength
-					&& currentPoint.minus(line.p2).magnitude() < lineLength;
+			const isOnLineSegment = lastParameter >= 0 && lastParameter <= lineLength;
 
-			if (lastPart && isOnLineSegment && Math.abs(lastDist) < strokeRadius / 10) {
+			if (lastPart && isOnLineSegment && Math.abs(lastDist) < stoppingThreshold) {
 				result.push({
 					point: currentPoint,
 					parameterValue: NaN,
@@ -352,7 +366,7 @@ export default class Path {
 				});
 			}
 
-			return pointToParameter(currentPoint);
+			return lastParameter;
 		};
 
 		// The maximum value of the line's parameter explored so far (0 corresponds to
@@ -367,8 +381,8 @@ export default class Path {
 			const startPoint = startPoints[i];
 
 			// Try raymarching in both directions.
-			maxLineT = Math.max(maxLineT, raymarchFrom(startPoint, 1, maxLineT));
-			maxLineT = Math.max(maxLineT, raymarchFrom(startPoint, -1, maxLineT));
+			maxLineT = Math.max(maxLineT, raymarchFrom(startPoint, 1, maxLineT) ?? maxLineT);
+			maxLineT = Math.max(maxLineT, raymarchFrom(startPoint, -1, maxLineT) ?? maxLineT);
 		}
 
 		return result;

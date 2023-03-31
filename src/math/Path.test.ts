@@ -132,25 +132,6 @@ describe('Path', () => {
 			);
 			expect(intersections.length).toBe(0);
 
-			// This line should intersect two of the strokes. Thus, there should be four
-			// intersections — one entering and one leaving for each intersection with the
-			// centers.
-			intersections = path.intersection(
-				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200)), strokeWidth,
-			);
-			expect(intersections.length).toBe(4);
-
-			// Intersections should be in increasing order away from the
-			// first point on the line.
-			expect(intersections[0].point.xy).toMatchObject({
-				x: -50,
-				y: 105,
-			});
-			expect(intersections[1].point.xy).toMatchObject({
-				x: -50,
-				y: 95,
-			});
-
 			// Test a line that only enters, but does not exit one of the strokes:
 			//
 			//        * <- Line to test
@@ -168,6 +149,36 @@ describe('Path', () => {
 			expect(intersections[0].point.xy).toMatchObject({
 				x: -50,
 				y: 105,
+			});
+
+
+			// Changing the order of the end points on the line should not change the result
+			intersections = path.intersection(
+				new LineSegment2(Vec2.of(-50, 100), Vec2.of(-50, 200)), strokeWidth,
+			);
+			expect(intersections.length).toBe(1);
+			expect(intersections[0].point.xy).toMatchObject({
+				x: -50,
+				y: 105,
+			});
+
+			// This line should intersect two of the strokes. Thus, there should be four
+			// intersections — one entering and one leaving for each intersection with the
+			// centers.
+			intersections = path.intersection(
+				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200)), strokeWidth,
+			);
+			expect(intersections.length).toBe(4);
+
+			// Intersections should be in increasing order away from the
+			// first point on the line.
+			expect(intersections[0].point.xy).toMatchObject({
+				x: -50,
+				y: 105,
+			});
+			expect(intersections[1].point.xy).toMatchObject({
+				x: -50,
+				y: 95,
 			});
 		});
 	});
