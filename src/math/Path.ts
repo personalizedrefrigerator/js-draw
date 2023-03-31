@@ -179,7 +179,10 @@ export default class Path {
 				partBBox = part.bbox;
 			} else {
 				const bbox = part.bbox();
-				partBBox = new Rect2(bbox.x.min, bbox.y.min, bbox.x.max, bbox.y.max);
+				const width = bbox.x.max - bbox.x.min;
+				const height = bbox.y.max - bbox.y.min;
+
+				partBBox = new Rect2(bbox.x.min, bbox.y.min, width, height);
 			}
 
 			return partBBox;
@@ -208,7 +211,22 @@ export default class Path {
 			// Raymarch:
 			const maxRaymarchSteps = 10;
 			let currentPoint = line.p2;
+			const lineLength = line.length;
+
+
 			let lastDist = sdf(currentPoint);
+			if (lastDist > lineLength) {
+				// Start at line.p1 instead.
+				currentPoint = line.p1;
+				lastDist = sdf(currentPoint);
+
+				// Skip if line.p1 and line.p2 are both too far away from
+				// the surface -- the line segment can't intersect.
+				if (lastDist > lineLength) {
+					continue;
+				}
+			}
+
 			let direction = line.direction;
 
 			for (let i = 0; i < maxRaymarchSteps; i++) {
@@ -220,6 +238,7 @@ export default class Path {
 
 				// Ensure we're stepping in the correct direction.
 				if (signedDist > lastDist) {
+					// If not, try going the other way.
 					direction = direction.times(-1);
 					currentPoint = currentPoint.plus(direction.times(2 * step));
 					signedDist = sdf(currentPoint);
@@ -228,10 +247,11 @@ export default class Path {
 				lastDist = signedDist;
 			}
 
-			const isOnLineSegment = currentPoint.minus(line.p1).magnitude() < line.length
-					&& currentPoint.minus(line.p2).magnitude() < line.length;
+			// Ensure that the point we ended with is on the line.
+			const isOnLineSegment = currentPoint.minus(line.p1).magnitude() < lineLength
+					&& currentPoint.minus(line.p2).magnitude() < lineLength;
 
-			if (isOnLineSegment && Math.abs(lastDist) < strokeRadius / 100) {
+			if (isOnLineSegment && Math.abs(lastDist) < strokeRadius / 10) {
 				result.push({
 					point: currentPoint,
 					parameterValue: NaN,
@@ -253,7 +273,7 @@ export default class Path {
 		const result: IntersectionResult[] = [];
 
 		// If given a non-zero strokeWidth, attempt to raymarch.
-		if (strokeRadius && strokeRadius > 1e-5) {
+		if (strokeRadius && strokeRadius > 1e-8) {
 			return this.raymarchIntersectionWith(line, strokeRadius);
 		}
 
