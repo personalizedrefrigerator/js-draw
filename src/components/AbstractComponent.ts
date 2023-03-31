@@ -114,9 +114,13 @@ export default abstract class AbstractComponent {
 	/**
 	 * @returns true if this component intersects `rect` -- it is entirely contained
 	 *  within the rectangle or one of the rectangle's edges intersects this component.
+	 *
+	 * The default implementation assumes that `this.getBBox()` returns a tight bounding box
+	 * -- that any horiziontal/vertical line that intersects this' boounding box also
+	 * intersects a point in this component.
 	 */
 	public intersectsRect(rect: Rect2): boolean {
-		// If this component intersects rect,
+		// If this component intersects the given rectangle,
 		// it is either contained entirely within rect or intersects one of rect's edges.
 
 		// If contained within,
@@ -124,13 +128,8 @@ export default abstract class AbstractComponent {
 			return true;
 		}
 
-		// Calculated bounding boxes can be slightly larger than their actual contents' bounding box.
-		// As such, test with more lines than just the rect's edges.
-		const testLines = [];
-		for (const subregion of rect.divideIntoGrid(2, 2)) {
-			testLines.push(...subregion.getEdges());
-		}
-
+		// Otherwise check if it intersects one of the rectangle's edges.
+		const testLines = rect.getEdges();
 		return testLines.some(edge => this.intersects(edge));
 	}
 

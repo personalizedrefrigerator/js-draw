@@ -202,11 +202,15 @@ export default class Path {
 		const lineLength = line.length;
 
 		type DistanceFunction = (point: Point2) => number;
-		const partDistFunctions: [GeometryType, DistanceFunction][] = [];
+		const partDistFunctions: {
+			part: GeometryType,
+			distFn: DistanceFunction,
+		}[] = [];
 
 		// Determine distance functions for all parts that the given line could possibly intersect with
 		for (const part of this.geometry) {
-			if (!getPartBBox(part).grownBy(strokeRadius).intersects(line.bbox)) {
+			const bbox = getPartBBox(part).grownBy(strokeRadius);
+			if (!bbox.intersects(line.bbox)) {
 				continue;
 			}
 
@@ -227,11 +231,15 @@ export default class Path {
 			// inside the shape).
 			const partSdf = (point: Point2) => partDist(point) - strokeRadius;
 
+			// If the line can't possibly intersect the part,
 			if (partSdf(line.p1) > lineLength && partSdf(line.p2) > lineLength) {
 				continue;
 			}
 
-			partDistFunctions.push([part, partDist]);
+			partDistFunctions.push({
+				part,
+				distFn: partDist,
+			});
 		}
 
 		// If no distance functions, there are no intersections.
@@ -245,7 +253,7 @@ export default class Path {
 			let minDist = null;
 			let minDistPart = null;
 
-			for (const [part, distFn] of partDistFunctions) {
+			for (const { part, distFn } of partDistFunctions) {
 				const currentDist = distFn(point);
 				minDist ??= currentDist;
 
