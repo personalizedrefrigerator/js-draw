@@ -159,6 +159,10 @@ export default class Rect2 {
 
 	// Returns this grown by [margin] in both the x and y directions.
 	public grownBy(margin: number): Rect2 {
+		if (margin === 0) {
+			return this;
+		}
+
 		return new Rect2(
 			this.x - margin, this.y - margin, this.w + margin * 2, this.h + margin * 2
 		);

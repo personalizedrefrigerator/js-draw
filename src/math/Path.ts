@@ -50,7 +50,8 @@ interface IntersectionResult {
 	point: Point2;
 }
 
-type GeometryArrayType = Array<LineSegment2|Bezier>;
+type GeometryType = LineSegment2|Bezier;
+type GeometryArrayType = Array<GeometryType>;
 export default class Path {
 	public readonly bbox: Rect2;
 
@@ -68,7 +69,7 @@ export default class Path {
 	private cachedGeometry: GeometryArrayType|null = null;
 
 	// Lazy-loads and returns this path's geometry
-	public get geometry(): Array<LineSegment2|Bezier> {
+	public get geometry(): GeometryArrayType {
 		if (this.cachedGeometry) {
 			return this.cachedGeometry;
 		}
@@ -167,12 +168,22 @@ export default class Path {
 		return Rect2.bboxOf(points);
 	}
 
-	private raymarchIntersectionWith(line: LineSegment2, strokeRadius: number): IntersectionResult[] {
+	/**
+	 * Let `S` be a closed path a distance `strokeRadius` from this path.
+	 *
+	 * @returns Approximate intersections of `line` with `S` using ray marching, starting from
+	 * 	        both end points of `line` and each point in `additionalRaymarchStartPoints`.
+	 */
+	private raymarchIntersectionWith(
+		line: LineSegment2, strokeRadius: number, additionalRaymarchStartPoints: Point2[] = []
+	): IntersectionResult[] {
+		// No intersection between bounding boxes: No possible intersection
+		// of the interior.
 		if (!line.bbox.intersects(this.bbox.grownBy(strokeRadius))) {
 			return [];
 		}
 
-		// Returns the bounding box of one segment of this' path.
+		// Returns the bounding box of one path segment.
 		const getPartBBox = (part: LineSegment2|Bezier) => {
 			let partBBox;
 			if (part instanceof LineSegment2) {
@@ -188,76 +199,168 @@ export default class Path {
 			return partBBox;
 		};
 
-		const result = [];
+		const lineLength = line.length;
 
+		type DistanceFunction = (point: Point2) => number;
+		const partDistFunctions: [GeometryType, DistanceFunction][] = [];
+
+		// Determine distance functions for all parts that the given line could possibly intersect with
 		for (const part of this.geometry) {
 			if (!getPartBBox(part).grownBy(strokeRadius).intersects(line.bbox)) {
 				continue;
 			}
 
 			// Signed distance function
-			let sdf: (point: Point2) => number;
+			let partDist: DistanceFunction;
 
 			if (part instanceof LineSegment2) {
-				sdf = (point: Point2) => part.distance(point) - strokeRadius;
+				partDist = (point: Point2) => part.distance(point);
 			} else {
-				sdf = (point: Point2) => {
+				partDist = (point: Point2) => {
 					const projection = Vec2.ofXY(part.project(point));
 					const distance = projection.minus(point).magnitude();
-					return distance - strokeRadius;
+					return distance;
 				};
 			}
 
-			// Raymarch:
-			const maxRaymarchSteps = 10;
-			let currentPoint = line.p2;
-			const lineLength = line.length;
+			// Part signed distance function (negative result implies `point` is
+			// inside the shape).
+			const partSdf = (point: Point2) => partDist(point) - strokeRadius;
 
+			if (partSdf(line.p1) > lineLength && partSdf(line.p2) > lineLength) {
+				continue;
+			}
 
-			let lastDist = sdf(currentPoint);
-			if (lastDist > lineLength) {
-				// Start at line.p1 instead.
-				currentPoint = line.p1;
-				lastDist = sdf(currentPoint);
+			partDistFunctions.push([part, partDist]);
+		}
 
-				// Skip if line.p1 and line.p2 are both too far away from
-				// the surface -- the line segment can't intersect.
-				if (lastDist > lineLength) {
-					continue;
+		// If no distance functions, there are no intersections.
+		if (partDistFunctions.length === 0) {
+			return [];
+		}
+
+		// Returns the minimum distance to a part in this stroke, where only parts that the given
+		// line could intersect are considered.
+		const sdf = (point: Point2): [GeometryType|null, number] => {
+			let minDist = null;
+			let minDistPart = null;
+
+			for (const [part, distFn] of partDistFunctions) {
+				const currentDist = distFn(point);
+				minDist ??= currentDist;
+
+				if (currentDist <= minDist) {
+					minDist = currentDist;
+					minDistPart = part;
 				}
 			}
 
-			let direction = line.direction;
+			minDist ??= Infinity;
+
+			return [ minDistPart, minDist - strokeRadius ];
+		};
+
+
+		// Raymarch:
+		const maxRaymarchSteps = 6;
+
+		// Start raymarching from each of these points. This allows detection of multiple
+		// intersections.
+		const startPoints = [
+			line.p1, ...additionalRaymarchStartPoints, line.p2
+		];
+
+		// Converts a point ON THE LINE to a parameter
+		const pointToParameter = (point: Point2) => {
+			return point.minus(line.p1).length();
+		};
+
+		// Sort start points by parameter on the line.
+		// This allows us to determine whether the current value of a parameter
+		// drops down to a value already tested.
+		startPoints.sort((a, b) => {
+			const t_a = pointToParameter(a);
+			const t_b = pointToParameter(b);
+
+			// Sort in increasing order
+			return t_a - t_b;
+		});
+
+		const result: IntersectionResult[] = [];
+
+		const raymarchFrom = (
+			startPoint: Point2,
+
+			// Direction to march in (multiplies line.direction)
+			directionMultiplier: -1|1,
+
+			// Terminate if the current point corresponds to a parameter
+			// below this.
+			minimumLineParameter: number,
+		) => {
+			let currentPoint = startPoint;
+			let [lastPart, lastDist] = sdf(currentPoint);
+
+			if (lastDist > lineLength) {
+				return pointToParameter(currentPoint);
+			}
+
+			const direction = line.direction.times(directionMultiplier);
 
 			for (let i = 0; i < maxRaymarchSteps; i++) {
 				// Step in the direction of the edge of the shape.
 				const step = lastDist;
 				currentPoint = currentPoint.plus(direction.times(step));
+				const parameterForCurrent = pointToParameter(currentPoint);
 
-				let signedDist = sdf(currentPoint);
+				// If we're below the minimum parameter, stop.
+				if (parameterForCurrent <= minimumLineParameter) {
+					return parameterForCurrent;
+				}
+
+				const [currentPart, signedDist] = sdf(currentPoint);
 
 				// Ensure we're stepping in the correct direction.
-				if (signedDist > lastDist) {
-					// If not, try going the other way.
-					direction = direction.times(-1);
-					currentPoint = currentPoint.plus(direction.times(2 * step));
-					signedDist = sdf(currentPoint);
+				// Note that because we could start with a negative distance and work towards a
+				// positive distance, we need absolute values here.
+				if (Math.abs(signedDist) > Math.abs(lastDist)) {
+					// If not, stop.
+					return parameterForCurrent;
 				}
 
 				lastDist = signedDist;
+				lastPart = currentPart;
 			}
 
 			// Ensure that the point we ended with is on the line.
 			const isOnLineSegment = currentPoint.minus(line.p1).magnitude() < lineLength
 					&& currentPoint.minus(line.p2).magnitude() < lineLength;
 
-			if (isOnLineSegment && Math.abs(lastDist) < strokeRadius / 10) {
+			if (lastPart && isOnLineSegment && Math.abs(lastDist) < strokeRadius / 10) {
 				result.push({
 					point: currentPoint,
 					parameterValue: NaN,
-					curve: part
+					curve: lastPart
 				});
 			}
+
+			return pointToParameter(currentPoint);
+		};
+
+		// The maximum value of the line's parameter explored so far (0 corresponds to
+		// line.p1)
+		let maxLineT = 0;
+
+		// Raymarch for each start point.
+		//
+		// Use a for (i from 0 to length) loop because startPoints may be added
+		// during iteration.
+		for (let i = 0; i < startPoints.length; i++) {
+			const startPoint = startPoints[i];
+
+			// Try raymarching in both directions.
+			maxLineT = Math.max(maxLineT, raymarchFrom(startPoint, 1, maxLineT));
+			maxLineT = Math.max(maxLineT, raymarchFrom(startPoint, -1, maxLineT));
 		}
 
 		return result;
@@ -270,17 +373,10 @@ export default class Path {
 	 * If `strokeRadius > 0`, the resultant `parameterValue` has no defined value.
 	 */
 	public intersection(line: LineSegment2, strokeRadius?: number): IntersectionResult[] {
-		const result: IntersectionResult[] = [];
+		let result: IntersectionResult[] = [];
 
-		// If given a non-zero strokeWidth, attempt to raymarch.
-		if (strokeRadius && strokeRadius > 1e-8) {
-			return this.raymarchIntersectionWith(line, strokeRadius);
-		}
-
-		// Otherwise, compute standard intersection.
-
-		// Is it possible to skip intersection checks?
-		if (!line.bbox.intersects(this.bbox)) {
+		// Is any intersection between shapes within the bounding boxes impossible?
+		if (!line.bbox.intersects(this.bbox.grownBy(strokeRadius ?? 0))) {
 			return [];
 		}
 
@@ -320,6 +416,16 @@ export default class Path {
 				}).filter(entry => entry !== null) as IntersectionResult[];
 				result.push(...intersectionPoints);
 			}
+		}
+
+		// If given a non-zero strokeWidth, attempt to raymarch.
+		// Even if raymarching, we need to collect starting points.
+		// We use the above-calculated intersections for this.
+		const doRaymarching = strokeRadius && strokeRadius > 1e-8;
+		if (doRaymarching) {
+			// Starting points for raymarching (in addition to the end points of the line).
+			const startPoints = result.map(intersection => intersection.point);
+			result = this.raymarchIntersectionWith(line, strokeRadius, startPoints);
 		}
 
 		return result;
