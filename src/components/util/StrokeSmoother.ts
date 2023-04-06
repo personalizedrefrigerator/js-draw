@@ -201,7 +201,7 @@ export class StrokeSmoother {
 		let exitingVec = this.computeExitingVec();
 
 		// Find the intersection between the entering vector and the exiting vector
-		const maxRelativeLength = 2.2;
+		const maxRelativeLength = 2;
 		const segmentStart = this.buffer[0];
 		const segmentEnd = newPoint.pos;
 		const startEndDist = segmentEnd.minus(segmentStart).magnitude();
@@ -257,7 +257,7 @@ export class StrokeSmoother {
 		// ±strokeWidth of the curve.
 		const curveMatchesPoints = (curve: QuadraticBezier): boolean => {
 			const minFit = Math.min(Math.max(
-				Math.min(this.curveStartWidth, this.curveEndWidth) / 3,
+				Math.min(this.curveStartWidth, this.curveEndWidth) / 4,
 				this.minFitAllowed
 			), this.maxFitAllowed);
 
