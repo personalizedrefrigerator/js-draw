@@ -84,3 +84,14 @@
 	overflow: visible;
 	z-index: 5;
 }
+
+@media print {
+	.imageEditorContainer .loadingMessage {
+		display: none;
+	}
+
+	.imageEditorContainer .imageEditorRenderArea canvas {
+		width: 100%;
+		height: initial;
+	}
+}

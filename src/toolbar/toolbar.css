@@ -211,3 +211,10 @@
 	padding-bottom: 5px;
 	padding-top: 5px;
 }
+
+@media print {
+	/* Hide the toolbar on print. */
+	.toolbar-root {
+		display: none;
+	}
+}
