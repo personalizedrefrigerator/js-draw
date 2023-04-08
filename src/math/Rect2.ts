@@ -106,13 +106,7 @@ export default class Rect2 {
 
 	// Returns a new rectangle containing both [this] and [other].
 	public union(other: Rect2): Rect2 {
-		const topLeft = this.topLeft.zip(other.topLeft, Math.min);
-		const bottomRight = this.bottomRight.zip(other.bottomRight, Math.max);
-
-		return Rect2.fromCorners(
-			topLeft,
-			bottomRight
-		);
+		return Rect2.union(this, other);
 	}
 
 	// Returns a the subdivision of this into [columns] columns
