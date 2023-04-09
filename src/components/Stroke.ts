@@ -191,6 +191,20 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return origBBox.grownBy(style.stroke.width / 2);
 	}
 
+	public override getExactBBox(): Rect2 {
+		let bbox: Rect2|null = null;
+
+		for (const { path, style } of this.parts) {
+			// Paths' default .bbox can be
+			const partBBox = this.bboxForPart(path.getExactBBox(), style);
+			bbox ??= partBBox;
+
+			bbox = bbox.union(partBBox);
+		}
+
+		return bbox ?? Rect2.empty;
+	}
+
 	protected applyTransformation(affineTransfm: Mat33): void {
 		this.contentBBox = Rect2.empty;
 		let isFirstPart = true;

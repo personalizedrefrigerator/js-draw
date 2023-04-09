@@ -97,9 +97,19 @@ export default abstract class AbstractComponent {
 		return this.zIndex;
 	}
 
-	/** @returns the bounding box of this. */
+	/**
+	 * @returns the bounding box of this. This can be a slight overestimate if doing so
+	 * 			significantly improves performance.
+	 */
 	public getBBox(): Rect2 {
 		return this.contentBBox;
+	}
+
+	/**
+	 * @returns the bounding box of this. Unlike `getBBox`, this should **not** be a rough estimate.
+	 */
+	public getExactBBox() {
+		return this.getBBox();
 	}
 
 	/** Called when this component is added to the given image. */
@@ -115,16 +125,17 @@ export default abstract class AbstractComponent {
 	 * @returns true if this component intersects `rect` -- it is entirely contained
 	 *  within the rectangle or one of the rectangle's edges intersects this component.
 	 *
-	 * The default implementation assumes that `this.getBBox()` returns a tight bounding box
+	 * The default implementation assumes that `this.getExactBBox()` returns a tight bounding box
 	 * -- that any horiziontal/vertical line that intersects this' boounding box also
-	 * intersects a point in this component.
+	 * intersects a point in this component. If this is not the case, components must override
+	 * this function.
 	 */
 	public intersectsRect(rect: Rect2): boolean {
 		// If this component intersects the given rectangle,
 		// it is either contained entirely within rect or intersects one of rect's edges.
 
 		// If contained within,
-		if (rect.containsRect(this.getBBox())) {
+		if (rect.containsRect(this.getExactBBox())) {
 			return true;
 		}
 

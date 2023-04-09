@@ -6,6 +6,7 @@ import LineSegment2 from './LineSegment2';
 import Mat33 from './Mat33';
 import Rect2 from './Rect2';
 import { Point2, Vec2 } from './Vec2';
+import Vec3 from './Vec3';
 
 export enum PathCommandType {
 	LineTo,
@@ -41,7 +42,7 @@ export type PathCommand = CubicBezierPathCommand | LinePathCommand | QuadraticBe
 
 interface IntersectionResult {
 	// @internal
-	curve: LineSegment2|Bezier;
+	curve: LineSegment2|Bezier|Point2;
 
 	// @internal
 	parameterValue: number;
@@ -50,9 +51,35 @@ interface IntersectionResult {
 	point: Point2;
 }
 
-type GeometryType = LineSegment2|Bezier;
+type GeometryType = LineSegment2|Bezier|Point2;
 type GeometryArrayType = Array<GeometryType>;
+
+// Returns the bounding box of one path segment.
+const getPartBBox = (part: GeometryType) => {
+	let partBBox;
+	if (part instanceof LineSegment2) {
+		partBBox = part.bbox;
+	} else if (part instanceof Bezier) {
+		const bbox = part.bbox();
+		const width = bbox.x.max - bbox.x.min;
+		const height = bbox.y.max - bbox.y.min;
+
+		partBBox = new Rect2(bbox.x.min, bbox.y.min, width, height);
+	} else {
+		partBBox = new Rect2(part.x, part.y, 0, 0);
+	}
+
+	return partBBox;
+};
+
+
+
 export default class Path {
+	/**
+	 * A rough estimate of the bounding box of the path.
+	 * A slight overestimate.
+	 * See {@link getExactBBox}
+	 */
 	public readonly bbox: Rect2;
 
 	public constructor(public readonly startPoint: Point2, public readonly parts: PathCommand[]) {
@@ -64,6 +91,15 @@ export default class Path {
 		for (const part of parts) {
 			this.bbox = this.bbox.union(Path.computeBBoxForSegment(startPoint, part));
 		}
+	}
+
+	public getExactBBox(): Rect2 {
+		const bboxes: Rect2[] = [];
+		for (const part of this.geometry) {
+			bboxes.push(getPartBBox(part));
+		}
+
+		return Rect2.union(...bboxes);
 	}
 
 	private cachedGeometry: GeometryArrayType|null = null;
@@ -102,6 +138,7 @@ export default class Path {
 				startPoint = part.point;
 				break;
 			case PathCommandType.MoveTo:
+				geometry.push(part.point);
 				startPoint = part.point;
 				break;
 			}
@@ -183,22 +220,6 @@ export default class Path {
 			return [];
 		}
 
-		// Returns the bounding box of one path segment.
-		const getPartBBox = (part: LineSegment2|Bezier) => {
-			let partBBox;
-			if (part instanceof LineSegment2) {
-				partBBox = part.bbox;
-			} else {
-				const bbox = part.bbox();
-				const width = bbox.x.max - bbox.x.min;
-				const height = bbox.y.max - bbox.y.min;
-
-				partBBox = new Rect2(bbox.x.min, bbox.y.min, width, height);
-			}
-
-			return partBBox;
-		};
-
 		const lineLength = line.length;
 
 		type DistanceFunction = (point: Point2) => number;
@@ -220,6 +241,8 @@ export default class Path {
 
 			if (part instanceof LineSegment2) {
 				partDist = (point: Point2) => part.distance(point);
+			} else if (part instanceof Vec3) {
+				partDist = (point: Point2) => part.minus(point).magnitude();
 			} else {
 				partDist = (point: Point2) => {
 					return part.project(point).d!;
@@ -387,7 +410,7 @@ export default class Path {
 				result.push({
 					point: currentPoint,
 					parameterValue: NaN,
-					curve: lastPart
+					curve: lastPart,
 				});
 			}
 
@@ -438,7 +461,7 @@ export default class Path {
 						point: intersection.point,
 					});
 				}
-			} else {
+			} else if (part instanceof Bezier) {
 				const intersectionPoints = part.intersects(line).map(t => {
 					// We're using the .intersects(line) function, which is documented
 					// to always return numbers. However, to satisfy the type checker (and

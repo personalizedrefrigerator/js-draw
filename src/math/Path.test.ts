@@ -90,7 +90,9 @@ describe('Path', () => {
 				x: -50,
 				y: 100,
 			});
-			expect(firstIntersection.curve.get(firstIntersection.parameterValue)).toMatchObject({
+
+			const curve = firstIntersection.curve as LineSegment2|Bezier;
+			expect(curve.get(firstIntersection.parameterValue)).toMatchObject({
 				x: -50,
 				y: 100,
 			});
