@@ -209,13 +209,12 @@ export default class Display {
 	}
 
 	/**
-	 * Clears the drawing surfaces and otherwise prepares for a rerender.
+	 * Clears the main drawing surface and otherwise prepares for a rerender.
 	 *
 	 * @returns the dry ink renderer.
 	 */
 	public startRerender(): AbstractRenderer {
 		this.resizeSurfacesCallback?.();
-		this.wetInkRenderer.clear();
 		this.dryInkRenderer.clear();
 
 		return this.dryInkRenderer;
