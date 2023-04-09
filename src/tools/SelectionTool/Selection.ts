@@ -191,6 +191,10 @@ export default class Selection {
 		this.editor.dispatch(new Selection.ApplyTransformationCommand(
 			this, selectedElems, fullTransform
 		));
+
+		// Clear renderings of any in-progress transformations
+		const wetInkRenderer = this.editor.display.getWetInkRenderer();
+		wetInkRenderer.clear();
 	}
 
 	static {
@@ -267,7 +271,7 @@ export default class Selection {
 			this.selection?.updateUI();
 
 			await editor.asyncUnapplyCommands(this.transformCommands, updateChunkSize, true);
-			this.selection?.setTransform(Mat33.identity);
+			this.selection?.setTransform(Mat33.identity, false);
 			this.selection?.recomputeRegion();
 			this.selection?.updateUI();
 		}
