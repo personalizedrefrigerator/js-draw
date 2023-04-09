@@ -22,7 +22,7 @@ export default class ToolbarShortcutHandler extends BaseTool {
 		this.listeners.delete(listener);
 	}
 
-	public onKeyPress(event: KeyPressEvent): boolean {
+	public override onKeyPress(event: KeyPressEvent): boolean {
 		for (const listener of this.listeners) {
 			if (listener(event)) {
 				return true;

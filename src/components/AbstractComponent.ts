@@ -207,7 +207,7 @@ export default abstract class AbstractComponent {
 			}
 		}
 
-		protected resolveComponent(image: EditorImage): void {
+		protected override resolveComponent(image: EditorImage): void {
 			if (this.component) {
 				return;
 			}

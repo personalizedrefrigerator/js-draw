@@ -37,7 +37,7 @@ export default class UnknownSVGObject extends AbstractComponent {
 	protected applyTransformation(_affineTransfm: Mat33): void {
 	}
 
-	public isSelectable() {
+	public override isSelectable() {
 		return false;
 	}
 

@@ -8,7 +8,9 @@
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
+		"noImplicitOverride": true,
 		"noUnusedLocals": true,
+
 		"strictBindCallApply": true,
 		"strictFunctionTypes": true,
 		"strictNullChecks": true,

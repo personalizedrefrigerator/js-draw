@@ -6,7 +6,7 @@ import BaseWidget from './BaseWidget';
 
 export default abstract class BaseToolWidget extends BaseWidget {
 	public constructor(
-		protected editor: Editor,
+		editor: Editor,
 		protected targetTool: BaseTool,
 		id: string,
 		localizationTable?: ToolbarLocalization,
@@ -47,7 +47,7 @@ export default abstract class BaseToolWidget extends BaseWidget {
 		}
 	}
 
-	public addTo(parent: HTMLElement) {
+	public override addTo(parent: HTMLElement) {
 		const result = super.addTo(parent);
 		this.setSelected(this.targetTool.isEnabled());
 

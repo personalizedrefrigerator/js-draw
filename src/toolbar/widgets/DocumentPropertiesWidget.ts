@@ -124,7 +124,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 	private static idCounter = 0;
 
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 

@@ -93,7 +93,7 @@ export default class ImageComponent extends AbstractComponent {
 		canvas.endObject(this.getLoadSaveData());
 	}
 
-	public getProportionalRenderingTime(): number {
+	public override getProportionalRenderingTime(): number {
 		// Estimate: Equivalent to a stroke with 10 segments.
 		return 10;
 	}

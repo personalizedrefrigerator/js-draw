@@ -27,7 +27,7 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	// @internal
-	public onPaste(event: PasteEvent): boolean {
+	public override onPaste(event: PasteEvent): boolean {
 		const mime = event.mime.toLowerCase();
 
 		if (mime === 'image/svg+xml') {

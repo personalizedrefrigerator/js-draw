@@ -39,7 +39,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 
 	private static nextThicknessInputId = 0;
 
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const thicknessLabel = document.createElement('label');
 		this.thicknessInput = document.createElement('input');
 
@@ -59,7 +59,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 		return true;
 	}
 
-	public serializeState(): SavedToolbuttonState {
+	public override serializeState(): SavedToolbuttonState {
 		return {
 			...super.serializeState(),
 
@@ -67,7 +67,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 		};
 	}
 
-	public deserializeFrom(state: SavedToolbuttonState) {
+	public override deserializeFrom(state: SavedToolbuttonState) {
 		super.deserializeFrom(state);
 
 		if (state.thickness) {

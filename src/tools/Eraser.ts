@@ -84,7 +84,7 @@ export default class Eraser extends BaseTool {
 		this.lastPoint = currentPoint;
 	}
 
-	public onPointerDown(event: PointerEvt): boolean {
+	public override onPointerDown(event: PointerEvt): boolean {
 		if (event.allPointers.length === 1 || event.current.device === PointerDevice.Eraser) {
 			this.lastPoint = event.current.canvasPos;
 			this.toRemove = [];
@@ -97,13 +97,13 @@ export default class Eraser extends BaseTool {
 		return false;
 	}
 
-	public onPointerMove(event: PointerEvt): void {
+	public override onPointerMove(event: PointerEvt): void {
 		const currentPoint = event.current.canvasPos;
 
 		this.eraseTo(currentPoint);
 	}
 
-	public onPointerUp(event: PointerEvt): void {
+	public override onPointerUp(event: PointerEvt): void {
 		this.eraseTo(event.current.canvasPos);
 
 		if (this.toRemove.length > 0) {
@@ -118,7 +118,7 @@ export default class Eraser extends BaseTool {
 		this.clearPreview();
 	}
 
-	public onGestureCancel(): void {
+	public override onGestureCancel(): void {
 		this.partialCommands.forEach(cmd => cmd.unapply(this.editor));
 		this.partialCommands = [];
 		this.clearPreview();

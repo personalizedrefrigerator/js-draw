@@ -124,7 +124,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.objectElems?.push(pathElem);
 	}
 
-	public drawPath(pathSpec: RenderablePathSpec) {
+	public override drawPath(pathSpec: RenderablePathSpec) {
 		const style = pathSpec.style;
 		const path = Path.fromRenderable(pathSpec).transformedBy(this.getCanvasToScreenTransform());
 
@@ -250,7 +250,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.objectElems?.push(svgImgElem);
 	}
 
-	public startObject(boundingBox: Rect2) {
+	public override startObject(boundingBox: Rect2) {
 		super.startObject(boundingBox);
 
 		// Only accumulate a path within an object
@@ -261,7 +261,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.objectElems = [];
 	}
 
-	public endObject(loaderData?: LoadSaveDataTable, elemClassNames?: string[]) {
+	public override endObject(loaderData?: LoadSaveDataTable, elemClassNames?: string[]) {
 		super.endObject(loaderData);
 
 		// Don't extend paths across objects

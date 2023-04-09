@@ -10,7 +10,7 @@ export default class SelectAllShortcutHandler extends BaseTool {
 	}
 
 	// @internal
-	public onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
+	public override onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
 		if (ctrlKey && key === 'a') {
 			const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
 

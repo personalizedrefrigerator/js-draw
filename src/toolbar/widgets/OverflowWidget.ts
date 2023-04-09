@@ -30,7 +30,7 @@ export default class OverflowWidget extends BaseWidget {
 		this.setDropdownVisible(!this.isDropdownVisible());
 	}
 
-	protected fillDropdown(dropdown: HTMLElement) {
+	protected override fillDropdown(dropdown: HTMLElement) {
 		this.overflowContainer ??= document.createElement('div');
 		if (this.overflowContainer.parentElement) {
 			this.overflowContainer.remove();
@@ -86,7 +86,7 @@ export default class OverflowWidget extends BaseWidget {
 
 	// This always returns false.
 	// Don't try to move the overflow menu to itself.
-	public canBeInOverflowMenu(): boolean {
+	public override canBeInOverflowMenu(): boolean {
 		return false;
 	}
 }

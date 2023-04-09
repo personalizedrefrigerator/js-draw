@@ -156,7 +156,7 @@ export default class SoundUITool extends BaseTool {
 		}
 	}
 
-	public setEnabled(enabled: boolean): void {
+	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
 
 		if (!enabled) {
@@ -169,7 +169,7 @@ export default class SoundUITool extends BaseTool {
 
 	private lastPointerPos: Point2;
 
-	public onPointerDown({ current, allPointers }: PointerEvt): boolean {
+	public override onPointerDown({ current, allPointers }: PointerEvt): boolean {
 		if (!this.soundFeedback) {
 			this.soundFeedback = new SoundFeedback();
 		}
@@ -188,7 +188,7 @@ export default class SoundUITool extends BaseTool {
 		return true;
 	}
 
-	public onPointerMove({ current }: PointerEvt): void {
+	public override onPointerMove({ current }: PointerEvt): void {
 		this.soundFeedback?.setColor(this.editor.display.getColorAt(current.screenPos) ?? Color4.black);
 
 		const pointerMotionLine = new LineSegment2(this.lastPointerPos, current.canvasPos);
@@ -202,11 +202,11 @@ export default class SoundUITool extends BaseTool {
 		}
 	}
 
-	public onPointerUp(_event: PointerEvt): void {
+	public override onPointerUp(_event: PointerEvt): void {
 		this.soundFeedback?.pause();
 	}
 
-	public onGestureCancel(): void {
+	public override onGestureCancel(): void {
 		this.soundFeedback?.pause();
 	}
 }

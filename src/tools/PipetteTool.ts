@@ -33,7 +33,7 @@ export default class PipetteTool extends BaseTool {
 		this.colorSelectListener = null;
 	}
 
-	public onPointerDown({ current, allPointers }: PointerEvt): boolean {
+	public override onPointerDown({ current, allPointers }: PointerEvt): boolean {
 		if (this.colorPreviewListener && allPointers.length === 1) {
 			this.colorPreviewListener(this.editor.display.getColorAt(current.screenPos));
 			return true;
@@ -41,15 +41,15 @@ export default class PipetteTool extends BaseTool {
 		return false;
 	}
 
-	public onPointerMove({ current }: PointerEvt): void {
+	public override onPointerMove({ current }: PointerEvt): void {
 		this.colorPreviewListener?.(this.editor.display.getColorAt(current.screenPos));
 	}
 
-	public onPointerUp({ current }: PointerEvt): void {
+	public override onPointerUp({ current }: PointerEvt): void {
 		this.colorSelectListener?.(this.editor.display.getColorAt(current.screenPos));
 	}
 
-	public onGestureCancel(): void {
+	public override onGestureCancel(): void {
 		this.colorSelectListener?.(null);
 	}
 }

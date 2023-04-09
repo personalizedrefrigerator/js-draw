@@ -132,7 +132,7 @@ export default class PenToolWidget extends BaseToolWidget {
 	}
 
 	private static idCounter: number = 0;
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 
@@ -223,7 +223,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		return true;
 	}
 
-	protected onKeyPress(event: KeyPressEvent): boolean {
+	protected override onKeyPress(event: KeyPressEvent): boolean {
 		if (!this.isSelected()) {
 			return false;
 		}
@@ -240,7 +240,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		return false;
 	}
 
-	public serializeState(): SavedToolbuttonState {
+	public override serializeState(): SavedToolbuttonState {
 		return {
 			...super.serializeState(),
 
@@ -250,7 +250,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		};
 	}
 
-	public deserializeFrom(state: SavedToolbuttonState) {
+	public override deserializeFrom(state: SavedToolbuttonState) {
 		super.deserializeFrom(state);
 
 		const verifyPropertyType = (propertyName: string, expectedType: 'string'|'number'|'object') => {

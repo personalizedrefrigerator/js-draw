@@ -73,7 +73,7 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	private selectionBoxHandlingEvt: boolean = false;
-	public onPointerDown({ allPointers, current }: PointerEvt): boolean {
+	public override onPointerDown({ allPointers, current }: PointerEvt): boolean {
 		const snapToGrid = this.ctrlKeyPressed;
 		if (snapToGrid) {
 			current = current.snappedToGrid(this.editor.viewport);
@@ -108,7 +108,7 @@ export default class SelectionTool extends BaseTool {
 		return false;
 	}
 
-	public onPointerMove(event: PointerEvt): void {
+	public override onPointerMove(event: PointerEvt): void {
 		if (!this.selectionBox) return;
 
 		let currentPointer = event.current;
@@ -168,7 +168,7 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	public onPointerUp(event: PointerEvt): void {
+	public override onPointerUp(event: PointerEvt): void {
 		if (!this.selectionBox) return;
 
 		let currentPointer = event.current;
@@ -192,7 +192,7 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	public onGestureCancel(): void {
+	public override onGestureCancel(): void {
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox?.onDragCancel();
 		} else {
@@ -216,7 +216,7 @@ export default class SelectionTool extends BaseTool {
 		'i', 'I', 'o', 'O',
 		'Control', 'Meta',
 	];
-	public onKeyPress(event: KeyPressEvent): boolean {
+	public override onKeyPress(event: KeyPressEvent): boolean {
 		if (event.key === 'Control' || event.key === 'Meta') {
 			this.ctrlKeyPressed = true;
 			return true;
@@ -335,7 +335,7 @@ export default class SelectionTool extends BaseTool {
 		return handled;
 	}
 
-	public onKeyUp(evt: KeyUpEvent) {
+	public override onKeyUp(evt: KeyUpEvent) {
 		if (evt.key === 'Control' || evt.key === 'Meta') {
 			this.ctrlKeyPressed = false;
 			return true;
@@ -366,7 +366,7 @@ export default class SelectionTool extends BaseTool {
 		return false;
 	}
 
-	public onCopy(event: CopyEvent): boolean {
+	public override onCopy(event: CopyEvent): boolean {
 		if (!this.selectionBox) {
 			return false;
 		}
@@ -401,7 +401,7 @@ export default class SelectionTool extends BaseTool {
 		return true;
 	}
 
-	public setEnabled(enabled: boolean) {
+	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
 		// Clear the selection

@@ -41,7 +41,7 @@ export default class Erase extends SerializableCommand {
 		editor.queueRerender();
 	}
 
-	public onDrop(editor: Editor) {
+	public override onDrop(editor: Editor) {
 		if (this.applied) {
 			for (const part of this.toRemove) {
 				editor.image.onDestroyElement(part);

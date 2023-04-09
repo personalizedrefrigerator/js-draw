@@ -9,7 +9,7 @@ export default class UndoRedoShortcut extends BaseTool {
 	}
 
 	// @internal
-	public onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
+	public override onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
 		if (ctrlKey) {
 			if (key === 'z') {
 				this.editor.history.undo();

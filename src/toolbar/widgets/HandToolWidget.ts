@@ -93,7 +93,7 @@ class ZoomWidget extends BaseWidget {
 		this.setDropdownVisible(!this.isDropdownVisible());
 	}
 
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		dropdown.replaceChildren(makeZoomControl(this.localizationTable, this.editor));
 		return true;
 	}
@@ -139,7 +139,7 @@ class HandModeWidget extends BaseWidget {
 		return this.makeIcon();
 	}
 
-	protected fillDropdown(_dropdown: HTMLElement): boolean {
+	protected override fillDropdown(_dropdown: HTMLElement): boolean {
 		return false;
 	}
 }
@@ -212,7 +212,7 @@ export default class HandToolWidget extends BaseToolWidget {
 		return this.editor.icons.makeHandToolIcon();
 	}
 
-	protected handleClick(): void {
+	protected override handleClick(): void {
 		if (this.allowTogglingBaseTool) {
 			super.handleClick();
 		} else {
@@ -220,13 +220,13 @@ export default class HandToolWidget extends BaseToolWidget {
 		}
 	}
 
-	public setSelected(selected: boolean): void {
+	public override setSelected(selected: boolean): void {
 		if (this.allowTogglingBaseTool) {
 			super.setSelected(selected);
 		}
 	}
 
-	public serializeState(): SavedToolbuttonState {
+	public override serializeState(): SavedToolbuttonState {
 		const toolMode = this.overridePanZoomTool.getMode();
 
 		return {
@@ -236,7 +236,7 @@ export default class HandToolWidget extends BaseToolWidget {
 		};
 	}
 
-	public deserializeFrom(state: SavedToolbuttonState): void {
+	public override deserializeFrom(state: SavedToolbuttonState): void {
 		if (state.touchPanning !== undefined) {
 			this.overridePanZoomTool.setModeEnabled(PanZoomMode.OneFingerTouchGestures, state.touchPanning);
 		}

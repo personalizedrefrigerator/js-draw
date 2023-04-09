@@ -208,7 +208,7 @@ export default class TextTool extends BaseTool {
 		setTimeout(() => this.textInputElem?.focus(), 0);
 	}
 
-	public setEnabled(enabled: boolean) {
+	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
 		if (!enabled) {
@@ -218,7 +218,7 @@ export default class TextTool extends BaseTool {
 		this.textEditOverlay.style.display = enabled ? 'block' : 'none';
 	}
 
-	public onPointerDown({ current, allPointers }: PointerEvt): boolean {
+	public override onPointerDown({ current, allPointers }: PointerEvt): boolean {
 		if (current.device === PointerDevice.Eraser) {
 			return false;
 		}
@@ -265,7 +265,7 @@ export default class TextTool extends BaseTool {
 		return false;
 	}
 
-	public onGestureCancel(): void {
+	public override onGestureCancel(): void {
 		this.flushInput();
 		this.editor.focus();
 	}

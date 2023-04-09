@@ -29,11 +29,11 @@ export default class ActionButtonWidget extends BaseWidget {
 		return this.makeIcon();
 	}
 
-	protected fillDropdown(_dropdown: HTMLElement): boolean {
+	protected override fillDropdown(_dropdown: HTMLElement): boolean {
 		return false;
 	}
 
-	public canBeInOverflowMenu(): boolean {
+	public override canBeInOverflowMenu(): boolean {
 		return !this.mustBeToplevel;
 	}
 }

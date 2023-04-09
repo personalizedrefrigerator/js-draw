@@ -31,7 +31,7 @@ export default class TextToolWidget extends BaseToolWidget {
 	}
 
 	private static idCounter: number = 0;
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 		const fontRow = document.createElement('div');
@@ -115,7 +115,7 @@ export default class TextToolWidget extends BaseToolWidget {
 		return true;
 	}
 
-	public serializeState(): SavedToolbuttonState {
+	public override serializeState(): SavedToolbuttonState {
 		const textStyle = this.tool.getTextStyle();
 
 		return {
@@ -127,7 +127,7 @@ export default class TextToolWidget extends BaseToolWidget {
 		};
 	}
 
-	public deserializeFrom(state: SavedToolbuttonState) {
+	public override deserializeFrom(state: SavedToolbuttonState) {
 		if (state.fontFamily && typeof(state.fontFamily) === 'string') {
 			this.tool.setFontFamily(state.fontFamily);
 		}

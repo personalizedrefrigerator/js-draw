@@ -69,11 +69,11 @@ export default class CanvasRenderer extends AbstractRenderer {
 		);
 	}
 
-	public canRenderFromWithoutDataLoss(other: AbstractRenderer) {
+	public override canRenderFromWithoutDataLoss(other: AbstractRenderer) {
 		return other instanceof CanvasRenderer;
 	}
 
-	public renderFromOtherOfSameType(transformBy: Mat33, other: AbstractRenderer): void {
+	public override renderFromOtherOfSameType(transformBy: Mat33, other: AbstractRenderer): void {
 		if (!(other instanceof CanvasRenderer)) {
 			throw new Error(`${other} cannot be rendered onto ${this}`);
 		}
@@ -85,7 +85,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	// Set parameters for lower/higher quality rendering
-	public setDraftMode(draftMode: boolean) {
+	public override setDraftMode(draftMode: boolean) {
 		if (draftMode) {
 			this.minSquareCurveApproxDist = 9;
 			this.minRenderSizeBothDimens = 2;
@@ -171,7 +171,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 	}
 
-	public drawPath(path: RenderablePathSpec) {
+	public override drawPath(path: RenderablePathSpec) {
 		if (this.ignoringObject) {
 			return;
 		}
@@ -217,7 +217,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	private clipLevels: number[] = [];
-	public startObject(boundingBox: Rect2, clip?: boolean) {
+	public override startObject(boundingBox: Rect2, clip?: boolean) {
 		if (this.isTooSmallToRender(boundingBox)) {
 			this.ignoreObjectsAboveLevel = this.getNestingLevel();
 			this.ignoringObject = true;
@@ -238,7 +238,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 	}
 
-	public endObject() {
+	public override endObject() {
 		// Cache this.objectLevel — it may be decremented by super.endObject.
 		const objectLevel = this.objectLevel;
 

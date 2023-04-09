@@ -16,7 +16,7 @@ export default class ToolSwitcherShortcut extends BaseTool {
 	}
 
 	// @internal
-	public onKeyPress({ key }: KeyPressEvent): boolean {
+	public override onKeyPress({ key }: KeyPressEvent): boolean {
 		const toolController = this.editor.toolController;
 		const primaryTools = toolController.getPrimaryTools();
 

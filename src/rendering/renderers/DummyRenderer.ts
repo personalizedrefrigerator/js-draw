@@ -53,26 +53,31 @@ export default class DummyRenderer extends AbstractRenderer {
 			);
 		}
 	}
+
 	protected beginPath(startPoint: Vec3) {
 		this.lastPoint = startPoint;
 		this.pointBuffer.push(startPoint);
 	}
+
 	protected endPath(style: RenderingStyle) {
 		this.renderedPathCount++;
 		this.lastFillStyle = style;
 	}
+
 	protected lineTo(point: Vec3) {
 		point = this.canvasToScreen(point);
 
 		this.lastPoint = point;
 		this.pointBuffer.push(point);
 	}
+
 	protected moveTo(point: Point2) {
 		point = this.canvasToScreen(point);
 
 		this.lastPoint = point;
 		this.pointBuffer.push(point);
 	}
+
 	protected traceCubicBezierCurve(p1: Vec3, p2: Vec3, p3: Vec3) {
 		p1 = this.canvasToScreen(p1);
 		p2 = this.canvasToScreen(p2);
@@ -81,6 +86,7 @@ export default class DummyRenderer extends AbstractRenderer {
 		this.lastPoint = p3;
 		this.pointBuffer.push(p1, p2, p3);
 	}
+
 	protected traceQuadraticBezierCurve(controlPoint: Vec3, endPoint: Vec3) {
 		controlPoint = this.canvasToScreen(controlPoint);
 		endPoint = this.canvasToScreen(endPoint);
@@ -88,6 +94,7 @@ export default class DummyRenderer extends AbstractRenderer {
 		this.lastPoint = endPoint;
 		this.pointBuffer.push(controlPoint, endPoint);
 	}
+
 	public drawPoints(..._points: Vec3[]) {
 		// drawPoints is intended for debugging.
 		// As such, it is unlikely to be the target of automated tests.
@@ -97,16 +104,18 @@ export default class DummyRenderer extends AbstractRenderer {
 	public drawText(text: string, _transform: Mat33, _style: TextRenderingStyle): void {
 		this.lastText = text;
 	}
+
 	public drawImage(image: RenderableImage) {
 		this.lastImage = image;
 	}
 
-	public startObject(boundingBox: Rect2, _clip: boolean) {
+	public override startObject(boundingBox: Rect2, _clip: boolean) {
 		super.startObject(boundingBox);
 
 		this.objectNestingLevel += 1;
 	}
-	public endObject() {
+
+	public override endObject() {
 		super.endObject();
 
 		this.objectNestingLevel -= 1;
@@ -117,11 +126,11 @@ export default class DummyRenderer extends AbstractRenderer {
 	}
 
 
-	public canRenderFromWithoutDataLoss(other: AbstractRenderer) {
+	public override canRenderFromWithoutDataLoss(other: AbstractRenderer) {
 		return other instanceof DummyRenderer;
 	}
 
-	public renderFromOtherOfSameType(transform: Mat33, other: AbstractRenderer): void {
+	public override renderFromOtherOfSameType(transform: Mat33, other: AbstractRenderer): void {
 		if (!(other instanceof DummyRenderer)) {
 			throw new Error(`${other} cannot be rendered onto ${this}`);
 		}

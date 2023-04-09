@@ -126,7 +126,7 @@ export default class PanZoom extends BaseTool {
 		return pointers.every(pointer => pointer.device === kind);
 	}
 
-	public onPointerDown({ allPointers: pointers, current: currentPointer }: PointerEvt): boolean {
+	public override onPointerDown({ allPointers: pointers, current: currentPointer }: PointerEvt): boolean {
 		let handlingGesture = false;
 
 		const inertialScrollerVelocity = this.inertialScroller?.getCurrentVelocity() ?? Vec2.zero;
@@ -266,7 +266,7 @@ export default class PanZoom extends BaseTool {
 		this.lastScreenCenter = pointer.screenPos;
 	}
 
-	public onPointerMove({ allPointers }: PointerEvt): void {
+	public override onPointerMove({ allPointers }: PointerEvt): void {
 		this.transform ??= Viewport.transformBy(Mat33.identity);
 
 		const lastTransform = this.transform;
@@ -281,7 +281,7 @@ export default class PanZoom extends BaseTool {
 		this.lastTimestamp = (new Date()).getTime();
 	}
 
-	public onPointerUp(event: PointerEvt): void {
+	public override onPointerUp(event: PointerEvt): void {
 		const onComplete = () => {
 			if (this.transform) {
 				this.transform.unapply(this.editor);
@@ -342,7 +342,7 @@ export default class PanZoom extends BaseTool {
 		}
 	}
 
-	public onGestureCancel(): void {
+	public override onGestureCancel(): void {
 		this.inertialScroller?.stop();
 		this.velocity = Vec2.zero;
 		this.transform?.unapply(this.editor);
@@ -367,7 +367,7 @@ export default class PanZoom extends BaseTool {
 		}
 	}
 
-	public onWheel({ delta, screenPos }: WheelEvt): boolean {
+	public override onWheel({ delta, screenPos }: WheelEvt): boolean {
 		this.inertialScroller?.stop();
 
 		// Reset the transformation -- wheel events are individual events, so we don't
@@ -393,7 +393,7 @@ export default class PanZoom extends BaseTool {
 		return true;
 	}
 
-	public onKeyPress({ key, ctrlKey, altKey }: KeyPressEvent): boolean {
+	public override onKeyPress({ key, ctrlKey, altKey }: KeyPressEvent): boolean {
 		this.inertialScroller?.stop();
 
 		if (!(this.mode & PanZoomMode.Keyboard)) {

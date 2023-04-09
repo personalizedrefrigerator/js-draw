@@ -73,7 +73,7 @@ export default class Pen extends BaseTool {
 		this.previewStroke();
 	}
 
-	public onPointerDown({ current, allPointers }: PointerEvt): boolean {
+	public override onPointerDown({ current, allPointers }: PointerEvt): boolean {
 		const isEraser = current.device === PointerDevice.Eraser;
 
 		let anyDeviceIsStylus = false;
@@ -92,13 +92,13 @@ export default class Pen extends BaseTool {
 		return false;
 	}
 
-	public onPointerMove({ current }: PointerEvt): void {
+	public override onPointerMove({ current }: PointerEvt): void {
 		if (!this.builder) return;
 
 		this.addPointToStroke(this.toStrokePoint(current));
 	}
 
-	public onPointerUp({ current }: PointerEvt): void {
+	public override onPointerUp({ current }: PointerEvt): void {
 		if (!this.builder) {
 			return;
 		}
@@ -117,7 +117,7 @@ export default class Pen extends BaseTool {
 		}
 	}
 
-	public onGestureCancel() {
+	public override onGestureCancel() {
 		this.editor.clearWetInk();
 	}
 
@@ -176,7 +176,7 @@ export default class Pen extends BaseTool {
 	public getColor() { return this.style.color; }
 	public getStrokeFactory() { return this.builderFactory; }
 
-	public setEnabled(enabled: boolean): void {
+	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
 
 		this.ctrlKeyPressed = false;
@@ -184,7 +184,7 @@ export default class Pen extends BaseTool {
 
 	private isSnappingToGrid() { return this.ctrlKeyPressed; }
 
-	public onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
+	public override onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
 		key = key.toLowerCase();
 
 		let newThickness: number|undefined;
@@ -213,7 +213,7 @@ export default class Pen extends BaseTool {
 		return false;
 	}
 
-	public onKeyUp({ key }: KeyUpEvent): boolean {
+	public override onKeyUp({ key }: KeyUpEvent): boolean {
 		key = key.toLowerCase();
 
 		if (key === 'control' || key === 'meta') {

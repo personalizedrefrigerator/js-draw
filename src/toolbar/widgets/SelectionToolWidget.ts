@@ -42,7 +42,7 @@ class RestyleSelectionWidget extends BaseWidget {
 		this.setDropdownVisible(!this.isDropdownVisible());
 	}
 
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
@@ -169,7 +169,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		}
 	}
 
-	protected onKeyPress(event: KeyPressEvent): boolean {
+	protected override onKeyPress(event: KeyPressEvent): boolean {
 		// Resize image to selection:
 		// Other keys are handled directly by the selection tool.
 		if (event.ctrlKey && event.key === 'r') {

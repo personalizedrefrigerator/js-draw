@@ -132,7 +132,7 @@ export default class FindTool extends BaseTool {
 		this.setVisible(!this.isVisible());
 	}
 
-	public onKeyPress(event: KeyPressEvent): boolean {
+	public override onKeyPress(event: KeyPressEvent): boolean {
 		if (event.ctrlKey && event.key === 'f') {
 			this.toggleVisible();
 
@@ -142,7 +142,7 @@ export default class FindTool extends BaseTool {
 		return false;
 	}
 
-	public setEnabled(enabled: boolean) {
+	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
 		if (enabled) {

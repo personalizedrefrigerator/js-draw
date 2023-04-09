@@ -178,7 +178,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		canvas.endObject(this.getLoadSaveData());
 	}
 
-	public getProportionalRenderingTime(): number {
+	public override getProportionalRenderingTime(): number {
 		return this.approximateRenderingTime;
 	}
 

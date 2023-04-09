@@ -133,7 +133,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		}
 	}
 
-	public onAddToImage(image: EditorImage) {
+	public override onAddToImage(image: EditorImage) {
 		if (this.viewportSizeChangeListener) {
 			console.warn('onAddToImage called when background is already in an image');
 			this.onRemoveFromImage();
@@ -146,7 +146,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		this.recomputeBBox(image);
 	}
 
-	public onRemoveFromImage(): void {
+	public override onRemoveFromImage(): void {
 		this.viewportSizeChangeListener?.remove();
 		this.viewportSizeChangeListener = null;
 	}
@@ -270,11 +270,11 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		return this.contentBBox.getEdges().some(edge => edge.intersects(lineSegment));
 	}
 
-	public isSelectable(): boolean {
+	public override isSelectable(): boolean {
 		return false;
 	}
 
-	public isBackground(): boolean {
+	public override isBackground(): boolean {
 		return true;
 	}
 

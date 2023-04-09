@@ -128,7 +128,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		canvas.endObject(this.getLoadSaveData());
 	}
 
-	public getProportionalRenderingTime(): number {
+	public override getProportionalRenderingTime(): number {
 		return this.textObjects.length;
 	}
 

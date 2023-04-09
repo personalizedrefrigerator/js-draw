@@ -42,7 +42,7 @@ class CustomPenTool extends jsdraw.BaseTool {
 
 
 
-	public onPointerDown({ current, allPointers }: jsdraw.PointerEvt): boolean {
+	public override onPointerDown({ current, allPointers }: jsdraw.PointerEvt): boolean {
 		if (allPointers.length === 1) {
 			this.lineBuilder = jsdraw.makeFreehandLineBuilder(this.toStrokePoint(current), this.editor.viewport);
 
@@ -53,11 +53,11 @@ class CustomPenTool extends jsdraw.BaseTool {
 		return false;
 	}
 
-	public onPointerMove({ current }: jsdraw.PointerEvt): void {
+	public override onPointerMove({ current }: jsdraw.PointerEvt): void {
 		this.addPointToStroke(this.toStrokePoint(current));
 	}
 
-	public onPointerUp({ current }: jsdraw.PointerEvt): void {
+	public override onPointerUp({ current }: jsdraw.PointerEvt): void {
 		if (!this.lineBuilder) {
 			return;
 		}
@@ -75,7 +75,7 @@ class CustomPenTool extends jsdraw.BaseTool {
 		this.editor.clearWetInk();
 	}
 
-	public onGestureCancel() {
+	public override onGestureCancel() {
 		this.editor.clearWetInk();
 	}
 
@@ -120,7 +120,7 @@ class CustomPenToolbarWidget extends jsdraw.BaseToolWidget {
 		return editor.icons.makePenIcon(style.thickness, style.color);
 	}
 
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const thicknessSlider = document.createElement('input');
 		thicknessSlider.type = 'range';
 		thicknessSlider.min = '1';
