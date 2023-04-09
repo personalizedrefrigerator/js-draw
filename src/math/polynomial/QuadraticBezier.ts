@@ -120,16 +120,15 @@ export default class QuadraticBezier {
 	}
 
 	/**
-     * @returns the exact distance from `point` to this.
+     * @returns the (more) exact distance from `point` to this.
      */
 	public distance(point: Point2): number {
 		if (!this.bezierJs) {
 			this.bezierJs = new Bezier([ this.p0.xy, this.p1.xy, this.p2.xy ]);
 		}
 
-		const proj = Vec2.ofXY(this.bezierJs.project(point.xy));
-		const dist = proj.minus(point).magnitude();
-		return dist;
+		// .d: Distance
+		return this.bezierJs.project(point.xy).d!;
 	}
 
 	public normal(t: number): Vec2 {
