@@ -1,5 +1,5 @@
 # 0.21.0
- * Color picker (Note: uses the [Coloris library](https://github.com/melloware/coloris-npm))
+ * Color picker (adjustments to integration of the [Coloris library](https://github.com/melloware/coloris-npm))
    * Allow the user to start drawing without an extra click when closing the color picker.
    * Increase the size of sliders' touch targets for easier selection.
  * Adjust stroke smoothing: Strokes should now be closer to user input.
