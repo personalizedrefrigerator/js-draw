@@ -160,6 +160,8 @@
 	bottom: 0;
 	right: 0;
 
+	touch-action: none;
+
 	background-color: var(--primary-background-color);
 	opacity: 0.3;
 }
