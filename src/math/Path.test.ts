@@ -181,6 +181,32 @@ describe('Path', () => {
 				y: 95,
 			});
 		});
+
+		it('should give all intersections for a Bézier stroked path', () => {
+			const lineStart = Vec2.zero;
+			const path = new Path(lineStart, [
+				{
+					kind: PathCommandType.QuadraticBezierTo,
+					controlPoint: Vec2.unitX,
+					endPoint: Vec2.unitY,
+				}
+			]);
+
+			const strokeWidth = 5;
+
+			// Should be no intersections for a line contained entirely within the stroke
+			// (including stroke width).
+			let intersections = path.intersection(
+				new LineSegment2(Vec2.of(-1, 0.5), Vec2.of(2, 0.5)), strokeWidth,
+			);
+			expect(intersections.length).toBe(0);
+
+			// Should be an intersection when exiting/entering the edge of the stroke
+			intersections = path.intersection(
+				new LineSegment2(Vec2.of(0, 0.5), Vec2.of(8, 0.5)), strokeWidth,
+			);
+			expect(intersections.length).toBe(1);
+		});
 	});
 
 	describe('polylineApproximation', () => {

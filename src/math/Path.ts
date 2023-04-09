@@ -202,8 +202,9 @@ export default class Path {
 		const lineLength = line.length;
 
 		type DistanceFunction = (point: Point2) => number;
-		const partDistFunctions: {
+		const partDistFunctionRecords: {
 			part: GeometryType,
+			bbox: Rect2,
 			distFn: DistanceFunction,
 		}[] = [];
 
@@ -221,9 +222,7 @@ export default class Path {
 				partDist = (point: Point2) => part.distance(point);
 			} else {
 				partDist = (point: Point2) => {
-					const projection = Vec2.ofXY(part.project(point));
-					const distance = projection.minus(point).magnitude();
-					return distance;
+					return part.project(point).d!;
 				};
 			}
 
@@ -236,26 +235,38 @@ export default class Path {
 				continue;
 			}
 
-			partDistFunctions.push({
+			partDistFunctionRecords.push({
 				part,
 				distFn: partDist,
+				bbox,
 			});
 		}
 
 		// If no distance functions, there are no intersections.
-		if (partDistFunctions.length === 0) {
+		if (partDistFunctionRecords.length === 0) {
 			return [];
 		}
 
 		// Returns the minimum distance to a part in this stroke, where only parts that the given
 		// line could intersect are considered.
 		const sdf = (point: Point2): [GeometryType|null, number] => {
-			let minDist = null;
+			let minDist = Infinity;
 			let minDistPart = null;
 
-			for (const { part, distFn } of partDistFunctions) {
+			const uncheckedDistFunctions = [];
+
+			// First pass: only curves for which the current point is inside
+			// the bounding box.
+			for (const distFnRecord of partDistFunctionRecords) {
+				const { part, distFn, bbox } = distFnRecord;
+
+				// Check later if the current point isn't in the bounding box.
+				if (!bbox.containsPoint(point)) {
+					uncheckedDistFunctions.push(distFnRecord);
+					continue;
+				}
+
 				const currentDist = distFn(point);
-				minDist ??= currentDist;
 
 				if (currentDist <= minDist) {
 					minDist = currentDist;
@@ -263,7 +274,21 @@ export default class Path {
 				}
 			}
 
-			minDist ??= Infinity;
+			// Second pass: Everything else
+			for (const { part, distFn, bbox } of uncheckedDistFunctions) {
+				// Skip if impossible for the distance to the target to be lesser than
+				// the current minimum.
+				if (!bbox.grownBy(minDist).containsPoint(point)) {
+					continue;
+				}
+
+				const currentDist = distFn(point);
+
+				if (currentDist <= minDist) {
+					minDist = currentDist;
+					minDistPart = part;
+				}
+			}
 
 			return [ minDistPart, minDist - strokeRadius ];
 		};
