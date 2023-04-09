@@ -15,6 +15,7 @@
 	"readme": "README.md",
 	"entryPointStrategy": "expand",
 	"out": "docs/typedoc/",
+	"tsconfig": "tsconfig-typedoc.json",
 
 	"validation": {
 		"notExported": false,
