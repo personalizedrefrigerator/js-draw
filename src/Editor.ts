@@ -607,22 +607,44 @@ export class Editor {
 	public handlePointerEventsFrom(elem: HTMLElement, filter?: HTMLPointerEventFilter) {
 		// May be required to prevent text selection on iOS/Safari:
 		// See https://stackoverflow.com/a/70992717/17055750
-		elem.addEventListener('touchstart', evt => evt.preventDefault());
-		elem.addEventListener('contextmenu', evt => {
+		const touchstartListener = (evt: Event) => evt.preventDefault();
+		const contextmenuListener = (evt: Event) => {
 			// Don't show a context menu
 			evt.preventDefault();
-		});
+		};
+
+		const listeners: Record<string, (event: Event)=>void> = {
+			'touchstart': touchstartListener,
+			'contextmenu': contextmenuListener,
+		};
 
 		const eventNames: HTMLPointerEventType[] = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'];
 		for (const eventName of eventNames) {
-			elem.addEventListener(eventName, evt => {
-				if (filter && !filter(eventName, evt)) {
+			listeners[eventName] = (evt: Event) => {
+				// This listener will only be called in the context of PointerEvents.
+				const event = evt as PointerEvent;
+
+				if (filter && !filter(eventName, event)) {
 					return true;
 				}
 
-				return this.handleHTMLPointerEvent(eventName, evt);
-			});
+				return this.handleHTMLPointerEvent(eventName, event);
+			};
 		}
+
+		// Add all listeners.
+		for (const eventName in listeners) {
+			elem.addEventListener(eventName, listeners[eventName]);
+		}
+
+		return {
+			/** Remove all event listeners registered by this function. */
+			remove: () => {
+				for (const eventName in listeners) {
+					elem.removeEventListener(eventName, listeners[eventName]);
+				}
+			},
+		};
 	}
 
 	/** Adds event listners for keypresses to `elem` and forwards those events to the editor. */

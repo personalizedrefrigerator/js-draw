@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import { EditorEventType } from '../types';
 
-import { coloris, init as colorisInit } from '@melloware/coloris';
+import { coloris, close as closeColoris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
@@ -92,6 +92,15 @@ export default class HTMLToolbar {
 		const closePickerOverlay = document.createElement('div');
 		closePickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;
 		this.editor.createHTMLOverlay(closePickerOverlay);
+
+		// Hide the color picker when attempting to draw on the overlay.
+		this.listeners.push(this.editor.handlePointerEventsFrom(closePickerOverlay, (eventName) => {
+			if (eventName === 'pointerdown') {
+				closeColoris();
+			}
+
+			return true;
+		}));
 
 		const maxSwatchLen = 12;
 		const swatches = [
