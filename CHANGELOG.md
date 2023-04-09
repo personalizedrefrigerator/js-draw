@@ -1,3 +1,11 @@
+# 0.21.0
+ * Color picker (Note: uses the [Coloris library](https://github.com/melloware/coloris-npm))
+   * Allow the user to start drawing without an extra click when closing the color picker.
+   * Increase the size of sliders' touch targets for easier selection.
+ * Adjust stroke smoothing: Strokes should now be closer to user input.
+ * Erasing and selecting: Use the edge rather than the center of strokes to determine eraser/selection intersection.
+   * This was previously only the case for filled strokes (as produced by the flat-tip pen).
+
 # 0.20.0
  * Added option for grid-patterned background.
 
