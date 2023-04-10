@@ -13,6 +13,9 @@ import Command from './commands/Command';
 import BaseWidget from './toolbar/widgets/BaseWidget';
 
 
+export type HTMLPointerEventName = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
+export type HTMLPointerEventFilter = (eventName: HTMLPointerEventName, event: PointerEvent)=>boolean;
+
 export interface PointerEvtListener {
 	onPointerDown(event: PointerEvt): boolean;
 	onPointerMove(event: PointerEvt): void;

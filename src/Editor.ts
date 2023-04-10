@@ -1,6 +1,6 @@
 import EditorImage from './EditorImage';
 import ToolController from './tools/ToolController';
-import { InputEvtType, PointerEvt, EditorNotifier, EditorEventType, ImageLoader } from './types';
+import { InputEvtType, PointerEvt, EditorNotifier, EditorEventType, ImageLoader, HTMLPointerEventName, HTMLPointerEventFilter } from './types';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
@@ -29,9 +29,6 @@ import AbstractComponent from './components/AbstractComponent';
 import Erase from './commands/Erase';
 import BackgroundComponent, { BackgroundType } from './components/BackgroundComponent';
 import sendPenEvent from './testing/sendPenEvent';
-
-type HTMLPointerEventType = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
-type HTMLPointerEventFilter = (eventName: HTMLPointerEventType, event: PointerEvent)=>boolean;
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -618,7 +615,7 @@ export class Editor {
 			'contextmenu': contextmenuListener,
 		};
 
-		const eventNames: HTMLPointerEventType[] = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'];
+		const eventNames: HTMLPointerEventName[] = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'];
 		for (const eventName of eventNames) {
 			listeners[eventName] = (evt: Event) => {
 				// This listener will only be called in the context of PointerEvents.

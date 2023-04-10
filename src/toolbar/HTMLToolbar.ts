@@ -1,5 +1,5 @@
 import Editor from '../Editor';
-import { EditorEventType } from '../types';
+import { EditorEventType, HTMLPointerEventName } from '../types';
 
 import { coloris, close as closeColoris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';
@@ -94,11 +94,42 @@ export default class HTMLToolbar {
 		this.editor.createHTMLOverlay(closePickerOverlay);
 
 		// Hide the color picker when attempting to draw on the overlay.
-		this.listeners.push(this.editor.handlePointerEventsFrom(closePickerOverlay, (eventName) => {
+		let eventBuffer: [ HTMLPointerEventName, PointerEvent ][] = [];
+		this.listeners.push(this.editor.handlePointerEventsFrom(closePickerOverlay, (eventName, event) => {
 			if (eventName === 'pointerdown') {
 				closeColoris();
+
+				// Buffer the event, but don't send it to the editor yet.
+				// We don't want to send single-click events, but we do want to send full strokes.
+				eventBuffer = [];
+				eventBuffer.push([ eventName, event ]);
+
+				// Capture the pointer so we receive future events even if the overlay is hidden.
+				closePickerOverlay.setPointerCapture(event.pointerId);
+
+				// Don't send to the editor.
+				return false;
+			}
+			else if (eventName === 'pointermove') {
+				// Send all buffered events to the editor -- start the stroke.
+				for (const [ eventName, event ] of eventBuffer) {
+					this.editor.handleHTMLPointerEvent(eventName, event);
+				}
+
+				eventBuffer = [];
+			}
+			// Otherwise, if we received a pointerup/pointercancel without flushing all pointerevents from the
+			// buffer, the gesture wasn't recognised as a stroke. Thus, the editor isn't expecting a pointerup/
+			// pointercancel event.
+			else if ((eventName === 'pointerup' || eventName === 'pointercancel') && eventBuffer.length > 0) {
+				closePickerOverlay.releasePointerCapture(event.pointerId);
+				eventBuffer = [];
+
+				// Don't send to the editor.
+				return false;
 			}
 
+			// Forward all other events to the editor.
 			return true;
 		}));
 
