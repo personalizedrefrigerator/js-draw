@@ -21,6 +21,7 @@ import InsertImageWidget from './widgets/InsertImageWidget';
 import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
 import OverflowWidget from './widgets/OverflowWidget';
 import { DispatcherEventListener } from '../EventDispatcher';
+import { Point2, Vec2 } from '../math/Vec2';
 
 export const toolbarCSSPrefix = 'toolbar-';
 
@@ -81,6 +82,79 @@ export default class HTMLToolbar {
 		}
 	}
 
+	private closeColorPickerOverlay: HTMLElement|null = null;
+	private setupCloseColorPickerOverlay() {
+		if (this.closeColorPickerOverlay) return;
+
+		this.closeColorPickerOverlay = document.createElement('div');
+		this.closeColorPickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;
+		this.editor.createHTMLOverlay(this.closeColorPickerOverlay);
+
+		// Buffer events: Send events to the editor only if the pointer has moved enough to
+		// suggest that the user is attempting to draw, rather than click to close the color picker.
+		let eventBuffer: [ HTMLPointerEventName, PointerEvent ][] = [];
+		let gestureStartPos: Point2|null = null;
+
+		// Hide the color picker when attempting to draw on the overlay.
+		this.listeners.push(this.editor.handlePointerEventsFrom(this.closeColorPickerOverlay, (eventName, event) => {
+			// Position of the current event.
+			const currentPos = Vec2.of(event.pageX, event.pageY);
+
+			// Whether to send the current event to the editor
+			let sendToEditor = true;
+
+			if (eventName === 'pointerdown') {
+				closeColoris();
+
+				// Buffer the event, but don't send it to the editor yet.
+				// We don't want to send single-click events, but we do want to send full strokes.
+				eventBuffer = [];
+				eventBuffer.push([ eventName, event ]);
+				gestureStartPos = currentPos;
+
+				// Capture the pointer so we receive future events even if the overlay is hidden.
+				this.closeColorPickerOverlay?.setPointerCapture(event.pointerId);
+
+				// Don't send to the editor.
+				sendToEditor = false;
+			}
+			else if (eventName === 'pointermove') {
+				// Skip if the pointer hasn't moved enough to not be a "click".
+				const strokeStartThreshold = 10;
+				if (gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold) {
+					eventBuffer.push([ eventName, event ]);
+					sendToEditor = false;
+				} else {
+					// Send all buffered events to the editor -- start the stroke.
+					for (const [ eventName, event ] of eventBuffer) {
+						this.editor.handleHTMLPointerEvent(eventName, event);
+					}
+
+					eventBuffer = [];
+					sendToEditor = true;
+				}
+			}
+			// Otherwise, if we received a pointerup/pointercancel without flushing all pointerevents from the
+			// buffer, the gesture wasn't recognised as a stroke. Thus, the editor isn't expecting a pointerup/
+			// pointercancel event.
+			else if ((eventName === 'pointerup' || eventName === 'pointercancel') && eventBuffer.length > 0) {
+				this.closeColorPickerOverlay?.releasePointerCapture(event.pointerId);
+				eventBuffer = [];
+
+				// Don't send to the editor.
+				sendToEditor = false;
+			}
+
+			// Transfer focus to the editor to allow keyboard events to be handled.
+			if (eventName === 'pointerup') {
+				this.editor.focus();
+			}
+
+			// Forward all other events to the editor.
+			return sendToEditor;
+		}));
+	}
+
 	// @internal
 	public setupColorPickers() {
 		// Much of the setup only needs to be done once.
@@ -89,49 +163,7 @@ export default class HTMLToolbar {
 			return;
 		}
 
-		const closePickerOverlay = document.createElement('div');
-		closePickerOverlay.className = `${toolbarCSSPrefix}closeColorPickerOverlay`;
-		this.editor.createHTMLOverlay(closePickerOverlay);
-
-		// Hide the color picker when attempting to draw on the overlay.
-		let eventBuffer: [ HTMLPointerEventName, PointerEvent ][] = [];
-		this.listeners.push(this.editor.handlePointerEventsFrom(closePickerOverlay, (eventName, event) => {
-			if (eventName === 'pointerdown') {
-				closeColoris();
-
-				// Buffer the event, but don't send it to the editor yet.
-				// We don't want to send single-click events, but we do want to send full strokes.
-				eventBuffer = [];
-				eventBuffer.push([ eventName, event ]);
-
-				// Capture the pointer so we receive future events even if the overlay is hidden.
-				closePickerOverlay.setPointerCapture(event.pointerId);
-
-				// Don't send to the editor.
-				return false;
-			}
-			else if (eventName === 'pointermove') {
-				// Send all buffered events to the editor -- start the stroke.
-				for (const [ eventName, event ] of eventBuffer) {
-					this.editor.handleHTMLPointerEvent(eventName, event);
-				}
-
-				eventBuffer = [];
-			}
-			// Otherwise, if we received a pointerup/pointercancel without flushing all pointerevents from the
-			// buffer, the gesture wasn't recognised as a stroke. Thus, the editor isn't expecting a pointerup/
-			// pointercancel event.
-			else if ((eventName === 'pointerup' || eventName === 'pointercancel') && eventBuffer.length > 0) {
-				closePickerOverlay.releasePointerCapture(event.pointerId);
-				eventBuffer = [];
-
-				// Don't send to the editor.
-				return false;
-			}
-
-			// Forward all other events to the editor.
-			return true;
-		}));
+		this.setupCloseColorPickerOverlay();
 
 		const maxSwatchLen = 12;
 		const swatches = [
@@ -184,7 +216,9 @@ export default class HTMLToolbar {
 
 			// Show/hide the overlay. Making the overlay visible gives users a surface to click
 			// on that shows/hides the color picker.
-			closePickerOverlay.style.display = event.open ? 'block' : 'none';
+			if (this.closeColorPickerOverlay) {
+				this.closeColorPickerOverlay.style.display = event.open ? 'block' : 'none';
+			}
 		}));
 
 		// Add newly-selected colors to the swatch.
@@ -524,6 +558,7 @@ export default class HTMLToolbar {
 	public remove() {
 		this.container.remove();
 		this.resizeObserver.disconnect();
+		this.closeColorPickerOverlay?.remove();
 
 		for (const listener of this.listeners) {
 			listener.remove();
