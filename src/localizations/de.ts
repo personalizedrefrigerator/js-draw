@@ -48,15 +48,16 @@ const localization: EditorLocalization = {
 	lockRotation: 'Sperre Rotation',
 	paste: 'Einfügen',
 
-	dropdownShown: t=>`Dropdown-Menü für ${t} angezeigt`,
-	dropdownHidden: t=>`Dropdown-Menü für ${t} versteckt`,
-	zoomLevel: t=>`Vergößerung: ${t}%`,
-	colorChangedAnnouncement: t=>`Farbe zu ${t} geändert`,
+	dropdownShown: (toolName) =>`Dropdown-Menü für ${toolName} angezeigt`,
+	dropdownHidden: (toolName) =>`Dropdown-Menü für ${toolName} versteckt`,
+	zoomLevel: (zoomPercent) =>`Vergößerung: ${zoomPercent}%`,
+	colorChangedAnnouncement: (color) =>`Farbe zu ${color} geändert`,
 	
 	imageSize: (size, units) => `Bild-Größe: ${size} ${units}`,
 	imageLoadError: (message) => `Fehler beim Laden des Bildes: ${message}`,
+	errorImageHasZeroSize: 'Fehler: Bild hat Größe Null',
 	
-	penTool: penNumber =>`Stift ${penNumber}`,
+	penTool: (penNumber) =>`Stift ${penNumber}`,
 
 	selectionTool: 'Auswahl',
 	eraserTool: 'Radiergummi',
@@ -77,20 +78,20 @@ const localization: EditorLocalization = {
 	findDialogHidden: 'Finde-Dialog versteckt',
 	focusedFoundText: (matchIdx, totalMatches) => `Sieh Treffer ${matchIdx} von ${totalMatches} an`,
 
-	toolEnabledAnnouncement: t=>`${t} aktiviert`,
-	toolDisabledAnnouncement: t=>`${t} deaktiviert`,
+	toolEnabledAnnouncement: (toolName) =>`${toolName} aktiviert`,
+	toolDisabledAnnouncement: (toolName) =>`${toolName} deaktiviert`,
 	updatedViewport: 'Transformierte Ansicht',
-	transformedElements: t=>`${t} Element${1===t?'':'e'} transformiert`,
-	resizeOutputCommand: t=>`Bildgröße auf ${t.w}x${t.h} geändert`,
-	addElementAction: t=>`${t} hinzugefügt`,
+	transformedElements: (elemCount) =>`${elemCount} Element${1 === elemCount ? '' : 'e'} transformiert`,
+	resizeOutputCommand: (newSize) =>`Bildgröße auf ${newSize.w}x${newSize.h} geändert`,
+	addElementAction: (componentDescription) =>`${componentDescription} hinzugefügt`,
 	eraseAction: (elemDescription, countErased)=>`${countErased} ${elemDescription} gelöscht`,
 	duplicateAction: (elemDescription, countErased)=>`${countErased} ${elemDescription} dupliziert`,
-	inverseOf: t=>`Umkehrung von ${t}`,
+	inverseOf: (actionDescription) =>`${actionDescription} umgekehrt`,
 
 	elements: 'Elemente',
 	erasedNoElements: 'Nichts entfernt',
 	duplicatedNoElements: 'Nichts dupliziert',
-	rotatedBy: t=>`${Math.abs(t)} Grad ${t<0?'im Uhrzeigersinn':'gegen den Uhrzeigersinn'} gedreht`,
+	rotatedBy: (degrees) =>`${Math.abs(degrees)} Grad ${degrees < 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn'} gedreht`,
 
 	movedLeft: 'Nacht links bewegt',
 	movedUp: 'Nacht oben bewegt',
@@ -99,16 +100,16 @@ const localization: EditorLocalization = {
 	zoomedOut: 'Ansicht verkleinert',
 	zoomedIn: 'Ansicht vergrößert',
 
-	selectedElements: t=>`${t} Element${ 1===t ? '' : 'e' } ausgewählt`,
+	selectedElements: (count) =>`${count} Element${ 1 === count ? '' : 'e' } ausgewählt`,
 	stroke: 'Strich',
 	svgObject: 'SVG-Objekt',
 
-	text: t=>`Text-Objekt: ${t}`,
-	pathNodeCount: t=>`Es gibt ${t} sichtbare Pfad-Objekte.`,
-	textNodeCount: t=>`Es gibt ${t} sichtbare Text-Knotenpunkte.`,
-	textNode: t=>`Text: ${t}`,
+	text: (text) =>`Text-Objekt: ${text}`,
+	pathNodeCount: (count) =>`Es gibt ${count} sichtbare Pfad-Objekte.`,
+	textNodeCount: (count) =>`Es gibt ${count} sichtbare Text-Knotenpunkte.`,
+	textNode: (content) =>`Text: ${content}`,
 	
-	imageNodeCount: nodeCount => `Es gibt ${nodeCount} sichtbare Bild-Knoten.`,
+	imageNodeCount: (nodeCount) => `Es gibt ${nodeCount} sichtbare Bild-Knoten.`,
 	imageNode: label => `Bild: ${label}`,
 	unlabeledImageNode: 'Bild ohne Label',
 
@@ -119,8 +120,27 @@ const localization: EditorLocalization = {
 	doneLoading: 'Laden fertig',
 
 	imageEditor: 'Bild-Editor',
-	undoAnnouncement: t=>`Rückgangig gemacht ${t}`,
-	redoAnnouncement: t=>`Wiederholt ${t}`,
+	undoAnnouncement: (commandDescription) =>`${commandDescription} rückgängig gemacht`,
+	redoAnnouncement: (commandDescription) =>`${commandDescription} wiederholt`,
+	reformatSelection: 'Formatiere Auswahl',
+	documentProperties: 'Seite',
+	backgroundColor: 'Hintergrundfarbe: ',
+	imageWidthOption: 'Breite: ',
+	imageHeightOption: 'Höhe: ',
+	useGridOption: 'Gitter: ',
+	toggleOverflow: 'Mehr',
+	selectAllTool: 'Alle auswählen',
+	soundExplorer: 'Klangbasierte Bilderkundung',
+	disableAccessibilityExploreTool: 'Deaktiviere klangbasierte Erkundung',
+	enableAccessibilityExploreTool: 'Aktiviere klangbasierte Erkundung',
+	copied: (count, description) => `${count} ${description} kopiert`,
+	pasted: (count, description) => `${count} ${description} eingefügt`,
+	unionOf: (actionDescription, actionCount) => `Vereinigung: ${actionCount} ${actionDescription}`,
+	emptyBackground: 'Leerer Hintergrund',
+	filledBackgroundWithColor: (color) => `Gefüllter Hintergrund (${color})`,
+	restyledElement: (elementDescription) => `${elementDescription} umgestaltet`,
+	
+	
 };
 
 export default localization;
