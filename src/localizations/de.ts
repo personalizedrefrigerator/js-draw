@@ -10,13 +10,13 @@ const localization: EditorLocalization = {
 	handTool: 'Verschieben',
 
 	zoom: 'Vergrößerung',
-	
+
 	image: 'Bild',
 	inputAltText: 'Alt-Text: ',
 	chooseFile: 'Wähle Datei: ',
 	submit: 'Absenden',
 	cancel: 'Abbrechen',
-	
+
 	resetView: 'Ansicht zurücksetzen',
 
 	thicknessLabel: 'Dicke: ',
@@ -39,12 +39,12 @@ const localization: EditorLocalization = {
 
 	selectPenType: 'Objekt-Typ: ',
 	freehandPen: 'Freihand',
-	pressureSensitiveFreehandPen: "Stift (druckempfindlich)",
+	pressureSensitiveFreehandPen: 'Stift (druckempfindlich)',
 	arrowPen: 'Pfeil',
 	linePen: 'Linie',
 	outlinedRectanglePen: 'Umrissenes Rechteck',
 	filledRectanglePen: 'Ausgefülltes Rechteck',
-	
+
 	lockRotation: 'Sperre Rotation',
 	paste: 'Einfügen',
 
@@ -52,11 +52,11 @@ const localization: EditorLocalization = {
 	dropdownHidden: (toolName) =>`Dropdown-Menü für ${toolName} versteckt`,
 	zoomLevel: (zoomPercent) =>`Vergößerung: ${zoomPercent}%`,
 	colorChangedAnnouncement: (color) =>`Farbe zu ${color} geändert`,
-	
+
 	imageSize: (size, units) => `Bild-Größe: ${size} ${units}`,
 	imageLoadError: (message) => `Fehler beim Laden des Bildes: ${message}`,
 	errorImageHasZeroSize: 'Fehler: Bild hat Größe Null',
-	
+
 	penTool: (penNumber) =>`Stift ${penNumber}`,
 
 	selectionTool: 'Auswahl',
@@ -108,7 +108,7 @@ const localization: EditorLocalization = {
 	pathNodeCount: (count) =>`Es gibt ${count} sichtbare Pfad-Objekte.`,
 	textNodeCount: (count) =>`Es gibt ${count} sichtbare Text-Knotenpunkte.`,
 	textNode: (content) =>`Text: ${content}`,
-	
+
 	imageNodeCount: (nodeCount) => `Es gibt ${nodeCount} sichtbare Bild-Knoten.`,
 	imageNode: label => `Bild: ${label}`,
 	unlabeledImageNode: 'Bild ohne Label',
@@ -139,8 +139,8 @@ const localization: EditorLocalization = {
 	emptyBackground: 'Leerer Hintergrund',
 	filledBackgroundWithColor: (color) => `Gefüllter Hintergrund (${color})`,
 	restyledElement: (elementDescription) => `${elementDescription} umgestaltet`,
-	
-	
+
+
 };
 
 export default localization;
