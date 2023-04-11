@@ -1,3 +1,12 @@
+# 0.22.0
+ * Improved German localization (thanks to @Mr-Kanister)
+ * Behavior changes
+   * Closing the color picker:
+     * Don't draw when the user **clicks** on the canvas to close the color picker. Drawing is still done if the user clicks and drags.
+ * Bug fixes
+   * Fix eraser flickering while erasing strokes.
+   * Fix in-progress strokes flickering during collaborative editing when incoming strokes are added to the editor.
+
 # 0.21.0
  * Color picker (adjustments to integration of the [Coloris library](https://github.com/melloware/coloris-npm))
    * Allow the user to start drawing without an extra click when closing the color picker.
