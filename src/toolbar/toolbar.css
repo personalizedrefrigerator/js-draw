@@ -74,12 +74,19 @@
 	margin-right: 3px;
 
 	min-width: 40px;
+	max-width: 105px;
 	width: min-content;
 	font-size: 1em;
 }
 
 .toolbar-button > label {
 	cursor: inherit;
+}
+
+/* Decrease the font size of labels in the main toolbar if they're long. */
+:not(.toolbar-dropdown) > .toolbar-toolContainer >
+		.toolbar-button > label.long-label {
+	font-size: 0.75em;
 }
 
 .toolbar-dropdown > .toolbar-toolContainer > button,

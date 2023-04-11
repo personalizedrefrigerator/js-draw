@@ -171,17 +171,28 @@ export default abstract class BaseWidget {
 
 	private toolbarWidgetToggleListener: DispatcherEventListener|null = null;
 
-	// Adds this to [parent]. This can only be called once for each ToolbarWidget.
-	// Returns the element that was just added to `parent`.
-	// @internal
+	/**
+	 * Adds this to `parent`. This can only be called once for each ToolbarWidget.
+	 * Returns the element that was just added to `parent`.
+	 * @internal
+	 */
 	public addTo(parent: HTMLElement) {
-		this.label.innerText = this.getTitle();
-
-		this.setupActionBtnClickListener(this.button);
-
+		// Update title and icon
 		this.icon = null;
 		this.updateIcon();
+		this.label.innerText = this.getTitle();
 
+		const longLabelCSSClass = 'long-label';
+		if (this.label.innerText.length > 7) {
+			this.label.classList.add(longLabelCSSClass);
+		} else {
+			this.label.classList.remove(longLabelCSSClass);
+		}
+
+		// Click functionality
+		this.setupActionBtnClickListener(this.button);
+
+		// Clear anything already in this.container.
 		this.container.replaceChildren();
 
 		this.button.replaceChildren(this.icon!, this.label);
