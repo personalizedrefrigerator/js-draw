@@ -10,11 +10,19 @@ const localization: EditorLocalization = {
 	handTool: 'Verschieben',
 
 	zoom: 'Vergrößerung',
+	
+	image: 'Bild',
+	inputAltText: 'Alt text: ',
+	chooseFile: 'Wähle Datei: ',
+	submit: 'Absenden',
+	cancel: 'Abbrechen',
+	
 	resetView: 'Ansicht zurücksetzen',
 
 	thicknessLabel: 'Dicke: ',
 	colorLabel: 'Farbe: ',
 	fontLabel: 'Schriftart: ',
+	textSize: 'Größe: ',
 
 	resizeImageToSelection: 'Bildgröße an Auswahl anpassen',
 	deleteSelection: 'Auswahl löschen',
@@ -31,16 +39,24 @@ const localization: EditorLocalization = {
 
 	selectPenType: 'Objekt-Typ: ',
 	freehandPen: 'Freihand',
+	pressureSensitiveFreehandPen: "Stift (druckempfindlich)",
 	arrowPen: 'Pfeil',
 	linePen: 'Linie',
 	outlinedRectanglePen: 'Umrissenes Rechteck',
 	filledRectanglePen: 'Ausgefülltes Rechteck',
+	
+	lockRotation: 'Sperre Rotation',
+	paste: 'Einfügen',
 
 	dropdownShown: t=>`Dropdown-Menü für ${t} angezeigt`,
 	dropdownHidden: t=>`Dropdown-Menü für ${t} versteckt`,
 	zoomLevel: t=>`Vergößerung: ${t}%`,
 	colorChangedAnnouncement: t=>`Farbe zu ${t} geändert`,
-	penTool: t=>`Stift ${t}`,
+	
+	imageSize: (size, units) => `Bild-Größe: ${size} ${units}`,
+	imageLoadError: (message) => `Fehler beim laden des Bildes: ${message}`,
+	
+	penTool: penNumber =>`Stift ${penNumber}`,
 
 	selectionTool: 'Auswahl',
 	eraserTool: 'Radiergummi',
@@ -52,6 +68,14 @@ const localization: EditorLocalization = {
 	keyboardPanZoom: 'Tastaturkürzel zum Verschieben/Vergrößern der Ansicht',
 	textTool: 'Text',
 	enterTextToInsert: 'Einzufügender Text',
+	changeTool: 'Wechsle Werkzeug',
+	pasteHandler: 'Copy-Paste-Handler',
+	findLabel: 'Finde',
+	toNextMatch: 'Nächstes',
+	closeFindDialog: 'Schließen',
+	findDialogShown: 'Finde-Dialog angezeigt',
+	findDialogHidden: 'Finde-Dialog versteckt',
+	focusedFoundText: (matchIdx, totalMatches) => `Sieh Treffer ${matchIdx} von ${totalMatches} an`,
 
 	toolEnabledAnnouncement: t=>`${t} aktiviert`,
 	toolDisabledAnnouncement: t=>`${t} deaktiviert`,
@@ -59,8 +83,8 @@ const localization: EditorLocalization = {
 	transformedElements: t=>`${t} Element${1===t?'':'e'} transformiert`,
 	resizeOutputCommand: t=>`Bildgröße auf ${t.w}x${t.h} geändert`,
 	addElementAction: t=>`${t} hinzugefügt`,
-	eraseAction: (t,e)=>`${e} ${t} gelöscht`,
-	duplicateAction: (t,e)=>`${e} ${t} dupliziert`,
+	eraseAction: (elemDescription, countErased)=>`${countErased} ${elemDescription} gelöscht`,
+	duplicateAction: (elemDescription, countErased)=>`${countErased} ${elemDescription} dupliziert`,
 	inverseOf: t=>`Umkehrung von ${t}`,
 
 	elements: 'Elemente',
@@ -83,11 +107,15 @@ const localization: EditorLocalization = {
 	pathNodeCount: t=>`Es gibt ${t} sichtbare Pfad-Objekte.`,
 	textNodeCount: t=>`Es gibt ${t} sichtbare Text-Knotenpunkte.`,
 	textNode: t=>`Text: ${t}`,
+	
+	imageNodeCount: nodeCount => `Es gibt ${nodeCount} sichtbare Bild-Knoten.`,
+	imageNode: label => `Bild: ${label}`,
+	unlabeledImageNode: 'Bild ohne Label',
 
 	rerenderAsText: 'Als Text darstellen',
 	accessibilityInputInstructions: 'Drücke ‚t‘, um den Inhalt des Ansichtsfensters als Text zu lesen. Verwende die Pfeiltasten, um die Ansicht zu verschieben, und klicke und ziehe, um Striche zu zeichnen. Drücke ‚w‘ zum Vergrößern und ‚s‘ zum Verkleinern der Ansicht.',
 
-	loading: t=>`Laden ${t}%...`,
+	loading: percentage =>`Laden ${percentage}%...`,
 	doneLoading: 'Laden fertig',
 
 	imageEditor: 'Bild-Editor',
