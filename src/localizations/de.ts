@@ -12,7 +12,7 @@ const localization: EditorLocalization = {
 	zoom: 'Vergrößerung',
 	
 	image: 'Bild',
-	inputAltText: 'Alt text: ',
+	inputAltText: 'Alt-Text: ',
 	chooseFile: 'Wähle Datei: ',
 	submit: 'Absenden',
 	cancel: 'Abbrechen',
@@ -54,7 +54,7 @@ const localization: EditorLocalization = {
 	colorChangedAnnouncement: t=>`Farbe zu ${t} geändert`,
 	
 	imageSize: (size, units) => `Bild-Größe: ${size} ${units}`,
-	imageLoadError: (message) => `Fehler beim laden des Bildes: ${message}`,
+	imageLoadError: (message) => `Fehler beim Laden des Bildes: ${message}`,
 	
 	penTool: penNumber =>`Stift ${penNumber}`,
 
