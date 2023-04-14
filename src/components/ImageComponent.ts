@@ -2,6 +2,7 @@ import LineSegment2 from '../math/LineSegment2';
 import Mat33, { Mat33Array } from '../math/Mat33';
 import Rect2 from '../math/Rect2';
 import AbstractRenderer, { RenderableImage } from '../rendering/renderers/AbstractRenderer';
+import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
@@ -109,19 +110,6 @@ export default class ImageComponent extends AbstractComponent {
 		return false;
 	}
 
-	protected serializeToJSON() {
-		return {
-			src: this.image.base64Url,
-			label: this.image.label,
-
-			// Store the width and height for bounding box computations while the image is loading.
-			width: this.image.image.width,
-			height: this.image.image.height,
-
-			transform: this.image.transform.toArray(),
-		};
-	}
-
 	protected applyTransformation(affineTransfm: Mat33) {
 		this.image.transform = affineTransfm.rightMul(this.image.transform);
 		this.recomputeBBox();
@@ -149,21 +137,40 @@ export default class ImageComponent extends AbstractComponent {
 		});
 	}
 
+	protected serializeToJSON() {
+		return {
+			src: this.image.base64Url,
+			label: this.image.label,
+
+			// Store the width and height for bounding box computations while the image is loading.
+			width: this.image.image.width,
+			height: this.image.image.height,
+
+			transform: this.image.transform.toArray(),
+		};
+	}
+
 	public static deserializeFromJSON(data: any): ImageComponent {
 		if (!(typeof data.src === 'string')) {
 			throw new Error(`${data} has invalid format! Expected src property.`);
 		}
+
+		assertIsNumberArray(data.transform);
+		assertIsNumber(data.width);
+		assertIsNumber(data.height);
 
 		const image = new Image();
 		image.src = data.src;
 		image.width = data.width;
 		image.height = data.height;
 
+		const transform = new Mat33(...(data.transform as Mat33Array));
+
 		return new ImageComponent({
 			image: image,
-			base64Url: image.src,
+			base64Url: data.src,
 			label: data.label,
-			transform: new Mat33(...(data.transform as Mat33Array)),
+			transform,
 		});
 	}
 }

@@ -72,12 +72,18 @@ class NonSerializableUnion extends Command {
 
 class SerializableUnion extends SerializableCommand {
 	private nonserializableCommand: NonSerializableUnion;
+	private serializedData: any;
+
 	public constructor(private commands: SerializableCommand[], private applyChunkSize: number|undefined) {
 		super('union');
 		this.nonserializableCommand = new NonSerializableUnion(commands, applyChunkSize);
 	}
 
 	protected serializeToJSON() {
+		if (this.serializedData) {
+			return this.serializedData;
+		}
+
 		return {
 			applyChunkSize: this.applyChunkSize,
 			data: this.commands.map(command => command.serialize()),
@@ -85,6 +91,9 @@ class SerializableUnion extends SerializableCommand {
 	}
 
 	public apply(editor: Editor) {
+		// Cache this' serialized form -- applying this may change how commands serialize.
+		this.serializedData = this.serializeToJSON();
+
 		return this.nonserializableCommand.apply(editor);
 	}
 
