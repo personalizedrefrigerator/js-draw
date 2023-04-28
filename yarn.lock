@@ -645,10 +645,10 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@melloware/coloris@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@melloware/coloris/-/coloris-0.18.0.tgz#80be501412567cea699fcaf370f1a0576b44766e"
-  integrity sha512-XF0OiDVkqYuqscUWFe2uFJORIOsus5JB+AQ4hEFMJjM2xJTkzrCmsIFkTwxjt/2PXeZwuo50ZDcZIiW3X5ZG0Q==
+"@melloware/coloris@^0.19.1":
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/@melloware/coloris/-/coloris-0.19.1.tgz#1bfac4515d26b6889f885ac3ff36e2deb6522ba3"
+  integrity sha512-7C1ue136iQw3UCLy5GoCxXR+u4F1eB0MMmpAwUH2okdQwmdjVNd+OmIQBKVDbM78lMFFJxzvtilWkYV/l8/4rw==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"

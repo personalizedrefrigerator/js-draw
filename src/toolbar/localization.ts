@@ -26,8 +26,11 @@ export interface ToolbarLocalization {
 	resizeImageToSelection: string;
 	deleteSelection: string;
 	duplicateSelection: string;
+
 	pickColorFromScreen: string;
 	clickToPickColorAnnouncement: string;
+	colorSelectionCanceledAnnouncement: string;
+
 	reformatSelection: string;
 	undo: string;
 	redo: string;
@@ -77,6 +80,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	selectPenType: 'Pen type: ',
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
+	colorSelectionCanceledAnnouncement: 'Color selection canceled',
 	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 	documentProperties: 'Page',
 	backgroundColor: 'Background Color: ',

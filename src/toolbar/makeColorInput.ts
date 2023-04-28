@@ -59,6 +59,10 @@ export const makeColorInput = (
 			open: true,
 		});
 		pipetteController.cancel();
+
+		// Focus the Coloris color picker, if it exists.
+		const colorPickerElem: HTMLElement|null = document.querySelector('#clr-picker > #clr-color-value');
+		colorPickerElem?.focus();
 	});
 	colorInput.addEventListener('close', () => {
 		editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
@@ -66,6 +70,9 @@ export const makeColorInput = (
 			open: false,
 		});
 		onInputEnd();
+
+		// Restore focus to the input that opened the color picker
+		colorInput.focus();
 	});
 
 	const setColorInputValue = (color: Color4|string) => {
@@ -95,11 +102,13 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	updatePipetteIcon();
 
 	const pipetteTool: PipetteTool|undefined = editor.toolController.getMatchingTools(PipetteTool)[0];
+
 	const endColorSelectMode = () => {
 		pipetteTool?.clearColorListener();
 		updatePipetteIcon();
 		pipetteButton.classList.remove('active');
 	};
+
 	const pipetteColorSelect = (color: Color4|null) => {
 		endColorSelectMode();
 
@@ -107,6 +116,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 			onColorChange(color);
 		}
 	};
+
 	const pipetteColorPreview = (color: Color4|null) => {
 		if (color) {
 			updatePipetteIcon(color);
@@ -119,6 +129,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 		// If already picking, cancel it.
 		if (pipetteButton.classList.contains('active')) {
 			endColorSelectMode();
+			editor.announceForAccessibility(editor.localization.colorSelectionCanceledAnnouncement);
 			return;
 		}
 
@@ -126,6 +137,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 			pipetteColorPreview,
 			pipetteColorSelect,
 		);
+
 		if (pipetteTool) {
 			pipetteButton.classList.add('active');
 			editor.announceForAccessibility(editor.localization.clickToPickColorAnnouncement);
