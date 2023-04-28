@@ -247,6 +247,7 @@ export default abstract class BaseWidget {
 
 	public setDisabled(disabled: boolean) {
 		this.disabled = disabled;
+
 		if (this.disabled) {
 			this.button.classList.add('disabled');
 			this.button.setAttribute('aria-disabled', 'true');
@@ -262,12 +263,18 @@ export default abstract class BaseWidget {
 			return;
 		}
 
+		// Ensure that accessibility tools check and read the value of
+		// aria-checked.
+		// TODO: Ensure that 'role' is set to 'switch' by default for selectable
+		//       buttons.
+		this.button.setAttribute('role', 'switch');
+
 		if (selected) {
 			this.container.classList.add('selected');
-			this.button.ariaSelected = 'true';
+			this.button.setAttribute('aria-checked', 'true');
 		} else {
 			this.container.classList.remove('selected');
-			this.button.ariaSelected = 'false';
+			this.button.setAttribute('aria-checked', 'false');
 		}
 	}
 
