@@ -61,7 +61,9 @@ export const makeColorInput = (
 		pipetteController.cancel();
 
 		// Focus the Coloris color picker, if it exists.
-		const colorPickerElem: HTMLElement|null = document.querySelector('#clr-picker > #clr-color-value');
+		// Don't focus the text input within the color picker, however,
+		// as this displays a keyboard on mobile devices.
+		const colorPickerElem: HTMLElement|null = document.querySelector('#clr-picker #clr-hue-slider');
 		colorPickerElem?.focus();
 	});
 	colorInput.addEventListener('close', () => {
