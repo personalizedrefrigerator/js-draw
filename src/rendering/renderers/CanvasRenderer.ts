@@ -227,14 +227,20 @@ export default class CanvasRenderer extends AbstractRenderer {
 		this.currentObjectBBox = boundingBox;
 
 		if (!this.ignoringObject && clip) {
-			this.clipLevels.push(this.objectLevel);
-			this.ctx.save();
-			this.ctx.beginPath();
-			for (const corner of boundingBox.corners) {
-				const screenCorner = this.canvasToScreen(corner);
-				this.ctx.lineTo(screenCorner.x, screenCorner.y);
+			// Don't clip if it would only remove content already trimmed by
+			// the edge of the screen.
+			const clippedIsOutsideScreen = boundingBox.containsRect(this.getViewport().visibleRect);
+
+			if (!clippedIsOutsideScreen) {
+				this.clipLevels.push(this.objectLevel);
+				this.ctx.save();
+				this.ctx.beginPath();
+				for (const corner of boundingBox.corners) {
+					const screenCorner = this.canvasToScreen(corner);
+					this.ctx.lineTo(screenCorner.x, screenCorner.y);
+				}
+				this.ctx.clip();
 			}
-			this.ctx.clip();
 		}
 	}
 
