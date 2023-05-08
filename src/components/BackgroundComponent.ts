@@ -215,7 +215,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		if (this.backgroundType === BackgroundType.None) {
 			return;
 		}
-		const clip = true;
+		const clip = this.backgroundType === BackgroundType.Grid;
 		canvas.startObject(this.contentBBox, clip);
 
 		if (this.backgroundType === BackgroundType.SolidColor || this.backgroundType === BackgroundType.Grid) {
