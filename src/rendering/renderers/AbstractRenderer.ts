@@ -107,6 +107,8 @@ export default abstract class AbstractRenderer {
 		if (lastStyle) {
 			this.endPath(lastStyle);
 		}
+
+		this.currentPaths = [];
 	}
 
 	public drawPath(path: RenderablePathSpec) {
@@ -139,6 +141,10 @@ export default abstract class AbstractRenderer {
 	// Note the start of an object with the given bounding box.
 	// Renderers are not required to support [clip]
 	public startObject(_boundingBox: Rect2, _clip?: boolean) {
+		if (this.objectLevel > 0) {
+			this.flushPath();
+		}
+
 		this.currentPaths = [];
 		this.objectLevel ++;
 	}
