@@ -1,5 +1,6 @@
 import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
+import waitForAll from '../util/waitForAll';
 import Command from './Command';
 import SerializableCommand from './SerializableCommand';
 
@@ -9,23 +10,10 @@ class NonSerializableUnion extends Command {
 		super();
 	}
 
-	private static waitForAll(commands: (Promise<void>|void)[]): Promise<void>|void {
-		// If any are Promises...
-		if (commands.some(command => command && command['then'])) {
-			console.log('waiting...');
-			// Wait for all commands to finish.
-			return Promise.all(commands)
-				// Ensure we return a Promise<void> and not a Promise<void[]>
-				.then(() => {});
-		}
-
-		return;
-	}
-
 	public apply(editor: Editor) {
 		if (this.applyChunkSize === undefined) {
 			const results = this.commands.map(cmd => cmd.apply(editor));
-			return NonSerializableUnion.waitForAll(results);
+			return waitForAll(results);
 		} else {
 			return editor.asyncApplyCommands(this.commands, this.applyChunkSize);
 		}
@@ -37,10 +25,14 @@ class NonSerializableUnion extends Command {
 
 		if (this.applyChunkSize === undefined) {
 			const results = commands.map(cmd => cmd.unapply(editor));
-			return NonSerializableUnion.waitForAll(results);
+			return waitForAll(results);
 		} else {
 			return editor.asyncUnapplyCommands(commands, this.applyChunkSize, false);
 		}
+	}
+
+	public override onDrop(editor: Editor): void {
+		this.commands.forEach(command => command.onDrop(editor));
 	}
 
 	public description(editor: Editor, localizationTable: EditorLocalization) {
@@ -99,6 +91,10 @@ class SerializableUnion extends SerializableCommand {
 
 	public unapply(editor: Editor) {
 		return this.nonserializableCommand.unapply(editor);
+	}
+
+	public override onDrop(editor: Editor): void {
+		this.nonserializableCommand.onDrop(editor);
 	}
 
 	public description(editor: Editor, localizationTable: EditorLocalization): string {

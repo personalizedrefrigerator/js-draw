@@ -12,11 +12,14 @@ const invertCommand = <T extends Command> (command: T): T extends SerializableCo
 			protected serializeToJSON() {
 				return command.serialize();
 			}
-			public apply(editor: Editor): void {
+			public apply(editor: Editor) {
 				command.unapply(editor);
 			}
-			public unapply(editor: Editor): void {
+			public unapply(editor: Editor) {
 				command.unapply(editor);
+			}
+			public override onDrop(editor: Editor) {
+				command.onDrop(editor);
 			}
 			public description(editor: Editor, localizationTable: EditorLocalization): string {
 				return localizationTable.inverseOf(command.description(editor, localizationTable));
@@ -31,6 +34,10 @@ const invertCommand = <T extends Command> (command: T): T extends SerializableCo
 
 			public unapply(editor: Editor) {
 				command.apply(editor);
+			}
+
+			public override onDrop(editor: Editor) {
+				command.onDrop(editor);
 			}
 
 			public description(editor: Editor, localizationTable: EditorLocalization) {

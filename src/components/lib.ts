@@ -14,13 +14,16 @@ import BackgroundComponent from './BackgroundComponent';
 
 export {
 	Stroke,
-	TextComponent as Text,
 	RestyleableComponent,
 	createRestyleComponentCommand,
 	isRestylableComponent,
 	RestyleableComponentStyle,
 
 	TextComponent,
+
+	// @deprecated
+	TextComponent as Text,
+
 	Stroke as StrokeComponent,
 	BackgroundComponent,
 	ImageComponent,

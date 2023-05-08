@@ -5,6 +5,29 @@ import { EditorLocalization } from '../localization';
 import Erase from './Erase';
 import SerializableCommand from './SerializableCommand';
 
+/**
+ * A command that duplicates the {@link AbstractComponent}s it's given. This command
+ * is the reverse of an {@link Erase} command.
+ *
+ * @example
+ * ```ts
+ * // Given some editor...
+ *
+ * // Find all elements intersecting the rectangle with top left (0,0) and
+ * // (width,height)=(100,100).
+ * const elems = editor.image.getElementsIntersectingRegion(
+ * 	new Rect2(0, 0, 100, 100)
+ * );
+ *
+ * // Create a command that, when applied, will duplicate the elements.
+ * const duplicateElems = new Duplicate(elems);
+ *
+ * // Apply the command (and make it undoable)
+ * editor.dispatch(duplicateElems);
+ * ```
+ *
+ * @see {@link Editor.dispatch} {@link EditorImage.getElementsIntersectingRegion}
+ */
 export default class Duplicate extends SerializableCommand {
 	private duplicates: AbstractComponent[];
 	private reverse: Erase;
@@ -22,6 +45,10 @@ export default class Duplicate extends SerializableCommand {
 
 	public unapply(editor: Editor): void {
 		this.reverse.apply(editor);
+	}
+
+	public override onDrop(editor: Editor): void {
+		this.reverse.onDrop(editor);
 	}
 
 	public description(_editor: Editor, localizationTable: EditorLocalization): string {

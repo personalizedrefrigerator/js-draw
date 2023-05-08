@@ -5,6 +5,26 @@ import EditorImage from '../EditorImage';
 import { EditorLocalization } from '../localization';
 import SerializableCommand from './SerializableCommand';
 
+/**
+ * Removes the given {@link AbstractComponent}s from the image.
+ *
+ * @example
+ * ```ts
+ * // Given some editor...
+ *
+ * // Find all elements intersecting the rectangle with top left (-10,-30) and
+ * // (width,height)=(50,100).
+ * const elems = editor.image.getElementsIntersectingRegion(
+ * 	new Rect2(-10, -30, 50, 100)
+ * );
+ *
+ * // Create a command that erases [elems] when applied
+ * const eraseElemsCmd = new Erase(elems);
+ *
+ * // Apply the command (and make it undoable)
+ * editor.dispatch(eraseElemsCmd);
+ * ```
+ */
 export default class Erase extends SerializableCommand {
 	private toRemove: AbstractComponent[];
 	private applied: boolean;

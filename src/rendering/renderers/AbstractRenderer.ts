@@ -30,6 +30,11 @@ export interface RenderableImage {
 	label?: string;
 }
 
+/**
+ * Abstract base class for renderers.
+ *
+ * @see {@link EditorImage.render}
+ */
 export default abstract class AbstractRenderer {
 	// If null, this' transformation is linked to the Viewport
 	private selfTransform: Mat33|null = null;
@@ -111,6 +116,10 @@ export default abstract class AbstractRenderer {
 		this.currentPaths = [];
 	}
 
+	/**
+	 * Draws a styled path. If within an object started by {@link startObject},
+	 * the resultant path may not be visible until {@link endObject} is called.
+	 */
 	public drawPath(path: RenderablePathSpec) {
 		// If we're being called outside of an object,
 		// we can't delay rendering
@@ -132,14 +141,19 @@ export default abstract class AbstractRenderer {
 		this.drawPath(path.toRenderable(lineFill));
 	}
 
-	// Fills a rectangle.
+	/** Draws a filled rectangle. */
 	public fillRect(rect: Rect2, fill: Color4) {
 		const path = Path.fromRect(rect);
 		this.drawPath(path.toRenderable({ fill }));
 	}
 
-	// Note the start of an object with the given bounding box.
-	// Renderers are not required to support [clip]
+	/**
+	 * This should be called whenever a new object is being drawn.
+	 *
+	 * @param _boundingBox The bounding box of the object to be drawn.
+	 * @param _clip Whether content outside `_boundingBox` should be drawn. Renderers
+	 *              that override this method are not required to support `_clip`.
+	 */
 	public startObject(_boundingBox: Rect2, _clip?: boolean) {
 		if (this.objectLevel > 0) {
 			this.flushPath();

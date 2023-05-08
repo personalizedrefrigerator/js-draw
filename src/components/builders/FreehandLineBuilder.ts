@@ -135,42 +135,15 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 				return [];
 			}
 
-			// Make the circle small -- because of the stroke style, we'll be drawing a stroke around it.
-			const width = Viewport.roundPoint(this.averageWidth / 10, Math.min(this.minFitAllowed, this.averageWidth / 10));
-			const center = this.roundPoint(this.startPoint.pos);
-
-			// Start on the right, cycle clockwise:
-			//    |
-			//  ----- ←
-			//    |
-
 			// Draw a circle-ish shape around the start point
 			return [
 				{
-					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(width, width)),
-
-					// Bottom of the circle
-					//    |
-					//  -----
-					//    |
-					//    ↑
-					endPoint: center.plus(Vec2.of(0, width)),
+					kind: PathCommandType.MoveTo,
+					point: this.roundPoint(this.startPoint.pos),
 				},
 				{
-					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(-width, width)),
-					endPoint: center.plus(Vec2.of(-width, 0)),
-				},
-				{
-					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(-width, -width)),
-					endPoint: center.plus(Vec2.of(0, -width)),
-				},
-				{
-					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(width, -width)),
-					endPoint: center.plus(Vec2.of(width, 0)),
+					kind: PathCommandType.LineTo,
+					point: this.roundPoint(this.startPoint.pos.plus(Vec2.of(0, this.averageWidth / 100))),
 				}
 			];
 		}
