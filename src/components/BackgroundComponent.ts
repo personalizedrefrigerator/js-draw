@@ -295,8 +295,13 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 	public description(localizationTable: ImageComponentLocalization) {
 		if (this.backgroundType === BackgroundType.SolidColor) {
 			return localizationTable.filledBackgroundWithColor(this.mainColor.toString());
-		} else {
+		} else if (this.backgroundType === BackgroundType.None) {
 			return localizationTable.emptyBackground;
+		} else if (this.backgroundType === BackgroundType.Grid) {
+			return localizationTable.gridBackground;
+		} else {
+			const exhaustivenessCheck: never = this.backgroundType;
+			return exhaustivenessCheck;
 		}
 	}
 
