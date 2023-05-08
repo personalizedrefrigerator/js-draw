@@ -1,3 +1,9 @@
+# 0.22.1
+ * Bug fixes
+   * Fix color picker not having keyboard focus on open.
+   * Fix screen readers not reading whether a toggle button was enabled/disabled.
+   * Work around a command serialization/deserialization issue by caching the serialized form of commands in some instances.
+
 # 0.22.0
  * Improved German localization (thanks to @Mr-Kanister)
  * Behavior changes
