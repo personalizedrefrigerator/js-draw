@@ -81,6 +81,7 @@
 
 .toolbar-button > label {
 	cursor: inherit;
+	user-select: none;
 }
 
 /* Decrease the font size of labels in the main toolbar if they're long. */
@@ -105,6 +106,7 @@
 
 .toolbar-root .toolbar-icon {
 	flex-shrink: 1;
+	user-select: none;
 
 	width: 100%;
 	min-width: 30px;
