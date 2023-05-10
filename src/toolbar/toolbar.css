@@ -133,7 +133,8 @@
 }
 
 .toolbar-dropdown.hidden,
-.toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-dropdown {
+.toolbar-toolContainer:not(.selected):not(.dropdownShowable)
+		> .toolbar-dropdown:not(.hiding) {
 	display: none;
 }
 

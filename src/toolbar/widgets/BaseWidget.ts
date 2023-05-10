@@ -290,6 +290,7 @@ export default abstract class BaseWidget {
 		if (this.hideDropdownTimeout) {
 			clearTimeout(this.hideDropdownTimeout);
 			this.hideDropdownTimeout = null;
+			this.dropdownContainer.classList.remove('hiding');
 		}
 
 
@@ -312,12 +313,15 @@ export default abstract class BaseWidget {
 				this.localizationTable.dropdownHidden(this.getTitle())
 			);
 
+			this.dropdownContainer.classList.add('hiding');
+
 			// Hide the dropdown *slightly* before the animation finishes. This
 			// prevents flickering in some browsers.
 			const hideDelay = animationDuration * 0.95;
 
 			this.hideDropdownTimeout = setTimeout(() => {
 				this.dropdownContainer.classList.add('hidden');
+				this.dropdownContainer.classList.remove('hiding');
 			}, hideDelay);
 		}
 
