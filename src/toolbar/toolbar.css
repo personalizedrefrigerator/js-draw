@@ -181,6 +181,9 @@
 .toolbar-dropdown {
 	/* Ensure the animation begins from the correct location. */
 	transform-origin: top left;
+
+	--dropdown-show-animation: dropdown-transition-in;
+	--dropdown-hide-animation: dropdown-transition-out;
 }
 
 .toolbar-buttonGroup {

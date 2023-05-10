@@ -319,7 +319,9 @@ export default abstract class BaseWidget {
 		}
 
 		// Animate
-		const animationName = visible ? 'dropdown-transition-in' : 'dropdown-transition-out';
+		const animationName = `var(--dropdown-${
+			visible ? 'show' : 'hide'
+		}-animation)`;
 		this.dropdownContainer.style.animation = `${animationDuration}ms ease ${animationName}`;
 
 		this.repositionDropdown();
