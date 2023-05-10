@@ -359,7 +359,7 @@ export default abstract class BaseWidget {
 			// transform property.
 			this.dropdownContainer.style.translate = `calc(${this.button.clientWidth + 'px'} - 100%) 0`;
 		} else {
-			this.dropdownContainer.style.transform = '';
+			this.dropdownContainer.style.translate = '';
 		}
 	}
 
