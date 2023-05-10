@@ -278,11 +278,22 @@ export default abstract class BaseWidget {
 		}
 	}
 
+	private hideDropdownTimeout: any|null = null;
+
 	protected setDropdownVisible(visible: boolean) {
 		const currentlyVisible = this.container.classList.contains('dropdownVisible');
 		if (currentlyVisible === visible) {
 			return;
 		}
+
+		// If waiting to hide the dropdown, cancel it.
+		if (this.hideDropdownTimeout) {
+			clearTimeout(this.hideDropdownTimeout);
+			this.hideDropdownTimeout = null;
+		}
+
+
+		const animationDuration = 150; // ms
 
 		if (visible) {
 			this.dropdownContainer.classList.remove('hidden');
@@ -296,12 +307,20 @@ export default abstract class BaseWidget {
 				parentWidget: this,
 			});
 		} else {
-			this.dropdownContainer.classList.add('hidden');
 			this.container.classList.remove('dropdownVisible');
 			this.editor.announceForAccessibility(
 				this.localizationTable.dropdownHidden(this.getTitle())
 			);
+
+			// Allow the dropdown's hiding animation to run — don't hide immediately.
+			this.hideDropdownTimeout = setTimeout(() => {
+				this.dropdownContainer.classList.add('hidden');
+			}, animationDuration);
 		}
+
+		// Animate
+		const animationName = visible ? 'dropdown-transition-in' : 'dropdown-transition-out';
+		this.dropdownContainer.style.animation = `${animationDuration}ms ease ${animationName}`;
 
 		this.repositionDropdown();
 	}
@@ -327,10 +346,10 @@ export default abstract class BaseWidget {
 		const screenWidth = document.body.clientWidth;
 
 		if (dropdownBBox.left > screenWidth / 2) {
-			this.dropdownContainer.style.marginLeft = this.button.clientWidth + 'px';
-			this.dropdownContainer.style.transform = 'translate(-100%, 0)';
+			// Use .translate so as not to conflict with CSS animating the
+			// transform property.
+			this.dropdownContainer.style.translate = `calc(${this.button.clientWidth + 'px'} - 100%) 0`;
 		} else {
-			this.dropdownContainer.style.marginLeft = '';
 			this.dropdownContainer.style.transform = '';
 		}
 	}

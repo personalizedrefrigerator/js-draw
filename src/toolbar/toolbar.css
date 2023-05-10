@@ -155,6 +155,34 @@
 	box-shadow: 0px 3px 3px var(--primary-shadow-color);
 }
 
+/* Animate showing/hiding the dropdown. Animations triggered in JavaScript. */
+@keyframes dropdown-transition-in {
+	0% {
+		opacity: 0;
+		transform: scale(1, 0);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1, 1);
+	}
+}
+
+@keyframes dropdown-transition-out {
+	0% {
+		opacity: 1;
+		transform: scale(1, 1);	
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1, 0);
+	}
+}
+
+.toolbar-dropdown {
+	/* Ensure the animation begins from the correct location. */
+	transform-origin: top left;
+}
+
 .toolbar-buttonGroup {
 	display: flex;
 	flex-direction: row;
