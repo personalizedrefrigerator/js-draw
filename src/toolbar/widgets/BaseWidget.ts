@@ -312,10 +312,13 @@ export default abstract class BaseWidget {
 				this.localizationTable.dropdownHidden(this.getTitle())
 			);
 
-			// Allow the dropdown's hiding animation to run — don't hide immediately.
+			// Hide the dropdown *slightly* before the animation finishes. This
+			// prevents flickering in some browsers.
+			const hideDelay = animationDuration * 0.95;
+
 			this.hideDropdownTimeout = setTimeout(() => {
 				this.dropdownContainer.classList.add('hidden');
-			}, animationDuration);
+			}, hideDelay);
 		}
 
 		// Animate
