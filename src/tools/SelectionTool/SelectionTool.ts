@@ -35,6 +35,10 @@ export default class SelectionTool extends BaseTool {
 		this.handleOverlay.classList.add('handleOverlay');
 
 		editor.notifier.on(EditorEventType.ViewportChanged, _data => {
+			// The selection box could be using the wet ink display if its transformation
+			// hasn't been finalized yet. Clear before updating the UI.
+			this.editor.clearWetInk();
+
 			this.selectionBox?.updateUI();
 		});
 
