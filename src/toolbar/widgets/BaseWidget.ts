@@ -172,7 +172,7 @@ export default abstract class BaseWidget {
 	private toolbarWidgetToggleListener: DispatcherEventListener|null = null;
 
 	/**
-	 * Adds this to `parent`. This can only be called once for each ToolbarWidget.
+	 * Adds this to `parent`.
 	 * Returns the element that was just added to `parent`.
 	 * @internal
 	 */
@@ -198,6 +198,9 @@ export default abstract class BaseWidget {
 		this.button.replaceChildren(this.icon!, this.label);
 		this.container.appendChild(this.button);
 
+		// Clear the dropdownContainer in case this element is being moved to another
+		// parent.
+		this.dropdownContainer.replaceChildren();
 		this.#hasDropdown = this.fillDropdown(this.dropdownContainer);
 		if (this.#hasDropdown) {
 			this.dropdownIcon = this.createDropdownIcon();
