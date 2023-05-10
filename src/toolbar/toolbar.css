@@ -187,6 +187,28 @@
 	--dropdown-hide-animation: dropdown-transition-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+	/* Disable toolbar animations if reducing motion */
+	.toolbar-dropdown {
+		--dropdown-show-animation: none;
+		--dropdown-hide-animation: none;
+	}
+
+	.toolbar-dropdown.hiding {
+		display: none;
+	}
+
+	/* Also disable arrow rotation */
+	.toolbar-toolContainer > .toolbar-button > .toolbar-showHideDropdownIcon {
+		transition: none;
+	}
+
+	/* ...and background color animation. */
+	.toolbar-button, .toolbar-root button {
+		transition: none;
+	}
+}
+
 .toolbar-buttonGroup {
 	display: flex;
 	flex-direction: row;
