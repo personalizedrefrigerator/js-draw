@@ -1,3 +1,9 @@
+# 0.23.1
+ * Bug fixes
+   * Fix regression: overflow menu in toolbar could be pushed off screen on window resize.
+   * Fix animations running despite `prefers-reduced-motion` being set to `reduce`.
+   * Fix `TextWidget` content duplicating when added to/removed from overflow widget.
+
 # 0.23.0
  * Bug fixes
    * Fix background disappearing when near maximum zoom in certain images.
