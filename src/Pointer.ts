@@ -41,11 +41,41 @@ export default class Pointer {
 	// this.
 	public snappedToGrid(viewport: Viewport): Pointer {
 		const snappedCanvasPos = viewport.snapToGrid(this.canvasPos);
-		const snappedScreenPos = viewport.canvasToScreen(snappedCanvasPos);
+		return this.withCanvasPosition(snappedCanvasPos, viewport);
+	}
+
+	// Snap this pointer to the X or Y axis (whichever is closer), where (0,0)
+	// is considered to be at `originPoint`.
+	// @internal
+	public lockedToXYAxes(originPoint: Vec2, viewport: Viewport) {
+		const current = this.canvasPos;
+		const currentFromStart = current.minus(originPoint);
+
+		// Determine whether the last point was closer to being on the
+		// x- or y- axis.
+		const projOntoXAxis = Vec2.unitX.times(currentFromStart.x);
+		const projOntoYAxis = Vec2.unitY.times(currentFromStart.y);
+
+		let pos;
+		if (currentFromStart.dot(projOntoXAxis) > currentFromStart.dot(projOntoYAxis)) {
+			pos = projOntoXAxis;
+		} else {
+			pos = projOntoYAxis;
+		}
+
+		pos = pos.plus(originPoint);
+
+		return this.withCanvasPosition(pos, viewport);
+	}
+
+	// Returns a copy of this pointer with a new position. The screen position is determined
+	// by the given `canvasPos`.
+	public withCanvasPosition(canvasPos: Point2, viewport: Viewport) {
+		const screenPos = viewport.canvasToScreen(canvasPos);
 
 		return new Pointer(
-			snappedScreenPos,
-			snappedCanvasPos,
+			screenPos,
+			canvasPos,
 			this.pressure,
 			this.isPrimary,
 			this.down,

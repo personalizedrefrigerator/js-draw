@@ -20,6 +20,7 @@ export default class SelectionTool extends BaseTool {
 	private selectionBox: Selection|null;
 	private lastEvtTarget: EventTarget|null = null;
 
+	private startPoint: Vec2|null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
 	private ctrlKeyPressed: boolean = false;
@@ -80,6 +81,8 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		if (allPointers.length === 1 && current.isPrimary) {
+			this.startPoint = current.canvasPos;
+
 			let transforming = false;
 
 			if (this.lastEvtTarget && this.selectionBox) {
@@ -112,6 +115,10 @@ export default class SelectionTool extends BaseTool {
 		if (!this.selectionBox) return;
 
 		let currentPointer = event.current;
+		if (!this.expandingSelectionBox && this.shiftKeyPressed && this.startPoint) {
+			currentPointer = currentPointer.lockedToXYAxes(this.startPoint, this.editor.viewport);
+		}
+
 		if (this.ctrlKeyPressed) {
 			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
 		}

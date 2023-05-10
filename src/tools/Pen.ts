@@ -15,7 +15,10 @@ export interface PenStyle {
 export default class Pen extends BaseTool {
 	protected builder: ComponentBuilder|null = null;
 	private lastPoint: StrokeDataPoint|null = null;
+	private startPoint: StrokeDataPoint|null = null;
+
 	private ctrlKeyPressed: boolean = false;
+	private shiftKeyPressed: boolean = false;
 
 	public constructor(
 		private editor: Editor,
@@ -30,8 +33,21 @@ export default class Pen extends BaseTool {
 		return 1 / this.editor.viewport.getScaleFactor() * this.style.thickness;
 	}
 
+	// Snap the given pointer to the nearer of the x/y axes.
+	private xyAxesSnap(pointer: Pointer) {
+		if (!this.startPoint) {
+			return pointer;
+		}
+
+		return pointer.lockedToXYAxes(this.startPoint.pos, this.editor.viewport);
+	}
+
 	// Converts a `pointer` to a `StrokeDataPoint`.
 	protected toStrokePoint(pointer: Pointer): StrokeDataPoint {
+		if (this.isAngleLocked() && this.lastPoint) {
+			pointer = this.xyAxesSnap(pointer);
+		}
+
 		if (this.isSnappingToGrid()) {
 			pointer = pointer.snappedToGrid(this.editor.viewport);
 		}
@@ -85,7 +101,8 @@ export default class Pen extends BaseTool {
 		}
 
 		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
-			this.builder = this.builderFactory(this.toStrokePoint(current), this.editor.viewport);
+			this.startPoint = this.toStrokePoint(current);
+			this.builder = this.builderFactory(this.startPoint, this.editor.viewport);
 			return true;
 		}
 
@@ -135,6 +152,7 @@ export default class Pen extends BaseTool {
 			}
 		}
 		this.builder = null;
+		this.lastPoint = null;
 		this.editor.clearWetInk();
 	}
 
@@ -183,6 +201,7 @@ export default class Pen extends BaseTool {
 	}
 
 	private isSnappingToGrid() { return this.ctrlKeyPressed; }
+	private isAngleLocked() { return this.shiftKeyPressed; }
 
 	public override onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
 		key = key.toLowerCase();
@@ -205,6 +224,11 @@ export default class Pen extends BaseTool {
 			return true;
 		}
 
+		if (key === 'shift') {
+			this.shiftKeyPressed = true;
+			return true;
+		}
+
 		// Ctrl+Z: End the stroke so that it can be undone/redone.
 		if (key === 'z' && ctrlKey && this.builder) {
 			this.finalizeStroke();
@@ -218,6 +242,11 @@ export default class Pen extends BaseTool {
 
 		if (key === 'control' || key === 'meta') {
 			this.ctrlKeyPressed = false;
+			return true;
+		}
+
+		if (key === 'shift') {
+			this.shiftKeyPressed = false;
 			return true;
 		}
 
