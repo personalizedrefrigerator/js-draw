@@ -1,3 +1,11 @@
+# 0.23.0
+ * Bug fixes
+   * Fix background disappearing when near maximum zoom in certain images.
+   * Fix default pen size not matching zoom when repeatedly drawing dots.
+ * Features/enhancements
+   * Animations for showing/hiding dropdowns in the toolbar.
+   * Lock drawing/selection transformation to the x or y axis when holding `shift`
+
 # 0.22.1
  * Bug fixes
    * Fix color picker not having keyboard focus on open.
