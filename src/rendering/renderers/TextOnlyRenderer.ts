@@ -28,6 +28,7 @@ export default class TextOnlyRenderer extends AbstractRenderer {
 		this.descriptionBuilder = [];
 		this.pathCount = 0;
 		this.textNodeCount = 0;
+		this.imageNodeCount = 0;
 	}
 
 	public getDescription(): string {
