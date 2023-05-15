@@ -39,7 +39,8 @@ export default class Pen extends BaseTool {
 			return pointer;
 		}
 
-		return pointer.lockedToXYAxes(this.startPoint.pos, this.editor.viewport);
+		const screenPos = this.editor.viewport.canvasToScreen(this.startPoint.pos);
+		return pointer.lockedToXYAxesScreen(screenPos, this.editor.viewport);
 	}
 
 	// Converts a `pointer` to a `StrokeDataPoint`.

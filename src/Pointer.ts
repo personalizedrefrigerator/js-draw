@@ -36,20 +36,22 @@ export default class Pointer {
 	) {
 	}
 
-	// Snaps this pointer to the nearest grid point (rounds the coordinates of this
-	// pointer based on the current zoom). Returns a new Pointer and does not modify
-	// this.
+	/**
+	 * Snaps this pointer to the nearest grid point (rounds the coordinates of this
+	 * pointer based on the current zoom). Returns a new Pointer and does not modify
+	 * this.
+	 */
 	public snappedToGrid(viewport: Viewport): Pointer {
 		const snappedCanvasPos = viewport.snapToGrid(this.canvasPos);
 		return this.withCanvasPosition(snappedCanvasPos, viewport);
 	}
 
 	// Snap this pointer to the X or Y axis (whichever is closer), where (0,0)
-	// is considered to be at `originPoint`.
+	// is considered to be at `originPointScreen`.
 	// @internal
-	public lockedToXYAxes(originPoint: Vec2, viewport: Viewport) {
-		const current = this.canvasPos;
-		const currentFromStart = current.minus(originPoint);
+	public lockedToXYAxesScreen(originPointScreen: Vec2, viewport: Viewport) {
+		const current = this.screenPos;
+		const currentFromStart = current.minus(originPointScreen);
 
 		// Determine whether the last point was closer to being on the
 		// x- or y- axis.
@@ -63,13 +65,21 @@ export default class Pointer {
 			pos = projOntoYAxis;
 		}
 
-		pos = pos.plus(originPoint);
+		pos = pos.plus(originPointScreen);
 
-		return this.withCanvasPosition(pos, viewport);
+		return this.withScreenPosition(pos, viewport);
 	}
 
-	// Returns a copy of this pointer with a new position. The screen position is determined
-	// by the given `canvasPos`.
+	/** @see {@link withCanvasPosition} */
+	public withScreenPosition(screenPos: Point2, viewport: Viewport) {
+		const canvasPos = viewport.screenToCanvas(screenPos);
+		return this.withCanvasPosition(canvasPos, viewport);
+	}
+
+	/**
+	 * Returns a copy of this pointer with a new position. The screen position is determined
+	 * by the given `canvasPos`.
+	 */
 	public withCanvasPosition(canvasPos: Point2, viewport: Viewport) {
 		const screenPos = viewport.canvasToScreen(canvasPos);
 
