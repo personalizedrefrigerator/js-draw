@@ -294,6 +294,7 @@ export default abstract class BaseWidget {
 			clearTimeout(this.hideDropdownTimeout);
 			this.hideDropdownTimeout = null;
 			this.dropdownContainer.classList.remove('hiding');
+			this.repositionDropdown();
 		}
 
 
@@ -310,6 +311,8 @@ export default abstract class BaseWidget {
 				kind: EditorEventType.ToolbarDropdownShown,
 				parentWidget: this,
 			});
+
+			this.repositionDropdown();
 		} else {
 			this.container.classList.remove('dropdownVisible');
 			this.editor.announceForAccessibility(
@@ -325,6 +328,7 @@ export default abstract class BaseWidget {
 			this.hideDropdownTimeout = setTimeout(() => {
 				this.dropdownContainer.classList.add('hidden');
 				this.dropdownContainer.classList.remove('hiding');
+				this.repositionDropdown();
 			}, hideDelay);
 		}
 
@@ -333,8 +337,6 @@ export default abstract class BaseWidget {
 			visible ? 'show' : 'hide'
 		}-animation)`;
 		this.dropdownContainer.style.animation = `${animationDuration}ms ease ${animationName}`;
-
-		this.repositionDropdown();
 	}
 
 	public canBeInOverflowMenu(): boolean {
