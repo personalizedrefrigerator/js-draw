@@ -120,7 +120,8 @@ export default class SelectionTool extends BaseTool {
 
 		let currentPointer = event.current;
 		if (!this.expandingSelectionBox && this.shiftKeyPressed && this.startPoint) {
-			currentPointer = currentPointer.lockedToXYAxes(this.startPoint, this.editor.viewport);
+			const screenPos = this.editor.viewport.canvasToScreen(this.startPoint);
+			currentPointer = currentPointer.lockedToXYAxesScreen(screenPos, this.editor.viewport);
 		}
 
 		if (this.ctrlKeyPressed) {
