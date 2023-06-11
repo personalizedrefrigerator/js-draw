@@ -151,6 +151,10 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 					background-color: rgba(255, 255, 255, 0.0);
 				}
 
+				:root {
+					height: 100vh;
+				}
+
 				button {
 					min-height: 35px;
 				}
@@ -288,8 +292,14 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 
 	const closeButton = popup.document.createElement('button');
 	closeButton.innerText = 'Close';
+
 	closeButton.onclick = () => {
 		popupContainer.remove();
+	};
+	popupDoc.documentElement.onclick = (event) => {
+		if (event.target === popupDoc.documentElement) {
+			popupContainer.remove();
+		}
 	};
 
 	const popupControlsArea = popup.document.querySelector('main > #controlsArea')!;
