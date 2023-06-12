@@ -1,4 +1,4 @@
-import ImageSaver from "./ImageSaver";
+import ImageSaver from './ImageSaver';
 
 export interface StoreEntry extends ImageSaver {
     title: string;
@@ -9,7 +9,9 @@ export interface StoreEntry extends ImageSaver {
     read(): Promise<string>;
 }
 
-export default interface AbstractStore {
+interface AbstractStore {
     getEntries(): Promise<StoreEntry[]>;
     createNewEntry(): Promise<StoreEntry|null>;
 }
+
+export default AbstractStore;

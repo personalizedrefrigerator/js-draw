@@ -15,8 +15,7 @@ export default class FloatingActionButton {
 	private mainButton: HTMLButtonElement;
 	private iconWrapper: HTMLDivElement;
 	private titleElem: HTMLDivElement;
-
-	private submenuArea: HTMLElement|null = null;
+	private disabled: boolean;
 
 	// TODO: A Set isn't the most efficient data structure for this.
 	private onClickListeners: Set<OnClickListener> = new Set();
@@ -55,35 +54,19 @@ export default class FloatingActionButton {
 
 	/** Callback triggered when this button is clicked. */
 	private onClick() {
+		if (this.disabled) {
+			return;
+		}
+
 		// Trigger all listeners
 		for (const listener of this.onClickListeners) {
 			listener();
 		}
-
-		// Toggle the submenu, if present.
-		if (this.submenuArea) {
-			this.submenuArea.classList.toggle('collapsed');
-		}
 	}
 
-	private setToplevel(toplevel: boolean) {
-		if (toplevel) {
-			this.container.classList.add(toplevelClassName);
-		} else {
-			this.container.classList.remove(toplevelClassName);
-		}
-	}
-
-	public addSubmenuItem(button: ButtonSpecifier) {
-		if (!this.submenuArea) {
-			this.submenuArea = document.createElement('div');
-			this.submenuArea.classList.add('submenu-container');
-		}
-
-		const fab = new FloatingActionButton(button, this.submenuArea);
-		fab.setToplevel(false);
-
-		return fab;
+	public setDisabled(disabled: boolean) {
+		this.disabled = disabled;
+		this.mainButton.disabled = this.disabled;
 	}
 
 	public addClickListener(listener: OnClickListener) {

@@ -2,26 +2,27 @@
 import { Editor, EditorEventType, HTMLToolbar } from '../../src/lib';
 import '../../src/styles';
 
-import { getLocalizationTable } from './localization';
-import makeLoadFromSaveList from './makeLoadFromSaveList';
+// If from an NPM package,
+//import { Editor, HTMLToolbar } from 'js-draw';
+//import 'js-draw/styles';
+
+import { Localization, getLocalizationTable } from './localization';
+import makeLoadFromSaveList from './ui/makeLoadFromSaveList';
 import { StoreEntry } from './storage/AbstractStore';
 import ImageSaver from './storage/ImageSaver';
 import { IndexedDBStore } from './storage/IndexedDBStore';
 import { LocalStorageStore } from './storage/LocalStorageStore';
 
-// If from an NPM package,
-//import { Editor, HTMLToolbar } from 'js-draw';
-//import 'js-draw/styles';
-
 import { showSavePopup, createFileSaver } from './util';
 import FloatingActionButton from './ui/FloatingActionButton';
 import { makeIconFromText } from './icons';
+import makeNewImageDialog from './ui/makeNewImageDialog';
 
 // Key in window.localStorage to save the SVG as.
 export const saveLocalStorageKey = 'lastSave';
 export const editorStateLocalStorageKey = 'editorState';
 
-const createEditor = (saveCallback: ()=>void): Editor => {
+const createEditor = (localization: Localization, saveCallback: ()=>void): Editor => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement);
 
@@ -31,7 +32,7 @@ const createEditor = (saveCallback: ()=>void): Editor => {
 	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
 
 	toolbar.addActionButton({
-		label: 'Save',
+		label: localization.save,
 		icon: editor.icons.makeSaveIcon(),
 	}, () => {
 		saveCallback();
@@ -89,7 +90,7 @@ const hideLaunchOptions = () => {
 // PWA file access. At the time of this writing, TypeScript does not recognise window.launchQueue.
 declare let launchQueue: any;
 
-const handlePWALaunching = () => {
+const handlePWALaunching = (localization: Localization) => {
 	// PWA: Handle files on launch.
 	// Ref: https://docs.microsoft.com/en-us/microsoft-edge/progressive-web-apps-chromium/how-to/handle-files#:~:text=Progressive%20Web%20Apps%20that%20can%20handle%20files%20feel,register%20as%20file%20handlers%20on%20the%20operating%20system.
 	if ('launchQueue' in window) {
@@ -109,7 +110,7 @@ const handlePWALaunching = () => {
 			hideLaunchOptions();
 
 			const fileSaver = createFileSaver(blob.name, file);
-			const editor = createEditor(() => saveImage(editor, fileSaver));
+			const editor = createEditor(localization, () => saveImage(editor, fileSaver));
 
 			const data = await blob.text();
 
@@ -119,113 +120,43 @@ const handlePWALaunching = () => {
 	}
 };
 
-const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
-	const editor = createEditor(() => saveImage(editor, storeEntry));
-
-	// Load the SVG data
-	editor.loadFromSVG(await storeEntry.read());
-};
-
 (async () => {
-	handlePWALaunching();
-	const launchButtonContainer = document.querySelector('#launchOptions');
-
 	const localization = getLocalizationTable();
+	handlePWALaunching(localization);
+
+	const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
+		const editor = createEditor(localization, () => saveImage(editor, storeEntry));
+
+		// Load the SVG data
+		editor.loadFromSVG(await storeEntry.read());
+	};
+
+	const launchButtonContainer = document.querySelector('#launchOptions');
 	const dataStore = new LocalStorageStore(localization);
 
-	const loadSaveList = await makeLoadFromSaveList(dataStore, loadFromStoreEntry);
+	const loadSaveList = await makeLoadFromSaveList(dataStore, loadFromStoreEntry, localization);
 	launchButtonContainer?.appendChild(loadSaveList);
 
 	const dbStore = await IndexedDBStore.create(localization);
 
 	const newImageFAB = new FloatingActionButton({
-		title: 'New',
+		title: localization.new,
 		icon: makeIconFromText('+')
 	}, document.body);
 
 	newImageFAB.addClickListener(async () => {
-		const entry = await dbStore.createNewEntry();
+		newImageFAB.setDisabled(true);
+		const entry = await makeNewImageDialog(localization, dbStore);
+		newImageFAB.setDisabled(false);
 
 		if (entry === null) {
-			alert('Unable to create new item!');
+			console.log('Creating new item canceled');
 			return;
 		}
 
 		await loadFromStoreEntry(entry);
 	});
 
-	const dbLoadSaveList = await makeLoadFromSaveList(dbStore, loadFromStoreEntry);
+	const dbLoadSaveList = await makeLoadFromSaveList(dbStore, loadFromStoreEntry, localization);
 	launchButtonContainer?.appendChild(dbLoadSaveList);
 })();
-
-/*
-(() => {
-	const showErrorsCheckbox: HTMLInputElement = document.querySelector('#alertOnError')!;
-	const loadFromTextarea: HTMLTextAreaElement = document.querySelector('#initialData')!;
-	const fileInput: HTMLInputElement = document.querySelector('#initialFile')!;
-	const startButton: HTMLButtonElement = document.querySelector('#startButton')!;
-	const optionsScreen: HTMLElement = document.querySelector('#editorOptions')!;
-
-	const loadFromLastSaveText = 'Load from last save (if available)';
-	const loadFromFileText = 'Load from selected file';
-	loadFromTextarea.value = loadFromLastSaveText;
-
-	// SVG source string
-	let sourceText: string|null = null;
-
-	// Clear the file input (don't autofill)
-	fileInput.value = '';
-
-	// Handle file uploads.
-	fileInput.onchange = () => {
-		loadFromTextarea.value = '...';
-		const files = fileInput.files ?? [];
-
-		if (files.length > 1) {
-			alert('Too many files!');
-			return;
-		}
-		if (files.length === 0) {
-			return;
-		}
-
-		const reader = new FileReader();
-		reader.onload = (progress => {
-			if (progress.target?.result) {
-				loadFromTextarea.value = loadFromFileText;
-
-				// The reader was started with .readAsText, so we know [result]
-				// is a string.
-				sourceText = progress.target.result as string;
-			}
-		});
-		reader.readAsText(files[0]);
-	};
-
-
-	startButton.onclick = () => {
-		const textareaData = loadFromTextarea.value;
-		const showErrors = showErrorsCheckbox.checked;
-		optionsScreen.remove();
-
-		if (showErrors) {
-			startVisualErrorLog();
-		}
-
-		const editor = createEditor(() => saveImage(editor));
-		editor.focus();
-
-		sourceText ??= textareaData;
-		if (sourceText === loadFromLastSaveText) {
-			sourceText = window.localStorage?.getItem(saveLocalStorageKey) ?? '';
-		}
-
-		if (sourceText && sourceText.length > 0) {
-			editor.loadFromSVG(sourceText);
-
-			// Don't keep sourceText in memory --- it might be quite large.
-			sourceText = '';
-		}
-	};
-})();
-*/
