@@ -57,12 +57,12 @@ export const matchingLocalizationTable = <T> (
 	} else {
 		return defaultLocalizationTable;
 	}
-}
+};
 
 /**
  * Returns a localization table for the `Editor` that matches
  * the user's current locale.
- * 
+ *
  * Returns the default localization table if no appropriate localization
  * exists.
  */
