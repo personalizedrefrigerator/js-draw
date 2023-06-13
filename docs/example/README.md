@@ -1,5 +1,5 @@
 
-# example-custom-bundle
+# example
 
 [example.html](./example.html) | [example.ts](./example.ts)
 

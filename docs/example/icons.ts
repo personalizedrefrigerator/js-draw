@@ -1,6 +1,11 @@
 
+// This file contains code for creating icons specific to the example app.
+// js-draw has its own code for creating icons (e.g. toolbar icons).
+
 const svgNamespace = 'http://www.w3.org/2000/svg';
 
+// Create an icon that contains text and nothing else. This might be
+// useful, for example, to create a "+" icon or a "?" icon.
 export const makeIconFromText = (text: string) => {
 	const icon = document.createElementNS(svgNamespace, 'svg');
 

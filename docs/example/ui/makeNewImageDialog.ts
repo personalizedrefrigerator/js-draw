@@ -4,6 +4,12 @@ import AbstractStore, { StoreEntry } from '../storage/AbstractStore';
 import makeReadOnlyStoreEntry from '../storage/makeReadOnlyStoreEntry';
 import './newImageDialog.css';
 
+/**
+ * Create a dialog that allows users to create a new drawing from the content
+ * of a file or from a template.
+ *
+ * @returns a promise that resolves when the dialog is submitted or closed.
+ */
 const makeNewImageDialog = (
 	localization: Localization,
 	store: AbstractStore
@@ -76,8 +82,8 @@ const makeNewImageDialog = (
 		fromTemplateArea.appendChild(templateButton);
 	};
 
-	addTemplateOption('Light Grid', templates.lightGrid);
-	addTemplateOption('Dark Grid', templates.darkGrid);
+	addTemplateOption(localization.templateLightGrid, templates.lightGrid);
+	addTemplateOption(localization.templateDarkGrid, templates.darkGrid);
 
 	container.replaceChildren(titleElem, fromTemplateArea, fromFileArea);
 	background.appendChild(container);
@@ -106,12 +112,14 @@ const makeNewImageDialog = (
 		reader.readAsText(files[0]);
 	};
 
+	// Close the dialog when the user clicks on its background.
 	background.onclick = (event) => {
 		if (event.target === background) {
 			closeDialogWithResult(null);
 		}
 	};
 
+	// Return a Promise that resolves when the dialog is closed.
 	return new Promise<StoreEntry|null>((resolve, _reject) => {
 		if (dialogResult !== undefined) {
 			background.remove();

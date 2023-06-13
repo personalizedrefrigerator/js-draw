@@ -1,50 +1,12 @@
-// Functions that are specific to this particular example (e.g.
-// functions helpful for debugging, etc.)
 
-import Editor from '../../src/Editor';
-import { Vec2 } from '../../src/lib';
-import ImageSaver from './storage/ImageSaver';
+// Imports from js-draw. Because thsi file is part of the js-draw
+// workspace, we use a relative path to impor these.
+import { Vec2, Editor } from '../../../src/lib';
 
+import ImageSaver from '../storage/ImageSaver';
 
-// Log errors, etc. to a visible element. Useful for debugging on mobile devices.
-export const startVisualErrorLog = () => {
-	const logArea: HTMLTextAreaElement = document.querySelector('#logOutput')!;
-	logArea.style.display = 'block';
-	logArea.value = `
-If enabled, errors will be logged to this textarea.
-	`;
-
-	const scrollLogToEnd = () => {
-		logArea.value = logArea.value.substring(logArea.value.length - 2000);
-		logArea.scrollTop = logArea.scrollHeight;
-	};
-
-	window.onerror = (evt) => {
-		logArea.value += '\nError thrown: ' + evt + '\n';
-		scrollLogToEnd();
-	};
-	const originalErrFn = console.error;
-	const originalWarnFn = console.warn;
-	const originalLogFn = console.log;
-	console.error = (...data) => {
-		originalErrFn.apply(console, data);
-		logArea.value += '\nError logged: ' + data.join(', ') + '\n';
-		scrollLogToEnd();
-	};
-	console.warn = (...data) => {
-		originalWarnFn.apply(console, data);
-		logArea.value += '\nWarning: ' + data.join(', ') + '\n';
-		scrollLogToEnd();
-	};
-	console.log = (...data) => {
-		originalLogFn.apply(console, data);
-		logArea.value += '\nLog: ' + data.join(', ') + '\n';
-		scrollLogToEnd();
-	};
-};
-
-// Saves [editor]'s content as an SVG and displays the result.
-export const showSavePopup = (
+/** Saves [editor]'s content as an SVG and displays the result. */
+const showSavePopup = (
 	// Data to save
 	img: SVGElement,
 
@@ -352,23 +314,4 @@ export const showSavePopup = (
 	})();
 };
 
-export const createFileSaver = (fileName: string, file: FileSystemHandle): ImageSaver => {
-	return {
-		title: fileName,
-		write: async (svgData: string): Promise<void> => {
-			try {
-				// As of 2/21/2023, TypeScript does not recognise createWritable
-				// as a property of FileSystemHandle.
-				const writable = await (file as any).createWritable();
-				await writable.write(svgData);
-				await writable.close();
-			} catch(e) {
-				throw `Error saving to filesystem: ${e}`;
-			}
-		},
-
-		// Doesn't support updating the title/preview.
-		updateTitle: null,
-		updatePreview: null,
-	};
-};
+export default showSavePopup;

@@ -9,8 +9,17 @@ export interface StoreEntry extends ImageSaver {
     read(): Promise<string>;
 }
 
+/**
+ * An `interface` to be implemented by all methods of saving/retreiving
+ * multiple images.
+ *
+ * Instances of this `interface` provide a way of reading/writing/deleting
+ * images.
+ */
 interface AbstractStore {
     getEntries(): Promise<StoreEntry[]>;
+
+    /** Creates a new `StoreEntry` or, on error, returns `null`. */
     createNewEntry(): Promise<StoreEntry|null>;
 }
 

@@ -1,4 +1,5 @@
 import { IconType } from '../types';
+import './FloatingActionButton.css';
 
 type OnClickListener = ()=>void;
 
@@ -17,7 +18,6 @@ export default class FloatingActionButton {
 	private titleElem: HTMLDivElement;
 	private disabled: boolean;
 
-	// TODO: A Set isn't the most efficient data structure for this.
 	private onClickListeners: Set<OnClickListener> = new Set();
 
 	public constructor(
@@ -79,4 +79,3 @@ export default class FloatingActionButton {
 		};
 	}
 }
-

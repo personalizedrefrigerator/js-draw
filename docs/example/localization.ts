@@ -8,6 +8,11 @@ export interface Localization {
     newImageHeading: string;
     new: string;
 
+	templateLightGrid: string;
+	templateDarkGrid: string;
+
+	confirmUnsavedChanges: string;
+
     save: string;
     delete: string;
     reallyDelete: (imageName: string) => string;
@@ -19,6 +24,11 @@ localizationTables.en = {
 	localStorageSave: 'Local Storage',
 	databaseLoadError: 'Database failed to load.',
 	untitledImage: 'Untitled Image',
+
+	templateLightGrid: 'Light Grid',
+	templateDarkGrid: 'Dark Grid',
+
+	confirmUnsavedChanges: 'There may be unsaved changes. Really quit?',
 
 	newImageHeading: 'New Image',
 	new: 'New',
