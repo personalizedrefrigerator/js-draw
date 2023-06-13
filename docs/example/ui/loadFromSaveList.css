@@ -2,6 +2,10 @@
 .save-item-list {
     display: flex;
     flex-direction: column-reverse;
+
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .save-item {

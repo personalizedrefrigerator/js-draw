@@ -8,7 +8,9 @@ const imageMetadataStoreName = 'imageMetadata';
 interface ImageMetadataRecord {
 	id: number;
 	name: string;
+	lastUpdateTime: number;
 	previewData?: string;
+	previewType?: 'datauri';
 }
 
 /**
@@ -148,30 +150,44 @@ export class IndexedDBStore implements AbstractStore {
 		});
 	}
 
+	private makeMetadata(id: number, title?: string, previewData?: string): ImageMetadataRecord {
+		return {
+			id,
+			name: title ?? this.localization.untitledImage,
+			lastUpdateTime: (new Date()).getTime(),
+			previewData
+		};
+	}
+
 	/**
 	 * Updates the preview data for the image with the given `id`.
 	 *
 	 * `previewData` currently must be a data URL.
 	 */
 	private async updateEntryPreview(id: number, previewData: string) {
-		const defaultMetadata: ImageMetadataRecord = { id, name: this.localization.untitledImage };
-
-		const existingMetadata = await this.readImageMetadata(id) ?? defaultMetadata;
+		const existingMetadata = await this.readImageMetadata(id) ?? this.makeMetadata(id);
 		existingMetadata.previewData = previewData;
+		existingMetadata.previewType = 'datauri';
 
 		await this.updateEntryMetadata(existingMetadata);
 	}
 
 	/** Changes the title of the image with the given `id`. */
 	private async updateEntryTitle(id: number, newTitle: string) {
-		const metadata = await this.readImageMetadata(id) ?? { id, name: newTitle };
+		const metadata = await this.readImageMetadata(id) ?? this.makeMetadata(id);
 		metadata.name = newTitle;
 		await this.updateEntryMetadata(metadata);
 	}
 
+	private async updateStoreEntryModifyTime(id: number) {
+		const metadata = await this.readImageMetadata(id) ?? this.makeMetadata(id);
+		metadata.lastUpdateTime = (new Date()).getTime();
+		await this.updateEntryMetadata(metadata);
+	}
+
 	/** Writes an SVG image to the entry with the given ID. */
-	private writeImage(id: number, svgData: string) {
-		return new Promise<void>((resolve, reject) => {
+	private async writeImage(id: number, svgData: string) {
+		await (new Promise<void>((resolve, reject) => {
 			const writeDataRequest = this.db
 				.transaction([imageDataStoreName], 'readwrite')
 				.objectStore(imageDataStoreName)
@@ -179,7 +195,9 @@ export class IndexedDBStore implements AbstractStore {
 
 			writeDataRequest.onsuccess = () => resolve();
 			writeDataRequest.onerror = () => reject('Error saving data: ' + writeDataRequest.error);
-		});
+		}));
+
+		await this.updateStoreEntryModifyTime(id);
 	}
 
 	/** Reads an SVG image saved with the given ID. */
@@ -251,6 +269,18 @@ export class IndexedDBStore implements AbstractStore {
 			keyRequest.onsuccess = (event: any) => {
 				const imageMetadataList = event.target.result as ImageMetadataRecord[];
 
+				// Sort in order of increasing update time.
+				imageMetadataList.sort((a, b) => {
+					const diff = (a.lastUpdateTime ?? 0) - (b.lastUpdateTime ?? 0);
+
+					if (diff === 0) {
+						// Break ties based on id (id auto-increments).
+						return a.id - b.id;
+					} else {
+						return diff;
+					}
+				});
+
 				resolve(imageMetadataList.map(metadata => {
 					return this.createStoreEntry(metadata);
 				}));
@@ -265,6 +295,7 @@ export class IndexedDBStore implements AbstractStore {
 	public createNewEntry(): Promise<StoreEntry | null> {
 		const metadata = {
 			name: this.localization.untitledImage,
+			lastUpdateTime: (new Date()).getTime(),
 		};
 
 		const transaction = this.db.transaction([ imageMetadataStoreName, imageDataStoreName ], 'readwrite');

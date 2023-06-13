@@ -20,6 +20,8 @@
     max-height: 100vh;
     overflow-y: auto;
 
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 3px;
+
     font-family: sans-serif;
     padding: 20px;
 }
