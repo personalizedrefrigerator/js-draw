@@ -68,6 +68,10 @@ const createEditor = (
 	// Load toolbar widget state from localStorage.
 	restoreToolbarState(toolbar);
 
+	// Set focus to the main region of the editor.
+	// This allows keyboard shortcuts to work.
+	editor.focus();
+
 	return editor;
 };
 
