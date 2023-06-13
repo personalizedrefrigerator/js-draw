@@ -1,12 +1,12 @@
 import ImageSaver from './ImageSaver';
 
 export interface StoreEntry extends ImageSaver {
-    title: string;
-    getIcon(): Element;
+	title: string;
+	getIcon(): Element;
 
-    delete(): Promise<void>;
-    write(newContent: string): Promise<void>;
-    read(): Promise<string>;
+	delete(): Promise<void>;
+	write(newContent: string): Promise<void>;
+	read(): Promise<string>;
 }
 
 /**
@@ -17,10 +17,10 @@ export interface StoreEntry extends ImageSaver {
  * images.
  */
 interface AbstractStore {
-    getEntries(): Promise<StoreEntry[]>;
+	getEntries(): Promise<StoreEntry[]>;
 
-    /** Creates a new `StoreEntry` or, on error, returns `null`. */
-    createNewEntry(): Promise<StoreEntry|null>;
+	/** Creates a new `StoreEntry` or, on error, returns `null`. */
+	createNewEntry(): Promise<StoreEntry|null>;
 }
 
 export default AbstractStore;

@@ -1,21 +1,21 @@
 import { matchingLocalizationTable } from '../../src/localizations/getLocalizationTable';
 
 export interface Localization {
-    localStorageSave: string;
-    databaseLoadError: string;
-    untitledImage: string;
+	localStorageSave: string;
+	databaseLoadError: string;
+	untitledImage: string;
 
-    newImageHeading: string;
-    new: string;
+	newImageHeading: string;
+	new: string;
 
 	templateLightGrid: string;
 	templateDarkGrid: string;
 
 	confirmUnsavedChanges: string;
 
-    save: string;
-    delete: string;
-    reallyDelete: (imageName: string) => string;
+	save: string;
+	delete: string;
+	reallyDelete: (imageName: string) => string;
 }
 
 const localizationTables: Record<string, Localization> = { };
