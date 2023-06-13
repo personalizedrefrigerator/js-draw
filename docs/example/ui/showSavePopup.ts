@@ -2,11 +2,15 @@
 // Imports from js-draw. Because thsi file is part of the js-draw
 // workspace, we use a relative path to impor these.
 import { Vec2, Editor } from '../../../src/lib';
+import { Localization } from '../localization';
 
 import ImageSaver from '../storage/ImageSaver';
 
 /** Saves [editor]'s content as an SVG and displays the result. */
 const showSavePopup = (
+	// Set of strings that (hopefully) match the user's language.
+	localization: Localization,
+
 	// Data to save
 	img: SVGElement,
 
@@ -147,7 +151,7 @@ const showSavePopup = (
 						<code>${imageSaver.title.replace(/[<>&]/g, '')}</code>...
 					</p>
 				</div>
-				<div><label for='filename'>Title: </label><input id='filename' type='text'/></div>
+				<div><label id='filenameLabel' for='filename'>Title: </label><input id='filename' type='text'/></div>
 				<div id='controlsArea'>
 				</div>
 			</main>
@@ -159,11 +163,15 @@ const showSavePopup = (
 	// Loading the preview can be much slower than saving the image.
 	// Only do so if requested.
 	const previewRegion = popupDoc.querySelector('#previewRegion')!;
+
+	const filenameLabel = popupDoc.querySelector('#filenameLabel')! as HTMLLabelElement;
+	filenameLabel.innerText = localization.imageTitleLabel;
+
 	const previewSVGButton = popupDoc.createElement('button');
 	const previewPNGButton = popupDoc.createElement('button');
 
-	previewSVGButton.innerText = 'View generated SVG image';
-	previewPNGButton.innerText = 'View generated PNG image';
+	previewSVGButton.innerText = localization.viewGeneratedSVGImage;
+	previewPNGButton.innerText = localization.viewGeneratedPNGImage;
 
 	previewSVGButton.onclick = () => {
 		const messageContainer = popupDoc.createElement('p');
@@ -185,7 +193,7 @@ const showSavePopup = (
 		};
 		updatePreview(img.outerHTML);
 
-		messageContainer.innerText = 'Preview: ';
+		messageContainer.innerText = localization.previewLabel;
 		svgTextContainer.value = imgHTML;
 
 		svgTextContainer.oninput = () => {
@@ -208,14 +216,14 @@ const showSavePopup = (
 	filenameInput.value = imageSaver.title;
 
 	const downloadButton = popup.document.createElement('button');
-	downloadButton.innerText = 'Download';
+	downloadButton.innerText = localization.download;
 	downloadButton.onclick = () => {
 		const blob = new Blob([ imgHTML ], { type: 'image/svg' });
 		const objectURL = URL.createObjectURL(blob);
 
 		const link = popup.document.createElement('a');
 		link.href = objectURL;
-		link.innerText = 'Download';
+		link.innerText = localization.download;
 
 		let downloadAs = filenameInput.value;
 		if (!downloadAs.endsWith('.svg')) {
@@ -256,7 +264,7 @@ const showSavePopup = (
 	};
 
 	const closeButton = popup.document.createElement('button');
-	closeButton.innerText = 'Close';
+	closeButton.innerText = localization.close;
 
 	const closePopup = () => {
 		updateTitle();
@@ -284,7 +292,7 @@ const showSavePopup = (
 	}
 
 	void (async () => {
-		let saveStatus = 'Saved to ' + imageSaver.title;
+		let saveStatus = localization.savedAs(imageSaver.title);
 		let error;
 
 		try {
@@ -304,7 +312,7 @@ const showSavePopup = (
 			popup.document.createTextNode(saveStatus),
 			popup.document.createTextNode(' '),
 			popup.document.createTextNode(
-				`Image size: ${imageSize}.`
+				localization.imageSize(imageSize)
 			),
 		);
 

@@ -108,13 +108,19 @@ const setUpUnsavedChangesWarning = (
 // methods).
 // An `AppNotifier` is an `EventDispatcher` (from js-draw) that allows us to send/receive
 // custom events.
-const saveImage = (editor: Editor, saveMethod: ImageSaver, appNotifier: AppNotifier) => {
+const saveImage = (
+	localization: Localization,
+
+	editor: Editor,
+	saveMethod: ImageSaver,
+	appNotifier: AppNotifier,
+) => {
 	const onSaveSuccess = () => {
 		// Notify other parts of the app that the image was saved successfully.
 		appNotifier.dispatch('image-saved', null);
 	};
 
-	showSavePopup(editor.toSVG(), editor, saveMethod, onSaveSuccess);
+	showSavePopup(localization, editor.toSVG(), editor, saveMethod, onSaveSuccess);
 };
 
 // Saves the current state of an `Editor`'s toolbar to `localStorage`.
@@ -173,7 +179,11 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 			hideLaunchOptions();
 
 			const fileSaver = makeFileSaver(blob.name, file);
-			const editor = createEditor(localization, appNotifier, () => saveImage(editor, fileSaver, appNotifier));
+			const editor = createEditor(
+				localization,
+				appNotifier,
+
+				() => saveImage(localization, editor, fileSaver, appNotifier));
 
 			const data = await blob.text();
 
@@ -195,7 +205,12 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 	// Load from a data store entry. `storeEntry` might be, for example,
 	// an image and its metadata as stored in this app's database.
 	const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
-		const editor = createEditor(localization, appNotifier, () => saveImage(editor, storeEntry, appNotifier));
+		const editor = createEditor(
+			localization,
+			appNotifier,
+
+			() => saveImage(localization, editor, storeEntry, appNotifier)
+		);
 
 		// Load the SVG data
 		editor.loadFromSVG(await storeEntry.read());
