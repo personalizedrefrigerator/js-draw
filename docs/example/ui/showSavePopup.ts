@@ -1,75 +1,28 @@
-// Functions that are specific to this particular example (e.g.
-// functions helpful for debugging, etc.)
 
-import { saveLocalStorageKey } from './example';
+// Imports from js-draw. Because thsi file is part of the js-draw
+// workspace, we use a relative path to impor these.
+import { Vec2, Editor } from '../../../src/lib';
+import { Localization } from '../localization';
 
+import ImageSaver from '../storage/ImageSaver';
 
-// Log errors, etc. to a visible element. Useful for debugging on mobile devices.
-export const startVisualErrorLog = () => {
-	const logArea: HTMLTextAreaElement = document.querySelector('#logOutput')!;
-	logArea.style.display = 'block';
-	logArea.value = `
-If enabled, errors will be logged to this textarea.
-	`;
+/** Saves [editor]'s content as an SVG and displays the result. */
+const showSavePopup = (
+	// Set of strings that (hopefully) match the user's language.
+	localization: Localization,
 
-	const scrollLogToEnd = () => {
-		logArea.value = logArea.value.substring(logArea.value.length - 2000);
-		logArea.scrollTop = logArea.scrollHeight;
-	};
+	// Data to save
+	img: SVGElement,
 
-	window.onerror = (evt) => {
-		logArea.value += '\nError thrown: ' + evt + '\n';
-		scrollLogToEnd();
-	};
-	const originalErrFn = console.error;
-	const originalWarnFn = console.warn;
-	const originalLogFn = console.log;
-	console.error = (...data) => {
-		originalErrFn.apply(console, data);
-		logArea.value += '\nError logged: ' + data.join(', ') + '\n';
-		scrollLogToEnd();
-	};
-	console.warn = (...data) => {
-		originalWarnFn.apply(console, data);
-		logArea.value += '\nWarning: ' + data.join(', ') + '\n';
-		scrollLogToEnd();
-	};
-	console.log = (...data) => {
-		originalLogFn.apply(console, data);
-		logArea.value += '\nLog: ' + data.join(', ') + '\n';
-		scrollLogToEnd();
-	};
-};
+	// Editor the data was taken from
+	editor: Editor,
 
-// Represents a method of saving an image (e.g. to localStorage).
-export interface ImageSaver {
-	// Estimated maximum size of the image that can be saved.
-	estimatedMaxSaveSize: number|null;
+	// Where data will be written to.
+	imageSaver: ImageSaver,
 
-	// Returns a message describing whether the image was saved
-	saveImage(svgData: string): Promise<string>;
-
-	saveTargetName: string;
-}
-
-type GetDataURLCallback = () => string;
-
-const localStorageSaver: ImageSaver = {
-	estimatedMaxSaveSize: 2.5 * 1024 * 1024, // 2.5 MiB
-	saveTargetName: 'localStorage',
-	saveImage: async (svgData: string) => {
-		try {
-			window.localStorage.setItem(saveLocalStorageKey, svgData);
-		} catch(e) {
-			return `Error saving to localStorage: ${e}`;
-		}
-
-		return 'Saved to localStorage!';
-	},
-};
-
-// Saves [editor]'s content as an SVG and displays the result.
-export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, imageSaver: ImageSaver = localStorageSaver) => {
+	// Called when data has been saved successfully.
+	onSaveSuccess: ()=>void,
+) => {
 	const imgHTML = img.outerHTML;
 
 	const popupContainer = document.createElement('div');
@@ -193,20 +146,12 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 				}
 			</style>
 			<main>
-				<p>
-					${
-	imageSaver.estimatedMaxSaveSize !== null
-		? `⚠ Warning ⚠: Some browsers won't save images over
-								roughly ${imageSaver.estimatedMaxSaveSize / 1024 / 1024} MiB!`
-		: ''
-}
-				</p>
 				<div id='previewRegion'>
 					<p>Saving to
-						<code>${imageSaver.saveTargetName.replace(/[<>&]/g, '')}</code>...
+						<code>${imageSaver.title.replace(/[<>&]/g, '')}</code>...
 					</p>
 				</div>
-				<div><label for='filename'>Download as: </label><input id='filename' type='text' value='editor-save.svg'/></div>
+				<div><label id='filenameLabel' for='filename'>Title: </label><input id='filename' type='text'/></div>
 				<div id='controlsArea'>
 				</div>
 			</main>
@@ -218,11 +163,15 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 	// Loading the preview can be much slower than saving the image.
 	// Only do so if requested.
 	const previewRegion = popupDoc.querySelector('#previewRegion')!;
+
+	const filenameLabel = popupDoc.querySelector('#filenameLabel')! as HTMLLabelElement;
+	filenameLabel.innerText = localization.imageTitleLabel;
+
 	const previewSVGButton = popupDoc.createElement('button');
 	const previewPNGButton = popupDoc.createElement('button');
 
-	previewSVGButton.innerText = 'View generated SVG image';
-	previewPNGButton.innerText = 'View generated PNG image';
+	previewSVGButton.innerText = localization.viewGeneratedSVGImage;
+	previewPNGButton.innerText = localization.viewGeneratedPNGImage;
 
 	previewSVGButton.onclick = () => {
 		const messageContainer = popupDoc.createElement('p');
@@ -244,7 +193,7 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 		};
 		updatePreview(img.outerHTML);
 
-		messageContainer.innerText = 'Preview: ';
+		messageContainer.innerText = localization.previewLabel;
 		svgTextContainer.value = imgHTML;
 
 		svgTextContainer.oninput = () => {
@@ -258,23 +207,31 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 
 	previewPNGButton.onclick = () => {
 		const imagePreview = popupDoc.createElement('img');
-		imagePreview.src = getDataURL();
+		imagePreview.src = editor.toDataURL();
 		imagePreview.style.maxWidth = '100%';
 		previewRegion.replaceChildren(imagePreview);
 	};
 
 	const filenameInput: HTMLInputElement = popupDoc.querySelector('input#filename')!;
+	filenameInput.value = imageSaver.title;
+
 	const downloadButton = popup.document.createElement('button');
-	downloadButton.innerText = 'Download';
+	downloadButton.innerText = localization.download;
 	downloadButton.onclick = () => {
 		const blob = new Blob([ imgHTML ], { type: 'image/svg' });
 		const objectURL = URL.createObjectURL(blob);
 
 		const link = popup.document.createElement('a');
 		link.href = objectURL;
-		link.innerText = 'Download';
+		link.innerText = localization.download;
+
+		let downloadAs = filenameInput.value;
+		if (!downloadAs.endsWith('.svg')) {
+			downloadAs += '.svg';
+		}
+
 		// Download as (Ref: https://stackoverflow.com/a/52814195/17055750)
-		link.setAttribute('download', filenameInput.value);
+		link.setAttribute('download', downloadAs);
 
 		downloadButton.style.display = 'none';
 		popupControlsArea.appendChild(link);
@@ -286,19 +243,40 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 		URL.revokeObjectURL(objectURL);
 	};
 
-	filenameInput.oninput = () => {
+	let updateTitleQueued = false;
+	const updateTitle = async () => {
+		if (imageSaver.updateTitle && imageSaver.title !== filenameInput.value) {
+			await imageSaver.updateTitle(filenameInput.value);
+
+			updateTitleQueued = false;
+		}
+	};
+	const queueUpdateTitle = () => {
+		if (!updateTitleQueued) {
+			updateTitleQueued = true;
+			setTimeout(updateTitle, 500);
+		}
+	};
+
+	filenameInput.oninput = async () => {
 		downloadButton.style.display = 'block';
+		queueUpdateTitle();
 	};
 
 	const closeButton = popup.document.createElement('button');
-	closeButton.innerText = 'Close';
+	closeButton.innerText = localization.close;
+
+	const closePopup = () => {
+		updateTitle();
+		popupContainer.remove();
+	};
 
 	closeButton.onclick = () => {
-		popupContainer.remove();
+		closePopup();
 	};
 	popupDoc.documentElement.onclick = (event) => {
 		if (event.target === popupDoc.documentElement) {
-			popupContainer.remove();
+			closePopup();
 		}
 	};
 
@@ -314,33 +292,34 @@ export const showSavePopup = (img: SVGElement, getDataURL: GetDataURLCallback, i
 	}
 
 	void (async () => {
-		const saveStatus = await imageSaver.saveImage(imgHTML);
+		let saveStatus = localization.savedAs(imageSaver.title);
+		let error;
+
+		try {
+			await imageSaver.write(imgHTML);
+
+			if (imageSaver.updatePreview) {
+				const format = undefined;
+				const size = Vec2.of(80, 80);
+				await imageSaver.updatePreview(editor.toDataURL(format, size));
+			}
+		} catch (e) {
+			saveStatus = 'Error: ' + e;
+			error = e;
+		}
+
 		previewRegion.replaceChildren(
 			popup.document.createTextNode(saveStatus),
 			popup.document.createTextNode(' '),
 			popup.document.createTextNode(
-				`Image size: ${imageSize}.`
+				localization.imageSize(imageSize)
 			),
 		);
+
+		if (!error) {
+			onSaveSuccess();
+		}
 	})();
 };
 
-export const createFileSaver = (fileName: string, file: FileSystemHandle): ImageSaver => {
-	return {
-		estimatedMaxSaveSize: null,
-		saveTargetName: fileName,
-		saveImage: async (svgData: string): Promise<string> => {
-			try {
-				// As of 2/21/2023, TypeScript does not recognise createWritable
-				// as a property of FileSystemHandle.
-				const writable = await (file as any).createWritable();
-				await writable.write(svgData);
-				await writable.close();
-
-				return `Saved to file system as ${fileName}!`;
-			} catch(e) {
-				return `Error saving to filesystem: ${e}`;
-			}
-		},
-	};
-};
+export default showSavePopup;

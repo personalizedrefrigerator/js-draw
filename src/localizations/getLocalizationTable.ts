@@ -22,9 +22,16 @@ const languageFromLocale = (locale: string) => {
 	return matches[1];
 };
 
-const getLocalizationTable = (userLocales?: readonly string[]): EditorLocalization => {
-	userLocales ??= navigator.languages;
-
+/**
+ * Return the localization table in `localizationTables` that best matches
+ * the list of `userLocales`. If there is no matching language, returns
+ * `defaultLocalizationTable`.
+ */
+export const matchingLocalizationTable = <T> (
+	userLocales: readonly string[],
+	localizationTables: Record<string, T>,
+	defaultLocalizationTable: T
+): T => {
 	let prevLanguage: string|undefined;
 	for (const locale of userLocales) {
 		const language = languageFromLocale(locale);
@@ -33,23 +40,35 @@ const getLocalizationTable = (userLocales?: readonly string[]): EditorLocalizati
 		// a localization for the language is,
 		if (prevLanguage && language !== prevLanguage) {
 			if (prevLanguage in allLocales) {
-				return allLocales[prevLanguage];
+				return localizationTables[prevLanguage];
 			}
 		}
 
 		// If the full locale (e.g. en_US) is available,
 		if (locale in allLocales) {
-			return allLocales[locale];
+			return localizationTables[locale];
 		}
 
 		prevLanguage = language;
 	}
 
 	if (prevLanguage && prevLanguage in allLocales) {
-		return allLocales[prevLanguage];
+		return localizationTables[prevLanguage];
 	} else {
-		return defaultEditorLocalization;
+		return defaultLocalizationTable;
 	}
+};
+
+/**
+ * Returns a localization table for the `Editor` that matches
+ * the user's current locale.
+ *
+ * Returns the default localization table if no appropriate localization
+ * exists.
+ */
+const getLocalizationTable = (userLocales?: readonly string[]): EditorLocalization => {
+	userLocales ??= navigator.languages;
+	return matchingLocalizationTable(userLocales, allLocales, defaultEditorLocalization);
 };
 
 export default getLocalizationTable;

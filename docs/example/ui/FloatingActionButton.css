@@ -1,0 +1,56 @@
+.floating-action-button.toplevel {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+}
+
+.floating-action-button .icon-wrapper {
+	border-radius: 20px;
+	background-color: var(--icon-background);
+	margin-bottom: 2px;
+
+	box-shadow: var(--shadow-color) -3px 0px 4px;
+	width: var(--button-width);
+	height: var(--button-width);
+
+	transition: background-color 0.2s ease;
+}
+
+.floating-action-button > button {
+	background-color: transparent;
+	border: none;
+	color: black;
+
+	--icon-color: black;
+	--shadow-color: rgba(0, 0, 0, 0.5);
+	--button-width: 50px;
+	--icon-background: rgba(255, 0, 0, 1);
+
+	width: var(--button-width);
+	max-width: 40vw;
+}
+
+.floating-action-button .icon-wrapper:hover {
+	--icon-background: rgba(255, 100, 100, 1);
+}
+
+.floating-action-button > .title {
+	text-align: center;
+}
+
+.floating-action-button .submenu-container {
+	position: relative;
+}
+
+.floating-action-button > .submenu-container.collapsed {
+	display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+	.floating-action-button > button {
+		color: white;
+		--icon-color: white;
+		--shadow-color: rgba(200, 200, 200, 0.4);
+	}
+}
+

@@ -1,0 +1,58 @@
+
+.save-item-list {
+    display: flex;
+    flex-direction: column-reverse;
+
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.save-item {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+
+    max-height: 120px;
+
+    border-bottom: 1px solid gray;
+
+    background-color: #eee;
+    --icon-color: black;
+}
+
+.save-item button {
+    background-color: transparent;
+    color: inherit;
+    border: none;
+}
+
+.save-item .icon {
+    max-height: 100%;
+}
+
+.save-item button:hover {
+    background-color: #aaa;
+}
+
+.save-item .open-button {
+    flex-grow: 1;
+    
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.save-item-list {
+    margin-bottom: 30px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .save-item {
+        background-color: #333;
+        color: white;
+        --icon-color: white;
+    }
+}
