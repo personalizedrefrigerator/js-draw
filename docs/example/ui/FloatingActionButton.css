@@ -21,6 +21,10 @@
 	border: none;
 	color: black;
 
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
 	--icon-color: black;
 	--shadow-color: rgba(0, 0, 0, 0.5);
 	--button-width: 50px;
