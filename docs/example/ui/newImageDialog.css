@@ -17,6 +17,8 @@
 .new-image-dialog-background .new-image-dialog {
     background-color: #ffe;
     border-radius: 4px;
+    max-height: 100vh;
+    overflow-y: auto;
 
     font-family: sans-serif;
     padding: 20px;
