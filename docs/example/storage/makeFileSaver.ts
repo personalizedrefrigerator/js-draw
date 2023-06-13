@@ -1,6 +1,10 @@
 import ImageSaver from './ImageSaver';
 
-/** */
+/**
+ * Returns an `ImageSaver` that can update the content of a `FileSystemHandle`.
+ *
+ * This is used by {@link showSavePopup}.
+ */
 const makeFileSaver = (fileName: string, file: FileSystemHandle): ImageSaver => {
 	return {
 		title: fileName,
