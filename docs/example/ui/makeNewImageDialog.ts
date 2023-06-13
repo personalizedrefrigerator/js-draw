@@ -55,6 +55,7 @@ const makeNewImageDialog = (
 
 	const fileInput = document.createElement('input');
 	fileInput.type = 'file';
+	fileInput.setAttribute('accept', 'image/svg,image/svg+xml,text/plain');
 	fromFileArea.appendChild(fileInput);
 
 	// Danger: svgData is not sanitized!
