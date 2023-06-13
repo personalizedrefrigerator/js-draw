@@ -37,3 +37,14 @@ export const makeIconFromText = (text: string) => {
 	return icon;
 };
 
+export const makeLocalStorageIcon = () => {
+	const elem = document.createElementNS(svgNamespace, 'svg');
+	const iconFillSStyle = 'style="fill: var(--icon-color);"';
+	elem.innerHTML = `
+		<path d="M 50,10 V 60 H 35 L 55,85 75,60 H 60 V 10 Z" ${iconFillSStyle}/>
+		<path d="m 15,85 v 10 h 85 V 85 Z" ${iconFillSStyle}/>
+	`;
+	elem.setAttribute('viewBox', '5 0 100 100');
+
+	return elem;
+};
