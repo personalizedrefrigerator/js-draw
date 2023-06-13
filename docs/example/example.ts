@@ -22,7 +22,12 @@ import makeNewImageDialog from './ui/makeNewImageDialog';
 export const saveLocalStorageKey = 'lastSave';
 export const editorStateLocalStorageKey = 'editorState';
 
-const createEditor = (localization: Localization, saveCallback: ()=>void): Editor => {
+type OnSaveSuccessCallback = ()=>void;
+
+const createEditor = (
+	localization: Localization,
+	saveCallback: (onSuccess: OnSaveSuccessCallback)=>void
+): Editor => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement);
 
@@ -31,16 +36,24 @@ const createEditor = (localization: Localization, saveCallback: ()=>void): Edito
 	// Add space between the save button and the other buttons.
 	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
 
+	let hasChanges = false;
+
 	toolbar.addActionButton({
 		label: localization.save,
 		icon: editor.icons.makeSaveIcon(),
 	}, () => {
-		saveCallback();
+		saveCallback(() => {
+			hasChanges = false;
+		});
 	});
 
 	// Show a confirmation dialog when the user tries to close the page.
 	window.onbeforeunload = () => {
-		return 'There may be unsaved changes. Really quit?';
+		if (hasChanges) {
+			return 'There may be unsaved changes. Really quit?';
+		}
+
+		return undefined;
 	};
 
 	// Save toolbar state whenever tool state changes (which could be caused by a
@@ -49,16 +62,24 @@ const createEditor = (localization: Localization, saveCallback: ()=>void): Edito
 		saveToolbarState(toolbar);
 	});
 
+	editor.notifier.on(EditorEventType.CommandDone, () => {
+		hasChanges = true;
+	});
+
+	editor.notifier.on(EditorEventType.CommandUndone, () => {
+		hasChanges = true;
+	});
+
 	// Load toolbar widget state from localStorage.
 	restoreToolbarState(toolbar);
 
 	return editor;
 };
 
-const saveImage = (editor: Editor, saveMethod: ImageSaver) => {
+const saveImage = (editor: Editor, saveMethod: ImageSaver, onSaveSuccess: ()=>void) => {
 	// saveMethod defaults to saving to localStorage. Thus, if no saveMethod is given,
 	// we save to localStorage.
-	showSavePopup(editor.toSVG(), editor, saveMethod);
+	showSavePopup(editor.toSVG(), editor, saveMethod, onSaveSuccess);
 };
 
 const saveToolbarState = (toolbar: HTMLToolbar) => {
@@ -110,7 +131,7 @@ const handlePWALaunching = (localization: Localization) => {
 			hideLaunchOptions();
 
 			const fileSaver = createFileSaver(blob.name, file);
-			const editor = createEditor(localization, () => saveImage(editor, fileSaver));
+			const editor = createEditor(localization, (onSuccess) => saveImage(editor, fileSaver, onSuccess));
 
 			const data = await blob.text();
 
@@ -125,7 +146,7 @@ const handlePWALaunching = (localization: Localization) => {
 	handlePWALaunching(localization);
 
 	const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
-		const editor = createEditor(localization, () => saveImage(editor, storeEntry));
+		const editor = createEditor(localization, (onSuccess) => saveImage(editor, storeEntry, onSuccess));
 
 		// Load the SVG data
 		editor.loadFromSVG(await storeEntry.read());

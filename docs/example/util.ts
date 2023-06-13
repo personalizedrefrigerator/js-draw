@@ -44,7 +44,19 @@ If enabled, errors will be logged to this textarea.
 };
 
 // Saves [editor]'s content as an SVG and displays the result.
-export const showSavePopup = (img: SVGElement, editor: Editor, imageSaver: ImageSaver) => {
+export const showSavePopup = (
+	// Data to save
+	img: SVGElement,
+
+	// Editor the data was taken from
+	editor: Editor,
+
+	// Where data will be written to.
+	imageSaver: ImageSaver,
+
+	// Called when data has been saved successfully.
+	onSaveSuccess: ()=>void,
+) => {
 	const imgHTML = img.outerHTML;
 
 	const popupContainer = document.createElement('div');
@@ -311,6 +323,8 @@ export const showSavePopup = (img: SVGElement, editor: Editor, imageSaver: Image
 
 	void (async () => {
 		let saveStatus = 'Saved to ' + imageSaver.title;
+		let error;
+
 		try {
 			await imageSaver.write(imgHTML);
 
@@ -321,6 +335,7 @@ export const showSavePopup = (img: SVGElement, editor: Editor, imageSaver: Image
 			}
 		} catch (e) {
 			saveStatus = 'Error: ' + e;
+			error = e;
 		}
 
 		previewRegion.replaceChildren(
@@ -330,6 +345,10 @@ export const showSavePopup = (img: SVGElement, editor: Editor, imageSaver: Image
 				`Image size: ${imageSize}.`
 			),
 		);
+
+		if (!error) {
+			onSaveSuccess();
+		}
 	})();
 };
 
