@@ -1,5 +1,5 @@
 {
-	"name": "js-draw-example",
+	"name": "@js-draw/demo",
 	"version": "0.0.1",
 	"description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
 	"author": "Henry Heino",
@@ -8,8 +8,8 @@
 	"scripts": {
 		"bundle": "ts-node scripts/bundle.ts",
 		"watchBundle": "ts-node scripts/watchBundle.ts",
-		"build": "yarn bundle",
-		"watch": "yarn watchBundle",
+		"build": "npm run bundle",
+		"watch": "npm run watchBundle",
 		"lint": "eslint ."
 	},
 	"devDependencies": {
@@ -17,7 +17,6 @@
 		"@types/jsdom": "^21.1.1",
 		"@types/node": "^20.3.0",
 		"css-loader": "^6.8.1",
-		"js-draw": "link:../../",
 		"style-loader": "^3.3.3",
 		"terser-webpack-plugin": "^5.3.9",
 		"ts-loader": "^9.4.3",

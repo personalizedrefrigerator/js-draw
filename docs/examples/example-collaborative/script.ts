@@ -1,6 +1,5 @@
-//import * as jsdraw from 'js-draw';
-//import 'js-draw/styles';
-import * as jsdraw from '../../src/bundle/bundled';
+import * as jsdraw from 'js-draw';
+import 'js-draw/styles';
 import './style.css';
 
 const editor = new jsdraw.Editor(document.body);

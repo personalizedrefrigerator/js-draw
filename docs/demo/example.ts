@@ -1,11 +1,6 @@
 // If from an NPM package,
-//import { Editor, EditorEventType, HTMLToolbar, EventDispatcher } from 'js-draw';
-//import 'js-draw/styles';
-
-// Because this example is in the same workspace as js-draw, we import
-// everything local paths.
-import { Editor, EditorEventType, HTMLToolbar, EventDispatcher } from '../../src/lib';
-import '../../src/styles';
+import { Editor, EditorEventType, HTMLToolbar, EventDispatcher } from 'js-draw';
+import 'js-draw/styles';
 
 import { Localization, getLocalizationTable } from './localization';
 import makeLoadFromSaveList from './ui/makeLoadFromSaveList';

@@ -33,19 +33,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install dependencies
-        run: yarn install
+        run: npm install
       - name: Test imports
-        run: yarn dist-test
+        run: npm run dist-test
       - name: Run tests
-        run: yarn test
+        run: npm run test
       - name: Lint
-        run: yarn lint-ci
-      - name: Build documentation
-        run: yarn doc
-      - name: Build
-        run: cd docs/example && yarn install && yarn build
-      - name: Remove flies that don't need to be uploaded
-        run: cd docs/ && rm -rf example*/node_modules/
+        run: npm run lint-ci
+      - name: Build pages
+        run: bash build_tools/build-website.sh
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact

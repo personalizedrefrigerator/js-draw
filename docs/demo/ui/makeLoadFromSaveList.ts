@@ -1,4 +1,4 @@
-import { IconProvider } from '../../../src/lib';
+import { IconProvider } from 'js-draw';
 import { Localization } from '../localization';
 import AbstractStore, { StoreEntry } from '../storage/AbstractStore';
 import './loadFromSaveList.css';

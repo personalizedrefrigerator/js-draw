@@ -8,8 +8,5 @@
     "type": "module",
 	"scripts": {
 		"test": "node test-imports.js && node test-require.cjs"
-	},
-	"devDependencies": {
-		"js-draw": "link:../../"
 	}
 }

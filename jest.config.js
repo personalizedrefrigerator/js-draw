@@ -18,12 +18,12 @@ const config = {
 	// See https://jestjs.io/docs/webpack#handling-static-assets
 	moduleNameMapper: {
 		// Webpack allows importing CSS files. Mock it.
-		'\\.(css|lessc)': '<rootDir>/__mocks__/styleMock.js',
-		'@melloware/coloris': '<rootDir>/__mocks__/coloris.ts',
+		'\\.(css|lessc)': '<rootDir>/testing/mocks/styleMock.js',
+		'@melloware/coloris': '<rootDir>/testing/mocks/coloris.ts',
 	},
 
 	testEnvironment: 'jsdom',
-	setupFilesAfterEnv: [ '<rootDir>/src/testing/beforeEachFile.ts' ],
+	setupFilesAfterEnv: [ '<rootDir>/testing/beforeEachFile.ts' ],
 };
 
 module.exports = config;

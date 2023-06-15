@@ -17,15 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install dependencies
-        run: yarn install
+        run: npm install
       - name: Test imports
-        run: yarn dist-test
+        run: npm run dist-test
       - name: Run tests
-        run: yarn test
+        run: npm run test
       - name: Lint
-        run: yarn lint-ci
+        run: npm run lint-ci
       - name: Build
-        run: cd docs/example && yarn install && yarn build
+        run: bash ./build_tools/build-website.sh
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

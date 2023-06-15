@@ -1,20 +1,20 @@
 # Building and testing
-`js-draw` uses `yarn` as its build system and to manage dependencies. Thus, to install dependencies and build the project for the first time,
+`js-draw` uses `npm` as its build system and to manage dependencies. Thus, to install dependencies and build the project for the first time,
 ```bash
 # After cloning the project,
 bash$ cd path/to/js-draw
 
 # Install dependencies
-bash$ yarn install
+bash$ npm install
 
 # Run tests
-bash$ yarn test
+bash$ npm run test
 
 # Run tests/re-run tests when files change
-bash$ yarn test --watch
+bash$ npm run test --watch
 
 # Build documentation
-bash$ yarn doc
+bash$ npm run doc
 ```
 
 ## Running/building the example projects
@@ -28,13 +28,13 @@ Next, `cd` to one of the example projects.
 
 ### Main example project
 ```bash
-bash$ cd example/
+bash$ cd docs/demo/
 
 # Install dependencies for the example project
-bash$ yarn install
+bash$ npm install
 
 # Re-build when files change
-bash$ yarn watch
+bash$ npm run watch
 ```
 
 In a separate terminal, run a local web-server. Use the web-server to open the `example.html` file.
@@ -44,10 +44,10 @@ bash$ python3 -m http.server
 
 ### Collaborative editing project
 ```bash
-bash$ cd example-collaborative/
+bash$ cd docs/examples/example-collaborative/
 
 # Re-build when files change
-bash$ yarn watch
+bash$ npm run watch
 ```
 
 and in a separate terminal,

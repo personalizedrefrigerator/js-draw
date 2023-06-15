@@ -1,4 +1,4 @@
-import { matchingLocalizationTable } from '../../src/localizations/getLocalizationTable';
+import { matchingLocalizationTable } from 'js-draw';
 
 export interface Localization {
 	localStorageSave: string;

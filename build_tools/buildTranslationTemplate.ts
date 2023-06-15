@@ -2,7 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { defaultEditorLocalization } from '../src/localization';
+import { defaultEditorLocalization } from '../packages/js-draw/src/localization';
 
 // Adds markdown formatting to format text like code.
 const codeFormat = (text: string) => {

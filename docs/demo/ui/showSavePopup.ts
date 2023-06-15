@@ -1,7 +1,7 @@
 
 // Imports from js-draw. Because thsi file is part of the js-draw
 // workspace, we use a relative path to impor these.
-import { Vec2, Editor } from '../../../src/lib';
+import { Vec2, Editor } from 'js-draw';
 import { Localization } from '../localization';
 
 import ImageSaver from '../storage/ImageSaver';

@@ -1,4 +1,4 @@
-import { EventDispatcher } from '../../src/lib';
+import { EventDispatcher } from 'js-draw';
 
 export type IconType = HTMLImageElement|SVGElement;
 
