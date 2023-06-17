@@ -57,12 +57,14 @@ const readConfig = (): BuildConfig => {
 			const errorContext = 'readConfig, reading an item in bundledFiles';
 
 			assertPropertyHasType(filePair, 'inPath', 'string', errorContext);
-			assertPropertyHasType(filePair, 'outPath', 'string', errorContext);
+			if ('outPath' in filePair) {
+				assertPropertyHasType(filePair, 'outPath', 'string', errorContext);
+			}
 			assertPropertyHasType(filePair, 'name', 'string', errorContext);
 
 			bundledFiles.push({
 				inPath: path.resolve(filePair.inPath),
-				outPath: path.resolve(filePair.outPath),
+				outPath: filePair.outPath ? path.resolve(filePair.outPath) : undefined,
 				name: filePair.name,
 			});
 		}

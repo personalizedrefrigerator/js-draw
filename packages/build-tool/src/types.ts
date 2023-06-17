@@ -3,7 +3,9 @@
 export interface BundledFileRecord {
     name: string;
     inPath: string;
-    outPath: string;
+
+    // outPath defaults to a path based on inPath
+    outPath?: string;
 }
 
 export interface TranslationSourcePair {
