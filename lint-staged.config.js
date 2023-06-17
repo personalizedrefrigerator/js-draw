@@ -1,6 +1,6 @@
 
 module.exports = {
 	'**/*.{js,ts}': [
-		'yarn run linter-precommit',
+		'npm run linter-precommit',
 	],
 };

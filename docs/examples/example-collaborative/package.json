@@ -1,0 +1,19 @@
+{
+	"name": "@js-draw/example-collaborative",
+	"version": "0.0.1",
+	"description": "Example collaborative editor",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"bundle": "ts-node scripts/bundle.ts",
+		"watchBundle": "ts-node scripts/watchBundle.ts",
+		"build": "build-tool build",
+		"watch": "build-tool watch"
+	},
+	"dependencies": {
+		"js-draw": "^0.23.1"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^0.0.1"
+	}
+}

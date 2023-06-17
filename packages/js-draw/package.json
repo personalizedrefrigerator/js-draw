@@ -1,0 +1,101 @@
+{
+  "name": "js-draw",
+  "version": "0.23.1",
+  "description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
+  "types": "./dist/mjs/lib.d.ts",
+  "main": "./dist/cjs/lib.js",
+  "exports": {
+    ".": {
+      "types": "./dist/mjs/lib.d.ts",
+      "import": "./dist/mjs/lib.mjs",
+      "require": "./dist/cjs/lib.js"
+    },
+    "./styles": {
+      "default": "./src/styles.js"
+    },
+    "./Editor.css": {
+      "default": "./src/Editor.css"
+    },
+    "./bundle": {
+      "types": "./dist/mjs/bundle/bundled.d.ts",
+      "default": "./dist/bundle.js"
+    },
+    "./bundledStyles": {
+      "default": "./dist/bundledStyles.js"
+    },
+    "./Editor": {
+      "types": "./dist/mjs/Editor.d.ts",
+      "default": "./dist/mjs/Editor.mjs"
+    },
+    "./types": {
+      "types": "./dist/mjs/types.d.ts",
+      "default": "./dist/mjs/types.mjs"
+    },
+    "./localization": {
+      "types": "./dist/mjs/localization.d.ts",
+      "default": "./dist/mjs/localization.mjs"
+    },
+    "./toolbar/HTMLToolbar": {
+      "types": "./dist/mjs/toolbar/HTMLToolbar.d.ts",
+      "default": "./dist/mjs/toolbar/HTMLToolbar.mjs"
+    },
+    "./math": {
+      "types": "./dist/mjs/math/lib.d.ts",
+      "import": "./dist/mjs/math/lib.mjs",
+      "require": "./dist/cjs/math/lib.js"
+    },
+    "./Color4": {
+      "types": "./dist/mjs/Color4.d.ts",
+      "import": "./dist/mjs/Color4.mjs",
+      "require": "./dist/cjs/Color4.js"
+    },
+    "./components": {
+      "types": "./dist/mjs/components/lib.d.ts",
+      "default": "./dist/mjs/components/lib.mjs"
+    },
+    "./commands": {
+      "types": "./dist/mjs/commands/lib.d.ts",
+      "default": "./dist/mjs/commands/lib.mjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/personalizedrefrigerator/js-draw.git"
+  },
+  "author": "Henry Heino",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "jest",
+    "dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
+    "dist": "npm run build && npm run dist-test",
+    "build": "rm -rf ./dist && mkdir dist && build-tool build",
+    "watch": "rm -rf ./dist && mkdir dist && build-tool watch",
+    "build-translation-template": "build-tool build-translation-template"
+  },
+  "dependencies": {
+    "@melloware/coloris": "0.20.0",
+    "bezier-js": "6.1.3"
+  },
+  "devDependencies": {
+    "@types/bezier-js": "4.1.0",
+    "@types/jest": "29.5.2",
+    "@types/jsdom": "21.1.1",
+
+    "@js-draw/build-tool": "0.0.1"
+  },
+  "bugs": {
+    "url": "https://github.com/personalizedrefrigerator/js-draw/issues"
+  },
+  "homepage": "https://github.com/personalizedrefrigerator/js-draw#readme",
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": [
+    "ink",
+    "drawing",
+    "pen",
+    "freehand",
+    "svg"
+  ]
+}

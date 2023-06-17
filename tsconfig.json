@@ -3,6 +3,8 @@
 		"alwaysStrict": true,
 		"target": "ES6",
 		"module": "CommonJS",
+		"outDir": "./dist/cjs",
+		
 		"forceConsistentCasingInFileNames": true,
 		"listEmittedFiles": false,
 		"noFallthroughCasesInSwitch": true,
@@ -17,21 +19,23 @@
 		"esModuleInterop": true,
 		"moduleResolution": "Node",
 		"declaration": true,
-		"outDir": "dist/cjs",
+
+		"baseUrl": "./packages",
+		"paths": {
+			"js-draw": ["packages/js-draw/src"],
+			"@js-draw/*": ["packages/*/src"]
+		}
 	},
-	"include": [
-		"**/*.ts",
-	],
 	"exclude": [
 		"**/node_modules",
 
 		// Files that don't need transpilation
 		// "**/*.test.ts", <- vscode requires .test.ts files to be transpiled for other settings to apply.
-		"__mocks__/*",
+		"./testing/__mocks__/*",
 
 		// Output files
 		"./dist/**"
 	],
 
-	"files": [ "./src/testing/global.d.ts" ]
+	"files": [ "./testing/global.d.ts" ]
 }

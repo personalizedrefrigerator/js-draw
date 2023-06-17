@@ -1,20 +1,20 @@
 # Building and testing
-`js-draw` uses `yarn` as its build system and to manage dependencies. Thus, to install dependencies and build the project for the first time,
+`js-draw` uses `npm` as its build system and to manage dependencies. Thus, to install dependencies and build the project for the first time,
 ```bash
 # After cloning the project,
 bash$ cd path/to/js-draw
 
 # Install dependencies
-bash$ yarn install
+bash$ npm install
 
 # Run tests
-bash$ yarn test
+bash$ npm run test
 
 # Run tests/re-run tests when files change
-bash$ yarn test --watch
+bash$ npm run test --watch
 
 # Build documentation
-bash$ yarn doc
+bash$ npm run doc
 ```
 
 ## Running/building the example projects
@@ -28,13 +28,16 @@ Next, `cd` to one of the example projects.
 
 ### Main example project
 ```bash
-bash$ cd example/
+bash$ cd docs/demo/
 
 # Install dependencies for the example project
-bash$ yarn install
+bash$ npm install
 
 # Re-build when files change
-bash$ yarn watch
+bash$ npm run watch
+
+# If you're making changes to packages/js-draw, you may also want to run
+# npm run watch in the packages/js-draw directory.
 ```
 
 In a separate terminal, run a local web-server. Use the web-server to open the `example.html` file.
@@ -44,10 +47,10 @@ bash$ python3 -m http.server
 
 ### Collaborative editing project
 ```bash
-bash$ cd example-collaborative/
+bash$ cd docs/examples/example-collaborative/
 
 # Re-build when files change
-bash$ yarn watch
+bash$ npm run watch
 ```
 
 and in a separate terminal,
@@ -59,10 +62,10 @@ bash$ python3 server.py
 # Notable files and directories
 > If this list is outdated, please open an issue.
 
-- [`src/localizations`](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/localizations) and [`getLocalizationTable.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/src/localizations/getLocalizationTable.ts).
-- [Stroke smoothing and geometric shape builders: `src/components/builders`](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/components/builders)
-- [Main app entrypoint: `src/Editor.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/src/Editor.ts)
-- [Default tools and sending events to them: `src/tools/ToolController.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/src/tools/ToolController.ts)
+- [`packages/js-draw/src/localizations`](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations) and [`getLocalizationTable.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/packages/js-draw/src/localizations/getLocalizationTable.ts).
+- [Stroke smoothing and geometric shape builders: `packages/js-draw/src/components/builders`](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/components/builders)
+- [Main app entrypoint: `packages/js-draw/src/Editor.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/packages/js-draw/src/Editor.ts)
+- [Default tools and sending events to them: `packages/js-draw/src/tools/ToolController.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/packages/js-draw/src/tools/ToolController.ts)
 
 # Code style
 
