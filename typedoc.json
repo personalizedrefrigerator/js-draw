@@ -1,12 +1,13 @@
 {
 	"entryPoints": [
-		"./src/lib.ts", "./src/bundle/bundled.ts"
+		"./packages/js-draw/src/lib.ts",
+		"./packages/js-draw/src/bundle/bundled.ts"
 	],
 	"exclude": [
 		"**/*.test.ts",
 		"node_modules/**",
-		"dist/",
-		"dist-test/",
+		"**/dist/",
+		"**/dist-test/",
 		"src/testing/"
 	],
 	"excludePrivate": true,

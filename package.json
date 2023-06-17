@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "dist-test": "lerna run dist-test",
+    "doc": "typedoc --options typedoc.json",
+    "watch-docs": "typedoc --watch --options typedoc.json",
+    "test": "jest",
     "lint": "eslint .",
     "linter-precommit": "eslint --fix --ext .js --ext .ts",
     "lint-staged": "lint-staged",
@@ -19,6 +23,10 @@
     "eslint": "^8.42.0",
     "@typescript-eslint/eslint-plugin": "^5.59.9",
     "@typescript-eslint/parser": "^5.59.9",
-    "lint-staged": "^13.2.2"
+    "lint-staged": "^13.2.2",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "jsdom": "^22.1.0"
   }
 }

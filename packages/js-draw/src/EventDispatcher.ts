@@ -1,3 +1,15 @@
+
+// Code shared with Joplin (js-draw was originally intended to be part of Joplin).
+
+// @see EventDispatcher
+type Listener<Value> = (data: Value)=> void;
+
+type CallbackHandler<EventType> = (data: EventType)=> void;
+
+export interface DispatcherEventListener {
+	remove: ()=>void;
+}
+
 /**
  * Handles notifying listeners of events.
  *
@@ -13,18 +25,7 @@
  * dispatcher.dispatch('event1');
  * ```
  *
- * @packageDocumentation
  */
-
-// Code shared with Joplin (js-draw was originally intended to be part of Joplin).
-
-type Listener<Value> = (data: Value)=> void;
-type CallbackHandler<EventType> = (data: EventType)=> void;
-export interface DispatcherEventListener {
-	remove: ()=>void;
-}
-
-// { @inheritDoc EventDispatcher! }
 export default class EventDispatcher<EventKeyType extends string|symbol|number, EventMessageType> {
 	private listeners: Partial<Record<EventKeyType, Array<Listener<EventMessageType>>>>;
 	public constructor() {

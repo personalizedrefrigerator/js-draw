@@ -67,12 +67,10 @@
   "private": false,
   "scripts": {
     "test": "jest",
-    "dist-test": "cd dist-test/test_imports && npm install && npm run test",
+    "dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
     "dist": "npm run build && npm run dist-test",
     "build": "rm -rf ./dist && mkdir dist&& build-tool build",
     "watch": "rm -rf ./dist && mkdir dist&& build-tool watch",
-    "doc": "typedoc --options typedoc.json",
-    "watch-docs": "typedoc --watch --options typedoc.json",
     "build-translation-template": "ts-node ../../build_tools/buildTranslationTemplate.ts"
   },
   "dependencies": {
@@ -83,20 +81,8 @@
     "@types/bezier-js": "^4.1.0",
     "@types/jest": "^29.5.2",
     "@types/jsdom": "^21.1.1",
-    "@types/node": "^20.3.0",
     "css-loader": "^6.8.1",
-    "jest": "^29.5.0",
-    "jest-environment-jsdom": "^29.5.0",
-    "jsdom": "^22.1.0",
     "pinst": "^3.0.0",
-    "style-loader": "^3.3.3",
-    "terser-webpack-plugin": "^5.3.9",
-    "ts-jest": "^29.1.0",
-    "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1",
-    "typedoc": "^0.24.8",
-    "typescript": "^5.1.3",
-    "webpack": "^5.86.0",
     "@js-draw/build-tool": "^0.0.1"
   },
   "bugs": {
