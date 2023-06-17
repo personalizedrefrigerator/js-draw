@@ -4,7 +4,7 @@ import de from './de';
 import en from './en';
 import es from './es';
 
-const allLocales: Record<string, EditorLocalization> = {
+export const allLocales: Record<string, EditorLocalization> = {
 	de,
 	en,
 	es,

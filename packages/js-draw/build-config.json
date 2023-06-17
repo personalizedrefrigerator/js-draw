@@ -12,5 +12,12 @@
             "inPath": "./src/styles.js",
             "outPath": "./dist/bundledStyles.js"
         }
+    ],
+    "translationSourceFiles": [
+        {
+            "name": "js-draw",
+            "path": "./tools/allLocales.js",
+            "defaultLocale": "en"
+        }
     ]
 }
