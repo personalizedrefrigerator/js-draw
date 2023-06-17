@@ -12,6 +12,7 @@
     "linter-precommit": "eslint --fix --ext .js --ext .ts",
     "lint-staged": "lint-staged",
     "lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
+    "preinstall": "git config core.hookspath .githooks",
     "postinstall": "npm run build"
   },
   "workspaces": [
