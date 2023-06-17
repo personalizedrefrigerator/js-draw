@@ -64,7 +64,6 @@ body:
       label: "zoom"
       description: "Translate `Zoom`."
       placeholder: "Zoom"
-      value: "Zoom"
     validations:
       required: false
   - type: input
@@ -82,7 +81,6 @@ body:
       label: "reformatSelection"
       description: "Translate `Format selection`."
       placeholder: "Format selection"
-      value: "Format selection"
     validations:
       required: false
   - type: input
@@ -91,7 +89,6 @@ body:
       label: "inputAltText"
       description: "Translate `Alt text: `."
       placeholder: "Alt text: "
-      value: "Alt text: "
     validations:
       required: false
   - type: input
@@ -100,7 +97,6 @@ body:
       label: "chooseFile"
       description: "Translate `Choose file: `."
       placeholder: "Choose file: "
-      value: "Choose file: "
     validations:
       required: false
   - type: input
@@ -109,7 +105,6 @@ body:
       label: "submit"
       description: "Translate `Submit`."
       placeholder: "Submit"
-      value: "Submit"
     validations:
       required: false
   - type: input
@@ -118,7 +113,6 @@ body:
       label: "cancel"
       description: "Translate `Cancel`."
       placeholder: "Cancel"
-      value: "Cancel"
     validations:
       required: false
   - type: input
@@ -145,7 +139,6 @@ body:
       label: "colorLabel"
       description: "Translate `Color: `."
       placeholder: "Color: "
-      value: "Color: "
     validations:
       required: false
   - type: input
@@ -244,7 +237,6 @@ body:
       label: "colorSelectionCanceledAnnouncement"
       description: "Translate `Color selection canceled`."
       placeholder: "Color selection canceled"
-      value: "Color selection canceled"
     validations:
       required: false
   - type: input
@@ -253,7 +245,6 @@ body:
       label: "selectionToolKeyboardShortcuts"
       description: "Translate `Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.`."
       placeholder: "Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize."
-      value: "Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize."
     validations:
       required: false
   - type: input
@@ -298,7 +289,6 @@ body:
       label: "useGridOption"
       description: "Translate `Grid: `."
       placeholder: "Grid: "
-      value: "Grid: "
     validations:
       required: false
   - type: input
@@ -334,7 +324,6 @@ body:
       label: "pressureSensitiveFreehandPen"
       description: "Translate `Freehand (pressure sensitive)`."
       placeholder: "Freehand (pressure sensitive)"
-      value: "Freehand (pressure sensitive)"
     validations:
       required: false
   - type: input
@@ -388,7 +377,6 @@ body:
       label: "paste"
       description: "Translate `Paste`."
       placeholder: "Paste"
-      value: "Paste"
     validations:
       required: false
   - type: input
@@ -448,7 +436,6 @@ body:
       label: "errorImageHasZeroSize"
       description: "Translate `Error: Image has zero size`."
       placeholder: "Error: Image has zero size"
-      value: "Error: Image has zero size"
     validations:
       required: false
   - type: input
@@ -486,7 +473,6 @@ body:
       label: "selectAllTool"
       description: "Translate `Select all shortcut`."
       placeholder: "Select all shortcut"
-      value: "Select all shortcut"
     validations:
       required: false
   - type: input
@@ -513,7 +499,6 @@ body:
       label: "twoFingerPanZoomTool"
       description: "Translate `Panning and zooming`."
       placeholder: "Panning and zooming"
-      value: "Panning and zooming"
     validations:
       required: false
   - type: input
@@ -522,7 +507,6 @@ body:
       label: "undoRedoTool"
       description: "Translate `Undo/Redo`."
       placeholder: "Undo/Redo"
-      value: "Undo/Redo"
     validations:
       required: false
   - type: input
@@ -531,7 +515,6 @@ body:
       label: "rightClickDragPanTool"
       description: "Translate `Right-click drag`."
       placeholder: "Right-click drag"
-      value: "Right-click drag"
     validations:
       required: false
   - type: input
@@ -540,7 +523,6 @@ body:
       label: "pipetteTool"
       description: "Translate `Pick color from screen`."
       placeholder: "Pick color from screen"
-      value: "Pick color from screen"
     validations:
       required: false
   - type: input
@@ -576,7 +558,6 @@ body:
       label: "changeTool"
       description: "Translate `Change tool`."
       placeholder: "Change tool"
-      value: "Change tool"
     validations:
       required: false
   - type: input
@@ -585,7 +566,6 @@ body:
       label: "pasteHandler"
       description: "Translate `Copy paste handler`."
       placeholder: "Copy paste handler"
-      value: "Copy paste handler"
     validations:
       required: false
   - type: input
@@ -594,7 +574,6 @@ body:
       label: "soundExplorer"
       description: "Translate `Sound-based image exploration`."
       placeholder: "Sound-based image exploration"
-      value: "Sound-based image exploration"
     validations:
       required: false
   - type: input
@@ -603,7 +582,6 @@ body:
       label: "disableAccessibilityExploreTool"
       description: "Translate `Disable sound-based exploration`."
       placeholder: "Disable sound-based exploration"
-      value: "Disable sound-based exploration"
     validations:
       required: false
   - type: input
@@ -612,7 +590,6 @@ body:
       label: "enableAccessibilityExploreTool"
       description: "Translate `Enable sound-based exploration`."
       placeholder: "Enable sound-based exploration"
-      value: "Enable sound-based exploration"
     validations:
       required: false
   - type: input
@@ -621,7 +598,6 @@ body:
       label: "findLabel"
       description: "Translate `Find`."
       placeholder: "Find"
-      value: "Find"
     validations:
       required: false
   - type: input
@@ -630,7 +606,6 @@ body:
       label: "toNextMatch"
       description: "Translate `Next`."
       placeholder: "Next"
-      value: "Next"
     validations:
       required: false
   - type: input
@@ -639,7 +614,6 @@ body:
       label: "closeFindDialog"
       description: "Translate `Close`."
       placeholder: "Close"
-      value: "Close"
     validations:
       required: false
   - type: input
@@ -648,7 +622,6 @@ body:
       label: "findDialogShown"
       description: "Translate `Find dialog shown`."
       placeholder: "Find dialog shown"
-      value: "Find dialog shown"
     validations:
       required: false
   - type: input
@@ -657,7 +630,6 @@ body:
       label: "findDialogHidden"
       description: "Translate `Find dialog hidden`."
       placeholder: "Find dialog hidden"
-      value: "Find dialog hidden"
     validations:
       required: false
   - type: input
@@ -720,7 +692,6 @@ body:
       label: "updatedViewport"
       description: "Translate `Transformed Viewport`."
       placeholder: "Transformed Viewport"
-      value: "Transformed Viewport"
     validations:
       required: false
   - type: input
@@ -792,7 +763,6 @@ body:
       label: "elements"
       description: "Translate `Elements`."
       placeholder: "Elements"
-      value: "Elements"
     validations:
       required: false
   - type: input
@@ -801,7 +771,6 @@ body:
       label: "erasedNoElements"
       description: "Translate `Erased nothing`."
       placeholder: "Erased nothing"
-      value: "Erased nothing"
     validations:
       required: false
   - type: input
@@ -810,7 +779,6 @@ body:
       label: "duplicatedNoElements"
       description: "Translate `Duplicated nothing`."
       placeholder: "Duplicated nothing"
-      value: "Duplicated nothing"
     validations:
       required: false
   - type: input
@@ -828,7 +796,6 @@ body:
       label: "movedLeft"
       description: "Translate `Moved left`."
       placeholder: "Moved left"
-      value: "Moved left"
     validations:
       required: false
   - type: input
@@ -837,7 +804,6 @@ body:
       label: "movedUp"
       description: "Translate `Moved up`."
       placeholder: "Moved up"
-      value: "Moved up"
     validations:
       required: false
   - type: input
@@ -846,7 +812,6 @@ body:
       label: "movedDown"
       description: "Translate `Moved down`."
       placeholder: "Moved down"
-      value: "Moved down"
     validations:
       required: false
   - type: input
@@ -855,7 +820,6 @@ body:
       label: "movedRight"
       description: "Translate `Moved right`."
       placeholder: "Moved right"
-      value: "Moved right"
     validations:
       required: false
   - type: input
@@ -864,7 +828,6 @@ body:
       label: "zoomedOut"
       description: "Translate `Zoomed out`."
       placeholder: "Zoomed out"
-      value: "Zoomed out"
     validations:
       required: false
   - type: input
@@ -873,7 +836,6 @@ body:
       label: "zoomedIn"
       description: "Translate `Zoomed in`."
       placeholder: "Zoomed in"
-      value: "Zoomed in"
     validations:
       required: false
   - type: input
@@ -891,7 +853,6 @@ body:
       label: "unlabeledImageNode"
       description: "Translate `Unlabeled image`."
       placeholder: "Unlabeled image"
-      value: "Unlabeled image"
     validations:
       required: false
   - type: input
@@ -900,7 +861,6 @@ body:
       label: "stroke"
       description: "Translate `Stroke`."
       placeholder: "Stroke"
-      value: "Stroke"
     validations:
       required: false
   - type: input
@@ -909,7 +869,6 @@ body:
       label: "svgObject"
       description: "Translate `SVG Object`."
       placeholder: "SVG Object"
-      value: "SVG Object"
     validations:
       required: false
   - type: input
@@ -918,7 +877,6 @@ body:
       label: "emptyBackground"
       description: "Translate `Empty background`."
       placeholder: "Empty background"
-      value: "Empty background"
     validations:
       required: false
   - type: input
@@ -927,7 +885,6 @@ body:
       label: "gridBackground"
       description: "Translate `Grid background`."
       placeholder: "Grid background"
-      value: "Grid background"
     validations:
       required: false
   - type: input
@@ -1017,7 +974,6 @@ body:
       label: "accessibilityInputInstructions"
       description: "Translate `Press \"t\" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press \"w\" to zoom in and \"s\" to zoom out.`."
       placeholder: "Press \"t\" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press \"w\" to zoom in and \"s\" to zoom out."
-      value: "Press \"t\" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press \"w\" to zoom in and \"s\" to zoom out."
     validations:
       required: false
   - type: input

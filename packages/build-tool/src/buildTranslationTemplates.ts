@@ -103,7 +103,13 @@ const generateTranslationTemplate = (
 
 	for (const key in defaultLocaleStrings) {
 		const englishTranslation = `${(defaultLocaleStrings as any)[key]}`;
-		const currentTranslation = (destLocaleStrings ?? {})[key];
+		let currentTranslation = (destLocaleStrings ?? {})[key];
+
+		// If matching the default, it probably hasn't been translated yet.
+		if (currentTranslation === englishTranslation) {
+			currentTranslation = undefined;
+		}
+
 		addInput('input', `translation-${key}`, {
 			label: `${key}`,
 			description: `Translate ${codeFormat(englishTranslation)}.`,

@@ -244,7 +244,6 @@ body:
       label: "colorSelectionCanceledAnnouncement"
       description: "Translate `Color selection canceled`."
       placeholder: "Color selection canceled"
-      value: "Color selection canceled"
     validations:
       required: false
   - type: input
@@ -550,7 +549,6 @@ body:
       label: "textTool"
       description: "Translate `Text`."
       placeholder: "Text"
-      value: "Text"
     validations:
       required: false
   - type: input
@@ -919,7 +917,6 @@ body:
       label: "gridBackground"
       description: "Translate `Grid background`."
       placeholder: "Grid background"
-      value: "Grid background"
     validations:
       required: false
   - type: input
