@@ -62,10 +62,10 @@ bash$ python3 server.py
 # Notable files and directories
 > If this list is outdated, please open an issue.
 
-- [`src/localizations`](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/localizations) and [`getLocalizationTable.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/src/localizations/getLocalizationTable.ts).
-- [Stroke smoothing and geometric shape builders: `src/components/builders`](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/components/builders)
-- [Main app entrypoint: `src/Editor.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/src/Editor.ts)
-- [Default tools and sending events to them: `src/tools/ToolController.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/src/tools/ToolController.ts)
+- [`packages/js-draw/src/localizations`](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations) and [`getLocalizationTable.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/packages/js-draw/src/localizations/getLocalizationTable.ts).
+- [Stroke smoothing and geometric shape builders: `packages/js-draw/src/components/builders`](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/components/builders)
+- [Main app entrypoint: `packages/js-draw/src/Editor.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/packages/js-draw/src/Editor.ts)
+- [Default tools and sending events to them: `packages/js-draw/src/tools/ToolController.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/packages/js-draw/src/tools/ToolController.ts)
 
 # Code style
 

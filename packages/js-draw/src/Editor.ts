@@ -67,7 +67,7 @@ export interface EditorSettings {
  * ```
  *
  * See also
- * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/example/example.ts#L15).
+ * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts#L15).
  */
 export class Editor {
 	// Wrapper around the viewport and toolbar
@@ -126,7 +126,7 @@ export class Editor {
 
 	/**
 	 * Controls the list of tools. See
-	 * [the custom tool example](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/example-custom-tools)
+	 * [the custom tool example](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples/example-custom-tools)
 	 * for more.
 	 */
 	public readonly toolController: ToolController;

@@ -77,7 +77,7 @@ const generateTranslationTemplate = (localizationStrings: any) => {
 	addLabel(collapseSpaces(`
 		(Optional) If you would like to submit a pull request that applies this translation, 
 		note that existing translations are present in
-		[src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/src/localizations).
+		[packages/js-draw/src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations).
 	`));
 
 	addInput('input', 'language-name', {
