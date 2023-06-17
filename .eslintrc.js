@@ -54,7 +54,7 @@ module.exports = {
 	},
 	'ignorePatterns': [
 		'**/*.bundle.js',
-		'dist/',
+		'**/dist/',
 		'docs/typedoc/'
 	],
 };

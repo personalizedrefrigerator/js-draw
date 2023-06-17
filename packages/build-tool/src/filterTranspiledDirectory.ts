@@ -1,31 +1,13 @@
 
-import { readdir, stat, rename, readFile, writeFile, unlink } from 'fs/promises';
-import path from 'path';
+import { rename, readFile, writeFile, unlink } from 'fs/promises';
+import forEachFileInDirectory from './forEachFileInDirectory';
 
 // Script to be run after building JavaScript files from TypeScript.
 // TODO: This is very hacky.
 // TODO: [Use the TypeScript Compiler API instead.](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)
 
-// Iterates over every JavaScript file in [directory].
-const forEachFile = async (directory: string, processFile: (filePath: string)=>Promise<void>) => {
-	const files = await readdir(directory);
-
-	await Promise.all(files.map(async (file) => {
-		const filePath = path.join(directory, file);
-		const stats = await stat(filePath);
-
-		if (stats.isDirectory()) {
-			await forEachFile(filePath, processFile);
-		} else if (stats.isFile()) {
-			await processFile(filePath);
-		} else {
-			throw new Error('Unknown file type!');
-		}
-	}));
-};
-
 const removeFiles = async (directory: string, filePattern: RegExp) => {
-	await forEachFile(directory, async (filePath: string) => {
+	await forEachFileInDirectory(directory, async (filePath: string) => {
 		if (!filePath.match(filePattern)) {
 			return;
 		}
@@ -34,17 +16,16 @@ const removeFiles = async (directory: string, filePattern: RegExp) => {
 	});
 };
 
-const main = async () => {
-	const rootDir = path.dirname(__dirname);
-	const cjsPath = `${rootDir}/dist/cjs`;
-	const mjsPath = `${rootDir}/dist/mjs`;
+const filterTranspiledDirectory = async (directoryPath: string) => {
+	const cjsPath = `${directoryPath}/cjs`;
+	const mjsPath = `${directoryPath}/mjs`;
 
 	const testPattern = /\.test\.js$/;
 	await removeFiles(cjsPath, testPattern);
 	await removeFiles(mjsPath, testPattern);
 
 	// We need to replace imports in ESM files.
-	await forEachFile(mjsPath, async (filePath: string) => {
+	await forEachFileInDirectory(mjsPath, async (filePath: string) => {
 		if (!filePath.endsWith('.js')) {
 			return;
 		}
@@ -68,4 +49,4 @@ const main = async () => {
 	});
 };
 
-main();
+export default filterTranspiledDirectory;

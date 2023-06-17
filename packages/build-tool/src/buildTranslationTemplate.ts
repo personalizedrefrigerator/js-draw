@@ -2,7 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { defaultEditorLocalization } from '../packages/js-draw/src/localization';
+//import { defaultEditorLocalization } from '../packages/js-draw/src/localization';
 
 // Adds markdown formatting to format text like code.
 const codeFormat = (text: string) => {
@@ -37,7 +37,7 @@ const codeFormat = (text: string) => {
 
 const collapseSpaces = (text: string) => text.replace(/\s+/g, ' ');
 
-const generateTranslationTemplate = () => {
+const generateTranslationTemplate = (localizationStrings: any) => {
 	const bodyContentLines: string[] = [];
 
 	const addInput = (
@@ -85,8 +85,8 @@ const generateTranslationTemplate = () => {
 		description: 'The name of the language to translate to in English (e.g. Spanish)',
 	}, true);
 
-	for (const key in defaultEditorLocalization) {
-		const englishTranslation = `${(defaultEditorLocalization as any)[key]}`;
+	for (const key in localizationStrings) {
+		const englishTranslation = `${(localizationStrings as any)[key]}`;
 		addInput('input', `translation-${key}`, {
 			label: `${key}`,
 			description: `Translate ${codeFormat(englishTranslation)}.`,
@@ -110,12 +110,16 @@ body:
 ${bodyContentLines.join('\n')}`;
 };
 
-const template = generateTranslationTemplate();
+const buildTranslationTemplate = (localizationStrings: any) => {
+	const template = generateTranslationTemplate(localizationStrings);
 
-// According to https://stackoverflow.com/a/13650454, fs should
-// be able to handle forward and back slashes (both) on Windows (so extra
-// path logic shouldn't be needed here.)
-const rootDir = path.dirname(__dirname);
-const translationTempaltePath = path.join(rootDir, '.github/ISSUE_TEMPLATE/translation.yml');
+	// According to https://stackoverflow.com/a/13650454, fs should
+	// be able to handle forward and back slashes (both) on Windows (so extra
+	// path logic shouldn't be needed here.)
+	const rootDir = path.dirname(__dirname);
+	const translationTempaltePath = path.join(rootDir, '.github/ISSUE_TEMPLATE/translation.yml');
 
-fs.writeFileSync(translationTempaltePath, template);
+	fs.writeFileSync(translationTempaltePath, template);
+};
+
+export default buildTranslationTemplate;

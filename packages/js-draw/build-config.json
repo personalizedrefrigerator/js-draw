@@ -1,0 +1,16 @@
+{
+    "inDirectory": "./src",
+    "outDirectory": "./dist",
+    "bundledFiles": [
+        {
+            "name": "jsdraw",
+	        "inPath": "./src/bundle/bundled.ts",
+            "outPath": "./dist/bundle.js"
+        },
+        {
+            "name": "jsdrawStyles",
+            "inPath": "./src/styles.js",
+            "outPath": "./dist/bundledStyles.js"
+        }
+    ]
+}

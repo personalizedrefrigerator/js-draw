@@ -46,7 +46,7 @@
 import Editor, { EditorSettings } from './Editor';
 export { default as EditorImage } from './EditorImage';
 export * from './types';
-export { default as getLocalizationTable } from './localizations/getLocalizationTable';
+export { default as getLocalizationTable, matchingLocalizationTable } from './localizations/getLocalizationTable';
 export * from './localization';
 
 export { default as Color4 } from './Color4';

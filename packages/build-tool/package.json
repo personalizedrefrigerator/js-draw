@@ -1,18 +1,12 @@
 {
-	"name": "@js-draw/example-custom-tools",
+	"name": "@js-draw/build-tool",
 	"version": "0.0.1",
-	"description": "Example demonstrating custom tools",
+	"description": "Tool to facilitate building and bundling TypeScript for js-draw.",
 	"license": "MIT",
 	"private": true,
-	"scripts": {
-		"bundle": "ts-node scripts/bundle.ts",
-		"watchBundle": "ts-node scripts/watchBundle.ts",
-		"build": "npm run bundle",
-		"watch": "npm run watchBundle",
-		"lint": "eslint ."
-	},
-	"dependencies": {
-		"js-draw": "^0.23.1"
+	"main": "src/lib.ts",
+	"bin": {
+		"build-tool": "./src/main.ts"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.5.1",

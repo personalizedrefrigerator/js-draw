@@ -11,7 +11,11 @@
 		"watch": "npm run watchBundle",
 		"lint": "eslint ."
 	},
+	"dependencies": {
+		"js-draw": "^0.23.1"
+	},
 	"devDependencies": {
+		"@js-draw/build-tool": "^0.0.1",
 		"@types/jest": "^29.5.1",
 		"@types/jsdom": "^21.1.1",
 		"@types/node": "^20.2.1",

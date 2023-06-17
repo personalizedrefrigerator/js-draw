@@ -3,6 +3,8 @@
 		"alwaysStrict": true,
 		"target": "ES6",
 		"module": "CommonJS",
+		"outDir": "./dist/cjs",
+		
 		"forceConsistentCasingInFileNames": true,
 		"listEmittedFiles": false,
 		"noFallthroughCasesInSwitch": true,
@@ -17,7 +19,6 @@
 		"esModuleInterop": true,
 		"moduleResolution": "Node",
 		"declaration": true,
-		"outDir": "./dist/cjs",
 
 		"baseUrl": "./packages",
 		"paths": {

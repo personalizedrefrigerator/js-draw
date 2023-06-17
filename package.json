@@ -2,6 +2,12 @@
   "name": "@js-draw/monorepo",
   "private": true,
   "version": "0.0.0",
+  "scripts": {
+    "lint": "eslint .",
+    "linter-precommit": "eslint --fix --ext .js --ext .ts",
+    "lint-staged": "lint-staged",
+    "lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts"
+  },
   "workspaces": [
     "packages/*",
     "docs/examples/*",
@@ -9,6 +15,10 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "lerna": "^7.0.1"
+    "lerna": "^7.0.1",
+    "eslint": "^8.42.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.9",
+    "@typescript-eslint/parser": "^5.59.9",
+    "lint-staged": "^13.2.2"
   }
 }

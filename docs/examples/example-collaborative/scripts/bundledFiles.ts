@@ -1,5 +1,5 @@
 import { dirname } from 'path';
-import BundledFile from '../../../../build_tools/BundledFile';
+import { BundledFile } from '@js-draw/build-tool';
 
 const rootDir = dirname(__dirname);
 export const bundledFiles: BundledFile[] = [
