@@ -150,10 +150,10 @@ export default class BundledFile {
 	public startWatching() {
 		const compiler = webpack(this.getWebpackOptions('development'));
 		const watchOptions = {
+			followSymlinks: true,
 			ignored: [
-				'**/node_modules',
-				'**/dist',
-			],
+				'node_modules/',
+			]
 		};
 
 		console.info('Watching bundle: ', this.bundleName);

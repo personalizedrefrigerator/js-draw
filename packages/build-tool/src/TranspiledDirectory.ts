@@ -224,46 +224,53 @@ class TranspiledDirectory {
 			const updatingFile: Record<string, boolean> = {};
 			const postUpdateFile: Record<string, ()=>Promise<void>> = {};
 
-			if (!ts.sys.watchDirectory) {
+			if (!ts.sys.watchFile) {
 				throw new Error('ts.sys.watchDirectory is null. (Unsupported on the current platform?)');
 			}
 
-			const recursive = true;
-			const watcher = ts.sys.watchDirectory(this.inDir, async (fileName) => {
-				console.log(`Watcher: ${fileName} updated`);
+			// TODO: This currently doesn't watch for added/removed files.
+			console.warn('Warning: This watcher currently doesn\'t check for added/removed files and directories');
 
-				const updateFile = async () => {
-					if (fs.existsSync(fileName)) {
-						associatedFiles[fileName] = [];
-						try {
-							updatingFile[fileName] = true;
-							await emitFile('cjs', fileName);
-							await emitFile('mjs', fileName);
-						} finally {
-							updatingFile[fileName] = false;
-						}
+			const watchers: ts.FileWatcher[] = [];
 
-						if (postUpdateFile[fileName]) {
-							void postUpdateFile[fileName]();
-							delete postUpdateFile[fileName];
+			for (const fileName of targetFiles) {
+				const watcher = ts.sys.watchFile?.(fileName, () => {
+					console.log(`Watcher: ${fileName} updated`);
+
+					const updateFile = async () => {
+						if (fs.existsSync(fileName)) {
+							associatedFiles[fileName] = [];
+							try {
+								updatingFile[fileName] = true;
+								await emitFile('cjs', fileName);
+								await emitFile('mjs', fileName);
+							} finally {
+								updatingFile[fileName] = false;
+							}
+
+							if (postUpdateFile[fileName]) {
+								void postUpdateFile[fileName]();
+								delete postUpdateFile[fileName];
+							}
+						} else {
+							for (const path of associatedFiles[fileName] ?? []) {
+								fs.unlinkSync(path);
+							}
 						}
+					};
+
+					if (updatingFile[fileName]) {
+						postUpdateFile[fileName] = updateFile;
 					} else {
-						for (const path of associatedFiles[fileName] ?? []) {
-							fs.unlinkSync(path);
-						}
+						updateFile();
 					}
-				};
-
-				if (updatingFile[fileName]) {
-					postUpdateFile[fileName] = updateFile;
-				} else {
-					updateFile();
-				}
-			}, recursive);
+				});
+				watchers.push(watcher);
+			}
 
 			return {
 				stop() {
-					watcher.close();
+					watchers.forEach(watcher => watcher.close());
 				}
 			};
 		}

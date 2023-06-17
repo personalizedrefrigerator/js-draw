@@ -35,6 +35,9 @@ bash$ npm install
 
 # Re-build when files change
 bash$ npm run watch
+
+# If you're making changes to packages/js-draw, you may also want to run
+# npm run watch in the packages/js-draw directory.
 ```
 
 In a separate terminal, run a local web-server. Use the web-server to open the `example.html` file.
