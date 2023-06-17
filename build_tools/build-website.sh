@@ -5,7 +5,7 @@
 # AFTER installing dependencies and running tests.
 
 # Ref: https://stackoverflow.com/a/1482133
-script_dir=$(dirname -- "$0")
+script_dir=$(dirname -- $(realpath "$0"))
 root_dir=$(dirname -- "$script_dir")
 
 cd "$root_dir"
