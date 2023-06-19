@@ -13,6 +13,10 @@ export interface Localization {
 
 	confirmUnsavedChanges: string;
 
+	advancedOptions: string;
+	pasteSVGTextDataHint: string;
+	submit: string;
+
 	save: string;
 	delete: string;
 	reallyDelete: (imageName: string) => string;
@@ -39,6 +43,10 @@ localizationTables.en = {
 	templateDarkGrid: 'Dark Grid',
 
 	confirmUnsavedChanges: 'There may be unsaved changes. Really quit?',
+
+	advancedOptions: 'Advanced...',
+	pasteSVGTextDataHint: 'Paste SVG text data here',
+	submit: 'Submit',
 
 	newImageHeading: 'New Image',
 	new: 'New',

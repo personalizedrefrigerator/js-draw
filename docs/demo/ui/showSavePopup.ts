@@ -23,7 +23,7 @@ const showSavePopup = (
 	// Called when data has been saved successfully.
 	onSaveSuccess: ()=>void,
 ) => {
-	const imgHTML = img.outerHTML;
+	let imgHTML = img.outerHTML;
 
 	const popupContainer = document.createElement('div');
 	popupContainer.classList.add('popupContainer');
@@ -176,6 +176,16 @@ const showSavePopup = (
 	previewSVGButton.onclick = () => {
 		const messageContainer = popupDoc.createElement('p');
 		const svgTextContainer = popupDoc.createElement('textarea');
+		const saveChangesButton = popupDoc.createElement('button');
+
+		// Add a button that allows saving changes made in the textarea.
+		saveChangesButton.style.display = 'none';
+		saveChangesButton.innerText = localization.save;
+		saveChangesButton.onclick = async () => {
+			imgHTML = svgTextContainer.value;
+			await writeImage(imgHTML);
+			saveChangesButton.style.display = 'none';
+		};
 
 		const imagePreview = popupDoc.createElement('img');
 		imagePreview.style.width = '150px';
@@ -191,17 +201,18 @@ const showSavePopup = (
 
 			imagePreview.src = 'data:image/svg+xml;base64,' + encoded;
 		};
-		updatePreview(img.outerHTML);
+		updatePreview(imgHTML);
 
 		messageContainer.innerText = localization.previewLabel;
 		svgTextContainer.value = imgHTML;
 
 		svgTextContainer.oninput = () => {
 			updatePreview(svgTextContainer.value);
+			saveChangesButton.style.display = 'block';
 		};
 
 		previewRegion.replaceChildren(
-			messageContainer, svgTextContainer, imagePreview
+			messageContainer, svgTextContainer, imagePreview, saveChangesButton
 		);
 	};
 
@@ -286,17 +297,17 @@ const showSavePopup = (
 	popupControlsArea.appendChild(previewPNGButton);
 	popupControlsArea.appendChild(downloadButton);
 
-	let imageSize = `${Math.round(imgHTML.length / 1024 * 10) / 10} KiB`;
-	if (imgHTML.length > 1024 * 1024) {
-		imageSize = `${Math.round(imgHTML.length / 1024 * 10 / 1024) / 10} MiB`;
-	}
+	const writeImage = async (svgText: string) => {
+		let imageSize = `${Math.round(svgText.length / 1024 * 10) / 10} KiB`;
+		if (svgText.length > 1024 * 1024) {
+			imageSize = `${Math.round(svgText.length / 1024 * 10 / 1024) / 10} MiB`;
+		}
 
-	void (async () => {
 		let saveStatus = localization.savedAs(imageSaver.title);
 		let error;
 
 		try {
-			await imageSaver.write(imgHTML);
+			await imageSaver.write(svgText);
 
 			if (imageSaver.updatePreview) {
 				const format = undefined;
@@ -319,7 +330,8 @@ const showSavePopup = (
 		if (!error) {
 			onSaveSuccess();
 		}
-	})();
+	};
+	void writeImage(imgHTML);
 };
 
 export default showSavePopup;

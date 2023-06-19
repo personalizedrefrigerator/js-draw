@@ -56,13 +56,27 @@ const makeNewImageDialog = (
 
 	const fromFileArea = makeCreationOption('From file');
 	const fromTemplateArea = makeCreationOption('From template');
+	const fromTextboxArea = makeCreationOption('From SVG text');
 
 	fromTemplateArea.classList.add('from-template-container');
 
+	// From file
 	const fileInput = document.createElement('input');
 	fileInput.type = 'file';
 	fileInput.setAttribute('accept', 'image/svg,image/svg+xml,text/plain');
 	fromFileArea.appendChild(fileInput);
+
+	// From textbox
+	const svgTextbox = document.createElement('textarea');
+	svgTextbox.setAttribute('placeholder', localization.pasteSVGTextDataHint);
+	const acceptSVGTextboxButton = document.createElement('button');
+	acceptSVGTextboxButton.innerText = localization.submit;
+
+	acceptSVGTextboxButton.onclick = () => {
+		closeDialogWithStringResult(svgTextbox.value);
+	};
+
+	fromTextboxArea.replaceChildren(svgTextbox, acceptSVGTextboxButton);
 
 	// Danger: svgData is not sanitized!
 	const addTemplateOption = (title: string, svgData: string) => {
@@ -85,7 +99,12 @@ const makeNewImageDialog = (
 	addTemplateOption(localization.templateLightGrid, templates.lightGrid);
 	addTemplateOption(localization.templateDarkGrid, templates.darkGrid);
 
-	container.replaceChildren(titleElem, fromTemplateArea, fromFileArea);
+	const advancedArea = document.createElement('details');
+	const advancedAreaSummary = document.createElement('summary');
+	advancedAreaSummary.innerText = localization.advancedOptions;
+	advancedArea.replaceChildren(advancedAreaSummary, fromTextboxArea);
+
+	container.replaceChildren(titleElem, fromTemplateArea, fromFileArea, advancedArea);
 	background.appendChild(container);
 	document.body.appendChild(background);
 
