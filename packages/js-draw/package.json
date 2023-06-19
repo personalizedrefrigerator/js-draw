@@ -66,7 +66,6 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "test": "jest",
     "dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
     "dist": "npm run build && npm run dist-test",
     "build": "rm -rf ./dist && mkdir dist && build-tool build",
