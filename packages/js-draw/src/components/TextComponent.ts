@@ -90,22 +90,35 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		return new Rect2(0, -heightEst * 2/3, widthEst, heightEst);
 	}
 
-	// Returns the bounding box of `text`. This is approximate if no Canvas is available.
-	private static getTextDimens(text: string, style: TextRenderingStyle): Rect2 {
+	// Returns a set of TextMetrics for the given text, if a canvas is available.
+	private static getTextMetrics(text: string, style: TextRenderingStyle): TextMetrics|null {
 		TextComponent.textMeasuringCtx ??= document.createElement('canvas').getContext('2d') ?? null;
 		if (!TextComponent.textMeasuringCtx) {
-			return this.estimateTextDimens(text, style);
+			return null;
 		}
 
 		const ctx = TextComponent.textMeasuringCtx;
 		TextComponent.applyTextStyles(ctx, style);
 
-		const measure = ctx.measureText(text);
+		return ctx.measureText(text);
+	}
+
+	// Returns the bounding box of `text`. This is approximate if no Canvas is available.
+	private static getTextDimens(text: string, style: TextRenderingStyle): Rect2 {
+		const metrics = this.getTextMetrics(text, style);
+
+		if (!metrics) {
+			return this.estimateTextDimens(text, style);
+		}
 
 		// Text is drawn with (0,0) at the bottom left of the baseline.
-		const textY = -measure.actualBoundingBoxAscent;
-		const textHeight = measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent;
-		return new Rect2(0, textY, measure.width, textHeight);
+		const textY = -metrics.actualBoundingBoxAscent;
+		const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+		return new Rect2(0, textY, metrics.width, textHeight);
+	}
+
+	public static getFontHeight(style: TextRenderingStyle): number {
+		return style.size;
 	}
 
 	private computeUntransformedBBoxOfPart(part: TextElement) {
@@ -343,11 +356,12 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		let lastComponent: TextComponent|null = null;
 		const components: TextComponent[] = [];
 
+		const lineMargin = Math.round(this.getFontHeight(style));
+
+		let position = Vec2.zero;
 		for (const line of lines) {
-			let position = Vec2.zero;
 			if (lastComponent) {
-				const lineMargin = Math.floor(style.size);
-				position = lastComponent.getBBox().bottomLeft.plus(Vec2.unitY.times(lineMargin));
+				position = position.plus(Vec2.unitY.times(lineMargin));
 			}
 
 			const component = new TextComponent([ line ], Mat33.translation(position), style);

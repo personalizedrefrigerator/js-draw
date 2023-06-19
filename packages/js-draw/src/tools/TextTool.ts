@@ -13,7 +13,7 @@ import Erase from '../commands/Erase';
 import uniteCommands from '../commands/uniteCommands';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 
-const overlayCssClass = 'textEditorOverlay';
+const overlayCSSClass = 'textEditorOverlay';
 export default class TextTool extends BaseTool {
 	private textStyle: TextRenderingStyle;
 
@@ -37,14 +37,14 @@ export default class TextTool extends BaseTool {
 		};
 
 		this.textEditOverlay = document.createElement('div');
-		this.textEditOverlay.classList.add(overlayCssClass);
+		this.textEditOverlay.classList.add(overlayCSSClass);
 		this.editor.addStyleSheet(`
-			.${overlayCssClass} {
+			.${overlayCSSClass} {
 				height: 0;
 				overflow: visible;
 			}
 
-			.${overlayCssClass} textarea {
+			.${overlayCSSClass} textarea {
 				background-color: rgba(0, 0, 0, 0);
 
 				white-space: pre;
@@ -63,11 +63,17 @@ export default class TextTool extends BaseTool {
 		this.editor.notifier.on(EditorEventType.ViewportChanged, () => this.updateTextInput());
 	}
 
-	private getTextAscent(text: string, style: TextRenderingStyle): number {
+	private initTextMeasuringCanvas() {
 		this.textMeasuringCtx ??= document.createElement('canvas').getContext('2d');
+	}
+
+	private getTextAscent(text: string, style: TextRenderingStyle): number {
+		this.initTextMeasuringCanvas();
 		if (this.textMeasuringCtx) {
+			this.textMeasuringCtx.textBaseline = 'alphabetic';
 			TextComponent.applyTextStyles(this.textMeasuringCtx, style);
-			return this.textMeasuringCtx.measureText(text).actualBoundingBoxAscent;
+			const measurement = this.textMeasuringCtx.measureText(text);
+			return measurement.fontBoundingBoxAscent ?? measurement.actualBoundingBoxAscent;
 		}
 
 		// Estimate
@@ -134,6 +140,7 @@ export default class TextTool extends BaseTool {
 		const textScreenPos = viewport.canvasToScreen(this.textTargetPosition);
 		this.textInputElem.placeholder = this.localizationTable.enterTextToInsert;
 		this.textInputElem.style.fontFamily = this.textStyle.fontFamily;
+		this.textInputElem.style.fontStyle = this.textStyle.fontStyle ?? '';
 		this.textInputElem.style.fontVariant = this.textStyle.fontVariant ?? '';
 		this.textInputElem.style.fontWeight = this.textStyle.fontWeight ?? '';
 		this.textInputElem.style.fontSize = `${this.textStyle.size}px`;
@@ -147,14 +154,21 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.width = `${this.textInputElem.scrollWidth}px`;
 		this.textInputElem.style.height = `${this.textInputElem.scrollHeight}px`;
 
-		// Get the ascent based on the font, using a character that is tall in most fonts.
-		const tallCharacter = '⎢';
-		const ascent = this.getTextAscent(tallCharacter, this.textStyle);
+		// Get the ascent based on the font, using a string of characters
+		// that is tall in most fonts.
+		const tallText = 'Testing!';
+		const ascent = this.getTextAscent(tallText, this.textStyle);
+		const vertAdjust = ascent;
 
 		const rotation = this.textRotation + viewport.getRotationAngle();
 		const scale: Mat33 = this.getTextScaleMatrix();
-		this.textInputElem.style.transform = `${scale.toCSSMatrix()} rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-ascent}px)`;
+		this.textInputElem.style.transform =
+			`${scale.toCSSMatrix()} rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-vertAdjust}px)`;
 		this.textInputElem.style.transformOrigin = 'top left';
+
+		// Match the line height of default rendered text.
+		const lineHeight = Math.floor(this.textStyle.size);
+		this.textInputElem.style.lineHeight = `${lineHeight}px`;
 	}
 
 	private startTextInput(textCanvasPos: Vec2, initialText: string) {
