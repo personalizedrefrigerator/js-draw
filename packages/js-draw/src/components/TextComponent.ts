@@ -12,6 +12,22 @@ import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } f
 
 const componentTypeId = 'text';
 
+export enum TextTransformMode {
+	/** Absolutely positioned in both the X and Y dimensions. */
+	ABSOLUTE_XY,
+
+	/** Relatively positioned in both the X and Y dimensions. */
+	RELATIVE_XY,
+
+	/**Relatively positioned in the X direction, absolutely positioned in the Y direction. */
+	RELATIVE_X_ABSOLUTE_Y,
+
+	/**Relatively positioned in the Y direction, absolutely positioned in the X direction. */
+	RELATIVE_Y_ABSOLUTE_X,
+}
+
+type TextElement = TextComponent|string;
+
 /**
  * Displays text.
  */
@@ -27,9 +43,14 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	 * @see {@link fromLines}
 	 */
 	public constructor(
-		protected readonly textObjects: Array<string|TextComponent>,
+		protected readonly textObjects: Array<TextElement>,
+
+		// Transformation relative to this component's parent element.
 		private transform: Mat33,
 		private style: TextRenderingStyle,
+
+		// @internal
+		private transformMode: TextTransformMode = TextTransformMode.ABSOLUTE_XY,
 	) {
 		super(componentTypeId);
 		this.recomputeBBox();
@@ -47,12 +68,13 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		const fontFamily = style.fontFamily.match(/\s/) ? style.fontFamily.replace(/["]/g, '\\"') : style.fontFamily;
 
 		ctx.font =	[
-			(style.size ?? 12) + 'px',
+			style.fontStyle ?? '',
 			style.fontWeight ?? '',
-			`${fontFamily}`,
-			style.fontWeight
+			(style.size ?? 12) + 'px',
+			`${fontFamily}`
 		].join(' ');
 
+		// TODO: Support RTL
 		ctx.textAlign = 'left';
 	}
 
@@ -86,21 +108,22 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		return new Rect2(0, textY, measure.width, textHeight);
 	}
 
-	private computeBBoxOfPart(part: string|TextComponent) {
+	private computeUntransformedBBoxOfPart(part: TextElement) {
 		if (typeof part === 'string') {
-			const textBBox = TextComponent.getTextDimens(part, this.style);
-			return textBBox.transformedBoundingBox(this.transform);
+			return TextComponent.getTextDimens(part, this.style);
 		} else {
-			const bbox = part.contentBBox.transformedBoundingBox(this.transform);
-			return bbox;
+			return part.contentBBox;
 		}
 	}
 
 	private recomputeBBox() {
 		let bbox: Rect2|null = null;
+		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const textObject of this.textObjects) {
-			const currentBBox = this.computeBBoxOfPart(textObject);
+			const transform = cursor.update(textObject);
+			const currentBBox = this.computeUntransformedBBoxOfPart(textObject).transformedBoundingBox(transform);
+
 			bbox ??= currentBBox;
 			bbox = bbox.union(currentBBox);
 		}
@@ -109,13 +132,15 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	}
 
 	private renderInternal(canvas: AbstractRenderer) {
-		const cursor = this.transform;
+		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const textObject of this.textObjects) {
+			const transform = cursor.update(textObject);
+
 			if (typeof textObject === 'string') {
-				canvas.drawText(textObject, cursor, this.style);
+				canvas.drawText(textObject, transform, this.style);
 			} else {
-				canvas.pushTransform(cursor);
+				canvas.pushTransform(transform);
 				textObject.renderInternal(canvas);
 				canvas.popTransform();
 			}
@@ -133,24 +158,23 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	}
 
 	public intersects(lineSegment: LineSegment2): boolean {
-
-		// Convert canvas space to internal space.
-		const invTransform = this.transform.inverse();
-		const p1InThisSpace = invTransform.transformVec2(lineSegment.p1);
-		const p2InThisSpace = invTransform.transformVec2(lineSegment.p2);
-		lineSegment = new LineSegment2(p1InThisSpace, p2InThisSpace);
+		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const subObject of this.textObjects) {
+			// Convert canvas space to internal space relative to the current object.
+			const invTransform = cursor.update(subObject).inverse();
+			const transformedLine = lineSegment.transformedBy(invTransform);
+
 			if (typeof subObject === 'string') {
 				const textBBox = TextComponent.getTextDimens(subObject, this.style);
 
 				// TODO: Use a better intersection check. Perhaps draw the text onto a CanvasElement and
 				// use pixel-testing to check for intersection with its contour.
-				if (textBBox.getEdges().some(edge => lineSegment.intersection(edge) !== null)) {
+				if (textBBox.getEdges().some(edge => transformedLine.intersection(edge) !== null)) {
 					return true;
 				}
 			} else {
-				if (subObject.intersects(lineSegment)) {
+				if (subObject.intersects(transformedLine)) {
 					return true;
 				}
 			}
@@ -282,7 +306,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 		const style = textStyleFromJSON(json.style);
 
-		const textObjects: Array<string|TextComponent> = json.textObjects.map((data: any) => {
+		const textObjects: Array<TextElement> = json.textObjects.map((data: any) => {
 			if ((data.text ?? null) !== null) {
 				return data.text;
 			}
@@ -333,6 +357,60 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 		return new TextComponent(components, transform, style);
 	}
+
+	private static TextCursor = class {
+		public transform: Mat33 = Mat33.identity;
+		public constructor(
+			private parentTransform: Mat33 = Mat33.identity, private parentStyle: TextRenderingStyle
+		) { }
+
+		/**
+		 * Based on previous calls to `update`, returns the transformation of
+		 * the given `element` (including the parentTransform given to this cursor's
+		 * constructor).
+		 *
+		 * The result does not take into account
+		 */
+		public update(elem: TextElement) {
+			let elementTransform = Mat33.identity;
+			let elemInternalTransform = Mat33.identity;
+			let textSize;
+			if (typeof(elem) === 'string') {
+				textSize = TextComponent.getTextDimens(elem, this.parentStyle);
+			} else {
+				// TODO: Double-check whether we need to take elem.transform into account here.
+				// elementTransform = elem.transform;
+				elemInternalTransform = elem.transform;
+				textSize = elem.getBBox();
+			}
+			const positioning = typeof(elem) === 'string' ? TextTransformMode.RELATIVE_XY : elem.transformMode;
+
+			if (positioning === TextTransformMode.RELATIVE_XY) {
+				// Position relative to the previous element's transform.
+				elementTransform = this.transform.rightMul(elementTransform);
+			} else if (positioning === TextTransformMode.RELATIVE_X_ABSOLUTE_Y || positioning === TextTransformMode.RELATIVE_Y_ABSOLUTE_X) {
+				// Zero the absolute component of this.transform's translation
+				const transform = this.transform.mapEntries((component, [row, col]) => {
+					if (positioning === TextTransformMode.RELATIVE_X_ABSOLUTE_Y) {
+						return row === 1 && col === 2 ? 0 : component;
+					} else if (positioning === TextTransformMode.RELATIVE_Y_ABSOLUTE_X) {
+						return row === 0 && col === 2 ? 0 : component;
+					}
+
+					throw new Error('Unreachable');
+					return 0;
+				});
+
+				elementTransform = transform.rightMul(elementTransform);
+			}
+
+			// Update this.transform so that future calls to update return correct values.
+			const endShiftTransform = Mat33.translation(Vec2.of(textSize.width, 0));
+			this.transform = elementTransform.rightMul(elemInternalTransform).rightMul(endShiftTransform);
+
+			return this.parentTransform.rightMul(elementTransform);
+		}
+	};
 }
 
 AbstractComponent.registerComponent(componentTypeId, (data: string) => TextComponent.deserializeFromString(data));

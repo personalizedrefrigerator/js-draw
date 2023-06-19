@@ -2,9 +2,19 @@ import RenderingStyle, { cloneStyle, styleFromJSON, styleToJSON } from './Render
 
 export interface TextRenderingStyle {
 	readonly size: number;
+
+	/** Name of the font. */
 	readonly fontFamily: string;
+
+	/** For example, `bold`. Like CSS `font-weight`. */
 	readonly fontWeight?: string;
+
+	/** For example, `italic`. Like CSS `font-style`. */
+	readonly fontStyle?: string;
+
 	readonly fontVariant?: string;
+
+	/** Fill and stroke of the text. */
 	readonly renderingStyle: RenderingStyle;
 }
 

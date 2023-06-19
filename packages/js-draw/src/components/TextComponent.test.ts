@@ -1,6 +1,7 @@
 import Color4 from '../Color4';
 import EditorImage from '../EditorImage';
 import Mat33 from '../math/Mat33';
+import { Vec2 } from '../math/Vec2';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import createEditor from '../testing/createEditor';
 import AbstractComponent from './AbstractComponent';
@@ -95,5 +96,28 @@ describe('TextComponent', () => {
 
 		expect(text1.getStyle().color).objEq(Color4.red);
 		expect(text2.getTextStyle()).toMatchObject(originalStyle);
+	});
+
+	describe('should position text components relatively or absolutely', () => {
+		const baseStyle: TextRenderingStyle = {
+			size: 12,
+			fontFamily: 'sans-serif',
+			renderingStyle: { fill: Color4.red },
+		};
+
+		it('strings should be placed relative to one another', () => {
+			const str1 = 'test';
+			const str2 = 'test2';
+
+			const container = new TextComponent([ str1, str2 ], Mat33.identity, baseStyle);
+
+			// Create separate components for str1 and str2 so we can check their individual bounding boxes
+			const str1Component = new TextComponent([ str1 ], Mat33.identity, baseStyle);
+			const str2Component = new TextComponent([ str2 ], Mat33.identity, baseStyle);
+
+			const widthSum = str1Component.getBBox().width + str2Component.getBBox().width;
+			const maxHeight = Math.max(str1Component.getBBox().height, str2Component.getBBox().height);
+			expect(container.getBBox().size).objEq(Vec2.of(widthSum, maxHeight));
+		});
 	});
 });

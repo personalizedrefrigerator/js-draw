@@ -4,7 +4,7 @@ import BackgroundComponent, { BackgroundType, backgroundTypeToClassNameMap, imag
 import ImageComponent from './components/ImageComponent';
 import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
-import TextComponent from './components/TextComponent';
+import TextComponent, { TextTransformMode } from './components/TextComponent';
 import UnknownSVGObject from './components/UnknownSVGObject';
 import Mat33 from './math/Mat33';
 import Path from './math/Path';
@@ -353,12 +353,35 @@ export default class SVGLoader implements ImageLoader {
 		const style: TextRenderingStyle = {
 			size: fontSize,
 			fontFamily: computedStyles.fontFamily || elem.style.fontFamily || 'sans-serif',
+			fontWeight: computedStyles.fontWeight || elem.style.fontWeight || undefined,
+			fontStyle: computedStyles.fontStyle || elem.style.fontStyle || undefined,
 			renderingStyle: this.getStyle(elem, computedStyles),
 		};
 
 		const supportedAttrs: string[] = [];
-		const transform = this.getTransform(elem, supportedAttrs, computedStyles);
-		const result = new TextComponent(contentList, transform, style);
+		let transform = this.getTransform(elem, supportedAttrs, computedStyles);
+		let transformMode = TextTransformMode.ABSOLUTE_XY;
+
+		const elemDX = elem.getAttribute('dx');
+		if (elemDX) {
+			transformMode = TextTransformMode.RELATIVE_X_ABSOLUTE_Y;
+			transform = transform.rightMul(Mat33.translation(Vec2.of(parseFloat(elemDX), 0)));
+			supportedAttrs.push('dx');
+		}
+
+		const elemDY = elem.getAttribute('dy');
+		if (elemDY) {
+			if (transformMode === TextTransformMode.RELATIVE_X_ABSOLUTE_Y) {
+				transformMode = TextTransformMode.RELATIVE_XY;
+			} else {
+				transformMode = TextTransformMode.RELATIVE_Y_ABSOLUTE_X;
+			}
+
+			transform = transform.rightMul(Mat33.translation(Vec2.of(0, parseFloat(elemDY))));
+			supportedAttrs.push('dy');
+		}
+
+		const result = new TextComponent(contentList, transform, style, transformMode);
 		this.attachUnrecognisedAttrs(
 			result,
 			elem,

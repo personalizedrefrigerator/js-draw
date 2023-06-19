@@ -301,6 +301,9 @@ export default class Mat33 {
 	}
 
 	/**
+	 * Returns a new `Mat33` where each entry is the output of the function
+	 * `mapping`.
+	 *
 	 * @example
 	 * ```
 	 * new Mat33(
@@ -313,11 +316,11 @@ export default class Mat33 {
 	 * //   ⎣ 6, 7, 8 ⎦
 	 * ```
 	 */
-	public mapEntries(mapping: (component: number)=>number): Mat33 {
+	public mapEntries(mapping: (component: number, rowcol: [number, number])=>number): Mat33 {
 		return new Mat33(
-			mapping(this.a1), mapping(this.a2), mapping(this.a3),
-			mapping(this.b1), mapping(this.b2), mapping(this.b3),
-			mapping(this.c1), mapping(this.c2), mapping(this.c3),
+			mapping(this.a1, [0, 0]), mapping(this.a2, [0, 1]), mapping(this.a3, [0, 2]),
+			mapping(this.b1, [1, 0]), mapping(this.b2, [1, 1]), mapping(this.b3, [1, 2]),
+			mapping(this.c1, [2, 0]), mapping(this.c2, [2, 1]), mapping(this.c3, [2, 2]),
 		);
 	}
 

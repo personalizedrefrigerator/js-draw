@@ -15,6 +15,11 @@ export const renderedStylesheetId = 'js-draw-style-sheet';
 
 const svgNameSpace = 'http://www.w3.org/2000/svg';
 
+const defaultTextStyle: Partial<TextRenderingStyle> = {
+	fontWeight: '400',
+	fontStyle: 'normal',
+};
+
 /**
  * Renders onto an `SVGElement`.
  *
@@ -167,7 +172,7 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	private textContainer: SVGTextElement|null = null;
 	private textContainerTransform: Mat33|null = null;
-	private textParentStyle: TextRenderingStyle|null = null;
+	private textParentStyle: Partial<TextRenderingStyle>|null = defaultTextStyle;
 	public drawText(text: string, transform: Mat33, style: TextRenderingStyle): void {
 		const applyTextStyles = (elem: SVGTextElement|SVGTSpanElement, style: TextRenderingStyle) => {
 			if (style.fontFamily !== this.textParentStyle?.fontFamily) {
@@ -178,6 +183,9 @@ export default class SVGRenderer extends AbstractRenderer {
 			}
 			if (style.fontWeight !== this.textParentStyle?.fontWeight) {
 				elem.style.fontWeight = style.fontWeight ?? '';
+			}
+			if (style.fontStyle !== this.textParentStyle?.fontStyle) {
+				elem.style.fontStyle = style.fontStyle ?? '';
 			}
 			if (style.size !== this.textParentStyle?.size) {
 				elem.style.fontSize = style.size + 'px';
@@ -214,7 +222,7 @@ export default class SVGRenderer extends AbstractRenderer {
 			if (this.objectLevel > 0) {
 				this.textContainer = container;
 				this.textContainerTransform = transform;
-				this.textParentStyle = style;
+				this.textParentStyle = { ...defaultTextStyle, ...style };
 			}
 		} else {
 			const elem = document.createElementNS(svgNameSpace, 'tspan');
@@ -257,7 +265,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		this.lastPathString = [];
 		this.lastPathStyle = null;
 		this.textContainer = null;
-		this.textParentStyle = null;
+		this.textParentStyle = defaultTextStyle;
 		this.objectElems = [];
 	}
 
