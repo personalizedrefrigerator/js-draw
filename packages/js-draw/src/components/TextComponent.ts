@@ -392,8 +392,10 @@ export default class TextComponent extends AbstractComponent implements Restylea
 				// Zero the absolute component of this.transform's translation
 				const transform = this.transform.mapEntries((component, [row, col]) => {
 					if (positioning === TextTransformMode.RELATIVE_X_ABSOLUTE_Y) {
+						// Zero the y component of this.transform's translation
 						return row === 1 && col === 2 ? 0 : component;
 					} else if (positioning === TextTransformMode.RELATIVE_Y_ABSOLUTE_X) {
+						// Zero the x component of this.transform's translation
 						return row === 0 && col === 2 ? 0 : component;
 					}
 

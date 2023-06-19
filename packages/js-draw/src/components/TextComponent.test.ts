@@ -5,7 +5,7 @@ import { Vec2 } from '../math/Vec2';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import createEditor from '../testing/createEditor';
 import AbstractComponent from './AbstractComponent';
-import TextComponent from './TextComponent';
+import TextComponent, { TextTransformMode } from './TextComponent';
 
 
 describe('TextComponent', () => {
@@ -98,7 +98,7 @@ describe('TextComponent', () => {
 		expect(text2.getTextStyle()).toMatchObject(originalStyle);
 	});
 
-	describe('should position text components relatively or absolutely', () => {
+	describe('should position text components relatively or absolutely (bounding box tests)', () => {
 		const baseStyle: TextRenderingStyle = {
 			size: 12,
 			fontFamily: 'sans-serif',
@@ -118,6 +118,87 @@ describe('TextComponent', () => {
 			const widthSum = str1Component.getBBox().width + str2Component.getBBox().width;
 			const maxHeight = Math.max(str1Component.getBBox().height, str2Component.getBBox().height);
 			expect(container.getBBox().size).objEq(Vec2.of(widthSum, maxHeight));
+		});
+
+		it('RELATIVE_X_ABSOLUTE_Y should work (relatively positioned along x, absolutely along y)', () => {
+			const component1 = new TextComponent([ 'test' ], Mat33.identity, baseStyle);
+
+			const componentTranslation = Vec2.of(10, 10);
+			const component2 = new TextComponent(
+				[ 'relatively' ],
+				Mat33.translation(componentTranslation),
+				baseStyle,
+				TextTransformMode.RELATIVE_X_ABSOLUTE_Y
+			);
+
+			const component3 = new TextComponent(
+				[ 'more of a test...' ],
+				Mat33.translation(componentTranslation),
+				baseStyle,
+				TextTransformMode.RELATIVE_X_ABSOLUTE_Y
+			);
+
+
+			const container = new TextComponent([ component1, component2, component3 ], Mat33.identity, baseStyle);
+			const expectedWidth =
+				component1.getBBox().width
+				// x should take the translation from each component into account.
+				+ componentTranslation.x + component2.getBBox().width
+				+ componentTranslation.x + component3.getBBox().width;
+			const expectedHeight = Math.max(
+				component1.getBBox().height,
+
+				// Absolute y: Should *not* take into account both components' y translations
+				componentTranslation.y + component3.getBBox().height
+			);
+			expect(container.getBBox().size).objEq(Vec2.of(expectedWidth, expectedHeight));
+		});
+
+		it('RELATIVE_Y_ABSOLUTE_X should work (relatively positioned along y, absolutely along x)', () => {
+			const firstComponentTranslation = Vec2.of(1000, 1000);
+			const component1 = new TextComponent(
+				[ '...' ],
+
+				// The translation of the first component shouldn't affect the Y size of the bounding box.
+				Mat33.translation(firstComponentTranslation),
+
+				baseStyle);
+
+			const componentTranslation = Vec2.of(10, 20);
+			const component2 = new TextComponent(
+				[ 'Test!' ],
+				Mat33.translation(componentTranslation),
+				baseStyle,
+				TextTransformMode.RELATIVE_Y_ABSOLUTE_X
+			);
+
+			const component3 = new TextComponent(
+				[ 'Even more of a test.' ],
+				Mat33.translation(componentTranslation),
+				baseStyle,
+				TextTransformMode.RELATIVE_Y_ABSOLUTE_X
+			);
+
+
+			const container = new TextComponent([ component1, component2, component3 ], Mat33.identity, baseStyle);
+			const expectedWidth =
+				component1.getBBox().width
+
+				// Space between the start of components 2 and 3 and the start of component 1
+				+ firstComponentTranslation.x - componentTranslation.x;
+
+			const expectedHeight =
+				// Don't include component1.bbox.height: component1 overlaps with component 2 completely in y
+				// similarly, component 2 overlaps completely with component3 in y.
+				//
+				// Note that while relative positioning is relative to the right edge of the baseline of the previous
+				// item (when in left-to-right mode). Thus, x is adjusted automatically by the text width, while
+				// y remains the same (if there is no additional translation).
+				+ componentTranslation.y
+				+ componentTranslation.y
+				+ component3.getBBox().height;
+
+			expect(container.getBBox().size).objEq(Vec2.of(expectedWidth, expectedHeight));
 		});
 	});
 });
