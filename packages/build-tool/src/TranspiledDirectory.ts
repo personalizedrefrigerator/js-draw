@@ -4,7 +4,6 @@
 import path, { dirname } from 'path';
 import * as ts from 'typescript';
 import * as fs from 'fs';
-//import { writeFile } from 'fs/promises';
 
 import forEachFileInDirectory from './forEachFileInDirectory';
 import { mkdir, writeFile } from 'fs/promises';
@@ -234,8 +233,12 @@ class TranspiledDirectory {
 			const watchers: ts.FileWatcher[] = [];
 
 			for (const fileName of targetFiles) {
+				fileVersions[fileName] ??= { version: 0 };
+
 				const watcher = ts.sys.watchFile?.(fileName, () => {
 					console.log(`Watcher: ${fileName} updated`);
+					fileVersions[fileName] ??= { version: 0 };
+					fileVersions[fileName].version ++;
 
 					const updateFile = async () => {
 						if (fs.existsSync(fileName)) {
