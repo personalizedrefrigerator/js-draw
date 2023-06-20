@@ -117,7 +117,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		return new Rect2(0, textY, metrics.width, textHeight);
 	}
 
-	public static getFontHeight(style: TextRenderingStyle): number {
+	private static getFontHeight(style: TextRenderingStyle): number {
 		return style.size;
 	}
 
