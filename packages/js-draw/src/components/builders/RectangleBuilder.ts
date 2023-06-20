@@ -1,6 +1,6 @@
 import Mat33 from '../../math/Mat33';
-import Path from '../../math/Path';
-import Rect2 from '../../math/Rect2';
+import Path from '../../math/shapes/Path';
+import Rect2 from '../../math/shapes/Rect2';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';

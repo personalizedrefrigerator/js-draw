@@ -2,12 +2,12 @@ import { EditorEventType, PointerEvt } from '../types';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
 import { Point2, Vec2 } from '../math/Vec2';
-import LineSegment2 from '../math/LineSegment2';
+import LineSegment2 from '../math/shapes/LineSegment2';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import { PointerDevice } from '../Pointer';
 import Color4 from '../Color4';
-import Rect2 from '../math/Rect2';
+import Rect2 from '../math/shapes/Rect2';
 import RenderingStyle from '../rendering/RenderingStyle';
 
 export default class Eraser extends BaseTool {

@@ -1,5 +1,5 @@
 import Path, { PathCommandType } from './Path';
-import { Vec2 } from './Vec2';
+import { Vec2 } from '../Vec2';
 
 
 describe('Path.toString', () => {

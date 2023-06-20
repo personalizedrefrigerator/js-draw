@@ -1,7 +1,7 @@
 import AbstractRenderer, { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
 import { Point2, Vec2 } from '../../math/Vec2';
-import Rect2 from '../../math/Rect2';
-import { PathCommand, PathCommandType } from '../../math/Path';
+import Rect2 from '../../math/shapes/Rect2';
+import { PathCommand, PathCommandType } from '../../math/shapes/Path';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';

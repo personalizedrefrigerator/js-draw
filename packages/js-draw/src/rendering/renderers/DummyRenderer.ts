@@ -1,5 +1,5 @@
 import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/Rect2';
+import Rect2 from '../../math/shapes/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';

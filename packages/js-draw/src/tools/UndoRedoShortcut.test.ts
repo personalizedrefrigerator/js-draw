@@ -3,7 +3,7 @@
 import Color4 from '../Color4';
 import Stroke from '../components/Stroke';
 import EditorImage from '../EditorImage';
-import Path from '../math/Path';
+import Path from '../math/shapes/Path';
 import createEditor from '../testing/createEditor';
 import { InputEvtType } from '../types';
 

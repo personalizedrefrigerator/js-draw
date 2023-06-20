@@ -1,8 +1,8 @@
 import Color4 from '../../Color4';
 import TextComponent from '../../components/TextComponent';
 import Mat33 from '../../math/Mat33';
-import Path from '../../math/Path';
-import Rect2 from '../../math/Rect2';
+import Path from '../../math/shapes/Path';
+import Rect2 from '../../math/shapes/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Vec3 from '../../math/Vec3';
 import Viewport from '../../Viewport';

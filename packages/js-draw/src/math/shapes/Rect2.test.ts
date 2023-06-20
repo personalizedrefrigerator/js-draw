@@ -1,7 +1,7 @@
 
 import Rect2 from './Rect2';
-import { Vec2 } from './Vec2';
-import Mat33 from './Mat33';
+import { Vec2 } from '../Vec2';
+import Mat33 from '../Mat33';
 
 describe('Rect2', () => {
 	it('width, height should always be positive', () => {
@@ -75,6 +75,11 @@ describe('Rect2', () => {
 		expect(new Rect2(1, 2, 3, 4).containsRect(new Rect2(1, 2, 1, 2))).toBe(true);
 		expect(new Rect2(-2, -2, 4, 4).containsRect(new Rect2(-1, 0, 1, 1))).toBe(true);
 		expect(new Rect2(-2, -2, 4, 4).containsRect(new Rect2(-1, 0, 10, 1))).toBe(false);
+	});
+
+	it('.center should be the center of a rectangle', () => {
+		expect(new Rect2(-1, -1, 2, 3).center).objEq(Vec2.of(0, 0.5));
+		expect(new Rect2(-1, -1, 2, 2).center).objEq(Vec2.zero);
 	});
 
 	describe('containsRect', () => {

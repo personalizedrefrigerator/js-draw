@@ -2,7 +2,9 @@ import { Bezier } from 'bezier-js';
 import LineSegment2 from './LineSegment2';
 import Path, { PathCommandType } from './Path';
 import Rect2 from './Rect2';
-import { Vec2 } from './Vec2';
+import { Vec2 } from '../Vec2';
+import CubicBezier from './CubicBezier';
+import QuadraticBezier from './QuadraticBezier';
 
 describe('Path', () => {
 	it('should instantiate Beziers from cubic and quatratic commands', () => {
@@ -24,19 +26,19 @@ describe('Path', () => {
 
 		const firstItem = path.geometry[0];
 		const secondItem = path.geometry[1];
-		expect(firstItem).toBeInstanceOf(Bezier);
-		expect(secondItem).toBeInstanceOf(Bezier);
+		expect(firstItem).toBeInstanceOf(CubicBezier);
+		expect(secondItem).toBeInstanceOf(QuadraticBezier);
 
 		// Force TypeScript to do type narrowing.
-		if (!(firstItem instanceof Bezier) || !(secondItem instanceof Bezier)) {
+		if (!(firstItem instanceof CubicBezier) || !(secondItem instanceof QuadraticBezier)) {
 			throw new Error('Invalid state! .toBeInstanceOf should have caused test to fail!');
 		}
 
 		// Make sure the control points (and start/end points) match what was set
-		expect(firstItem.points).toMatchObject([
+		expect(firstItem.getPoints()).toMatchObject([
 			{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: -1, y: -1 }, { x: 3, y: 3 }
 		]);
-		expect(secondItem.points).toMatchObject([
+		expect(secondItem.getPoints()).toMatchObject([
 			{ x: 3, y: 3 }, { x: 1, y: 1 }, { x: 0, y: 0 },
 		]);
 	});

@@ -1,6 +1,6 @@
 import Color4 from '../Color4';
 import Editor from '../Editor';
-import LineSegment2 from '../math/LineSegment2';
+import LineSegment2 from '../math/shapes/LineSegment2';
 import { Point2 } from '../math/Vec2';
 import { PointerEvt } from '../types';
 import BaseTool from './BaseTool';

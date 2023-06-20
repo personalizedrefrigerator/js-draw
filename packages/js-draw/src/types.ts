@@ -6,7 +6,7 @@ import { Point2, Vec2 } from './math/Vec2';
 import Vec3 from './math/Vec3';
 import BaseTool from './tools/BaseTool';
 import AbstractComponent from './components/AbstractComponent';
-import Rect2 from './math/Rect2';
+import Rect2 from './math/shapes/Rect2';
 import Pointer from './Pointer';
 import Color4 from './Color4';
 import Command from './commands/Command';

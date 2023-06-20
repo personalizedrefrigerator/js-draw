@@ -1,7 +1,7 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import LineSegment2 from '../math/LineSegment2';
+import LineSegment2 from '../math/shapes/LineSegment2';
 import Mat33, { Mat33Array } from '../math/Mat33';
-import Rect2 from '../math/Rect2';
+import Rect2 from '../math/shapes/Rect2';
 import Editor from '../Editor';
 import { Vec2 } from '../math/Vec2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';

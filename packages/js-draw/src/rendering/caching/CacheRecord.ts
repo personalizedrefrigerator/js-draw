@@ -1,5 +1,5 @@
 import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/Rect2';
+import Rect2 from '../../math/shapes/Rect2';
 import AbstractRenderer from '../renderers/AbstractRenderer';
 import { BeforeDeallocCallback, CacheState } from './types';
 

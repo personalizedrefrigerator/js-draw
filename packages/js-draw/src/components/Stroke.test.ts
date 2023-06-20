@@ -1,5 +1,5 @@
 import Color4 from '../Color4';
-import Path from '../math/Path';
+import Path from '../math/shapes/Path';
 import { Vec2 } from '../math/Vec2';
 import Stroke from './Stroke';
 import createEditor from '../testing/createEditor';

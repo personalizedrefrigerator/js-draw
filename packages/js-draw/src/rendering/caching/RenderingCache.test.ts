@@ -3,7 +3,7 @@
 import DummyRenderer from '../renderers/DummyRenderer';
 import { createCache } from './testUtils';
 import Stroke from '../../components/Stroke';
-import Path from '../../math/Path';
+import Path from '../../math/shapes/Path';
 import Color4 from '../../Color4';
 import EditorImage from '../../EditorImage';
 import Viewport from '../../Viewport';

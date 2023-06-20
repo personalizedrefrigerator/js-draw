@@ -5,7 +5,7 @@ import uniteCommands from '../../commands/uniteCommands';
 import BackgroundComponent, { BackgroundType } from '../../components/BackgroundComponent';
 import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
-import Rect2 from '../../math/Rect2';
+import Rect2 from '../../math/shapes/Rect2';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';

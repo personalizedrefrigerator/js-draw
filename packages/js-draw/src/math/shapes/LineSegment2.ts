@@ -1,22 +1,37 @@
-import Mat33 from './Mat33';
+import Mat33 from '../Mat33';
 import Rect2 from './Rect2';
-import { Vec2, Point2 } from './Vec2';
+import { Vec2, Point2 } from '../Vec2';
+import Abstract2DShape from './Abstract2DShape';
 
 interface IntersectionResult {
 	point: Point2;
 	t: number;
 }
 
-export default class LineSegment2 {
+export default class LineSegment2 extends Abstract2DShape {
 	// invariant: ||direction|| = 1
+
+	/**
+	 * The **unit** direction vector of this line segment, from
+	 * `point1` to `point2`.
+	 *
+	 * In other words, `direction` is `point2.minus(point1).normalized()`
+	 * (perhaps except when `point1` is equal to `point2`).
+	 */
 	public readonly direction: Vec2;
+
+	/** The distance between `point1` and `point2`. */
 	public readonly length: number;
+
+	/** The bounding box of this line segment. */
 	public readonly bbox;
 
 	public constructor(
 		private readonly point1: Point2,
 		private readonly point2: Point2
 	) {
+		super();
+
 		this.bbox = Rect2.bboxOf([point1, point2]);
 
 		this.direction = point2.minus(point1);
@@ -38,8 +53,24 @@ export default class LineSegment2 {
 		return this.point2;
 	}
 
+	/**
+	 * Gets a point a distance `t` along this line.
+	 *
+	 * @deprecated
+	 */
 	public get(t: number): Point2 {
 		return this.point1.plus(this.direction.times(t));
+	}
+
+	/**
+	 * Returns a point a fraction, `t`, along this line segment.
+	 * Thus, `segment.at(0)` returns `segment.p1` and `segment.at(1)` returns
+	 * `segment.p2`.
+	 *
+	 * `t` should be in `[0, 1]`.
+	 */
+	public at(t: number): Point2 {
+		return this.get(t * this.length);
 	}
 
 	public intersection(other: LineSegment2): IntersectionResult|null {
@@ -131,6 +162,15 @@ export default class LineSegment2 {
 		return this.intersection(other) !== null;
 	}
 
+	public override intersectsLineSegment(lineSegment: LineSegment2) {
+		const intersection = this.intersection(lineSegment);
+
+		if (intersection) {
+			return [ intersection.point ];
+		}
+		return [];
+	}
+
 	// Returns the closest point on this to [target]
 	public closestPointTo(target: Point2) {
 		// Distance from P1 along this' direction.
@@ -150,8 +190,13 @@ export default class LineSegment2 {
 		}
 	}
 
-	/** Returns the distance from this line segment to `target`. */
-	public distance(target: Point2) {
+	/**
+	 * Returns the distance from this line segment to `target`.
+	 *
+	 * Because a line segment has no interior, this signed distance is equivalent to
+	 * the full distance between `target` and this line segment.
+	 */
+	public signedDistance(target: Point2) {
 		return this.closestPointTo(target).minus(target).magnitude();
 	}
 
@@ -159,7 +204,12 @@ export default class LineSegment2 {
 		return new LineSegment2(affineTransfm.transformVec2(this.p1), affineTransfm.transformVec2(this.p2));
 	}
 
-	public toString() {
+	/** @inheritdoc */
+	public override getTightBoundingBox(): Rect2 {
+		return this.bbox;
+	}
+
+	public override toString() {
 		return `LineSegment(${this.p1.toString()}, ${this.p2.toString()})`;
 	}
 }

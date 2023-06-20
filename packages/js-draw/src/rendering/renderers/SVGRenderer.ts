@@ -1,8 +1,8 @@
 
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Mat33 from '../../math/Mat33';
-import Path from '../../math/Path';
-import Rect2 from '../../math/Rect2';
+import Path from '../../math/shapes/Path';
+import Rect2 from '../../math/shapes/Rect2';
 import { toRoundedString } from '../../math/rounding';
 import { Point2, Vec2 } from '../../math/Vec2';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';

@@ -1,15 +1,21 @@
-import { Bezier } from 'bezier-js';
 import { Point2, Vec2 } from '../Vec2';
-import solveQuadratic from './solveQuadratic';
+import solveQuadratic from '../polynomial/solveQuadratic';
+import BezierJSWrapper from './BezierJSWrapper';
+import Rect2 from './Rect2';
 
-export default class QuadraticBezier {
-	private bezierJs: Bezier|null = null;
-
+/**
+ * A wrapper around `bezier-js`'s quadratic Bézier.
+ *
+ * This wrappper lazy-loads `bezier-js`'s Bézier and can perform some operations
+ * without loading it at all (e.g. `normal`, `at`, and `approximateDistance`).
+ */
+export default class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
         public readonly p0: Point2,
         public readonly p1: Point2,
-        public readonly p2: Point2) {
-
+        public readonly p2: Point2
+	) {
+		super();
 	}
 
 	/**
@@ -27,7 +33,7 @@ export default class QuadraticBezier {
 	/**
      * @returns the curve evaluated at `t`.
      */
-	public at(t: number): Point2 {
+	public override at(t: number): Point2 {
 		const p0 = this.p0;
 		const p1 = this.p1;
 		const p2 = this.p2;
@@ -37,7 +43,7 @@ export default class QuadraticBezier {
 		);
 	}
 
-	public derivativeAt(t: number): Point2 {
+	public override derivativeAt(t: number): Point2 {
 		const p0 = this.p0;
 		const p1 = this.p1;
 		const p2 = this.p2;
@@ -47,8 +53,18 @@ export default class QuadraticBezier {
 		);
 	}
 
+	public override normal(t: number): Vec2 {
+		const tangent = this.derivativeAt(t);
+		return tangent.orthog().normalized();
+	}
+
+	/** @returns an overestimate of this shape's bounding box. */
+	public override getLooseBoundingBox(): Rect2 {
+		return Rect2.bboxOf([ this.p0, this.p1, this.p2 ]);
+	}
+
 	/**
-     * @returns the approximate distance from `point` to this curve.
+     * @returns the *approximate* distance from `point` to this curve.
      */
 	public approximateDistance(point: Point2): number {
 		// We want to minimize f(t) = |B(t) - p|².
@@ -119,20 +135,7 @@ export default class QuadraticBezier {
 		return Math.sqrt(Math.min(sqrDist1, sqrDist2, sqrDist3, sqrDist4));
 	}
 
-	/**
-     * @returns the (more) exact distance from `point` to this.
-     */
-	public distance(point: Point2): number {
-		if (!this.bezierJs) {
-			this.bezierJs = new Bezier([ this.p0.xy, this.p1.xy, this.p2.xy ]);
-		}
-
-		// .d: Distance
-		return this.bezierJs.project(point.xy).d!;
-	}
-
-	public normal(t: number): Vec2 {
-		const tangent = this.derivativeAt(t);
-		return tangent.orthog().normalized();
+	public override getPoints() {
+		return [ this.p0, this.p1, this.p2 ];
 	}
 }

@@ -1,12 +1,15 @@
 import { Bezier } from 'bezier-js';
-import { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
-import RenderingStyle from '../rendering/RenderingStyle';
-import { toRoundedString, toStringOfSamePrecision } from './rounding';
+import { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
+import RenderingStyle from '../../rendering/RenderingStyle';
+import { toRoundedString, toStringOfSamePrecision } from '../rounding';
 import LineSegment2 from './LineSegment2';
-import Mat33 from './Mat33';
+import Mat33 from '../Mat33';
 import Rect2 from './Rect2';
-import { Point2, Vec2 } from './Vec2';
-import Vec3 from './Vec3';
+import { Point2, Vec2 } from '../Vec2';
+import Abstract2DShape from './Abstract2DShape';
+import CubicBezier from './CubicBezier';
+import QuadraticBezier from './QuadraticBezier';
+import PointShape2D from './PointShape2D';
 
 export enum PathCommandType {
 	LineTo,
@@ -38,41 +41,21 @@ export interface MoveToPathCommand {
 	point: Point2;
 }
 
-export type PathCommand = CubicBezierPathCommand | LinePathCommand | QuadraticBezierPathCommand | MoveToPathCommand;
+export type PathCommand = CubicBezierPathCommand | QuadraticBezierPathCommand | MoveToPathCommand | LinePathCommand;
 
 interface IntersectionResult {
 	// @internal
-	curve: LineSegment2|Bezier|Point2;
+	curve: Abstract2DShape;
 
-	// @internal
+	/** @internal @deprecated */
 	parameterValue: number;
 
 	// Point at which the intersection occured.
 	point: Point2;
 }
 
-type GeometryType = LineSegment2|Bezier|Point2;
+type GeometryType = Abstract2DShape;
 type GeometryArrayType = Array<GeometryType>;
-
-// Returns the bounding box of one path segment.
-const getPartBBox = (part: GeometryType) => {
-	let partBBox;
-	if (part instanceof LineSegment2) {
-		partBBox = part.bbox;
-	} else if (part instanceof Bezier) {
-		const bbox = part.bbox();
-		const width = bbox.x.max - bbox.x.min;
-		const height = bbox.y.max - bbox.y.min;
-
-		partBBox = new Rect2(bbox.x.min, bbox.y.min, width, height);
-	} else {
-		partBBox = new Rect2(part.x, part.y, 0, 0);
-	}
-
-	return partBBox;
-};
-
-
 
 export default class Path {
 	/**
@@ -96,7 +79,7 @@ export default class Path {
 	public getExactBBox(): Rect2 {
 		const bboxes: Rect2[] = [];
 		for (const part of this.geometry) {
-			bboxes.push(getPartBBox(part));
+			bboxes.push(part.getTightBoundingBox());
 		}
 
 		return Rect2.union(...bboxes);
@@ -117,16 +100,16 @@ export default class Path {
 			switch (part.kind) {
 			case PathCommandType.CubicBezierTo:
 				geometry.push(
-					new Bezier(
-						startPoint.xy, part.controlPoint1.xy, part.controlPoint2.xy, part.endPoint.xy
+					new CubicBezier(
+						startPoint, part.controlPoint1, part.controlPoint2, part.endPoint
 					)
 				);
 				startPoint = part.endPoint;
 				break;
 			case PathCommandType.QuadraticBezierTo:
 				geometry.push(
-					new Bezier(
-						startPoint.xy, part.controlPoint.xy, part.endPoint.xy
+					new QuadraticBezier(
+						startPoint, part.controlPoint, part.endPoint
 					)
 				);
 				startPoint = part.endPoint;
@@ -138,7 +121,7 @@ export default class Path {
 				startPoint = part.point;
 				break;
 			case PathCommandType.MoveTo:
-				geometry.push(part.point);
+				geometry.push(new PointShape2D(part.point));
 				startPoint = part.point;
 				break;
 			}
@@ -231,23 +214,13 @@ export default class Path {
 
 		// Determine distance functions for all parts that the given line could possibly intersect with
 		for (const part of this.geometry) {
-			const bbox = getPartBBox(part).grownBy(strokeRadius);
+			const bbox = part.getTightBoundingBox().grownBy(strokeRadius);
 			if (!bbox.intersects(line.bbox)) {
 				continue;
 			}
 
 			// Signed distance function
-			let partDist: DistanceFunction;
-
-			if (part instanceof LineSegment2) {
-				partDist = (point: Point2) => part.distance(point);
-			} else if (part instanceof Vec3) {
-				partDist = (point: Point2) => part.minus(point).magnitude();
-			} else {
-				partDist = (point: Point2) => {
-					return part.project(point).d!;
-				};
-			}
+			const partDist: DistanceFunction = (point) => part.signedDistance(point);
 
 			// Part signed distance function (negative result implies `point` is
 			// inside the shape).

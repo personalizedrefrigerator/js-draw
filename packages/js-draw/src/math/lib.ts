@@ -1,7 +1,7 @@
-import LineSegment2 from './LineSegment2';
+import LineSegment2 from './shapes/LineSegment2';
 import Mat33 from './Mat33';
-import Path from './Path';
-import Rect2 from './Rect2';
+import Path from './shapes/Path';
+import Rect2 from './shapes/Rect2';
 import { Vec2 } from './Vec2';
 import Vec3 from './Vec3';
 

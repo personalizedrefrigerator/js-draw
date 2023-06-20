@@ -1,6 +1,8 @@
 import LineSegment2 from './LineSegment2';
-import Mat33 from './Mat33';
-import { Point2, Vec2 } from './Vec2';
+import Mat33 from '../Mat33';
+import { Point2, Vec2 } from '../Vec2';
+import Abstract2DShape from './Abstract2DShape';
+import Vec3 from '../Vec3';
 
 /** An object that can be converted to a Rect2. */
 export interface RectTemplate {
@@ -12,15 +14,14 @@ export interface RectTemplate {
 	height?: number;
 }
 
-// invariant: w ≥ 0, h ≥ 0.
-export default class Rect2 {
+// invariant: w ≥ 0, h ≥ 0, immutable
+export default class Rect2 extends Abstract2DShape {
 	// Derived state:
 
 	// topLeft assumes up is -y
 	public readonly topLeft: Point2;
 	public readonly size: Vec2;
 	public readonly bottomRight: Point2;
-	public readonly center: Point2;
 	public readonly area: number;
 
 	public constructor(
@@ -29,6 +30,8 @@ export default class Rect2 {
 		public readonly w: number,
 		public readonly h: number
 	) {
+		super();
+
 		if (w < 0) {
 			this.x += w;
 			this.w = Math.abs(w);
@@ -43,7 +46,6 @@ export default class Rect2 {
 		this.topLeft = Vec2.of(this.x, this.y);
 		this.size = Vec2.of(this.w, this.h);
 		this.bottomRight = this.topLeft.plus(this.size);
-		this.center = this.topLeft.plus(this.size.times(0.5));
 		this.area = this.w * this.h;
 	}
 
@@ -56,7 +58,7 @@ export default class Rect2 {
 		return new Rect2(this.x, this.y, size.x, size.y);
 	}
 
-	public containsPoint(other: Point2): boolean {
+	public override containsPoint(other: Point2): boolean {
 		return this.x <= other.x && this.y <= other.y
 			&& this.x + this.w >= other.x && this.y + this.h >= other.y;
 	}
@@ -208,6 +210,10 @@ export default class Rect2 {
 		return this.h;
 	}
 
+	public get center() {
+		return this.topLeft.plus(this.size.times(0.5));
+	}
+
 	// Returns edges in the order
 	// [ rightEdge, topEdge, leftEdge, bottomEdge ]
 	public getEdges(): LineSegment2[] {
@@ -218,6 +224,31 @@ export default class Rect2 {
 			new LineSegment2(corners[2], corners[3]),
 			new LineSegment2(corners[3], corners[0]),
 		];
+	}
+
+	public override intersectsLineSegment(lineSegment: LineSegment2): Point2[] {
+		const result: Point2[] = [];
+
+		for (const edge of this.getEdges()) {
+			const intersection = edge.intersectsLineSegment(lineSegment);
+			intersection.forEach(point => result.push(point));
+		}
+
+		return result;
+	}
+
+	public override signedDistance(point: Vec3): number {
+		const closestBoundaryPoint = this.getClosestPointOnBoundaryTo(point);
+		const dist = point.minus(closestBoundaryPoint).magnitude();
+
+		if (this.containsPoint(point)) {
+			return -dist;
+		}
+		return dist;
+	}
+
+	public override getTightBoundingBox(): Rect2 {
+		return this;
 	}
 
 	// [affineTransform] is a transformation matrix that both scales and **translates**.
@@ -231,7 +262,7 @@ export default class Rect2 {
 		return this.topLeft.eq(other.topLeft, fuzz) && this.size.eq(other.size, fuzz);
 	}
 
-	public toString(): string {
+	public override toString(): string {
 		return `Rect(point(${this.x}, ${this.y}), size(${this.w}, ${this.h}))`;
 	}
 

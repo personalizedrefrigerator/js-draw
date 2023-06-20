@@ -5,9 +5,9 @@
 // @packageDocumentation
 //
 
-import LineSegment2 from '../math/LineSegment2';
+import LineSegment2 from '../math/shapes/LineSegment2';
 import Mat33 from '../math/Mat33';
-import Rect2 from '../math/Rect2';
+import Rect2 from '../math/shapes/Rect2';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import AbstractComponent from './AbstractComponent';

@@ -1,8 +1,8 @@
 import Color4 from '../../Color4';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Mat33 from '../../math/Mat33';
-import Path, { PathCommand, PathCommandType } from '../../math/Path';
-import Rect2 from '../../math/Rect2';
+import Path, { PathCommand, PathCommandType } from '../../math/shapes/Path';
+import Rect2 from '../../math/shapes/Rect2';
 import { Point2, Vec2 } from '../../math/Vec2';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';

@@ -2,7 +2,7 @@ import Editor from './Editor';
 import AbstractRenderer from './rendering/renderers/AbstractRenderer';
 import Viewport from './Viewport';
 import AbstractComponent from './components/AbstractComponent';
-import Rect2 from './math/Rect2';
+import Rect2 from './math/shapes/Rect2';
 import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';

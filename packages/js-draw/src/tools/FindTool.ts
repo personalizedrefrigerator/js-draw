@@ -4,7 +4,7 @@
 
 import Editor from '../Editor';
 import TextComponent from '../components/TextComponent';
-import Rect2 from '../math/Rect2';
+import Rect2 from '../math/shapes/Rect2';
 import { KeyPressEvent } from '../types';
 import BaseTool from './BaseTool';
 

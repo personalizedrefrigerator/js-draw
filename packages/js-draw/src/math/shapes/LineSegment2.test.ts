@@ -1,6 +1,6 @@
 import LineSegment2 from './LineSegment2';
-import { Vec2 } from './Vec2';
-import Mat33 from './Mat33';
+import { Vec2 } from '../Vec2';
+import Mat33 from '../Mat33';
 
 
 describe('Line2', () => {

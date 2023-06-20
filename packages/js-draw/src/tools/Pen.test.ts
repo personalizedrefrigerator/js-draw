@@ -3,7 +3,7 @@ import PenTool from './Pen';
 import { Vec2 } from '../math/Vec2';
 import createEditor from '../testing/createEditor';
 import { InputEvtType } from '../types';
-import Rect2 from '../math/Rect2';
+import Rect2 from '../math/shapes/Rect2';
 import StrokeComponent from '../components/Stroke';
 import Mat33 from '../math/Mat33';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';

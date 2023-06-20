@@ -1,8 +1,8 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import LineSegment2 from '../math/LineSegment2';
+import LineSegment2 from '../math/shapes/LineSegment2';
 import Mat33 from '../math/Mat33';
-import Path from '../math/Path';
-import Rect2 from '../math/Rect2';
+import Path from '../math/shapes/Path';
+import Rect2 from '../math/shapes/Rect2';
 import Editor from '../Editor';
 import AbstractRenderer, { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';

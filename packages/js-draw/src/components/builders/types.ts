@@ -1,4 +1,4 @@
-import Rect2 from '../../math/Rect2';
+import Rect2 from '../../math/shapes/Rect2';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';
