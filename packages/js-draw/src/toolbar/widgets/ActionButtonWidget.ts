@@ -7,11 +7,11 @@ export default class ActionButtonWidget extends BaseWidget {
 		editor: Editor,
 		id: string,
 
-        protected makeIcon: ()=> Element|null,
+		protected makeIcon: ()=> Element|null,
 		protected title: string,
-        protected clickAction: ()=>void,
+		protected clickAction: ()=>void,
 
-        localizationTable?: ToolbarLocalization,
+		localizationTable?: ToolbarLocalization,
 		protected mustBeToplevel: boolean = false,
 	) {
 		super(editor, id, localizationTable);

@@ -12,9 +12,9 @@ export default class Triangle extends Abstract2DShape {
 	 * @see {@link fromVertices}
 	 */
 	protected constructor(
-        public readonly vertex1: Vec3,
-        public readonly vertex2: Vec3,
-        public readonly vertex3: Vec3,
+		public readonly vertex1: Vec3,
+		public readonly vertex2: Vec3,
+		public readonly vertex3: Vec3,
 	) {
 		super();
 	}

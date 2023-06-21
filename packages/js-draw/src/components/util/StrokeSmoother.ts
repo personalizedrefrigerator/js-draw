@@ -5,13 +5,13 @@ import { StrokeDataPoint } from '../../types';
 import QuadraticBezier from '../../math/shapes/QuadraticBezier';
 
 export interface Curve {
-    startPoint: Vec2;
-    startWidth: number;
+	startPoint: Vec2;
+	startWidth: number;
 
-    controlPoint: Vec2;
+	controlPoint: Vec2;
 
-    endWidth: number;
-    endPoint: Vec2;
+	endWidth: number;
+	endPoint: Vec2;
 }
 
 type OnCurveAddedCallback = (curve: Curve|null)=>void;
@@ -41,7 +41,7 @@ export class StrokeSmoother {
 		private minFitAllowed: number,
 		private maxFitAllowed: number,
 
-        private onCurveAdded: OnCurveAddedCallback,
+		private onCurveAdded: OnCurveAddedCallback,
 	) {
 		this.lastPoint = this.startPoint;
 

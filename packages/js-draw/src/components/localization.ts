@@ -3,7 +3,7 @@ export interface ImageComponentLocalization {
 	text: (text: string)=> string;
 	imageNode: (description: string)=> string;
 	stroke: string;
-    svgObject: string;
+	svgObject: string;
 	emptyBackground: string;
 	gridBackground: string;
 	filledBackgroundWithColor: (color: string)=> string;

@@ -28,7 +28,7 @@ const printUsage = () => {
 	console.log();
 	console.log(
 		'Both build and watch read from a build-config.json in the ' +
-        'current directory.'
+		'current directory.'
 	);
 };
 

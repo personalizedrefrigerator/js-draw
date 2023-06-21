@@ -8,8 +8,8 @@ import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 
 export interface PenStyle {
-    color: Color4;
-    thickness: number;
+	color: Color4;
+	thickness: number;
 }
 
 export default class Pen extends BaseTool {

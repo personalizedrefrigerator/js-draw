@@ -7,17 +7,17 @@ import Rect2 from './Rect2';
  */
 class CubicBezier extends BezierJSWrapper {
 	public constructor(
-        // Start point
-        public readonly p0: Point2,
+		// Start point
+		public readonly p0: Point2,
 
-        // Control point 1
-        public readonly p1: Point2,
+		// Control point 1
+		public readonly p1: Point2,
 
-        // Control point 2
-        public readonly p2: Point2,
+		// Control point 2
+		public readonly p2: Point2,
 
-        // End point
-        public readonly p3: Point2,
+		// End point
+		public readonly p3: Point2,
 	) {
 		super();
 	}

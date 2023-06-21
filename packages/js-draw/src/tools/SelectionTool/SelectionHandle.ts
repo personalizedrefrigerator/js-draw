@@ -49,9 +49,9 @@ export default class SelectionHandle {
 	}
 
 	/**
-     * Adds this to `container`, where `conatiner` should be the background/selection
-     * element visible on the screen.
-     */
+	 * Adds this to `container`, where `conatiner` should be the background/selection
+	 * element visible on the screen.
+	 */
 	public addTo(container: HTMLElement) {
 		container.appendChild(this.element);
 	}
@@ -71,8 +71,8 @@ export default class SelectionHandle {
 	}
 
 	/**
-     * @returns `true` if the given `EventTarget` matches this.
-     */
+	 * @returns `true` if the given `EventTarget` matches this.
+	 */
 	public isTarget(target: EventTarget): boolean {
 		return target === this.element;
 	}

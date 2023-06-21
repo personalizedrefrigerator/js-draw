@@ -3,10 +3,10 @@ export interface TextRendererLocalization {
 	pathNodeCount(pathCount: number): string;
 	textNodeCount(nodeCount: number): string;
 	imageNodeCount(nodeCount: number): string;
-    textNode(content: string): string;
+	textNode(content: string): string;
 	unlabeledImageNode: string;
 	imageNode(label: string): string;
-    rerenderAsText: string;
+	rerenderAsText: string;
 }
 
 export const defaultTextRendererLocalization: TextRendererLocalization = {

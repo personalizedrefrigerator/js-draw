@@ -32,18 +32,18 @@ abstract class BezierJSWrapper extends Abstract2DShape {
 	}
 
 	/**
-     * @returns the (more) exact distance from `point` to this.
+	 * @returns the (more) exact distance from `point` to this.
 	 *
 	 * @see {@link approximateDistance}
-     */
+	 */
 	public override distance(point: Point2) {
 		// A Bézier curve has no interior, thus, signed distance is the same as distance.
 		return this.signedDistance(point);
 	}
 
 	/**
-     * @returns the curve evaluated at `t`.
-     */
+	 * @returns the curve evaluated at `t`.
+	 */
 	public at(t: number): Point2 {
 		return Vec2.ofXY(this.getBezier().get(t));
 	}

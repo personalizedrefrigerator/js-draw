@@ -14,25 +14,25 @@ export enum PointerDevice {
 // object is immutable — it will not be updated when the pointer's information changes.
 export default class Pointer {
 	private constructor(
-        // The (x, y) position of the pointer relative to the top-left corner
-        // of the visible canvas.
-        public readonly screenPos: Point2,
+		// The (x, y) position of the pointer relative to the top-left corner
+		// of the visible canvas.
+		public readonly screenPos: Point2,
 
-        // Position of the pointer relative to the top left corner of the drawing
-        // surface.
-        public readonly canvasPos: Point2,
+		// Position of the pointer relative to the top left corner of the drawing
+		// surface.
+		public readonly canvasPos: Point2,
 
-        public readonly pressure: number|null,
-        public readonly isPrimary: boolean,
-        public readonly down: boolean,
+		public readonly pressure: number|null,
+		public readonly isPrimary: boolean,
+		public readonly down: boolean,
 
-        public readonly device: PointerDevice,
+		public readonly device: PointerDevice,
 
-        // Unique ID for the pointer
-        public readonly id: number,
+		// Unique ID for the pointer
+		public readonly id: number,
 
-        // Numeric timestamp (milliseconds, as from `(new Date).getTime()`)
-        public readonly timeStamp: number,
+		// Numeric timestamp (milliseconds, as from `(new Date).getTime()`)
+		public readonly timeStamp: number,
 	) {
 	}
 

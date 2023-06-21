@@ -1,13 +1,13 @@
 
 export interface ToolLocalization {
 	keyboardPanZoom: string;
-    penTool: (penId: number)=>string;
-    selectionTool: string;
+	penTool: (penId: number)=>string;
+	selectionTool: string;
 	selectAllTool: string;
-    eraserTool: string;
-    touchPanTool: string;
-    twoFingerPanZoomTool: string;
-    undoRedoTool: string;
+	eraserTool: string;
+	touchPanTool: string;
+	twoFingerPanZoomTool: string;
+	undoRedoTool: string;
 	pipetteTool: string;
 	rightClickDragPanTool: string;
 
@@ -32,8 +32,8 @@ export interface ToolLocalization {
 	copied: (count: number, description: string) => string;
 	pasted: (count: number, description: string) => string;
 
-    toolEnabledAnnouncement: (toolName: string) => string;
-    toolDisabledAnnouncement: (toolName: string) => string;
+	toolEnabledAnnouncement: (toolName: string) => string;
+	toolDisabledAnnouncement: (toolName: string) => string;
 }
 
 export const defaultToolLocalization: ToolLocalization = {

@@ -20,9 +20,15 @@ module.exports = {
 		'@typescript-eslint'
 	],
 	'rules': {
-		'indent': [
+		'@typescript-eslint/indent': [
 			'error',
-			'tab'
+			'tab',
+			{
+				'ignoredNodes': [
+					// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
+					'TSUnionType',
+				]
+			}
 		],
 		'linebreak-style': [
 			'error',

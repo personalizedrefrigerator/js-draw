@@ -1,35 +1,35 @@
 
 
 export interface BundledFileRecord {
-    name: string;
-    inPath: string;
+	name: string;
+	inPath: string;
 
-    // outPath defaults to a path based on inPath
-    outPath?: string;
+	// outPath defaults to a path based on inPath
+	outPath?: string;
 }
 
 export interface TranslationSourcePair {
-    // Name of the project
-    name: string;
+	// Name of the project
+	name: string;
 
-    // JavaScript source file providing the translation source.
-    // Each file should have a single default export that contains
-    // a map from locale keys (e.g. en for English, es for Español, etc.) to
-    // a localization.
-    path: string;
+	// JavaScript source file providing the translation source.
+	// Each file should have a single default export that contains
+	// a map from locale keys (e.g. en for English, es for Español, etc.) to
+	// a localization.
+	path: string;
 
-    // The key of the default locale (which should have translations for all valid
-    // keys).
-    defaultLocale: string;
+	// The key of the default locale (which should have translations for all valid
+	// keys).
+	defaultLocale: string;
 }
 
 export interface BuildConfig {
-    bundledFiles: BundledFileRecord[];
+	bundledFiles: BundledFileRecord[];
 
-    translationSourceFiles: TranslationSourcePair[];
-    translationDestPath: string;
+	translationSourceFiles: TranslationSourcePair[];
+	translationDestPath: string;
 
-    inDirectory: string|undefined;
-    outDirectory: string|undefined;
+	inDirectory: string|undefined;
+	outDirectory: string|undefined;
 }
 

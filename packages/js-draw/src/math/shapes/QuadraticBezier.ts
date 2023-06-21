@@ -11,17 +11,17 @@ import Rect2 from './Rect2';
  */
 export default class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
-        public readonly p0: Point2,
-        public readonly p1: Point2,
-        public readonly p2: Point2
+		public readonly p0: Point2,
+		public readonly p1: Point2,
+		public readonly p2: Point2
 	) {
 		super();
 	}
 
 	/**
-     * Returns a component of a quadratic Bézier curve at t, where p0,p1,p2 are either all x or
-     * all y components of the target curve.
-     */
+	 * Returns a component of a quadratic Bézier curve at t, where p0,p1,p2 are either all x or
+	 * all y components of the target curve.
+	 */
 	private static componentAt(t: number, p0: number, p1: number, p2: number) {
 		return p0 + t * (-2 * p0 + 2 * p1) + t * t * (p0 - 2 * p1 + p2);
 	}
@@ -31,8 +31,8 @@ export default class QuadraticBezier extends BezierJSWrapper {
 	}
 
 	/**
-     * @returns the curve evaluated at `t`.
-     */
+	 * @returns the curve evaluated at `t`.
+	 */
 	public override at(t: number): Point2 {
 		const p0 = this.p0;
 		const p1 = this.p1;
@@ -64,8 +64,8 @@ export default class QuadraticBezier extends BezierJSWrapper {
 	}
 
 	/**
-     * @returns the *approximate* distance from `point` to this curve.
-     */
+	 * @returns the *approximate* distance from `point` to this curve.
+	 */
 	public approximateDistance(point: Point2): number {
 		// We want to minimize f(t) = |B(t) - p|².
 		// Expanding,
