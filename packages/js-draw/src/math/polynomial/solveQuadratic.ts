@@ -2,6 +2,8 @@
 /**
  * Solves an equation of the form ax² + bx + c = 0.
  * The larger solution is returned first.
+ *
+ * It is possible that the two solutions returned by this function are the same.
  */
 const solveQuadratic = (a: number, b: number, c: number): [number, number] => {
 	// See also https://en.wikipedia.org/wiki/Quadratic_formula

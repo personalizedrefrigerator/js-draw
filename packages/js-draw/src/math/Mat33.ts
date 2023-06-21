@@ -189,8 +189,10 @@ export default class Mat33 {
 	}
 
 	/**
-	 * Applies this as an affine transformation to the given vector.
+	 * Applies this as an **affine** transformation to the given vector.
 	 * Returns a transformed version of `other`.
+	 *
+	 * Unlike {@link transformVec3}, this **does** translate the given vector.
 	 */
 	public transformVec2(other: Vec2): Vec2 {
 		// When transforming a Vec2, we want to use the z transformation
