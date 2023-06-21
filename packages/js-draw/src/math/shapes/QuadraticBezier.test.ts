@@ -1,5 +1,5 @@
 import { Vec2 } from '../Vec2';
-import QuadraticBezier from '../shapes/QuadraticBezier';
+import QuadraticBezier from './QuadraticBezier';
 
 describe('QuadraticBezier', () => {
 	it('approxmiateDistance should approximately return the distance to the curve', () => {
