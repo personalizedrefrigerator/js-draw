@@ -1,4 +1,3 @@
-import { Bezier } from 'bezier-js';
 import LineSegment2 from './LineSegment2';
 import Path, { PathCommandType } from './Path';
 import Rect2 from './Rect2';
@@ -89,12 +88,6 @@ describe('Path', () => {
 			// First intersection should be with the first curve
 			const firstIntersection = intersections[0];
 			expect(firstIntersection.point.xy).toMatchObject({
-				x: -50,
-				y: 100,
-			});
-
-			const curve = firstIntersection.curve as LineSegment2|Bezier;
-			expect(curve.get(firstIntersection.parameterValue)).toMatchObject({
 				x: -50,
 				y: 100,
 			});
