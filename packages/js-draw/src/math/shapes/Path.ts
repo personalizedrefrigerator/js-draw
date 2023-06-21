@@ -1,4 +1,3 @@
-import { Bezier } from 'bezier-js';
 import { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
 import RenderingStyle from '../../rendering/RenderingStyle';
 import { toRoundedString, toStringOfSamePrecision } from '../rounding';
@@ -48,7 +47,7 @@ interface IntersectionResult {
 	curve: Abstract2DShape;
 
 	/** @internal @deprecated */
-	parameterValue: number;
+	parameterValue?: number;
 
 	// Point at which the intersection occured.
 	point: Point2;
@@ -424,40 +423,13 @@ export default class Path {
 		}
 
 		for (const part of this.geometry) {
-			if (part instanceof LineSegment2) {
-				const intersection = part.intersection(line);
+			const intersection = part.intersectsLineSegment(line);
 
-				if (intersection) {
-					result.push({
-						curve: part,
-						parameterValue: intersection.t,
-						point: intersection.point,
-					});
-				}
-			} else if (part instanceof Bezier) {
-				const intersectionPoints = part.intersects(line).map(t => {
-					// We're using the .intersects(line) function, which is documented
-					// to always return numbers. However, to satisfy the type checker (and
-					// possibly improperly-defined types),
-					if (typeof t === 'string') {
-						t = parseFloat(t);
-					}
-
-					const point = Vec2.ofXY(part.get(t));
-
-					// Ensure that the intersection is on the line
-					if (point.minus(line.p1).magnitude() > line.length
-							|| point.minus(line.p2).magnitude() > line.length) {
-						return null;
-					}
-
-					return {
-						point,
-						parameterValue: t,
-						curve: part,
-					};
-				}).filter(entry => entry !== null) as IntersectionResult[];
-				result.push(...intersectionPoints);
+			if (intersection.length > 0) {
+				result.push({
+					curve: part,
+					point: intersection[0],
+				});
 			}
 		}
 
