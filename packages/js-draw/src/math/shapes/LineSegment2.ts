@@ -8,6 +8,7 @@ interface IntersectionResult {
 	t: number;
 }
 
+/** Represents a line segment. A `LineSegment2` is immutable. */
 export default class LineSegment2 extends Abstract2DShape {
 	// invariant: ||direction|| = 1
 
@@ -26,6 +27,7 @@ export default class LineSegment2 extends Abstract2DShape {
 	/** The bounding box of this line segment. */
 	public readonly bbox;
 
+	/** Creates a new `LineSegment2` from its endpoints. */
 	public constructor(
 		private readonly point1: Point2,
 		private readonly point2: Point2
@@ -45,10 +47,13 @@ export default class LineSegment2 extends Abstract2DShape {
 
 	// Accessors to make LineSegment2 compatible with bezier-js's
 	// interface
+
+	/** Alias for `point1`. */
 	public get p1(): Point2 {
 		return this.point1;
 	}
 
+	/** Alias for `point2`. */
 	public get p2(): Point2 {
 		return this.point2;
 	}
@@ -162,6 +167,14 @@ export default class LineSegment2 extends Abstract2DShape {
 		return this.intersection(other) !== null;
 	}
 
+	/**
+	 * Returns the points at which this line segment intersects the
+	 * given line segment.
+	 *
+	 * Note that {@link intersects} returns *whether* this line segment intersects another
+	 * line segment. This method, by contrast, returns **the point** at which the intersection
+	 * occurs, if such a point exists.
+	 */
 	public override intersectsLineSegment(lineSegment: LineSegment2) {
 		const intersection = this.intersection(lineSegment);
 
@@ -200,8 +213,11 @@ export default class LineSegment2 extends Abstract2DShape {
 		return this.closestPointTo(target).minus(target).magnitude();
 	}
 
+	/** Returns a copy of this line segment transformed by the given `affineTransfm`. */
 	public transformedBy(affineTransfm: Mat33): LineSegment2 {
-		return new LineSegment2(affineTransfm.transformVec2(this.p1), affineTransfm.transformVec2(this.p2));
+		return new LineSegment2(
+			affineTransfm.transformVec2(this.p1), affineTransfm.transformVec2(this.p2)
+		);
 	}
 
 	/** @inheritdoc */
