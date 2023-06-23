@@ -323,6 +323,10 @@ export default class SVGRenderer extends AbstractRenderer {
 		_controlPoint1: Point2, _controlPoint2: Point2, _endPoint: Point2
 	) { this.unimplementedMessage(); }
 	protected traceQuadraticBezierCurve(_controlPoint: Point2, _endPoint: Point2) { this.unimplementedMessage(); }
+	protected override traceEllipticalArc(
+		_size: Vec2, _majorAxisRotation: number, _largeArcFlag: boolean, _sweepFlag: boolean,
+		_endPoint: Point2,
+	) { this.unimplementedMessage(); }
 
 	public drawPoints(...points: Point2[]) {
 		points.map(point => {

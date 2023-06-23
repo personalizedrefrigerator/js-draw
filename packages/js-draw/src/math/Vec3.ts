@@ -51,7 +51,8 @@ export default class Vec3 {
 	/**
 	 * Return this' angle in the XY plane (treats this as a Vec2).
 	 *
-	 * This is equivalent to `Math.atan2(vec.y, vec.x)`.
+	 * This is equivalent to `Math.atan2(vec.y, vec.x)`. Thus, the output angle is in the range
+	 * `(-pi, pi]`.
 	 */
 	public angle(): number {
 		return Math.atan2(this.y, this.x);

@@ -82,7 +82,12 @@ class Ellipse extends Abstract2DShape {
 		);
 	}
 
-	/** @returns a point on this ellipse, given a parameter value, `t ∈ [0, 2π]`. */
+	/**
+	 * @returns a point on this ellipse, given a parameter value, `t ∈ [0, 2π)`.
+	 *
+	 * Because `t` is treated as an angle, `at(3π)` is equivalent to `at(π)`. Thus,
+	 * `at(a + 2πk) = at(a)` for all `k ∈ ℤ`.
+	 */
 	public at(t: number) {
 		// See https://math.stackexchange.com/q/2645689
 
@@ -119,7 +124,34 @@ class Ellipse extends Abstract2DShape {
 		);
 	}
 
-	public override getTightBoundingBox(): Rect2 {
+	/**
+	 * Returns the parameter value that produces the given `point`.
+	 *
+	 * `point` should be a point on this ellipse. If it is not, returns `null`.
+	 */
+	public parameterForPoint(point: Point2): number|null {
+		if (!this.containsPoint(point)) {
+			return null;
+		}
+
+		const pointOnCircle = this.transform.inverse().transformVec2(point);
+		return pointOnCircle.angle();
+	}
+
+	/**
+	 * Returns the points on this ellipse with minimum/maximum x/y values.
+	 *
+	 * Return values are in the form
+	 * ```
+	 *  [
+	 * 		point with minimum X,
+	 * 		point with maximum X,
+	 * 		point with minimum Y,
+	 * 		point with maximum Y,
+	 *  ]
+	 * ```
+	 */
+	public getXYExtrema(): [ Point2, Point2, Point2, Point2 ] {
 		const cosAngle = Math.cos(this.angle);
 		const sinAngle = Math.sin(this.angle);
 
@@ -133,8 +165,14 @@ class Ellipse extends Abstract2DShape {
 		//  ⟹ (sin t)/(cos t) = (ry (cos α)) / (rx (sin α))
 		//  ⟹            t    = Arctan2(ry (cos α), rx (sin α)) ± 2πk
 		const yExtremaT = Math.atan2(this.ry * cosAngle, this.rx * sinAngle);
-		const yExtrema1 = this.at(yExtremaT);
-		const yExtrema2 = this.at(yExtremaT + Math.PI);
+		let yExtrema1 = this.at(yExtremaT);
+		let yExtrema2 = this.at(yExtremaT + Math.PI);
+
+		if (yExtrema1.y > yExtrema2.y) {
+			const tmp = yExtrema1;
+			yExtrema1 = yExtrema2;
+			yExtrema2 = tmp;
+		}
 
 		// Similarly, for angle α, xComponent(t) = 0, thus,
 		//     rx (cos α) (-sin t) - ry (sin α) (cos t) = 0
@@ -143,10 +181,21 @@ class Ellipse extends Abstract2DShape {
 		// ⟹     -(sin t)/(cos t) = ry (sin α) / (rx cos α)
 		// ⟹             tan t    = -ry (sin α) / (rx cos α)
 		const xExtremaT = Math.atan2(-this.ry * sinAngle, this.rx * cosAngle);
-		const xExtrema1 = this.at(xExtremaT);
-		const xExtrema2 = this.at(xExtremaT + Math.PI);
+		let xExtrema1 = this.at(xExtremaT);
+		let xExtrema2 = this.at(xExtremaT + Math.PI);
 
-		return Rect2.bboxOf([ xExtrema1, xExtrema2, yExtrema1, yExtrema2 ]);
+		if (xExtrema1.x > xExtrema2.x) {
+			const tmp = xExtrema1;
+			xExtrema1 = xExtrema2;
+			xExtrema2 = tmp;
+		}
+
+		return [ xExtrema1, xExtrema2, yExtrema1, yExtrema2 ];
+	}
+
+	/** @inheritdoc */
+	public override getTightBoundingBox(): Rect2 {
+		return Rect2.bboxOf(this.getXYExtrema());
 	}
 
 
@@ -238,15 +287,34 @@ class Ellipse extends Abstract2DShape {
 		return intersectionsOnSeg;
 	}
 
+	public getSemiMajorAxisDirection() {
+		return this.f2.eq(this.center) ? Vec2.of(1, 0) : this.f2.minus(this.center).normalized();
+	}
+
+	public getSemiMinorAxisDirection() {
+		return this.getSemiMajorAxisDirection().orthog();
+	}
+
+	public getSemiMinorAxisVec() {
+		return this.getSemiMinorAxisDirection().times(this.ry);
+	}
+
+	public getSemiMajorAxisVec() {
+		return this.getSemiMajorAxisDirection().times(this.rx);
+	}
+
 	/**
-	 * Returns the distance from the edge of this to `point`, or, if `point` is inside this,
-	 * the negative of that distance.
+	 * Returns the closest point on this ellipse to `point`.
 	 */
-	public override signedDistance(point: Vec3): number {
+	public closestPointTo(point: Point2): Point2 {
 		// Our initial guess below requires that point ≠ center. Thus, we need
 		// an edge case.
 		if (point.eq(this.center)) {
-			return -Math.min(this.rx, this.ry);
+			const xAxisDir = this.getSemiMajorAxisDirection();
+			if (this.rx < this.ry) {
+				return this.center.plus(xAxisDir.times(this.rx));
+			}
+			return this.center.plus(xAxisDir.orthog().times(this.ry));
 		}
 
 		// Letting p be `point` and v(t) be a point on the ellipse given parameter t, observe that
@@ -322,7 +390,15 @@ class Ellipse extends Abstract2DShape {
 			lastLoss = newLoss;
 		}
 
-		const dist = this.at(tApproximation).minus(point).length();
+		return this.at(tApproximation);
+	}
+
+	/**
+	 * Returns the distance from the edge of this to `point`, or, if `point` is inside this,
+	 * the negative of that distance.
+	 */
+	public override signedDistance(point: Point2): number {
+		const dist = point.minus(this.closestPointTo(point)).length();
 
 		// SDF is negative for points contained in the ellipse.
 		if (this.containsPoint(point)) {
@@ -331,7 +407,7 @@ class Ellipse extends Abstract2DShape {
 		return dist;
 	}
 
-	public override containsPoint(point: Vec3, epsilon: number = 0): boolean {
+	public override containsPoint(point: Vec3, epsilon: number = Abstract2DShape.smallValue): boolean {
 		const distSum = this.f1.minus(point).magnitude() + this.f2.minus(point).magnitude();
 		return distSum <= 2 * this.rx + epsilon;
 	}

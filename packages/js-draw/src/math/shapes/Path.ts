@@ -9,12 +9,14 @@ import Abstract2DShape from './Abstract2DShape';
 import CubicBezier from './CubicBezier';
 import QuadraticBezier from './QuadraticBezier';
 import PointShape2D from './PointShape2D';
+import EllipticalArc from './EllipticalArc';
 
 export enum PathCommandType {
 	LineTo,
 	MoveTo,
 	CubicBezierTo,
 	QuadraticBezierTo,
+	EllipticalArcTo,
 }
 
 export interface CubicBezierPathCommand {
@@ -30,6 +32,16 @@ export interface QuadraticBezierPathCommand {
 	endPoint: Point2;
 }
 
+// See [the W3C spec](https://www.w3.org/TR/SVG/implnote.html#ArcSyntax) for details.
+export interface EllipticalArcPathCommand {
+	kind: PathCommandType.EllipticalArcTo,
+	endPoint: Point2,
+	size: Vec2, // Vec2(semimajor axis, semiminor axis)
+	majorAxisRotation: number,
+	largeArcFlag: boolean,
+	sweepFlag: boolean
+}
+
 export interface LinePathCommand {
 	kind: PathCommandType.LineTo;
 	point: Point2;
@@ -40,7 +52,12 @@ export interface MoveToPathCommand {
 	point: Point2;
 }
 
-export type PathCommand = CubicBezierPathCommand | QuadraticBezierPathCommand | MoveToPathCommand | LinePathCommand;
+export type PathCommand =
+	CubicBezierPathCommand
+	| QuadraticBezierPathCommand
+	| EllipticalArcPathCommand
+	| MoveToPathCommand
+	| LinePathCommand;
 
 interface IntersectionResult {
 	// @internal
@@ -52,6 +69,13 @@ interface IntersectionResult {
 	// Point at which the intersection occured.
 	point: Point2;
 }
+
+const arcFromCommand = (startPoint: Point2, part: EllipticalArcPathCommand) => {
+	return EllipticalArc.fromStartEnd(
+		startPoint, part.endPoint, part.size.x, part.size.y,
+		part.majorAxisRotation, part.largeArcFlag, part.sweepFlag
+	);
+};
 
 type GeometryType = Abstract2DShape;
 type GeometryArrayType = Array<GeometryType>;
@@ -70,8 +94,10 @@ export default class Path {
 
 		// Convert into a representation of the geometry (cache for faster intersection
 		// calculation)
+		let lastPoint = startPoint;
 		for (const part of parts) {
-			this.bbox = this.bbox.union(Path.computeBBoxForSegment(startPoint, part));
+			this.bbox = this.bbox.union(Path.computeBBoxForSegment(lastPoint, part));
+			lastPoint = Path.getPartEndpoint(part);
 		}
 	}
 
@@ -94,6 +120,7 @@ export default class Path {
 
 		let startPoint = this.startPoint;
 		const geometry: GeometryArrayType = [];
+		let exhaustivenessCheck: never;
 
 		for (const part of this.parts) {
 			switch (part.kind) {
@@ -123,6 +150,13 @@ export default class Path {
 				geometry.push(new PointShape2D(part.point));
 				startPoint = part.point;
 				break;
+			case PathCommandType.EllipticalArcTo:
+				geometry.push(arcFromCommand(startPoint, part));
+				startPoint = part.endPoint;
+				break;
+			default:
+				exhaustivenessCheck = part;
+				return exhaustivenessCheck;
 			}
 		}
 
@@ -139,6 +173,7 @@ export default class Path {
 		}
 
 		const points: Point2[] = [];
+		let exhaustivenessCheck: never;
 
 		for (const part of this.parts) {
 			switch (part.kind) {
@@ -152,6 +187,12 @@ export default class Path {
 			case PathCommandType.LineTo:
 				points.push(part.point);
 				break;
+			case PathCommandType.EllipticalArcTo:
+				points.push(part.endPoint);
+				break;
+			default:
+				exhaustivenessCheck = part;
+				return exhaustivenessCheck;
 			}
 		}
 
@@ -165,6 +206,10 @@ export default class Path {
 		return result;
 	}
 
+	/**
+	 * **Estimates** the bounding box for the path segment given by `part`. This
+	 * estimate is an overestimate.
+	 */
 	public static computeBBoxForSegment(startPoint: Point2, part: PathCommand): Rect2 {
 		const points = [startPoint];
 		let exhaustivenessCheck: never;
@@ -179,12 +224,23 @@ export default class Path {
 		case PathCommandType.QuadraticBezierTo:
 			points.push(part.controlPoint, part.endPoint);
 			break;
+		case PathCommandType.EllipticalArcTo:
+			points.push(...arcFromCommand(startPoint, part).getLooseBoundingBox().corners);
+			break;
 		default:
 			exhaustivenessCheck = part;
 			return exhaustivenessCheck;
 		}
 
 		return Rect2.bboxOf(points);
+	}
+
+	public static getPartEndpoint(part: PathCommand) {
+		if (part.kind === PathCommandType.LineTo || part.kind === PathCommandType.MoveTo) {
+			return part.point;
+		} else {
+			return part.endPoint;
+		}
 	}
 
 	/**
@@ -446,7 +502,9 @@ export default class Path {
 		return result;
 	}
 
-	private static mapPathCommand(part: PathCommand, mapping: (point: Point2)=> Point2): PathCommand {
+	private static mapPathCommand(
+		startPoint: Point2, part: PathCommand, mapping: (point: Point2)=> Point2
+	): PathCommand {
 		switch (part.kind) {
 		case PathCommandType.MoveTo:
 		case PathCommandType.LineTo:
@@ -472,6 +530,50 @@ export default class Path {
 			break;
 		}
 
+		if (part.kind === PathCommandType.EllipticalArcTo) {
+			// TODO: Can this be done without (re)initializing this portion of the geometry?
+			// TODO: Move to EllipticalArc.ts
+			const arc = arcFromCommand(startPoint, part);
+			if (arc instanceof LineSegment2) {
+				return {
+					kind: PathCommandType.LineTo,
+					point: mapping(part.endPoint),
+				};
+			}
+
+			// TODO: This isn't correct in all cases.
+			const ellipse = arc.fullEllipse;
+			const majAxisDirection = Vec2.of(
+				Math.cos(part.majorAxisRotation),
+				Math.sin(part.majorAxisRotation)
+			);
+			const minAxisDirection = Vec2.of(
+				Math.cos(part.majorAxisRotation + Math.PI / 2),
+				Math.sin(part.majorAxisRotation + Math.PI / 2)
+			);
+			const p1 = ellipse.center.plus(majAxisDirection.times(part.size.x));
+			const p2 = ellipse.center.plus(minAxisDirection.times(part.size.y));
+
+			const p1Mapped = mapping(p1);
+			const p2Mapped = mapping(p2);
+
+			const centerMapped = mapping(arc.fullEllipse.center);
+
+			const semiMajorAxisMapped = p1Mapped.minus(centerMapped);
+			const semiMinorAxisMapped = p2Mapped.minus(centerMapped);
+
+			return {
+				kind: part.kind,
+				endPoint: mapping(part.endPoint),
+				size: Vec2.of(semiMajorAxisMapped.length(), semiMinorAxisMapped.length()),
+				majorAxisRotation: semiMajorAxisMapped.angle(),
+
+				// TODO: Do these need to be changed based on the mapping?
+				largeArcFlag: part.largeArcFlag,
+				sweepFlag: part.sweepFlag,
+			};
+		}
+
 		const exhaustivenessCheck: never = part;
 		return exhaustivenessCheck;
 	}
@@ -479,9 +581,11 @@ export default class Path {
 	public mapPoints(mapping: (point: Point2)=>Point2): Path {
 		const startPoint = mapping(this.startPoint);
 		const newParts: PathCommand[] = [];
+		let prevPoint = this.startPoint;
 
 		for (const part of this.parts) {
-			newParts.push(Path.mapPathCommand(part, mapping));
+			newParts.push(Path.mapPathCommand(prevPoint, part, mapping));
+			prevPoint = Path.getPartEndpoint(part);
 		}
 
 		return new Path(startPoint, newParts);
@@ -516,11 +620,7 @@ export default class Path {
 			return this.startPoint;
 		}
 		const lastPart = this.parts[this.parts.length - 1];
-		if (lastPart.kind === PathCommandType.QuadraticBezierTo || lastPart.kind === PathCommandType.CubicBezierTo) {
-			return lastPart.endPoint;
-		} else {
-			return lastPart.point;
-		}
+		return Path.getPartEndpoint(lastPart);
 	}
 
 	public roughlyIntersects(rect: Rect2, strokeWidth: number = 0) {
@@ -541,12 +641,7 @@ export default class Path {
 		let startPoint = this.startPoint;
 		for (const part of this.parts) {
 			const bbox = Path.computeBBoxForSegment(startPoint, part).grownBy(strokeWidth);
-
-			if (part.kind === PathCommandType.LineTo || part.kind === PathCommandType.MoveTo) {
-				startPoint = part.point;
-			} else {
-				startPoint = part.endPoint;
-			}
+			startPoint = Path.getPartEndpoint(part);
 
 			if (rect.intersects(bbox)) {
 				return true;
@@ -799,6 +894,19 @@ export default class Path {
 			}
 		};
 
+		const addArcCommand = (command: EllipticalArcPathCommand) => {
+			const endX = toRoundedString(command.endPoint.x);
+			const endY = toRoundedString(command.endPoint.y);
+			const rx = toRoundedString(command.size.x);
+			const ry = toRoundedString(command.size.y);
+			const xRotation = toRoundedString(command.majorAxisRotation * 180 / Math.PI);
+			const largeArcFlag = command.largeArcFlag ? '1' : '0';
+			const sweepFlag = command.sweepFlag ? '1' : '0';
+
+			result.push(`A${rx},${ry} ${xRotation} ${largeArcFlag} ${sweepFlag} ${endX},${endY}`);
+			prevPoint = command.endPoint;
+		};
+
 		// Don't add two moveTos in a row (this can happen if
 		// the start point corresponds to a moveTo _and_ the first command is
 		// also a moveTo)
@@ -822,6 +930,9 @@ export default class Path {
 				break;
 			case PathCommandType.QuadraticBezierTo:
 				addCommand('Q', part.controlPoint, part.endPoint);
+				break;
+			case PathCommandType.EllipticalArcTo:
+				addArcCommand(part);
 				break;
 			default:
 				exhaustivenessCheck = part;
@@ -889,14 +1000,35 @@ export default class Path {
 				endPoint,
 			});
 		};
+		const ellipticalArcTo = (
+			rx: number, ry: number,
+
+			// Degrees
+			majAxisRotation: number,
+			largeArcFlag: number, sweepFlag: number,
+			endPoint: Point2,
+		) => {
+			// Degrees -> radians
+			majAxisRotation = majAxisRotation * Math.PI / 180;
+
+			commands.push({
+				kind: PathCommandType.EllipticalArcTo,
+				size: Vec2.of(rx, ry),
+				majorAxisRotation: majAxisRotation,
+				largeArcFlag: largeArcFlag > 0.5,
+				sweepFlag: sweepFlag > 0.5,
+				endPoint,
+			});
+		};
 		const commandArgCounts: Record<string, number> = {
-			'm': 1,
-			'l': 1,
-			'c': 3,
-			'q': 2,
+			'm': 2,
+			'l': 2,
+			'c': 6,
+			'a': 7,
+			'q': 4,
 			'z': 0,
-			'h': 1,
-			'v': 1,
+			'h': 2,
+			'v': 2,
 		};
 
 		// Each command: Command character followed by anything that isn't a command character
@@ -919,14 +1051,20 @@ export default class Path {
 				return accumualtor;
 			}, []);
 
-			let numericArgs = argParts.map(arg => parseFloat(arg));
+			// All arguments, converted to numbers
+			const numericArgs = argParts.map(arg => parseFloat(arg));
+
+			let pointArgCoordinates = numericArgs;
+			const nonPointArgs: number[] = [];
 
 			let commandChar = current[1].toLowerCase();
 			let uppercaseCommand = current[1] !== commandChar;
 
+			let nonPointArgsPerSet = 0;
+
 			// Convert commands that don't take points into commands that do.
 			if (commandChar === 'v' || commandChar === 'h') {
-				numericArgs = numericArgs.reduce((accumulator: number[], current: number): number[] => {
+				pointArgCoordinates = pointArgCoordinates.reduce((accumulator: number[], current: number): number[] => {
 					if (commandChar === 'v') {
 						return accumulator.concat(uppercaseCommand ? lastPos.x : 0, current);
 					} else {
@@ -936,7 +1074,7 @@ export default class Path {
 				commandChar = 'l';
 			} else if (commandChar === 'z') {
 				if (firstPos) {
-					numericArgs = [ firstPos.x, firstPos.y ];
+					pointArgCoordinates = [ firstPos.x, firstPos.y ];
 					firstPos = lastPos;
 				} else {
 					continue;
@@ -947,9 +1085,41 @@ export default class Path {
 				commandChar = 'l';
 			}
 
+			// Expected number of arguments per set.
+			const expectedArgCount: number = commandArgCounts[commandChar] ?? 0;
 
-			const commandArgCount: number = commandArgCounts[commandChar] ?? 0;
-			const allArgs = numericArgs.reduce((
+			// Some commands don't take only point arguments and thus need
+			// special  processing.
+			if (commandChar === 'a') {
+				pointArgCoordinates = [];
+				nonPointArgsPerSet = 5;
+				for (let i = 0; i < numericArgs.length; i++) {
+					//  0  1  2               3           4         5 6
+					// rx ry majAxisRotation largeArcFlag sweepFlag x y
+					if (i % expectedArgCount === 5 || i % expectedArgCount === 6) {
+						pointArgCoordinates.push(numericArgs[i]);
+					} else {
+						nonPointArgs.push(numericArgs[i]);
+					}
+				}
+			}
+
+			const actualArgCount = pointArgCoordinates.length + nonPointArgs.length;
+			if (actualArgCount % expectedArgCount !== 0) {
+				throw new Error([
+					`Incorrect number of arguments: got ${JSON.stringify(numericArgs)}`,
+					`with a length of ${actualArgCount} ≠ ${expectedArgCount}k, k ∈ ℤ.`,
+					`The number of arguments to ${commandChar} must be a multiple of ${expectedArgCount}!`,
+					`Command: ${current[0]}`,
+				].join('\n'));
+			}
+
+			// Because SVG argument lists can be repeated without repeating letters,
+			// we can have multiple sets of arguments for the same command;
+			const numArgSets = actualArgCount / expectedArgCount;
+			const pointArgsPerSet = (expectedArgCount - nonPointArgsPerSet) / 2;
+
+			const pointArgs = pointArgCoordinates.reduce((
 				accumulator: Point2[], current, index, parts
 			): Point2[] => {
 				if (index % 2 !== 0) {
@@ -969,40 +1139,48 @@ export default class Path {
 					newPos = lastPos.plus(coordinate);
 				}
 
-				if ((index + 1) % commandArgCount === 0) {
+				// If the last point arg in the set,
+				if ((index + 1) % pointArgsPerSet === 0) {
 					lastPos = newPos;
 				}
 
 				return newPos;
 			});
 
-			if (allArgs.length % commandArgCount !== 0) {
-				throw new Error([
-					`Incorrect number of arguments: got ${JSON.stringify(allArgs)} with a length of ${allArgs.length} ≠ ${commandArgCount}k, k ∈ ℤ.`,
-					`The number of arguments to ${commandChar} must be a multiple of ${commandArgCount}!`,
-					`Command: ${current[0]}`,
-				].join('\n'));
-			}
 
-			for (let argPos = 0; argPos < allArgs.length; argPos += commandArgCount) {
-				const args = allArgs.slice(argPos, argPos + commandArgCount);
+			for (let argSetIdx = 0; argSetIdx < numArgSets; argSetIdx ++) {
+				const points = pointArgs.slice(
+					argSetIdx * pointArgsPerSet,
+					(argSetIdx + 1) * pointArgsPerSet
+				);
+				const nonPoints = nonPointArgsPerSet === 0 ? [] : nonPointArgs.slice(
+					argSetIdx * nonPointArgsPerSet,
+					(argSetIdx + 1) * nonPointArgsPerSet
+				);
 
 				switch (commandChar.toLowerCase()) {
 				case 'm':
-					if (argPos === 0) {
-						moveTo(args[0]);
+					if (argSetIdx === 0) {
+						moveTo(points[0]);
 					} else {
-						lineTo(args[0]);
+						lineTo(points[0]);
 					}
 					break;
 				case 'l':
-					lineTo(args[0]);
+					lineTo(points[0]);
 					break;
 				case 'c':
-					cubicBezierTo(args[0], args[1], args[2]);
+					cubicBezierTo(points[0], points[1], points[2]);
 					break;
 				case 'q':
-					quadraticBeierTo(args[0], args[1]);
+					quadraticBeierTo(points[0], points[1]);
+					break;
+				case 'a':
+					ellipticalArcTo(
+						nonPoints[0], nonPoints[1],
+						nonPoints[2], nonPoints[3], nonPoints[4],
+						points[0],
+					);
 					break;
 				default:
 					throw new Error(`Unknown path command ${commandChar}`);
@@ -1011,10 +1189,10 @@ export default class Path {
 				isFirstCommand = false;
 			}
 
-			if (allArgs.length > 0) {
-				firstPos ??= allArgs[0];
+			if (pointArgs.length > 0) {
+				firstPos ??= pointArgs[0];
 				startPos ??= firstPos;
-				lastPos = allArgs[allArgs.length - 1];
+				lastPos = pointArgs[pointArgs.length - 1];
 			}
 		}
 

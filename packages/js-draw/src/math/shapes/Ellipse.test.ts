@@ -109,6 +109,14 @@ describe('Ellipse', () => {
 		});
 	});
 
+	it('parameterForPoint should return the parameter value for a given point', () => {
+		forEachEllipseOnMainTestPath((ellipse) => {
+			for (let i = -Math.PI + 0.001; i < Math.PI; i += 0.3) {
+				expect(ellipse.parameterForPoint(ellipse.at(i))).toBeCloseTo(i);
+			}
+		});
+	});
+
 	describe('should compute correct signed distance', () => {
 		it('for a circle', () => {
 			for (const center of [ Vec2.zero, Vec2.of(1, 0.5)]) {
@@ -207,6 +215,30 @@ describe('Ellipse', () => {
 			expect(bbox.center).objEq(Vec2.zero);
 			expect(bbox.width).toBe(4); // 2rx
 			expect(bbox.height).toBe(2 * Math.sqrt(rx ** 2 - 1 ** 2)); // 2ry
+		});
+	});
+
+	it('should compute correct XY extrema', () => {
+		forEachEllipseOnMainTestPath(ellipse => {
+			const extrema = ellipse.getXYExtrema();
+			expect(extrema).toHaveLength(4);
+
+			// Should be in correct order (small x, big x, small y, big y).
+			expect(extrema[0].x).toBeLessThanOrEqual(extrema[1].x);
+			expect(extrema[2].y).toBeLessThanOrEqual(extrema[3].y);
+
+			// Neighboring points should not be as extreme
+			for (let delta = -0.1; delta <= 0.1; delta += 0.04) {
+				for (let i = 0; i < 4; i++) {
+					const extremaParam = ellipse.parameterForPoint(extrema[i])!;
+					const neighborPoint = ellipse.at(extremaParam + delta);
+
+					expect(neighborPoint.x).toBeGreaterThan(extrema[0].x);
+					expect(neighborPoint.x).toBeLessThan(extrema[1].x);
+					expect(neighborPoint.y).toBeGreaterThan(extrema[2].y);
+					expect(neighborPoint.y).toBeLessThan(extrema[3].y);
+				}
+			}
 		});
 	});
 });

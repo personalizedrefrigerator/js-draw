@@ -1,4 +1,6 @@
 import Color4 from '../../Color4';
+import EllipticalArc from '../../math/shapes/EllipticalArc';
+import LineSegment2 from '../../math/shapes/LineSegment2';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Mat33 from '../../math/Mat33';
 import Path, { PathCommand, PathCommandType } from '../../math/shapes/Path';
@@ -71,8 +73,9 @@ export default abstract class AbstractRenderer {
 	public setDraftMode(_draftMode: boolean) { }
 
 	protected objectLevel: number = 0;
+	protected pathLastPoint: Point2 = Vec2.zero;
 	private currentPaths: RenderablePathSpec[]|null = null;
-	private flushPath() {
+	private flushPath(): void {
 		if (!this.currentPaths) {
 			return;
 		}
@@ -80,6 +83,7 @@ export default abstract class AbstractRenderer {
 		let lastStyle: RenderingStyle|null = null;
 		for (const path of this.currentPaths) {
 			const { startPoint, commands, style } = path;
+			this.pathLastPoint = startPoint;
 
 			if (!lastStyle || !stylesEqual(lastStyle, style)) {
 				if (lastStyle) {
@@ -95,16 +99,29 @@ export default abstract class AbstractRenderer {
 			for (const command of commands) {
 				if (command.kind === PathCommandType.LineTo) {
 					this.lineTo(command.point);
+					this.pathLastPoint = command.point;
 				} else if (command.kind === PathCommandType.MoveTo) {
 					this.moveTo(command.point);
+					this.pathLastPoint = command.point;
 				} else if (command.kind === PathCommandType.CubicBezierTo) {
 					this.traceCubicBezierCurve(
 						command.controlPoint1, command.controlPoint2, command.endPoint
 					);
+					this.pathLastPoint = command.endPoint;
 				} else if (command.kind === PathCommandType.QuadraticBezierTo) {
 					this.traceQuadraticBezierCurve(
 						command.controlPoint, command.endPoint
 					);
+					this.pathLastPoint = command.endPoint;
+				} else if (command.kind === PathCommandType.EllipticalArcTo) {
+					this.traceEllipticalArc(
+						command.size, command.majorAxisRotation, command.largeArcFlag,
+						command.sweepFlag, command.endPoint,
+					);
+					this.pathLastPoint = command.endPoint;
+				} else {
+					const exhaustivenessCheck: never = command;
+					return exhaustivenessCheck;
 				}
 			}
 		}
@@ -145,6 +162,34 @@ export default abstract class AbstractRenderer {
 	public fillRect(rect: Rect2, fill: Color4) {
 		const path = Path.fromRect(rect);
 		this.drawPath(path.toRenderable({ fill }));
+	}
+
+	/**
+	 * Draws an approximate elliptical arc. It is recommended that subclasses override this method.
+	 *
+	 * Notice the order of the parameters (the first parameter is `size`, not `startPoint`).
+	 */
+	protected traceEllipticalArc(
+		size: Vec2,
+		majorAxisRotation: number,
+		largeArcFlag: boolean,
+		sweepFlag: boolean,
+		endPoint: Point2,
+	): void {
+		const startPoint = this.pathLastPoint;
+		const ellipse = EllipticalArc.fromStartEnd(
+			startPoint, endPoint, size.x, size.y, majorAxisRotation, largeArcFlag, sweepFlag
+		);
+
+		if (ellipse instanceof LineSegment2) {
+			this.lineTo(endPoint);
+			return;
+		}
+
+		for (let t = ellipse.minParam; t <= ellipse.maxParam; t += 0.1) {
+			this.lineTo(ellipse.at(t));
+		}
+		this.lineTo(ellipse.at(ellipse.maxParam));
 	}
 
 	/**
