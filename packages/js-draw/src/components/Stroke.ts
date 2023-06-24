@@ -146,7 +146,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		}
 	}
 
-	public intersects(line: LineSegment2): boolean {
+	public override intersects(line: LineSegment2): boolean {
 		for (const part of this.parts) {
 			const strokeWidth = part.style.stroke?.width;
 			const strokeRadius = strokeWidth ? strokeWidth / 2 : undefined;
@@ -158,7 +158,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return false;
 	}
 
-	public render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
+	public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.getBBox());
 		for (const part of this.parts) {
 			const bbox = this.bboxForPart(part.path.bbox, part.style);
@@ -258,15 +258,15 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return result ?? Path.empty;
 	}
 
-	public description(localization: ImageComponentLocalization): string {
+	public override description(localization: ImageComponentLocalization): string {
 		return localization.stroke;
 	}
 
-	protected createClone(): AbstractComponent {
+	protected override createClone(): AbstractComponent {
 		return new Stroke(this.parts);
 	}
 
-	protected serializeToJSON() {
+	protected override serializeToJSON() {
 		return this.parts.map(part => {
 			return {
 				style: styleToJSON(part.style),

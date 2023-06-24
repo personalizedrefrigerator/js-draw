@@ -21,7 +21,7 @@ export default class UnknownSVGObject extends AbstractComponent {
 		this.contentBBox = Rect2.of(svgObject.getBoundingClientRect());
 	}
 
-	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
 		if (!(canvas instanceof SVGRenderer)) {
 			// Don't draw unrenderable objects if we can't
 			return;
@@ -30,7 +30,7 @@ export default class UnknownSVGObject extends AbstractComponent {
 		canvas.drawSVGElem(this.svgObject);
 	}
 
-	public intersects(lineSegment: LineSegment2): boolean {
+	public override intersects(lineSegment: LineSegment2): boolean {
 		return this.contentBBox.getEdges().some(edge => edge.intersection(lineSegment) !== null);
 	}
 

@@ -88,7 +88,7 @@ export default class ImageComponent extends AbstractComponent {
 		});
 	}
 
-	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
 		canvas.startObject(this.contentBBox);
 		canvas.drawImage(this.image);
 		canvas.endObject(this.getLoadSaveData());
@@ -99,7 +99,7 @@ export default class ImageComponent extends AbstractComponent {
 		return 10;
 	}
 
-	public intersects(lineSegment: LineSegment2): boolean {
+	public override intersects(lineSegment: LineSegment2): boolean {
 		const rect = this.getImageRect();
 		const edges = rect.getEdges().map(edge => edge.transformedBy(this.image.transform));
 		for (const edge of edges) {
@@ -115,7 +115,7 @@ export default class ImageComponent extends AbstractComponent {
 		this.recomputeBBox();
 	}
 
-	public description(localizationTable: ImageComponentLocalization): string {
+	public override description(localizationTable: ImageComponentLocalization): string {
 		return this.image.label ? localizationTable.imageNode(this.image.label) : localizationTable.unlabeledImageNode;
 	}
 
@@ -131,13 +131,13 @@ export default class ImageComponent extends AbstractComponent {
 		return this.image.transform;
 	}
 
-	protected createClone(): AbstractComponent {
+	protected override createClone(): AbstractComponent {
 		return new ImageComponent({
 			...this.image,
 		});
 	}
 
-	protected serializeToJSON() {
+	protected override serializeToJSON() {
 		return {
 			src: this.image.base64Url,
 			label: this.image.label,

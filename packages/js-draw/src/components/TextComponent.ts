@@ -160,7 +160,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		}
 	}
 
-	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
 		canvas.startObject(this.contentBBox);
 		this.renderInternal(canvas);
 		canvas.endObject(this.getLoadSaveData());
@@ -170,7 +170,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		return this.textObjects.length;
 	}
 
-	public intersects(lineSegment: LineSegment2): boolean {
+	public override intersects(lineSegment: LineSegment2): boolean {
 		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const subObject of this.textObjects) {
