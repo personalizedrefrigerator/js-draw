@@ -543,30 +543,22 @@ export default class Path {
 
 			// TODO: This isn't correct in all cases.
 			const ellipse = arc.fullEllipse;
-			const majAxisDirection = Vec2.of(
-				Math.cos(part.majorAxisRotation),
-				Math.sin(part.majorAxisRotation)
-			);
-			const minAxisDirection = Vec2.of(
-				Math.cos(part.majorAxisRotation + Math.PI / 2),
-				Math.sin(part.majorAxisRotation + Math.PI / 2)
-			);
-			const p1 = ellipse.center.plus(majAxisDirection.times(part.size.x));
-			const p2 = ellipse.center.plus(minAxisDirection.times(part.size.y));
+			const transformedCenter = mapping(ellipse.center);
+			const transformedEnd = mapping(part.endPoint);
+			const transformedRight = mapping(ellipse.center.plus(ellipse.getSemiMajorAxisVec()));
+			const transformedUp = mapping(ellipse.center.plus(ellipse.getSemiMinorAxisVec()));
 
-			const p1Mapped = mapping(p1);
-			const p2Mapped = mapping(p2);
-
-			const centerMapped = mapping(arc.fullEllipse.center);
-
-			const semiMajorAxisMapped = p1Mapped.minus(centerMapped);
-			const semiMinorAxisMapped = p2Mapped.minus(centerMapped);
+			const transformedSemiMajAxis = transformedRight.minus(transformedCenter);
+			const transformedSemiMinAxis = transformedUp.minus(transformedCenter);
+			const rx = transformedSemiMajAxis.length();
+			const ry = transformedSemiMinAxis.length();
+			const majorAxisRotation = transformedSemiMajAxis.angle();
 
 			return {
 				kind: part.kind,
-				endPoint: mapping(part.endPoint),
-				size: Vec2.of(semiMajorAxisMapped.length(), semiMinorAxisMapped.length()),
-				majorAxisRotation: semiMajorAxisMapped.angle(),
+				endPoint: transformedEnd,
+				size: Vec2.of(rx, ry),
+				majorAxisRotation,
 
 				// TODO: Do these need to be changed based on the mapping?
 				largeArcFlag: part.largeArcFlag,

@@ -36,7 +36,7 @@ class Ellipse extends Abstract2DShape {
 	 *
 	 * @param f1 Position of the first focus
 	 * @param f2 Position of the second focus
-	 * @param a Length of the semimajor axis
+	 * @param rx Length of the semimajor axis
 	 */
 	public constructor(
 		// Focus 1
@@ -81,6 +81,43 @@ class Ellipse extends Abstract2DShape {
 			Mat33.scaling2D(Vec2.of(this.rx, this.ry))
 		);
 	}
+
+	// public static fromTransform(
+	// 	transform: Mat33,
+	// ) {
+	// 	// See https://math.stackexchange.com/a/2147944
+
+	// 	const xAxis = Vec2.unitX;
+	// 	const yAxis = Vec2.unitY;
+	// 	const zero = Vec2.zero;
+
+	// 	const center = transform.transformVec2(zero);
+	// 	const right = transform.transformVec3(xAxis);
+	// 	const top = transform.transformVec3(yAxis);
+
+	// 	// The two foci lie along the longer axis.
+	// 	// rx is half the length of this longer axis.
+
+	// 	//   (rx-ℓ) ℓ   ℓ  (rx-ℓ)
+	// 	//  |-----x---o---x-----|
+	// 	//       f1      f2
+	// 	// where ℓ is the distance between the foci.
+
+	// 	const upVec = top.minus(center);
+	// 	const rightVec = right.minus(center);
+
+	// 	const ry = Math.min(upVec.length(), rightVec.length());
+	// 	const rx = Math.max(upVec.length(), rightVec.length());
+
+	// 	// Choose the x-axis to be the longer of the two axes
+
+	// 	let f1, f2;
+	// 	if (top.length() > right.length()) {
+	// 		f1 = center.plus();
+	// 	} else {
+	// 		;
+	// 	}
+	// }
 
 	/**
 	 * @returns a point on this ellipse, given a parameter value, `t ∈ [0, 2π)`.
@@ -134,6 +171,14 @@ class Ellipse extends Abstract2DShape {
 			return null;
 		}
 
+		return this.parameterForPointUnchecked(point);
+	}
+
+	/**
+	 * Like {@link parameterForPoint}, but does not verify that `point` is on this
+	 * ellipse.
+	 */
+	public parameterForPointUnchecked(point: Point2) {
 		const pointOnCircle = this.transform.inverse().transformVec2(point);
 		return pointOnCircle.angle();
 	}

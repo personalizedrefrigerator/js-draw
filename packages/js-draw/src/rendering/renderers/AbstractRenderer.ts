@@ -186,10 +186,18 @@ export default abstract class AbstractRenderer {
 			return;
 		}
 
-		for (let t = ellipse.minParam; t <= ellipse.maxParam; t += 0.1) {
-			this.lineTo(ellipse.at(t));
+		const step = 0.1;
+		if (ellipse.reverseSweep) {
+			for (let t = ellipse.maxParam; t >= ellipse.minParam; t -= step) {
+				this.lineTo(ellipse.at(t));
+			}
+			this.lineTo(ellipse.at(ellipse.minParam));
+		} else {
+			for (let t = ellipse.minParam; t <= ellipse.maxParam; t += step) {
+				this.lineTo(ellipse.at(t));
+			}
+			this.lineTo(ellipse.at(ellipse.maxParam));
 		}
-		this.lineTo(ellipse.at(ellipse.maxParam));
 	}
 
 	/**

@@ -1,5 +1,6 @@
 import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
+import solveQuadratic from './polynomial/solveQuadratic';
 
 export type Mat33Array = [
 	number, number, number,
@@ -219,6 +220,76 @@ export default class Mat33 {
 			this.rows[1].dot(other),
 			this.rows[2].dot(other)
 		);
+	}
+
+	/**
+	 * Returns the eigenvalues of the top left corner of this matrix.
+	 */
+	public mat22EigenValues(): [number,number]|[number]|[] {
+		// If A is the 2x2 submatrix in the top-left corner of this, we want
+		// to find all vectors v such that
+		//  ∃λ∈ℝ s.t. Av = λv.
+		// Using Algebra,
+		//   Av = λv ⟹  Av - λv  = 0
+		//           ⟹ Av - λIv  = 0
+		//           ⟹ (A - λI)v = 0
+		//           ⟹ v ∈ Kernel(A - λI)
+		// We're intereseted in λ for which Kernel(A - λI) ≠ ∅,
+		// thus, where A - λI is not invertable, hence,
+		//     0 = det(A - λI)
+		//	            ⎡ a1 a2 ⎤   ⎡ λ 0 ⎤
+		//       = det( ⎣ b1 b2 ⎦ - ⎣ 0 λ ⎦  )
+		//	           ⎡ a1-λ   a2   ⎤
+		//       = det ⎣   b1   b2-λ ⎦
+		//       = (a1-λ)(b2-λ) - (a2)(b1)
+		//       = a1 b2 - λ b2 - λ a1 + λ² - (a2)(b1)
+		//       = λ² + (λ)(-a1 - b2) + a1 b2 - a2 b1
+		// Solving gives the eigenvalues.
+		const [ lambda1, lambda2 ] = solveQuadratic(
+			1, -this.a1 - this.b2, this.a1 * this.b2 - this.a2 * this.b1
+		);
+
+		// No solutions
+		if (isNaN(lambda1) && isNaN(lambda2)) {
+			return [];
+		}
+
+		// One solution (float equality check is okay here because solveQuadratic
+		// produces two solutions that are *exactly* the same).
+		if (lambda1 === lambda2) {
+			return [lambda1];
+		}
+
+		return [ lambda1, lambda2 ];
+	}
+
+	/** Returns the unit eigenvectors of the top left 2x2 submatrix of this. */
+	public mat22EigenVectors(): Vec2[] {
+		const eigvals = this.mat22EigenValues();
+		const eigvecs = [];
+
+		for (const eigval of eigvals) {
+			let row1 = Vec2.of(this.a1 - eigval, this.a2);
+			const row2 = Vec2.of(this.b1, this.b2 - eigval);
+
+			if (row1.eq(Vec2.zero)) {
+				row1 = row2;
+			}
+
+			// Because an eigenvalue, λ, corresponds to a case where
+			// A - λI is singular, we must have that row1 is a multiple of row2.
+			// Hence, for all φ ∈ ℝ,
+			//  φ v.x + φ v.y = 0 is equivalent to the system of equations above.
+
+			if (row1.eq(Vec2.zero)) {
+				eigvecs.push(Vec2.unitX);
+				eigvecs.push(Vec2.unitY);
+			} else {
+				eigvecs.push(Vec2.of(row1.x, -row1.y).normalized());
+			}
+		}
+
+		return eigvecs;
 	}
 
 	/** @returns true iff this is the identity matrix. */
