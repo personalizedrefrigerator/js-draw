@@ -59,7 +59,7 @@ export default class FloatingActionButton {
 		}
 
 		// Trigger all listeners
-		for (const listener of this.onClickListeners) {
+		for (const listener of Array.from(this.onClickListeners.values())) {
 			listener();
 		}
 	}

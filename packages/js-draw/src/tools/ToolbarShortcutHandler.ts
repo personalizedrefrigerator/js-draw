@@ -23,7 +23,12 @@ export default class ToolbarShortcutHandler extends BaseTool {
 	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
-		for (const listener of this.listeners) {
+		// TypeScript seems to automatically convert for of loops into for(init;check;update)
+		// loops (even with target set to es6). Thus, we cannot iterate directly through the
+		// set here.
+		// See https://stackoverflow.com/q/48886500
+		const listeners = Array.from(this.listeners.values());
+		for (const listener of listeners) {
 			if (listener(event)) {
 				return true;
 			}
