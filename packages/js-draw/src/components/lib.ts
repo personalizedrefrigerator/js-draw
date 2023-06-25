@@ -1,6 +1,7 @@
 export * from './builders/types';
 export { makeFreehandLineBuilder } from './builders/FreehandLineBuilder';
 export { makePressureSensitiveFreehandLineBuilder } from './builders/PressureSensitiveFreehandLineBuilder';
+export { makeOutlinedCircleBuilder } from './builders/CircleBuilder';
 export { default as StrokeSmoother, Curve as StrokeSmootherCurve } from './util/StrokeSmoother';
 
 export * from './AbstractComponent';

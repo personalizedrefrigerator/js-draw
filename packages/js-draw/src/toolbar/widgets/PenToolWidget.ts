@@ -3,6 +3,7 @@ import { makeFreehandLineBuilder } from '../../components/builders/FreehandLineB
 import { makePressureSensitiveFreehandLineBuilder } from '../../components/builders/PressureSensitiveFreehandLineBuilder';
 import { makeLineBuilder } from '../../components/builders/LineBuilder';
 import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../../components/builders/RectangleBuilder';
+import { makeOutlinedCircleBuilder } from '../../components/builders/CircleBuilder';
 import { ComponentBuilderFactory } from '../../components/builders/types';
 import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
@@ -13,7 +14,6 @@ import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 import Color4 from '../../Color4';
 import { SavedToolbuttonState } from './BaseWidget';
-
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -73,6 +73,12 @@ export default class PenToolWidget extends BaseToolWidget {
 
 				factory: makeOutlinedRectangleBuilder,
 			},
+			{
+				name: this.localizationTable.outlinedCirclePen,
+				id: 'outlined-circle',
+
+				factory: makeOutlinedCircleBuilder,
+			}
 		];
 
 		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
