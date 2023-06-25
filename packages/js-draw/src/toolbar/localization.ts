@@ -6,6 +6,7 @@ export interface ToolbarLocalization {
 	touchPanning: string;
 	lockRotation: string;
 	outlinedRectanglePen: string;
+	outlinedCirclePen: string,
 	filledRectanglePen: string;
 	linePen: string;
 	arrowPen: string;
@@ -97,6 +98,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	linePen: 'Line',
 	outlinedRectanglePen: 'Outlined rectangle',
 	filledRectanglePen: 'Filled rectangle',
+	outlinedCirclePen: 'Outlined circle',
 	lockRotation: 'Lock rotation',
 
 	paste: 'Paste',
