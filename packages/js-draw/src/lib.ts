@@ -59,6 +59,7 @@ export * from './tools/lib';
 export * from './toolbar/lib';
 export * from './rendering/lib';
 export * from './testing/lib';
+export * from './shortcuts/lib';
 export { default as EventDispatcher } from './EventDispatcher';
 export { default as Pointer, PointerDevice } from './Pointer';
 export { default as HTMLToolbar } from './toolbar/HTMLToolbar';

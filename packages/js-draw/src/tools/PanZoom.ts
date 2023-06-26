@@ -4,6 +4,7 @@ import Mat33 from '../math/Mat33';
 import { Point2, Vec2 } from '../math/Vec2';
 import Vec3 from '../math/Vec3';
 import Pointer, { PointerDevice } from '../Pointer';
+import KeyboardShortcutManager from '../shortcuts/KeyboardShortcutManager';
 import { EditorEventType, KeyPressEvent, PointerEvt, WheelEvt } from '../types';
 import untilNextAnimationFrame from '../util/untilNextAnimationFrame';
 import { Viewport, ViewportTransform } from '../Viewport';
@@ -86,6 +87,41 @@ class InertialScroller {
 		}
 	}
 }
+
+// Keyboard shortcuts
+const moveLeftKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveLeft';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	moveLeftKeyboardShortcutId, [ 'ArrowLeft', 'h', 'a' ], 'Pan left'
+);
+const moveRightKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveRight';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	moveRightKeyboardShortcutId, [ 'ArrowRight', 'l', 'd' ], 'Pan right'
+);
+const moveUpKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveUp';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	moveUpKeyboardShortcutId, [ 'ArrowUp', 'k', 'q' ], 'Pan up'
+);
+const moveDownKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveDown';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	moveDownKeyboardShortcutId, [ 'ArrowDown', 'j', 'e' ], 'Pan down'
+);
+const rotateClockwiseKeyboardShortcutId = 'jsdraw.tools.PanZoom.rotateViewClockwise';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	rotateClockwiseKeyboardShortcutId, [ 'R' ], 'Rotate viewport clockwise'
+);
+const rotateCounterClockwiseKeyboardShortcutId = 'jsdraw.tools.PanZoom.rotateViewCounterClockwise';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	rotateCounterClockwiseKeyboardShortcutId, [ 'r' ], 'Rotate viewport counter-clockwise'
+);
+const zoomInKeyboardShortcutId = 'jsdraw.tools.PanZoom.zoomIn';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	zoomInKeyboardShortcutId, [ 'w' ], 'Zoom in'
+);
+const zoomOutKeyboardShortcutId = 'jsdraw.tools.PanZoom.zoomOut';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	zoomOutKeyboardShortcutId, [ 's' ], 'Zoom out'
+);
+
 
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;
@@ -393,13 +429,10 @@ export default class PanZoom extends BaseTool {
 		return true;
 	}
 
-	public override onKeyPress({ key, ctrlKey, altKey }: KeyPressEvent): boolean {
+	public override onKeyPress(event: KeyPressEvent): boolean {
 		this.inertialScroller?.stop();
 
 		if (!(this.mode & PanZoomMode.Keyboard)) {
-			return false;
-		}
-		if (ctrlKey || altKey) {
 			return false;
 		}
 
@@ -411,40 +444,24 @@ export default class PanZoom extends BaseTool {
 		let rotation = 0;
 
 		// Keyboard shortcut handling
-		switch (key) {
-		case 'a':
-		case 'h':
-		case 'ArrowLeft':
+		const shortcucts = this.editor.shortcuts;
+		if (shortcucts.matchesShortcut(moveLeftKeyboardShortcutId, event)) {
 			translation = Vec2.of(-1, 0);
-			break;
-		case 'd':
-		case 'l':
-		case 'ArrowRight':
+		} else if (shortcucts.matchesShortcut(moveRightKeyboardShortcutId, event)) {
 			translation = Vec2.of(1, 0);
-			break;
-		case 'q':
-		case 'k':
-		case 'ArrowUp':
+		} else if (shortcucts.matchesShortcut(moveUpKeyboardShortcutId, event)) {
 			translation = Vec2.of(0, -1);
-			break;
-		case 'e':
-		case 'j':
-		case 'ArrowDown':
+		} else if (shortcucts.matchesShortcut(moveDownKeyboardShortcutId, event)) {
 			translation = Vec2.of(0, 1);
-			break;
-		case 'w':
-			scale = 1 / 2;
-			break;
-		case 's':
+		} else if (shortcucts.matchesShortcut(zoomInKeyboardShortcutId, event)) {
+			scale = 1/2;
+		} else if (shortcucts.matchesShortcut(zoomOutKeyboardShortcutId, event)) {
 			scale = 2;
-			break;
-		case 'r':
+		} else if (shortcucts.matchesShortcut(rotateClockwiseKeyboardShortcutId, event)) {
 			rotation = 1;
-			break;
-		case 'R':
+		} else if (shortcucts.matchesShortcut(rotateCounterClockwiseKeyboardShortcutId, event)) {
 			rotation = -1;
-			break;
-		default:
+		} else {
 			return false;
 		}
 

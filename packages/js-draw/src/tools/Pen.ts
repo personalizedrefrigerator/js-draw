@@ -6,6 +6,27 @@ import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuil
 import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt, StrokeDataPoint } from '../types';
 import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
+import { undoKeyboardShortcutId } from './UndoRedoShortcut';
+import KeyboardShortcutManager from '../shortcuts/KeyboardShortcutManager';
+
+// Keyboard shortcut initialization
+const increaseSizeKeyboardShortcutId = 'jsdraw.tools.Pen.increaseSize';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	increaseSizeKeyboardShortcutId, [ '+', '=' ], 'Increase pen size'
+);
+const decreaseSizeKeyboardShortcutId = 'jsdraw.tools.Pen.decreaseSize';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	decreaseSizeKeyboardShortcutId, [ '-', '_' ], 'Decrease pen size'
+);
+const snapToGridKeyboardShortcutId = 'jsdraw.tools.Pen.snapToGrid';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	snapToGridKeyboardShortcutId, [ 'control', 'meta' ], 'Snap to grid (press and hold)'
+);
+const lineLockKeyboardShortcutId = 'jsdraw.tools.Pen.lockToLine';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	lineLockKeyboardShortcutId, [ 'shift' ], 'Snap to XY axes (press and hold)'
+);
+
 
 export interface PenStyle {
 	color: Color4;
@@ -17,8 +38,8 @@ export default class Pen extends BaseTool {
 	private lastPoint: StrokeDataPoint|null = null;
 	private startPoint: StrokeDataPoint|null = null;
 
-	private ctrlKeyPressed: boolean = false;
-	private shiftKeyPressed: boolean = false;
+	private snapToGridEnabled: boolean = false;
+	private angleLockEnabled: boolean = false;
 
 	public constructor(
 		private editor: Editor,
@@ -45,11 +66,11 @@ export default class Pen extends BaseTool {
 
 	// Converts a `pointer` to a `StrokeDataPoint`.
 	protected toStrokePoint(pointer: Pointer): StrokeDataPoint {
-		if (this.isAngleLocked() && this.lastPoint) {
+		if (this.angleLockEnabled && this.lastPoint) {
 			pointer = this.xyAxesSnap(pointer);
 		}
 
-		if (this.isSnappingToGrid()) {
+		if (this.snapToGridEnabled) {
 			pointer = pointer.snappedToGrid(this.editor.viewport);
 		}
 
@@ -198,19 +219,26 @@ export default class Pen extends BaseTool {
 	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
 
-		this.ctrlKeyPressed = false;
+		this.snapToGridEnabled = false;
 	}
 
-	private isSnappingToGrid() { return this.ctrlKeyPressed; }
-	private isAngleLocked() { return this.shiftKeyPressed; }
+	public override onKeyPress(event: KeyPressEvent): boolean {
+		const shortcuts = this.editor.shortcuts;
 
-	public override onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
-		key = key.toLowerCase();
+		// Ctrl+Z: End the stroke so that it can be undone/redone.
+		const isCtrlZ = shortcuts.matchesShortcut(undoKeyboardShortcutId, event);
+		if (this.builder && isCtrlZ) {
+			this.finalizeStroke();
+
+			// Return false: Allow other listeners to handle the event (e.g.
+			// undo/redo).
+			return false;
+		}
 
 		let newThickness: number|undefined;
-		if (key === '-' || key === '_') {
+		if (shortcuts.matchesShortcut(decreaseSizeKeyboardShortcutId, event)) {
 			newThickness = this.getThickness() * 2/3;
-		} else if (key === '+' || key === '=') {
+		} else if (shortcuts.matchesShortcut(increaseSizeKeyboardShortcutId, event)) {
 			newThickness = this.getThickness() * 3/2;
 		}
 
@@ -220,34 +248,29 @@ export default class Pen extends BaseTool {
 			return true;
 		}
 
-		if (key === 'control' || key === 'meta') {
-			this.ctrlKeyPressed = true;
+		if (shortcuts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
+			this.snapToGridEnabled = true;
 			return true;
 		}
 
-		if (key === 'shift') {
-			this.shiftKeyPressed = true;
+		if (shortcuts.matchesShortcut(lineLockKeyboardShortcutId, event)) {
+			this.angleLockEnabled = true;
 			return true;
-		}
-
-		// Ctrl+Z: End the stroke so that it can be undone/redone.
-		if (key === 'z' && ctrlKey && this.builder) {
-			this.finalizeStroke();
 		}
 
 		return false;
 	}
 
-	public override onKeyUp({ key }: KeyUpEvent): boolean {
-		key = key.toLowerCase();
+	public override onKeyUp(event: KeyUpEvent): boolean {
+		const shortcuts = this.editor.shortcuts;
 
-		if (key === 'control' || key === 'meta') {
-			this.ctrlKeyPressed = false;
+		if (shortcuts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
+			this.snapToGridEnabled = false;
 			return true;
 		}
 
-		if (key === 'shift') {
-			this.shiftKeyPressed = false;
+		if (shortcuts.matchesShortcut(lineLockKeyboardShortcutId, event)) {
+			this.angleLockEnabled = false;
 			return true;
 		}
 

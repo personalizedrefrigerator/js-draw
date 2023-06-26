@@ -3,12 +3,20 @@
 // @packageDocumentation
 
 import Editor from '../Editor';
+import KeyboardShortcutManager from '../shortcuts/KeyboardShortcutManager';
 import TextComponent from '../components/TextComponent';
 import Rect2 from '../math/shapes/Rect2';
 import { KeyPressEvent } from '../types';
 import BaseTool from './BaseTool';
 
-export const cssPrefix = 'find-tool';
+export const toggleFindVisibleShortcutId = 'js-draw.tools.FindTool.toggleVisible';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	toggleFindVisibleShortcutId,
+	[ 'ctrlOrMeta+f' ],
+	'Shows/hides the find tool'
+);
+
+const cssPrefix = 'find-tool';
 
 export default class FindTool extends BaseTool {
 	private overlay: HTMLElement;
@@ -93,7 +101,7 @@ export default class FindTool extends BaseTool {
 			else if (ev.key === 'Escape') {
 				this.setVisible(false);
 			}
-			else if (ev.key === 'f' && ev.ctrlKey) {
+			else if (this.editor.shortcuts.matchesShortcut(toggleFindVisibleShortcutId, ev)) {
 				ev.preventDefault();
 				this.toggleVisible();
 			}
@@ -133,7 +141,7 @@ export default class FindTool extends BaseTool {
 	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
-		if (event.ctrlKey && event.key === 'f') {
+		if (this.editor.shortcuts.matchesShortcut(toggleFindVisibleShortcutId, event)) {
 			this.toggleVisible();
 
 			return true;

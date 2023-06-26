@@ -29,6 +29,8 @@ import AbstractComponent from './components/AbstractComponent';
 import Erase from './commands/Erase';
 import BackgroundComponent, { BackgroundType } from './components/BackgroundComponent';
 import sendPenEvent from './testing/sendPenEvent';
+import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
+import KeyBinding from './shortcuts/KeyBinding';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -47,6 +49,18 @@ export interface EditorSettings {
 	/** Minimum zoom fraction (e.g. 0.5 → 50% zoom). */
 	minZoom: number,
 	maxZoom: number,
+
+	/**
+	 * Overrides for keyboard shortcuts. For example,
+	 * ```ts
+	 * {
+	 * 	'some.shortcut.id': [ ShortcutManager.keyboardShortcutFromString('ctrl+a') ],
+	 * 	'another.shortcut.id': [ ]
+	 * }
+	 * ```
+	 * where shortcut IDs map to lists of associated keybindings.
+	 */
+	keyboardShortcutOverrides: Record<string, Array<KeyBinding>>,
 
 	iconProvider: IconProvider,
 }
@@ -125,6 +139,13 @@ export class Editor {
 	public readonly icons: IconProvider;
 
 	/**
+	 * Manages and allows overriding of keyboard shortcuts.
+	 *
+	 * @internal
+	 */
+	public readonly shortcuts: KeyboardShortcutManager;
+
+	/**
 	 * Controls the list of tools. See
 	 * [the custom tool example](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples/example-custom-tools)
 	 * for more.
@@ -184,9 +205,12 @@ export class Editor {
 			localization: this.localization,
 			minZoom: settings.minZoom ?? 2e-10,
 			maxZoom: settings.maxZoom ?? 1e12,
+			keyboardShortcutOverrides: settings.keyboardShortcutOverrides ?? {},
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 		};
 		this.icons = this.settings.iconProvider;
+
+		this.shortcuts = new KeyboardShortcutManager(this.settings.keyboardShortcutOverrides);
 
 		this.container = document.createElement('div');
 		this.renderingRegion = document.createElement('div');
