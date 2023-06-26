@@ -1,6 +1,7 @@
 import Editor from '../../Editor';
 import { KeyPressEvent } from '../../types';
 import BaseTool from '../BaseTool';
+import { selectAllKeyboardShortcut } from '../keybindings';
 import SelectionTool from './SelectionTool';
 
 // Handles ctrl+a: Select all
@@ -10,8 +11,8 @@ export default class SelectAllShortcutHandler extends BaseTool {
 	}
 
 	// @internal
-	public override onKeyPress({ key, ctrlKey }: KeyPressEvent): boolean {
-		if (ctrlKey && key === 'a') {
+	public override onKeyPress(event: KeyPressEvent): boolean {
+		if (this.editor.shortcuts.matchesShortcut(selectAllKeyboardShortcut, event)) {
 			const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
 
 			if (selectionTools.length > 0) {

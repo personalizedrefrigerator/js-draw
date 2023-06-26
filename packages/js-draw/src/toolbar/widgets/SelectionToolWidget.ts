@@ -9,6 +9,7 @@ import makeColorInput from '../makeColorInput';
 import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget from './BaseWidget';
+import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 
 class RestyleSelectionWidget extends BaseWidget {
 	private updateFormatData: ()=>void = () => {};
@@ -170,9 +171,11 @@ export default class SelectionToolWidget extends BaseToolWidget {
 	}
 
 	protected override onKeyPress(event: KeyPressEvent): boolean {
+		const shortcuts = this.editor.shortcuts;
+
 		// Resize image to selection:
 		// Other keys are handled directly by the selection tool.
-		if (event.ctrlKey && event.key === 'r') {
+		if (shortcuts.matchesShortcut(resizeImageToSelectionKeyboardShortcut, event)) {
 			this.resizeImageToSelection();
 			return true;
 		}

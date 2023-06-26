@@ -6,26 +6,9 @@ import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuil
 import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt, StrokeDataPoint } from '../types';
 import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
-import { undoKeyboardShortcutId } from './UndoRedoShortcut';
-import KeyboardShortcutManager from '../shortcuts/KeyboardShortcutManager';
+import { undoKeyboardShortcutId } from './keybindings';
+import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId, lineLockKeyboardShortcutId, snapToGridKeyboardShortcutId } from './keybindings';
 
-// Keyboard shortcut initialization
-const increaseSizeKeyboardShortcutId = 'jsdraw.tools.Pen.increaseSize';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	increaseSizeKeyboardShortcutId, [ '+', '=' ], 'Increase pen size'
-);
-const decreaseSizeKeyboardShortcutId = 'jsdraw.tools.Pen.decreaseSize';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	decreaseSizeKeyboardShortcutId, [ '-', '_' ], 'Decrease pen size'
-);
-const snapToGridKeyboardShortcutId = 'jsdraw.tools.Pen.snapToGrid';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	snapToGridKeyboardShortcutId, [ 'control', 'meta' ], 'Snap to grid (press and hold)'
-);
-const lineLockKeyboardShortcutId = 'jsdraw.tools.Pen.lockToLine';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	lineLockKeyboardShortcutId, [ 'shift' ], 'Snap to XY axes (press and hold)'
-);
 
 
 export interface PenStyle {

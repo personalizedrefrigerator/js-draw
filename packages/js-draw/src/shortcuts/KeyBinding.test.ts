@@ -40,4 +40,12 @@ describe('KeyBinding', ()  => {
 		).toBe(true);
 		expect(ctrlOrMetaShiftB.matchesEvent(shiftB)).toBe(false);
 	});
+
+	it('ctrl-1 should match ctrl + the number 1', () => {
+		const ctrl1 = KeyBinding.fromString('ctrl-1');
+
+		expect(ctrl1.matchesEvent({ key: '1', shiftKey: false, ctrlKey: true })).toBe(true);
+		expect(ctrl1.matchesEvent({ key: '1', shiftKey: true, ctrlKey: true })).toBe(true);
+		expect(ctrl1.matchesEvent({ key: '1', shiftKey: true, ctrlKey: false })).toBe(false);
+	});
 });

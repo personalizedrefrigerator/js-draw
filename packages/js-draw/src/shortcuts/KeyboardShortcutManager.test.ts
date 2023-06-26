@@ -1,4 +1,4 @@
-import { undoKeyboardShortcutId } from '../tools/UndoRedoShortcut';
+import { undoKeyboardShortcutId } from '../tools/keybindings';
 import KeyBinding from './KeyBinding';
 import KeyboardShortcutManager from './KeyboardShortcutManager';
 

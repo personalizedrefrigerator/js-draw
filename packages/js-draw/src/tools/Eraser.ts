@@ -1,4 +1,4 @@
-import { EditorEventType, PointerEvt } from '../types';
+import { EditorEventType, KeyPressEvent, PointerEvt } from '../types';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
 import { Point2, Vec2 } from '../math/Vec2';
@@ -9,6 +9,7 @@ import { PointerDevice } from '../Pointer';
 import Color4 from '../Color4';
 import Rect2 from '../math/shapes/Rect2';
 import RenderingStyle from '../rendering/RenderingStyle';
+import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2|null = null;
@@ -122,6 +123,26 @@ export default class Eraser extends BaseTool {
 		this.partialCommands.forEach(cmd => cmd.unapply(this.editor));
 		this.partialCommands = [];
 		this.clearPreview();
+	}
+
+
+	public override onKeyPress(event: KeyPressEvent): boolean {
+		const shortcuts = this.editor.shortcuts;
+
+		let newThickness: number|undefined;
+		if (shortcuts.matchesShortcut(decreaseSizeKeyboardShortcutId, event)) {
+			newThickness = this.getThickness() * 2/3;
+		} else if (shortcuts.matchesShortcut(increaseSizeKeyboardShortcutId, event)) {
+			newThickness = this.getThickness() * 3/2;
+		}
+
+		if (newThickness !== undefined) {
+			newThickness = Math.min(Math.max(1, newThickness), 200);
+			this.setThickness(newThickness);
+			return true;
+		}
+
+		return false;
 	}
 
 	public getThickness() {

@@ -1,17 +1,7 @@
 import Editor from '../Editor';
-import KeyboardShortcutManager from '../shortcuts/KeyboardShortcutManager';
 import { KeyPressEvent } from '../types';
 import BaseTool from './BaseTool';
-
-export const undoKeyboardShortcutId = 'jsdraw.tools.undo';
-export const redoKeyboardShortcutId = 'jsdaw.tools.redo';
-
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	undoKeyboardShortcutId, [ 'ctrlOrMeta+z' ], 'Undo'
-);
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	redoKeyboardShortcutId, [ 'ctrlOrMeta+shift+z' ], 'Redo'
-);
+import { redoKeyboardShortcutId, undoKeyboardShortcutId } from './keybindings';
 
 // Handles ctrl+Z, ctrl+Shift+Z keyboard shortcuts.
 export default class UndoRedoShortcut extends BaseTool {

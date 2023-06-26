@@ -9,6 +9,7 @@ import BaseTool from '../BaseTool';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
+import { duplicateSelectionShortcut, selectAllKeyboardShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -23,7 +24,7 @@ export default class SelectionTool extends BaseTool {
 	private startPoint: Vec2|null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
-	private ctrlKeyPressed: boolean = false;
+	private snapToGrid: boolean = false;
 
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
@@ -79,7 +80,7 @@ export default class SelectionTool extends BaseTool {
 
 	private selectionBoxHandlingEvt: boolean = false;
 	public override onPointerDown({ allPointers, current }: PointerEvt): boolean {
-		const snapToGrid = this.ctrlKeyPressed;
+		const snapToGrid = this.snapToGrid;
 		if (snapToGrid) {
 			current = current.snappedToGrid(this.editor.viewport);
 		}
@@ -124,7 +125,7 @@ export default class SelectionTool extends BaseTool {
 			currentPointer = currentPointer.lockedToXYAxesScreen(screenPos, this.editor.viewport);
 		}
 
-		if (this.ctrlKeyPressed) {
+		if (this.snapToGrid) {
 			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
 		}
 
@@ -184,7 +185,7 @@ export default class SelectionTool extends BaseTool {
 		if (!this.selectionBox) return;
 
 		let currentPointer = event.current;
-		if (this.ctrlKeyPressed) {
+		if (this.snapToGrid) {
 			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
 		}
 
@@ -229,17 +230,19 @@ export default class SelectionTool extends BaseTool {
 		'Control', 'Meta',
 	];
 	public override onKeyPress(event: KeyPressEvent): boolean {
-		if (event.key === 'Control' || event.key === 'Meta') {
-			this.ctrlKeyPressed = true;
+		const shortcucts = this.editor.shortcuts;
+
+		if (shortcucts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
+			this.snapToGrid = true;
 			return true;
 		}
 
-		if (this.selectionBox && event.ctrlKey && event.key === 'd') {
+		if (this.selectionBox && shortcucts.matchesShortcut(duplicateSelectionShortcut, event)) {
 			// Handle duplication on key up — we don't want to accidentally duplicate
 			// many times.
 			return true;
 		}
-		else if (event.key === 'a' && event.ctrlKey) {
+		else if (shortcucts.matchesShortcut(selectAllKeyboardShortcut, event)) {
 			this.setSelection(this.editor.image.getAllElements());
 			return true;
 		}
@@ -348,27 +351,28 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public override onKeyUp(evt: KeyUpEvent) {
-		if (evt.key === 'Control' || evt.key === 'Meta') {
-			this.ctrlKeyPressed = false;
+		const shortcucts = this.editor.shortcuts;
+		if (shortcucts.matchesShortcut(snapToGridKeyboardShortcutId, evt)) {
+			this.snapToGrid = false;
+			return true;
+		}
+
+		if (shortcucts.matchesShortcut(selectAllKeyboardShortcut, evt)) {
+			// Selected all in onKeyDown. Don't finalizeTransform.
+			return true;
+		}
+
+		if (this.selectionBox && shortcucts.matchesShortcut(duplicateSelectionShortcut, evt)) {
+			// Finalize duplicating the selection
+			this.selectionBox.duplicateSelectedObjects().then(command => {
+				this.editor.dispatch(command);
+			});
 			return true;
 		}
 
 		if (evt.key === 'Shift') {
 			this.shiftKeyPressed = false;
 			return true;
-		}
-		else if (evt.ctrlKey) {
-			if (this.selectionBox && evt.key === 'd') {
-				this.selectionBox.duplicateSelectedObjects().then(command => {
-					this.editor.dispatch(command);
-				});
-				return true;
-			}
-
-			if (evt.key === 'a' || evt.key === 'r') {
-				// Selected all in onKeyDown. Don't finalizeTransform.
-				return true;
-			}
 		}
 
 		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
@@ -421,7 +425,7 @@ export default class SelectionTool extends BaseTool {
 		this.selectionBox = null;
 
 		this.shiftKeyPressed = false;
-		this.ctrlKeyPressed = false;
+		this.snapToGrid = false;
 
 		this.handleOverlay.style.display = enabled ? 'block' : 'none';
 

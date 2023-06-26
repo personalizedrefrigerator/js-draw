@@ -3,18 +3,11 @@
 // @packageDocumentation
 
 import Editor from '../Editor';
-import KeyboardShortcutManager from '../shortcuts/KeyboardShortcutManager';
 import TextComponent from '../components/TextComponent';
 import Rect2 from '../math/shapes/Rect2';
 import { KeyPressEvent } from '../types';
 import BaseTool from './BaseTool';
-
-export const toggleFindVisibleShortcutId = 'js-draw.tools.FindTool.toggleVisible';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	toggleFindVisibleShortcutId,
-	[ 'ctrlOrMeta+f' ],
-	'Shows/hides the find tool'
-);
+import { toggleFindVisibleShortcutId } from './keybindings';
 
 const cssPrefix = 'find-tool';
 

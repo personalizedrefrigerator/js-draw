@@ -56,11 +56,16 @@ export default class KeyBinding implements KeyCombination {
 	public matchesEvent(keyEvent: Partial<KeyCombination>) {
 		const key = keyEvent.key?.toLowerCase();
 
+		// Determine whether the input is an upper case letter or not.
+		const isUpperCaseKey = keyEvent.key?.toUpperCase() === keyEvent.key
+			&& keyEvent.key?.toLowerCase() !== keyEvent.key
+			&& keyEvent.key?.length === 1;
+
 		const ctrlKey = (keyEvent.ctrlKey ?? false) || key === 'control';
 		const altKey = (keyEvent.altKey ?? false) || key === 'alt';
 		const metaKey = (keyEvent.metaKey ?? false) || key === 'meta';
 		const shiftKey =
-				(keyEvent.shiftKey ?? (keyEvent.key?.toLocaleUpperCase() === keyEvent.key)) || key === 'shift';
+				(keyEvent.shiftKey ?? isUpperCaseKey) || key === 'shift';
 		const keyEventHasCtrlOrMeta =
 				keyEvent.controlOrMeta || keyEvent.ctrlKey || keyEvent.metaKey || false;
 
@@ -130,7 +135,7 @@ export default class KeyBinding implements KeyCombination {
 				&& shortcutStr.length === 1;
 
 			let shiftKey: boolean|undefined = isUpperCaseLetter;
-			// If neither uppercase nor lowercase,
+			// If neither uppercase nor lowercase (or both)
 			if (!isLowerCaseLetter && !isUpperCaseLetter) {
 				// Use undefined rather than false: Expected behaviour is probably
 				// to ignore shift
@@ -138,7 +143,9 @@ export default class KeyBinding implements KeyCombination {
 			}
 
 			// shiftKey should always be true if the key is 'shift'
-			shiftKey = shiftKey || key === 'shift';
+			if (key === 'shift') {
+				shiftKey = true;
+			}
 
 			return new KeyBinding({
 				key: shortcutStr,
@@ -160,7 +167,7 @@ export default class KeyBinding implements KeyCombination {
 		const key = match[2].toLowerCase(); // TODO: .toLocaleLowerCase()?
 		const modifiers = (match[1] ?? '').split(/[-+]/);
 
-		let shiftKey = false;
+		let shiftKey = undefined;
 		let ctrlKey = false;
 		let altKey = false;
 		let metaKey = false;
@@ -174,6 +181,9 @@ export default class KeyBinding implements KeyCombination {
 			switch (modifier.toLowerCase()) {
 			case 'shift':
 				shiftKey = true;
+				break;
+			case 'noshift':
+				shiftKey = false;
 				break;
 			case 'ctrl':
 			case 'control':

@@ -4,11 +4,11 @@ import Mat33 from '../math/Mat33';
 import { Point2, Vec2 } from '../math/Vec2';
 import Vec3 from '../math/Vec3';
 import Pointer, { PointerDevice } from '../Pointer';
-import KeyboardShortcutManager from '../shortcuts/KeyboardShortcutManager';
 import { EditorEventType, KeyPressEvent, PointerEvt, WheelEvt } from '../types';
 import untilNextAnimationFrame from '../util/untilNextAnimationFrame';
 import { Viewport, ViewportTransform } from '../Viewport';
 import BaseTool from './BaseTool';
+import { moveDownKeyboardShortcutId, moveLeftKeyboardShortcutId, moveRightKeyboardShortcutId, moveUpKeyboardShortcutId, rotateClockwiseKeyboardShortcutId, rotateCounterClockwiseKeyboardShortcutId, zoomInKeyboardShortcutId, zoomOutKeyboardShortcutId } from './keybindings';
 
 interface PinchData {
 	canvasCenter: Point2;
@@ -87,41 +87,6 @@ class InertialScroller {
 		}
 	}
 }
-
-// Keyboard shortcuts
-const moveLeftKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveLeft';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	moveLeftKeyboardShortcutId, [ 'ArrowLeft', 'h', 'a' ], 'Pan left'
-);
-const moveRightKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveRight';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	moveRightKeyboardShortcutId, [ 'ArrowRight', 'l', 'd' ], 'Pan right'
-);
-const moveUpKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveUp';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	moveUpKeyboardShortcutId, [ 'ArrowUp', 'k', 'q' ], 'Pan up'
-);
-const moveDownKeyboardShortcutId = 'jsdraw.tools.PanZoom.moveDown';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	moveDownKeyboardShortcutId, [ 'ArrowDown', 'j', 'e' ], 'Pan down'
-);
-const rotateClockwiseKeyboardShortcutId = 'jsdraw.tools.PanZoom.rotateViewClockwise';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	rotateClockwiseKeyboardShortcutId, [ 'R' ], 'Rotate viewport clockwise'
-);
-const rotateCounterClockwiseKeyboardShortcutId = 'jsdraw.tools.PanZoom.rotateViewCounterClockwise';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	rotateCounterClockwiseKeyboardShortcutId, [ 'r' ], 'Rotate viewport counter-clockwise'
-);
-const zoomInKeyboardShortcutId = 'jsdraw.tools.PanZoom.zoomIn';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	zoomInKeyboardShortcutId, [ 'w' ], 'Zoom in'
-);
-const zoomOutKeyboardShortcutId = 'jsdraw.tools.PanZoom.zoomOut';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	zoomOutKeyboardShortcutId, [ 's' ], 'Zoom out'
-);
-
 
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;

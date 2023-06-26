@@ -14,6 +14,7 @@ import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 import Color4 from '../../Color4';
 import { SavedToolbuttonState } from './BaseWidget';
+import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -234,12 +235,14 @@ export default class PenToolWidget extends BaseToolWidget {
 			return false;
 		}
 
-		// Map alt+0-9 to different pen types.
-		if (/^[0-9]$/.exec(event.key) && event.ctrlKey) {
-			const penTypeIdx = parseInt(event.key) - 1;
-			if (penTypeIdx >= 0 && penTypeIdx < this.penTypes.length) {
-				this.tool.setStrokeFactory(this.penTypes[penTypeIdx].factory);
-				return true;
+		for (let i = 0; i < selectStrokeTypeKeyboardShortcutIds.length; i++) {
+			const shortcut = selectStrokeTypeKeyboardShortcutIds[i];
+			if (this.editor.shortcuts.matchesShortcut(shortcut, event)) {
+				const penTypeIdx = i;
+				if (penTypeIdx < this.penTypes.length) {
+					this.tool.setStrokeFactory(this.penTypes[penTypeIdx].factory);
+					return true;
+				}
 			}
 		}
 
