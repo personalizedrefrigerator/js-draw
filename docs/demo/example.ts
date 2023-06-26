@@ -204,6 +204,8 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 	// Load from a data store entry. `storeEntry` might be, for example,
 	// an image and its metadata as stored in this app's database.
 	const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
+		hideLaunchOptions();
+
 		const editor = createEditor(
 			localization,
 			appNotifier,
