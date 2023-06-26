@@ -39,20 +39,20 @@ export const matchingLocalizationTable = <T> (
 		// If the specific localization of the language is not available, but
 		// a localization for the language is,
 		if (prevLanguage && language !== prevLanguage) {
-			if (prevLanguage in allLocales) {
+			if (prevLanguage in localizationTables) {
 				return localizationTables[prevLanguage];
 			}
 		}
 
 		// If the full locale (e.g. en_US) is available,
-		if (locale in allLocales) {
+		if (locale in localizationTables) {
 			return localizationTables[locale];
 		}
 
 		prevLanguage = language;
 	}
 
-	if (prevLanguage && prevLanguage in allLocales) {
+	if (prevLanguage && prevLanguage in localizationTables) {
 		return localizationTables[prevLanguage];
 	} else {
 		return defaultLocalizationTable;
