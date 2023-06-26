@@ -54,24 +54,38 @@ export default class KeyBinding implements KeyCombination {
 
 	/** Returns true if and only if `keyEvent` should trigger this shortcut. */
 	public matchesEvent(keyEvent: Partial<KeyCombination>) {
-		const key = keyEvent.key?.toLowerCase();
+		const lowercaseKey = keyEvent.key?.toLowerCase();
 
 		// Determine whether the input is an upper case letter or not.
 		const isUpperCaseKey = keyEvent.key?.toUpperCase() === keyEvent.key
 			&& keyEvent.key?.toLowerCase() !== keyEvent.key
 			&& keyEvent.key?.length === 1;
+		const isLowercaseKey = keyEvent.key?.toLowerCase() !== keyEvent.key
+			&& !isUpperCaseKey
+			&& keyEvent.key?.length === 1;
 
-		const ctrlKey = (keyEvent.ctrlKey ?? false) || key === 'control';
-		const altKey = (keyEvent.altKey ?? false) || key === 'alt';
-		const metaKey = (keyEvent.metaKey ?? false) || key === 'meta';
+		const ctrlKey = (keyEvent.ctrlKey ?? false) || lowercaseKey === 'control';
+		const altKey = (keyEvent.altKey ?? false) || lowercaseKey === 'alt';
+		const metaKey = (keyEvent.metaKey ?? false) || lowercaseKey === 'meta';
 		const shiftKey =
-				(keyEvent.shiftKey ?? isUpperCaseKey) || key === 'shift';
+				(keyEvent.shiftKey ?? isUpperCaseKey) || lowercaseKey === 'shift';
 		const keyEventHasCtrlOrMeta =
 				keyEvent.controlOrMeta || keyEvent.ctrlKey || keyEvent.metaKey || false;
 
 		// Different keys entirely? They don't match.
-		if (this.key.toLowerCase() !== key) {
+		if (this.key.toLowerCase() !== lowercaseKey) {
 			return false;
+		}
+
+		// If a case where the ASCII case of the given key might matter,
+		// compare.
+		if ((isUpperCaseKey || isLowercaseKey) && this.key !== keyEvent.key) {
+			// this.shiftKey may be interpreted as allowing this shortcut to be uppercased.
+			// If so, try making this.key uppercase and matching the shortcut.
+			const uppercaseKeyMatches = this.shiftKey === true && this.key.toUpperCase() === keyEvent.key;
+			if (!uppercaseKeyMatches) {
+				return false;
+			}
 		}
 
 		const shortcutControlOrMeta = this.controlOrMeta;
@@ -123,37 +137,23 @@ export default class KeyBinding implements KeyCombination {
 	public static fromString(shortcutStr: string): KeyBinding {
 		const hasNoModifiers = shortcutStr.search(/[-+]/) === -1 || shortcutStr.length === 1;
 		if (hasNoModifiers) {
-			const key = shortcutStr.toLowerCase();
-			const isUpperCaseLetter =
-				shortcutStr === shortcutStr.toUpperCase()
-				&& shortcutStr !== shortcutStr.toLowerCase()
-				&& shortcutStr.length === 1;
+			const lowercaseKey = shortcutStr.toLowerCase();
 
-			const isLowerCaseLetter =
-				shortcutStr !== shortcutStr.toUpperCase()
-				&& shortcutStr === shortcutStr.toLowerCase()
-				&& shortcutStr.length === 1;
-
-			let shiftKey: boolean|undefined = isUpperCaseLetter;
-			// If neither uppercase nor lowercase (or both)
-			if (!isLowerCaseLetter && !isUpperCaseLetter) {
-				// Use undefined rather than false: Expected behaviour is probably
-				// to ignore shift
-				shiftKey = undefined;
-			}
+			// undefined: don't require or not require shift.
+			let shiftKey: boolean|undefined = undefined;
 
 			// shiftKey should always be true if the key is 'shift'
-			if (key === 'shift') {
+			if (lowercaseKey === 'shift') {
 				shiftKey = true;
 			}
 
 			return new KeyBinding({
 				key: shortcutStr,
 				shiftKey: shiftKey,
-				ctrlKey: key === 'control' || key === 'ctrl',
-				altKey: key === 'alt',
-				metaKey: key === 'meta',
-				controlOrMeta: key === 'control or meta' || key === 'ctrlormeta',
+				ctrlKey: lowercaseKey === 'control' || lowercaseKey === 'ctrl',
+				altKey: lowercaseKey === 'alt',
+				metaKey: lowercaseKey === 'meta',
+				controlOrMeta: lowercaseKey === 'control or meta' || lowercaseKey === 'ctrlormeta',
 			});
 		}
 
@@ -164,7 +164,7 @@ export default class KeyBinding implements KeyCombination {
 			throw new Error(`Invalid shortcut expression, ${shortcutStr}!`);
 		}
 
-		const key = match[2].toLowerCase(); // TODO: .toLocaleLowerCase()?
+		const key = match[2];
 		const modifiers = (match[1] ?? '').split(/[-+]/);
 
 		let shiftKey = undefined;

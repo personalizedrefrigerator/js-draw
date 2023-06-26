@@ -10,7 +10,7 @@ KeyboardShortcutManager.registerDefaultKeyboardShortcut(
 	undoKeyboardShortcutId, [ 'ctrlOrMeta+z' ], 'Undo'
 );
 KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	redoKeyboardShortcutId, [ 'ctrlOrMeta+shift+z' ], 'Redo'
+	redoKeyboardShortcutId, [ 'ctrlOrMeta+Z', 'ctrlOrMeta+Shift+z' ], 'Redo'
 );
 
 // Pen/eraser/selection keybindings
