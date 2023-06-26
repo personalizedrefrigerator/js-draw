@@ -1,3 +1,11 @@
+# 0.24.0
+ * Bug fixes
+   * Fix italic `<text ...></text>` objects not supported.
+ * Features
+   * Support rendering relatively positioned text loaded from SVGs.
+   * New drawable shape: circle. (Note, however, that SVG ellipses/elliptical arcs are **not** yet suppported.)
+   * Exposes an API that allows configuration of *some* keyboard shortcuts.
+
 # 0.23.1
  * Bug fixes
    * Fix regression: overflow menu in toolbar could be pushed off screen on window resize.
