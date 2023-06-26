@@ -126,7 +126,7 @@ export default class KeyboardShortcutManager {
 	 *
 	 * @see {@link getShortcutDescription}
 	 */
-	public static allShortcutIds() {
+	public static getAllShortcutIds() {
 		const ids = [];
 		for (const id in this.shortcuts) {
 			ids.push(id);
@@ -153,7 +153,7 @@ export default class KeyboardShortcutManager {
 	 *
 	 * `localeList`, if given, attempts to
 	 */
-	public static getShortcutDescription(id: string, localeList?: string[]): string|null {
+	public static getShortcutDescription(id: string, localeList?: readonly string[]): string|null {
 		const localizationTable = matchingLocalizationTable(
 			localeList ?? [], this.shortcutLocalizedDescriptions, this.shortcutDefaultDescriptions
 		);

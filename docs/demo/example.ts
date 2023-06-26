@@ -1,5 +1,5 @@
 // If from an NPM package,
-import { Editor, EditorEventType, HTMLToolbar, EventDispatcher } from 'js-draw';
+import { Editor, EditorEventType, EventDispatcher } from 'js-draw';
 import 'js-draw/styles';
 
 import { Localization, getLocalizationTable } from './localization';
@@ -15,9 +15,8 @@ import FloatingActionButton from './ui/FloatingActionButton';
 import { makeIconFromText } from './icons';
 import makeNewImageDialog from './ui/makeNewImageDialog';
 import { AppNotifier } from './types';
-
-// Key in window.localStorage to store the last state of the toolbar.
-export const editorStateLocalStorageKey = 'editorState';
+import { loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
+import makeSettingsDialog from './ui/makeSettingsDialog';
 
 // Creates and sets up a new Editor
 const createEditor = (
@@ -33,7 +32,9 @@ const createEditor = (
 	saveCallback: ()=>void,
 ): Editor => {
 	const parentElement = document.body;
-	const editor = new Editor(parentElement);
+	const editor = new Editor(parentElement, {
+		keyboardShortcutOverrides: loadKeybindingOverrides()
+	});
 
 	// Although new Editor(parentElement) created an Editor, it doesn't have a toolbar
 	// yet. `.addToolbar()` creates a toolbar and adds it to the document, using the
@@ -120,31 +121,6 @@ const saveImage = (
 	};
 
 	showSavePopup(localization, editor.toSVG(), editor, saveMethod, onSaveSuccess);
-};
-
-// Saves the current state of an `Editor`'s toolbar to `localStorage`.
-const saveToolbarState = (toolbar: HTMLToolbar) => {
-	try {
-		localStorage.setItem(editorStateLocalStorageKey, toolbar.serializeState());
-	} catch (e) {
-		console.warn('Error saving editor prefs: ', e);
-	}
-};
-
-// Loads the state of a toolbar from `localStorage` (if present) and applies it to the given
-// `toolbar`.
-const restoreToolbarState = (toolbar: HTMLToolbar) => {
-	const toolbarState = localStorage.getItem(editorStateLocalStorageKey);
-	if (toolbarState) {
-		// If the toolbar state is invalid, deserialize may throw errors. To prevent a change in
-		// how toolbar state is stored from stopping the app, print a warning and continue if
-		// we fail to deserialize the toolbar state.
-		try {
-			toolbar.deserializeState(toolbarState);
-		} catch(e) {
-			console.warn('Error deserializing toolbar state: ', e);
-		}
-	}
 };
 
 // Destroys the welcome screen.
@@ -255,4 +231,14 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 
 		await loadFromStoreEntry(entry);
 	});
+
+	const settingsButton = document.createElement('button');
+	settingsButton.innerText = localization.settings;
+	settingsButton.onclick = async () => {
+		settingsButton.style.display = 'none';
+		await makeSettingsDialog(localization);
+		settingsButton.style.display = 'block';
+	};
+	settingsButton.classList.add('settingsButton');
+	launchButtonContainer?.appendChild(settingsButton);
 })();

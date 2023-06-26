@@ -3,8 +3,10 @@ export interface KeyCombination {
 	/** A key (e.g. `a`, `b`, `control`). */
 	readonly key: string;
 
-	/** Whether the shift key must be pressed to trigger the shortcut */
-	readonly shiftKey: boolean;
+	/**
+	 * Whether the shift key must be pressed to trigger the shortcut.
+	 */
+	readonly shiftKey: boolean|undefined;
 
 	/** Whether the control key must be pressed to trigger the shortcut */
 	readonly ctrlKey: boolean;
@@ -24,8 +26,10 @@ export default class KeyBinding implements KeyCombination {
 	/** @inheritdoc */
 	public readonly key: string;
 
-	/** @inheritdoc */
-	public readonly shiftKey: boolean;
+	/**
+	 * If undefined, the state of the shift key is ignored.
+	 */
+	public readonly shiftKey: boolean|undefined;
 
 	/** @inheritdoc */
 	public readonly ctrlKey: boolean;
@@ -76,7 +80,7 @@ export default class KeyBinding implements KeyCombination {
 		const matches =
 			(ctrlAndMetaMatches || (shortcutControlOrMeta && keyEventHasCtrlOrMeta))
 			&& altKey === this.altKey
-			&& shiftKey === this.shiftKey;
+			&& (shiftKey === this.shiftKey || this.shiftKey === undefined);
 		return matches;
 	}
 
@@ -115,13 +119,30 @@ export default class KeyBinding implements KeyCombination {
 		const hasNoModifiers = shortcutStr.search(/[-+]/) === -1 || shortcutStr.length === 1;
 		if (hasNoModifiers) {
 			const key = shortcutStr.toLowerCase();
-			const isUpperCase =
+			const isUpperCaseLetter =
 				shortcutStr === shortcutStr.toUpperCase()
-				&& shortcutStr !== shortcutStr.toLowerCase();
+				&& shortcutStr !== shortcutStr.toLowerCase()
+				&& shortcutStr.length === 1;
+
+			const isLowerCaseLetter =
+				shortcutStr !== shortcutStr.toUpperCase()
+				&& shortcutStr === shortcutStr.toLowerCase()
+				&& shortcutStr.length === 1;
+
+			let shiftKey: boolean|undefined = isUpperCaseLetter;
+			// If neither uppercase nor lowercase,
+			if (!isLowerCaseLetter && !isUpperCaseLetter) {
+				// Use undefined rather than false: Expected behaviour is probably
+				// to ignore shift
+				shiftKey = undefined;
+			}
+
+			// shiftKey should always be true if the key is 'shift'
+			shiftKey = shiftKey || key === 'shift';
 
 			return new KeyBinding({
 				key: shortcutStr,
-				shiftKey: isUpperCase || key === 'shift',
+				shiftKey: shiftKey,
 				ctrlKey: key === 'control' || key === 'ctrl',
 				altKey: key === 'alt',
 				metaKey: key === 'meta',

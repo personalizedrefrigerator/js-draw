@@ -37,9 +37,11 @@ const makeNewImageDialog = (
 	};
 
 	const background = document.createElement('div');
+	background.classList.add('dialog-background');
 	background.classList.add('new-image-dialog-background');
 
 	const container = document.createElement('div');
+	container.classList.add('dialog');
 	container.classList.add('new-image-dialog');
 
 	const titleElem = document.createElement('h2');

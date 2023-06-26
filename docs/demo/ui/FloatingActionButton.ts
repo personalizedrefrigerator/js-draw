@@ -9,8 +9,6 @@ interface ButtonSpecifier {
 	onClick?: OnClickListener;
 }
 
-const toplevelClassName = 'toplevel';
-
 export default class FloatingActionButton {
 	private container: HTMLElement;
 	private mainButton: HTMLButtonElement;
@@ -31,7 +29,7 @@ export default class FloatingActionButton {
 		this.titleElem = document.createElement('div');
 
 		this.container.classList.add('floating-action-button');
-		this.container.classList.add(toplevelClassName);
+		this.container.classList.add('toplevel');
 		this.iconWrapper.classList.add('icon-wrapper');
 		this.titleElem.classList.add('title');
 

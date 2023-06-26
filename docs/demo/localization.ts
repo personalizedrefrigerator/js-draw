@@ -21,6 +21,11 @@ export interface Localization {
 	delete: string;
 	reallyDelete: (imageName: string) => string;
 
+	settings: string;
+	reset: string,
+	keyboardShortcuts: string;
+	bindingParseError: (errorMessage: string) => string;
+
 	// Save screen:
 	imageTitleLabel: string;
 	viewGeneratedSVGImage: string;
@@ -55,6 +60,11 @@ localizationTables.en = {
 	delete: 'Delete',
 	reallyDelete: (imageName) => `Are you sure you want to delete ${imageName}?`,
 
+	settings: 'Settings',
+	keyboardShortcuts: 'Keyboard Shortcuts',
+	reset: 'Reset',
+	bindingParseError: (errorMessage: string) => `Error: ${errorMessage}`,
+
 	imageTitleLabel: 'Image title: ',
 	viewGeneratedSVGImage: 'View generated SVG image',
 	viewGeneratedPNGImage: 'View generated PNG image',
@@ -73,6 +83,8 @@ localizationTables.es = {
 	save: 'Guarde',
 	delete: 'Borre',
 	reallyDelete: (imageName) => `¿Está seguro que quiere borrar "${imageName}"?`,
+
+	settings: 'Ajustes',
 
 	imageTitleLabel: 'Título: ',
 	viewGeneratedSVGImage: 'Ver imagen de SVG',
