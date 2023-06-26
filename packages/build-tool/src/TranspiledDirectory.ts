@@ -235,7 +235,8 @@ class TranspiledDirectory {
 			for (const fileName of targetFiles) {
 				fileVersions[fileName] ??= { version: 0 };
 
-				const watcher = ts.sys.watchFile?.(fileName, () => {
+				const pollInterval = 1000;
+				const watcher = ts.sys.watchFile(fileName, () => {
 					console.log(`Watcher: ${fileName} updated`);
 					fileVersions[fileName] ??= { version: 0 };
 					fileVersions[fileName].version ++;
@@ -267,7 +268,7 @@ class TranspiledDirectory {
 					} else {
 						updateFile();
 					}
-				});
+				}, pollInterval);
 				watchers.push(watcher);
 			}
 
