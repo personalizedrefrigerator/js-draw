@@ -307,4 +307,43 @@ describe('PanZoom', () => {
 			lastVisibleRect = editor.viewport.visibleRect;
 		}
 	});
+
+	it('"r" and "R" keyboard shortcuts should rotate the viewport in opposite directions', () => {
+		const editor = createEditor();
+		selectPanZom(editor);
+		editor.viewport.resetTransform(Mat33.identity);
+
+		// Returns the transformed version of [vec], treating the vector as
+		// starting at the center of the editor's visible region.
+		const transformedVec = (vec: Vec2) => {
+			const canvasToScreen = editor.viewport.canvasToScreenTransform;
+			const center = editor.viewport.visibleRect.center;
+
+			const transformedEnd = canvasToScreen.transformVec2(center.plus(vec));
+			const transformedStart = canvasToScreen.transformVec2(center);
+			return transformedEnd.minus(transformedStart);
+		};
+
+		const tolerableError = 0.001;
+
+		expect(transformedVec(Vec2.unitX).length()).toBeCloseTo(1);
+
+		editor.toolController.dispatchInputEvent({
+			kind: InputEvtType.KeyPressEvent,
+			ctrlKey: false,
+			altKey: false,
+			key: 'r',
+		});
+		expect(transformedVec(Vec2.unitX).length()).toBeCloseTo(1);
+		expect(transformedVec(Vec2.unitX)).not.objEq(Vec2.unitX, tolerableError);
+
+		editor.toolController.dispatchInputEvent({
+			kind: InputEvtType.KeyPressEvent,
+			ctrlKey: false,
+			altKey: false,
+			key: 'R',
+		});
+		expect(transformedVec(Vec2.unitX).length()).toBeCloseTo(1);
+		expect(transformedVec(Vec2.unitX)).objEq(Vec2.unitX, tolerableError);
+	});
 });

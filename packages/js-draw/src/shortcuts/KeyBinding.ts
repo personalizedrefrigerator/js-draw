@@ -60,7 +60,7 @@ export default class KeyBinding implements KeyCombination {
 		const isUpperCaseKey = keyEvent.key?.toUpperCase() === keyEvent.key
 			&& keyEvent.key?.toLowerCase() !== keyEvent.key
 			&& keyEvent.key?.length === 1;
-		const isLowercaseKey = keyEvent.key?.toLowerCase() !== keyEvent.key
+		const isLowercaseKey = keyEvent.key?.toLowerCase() === keyEvent.key
 			&& !isUpperCaseKey
 			&& keyEvent.key?.length === 1;
 
