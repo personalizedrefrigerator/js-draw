@@ -8,7 +8,7 @@ import { ComponentBuilderFactory } from '../../components/builders/types';
 import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
 import { EditorEventType, KeyPressEvent } from '../../types';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../DropdownToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';

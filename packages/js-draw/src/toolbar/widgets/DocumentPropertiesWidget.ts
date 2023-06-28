@@ -7,7 +7,7 @@ import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
 import Rect2 from '../../math/shapes/Rect2';
 import { EditorEventType } from '../../types';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../DropdownToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseWidget from './BaseWidget';

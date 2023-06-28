@@ -2,7 +2,7 @@ import Editor from '../../Editor';
 import { DispatcherEventListener } from '../../EventDispatcher';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
 import { EditorEventType, InputEvtType, KeyPressEvent } from '../../types';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../DropdownToolbar';
 import { ToolbarLocalization } from '../localization';
 
 export type SavedToolbuttonState = Record<string, any>;
@@ -65,6 +65,8 @@ export default abstract class BaseWidget {
 	 * `container = { 'foo': somethingNotThis, 'foo-1': somethingElseNotThis }`, this method
 	 * returns `foo-2` because elements with IDs `foo` and `foo-1` are already present in
 	 * `container`.
+	 *
+	 * If `this` is already in `container`, returns the id given to `this` in the container.
 	 */
 	public getUniqueIdIn(container: Record<string, BaseWidget>): string {
 		let id = this.getId();
@@ -235,6 +237,9 @@ export default abstract class BaseWidget {
 		return this.container;
 	}
 
+	public remove() {
+		this.container.remove();
+	}
 
 	protected updateIcon() {
 		const newIcon = this.createIcon();

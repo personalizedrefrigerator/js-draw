@@ -38,7 +38,7 @@
  * @see
  * {@link Editor}
  * {@link Editor.loadFromSVG}
- * {@link HTMLToolbar.addActionButton }
+ * {@link DropdownToolbar.addActionButton }
  *
  * @packageDocumentation
  */
@@ -62,7 +62,16 @@ export * from './testing/lib';
 export * from './shortcuts/lib';
 export { default as EventDispatcher } from './EventDispatcher';
 export { default as Pointer, PointerDevice } from './Pointer';
-export { default as HTMLToolbar } from './toolbar/HTMLToolbar';
+export {
+	default as AbstractToolbar,
+
+	/**
+	 * Using the HTMLToolbar alias is deprecated. Use
+	 * `AbstractToolbar` instead.
+	 * @deprecated
+	 */
+	default as HTMLToolbar,
+} from './toolbar/AbstractToolbar';
 export { default as UndoRedoHistory } from './UndoRedoHistory';
 
 export { Editor, EditorSettings };
