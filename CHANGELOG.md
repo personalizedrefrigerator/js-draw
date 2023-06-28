@@ -1,3 +1,7 @@
+# 0.24.1
+ * Bug fixes
+   * Fixed a regression from v0.24.0: Some key combinations were recognized incorrectly. For example, `r` and `R` both, by default, caused the screen to rotate in the same direction (rather than opposite directions).
+
 # 0.24.0
  * Bug fixes
    * Fix italic `<text ...></text>` objects not supported.

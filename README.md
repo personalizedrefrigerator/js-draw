@@ -2,7 +2,7 @@
 
 [NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
 
-![](docs/img/js-draw.jpg)
+![](docs/img/readme-images/js-draw.jpg)
 
 For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html).
 
@@ -102,7 +102,7 @@ For example, although `js-draw` doesn't support `<circle/>` elements,
 ```
 renders as
 
-![screenshot of the image editor, displaying a green checkmark. The circle is invisible](docs/img/unsupported-elements--in-editor.png)
+![screenshot of the image editor, displaying a green checkmark. The circle is invisible](docs/img/readme-images/unsupported-elements--in-editor.png)
 
 but exports to
 ```xml

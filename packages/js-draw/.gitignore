@@ -1,1 +1,6 @@
 node_modules/
+
+
+# Files automatically copied from the root of the repository
+README.md
+docs/
