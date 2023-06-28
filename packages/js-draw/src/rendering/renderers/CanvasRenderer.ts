@@ -116,6 +116,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	protected endPath(style: RenderingStyle) {
+		this.ctx.save();
 		this.ctx.fillStyle = style.fill.toHexString();
 		this.ctx.fill();
 
@@ -128,6 +129,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 
 		this.ctx.closePath();
+		this.ctx.restore();
 	}
 
 	protected lineTo(point: Point2) {
