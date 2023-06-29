@@ -3,6 +3,9 @@
  * A class that manages whether/what content is shown for a widget.
  *
  * This might be a dropdown menu or a sidebar.
+ *
+ * TODO: Shouldn't be an interface, unless always internal.
+ * @internal
  */
 export interface WidgetContentDisplay {
 	/**
@@ -19,6 +22,9 @@ export interface WidgetContentDisplay {
 
 	/** Returns whether the dropdown is visible (not hidden). */
 	isVisible(): boolean;
+
+	/** Note that the tool associated with this dropdown has been activated. */
+	noteActivated(): void;
 
 	/** Adds the given `item` to the content of the dropdown. */
 	addItem(item: HTMLElement): void;

@@ -1,0 +1,14 @@
+
+.toolbar-sidebar {
+	background-color: var(--primary-background-color);
+	--icon-color: var(--primary-foreground-color);
+
+	position: absolute;
+	height: 90%;
+	margin-top: 5px;
+	box-shadow: 0px 0px 2px var(--primary-shadow-color);
+}
+
+.toolbar-sidebar .toolbar-toolContainer {
+	display: inline-block;
+}

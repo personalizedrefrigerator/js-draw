@@ -307,6 +307,14 @@ export default abstract class BaseWidget {
 		}
 	}
 
+	/**
+	 * Only used by some layout managers.
+	 * In those layout managers, makes this dropdown visible.
+	 */
+	protected activateDropdown() {
+		this.dropdown?.noteActivated();
+	}
+
 	public canBeInOverflowMenu(): boolean {
 		return true;
 	}

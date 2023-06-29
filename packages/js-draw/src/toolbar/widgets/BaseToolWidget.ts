@@ -39,6 +39,7 @@ export default abstract class BaseToolWidget extends BaseWidget {
 		if (this.hasDropdown) {
 			if (!this.targetTool.isEnabled()) {
 				this.targetTool.setEnabled(true);
+				this.activateDropdown();
 			} else {
 				this.setDropdownVisible(!this.isDropdownVisible());
 			}

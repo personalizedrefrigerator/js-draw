@@ -7,7 +7,6 @@ import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2 } from './math/Vec2';
 import Vec3 from './math/Vec3';
-import DropdownToolbar from './toolbar/DropdownToolbar';
 import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
 import Display, { RenderingMode } from './rendering/Display';
 import SVGRenderer from './rendering/renderers/SVGRenderer';
@@ -32,6 +31,7 @@ import sendPenEvent from './testing/sendPenEvent';
 import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import AbstractToolbar from './toolbar/AbstractToolbar';
+import SidebarToolbar from './toolbar/SidebarToolbar';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -329,7 +329,7 @@ export class Editor {
 	 * @returns a reference to the toolbar.
 	 */
 	public addToolbar(defaultLayout: boolean = true): AbstractToolbar {
-		const toolbar = new DropdownToolbar(this, this.container, this.localization);
+		const toolbar = new SidebarToolbar(this, this.container, this.localization);
 
 		if (defaultLayout) {
 			toolbar.addDefaults();

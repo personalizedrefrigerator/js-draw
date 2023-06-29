@@ -7,7 +7,7 @@ import { toolbarCSSPrefix } from './constants';
 
 
 export default class DropdownToolbar extends AbstractToolbar {
-	private container: HTMLElement;
+	protected container: HTMLElement;
 	private resizeObserver: ResizeObserver;
 
 	// Flex-order of the next widget to be added.
@@ -25,6 +25,7 @@ export default class DropdownToolbar extends AbstractToolbar {
 
 		this.container = document.createElement('div');
 		this.container.classList.add(`${toolbarCSSPrefix}root`);
+		this.container.classList.add(`${toolbarCSSPrefix}element`);
 		this.container.setAttribute('role', 'toolbar');
 		parent.appendChild(this.container);
 

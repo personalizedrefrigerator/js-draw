@@ -34,10 +34,6 @@ class Dropdown implements WidgetContentDisplay {
 
 		parent.target.insertAdjacentElement('afterend', this.dropdownContainer);
 
-		if (this.dropdownToggleListener) {
-			this.dropdownToggleListener.remove();
-		}
-
 		// When another dropdown is shown,
 		this.dropdownToggleListener = this.notifier.on(DropdownEventType.DropdownShown, (evt) => {
 			if (
@@ -50,6 +46,10 @@ class Dropdown implements WidgetContentDisplay {
 				this.setVisible(false);
 			}
 		});
+	}
+
+	public noteActivated(): void {
+		// Do nothing.
 	}
 
 	protected repositionDropdown() {
