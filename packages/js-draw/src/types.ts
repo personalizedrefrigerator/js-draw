@@ -10,7 +10,7 @@ import Rect2 from './math/shapes/Rect2';
 import Pointer from './Pointer';
 import Color4 from './Color4';
 import Command from './commands/Command';
-import BaseWidget from './toolbar/widgets/BaseWidget';
+import { WidgetContentLayoutManager } from './toolbar/widgets/layout/types';
 
 
 export type HTMLPointerEventName = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
@@ -198,7 +198,10 @@ export interface ColorPickerColorSelected {
 
 export interface ToolbarDropdownShownEvent {
 	readonly kind: EditorEventType.ToolbarDropdownShown;
-	readonly parentWidget: BaseWidget;
+
+	// True iff the source dropdown is toplevel.
+	readonly fromToplevelDropdown: boolean;
+	readonly layoutManager: WidgetContentLayoutManager;
 }
 
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent

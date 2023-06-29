@@ -8,13 +8,13 @@ import { ComponentBuilderFactory } from '../../components/builders/types';
 import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
 import { EditorEventType, KeyPressEvent } from '../../types';
-import { toolbarCSSPrefix } from '../DropdownToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 import Color4 from '../../Color4';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
+import { toolbarCSSPrefix } from '../constants';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')

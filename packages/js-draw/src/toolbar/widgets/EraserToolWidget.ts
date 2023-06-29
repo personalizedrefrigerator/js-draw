@@ -1,7 +1,7 @@
 import Editor from '../../Editor';
 import Eraser from '../../tools/Eraser';
 import { EditorEventType } from '../../types';
-import { toolbarCSSPrefix } from '../DropdownToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import { SavedToolbuttonState } from './BaseWidget';

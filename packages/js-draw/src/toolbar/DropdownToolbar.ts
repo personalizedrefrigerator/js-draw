@@ -3,8 +3,8 @@ import { defaultToolbarLocalization, ToolbarLocalization } from './localization'
 import BaseWidget from './widgets/BaseWidget';
 import OverflowWidget from './widgets/OverflowWidget';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
+import { toolbarCSSPrefix } from './constants';
 
-export const toolbarCSSPrefix = 'toolbar-';
 
 export default class DropdownToolbar extends AbstractToolbar {
 	private container: HTMLElement;

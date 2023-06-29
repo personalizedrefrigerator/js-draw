@@ -21,8 +21,7 @@ import InsertImageWidget from './widgets/InsertImageWidget';
 import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
 import { DispatcherEventListener } from '../EventDispatcher';
 import { Point2, Vec2 } from '../math/Vec2';
-
-export const toolbarCSSPrefix = 'toolbar-';
+import { toolbarCSSPrefix } from './constants';
 
 type UpdateColorisCallback = ()=>void;
 type WidgetByIdMap = Record<string, BaseWidget>;
