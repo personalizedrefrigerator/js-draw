@@ -180,6 +180,10 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			return true;
 		}
 
+		// If we didn't handle the event, allow the superclass to handle it.
+		if (super.onKeyPress(event)) {
+			return true;
+		}
 		return false;
 	}
 
