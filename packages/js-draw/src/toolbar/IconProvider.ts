@@ -16,20 +16,28 @@ const iconColorFill = `
 const iconColorStrokeFill = `
 	style='fill: var(--icon-color); stroke: var(--icon-color);'
 `;
-const checkerboardPatternDef = `
-	<pattern
-		id='checkerboard'
-		viewBox='0,0,10,10'
-		width='20%'
-		height='20%'
-		patternUnits='userSpaceOnUse'
-	>
-		<rect x=0 y=0 width=10 height=10 fill='white'/>
-		<rect x=0 y=0 width=5 height=5 fill='gray'/>
-		<rect x=5 y=5 width=5 height=5 fill='gray'/>
-	</pattern>
-`;
-const checkerboardPatternRef = 'url(#checkerboard)';
+
+let checkerboardIdCounter = 0;
+const makeCheckerboardPattern = () => {
+	const id = `checkerboard-${checkerboardIdCounter++}`;
+	const patternDef = `
+		<pattern
+			id='${id}'
+			viewBox='0,0,10,10'
+			width='20%'
+			height='20%'
+			patternUnits='userSpaceOnUse'
+		>
+			<rect x=0 y=0 width=10 height=10 fill='white'/>
+			<rect x=0 y=0 width=5 height=5 fill='gray'/>
+			<rect x=5 y=5 width=5 height=5 fill='gray'/>
+		</pattern>
+	`;
+	const patternRef = `url(#${id})`;
+
+	return { patternDef, patternRef };
+};
+
 
 /**
  * Provides icons that can be used in the toolbar, etc.
@@ -451,13 +459,15 @@ export default class IconProvider {
 			Color4.fromString(color), tipThickness / 40 - 0.1
 		).toHexString();
 
+		const checkerboardPattern = makeCheckerboardPattern();
+
 		const ink = `
 			<path
-				fill="${checkerboardPatternRef}"
+				fill="${checkerboardPattern.patternRef}"
 				d="${inkTipPath}"
 			/>
 			<path
-				fill="${checkerboardPatternRef}"
+				fill="${checkerboardPattern.patternRef}"
 				d="${inkTrailPath}"
 			/>
 			<path
@@ -472,7 +482,7 @@ export default class IconProvider {
 
 		const penTip = `
 			<path
-				fill="${checkerboardPatternRef}"
+				fill="${checkerboardPattern.patternRef}"
 				d="${penTipPath}"
 			/>
 			<path
@@ -500,7 +510,7 @@ export default class IconProvider {
 
 			<!-- color bubble -->
 			<path
-				fill="${checkerboardPatternRef}"
+				fill="${checkerboardPattern.patternRef}"
 				d="${colorBubblePath}"
 			/>
 			<path
@@ -511,7 +521,7 @@ export default class IconProvider {
 
 		icon.innerHTML = `
 		<defs>
-			${checkerboardPatternDef}
+			${checkerboardPattern.patternDef}
 		</defs>
 		<g>
 			${ink}
@@ -586,8 +596,10 @@ export default class IconProvider {
 		pipette.style.fill = 'var(--icon-color)';
 
 		if (color) {
+			const checkerboardPattern = makeCheckerboardPattern();
+
 			const defs = document.createElementNS(svgNamespace, 'defs');
-			defs.innerHTML = checkerboardPatternDef;
+			defs.innerHTML = checkerboardPattern.patternDef;
 			icon.appendChild(defs);
 
 			const fluidBackground = document.createElementNS(svgNamespace, 'path');
@@ -601,7 +613,7 @@ export default class IconProvider {
 			fluidBackground.setAttribute('d', fluidPathData);
 
 			fluid.style.fill = color.toHexString();
-			fluidBackground.style.fill = checkerboardPatternRef;
+			fluidBackground.style.fill = checkerboardPattern.patternRef;
 
 			icon.appendChild(fluidBackground);
 			icon.appendChild(fluid);
