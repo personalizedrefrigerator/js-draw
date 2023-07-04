@@ -38,8 +38,8 @@ const localization: EditorLocalization = {
 	anyDevicePanning: 'Ansicht mit jedem Eingabegerät verschieben',
 
 	selectPenType: 'Objekt-Typ: ',
-	freehandPen: 'Freihand',
-	pressureSensitiveFreehandPen: 'Stift (druckempfindlich)',
+	roundedTipPen: 'Freihand',
+	flatTipPen: 'Stift (druckempfindlich)',
 	arrowPen: 'Pfeil',
 	linePen: 'Linie',
 	outlinedRectanglePen: 'Umrissenes Rechteck',

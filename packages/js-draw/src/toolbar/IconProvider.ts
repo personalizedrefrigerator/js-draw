@@ -552,6 +552,9 @@ export default class IconProvider {
 		const renderer = new SVGRenderer(icon, viewport);
 		builder.preview(renderer);
 
+		const bbox = builder.getBBox();
+		icon.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.w} ${bbox.h}`);
+
 		return icon;
 	}
 

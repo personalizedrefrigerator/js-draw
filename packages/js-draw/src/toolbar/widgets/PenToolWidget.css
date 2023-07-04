@@ -1,0 +1,53 @@
+
+.toolbar-pen-type-selector > div {
+	display: flex;
+	flex-direction: row;
+
+	max-width: 350px;
+	flex-wrap: wrap;
+
+	--button-size: 56px;
+}
+
+.toolbar-pen-type-selector .pen-type-button {
+	display: flex;
+	flex-direction: column-reverse;
+	box-sizing: border-box;
+
+	flex-shrink: 1;
+	margin: 2px;
+}
+
+.toolbar-pen-type-selector .pen-type-button:focus-within {
+	outline: 2px solid var(--primary-foreground-color);
+}
+
+.toolbar-pen-type-selector .pen-type-button input {
+	opacity: 0;
+	height: 0;
+}
+
+.toolbar-pen-type-selector .pen-type-button label {
+	display: flex;
+	flex-direction: column;
+
+	width: var(--button-size);
+	height: var(--button-size);
+
+	font-size: 0.7rem;
+	align-items: center;
+	justify-content: center;
+	padding: 4px;
+}
+
+
+.toolbar-pen-type-selector .pen-type-button .icon {
+	flex-grow: 1;
+	flex-shrink: 1;
+	width: 100%;
+}
+
+.toolbar-pen-type-selector .pen-type-button.checked {
+	background-color: var(--secondary-background-color);
+	color: var(--secondary-foreground-color);
+}
