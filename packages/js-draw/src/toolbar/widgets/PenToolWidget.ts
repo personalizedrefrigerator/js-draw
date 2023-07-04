@@ -352,6 +352,10 @@ export default class PenToolWidget extends BaseToolWidget {
 			}
 		}
 
+		// Run any default actions registered by the parent class.
+		if (super.onKeyPress(event)) {
+			return true;
+		}
 		return false;
 	}
 
