@@ -532,7 +532,13 @@ export default class IconProvider {
 		return icon;
 	}
 
-	public makeIconFromFactory(pen: Pen, factory: ComponentBuilderFactory): IconType {
+	public makeIconFromFactory(
+		pen: Pen,
+		factory: ComponentBuilderFactory,
+
+		// If true, attempts to guess the location of a transparency grid
+		includeTransparencyGrid: boolean = false
+	): IconType {
 		// Increase the thickness we use to generate the icon less with larger actual thicknesses.
 		// We want the icon to be recognisable with a large range of thicknesses.
 		const thickness = Math.sqrt(pen.getThickness()) * 3;
@@ -559,8 +565,56 @@ export default class IconProvider {
 		icon.setAttribute('viewBox', '0 0 100 100');
 		viewport.updateScreenSize(Vec2.of(100, 100));
 
-		const renderer = new SVGRenderer(icon, viewport);
+		let renderer;
+
+		if (includeTransparencyGrid) {
+			const checkerboardPattern = makeCheckerboardPattern();
+
+			const defs = document.createElementNS(svgNamespace, 'defs');
+			defs.innerHTML = checkerboardPattern.patternDef;
+			icon.appendChild(defs);
+
+			const background = document.createElementNS(svgNamespace, 'g');
+			icon.appendChild(background);
+
+			renderer = new class extends SVGRenderer {
+				public constructor() {
+					super(icon, viewport);
+				}
+
+				protected override addPathToSVG() {
+					const addedPath = super.addPathToSVG();
+
+					if (addedPath) {
+						// Add a copy of the path on the background
+						const copy = addedPath.cloneNode(true) as SVGPathElement;
+						copy.style.zIndex = '-1';
+
+						// Make the
+						if (copy.hasAttribute('fill')
+								&& copy.getAttribute('fill') !== 'transparent'
+								&& copy.getAttribute('fill') !== 'none') {
+							copy.setAttribute('fill', checkerboardPattern.patternRef);
+						}
+
+						if (copy.hasAttribute('stroke')) {
+							copy.setAttribute('stroke', checkerboardPattern.patternRef);
+						}
+
+						background.appendChild(copy);
+					}
+
+					return addedPath;
+				}
+			}();
+		} else {
+			renderer = new SVGRenderer(icon, viewport);
+		}
 		builder.preview(renderer);
+
+		// If only a single path was rendered, try to give it a checkerboard background to
+		// emphasize transparency. TODO: This is very fragile
+
 
 		const bbox = builder.getBBox();
 		icon.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.w} ${bbox.h}`);

@@ -104,10 +104,11 @@ export default class SVGRenderer extends AbstractRenderer {
 		}
 	}
 
-	// Push [this.fullPath] to the SVG
-	private addPathToSVG() {
+	// Push `this.fullPath` to the SVG. Returns the path added to the SVG, if any.
+	// @internal
+	protected addPathToSVG() {
 		if (!this.lastPathStyle || this.lastPathString.length === 0) {
-			return;
+			return null;
 		}
 
 		const pathElem = document.createElementNS(svgNameSpace, 'path');
@@ -127,6 +128,8 @@ export default class SVGRenderer extends AbstractRenderer {
 
 		this.elem.appendChild(pathElem);
 		this.objectElems?.push(pathElem);
+
+		return pathElem;
 	}
 
 	public override drawPath(pathSpec: RenderablePathSpec) {
