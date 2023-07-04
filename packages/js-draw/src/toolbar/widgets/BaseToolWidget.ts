@@ -1,6 +1,6 @@
 import Editor from '../../Editor';
 import BaseTool from '../../tools/BaseTool';
-import { EditorEventType } from '../../types';
+import { EditorEventType, KeyPressEvent } from '../../types';
 import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 
@@ -46,6 +46,15 @@ export default abstract class BaseToolWidget extends BaseWidget {
 		} else {
 			this.targetTool.setEnabled(!this.targetTool.isEnabled());
 		}
+	}
+
+	protected override onKeyPress(event: KeyPressEvent): boolean {
+		if (this.isSelected() && event.key === ' ' && this.hasDropdown) {
+			this.handleClick();
+			return true;
+		}
+
+		return false;
 	}
 
 	public override addTo(parent: HTMLElement) {

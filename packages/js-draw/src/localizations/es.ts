@@ -30,7 +30,7 @@ const localization: EditorLocalization = {
 	filledRectanglePen: 'Rectángulo sin borde',
 	linePen: 'Línea',
 	arrowPen: 'Flecha',
-	freehandPen: 'Dibuja sin restricción de forma',
+	roundedTipPen: 'Lapiz Redondeado',
 	selectPenType: 'Forma de dibuja:',
 	handTool: 'Mover',
 	zoom: 'Zoom',
