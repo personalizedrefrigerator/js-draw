@@ -8,6 +8,7 @@ import StrokeComponent from '../components/Stroke';
 import Mat33 from '../math/Mat33';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import sendPenEvent from '../testing/sendPenEvent';
+import sendTouchEvent from '../testing/sendTouchEvent';
 
 describe('Pen', () => {
 	it('should draw horizontal lines', () => {
@@ -151,6 +152,73 @@ describe('Pen', () => {
 
 		expect(elems[0].getBBox().topLeft).objEq(Vec2.of(420, 24), 32); // ± 32
 		expect(elems[0].getBBox().bottomRight).objEq(Vec2.of(420, 340), 25); // ± 25
+	});
+
+	// if `mainEventIsPen` is false, tests with touch events.
+	const testEventCancelation = (mainEventIsPen: boolean) => {
+		const editor = createEditor();
+
+		expect(editor.image.getElementsIntersectingRegion(new Rect2(0, 0, 1000, 1000))).toHaveLength(0);
+
+		const sendMainEvent = mainEventIsPen ? sendPenEvent : sendTouchEvent;
+
+		// Start the drawing
+		const mainPointer = sendMainEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(417, 24));
+		jest.advanceTimersByTime(245);
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 197));
+		jest.advanceTimersByTime(20);
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 199));
+		jest.advanceTimersByTime(12);
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 201));
+		jest.advanceTimersByTime(40);
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(423, 203));
+		jest.advanceTimersByTime(14);
+
+		// Attempt to cancel the drawing
+		let firstPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0), [ mainPointer ]);
+		let secondPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(100, 0), [ firstPointer, mainPointer ]);
+
+		const maxIterations = 10;
+		for (let i = 0; i < maxIterations; i++) {
+			jest.advanceTimersByTime(100);
+
+			const point1 = Vec2.of(-i * 5, 0);
+			const point2 = Vec2.of(i * 5 + 100, 0);
+
+			const eventType = InputEvtType.PointerMoveEvt;
+			firstPointer = sendTouchEvent(editor, eventType, point1, [ secondPointer, mainPointer ]);
+			secondPointer = sendTouchEvent(editor, eventType, point2, [ firstPointer, mainPointer ]);
+
+			if (i === maxIterations - 1) {
+				jest.advanceTimersByTime(10);
+
+				sendTouchEvent(editor, InputEvtType.PointerUpEvt, point1, [ secondPointer, mainPointer ]);
+				sendTouchEvent(editor, InputEvtType.PointerUpEvt, point2, [ mainPointer ]);
+			}
+
+			jest.advanceTimersByTime(100);
+		}
+
+		// Finish the drawing
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 333), [firstPointer, secondPointer]);
+		jest.advanceTimersByTime(8);
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 340), [firstPointer, secondPointer]);
+		sendMainEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(420, 340), [firstPointer, secondPointer]);
+
+		const elementsInDrawingArea = editor.image.getElementsIntersectingRegion(new Rect2(0, 0, 1000, 1000));
+		if (mainEventIsPen) {
+			expect(elementsInDrawingArea).toHaveLength(1);
+		} else {
+			expect(elementsInDrawingArea).toHaveLength(0);
+		}
+	};
+
+	it('pen events should not be cancelable by touch events', () => {
+		testEventCancelation(true);
+	});
+
+	it('touch events should be cancelable by touch events', () => {
+		testEventCancelation(false);
 	});
 
 	it('ctrl+z should finalize then undo the current stroke', async () => {
