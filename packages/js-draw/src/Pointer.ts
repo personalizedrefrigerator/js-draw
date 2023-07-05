@@ -123,8 +123,7 @@ export default class Pointer {
 			if (evt.buttons & 0x2) {
 				device = PointerDevice.RightButtonMouse;
 			}
-			// Commented out to work around a bug in old versions of Chrome:
-			// Left mouse up events were being given type "other".
+			// Commented out: Mouse up events seem to not satisfy this condition on mouse up.
 			// else if (!(evt.buttons & 0x1)) {
 			//	device = PointerDevice.Other;
 			//}
