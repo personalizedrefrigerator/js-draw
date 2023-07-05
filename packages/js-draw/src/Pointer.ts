@@ -122,9 +122,12 @@ export default class Pointer {
 		if (device === PointerDevice.PrimaryButtonMouse) {
 			if (evt.buttons & 0x2) {
 				device = PointerDevice.RightButtonMouse;
-			} else if (!(evt.buttons & 0x1)) {
-				device = PointerDevice.Other;
 			}
+			// Commented out to work around a bug in old versions of Chrome:
+			// Left mouse up events were being given type "other".
+			// else if (!(evt.buttons & 0x1)) {
+			//	device = PointerDevice.Other;
+			//}
 		}
 
 		return new Pointer(

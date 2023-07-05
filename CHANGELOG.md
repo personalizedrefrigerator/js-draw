@@ -1,3 +1,14 @@
+# 0.25.1
+ * Bug fixes
+   * Fixes a bug in old versions of Chromium-based browsers: Strokes disappear on left mouse button up.
+
+# 0.25.0
+ * Bug fixes
+   * Fix strokes sometimes not scaling correctly when zooming.
+   * *Possible* fix for pen strokes being canceled on some devices (#23).
+ * Other changes
+   * New UI for pen subtypes.
+
 # 0.24.1
  * Bug fixes
    * Fixed a regression from v0.24.0: Some key combinations were recognized incorrectly. For example, `r` and `R` both, by default, caused the screen to rotate in the same direction (rather than opposite directions).
