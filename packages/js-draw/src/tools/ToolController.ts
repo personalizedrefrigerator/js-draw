@@ -115,7 +115,16 @@ export default class ToolController {
 	public dispatchInputEvent(event: InputEvt): boolean {
 		let handled = false;
 		if (event.kind === InputEvtType.PointerDownEvt) {
+			let canOnlySendToActiveTool = false;
+			if (this.activeTool && !this.activeTool.eventCanBeDeliveredToNonActiveTool(event)) {
+				canOnlySendToActiveTool = true;
+			}
+
 			for (const tool of this.tools) {
+				if (canOnlySendToActiveTool && tool !== this.activeTool) {
+					continue;
+				}
+
 				if (tool.isEnabled() && tool.onPointerDown(event)) {
 					if (this.activeTool !== tool) {
 						this.activeTool?.onGestureCancel();
@@ -127,8 +136,14 @@ export default class ToolController {
 				}
 			}
 		} else if (event.kind === InputEvtType.PointerUpEvt) {
-			this.activeTool?.onPointerUp(event);
-			this.activeTool = null;
+			const upResult = this.activeTool?.onPointerUp(event);
+			const continueHandlingEvents = upResult && event.allPointers.length > 1;
+
+			// Should the active tool continue handling events (without an additional pointer down?)
+			if (!continueHandlingEvents) {
+				// No -- Remove the current tool
+				this.activeTool = null;
+			}
 			handled = true;
 		} else if (event.kind === InputEvtType.PointerMoveEvt) {
 			if (this.activeTool !== null) {

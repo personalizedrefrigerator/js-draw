@@ -5,9 +5,21 @@ export default abstract class BaseTool implements PointerEvtListener {
 	private enabled: boolean = true;
 	private group: ToolEnabledGroup|null = null;
 
+	/**
+	 * Returns true iff the tool handled the event and thus should receive additional
+	 * events.
+	 */
 	public onPointerDown(_event: PointerEvt): boolean { return false; }
 	public onPointerMove(_event: PointerEvt) { }
-	public onPointerUp(_event: PointerEvt) { }
+
+	/**
+	 * Returns true iff there are additional pointers down and the tool should
+	 * remain active to handle the additional events.
+	 *
+	 * For most purposes, this should return `false` or nothing.
+	 */
+	public onPointerUp(_event: PointerEvt): boolean|void { }
+
 	public onGestureCancel() { }
 
 	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
@@ -31,6 +43,15 @@ export default abstract class BaseTool implements PointerEvtListener {
 
 	public onKeyUp(_event: KeyUpEvent): boolean {
 		return false;
+	}
+
+	/**
+	 * Return true if, while this tool is active, `_event` can be delivered to
+	 * another tool that is higher priority than this.
+	 * @internal May be renamed
+	 */
+	public eventCanBeDeliveredToNonActiveTool(_event: PointerEvt) {
+		return true;
 	}
 
 	public setEnabled(enabled: boolean) {

@@ -20,6 +20,7 @@ export default class Pen extends BaseTool {
 	protected builder: ComponentBuilder|null = null;
 	private lastPoint: StrokeDataPoint|null = null;
 	private startPoint: StrokeDataPoint|null = null;
+	private currentDeviceType: PointerDevice|null = null;
 
 	private snapToGridEnabled: boolean = false;
 	private angleLockEnabled: boolean = false;
@@ -94,7 +95,8 @@ export default class Pen extends BaseTool {
 		this.previewStroke();
 	}
 
-	public override onPointerDown({ current, allPointers }: PointerEvt): boolean {
+	public override onPointerDown(event: PointerEvt): boolean {
+		const { current, allPointers } = event;
 		const isEraser = current.device === PointerDevice.Eraser;
 
 		let anyDeviceIsStylus = false;
@@ -105,24 +107,57 @@ export default class Pen extends BaseTool {
 			}
 		}
 
+		// Avoid canceling an existing stroke
+		if (this.builder && !this.eventCanCancelStroke(event)) {
+			return true;
+		}
+
 		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
 			this.startPoint = this.toStrokePoint(current);
 			this.builder = this.builderFactory(this.startPoint, this.editor.viewport);
+			this.currentDeviceType = current.device;
 			return true;
 		}
 
 		return false;
 	}
 
+	private eventCanCancelStroke(event: PointerEvt) {
+		// If there has been a delay since the last input event,
+		// it's always okay to cancel
+		const lastInputTime = this.lastPoint?.time ?? 0;
+		if (event.current.timeStamp - lastInputTime > 1000) {
+			return true;
+		}
+
+		const isPenStroke = this.currentDeviceType === PointerDevice.Pen;
+		const isTouchEvent = event.current.device === PointerDevice.Touch;
+
+		// Don't allow pen strokes to be cancelled by touch events.
+		if (isPenStroke && isTouchEvent) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public override eventCanBeDeliveredToNonActiveTool(event: PointerEvt) {
+		return this.eventCanCancelStroke(event);
+	}
+
 	public override onPointerMove({ current }: PointerEvt): void {
 		if (!this.builder) return;
+		if (current.device !== this.currentDeviceType) return;
 
 		this.addPointToStroke(this.toStrokePoint(current));
 	}
 
-	public override onPointerUp({ current }: PointerEvt): void {
-		if (!this.builder) {
-			return;
+	public override onPointerUp({ current }: PointerEvt) {
+		if (!this.builder) return false;
+		if (current.device !== this.currentDeviceType) {
+			// this.builder still exists, so we're handling events from another
+			// device type.
+			return true;
 		}
 
 		// onPointerUp events can have zero pressure. Use the last pressure instead.
@@ -137,9 +172,12 @@ export default class Pen extends BaseTool {
 		if (current.isPrimary) {
 			this.finalizeStroke();
 		}
+
+		return false;
 	}
 
 	public override onGestureCancel() {
+		this.builder = null;
 		this.editor.clearWetInk();
 	}
 
