@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/example-custom-tools",
-	"version": "0.25.0",
+	"version": "0.25.1",
 	"description": "Example demonstrating custom tools",
 	"license": "MIT",
 	"private": true,
@@ -11,7 +11,7 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"js-draw": "^0.25.0"
+		"js-draw": "^0.25.1"
 	},
 	"devDependencies": {
 		"@js-draw/build-tool": "^0.25.0"
