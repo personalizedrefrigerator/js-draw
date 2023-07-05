@@ -1,3 +1,7 @@
+# 0.25.1
+ * Bug fixes
+   * Fixes a bug in old versions of Chromium-based browsers: Strokes disappear on left mouse button up.
+
 # 0.25.0
  * Bug fixes
    * Fix strokes sometimes not scaling correctly when zooming.
