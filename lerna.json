@@ -4,6 +4,7 @@
   "packages": [
     "docs/examples/*",
     "packages/*",
-    "docs/demo"
+    "docs/demo",
+    "docs/debugging/*"
   ]
 }
