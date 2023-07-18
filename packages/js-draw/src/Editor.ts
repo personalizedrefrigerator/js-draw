@@ -31,6 +31,7 @@ import BackgroundComponent, { BackgroundType } from './components/BackgroundComp
 import sendPenEvent from './testing/sendPenEvent';
 import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
+import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -252,6 +253,9 @@ export class Editor {
 		this.image = new EditorImage();
 		this.history = new UndoRedoHistory(this, this.announceRedoCallback, this.announceUndoCallback);
 		this.toolController = new ToolController(this, this.localization);
+
+		// TODO: Make configurable
+		this.toolController.addInputMapper(StrokeKeyboardControl.fromEditor(this));
 
 		parent.appendChild(this.container);
 
