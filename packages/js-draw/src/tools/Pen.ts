@@ -3,11 +3,11 @@ import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Pointer, { PointerDevice } from '../Pointer';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
-import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt, StrokeDataPoint } from '../types';
+import { EditorEventType, KeyPressEvent, PointerEvt, StrokeDataPoint } from '../types';
 import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 import { undoKeyboardShortcutId } from './keybindings';
-import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId, lineLockKeyboardShortcutId, snapToGridKeyboardShortcutId } from './keybindings';
+import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 
 
 
@@ -22,9 +22,6 @@ export default class Pen extends BaseTool {
 	private startPoint: StrokeDataPoint|null = null;
 	private currentDeviceType: PointerDevice|null = null;
 
-	private snapToGridEnabled: boolean = false;
-	private angleLockEnabled: boolean = false;
-
 	public constructor(
 		private editor: Editor,
 		description: string,
@@ -38,26 +35,8 @@ export default class Pen extends BaseTool {
 		return 1 / this.editor.viewport.getScaleFactor() * this.style.thickness;
 	}
 
-	// Snap the given pointer to the nearer of the x/y axes.
-	private xyAxesSnap(pointer: Pointer) {
-		if (!this.startPoint) {
-			return pointer;
-		}
-
-		const screenPos = this.editor.viewport.canvasToScreen(this.startPoint.pos);
-		return pointer.lockedToXYAxesScreen(screenPos, this.editor.viewport);
-	}
-
 	// Converts a `pointer` to a `StrokeDataPoint`.
 	protected toStrokePoint(pointer: Pointer): StrokeDataPoint {
-		if (this.angleLockEnabled && this.lastPoint) {
-			pointer = this.xyAxesSnap(pointer);
-		}
-
-		if (this.snapToGridEnabled) {
-			pointer = pointer.snappedToGrid(this.editor.viewport);
-		}
-
 		const minPressure = 0.3;
 		let pressure = Math.max(pointer.pressure ?? 1.0, minPressure);
 
@@ -239,8 +218,6 @@ export default class Pen extends BaseTool {
 
 	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
-
-		this.snapToGridEnabled = false;
 	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
@@ -266,32 +243,6 @@ export default class Pen extends BaseTool {
 		if (newThickness !== undefined) {
 			newThickness = Math.min(Math.max(1, newThickness), 256);
 			this.setThickness(newThickness);
-			return true;
-		}
-
-		if (shortcuts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
-			this.snapToGridEnabled = true;
-			return true;
-		}
-
-		if (shortcuts.matchesShortcut(lineLockKeyboardShortcutId, event)) {
-			this.angleLockEnabled = true;
-			return true;
-		}
-
-		return false;
-	}
-
-	public override onKeyUp(event: KeyUpEvent): boolean {
-		const shortcuts = this.editor.shortcuts;
-
-		if (shortcuts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
-			this.snapToGridEnabled = false;
-			return true;
-		}
-
-		if (shortcuts.matchesShortcut(lineLockKeyboardShortcutId, event)) {
-			this.angleLockEnabled = false;
 			return true;
 		}
 

@@ -18,16 +18,20 @@ import { makePressureSensitiveFreehandLineBuilder } from '../components/builders
 import FindTool from './FindTool';
 import SelectAllShortcutHandler from './SelectionTool/SelectAllShortcutHandler';
 import SoundUITool from './SoundUITool';
+import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
+import IdentityInputMapper from './InputFilter/IdentityInputMapper';
 
-export default class ToolController {
+export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
 	private activeTool: BaseTool|null = null;
 	private primaryToolGroup: ToolEnabledGroup;
+	private inputMapper: InputMapper;
 
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
 		const primaryToolGroup = new ToolEnabledGroup();
 		this.primaryToolGroup = primaryToolGroup;
+		this.inputMapper = new IdentityInputMapper(this);
 
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
@@ -111,8 +115,8 @@ export default class ToolController {
 		this.tools.push(tool);
 	}
 
-	// Returns true if the event was handled
-	public dispatchInputEvent(event: InputEvt): boolean {
+	// @internal use dispatchEvent
+	public onEvent(event: InputEvt): boolean {
 		let handled = false;
 		if (event.kind === InputEvtType.PointerDownEvt) {
 			let canOnlySendToActiveTool = false;
@@ -191,6 +195,24 @@ export default class ToolController {
 		}
 
 		return handled;
+	}
+
+	// Returns true if the event was handled
+	public dispatchInputEvent(event: InputEvt): boolean {
+		return this.inputMapper.onEvent(event);
+	}
+
+	/**
+	 * Adds a new `InputMapper` to this' input pipeline.
+	 *
+	 * A `mapper` is really a relation that maps each event to no, one,
+	 * or many other events.
+	 *
+	 * @see {@link InputMapper}.
+	 */
+	public addInputMapper(mapper: InputMapper) {
+		this.inputMapper.setEmitListener(mapper);
+		mapper.setEmitListener(this);
 	}
 
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
