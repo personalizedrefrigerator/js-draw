@@ -460,6 +460,9 @@ export default class Selection {
 	private targetHandle: SelectionHandle|null = null;
 	private backgroundDragging: boolean = false;
 	public onDragStart(pointer: Pointer, target: EventTarget): boolean {
+		// Clear the HTML selection (prevent HTML drag and drop being triggered by this drag)
+		document.getSelection()?.removeAllRanges();
+
 		this.removeDeletedElemsFromSelection();
 		this.addRemoveSelectionFromImage(false);
 
