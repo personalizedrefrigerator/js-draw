@@ -1,4 +1,5 @@
-import { PointerEvtListener, WheelEvt, PointerEvt, EditorNotifier, EditorEventType, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent } from '../types';
+import { EditorNotifier, EditorEventType } from '../types';
+import { PointerEvtListener, WheelEvt, PointerEvt, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent } from '../inputEvents';
 import ToolEnabledGroup from './ToolEnabledGroup';
 
 export default abstract class BaseTool implements PointerEvtListener {

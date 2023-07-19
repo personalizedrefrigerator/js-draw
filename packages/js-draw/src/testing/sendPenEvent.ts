@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import { Point2 } from '../math/Vec2';
 import Pointer from '../Pointer';
-import { InputEvtType } from '../types';
+import { InputEvtType } from '../inputEvents';
 import getUniquePointerId from './getUniquePointerId';
 
 /**

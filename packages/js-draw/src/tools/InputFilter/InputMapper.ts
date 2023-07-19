@@ -1,4 +1,4 @@
-import { InputEvt } from '../../types';
+import { InputEvt } from '../../inputEvents';
 
 export interface InputEventListener {
 	// Returns true if handled

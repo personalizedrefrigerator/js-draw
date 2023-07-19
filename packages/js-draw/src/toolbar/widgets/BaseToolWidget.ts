@@ -1,6 +1,7 @@
 import Editor from '../../Editor';
 import BaseTool from '../../tools/BaseTool';
-import { EditorEventType, KeyPressEvent } from '../../types';
+import { EditorEventType } from '../../types';
+import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 

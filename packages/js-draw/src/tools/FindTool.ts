@@ -5,7 +5,7 @@
 import Editor from '../Editor';
 import TextComponent from '../components/TextComponent';
 import Rect2 from '../math/shapes/Rect2';
-import { KeyPressEvent } from '../types';
+import { KeyPressEvent } from '../inputEvents';
 import BaseTool from './BaseTool';
 import { toggleFindVisibleShortcutId } from './keybindings';
 

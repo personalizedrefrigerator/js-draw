@@ -7,7 +7,8 @@ import { makeOutlinedCircleBuilder } from '../../components/builders/CircleBuild
 import { ComponentBuilderFactory } from '../../components/builders/types';
 import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
-import { EditorEventType, KeyPressEvent } from '../../types';
+import { EditorEventType } from '../../types';
+import { KeyPressEvent } from '../../inputEvents';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';

@@ -1,4 +1,4 @@
-import { InputEvtType, InputEvt, EditorEventType } from '../types';
+import { EditorEventType } from '../types';
 import Editor from '../Editor';
 import BaseTool from './BaseTool';
 import PanZoom, { PanZoomMode } from './PanZoom';
@@ -20,6 +20,7 @@ import SelectAllShortcutHandler from './SelectionTool/SelectAllShortcutHandler';
 import SoundUITool from './SoundUITool';
 import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
 import IdentityInputMapper from './InputFilter/IdentityInputMapper';
+import { InputEvt, InputEvtType } from '../inputEvents';
 
 export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];

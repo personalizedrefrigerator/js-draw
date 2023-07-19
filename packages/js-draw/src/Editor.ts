@@ -1,6 +1,7 @@
 import EditorImage from './EditorImage';
 import ToolController from './tools/ToolController';
-import { InputEvtType, PointerEvt, EditorNotifier, EditorEventType, ImageLoader, HTMLPointerEventName, HTMLPointerEventFilter } from './types';
+import { EditorNotifier, EditorEventType, ImageLoader } from './types';
+import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent } from './inputEvents';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
@@ -674,30 +675,22 @@ export class Editor {
 
 	/** Adds event listners for keypresses to `elem` and forwards those events to the editor. */
 	public handleKeyEventsFrom(elem: HTMLElement) {
-		elem.addEventListener('keydown', evt => {
-			if (evt.key === 't' || evt.key === 'T') {
-				evt.preventDefault();
+		elem.addEventListener('keydown', htmlEvent => {
+			const event = keyPressEventFromHTMLEvent(htmlEvent);
+			if (event.key === 't' || event.key === 'T') {
+				htmlEvent.preventDefault();
 				this.display.rerenderAsText();
-			} else if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.KeyPressEvent,
-				key: evt.key,
-				ctrlKey: evt.ctrlKey || evt.metaKey,
-				altKey: evt.altKey,
-			})) {
-				evt.preventDefault();
-			} else if (evt.key === 'Escape') {
+			} else if (this.toolController.dispatchInputEvent(event)) {
+				htmlEvent.preventDefault();
+			} else if (event.key === 'Escape') {
 				this.renderingRegion.blur();
 			}
 		});
 
-		elem.addEventListener('keyup', evt => {
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.KeyUpEvent,
-				key: evt.key,
-				ctrlKey: evt.ctrlKey || evt.metaKey,
-				altKey: evt.altKey,
-			})) {
-				evt.preventDefault();
+		elem.addEventListener('keyup', htmlEvent => {
+			const event = keyUpEventFromHTMLEvent(htmlEvent);
+			if (this.toolController.dispatchInputEvent(event)) {
+				htmlEvent.preventDefault();
 			}
 		});
 
@@ -939,6 +932,7 @@ export class Editor {
 			key,
 			ctrlKey,
 			altKey,
+			//shiftKey,
 		});
 	}
 

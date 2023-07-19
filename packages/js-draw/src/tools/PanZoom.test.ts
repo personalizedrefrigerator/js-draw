@@ -3,7 +3,7 @@ import Editor from '../Editor';
 import { Mat33, Vec2 } from '../lib';
 import createEditor from '../testing/createEditor';
 import sendTouchEvent from '../testing/sendTouchEvent';
-import { InputEvtType } from '../types';
+import { InputEvtType } from '../inputEvents';
 import waitForTimeout from '../util/waitForTimeout';
 import PanZoom, { PanZoomMode } from './PanZoom';
 

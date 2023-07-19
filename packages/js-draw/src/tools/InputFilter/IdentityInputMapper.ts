@@ -1,4 +1,4 @@
-import { InputEvt } from 'js-draw/src/types';
+import { InputEvt } from '../../inputEvents';
 import InputMapper from './InputMapper';
 
 /**

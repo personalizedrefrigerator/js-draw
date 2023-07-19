@@ -2,7 +2,7 @@ import Editor from '../Editor';
 import AbstractComponent from '../components/AbstractComponent';
 import TextComponent from '../components/TextComponent';
 import SVGLoader from '../SVGLoader';
-import { PasteEvent } from '../types';
+import { PasteEvent } from '../inputEvents';
 import Mat33 from '../math/Mat33';
 import BaseTool from './BaseTool';
 import TextTool from './TextTool';

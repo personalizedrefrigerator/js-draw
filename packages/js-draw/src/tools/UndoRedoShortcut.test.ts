@@ -5,7 +5,7 @@ import Stroke from '../components/Stroke';
 import EditorImage from '../EditorImage';
 import Path from '../math/shapes/Path';
 import createEditor from '../testing/createEditor';
-import { InputEvtType } from '../types';
+import { InputEvtType } from '../inputEvents';
 
 describe('UndoRedoShortcut', () => {
 	const testStroke = new Stroke([Path.fromString('M0,0L10,10').toRenderable({ fill: Color4.red })]);

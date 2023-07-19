@@ -1,4 +1,4 @@
-import { InputEvt, InputEvtType, PointerEvt } from '../../types';
+import { InputEvt, InputEvtType, PointerEvt } from '../../inputEvents';
 import InputMapper from './InputMapper';
 import KeyboardShortcutManager from '../../shortcuts/KeyboardShortcutManager';
 import { lineLockKeyboardShortcutId, snapToGridKeyboardShortcutId } from '../keybindings';

@@ -1,7 +1,8 @@
 import Editor from '../../Editor';
 import { DispatcherEventListener } from '../../EventDispatcher';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
-import { EditorEventType, InputEvtType, KeyPressEvent } from '../../types';
+import { EditorEventType } from '../../types';
+import { KeyPressEvent, keyUpEventFromHTMLEvent } from '../../inputEvents';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 
@@ -111,12 +112,8 @@ export default abstract class BaseWidget {
 
 			// If we didn't do anything with the event, send it to the editor.
 			if (!handled) {
-				handled = this.editor.toolController.dispatchInputEvent({
-					kind: InputEvtType.KeyPressEvent,
-					key: evt.key,
-					ctrlKey: evt.ctrlKey || evt.metaKey,
-					altKey: evt.altKey,
-				});
+				const editorEvent = keyUpEventFromHTMLEvent(evt);
+				handled = this.editor.toolController.dispatchInputEvent(editorEvent);
 			}
 
 			if (handled) {
@@ -124,20 +121,16 @@ export default abstract class BaseWidget {
 			}
 		};
 
-		button.onkeyup = evt => {
-			if (evt.key in clickTriggers) {
+		button.onkeyup = htmlEvent => {
+			if (htmlEvent.key in clickTriggers) {
 				return;
 			}
 
-			const handled = this.editor.toolController.dispatchInputEvent({
-				kind: InputEvtType.KeyUpEvent,
-				key: evt.key,
-				ctrlKey: evt.ctrlKey || evt.metaKey,
-				altKey: evt.altKey,
-			});
+			const event = keyUpEventFromHTMLEvent(htmlEvent);
+			const handled = this.editor.toolController.dispatchInputEvent(event);
 
 			if (handled) {
-				evt.preventDefault();
+				htmlEvent.preventDefault();
 			}
 		};
 
