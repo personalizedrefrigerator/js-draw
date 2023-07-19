@@ -75,11 +75,13 @@ export default class StrokeKeyboardControl extends InputMapper {
 
 		let handled = this.emit(event);
 
-		// Handle keyboard shortcuts (if not already handled by another source).
-		// Only handle if !handled already -- some tools (e.g. the selection tool)
-		// may use these keyboard shortcuts as unrelated modifiers that we don't want
-		// to override.
-		if (!handled && (event.kind === InputEvtType.KeyPressEvent || event.kind === InputEvtType.KeyUpEvent)) {
+		if (// Always check keyUpEvents (in case we handled the corresponding keyDown event)
+			event.kind === InputEvtType.KeyUpEvent
+
+			// Only handle key press events if another tool isn't handling it. We don't want
+			// snap to grid/angle lock to conflict with selection/another tool's shortcuts.
+			|| (!handled && event.kind === InputEvtType.KeyPressEvent)
+		) {
 			const isKeyPress = event.kind === InputEvtType.KeyPressEvent;
 
 			if (shortcuts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
