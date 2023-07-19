@@ -33,6 +33,7 @@ import sendPenEvent from './testing/sendPenEvent';
 import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
+import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -919,20 +920,33 @@ export class Editor {
 		return styleSheet;
 	}
 
-	// Dispatch a keyboard event to the currently selected tool.
-	// Intended for unit testing
+	/**
+	 * Dispatch a keyboard event to the currently selected tool.
+	 * Intended for unit testing.
+	 *
+	 * If `shiftKey` is undefined, it is guessed from `key`.
+	 *
+	 * At present, the **key code** dispatched is guessed from the given key and,
+	 * while this works for ASCII alphanumeric characters, this does not work for
+	 * most non-alphanumeric keys.
+	 * @deprecated
+	 */
 	public sendKeyboardEvent(
 		eventType: InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent,
 		key: string,
 		ctrlKey: boolean = false,
 		altKey: boolean = false,
+		shiftKey: boolean|undefined = undefined,
 	) {
+		shiftKey ??= key.toUpperCase() === key && key.toLowerCase() !== key;
+
 		this.toolController.dispatchInputEvent({
 			kind: eventType,
 			key,
+			code: guessKeyCodeFromKey(key),
 			ctrlKey,
 			altKey,
-			//shiftKey,
+			shiftKey,
 		});
 	}
 

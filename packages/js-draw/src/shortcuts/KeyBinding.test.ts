@@ -48,4 +48,14 @@ describe('KeyBinding', ()  => {
 		expect(ctrl1.matchesEvent({ key: '1', shiftKey: true, ctrlKey: true })).toBe(true);
 		expect(ctrl1.matchesEvent({ key: '1', shiftKey: true, ctrlKey: false })).toBe(false);
 	});
+
+	it('ctrl-KeyA should match ctrl + event with code KeyA', () => {
+		const ctrlA = KeyBinding.fromString('ctrl-KeyA');
+
+		expect(ctrlA.matchesEvent({ code: 'KeyA', shiftKey: false, ctrlKey: true })).toBe(true);
+		expect(ctrlA.matchesEvent({ key: 'a', code: 'KeyA', shiftKey: false, ctrlKey: true })).toBe(true);
+		expect(ctrlA.matchesEvent({ key: 'a', code: 'KeyA', shiftKey: false, ctrlKey: false })).toBe(false);
+		expect(ctrlA.matchesEvent({ code: 'KeyB', shiftKey: false, ctrlKey: true })).toBe(false);
+		expect(ctrlA.matchesEvent({ code: 'KeyA', shiftKey: true, ctrlKey: true })).toBe(false);
+	});
 });

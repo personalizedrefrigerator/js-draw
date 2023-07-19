@@ -20,7 +20,9 @@ describe('UndoRedoShortcut', () => {
 			kind: InputEvtType.KeyPressEvent,
 			ctrlKey: true,
 			altKey: false,
+			shiftKey: false,
 			key: 'z',
+			code: 'KeyZ',
 		});
 
 		expect(editor.history.undoStackSize).toBe(0);
@@ -37,7 +39,9 @@ describe('UndoRedoShortcut', () => {
 			kind: InputEvtType.KeyPressEvent,
 			ctrlKey: true,
 			altKey: false,
+			shiftKey: false,
 			key: 'z',
+			code: 'KeyZ',
 		});
 
 		expect(editor.history.undoStackSize).toBe(1);
@@ -47,7 +51,9 @@ describe('UndoRedoShortcut', () => {
 			kind: InputEvtType.KeyPressEvent,
 			ctrlKey: true,
 			altKey: false,
+			shiftKey: true,
 			key: 'Z',
+			code: 'KeyZ',
 		});
 
 		expect(editor.history.undoStackSize).toBe(2);

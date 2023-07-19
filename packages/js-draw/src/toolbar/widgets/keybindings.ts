@@ -16,6 +16,6 @@ export const selectStrokeTypeKeyboardShortcutIds: string[] =
 for (let i = 0; i < selectStrokeTypeKeyboardShortcutIds.length; i++) {
 	const id = selectStrokeTypeKeyboardShortcutIds[i];
 	KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-		id, [ `ctrlOrMeta+${(i + 1)}` ], 'Select pen style ' + (i + 1),
+		id, [ `CtrlOrMeta+Digit${(i + 1)}` ], 'Select pen style ' + (i + 1),
 	);
 }

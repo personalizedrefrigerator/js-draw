@@ -35,7 +35,7 @@ const isUppercaseLetter = (text: string) => {
 
 const isLowercaseLetter = (text: string) => {
 	return text.toLowerCase() === text
-		&& !isUppercaseLetter(text)
+		&& text.toUpperCase() !== text
 		&& text.length === 1;
 };
 
@@ -86,19 +86,22 @@ export default class KeyBinding implements KeyCombination {
 		const keyEventHasCtrlOrMeta =
 				keyEvent.controlOrMeta || keyEvent.ctrlKey || keyEvent.metaKey || false;
 
-		// Different keys entirely? They don't match.
-		if (this.key.toLowerCase() !== lowercaseKey && this.key !== keyEvent.code) {
-			return false;
-		}
-
-		// If a case where the ASCII case of the given key might matter,
-		// compare.
-		if ((isUpperCaseKey || isLowercaseKey) && this.key !== keyEvent.key) {
-			// this.shiftKey may be interpreted as allowing this shortcut to be uppercased.
-			// If so, try making this.key uppercase and matching the shortcut.
-			const uppercaseKeyMatches = this.shiftKey === true && this.key.toUpperCase() === keyEvent.key;
-			if (!uppercaseKeyMatches) {
+		// If we're not working with key codes,
+		if (this.key !== keyEvent.code) {
+			// Different keys entirely? They don't match.
+			if (this.key.toLowerCase() !== lowercaseKey) {
 				return false;
+			}
+
+			// If a case where the ASCII case of the given key might matter,
+			// compare.
+			if ((isUpperCaseKey || isLowercaseKey) && this.key !== keyEvent.key) {
+				// this.shiftKey may be interpreted as allowing this shortcut to be uppercased.
+				// If so, try making this.key uppercase and matching the shortcut.
+				const uppercaseKeyMatches = this.shiftKey === true && this.key.toUpperCase() === keyEvent.key;
+				if (!uppercaseKeyMatches) {
+					return false;
+				}
 			}
 		}
 
@@ -154,11 +157,15 @@ export default class KeyBinding implements KeyCombination {
 			// the shift key is pressed.
 			let shiftKey: boolean|undefined = undefined;
 
-			if (isUppercaseLetter(shortcutStr)) {
+			if (isUppercaseLetter(key)) {
 				shiftKey = true;
 			}
-
-			if (isLowercaseLetter(shortcutStr)) {
+			else if (isLowercaseLetter(key)) {
+				shiftKey = false;
+			}
+			// If not just a single character (e.g. a key code like KeyA), shift must
+			// be specified manually.
+			else if (key.length > 1) {
 				shiftKey = false;
 			}
 
@@ -170,7 +177,7 @@ export default class KeyBinding implements KeyCombination {
 			}
 
 			return {
-				shiftKey: shiftKey,
+				shiftKey,
 				ctrlKey: lowercaseKey === 'control' || lowercaseKey === 'ctrl',
 				altKey: lowercaseKey === 'alt',
 				metaKey: lowercaseKey === 'meta',

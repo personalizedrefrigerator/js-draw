@@ -45,7 +45,7 @@ export interface WheelEvt {
 interface BaseKeyEvent {
 	// key, as given by an HTML `KeyboardEvent`
 	readonly key: string;
-	//readonly code: string;
+	readonly code: string;
 
 	// If `ctrlKey` is undefined, that is equivalent to `ctrlKey = false`.
 	readonly ctrlKey: boolean|undefined;
@@ -54,7 +54,7 @@ interface BaseKeyEvent {
 	readonly altKey: boolean|undefined;
 
 	// If falsey, the `shift` key is not pressed.
-	//readonly shiftKey: boolean|undefined;
+	readonly shiftKey: boolean|undefined;
 }
 
 /**
@@ -117,13 +117,15 @@ export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt 
 
 type KeyEventType = InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent;
 
+// Constructor
 const keyEventFromHTMLEvent = (kind: KeyEventType, event: KeyboardEvent): KeyPressEvent|KeyUpEvent => {
 	return {
 		kind,
 		key: event.key,
+		code: event.code,
 		ctrlKey: event.ctrlKey || event.metaKey,
 		altKey: event.altKey,
-		//shiftKey: event.shiftKey,
+		shiftKey: event.shiftKey,
 	};
 };
 
