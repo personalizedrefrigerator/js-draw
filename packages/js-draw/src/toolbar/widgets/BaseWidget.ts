@@ -2,7 +2,7 @@ import Editor from '../../Editor';
 import { DispatcherEventListener } from '../../EventDispatcher';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
 import { EditorEventType } from '../../types';
-import { KeyPressEvent, keyUpEventFromHTMLEvent } from '../../inputEvents';
+import { KeyPressEvent, keyPressEventFromHTMLEvent, keyUpEventFromHTMLEvent } from '../../inputEvents';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 
@@ -112,7 +112,7 @@ export default abstract class BaseWidget {
 
 			// If we didn't do anything with the event, send it to the editor.
 			if (!handled) {
-				const editorEvent = keyUpEventFromHTMLEvent(evt);
+				const editorEvent = keyPressEventFromHTMLEvent(evt);
 				handled = this.editor.toolController.dispatchInputEvent(editorEvent);
 			}
 
