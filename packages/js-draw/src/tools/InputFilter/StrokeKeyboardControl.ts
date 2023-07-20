@@ -22,7 +22,7 @@ export default class StrokeKeyboardControl extends InputMapper {
 	public constructor(
 		private shortcuts: KeyboardShortcutManager, private viewport: Viewport
 	) {
-		super(null);
+		super();
 	}
 
 	// Snap the given pointer to the nearer of the x/y axes.

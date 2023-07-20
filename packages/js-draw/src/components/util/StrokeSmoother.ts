@@ -153,8 +153,11 @@ export class StrokeSmoother {
 				return;
 			}
 
-			const velocity = newPoint.pos.minus(this.lastPoint.pos).times(1 / (deltaTime) * 1000);
-			this.momentum = this.momentum.lerp(velocity, 0.9);
+			const deltaTimeSeconds = deltaTime / 1000;
+			const velocity = newPoint.pos.minus(this.lastPoint.pos).times(1 / deltaTimeSeconds);
+
+			// TODO: Do we need momentum smoothing? (this.momentum.lerp(velocity, 0.9);)
+			this.momentum = velocity;
 		}
 
 		const lastPoint = this.lastPoint ?? newPoint;
@@ -201,7 +204,7 @@ export class StrokeSmoother {
 		let exitingVec = this.computeExitingVec();
 
 		// Find the intersection between the entering vector and the exiting vector
-		const maxRelativeLength = 2;
+		const maxRelativeLength = 2.4;
 		const segmentStart = this.buffer[0];
 		const segmentEnd = newPoint.pos;
 		const startEndDist = segmentEnd.minus(segmentStart).magnitude();

@@ -9,11 +9,9 @@ export interface InputEventListener {
  * Accepts input events and emits input events.
  */
 export default abstract class InputMapper implements InputEventListener {
-	#listener: InputEventListener|null;
+	#listener: InputEventListener|null = null;
 
-	public constructor(listener: InputEventListener|null) {
-		this.#listener = listener;
-	}
+	public constructor() { }
 
 	// @internal
 	public setEmitListener(listener: InputEventListener|null) {

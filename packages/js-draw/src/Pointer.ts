@@ -76,6 +76,20 @@ export default class Pointer {
 		return this.withCanvasPosition(canvasPos, viewport);
 	}
 
+	/** Returns a copy of this pointer with a changed timestamp. */
+	public withTimestamp(timeStamp: number) {
+		return new Pointer(
+			this.screenPos,
+			this.canvasPos,
+			this.pressure,
+			this.isPrimary,
+			this.down,
+			this.device,
+			this.id,
+			timeStamp
+		);
+	}
+
 	/**
 	 * Returns a copy of this pointer with a new position. The screen position is determined
 	 * by the given `canvasPos`.

@@ -34,6 +34,7 @@ import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
+import InputStabilizer from './tools/InputFilter/InputStabilizer';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -257,6 +258,7 @@ export class Editor {
 		this.toolController = new ToolController(this, this.localization);
 
 		// TODO: Make configurable
+		this.toolController.addInputMapper(InputStabilizer.fromEditor(this));
 		this.toolController.addInputMapper(StrokeKeyboardControl.fromEditor(this));
 
 		parent.appendChild(this.container);

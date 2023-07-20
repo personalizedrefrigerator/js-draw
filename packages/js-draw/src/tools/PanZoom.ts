@@ -48,7 +48,7 @@ class InertialScroller {
 		}
 
 		this.currentVelocity = this.initialVelocity;
-		let lastTime = (new Date()).getTime();
+		let lastTime = Date.now();
 		this.running = true;
 
 		const maxSpeed = 5000; // units/s
@@ -58,7 +58,7 @@ class InertialScroller {
 		}
 
 		while (this.running && this.currentVelocity.magnitude() > minSpeed) {
-			const nowTime = (new Date()).getTime();
+			const nowTime = Date.now();
 			const dt = (nowTime - lastTime) / 1000;
 
 			this.currentVelocity = this.currentVelocity.times(Math.pow(1/8, dt));
@@ -168,7 +168,7 @@ export default class PanZoom extends BaseTool {
 
 	private updateVelocity(currentCenter: Point2) {
 		const deltaPos = currentCenter.minus(this.lastScreenCenter);
-		let deltaTime = ((new Date()).getTime() - this.lastTimestamp) / 1000;
+		let deltaTime = (Date.now() - this.lastTimestamp) / 1000;
 
 		// Ignore duplicate events, unless there has been enough time between them.
 		if (deltaPos.magnitude() === 0 && deltaTime < 0.1) {

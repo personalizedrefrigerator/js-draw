@@ -136,3 +136,9 @@ export const keyUpEventFromHTMLEvent = (event: KeyboardEvent) => {
 export const keyPressEventFromHTMLEvent = (event: KeyboardEvent) => {
 	return keyEventFromHTMLEvent(InputEvtType.KeyPressEvent, event) as KeyPressEvent;
 };
+
+export const isPointerEvt = (event: InputEvt): event is PointerEvt => {
+	return event.kind === InputEvtType.PointerDownEvt
+		|| event.kind === InputEvtType.PointerMoveEvt
+		|| event.kind === InputEvtType.PointerUpEvt;
+};

@@ -26,13 +26,19 @@ export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
 	private activeTool: BaseTool|null = null;
 	private primaryToolGroup: ToolEnabledGroup;
-	private inputMapper: InputMapper;
+
+	// Form a pipeline that allows filtering/mapping input events.
+	private inputMapPipelineHead: InputMapper;
+	private inputMapPipelineTail: InputMapper;
 
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
+		this.inputMapPipelineHead = new IdentityInputMapper();
+		this.inputMapPipelineHead.setEmitListener(this);
+		this.inputMapPipelineTail = this.inputMapPipelineHead;
+
 		const primaryToolGroup = new ToolEnabledGroup();
 		this.primaryToolGroup = primaryToolGroup;
-		this.inputMapper = new IdentityInputMapper(this);
 
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
@@ -200,7 +206,8 @@ export default class ToolController implements InputEventListener {
 
 	// Returns true if the event was handled
 	public dispatchInputEvent(event: InputEvt): boolean {
-		return this.inputMapper.onEvent(event);
+		// Feed the event through the input pipeline
+		return this.inputMapPipelineHead.onEvent(event);
 	}
 
 	/**
@@ -212,8 +219,9 @@ export default class ToolController implements InputEventListener {
 	 * @see {@link InputMapper}.
 	 */
 	public addInputMapper(mapper: InputMapper) {
-		this.inputMapper.setEmitListener(mapper);
+		this.inputMapPipelineTail.setEmitListener(mapper);
 		mapper.setEmitListener(this);
+		this.inputMapPipelineTail = mapper;
 	}
 
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
