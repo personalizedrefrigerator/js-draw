@@ -65,7 +65,7 @@ class StylusInputStabilizer {
 				const toTarget = this.targetPoint.minus(this.strokePoint);
 				const acceleration = toTarget.times(this.options.accelerationFromDistanceFactor);
 
-				const decayFactor = this.options.velocityDecayFactor;
+				const decayFactor = (this.options.velocityDecayFactor - Math.atan(toTarget.length())/Math.PI) / 2;
 				this.velocity = this.velocity.times(1 - decayFactor).plus(acceleration.times(deltaTime));
 				this.strokePoint = this.strokePoint.plus(this.velocity.times(deltaTime));
 			}
