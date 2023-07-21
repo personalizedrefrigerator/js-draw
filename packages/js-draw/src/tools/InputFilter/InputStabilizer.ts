@@ -42,7 +42,7 @@ const defaultOptions: InputStabilizerOptions = {
 
 	inertiaFraction: 0.78,
 
-	minSimilarityToFinalize: 0.6,
+	minSimilarityToFinalize: -0.1,
 	velocityDecayFactor: 0.1,
 };
 
