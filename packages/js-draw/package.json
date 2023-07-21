@@ -75,7 +75,7 @@
     "postpack": "ts-node tools/copyREADME.ts revert"
   },
   "dependencies": {
-    "@melloware/coloris": "0.20.0",
+    "@melloware/coloris": "0.21.0",
     "bezier-js": "6.1.3"
   },
   "devDependencies": {
