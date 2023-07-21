@@ -6,14 +6,22 @@ import { Point2, Vec2 } from '../../math/Vec2';
 import untilNextAnimationFrame from '../../util/untilNextAnimationFrame';
 
 interface InputStabilizerOptions {
-	accelerationFromDistanceFactor: number;
-	velocityDecayFactor: number;
+	mass: number;
+	springConstant: number;
+	frictionCoefficient: number;
+
+	maxPointDist: number;
+
 	minSimilarityToFinalize: number;
 }
 
 const defaultOptions: InputStabilizerOptions = {
-	accelerationFromDistanceFactor: 1/900,
-	velocityDecayFactor: 0.4,
+	mass: 0.5, // kg
+	springConstant: 100.0,
+	frictionCoefficient: 0.28,
+
+	maxPointDist: 10,
+
 	minSimilarityToFinalize: 0.6,
 };
 
@@ -54,6 +62,21 @@ class StylusInputStabilizer {
 		this.targetPoint = point;
 	}
 
+	private getNextVelocity(deltaTimeMs: number) {
+		const toTarget = this.targetPoint.minus(this.strokePoint);
+
+		const springForce = toTarget.times(this.options.springConstant);
+
+		const normalForceMagnitude = this.options.mass * 9.81;
+		const frictionForce = this.velocity.normalizedOrZero().times(
+			-this.options.frictionCoefficient * normalForceMagnitude * 2
+		);
+		const acceleration = (springForce.plus(frictionForce)).times(1/this.options.mass);
+
+		const decayFactor = 0.1;
+		return this.velocity.times(1 - decayFactor).plus(acceleration.times(deltaTimeMs / 1000));
+	}
+
 	public update(force: boolean): boolean {
 		const nowTime = Date.now();
 		const deltaTime = nowTime - this.lastUpdateTime;
@@ -62,12 +85,31 @@ class StylusInputStabilizer {
 
 		if (deltaTime > this.targetInterval || force) {
 			if (!reachedTarget) {
-				const toTarget = this.targetPoint.minus(this.strokePoint);
-				const acceleration = toTarget.times(this.options.accelerationFromDistanceFactor);
+				let velocity: Vec2;
+				let deltaX: Vec2;
+				let parts = 1;
 
-				const decayFactor = (this.options.velocityDecayFactor - Math.atan(toTarget.length())/Math.PI) / 2;
-				this.velocity = this.velocity.times(1 - decayFactor).plus(acceleration.times(deltaTime));
-				this.strokePoint = this.strokePoint.plus(this.velocity.times(deltaTime));
+				do {
+					velocity = this.getNextVelocity(deltaTime / parts);
+					deltaX = velocity.times(deltaTime / 1000);
+
+					parts ++;
+				} while (deltaX.magnitude() > this.options.maxPointDist && parts < 10);
+
+				for (let i = 0; i < parts; i++) {
+					this.velocity = this.getNextVelocity(deltaTime / parts);
+					deltaX = this.velocity.times(deltaTime / 1000);
+					this.strokePoint = this.strokePoint.plus(deltaX);
+
+					// Allows the last updatePointer to be returned.
+					if (i < parts - 1) {
+						this.updatePointer(this.strokePoint, nowTime);
+					}
+				}
+
+				//if (toTarget.magnitudeSquared() < this.targetPoint.minus(this.strokePoint).magnitudeSquared()) {
+				//	this.strokePoint = prevPoint.lerp(this.strokePoint, 0.5);
+				//}
 			}
 
 			// Even if we have reached the target, ensure that lastUpdateTime is updated

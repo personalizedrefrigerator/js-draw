@@ -67,6 +67,17 @@ export default class Vec3 {
 		return Vec3.of(this.x / norm, this.y / norm, this.z / norm);
 	}
 
+	/**
+	 * Like {@link normalized}, except returns zero if this has zero magnitude.
+	 */
+	public normalizedOrZero(): Vec3 {
+		if (this.eq(Vec3.zero)) {
+			return Vec3.zero;
+		}
+
+		return this.normalized();
+	}
+
 	/** @returns A copy of `this` multiplied by a scalar. */
 	public times(c: number): Vec3 {
 		return Vec3.of(this.x * c, this.y * c, this.z * c);
