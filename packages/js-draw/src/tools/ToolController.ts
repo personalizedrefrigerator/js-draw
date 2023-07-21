@@ -42,12 +42,15 @@ export default class ToolController implements InputEventListener {
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 8 });
-		primaryPenTool.setInputMapper(new InputStabilizer(editor.viewport));
+		const secondaryPenTool = new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 });
+
+		// Stabilize the secondary pen tool.
+		secondaryPenTool.setInputMapper(new InputStabilizer(editor.viewport));
 
 		const primaryTools = [
 			// Three pens
 			primaryPenTool,
-			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 }),
+			secondaryPenTool,
 
 			// Highlighter-like pen with width=40
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 40 }, makePressureSensitiveFreehandLineBuilder),

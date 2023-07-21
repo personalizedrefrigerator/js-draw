@@ -9,6 +9,7 @@ import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import Color4 from '../../Color4';
 
+// While a `PolylineBuilder` can use a large amount of output memory, it can be helpful for debugging.
 export const makePolylineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
 	return new PolylineBuilder(initialPoint, viewport);
 };
