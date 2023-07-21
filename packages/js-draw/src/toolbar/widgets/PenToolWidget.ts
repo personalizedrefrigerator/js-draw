@@ -461,6 +461,8 @@ export default class PenToolWidget extends BaseToolWidget {
 			}
 		}
 
-		this.setInputStabilizationEnabled(!!state.inputStabilization);
+		if (state.inputStabilization !== undefined) {
+			this.setInputStabilizationEnabled(!!state.inputStabilization);
+		}
 	}
 }
