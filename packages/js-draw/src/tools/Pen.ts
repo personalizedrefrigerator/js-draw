@@ -9,6 +9,7 @@ import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
+import InputStabilizer from './InputFilter/InputStabilizer';
 
 export interface PenStyle {
 	color: Color4;
@@ -209,6 +210,22 @@ export default class Pen extends BaseTool {
 			this.builderFactory = factory;
 			this.noteUpdated();
 		}
+	}
+
+	public setHasStabilization(hasStabilization: boolean) {
+		const hasInputMapper = !!this.getInputMapper();
+
+		// TODO: Currently, this assumes that there is no other input mapper.
+		if (hasStabilization === hasInputMapper) {
+			return;
+		}
+
+		if (hasInputMapper) {
+			this.setInputMapper(null);
+		} else {
+			this.setInputMapper(new InputStabilizer(this.editor.viewport));
+		}
+		this.noteUpdated();
 	}
 
 	public getThickness() { return this.style.thickness; }

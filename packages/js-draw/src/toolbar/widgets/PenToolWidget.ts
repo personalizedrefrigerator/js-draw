@@ -16,7 +16,6 @@ import BaseToolWidget from './BaseToolWidget';
 import Color4 from '../../Color4';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
-import InputStabilizer from '../../tools/InputFilter/InputStabilizer';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -280,17 +279,7 @@ export default class PenToolWidget extends BaseToolWidget {
 	}
 
 	private setInputStabilizationEnabled(enabled: boolean) {
-		const hasInputMapper = !!this.tool.getInputMapper();
-
-		if (enabled === hasInputMapper) {
-			return;
-		}
-
-		if (hasInputMapper) {
-			this.tool.setInputMapper(null);
-		} else {
-			this.tool.setInputMapper(new InputStabilizer(this.editor.viewport));
-		}
+		this.tool.setHasStabilization(enabled);
 	}
 
 	protected createAdvancedOptions() {
