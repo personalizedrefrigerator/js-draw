@@ -6,8 +6,8 @@
 	"exclude": [
 		"**/*.test.ts",
 		"node_modules/**",
-		"**/dist/",
-		"**/dist-test/",
+		"**/dist/**",
+		"**/dist-test/**",
 		"src/testing/"
 	],
 	"excludePrivate": true,

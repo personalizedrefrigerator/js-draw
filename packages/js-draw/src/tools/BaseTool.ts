@@ -51,7 +51,7 @@ export default abstract class BaseTool implements InputEventListener {
 	}
 
 	// @internal
-	public onEvent(event: InputEvt) {
+	public onEvent(event: InputEvt): boolean {
 		if (this.#inputMapper) {
 			return this.#inputMapper.onEvent(event);
 		}
