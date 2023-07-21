@@ -40,9 +40,9 @@ const defaultOptions: InputStabilizerOptions = {
 
 	maxPointDist: 10, // screen units
 
-	inertiaFraction: 0.78,
+	inertiaFraction: 0.75,
 
-	minSimilarityToFinalize: -0.1,
+	minSimilarityToFinalize: 0.0,
 	velocityDecayFactor: 0.1,
 };
 
