@@ -5,24 +5,45 @@ import Editor from '../../Editor';
 import { Point2, Vec2 } from '../../math/Vec2';
 import untilNextAnimationFrame from '../../util/untilNextAnimationFrame';
 
+enum StabilizerType {
+	IntertialStabilizer,
+}
+
 interface InputStabilizerOptions {
+	kind: StabilizerType.IntertialStabilizer,
+
 	mass: number;
 	springConstant: number;
 	frictionCoefficient: number;
 
 	maxPointDist: number;
 
+	// Minimum cosine similarity between the velocity vector and the displacement to
+	// the stroke endpoint to connect them.
 	minSimilarityToFinalize: number;
+
+	// Fraction of how much should be inertia based and how much should be
+	// moving in the direction of the pointer.
+	inertiaFraction: number;
+
+	// In addition to friction, decreases the velocity by this fraction at each
+	// time step.
+	velocityDecayFactor: number;
 }
 
 const defaultOptions: InputStabilizerOptions = {
+	kind: StabilizerType.IntertialStabilizer,
+
 	mass: 0.4, // kg
 	springConstant: 100.0, // N/m
 	frictionCoefficient: 0.28,
 
 	maxPointDist: 10, // screen units
 
+	inertiaFraction: 0.82,
+
 	minSimilarityToFinalize: 0.6,
+	velocityDecayFactor: 0.1,
 };
 
 // Stabilizes input for a single cursor
@@ -67,19 +88,20 @@ class StylusInputStabilizer {
 
 		const springForce = toTarget.times(this.options.springConstant);
 
-		const normalForceMagnitude = this.options.mass * 9.81;
+		const gravityAccel = 10;
+		const normalForceMagnitude = this.options.mass * gravityAccel;
 		const frictionForce = this.velocity.normalizedOrZero().times(
-			-this.options.frictionCoefficient * normalForceMagnitude * 2
+			-this.options.frictionCoefficient * normalForceMagnitude
 		);
 		const acceleration = (springForce.plus(frictionForce)).times(1/this.options.mass);
 
-		const decayFactor = 0.1;
+		const decayFactor = this.options.velocityDecayFactor;
 		const springVelocity = this.velocity.times(1 - decayFactor).plus(acceleration.times(deltaTimeMs / 1000));
 
 		// An alternate velocity that goes directly towards the target.
 		const toTargetVelocity = toTarget.normalizedOrZero().times(springVelocity.length());
 
-		return springVelocity.lerp(toTargetVelocity, 0.25);
+		return toTargetVelocity.lerp(springVelocity, this.options.inertiaFraction);
 	}
 
 	public update(force: boolean): boolean {
