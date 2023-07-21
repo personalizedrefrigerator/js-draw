@@ -46,6 +46,9 @@ export interface ToolbarLocalization {
 	useGridOption: string;
 	toggleOverflow: string,
 
+	advanced: string;
+	inputStabilization: string;
+
 	errorImageHasZeroSize: string;
 
 	dropdownShown: (toolName: string)=> string;
@@ -89,6 +92,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	imageHeightOption: 'Height: ',
 	useGridOption: 'Grid: ',
 	toggleOverflow: 'More',
+	advanced: 'Advanced',
+	inputStabilization: 'Input stabilization',
 
 	touchPanning: 'Touchscreen panning',
 

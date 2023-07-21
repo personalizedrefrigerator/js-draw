@@ -16,6 +16,7 @@ import BaseToolWidget from './BaseToolWidget';
 import Color4 from '../../Color4';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
+import InputStabilizer from '../../tools/InputFilter/InputStabilizer';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -278,6 +279,53 @@ export default class PenToolWidget extends BaseToolWidget {
 		};
 	}
 
+	private setInputStabilizationEnabled(enabled: boolean) {
+		const hasInputMapper = !!this.tool.getInputMapper();
+
+		if (enabled === hasInputMapper) {
+			return;
+		}
+
+		if (hasInputMapper) {
+			this.tool.setInputMapper(null);
+		} else {
+			this.tool.setInputMapper(new InputStabilizer(this.editor.viewport));
+		}
+	}
+
+	protected createAdvancedOptions() {
+		const container = document.createElement('details');
+		const label = document.createElement('summary');
+		label.innerText = this.localizationTable.advanced;
+
+		const stabilizationOption = document.createElement('div');
+		const stabilizationCheckbox = document.createElement('input');
+		const stabilizationLabel = document.createElement('label');
+		stabilizationLabel.innerText = this.localizationTable.inputStabilization;
+
+		stabilizationCheckbox.type = 'checkbox';
+		stabilizationCheckbox.id = `${toolbarCSSPrefix}-penInputStabilizationCheckbox-${PenToolWidget.idCounter++}`;
+		stabilizationLabel.htmlFor = stabilizationCheckbox.id;
+
+		stabilizationOption.replaceChildren(stabilizationCheckbox, stabilizationLabel);
+
+		container.replaceChildren(label, stabilizationOption);
+
+		stabilizationCheckbox.oninput = () => {
+			this.setInputStabilizationEnabled(stabilizationCheckbox.checked);
+		};
+
+		return {
+			update: () => {
+				stabilizationCheckbox.checked = !!this.tool.getInputMapper();
+			},
+
+			addTo: (parent: HTMLElement) => {
+				parent.appendChild(container);
+			}
+		};
+	}
+
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		container.classList.add(`${toolbarCSSPrefix}spacedList`);
@@ -322,6 +370,8 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
+		const advanced = this.createAdvancedOptions();
+
 		this.updateInputs = () => {
 			setColorInputValue(this.tool.getColor());
 			thicknessInput.value = inverseThicknessInputFn(this.tool.getThickness()).toString();
@@ -330,11 +380,14 @@ export default class PenToolWidget extends BaseToolWidget {
 
 			// Update the selected stroke factory.
 			penTypeSelect.setValue(this.getCurrentPenTypeIdx());
+			advanced.update();
 		};
 		this.updateInputs();
 
 		container.replaceChildren(colorRow, thicknessRow);
 		penTypeSelect.addTo(container);
+		advanced.addTo(container);
+
 		dropdown.replaceChildren(container);
 		return true;
 	}
@@ -369,6 +422,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			color: this.tool.getColor().toHexString(),
 			thickness: this.tool.getThickness(),
 			strokeFactoryId: this.getCurrentPenType()?.id,
+			inputStabilization: !!this.tool.getInputMapper(),
 		};
 	}
 
@@ -405,6 +459,10 @@ export default class PenToolWidget extends BaseToolWidget {
 					break;
 				}
 			}
+		}
+
+		if (state.inputStabilization) {
+
 		}
 	}
 }

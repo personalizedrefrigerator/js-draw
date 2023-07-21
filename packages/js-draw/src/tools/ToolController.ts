@@ -19,8 +19,9 @@ import FindTool from './FindTool';
 import SelectAllShortcutHandler from './SelectionTool/SelectAllShortcutHandler';
 import SoundUITool from './SoundUITool';
 import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
-import IdentityInputMapper from './InputFilter/IdentityInputMapper';
 import { InputEvt, InputEvtType } from '../inputEvents';
+import InputPipeline from './InputFilter/InputPipeline';
+import InputStabilizer from './InputFilter/InputStabilizer';
 
 export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
@@ -28,14 +29,12 @@ export default class ToolController implements InputEventListener {
 	private primaryToolGroup: ToolEnabledGroup;
 
 	// Form a pipeline that allows filtering/mapping input events.
-	private inputMapPipelineHead: InputMapper;
-	private inputMapPipelineTail: InputMapper;
+	private inputPipeline: InputPipeline;
 
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
-		this.inputMapPipelineHead = new IdentityInputMapper();
-		this.inputMapPipelineHead.setEmitListener(this);
-		this.inputMapPipelineTail = this.inputMapPipelineHead;
+		this.inputPipeline = new InputPipeline();
+		this.inputPipeline.setEmitListener(event => this.onEventInternal(event));
 
 		const primaryToolGroup = new ToolEnabledGroup();
 		this.primaryToolGroup = primaryToolGroup;
@@ -43,6 +42,8 @@ export default class ToolController implements InputEventListener {
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 8 });
+		primaryPenTool.setInputMapper(new InputStabilizer(editor.viewport));
+
 		const primaryTools = [
 			// Three pens
 			primaryPenTool,
@@ -122,8 +123,8 @@ export default class ToolController implements InputEventListener {
 		this.tools.push(tool);
 	}
 
-	// @internal use dispatchEvent
-	public onEvent(event: InputEvt): boolean {
+	// @internal use `dispatchEvent` rather than calling `onEvent` directly.
+	private onEventInternal(event: InputEvt): boolean {
 		let handled = false;
 		if (event.kind === InputEvtType.PointerDownEvt) {
 			let canOnlySendToActiveTool = false;
@@ -136,9 +137,9 @@ export default class ToolController implements InputEventListener {
 					continue;
 				}
 
-				if (tool.isEnabled() && tool.onPointerDown(event)) {
+				if (tool.isEnabled() && tool.onEvent(event)) {
 					if (this.activeTool !== tool) {
-						this.activeTool?.onGestureCancel();
+						this.activeTool?.onEvent({ kind: InputEvtType.GestureCancelEvt });
 					}
 
 					this.activeTool = tool;
@@ -147,7 +148,7 @@ export default class ToolController implements InputEventListener {
 				}
 			}
 		} else if (event.kind === InputEvtType.PointerUpEvt) {
-			const upResult = this.activeTool?.onPointerUp(event);
+			const upResult = this.activeTool?.onEvent(event);
 			const continueHandlingEvents = upResult && event.allPointers.length > 1;
 
 			// Should the active tool continue handling events (without an additional pointer down?)
@@ -158,43 +159,21 @@ export default class ToolController implements InputEventListener {
 			handled = true;
 		} else if (event.kind === InputEvtType.PointerMoveEvt) {
 			if (this.activeTool !== null) {
-				this.activeTool.onPointerMove(event);
+				this.activeTool.onEvent(event);
 				handled = true;
 			}
 		} else if (event.kind === InputEvtType.GestureCancelEvt) {
 			if (this.activeTool !== null) {
-				this.activeTool.onGestureCancel();
+				this.activeTool.onEvent(event);
 				this.activeTool = null;
 			}
 		} else {
-			let allCasesHandledGuard: never;
-
 			for (const tool of this.tools) {
 				if (!tool.isEnabled()) {
 					continue;
 				}
 
-				switch (event.kind) {
-				case InputEvtType.KeyPressEvent:
-					handled = tool.onKeyPress(event);
-					break;
-				case InputEvtType.KeyUpEvent:
-					handled = tool.onKeyUp(event);
-					break;
-				case InputEvtType.WheelEvt:
-					handled = tool.onWheel(event);
-					break;
-				case InputEvtType.CopyEvent:
-					handled = tool.onCopy(event);
-					break;
-				case InputEvtType.PasteEvent:
-					handled = tool.onPaste(event);
-					break;
-				default:
-					allCasesHandledGuard = event;
-					return allCasesHandledGuard;
-				}
-
+				handled = tool.onEvent(event);
 				if (handled) {
 					break;
 				}
@@ -204,10 +183,15 @@ export default class ToolController implements InputEventListener {
 		return handled;
 	}
 
-	// Returns true if the event was handled
+	/** Alias for {@link dispatchInputEvent}. */
+	public onEvent(event: InputEvt) {
+		return this.dispatchInputEvent(event);
+	}
+
+	// Returns true if the event was handled.
 	public dispatchInputEvent(event: InputEvt): boolean {
 		// Feed the event through the input pipeline
-		return this.inputMapPipelineHead.onEvent(event);
+		return this.inputPipeline.onEvent(event);
 	}
 
 	/**
@@ -219,9 +203,7 @@ export default class ToolController implements InputEventListener {
 	 * @see {@link InputMapper}.
 	 */
 	public addInputMapper(mapper: InputMapper) {
-		this.inputMapPipelineTail.setEmitListener(mapper);
-		mapper.setEmitListener(this);
-		this.inputMapPipelineTail = mapper;
+		this.inputPipeline.addToTail(mapper);
 	}
 
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {

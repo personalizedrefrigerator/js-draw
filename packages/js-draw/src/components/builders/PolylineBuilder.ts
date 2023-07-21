@@ -1,4 +1,4 @@
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Vec2 } from '../../math/Vec2';
 import Path, { PathCommand, PathCommandType } from '../../math/shapes/Path';
 import Rect2 from '../../math/shapes/Rect2';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';

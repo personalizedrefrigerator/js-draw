@@ -1,25 +1,33 @@
 import { InputEvt } from '../../inputEvents';
 
+type OnEventCallback = (event: InputEvt)=>boolean;
+
 export interface InputEventListener {
 	// Returns true if handled
-	onEvent(event: InputEvt): boolean;
+	onEvent: OnEventCallback;
 }
 
 /**
  * Accepts input events and emits input events.
  */
 export default abstract class InputMapper implements InputEventListener {
-	#listener: InputEventListener|null = null;
+	#listener: OnEventCallback|null = null;
 
 	public constructor() { }
 
 	// @internal
-	public setEmitListener(listener: InputEventListener|null) {
-		this.#listener = listener;
+	public setEmitListener(listener: InputEventListener|OnEventCallback|null) {
+		if (listener && typeof (listener) === 'object') {
+			this.#listener = (event) => {
+				return listener.onEvent(event) ?? false;
+			};
+		} else {
+			this.#listener = listener;
+		}
 	}
 
 	protected emit(event: InputEvt): boolean {
-		return this.#listener?.onEvent(event) ?? false;
+		return this.#listener?.(event) ?? false;
 	}
 
 	/**

@@ -34,7 +34,6 @@ import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
-import InputStabilizer from './tools/InputFilter/InputStabilizer';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -257,8 +256,7 @@ export class Editor {
 		this.history = new UndoRedoHistory(this, this.announceRedoCallback, this.announceUndoCallback);
 		this.toolController = new ToolController(this, this.localization);
 
-		// TODO: Make configurable
-		this.toolController.addInputMapper(InputStabilizer.fromEditor(this));
+		// TODO: Make this pipeline configurable (e.g. allow users to add global input stabilization)
 		this.toolController.addInputMapper(StrokeKeyboardControl.fromEditor(this));
 
 		parent.appendChild(this.container);

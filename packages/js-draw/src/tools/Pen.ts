@@ -10,8 +10,6 @@ import { ComponentBuilder, ComponentBuilderFactory } from '../components/builder
 import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 
-
-
 export interface PenStyle {
 	color: Color4;
 	thickness: number;

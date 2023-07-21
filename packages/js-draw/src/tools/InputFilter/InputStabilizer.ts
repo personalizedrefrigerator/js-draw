@@ -16,11 +16,11 @@ interface InputStabilizerOptions {
 }
 
 const defaultOptions: InputStabilizerOptions = {
-	mass: 0.5, // kg
-	springConstant: 100.0,
+	mass: 0.4, // kg
+	springConstant: 100.0, // N/m
 	frictionCoefficient: 0.28,
 
-	maxPointDist: 10,
+	maxPointDist: 10, // screen units
 
 	minSimilarityToFinalize: 0.6,
 };
@@ -74,7 +74,12 @@ class StylusInputStabilizer {
 		const acceleration = (springForce.plus(frictionForce)).times(1/this.options.mass);
 
 		const decayFactor = 0.1;
-		return this.velocity.times(1 - decayFactor).plus(acceleration.times(deltaTimeMs / 1000));
+		const springVelocity = this.velocity.times(1 - decayFactor).plus(acceleration.times(deltaTimeMs / 1000));
+
+		// An alternate velocity that goes directly towards the target.
+		const toTargetVelocity = toTarget.normalizedOrZero().times(springVelocity.length());
+
+		return springVelocity.lerp(toTargetVelocity, 0.25);
 	}
 
 	public update(force: boolean): boolean {
@@ -106,10 +111,6 @@ class StylusInputStabilizer {
 						this.updatePointer(this.strokePoint, nowTime);
 					}
 				}
-
-				//if (toTarget.magnitudeSquared() < this.targetPoint.minus(this.strokePoint).magnitudeSquared()) {
-				//	this.strokePoint = prevPoint.lerp(this.strokePoint, 0.5);
-				//}
 			}
 
 			// Even if we have reached the target, ensure that lastUpdateTime is updated
