@@ -929,7 +929,8 @@ export class Editor {
 	 * At present, the **key code** dispatched is guessed from the given key and,
 	 * while this works for ASCII alphanumeric characters, this does not work for
 	 * most non-alphanumeric keys.
-	 * @deprecated
+	 *
+	 * Because guessing the key code from `key` is problematic, **only use this for testing**.
 	 */
 	public sendKeyboardEvent(
 		eventType: InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent,

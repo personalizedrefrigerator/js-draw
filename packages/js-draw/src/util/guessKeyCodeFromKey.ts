@@ -13,6 +13,8 @@ const keyToKeyCode: Record<string, string> = {
  * Attempts to guess the .code value corresponding to the given key.
  *
  * Use this to facilitate testing.
+ *
+ * If no matching keycode is found, returns `key`.
  */
 const guessKeyCodeFromKey = (key: string) => {
 	const upperKey = key.toUpperCase();
@@ -28,7 +30,7 @@ const guessKeyCodeFromKey = (key: string) => {
 		return keyToKeyCode[key];
 	}
 
-	return '';
+	return key;
 };
 
 export default guessKeyCodeFromKey;

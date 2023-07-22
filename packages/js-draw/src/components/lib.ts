@@ -22,7 +22,7 @@ export {
 
 	TextComponent,
 
-	// @deprecated
+	/** @deprecated use {@link TextComponent} */
 	TextComponent as Text,
 
 	Stroke as StrokeComponent,
