@@ -30,7 +30,7 @@ class PolylineBuilder implements ComponentBuilder {
 
 	private buildPreview(): Stroke {
 		const points = [];
-		let maxWidth = this.startPoint.width;
+		//let maxWidth = this.startPoint.width;
 
 		for (let i = 0; i < this.points.length; i++) {
 			const point = this.points[i];
@@ -40,7 +40,7 @@ class PolylineBuilder implements ComponentBuilder {
 		for (let i = this.points.length - 1; i >= 0; i--) {
 			const point = this.points[i];
 			points.push(point.pos.plus(Vec2.of(0, -point.width / 2.5)));
-			maxWidth = Math.max(point.width, maxWidth);
+			//maxWidth = Math.max(point.width, maxWidth);
 		}
 
 		const pathCommands: PathCommand[] = points.map(point => {
@@ -54,13 +54,13 @@ class PolylineBuilder implements ComponentBuilder {
 			.mapPoints(point => this.viewport.roundPoint(point));
 
 		// Round the stroke width so that when exported it doesn't have unnecessary trailing decimals.
-		maxWidth = Viewport.roundPoint(maxWidth, 5 / this.viewport.getScaleFactor());
+		//maxWidth = Viewport.roundPoint(maxWidth, 5 / this.viewport.getScaleFactor());
 
 		const preview = new Stroke([
 			path.toRenderable({
 				fill: Color4.transparent,
 				stroke: {
-					width: maxWidth,
+					width: 1,
 					color: this.startPoint.color,
 				},
 			}),

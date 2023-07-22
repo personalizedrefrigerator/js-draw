@@ -90,6 +90,20 @@ export default class Pointer {
 		);
 	}
 
+	/** Returns a copy of this, but with the given `pressure`. */
+	public withPressure(pressure: number|null) {
+		return new Pointer(
+			this.screenPos,
+			this.canvasPos,
+			pressure,
+			this.isPrimary,
+			this.down,
+			this.device,
+			this.id,
+			this.timeStamp,
+		);
+	}
+
 	/**
 	 * Returns a copy of this pointer with a new position. The screen position is determined
 	 * by the given `canvasPos`.

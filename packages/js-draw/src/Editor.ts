@@ -34,6 +34,7 @@ import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
+import PressureInference from './tools/InputFilter/PressureInference';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -258,6 +259,7 @@ export class Editor {
 
 		// TODO: Make this pipeline configurable (e.g. allow users to add global input stabilization)
 		this.toolController.addInputMapper(StrokeKeyboardControl.fromEditor(this));
+		this.toolController.addInputMapper(new PressureInference());
 
 		parent.appendChild(this.container);
 
