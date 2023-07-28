@@ -24,13 +24,14 @@ export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: S
 // Handles stroke smoothing and creates Strokes from user/stylus input.
 export default class FreehandLineBuilder implements ComponentBuilder {
 	private isFirstSegment: boolean = true;
-	private parts: PathCommand[] = [];
+
+	private upperParts: PathCommand[] = [];
+	private lowerParts: PathCommand[] = [];
 
 	private curveFitter: StrokeSmoother;
 
 	private bbox: Rect2;
-	private averageWidth: number;
-	private widthAverageNumSamples: number = 1;
+	private strokeWidth: number;
 
 	public constructor(
 		private startPoint: StrokeDataPoint,
@@ -42,7 +43,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	) {
 		this.curveFitter = new StrokeSmoother(startPoint, minFitAllowed, maxFitAllowed, (curve: Curve|null) => this.addCurve(curve));
 
-		this.averageWidth = startPoint.width;
+		this.strokeWidth = startPoint.width;
 		this.bbox = new Rect2(this.startPoint.pos.x, this.startPoint.pos.y, 0, 0);
 	}
 
@@ -55,14 +56,17 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			fill: Color4.transparent,
 			stroke: {
 				color: this.startPoint.color,
-				width: this.roundDistance(this.averageWidth),
+				width: this.roundDistance(this.strokeWidth),
 			}
 		};
 	}
 
 	protected previewCurrentPath(): RenderablePathSpec|null {
-		const path = this.parts.slice();
-		const commands = [...path, ...this.curveToPathCommands(this.curveFitter.preview())];
+		const upperPath = this.upperParts;
+		const lowerPath = this.lowerParts;
+
+		const [ nextUpperCommands, nextLowerCommands ] = this.curveToPathCommands(this.curveFitter.preview());
+		const commands = [ ...upperPath, ...nextUpperCommands, ...lowerPath, ...nextLowerCommands ];
 		const startPoint = this.startPoint.pos;
 
 		return {
@@ -108,7 +112,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	}
 
 	private getMinFit(): number {
-		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 3);
+		let minFit = Math.min(this.minFitAllowed, this.strokeWidth / 3);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
@@ -127,16 +131,16 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		return Viewport.roundPoint(dist, minFit);
 	}
 
-	private curveToPathCommands(curve: Curve|null): PathCommand[] {
+	private curveToPathCommands(curve: Curve|null): [PathCommand[], PathCommand[]] {
 		// Case where no points have been added
 		if (!curve) {
 			// Don't create a circle around the initial point if the stroke has more than one point.
 			if (!this.isFirstSegment) {
-				return [];
+				return [[], []];
 			}
 
 			// Make the circle small -- because of the stroke style, we'll be drawing a stroke around it.
-			const width = Viewport.roundPoint(this.averageWidth / 10, Math.min(this.minFitAllowed, this.averageWidth / 10));
+			const width = Viewport.roundPoint(this.strokeWidth / 10, Math.min(this.minFitAllowed, this.strokeWidth / 10));
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
@@ -145,7 +149,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			//    |
 
 			// Draw a circle-ish shape around the start point
-			return [
+			return [[
 				{
 					kind: PathCommandType.QuadraticBezierTo,
 					controlPoint: center.plus(Vec2.of(width, width)),
@@ -172,30 +176,49 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 					controlPoint: center.plus(Vec2.of(width, -width)),
 					endPoint: center.plus(Vec2.of(width, 0)),
 				}
-			];
+			], []];
 		}
 
-		const result: PathCommand[] = [];
+		const mainCommands: PathCommand[] = [];
+		const pressureCommands: PathCommand[] = [];
+
+		const startPressureDisplacement = Vec2.of(0, curve.startWidth - this.strokeWidth);
+		const endPressureDisplacement = Vec2.of(0, curve.endWidth - this.strokeWidth);
+		const midPressureDisplacement = startPressureDisplacement.lerp(endPressureDisplacement, 0.5);
+
+		this.strokeWidth = Math.max(this.strokeWidth, endPressureDisplacement.length());
 
 		if (this.isFirstSegment) {
-			result.push({
+			mainCommands.push({
 				kind: PathCommandType.MoveTo,
 				point: this.roundPoint(curve.startPoint),
 			});
+
+			pressureCommands.push({
+				kind: PathCommandType.MoveTo,
+				point: this.roundPoint(curve.startPoint.plus(startPressureDisplacement)),
+			});
 		}
 
-		result.push({
+		mainCommands.push({
 			kind: PathCommandType.QuadraticBezierTo,
 			controlPoint: this.roundPoint(curve.controlPoint),
 			endPoint: this.roundPoint(curve.endPoint),
 		});
 
-		return result;
+		pressureCommands.push({
+			kind: PathCommandType.QuadraticBezierTo,
+			controlPoint: this.roundPoint(curve.controlPoint.plus(midPressureDisplacement)),
+			endPoint: this.roundPoint(curve.endPoint.plus(endPressureDisplacement)),
+		});
+
+		return [ mainCommands, pressureCommands ];
 	}
 
 	private addCurve(curve: Curve|null) {
-		const parts = this.curveToPathCommands(curve);
-		this.parts.push(...parts);
+		const [ upperParts, lowerParts ] = this.curveToPathCommands(curve);
+		this.upperParts.push(...upperParts);
+		this.lowerParts.push(...lowerParts);
 
 		if (this.isFirstSegment) {
 			this.isFirstSegment = false;
@@ -204,9 +227,6 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 	public addPoint(newPoint: StrokeDataPoint) {
 		this.curveFitter.addPoint(newPoint);
-		this.widthAverageNumSamples ++;
-		this.averageWidth =
-			this.averageWidth * (this.widthAverageNumSamples - 1) / this.widthAverageNumSamples
-				+ newPoint.width / this.widthAverageNumSamples;
+		this.bbox = this.bbox.grownToPoint(newPoint.pos);
 	}
 }
