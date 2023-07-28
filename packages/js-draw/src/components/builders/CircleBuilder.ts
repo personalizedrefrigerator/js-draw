@@ -36,7 +36,7 @@ class CircleBuilder implements ComponentBuilder {
 
 		// Round the stroke width so that when exported it doesn't have unnecessary trailing decimals.
 		const strokeWidth =
-			Viewport.roundPoint(this.endPoint.width, 5 / this.viewport.getScaleFactor());
+			Viewport.roundPoint(this.startPoint.width, 5 / this.viewport.getScaleFactor());
 
 		const center = this.startPoint.pos.lerp(this.endPoint.pos, 0.5);
 		const startEndDelta = this.endPoint.pos.minus(center);

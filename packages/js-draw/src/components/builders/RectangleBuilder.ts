@@ -45,7 +45,7 @@ export default class RectangleBuilder implements ComponentBuilder {
 		const rect = Rect2.fromCorners(startPoint, endPoint);
 		const path = Path.fromRect(
 			rect,
-			this.filled ? null : this.endPoint.width,
+			this.filled ? null : this.startPoint.width,
 		).transformedBy(
 			// Rotate the canvas rectangle so that its rotation matches the screen
 			rotationMat

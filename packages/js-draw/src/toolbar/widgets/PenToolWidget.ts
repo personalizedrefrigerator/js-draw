@@ -16,7 +16,6 @@ import BaseToolWidget from './BaseToolWidget';
 import Color4 from '../../Color4';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
-import { makePolylineBuilder } from '../../components/builders/PolylineBuilder';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -54,12 +53,6 @@ export default class PenToolWidget extends BaseToolWidget {
 				id: 'freehand-pen',
 
 				factory: makeFreehandLineBuilder,
-			},
-			{
-				name: this.localizationTable.roundedTipPen,
-				id: 'memory-hog-pen',
-
-				factory: makePolylineBuilder,
 			},
 			{
 				name: this.localizationTable.arrowPen,
