@@ -1,7 +1,8 @@
 import Editor from '../Editor';
 import { Point2 } from '../math/Vec2';
 import Pointer from '../Pointer';
-import { InputEvtType } from '../types';
+import { InputEvtType } from '../inputEvents';
+import getUniquePointerId from './getUniquePointerId';
 
 /**
  * Dispatch a pen event to the currently selected tool.
@@ -16,8 +17,10 @@ const sendPenEvent = (
 
 	allPointers?: Pointer[]
 ) => {
+	const id = getUniquePointerId(allPointers ?? []);
+
 	const mainPointer = Pointer.ofCanvasPoint(
-		point, eventType !== InputEvtType.PointerUpEvt, editor.viewport
+		point, eventType !== InputEvtType.PointerUpEvt, editor.viewport, id
 	);
 
 	editor.toolController.dispatchInputEvent({
@@ -27,5 +30,7 @@ const sendPenEvent = (
 		],
 		current: mainPointer,
 	});
+
+	return mainPointer;
 };
 export default sendPenEvent;

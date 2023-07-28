@@ -76,6 +76,20 @@ export default class Pointer {
 		return this.withCanvasPosition(canvasPos, viewport);
 	}
 
+	/** Returns a copy of this pointer with a changed timestamp. */
+	public withTimestamp(timeStamp: number) {
+		return new Pointer(
+			this.screenPos,
+			this.canvasPos,
+			this.pressure,
+			this.isPrimary,
+			this.down,
+			this.device,
+			this.id,
+			timeStamp
+		);
+	}
+
 	/**
 	 * Returns a copy of this pointer with a new position. The screen position is determined
 	 * by the given `canvasPos`.
@@ -122,9 +136,11 @@ export default class Pointer {
 		if (device === PointerDevice.PrimaryButtonMouse) {
 			if (evt.buttons & 0x2) {
 				device = PointerDevice.RightButtonMouse;
-			} else if (!(evt.buttons & 0x1)) {
-				device = PointerDevice.Other;
 			}
+			// Commented out: Mouse up events seem to not satisfy this condition on mouse up.
+			// else if (!(evt.buttons & 0x1)) {
+			//	device = PointerDevice.Other;
+			//}
 		}
 
 		return new Pointer(

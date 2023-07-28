@@ -1,4 +1,4 @@
-import { InputEvtType, InputEvt, EditorEventType } from '../types';
+import { EditorEventType } from '../types';
 import Editor from '../Editor';
 import BaseTool from './BaseTool';
 import PanZoom, { PanZoomMode } from './PanZoom';
@@ -18,24 +18,39 @@ import { makePressureSensitiveFreehandLineBuilder } from '../components/builders
 import FindTool from './FindTool';
 import SelectAllShortcutHandler from './SelectionTool/SelectAllShortcutHandler';
 import SoundUITool from './SoundUITool';
+import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
+import { InputEvt, InputEvtType } from '../inputEvents';
+import InputPipeline from './InputFilter/InputPipeline';
+import InputStabilizer from './InputFilter/InputStabilizer';
 
-export default class ToolController {
+export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
 	private activeTool: BaseTool|null = null;
 	private primaryToolGroup: ToolEnabledGroup;
 
+	// Form a pipeline that allows filtering/mapping input events.
+	private inputPipeline: InputPipeline;
+
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
+		this.inputPipeline = new InputPipeline();
+		this.inputPipeline.setEmitListener(event => this.onEventInternal(event));
+
 		const primaryToolGroup = new ToolEnabledGroup();
 		this.primaryToolGroup = primaryToolGroup;
 
 		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
 		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
 		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 8 });
+		const secondaryPenTool = new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 });
+
+		// Stabilize the secondary pen tool.
+		secondaryPenTool.setInputMapper(new InputStabilizer(editor.viewport));
+
 		const primaryTools = [
 			// Three pens
 			primaryPenTool,
-			new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 }),
+			secondaryPenTool,
 
 			// Highlighter-like pen with width=40
 			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 40 }, makePressureSensitiveFreehandLineBuilder),
@@ -111,14 +126,23 @@ export default class ToolController {
 		this.tools.push(tool);
 	}
 
-	// Returns true if the event was handled
-	public dispatchInputEvent(event: InputEvt): boolean {
+	// @internal use `dispatchEvent` rather than calling `onEvent` directly.
+	private onEventInternal(event: InputEvt): boolean {
 		let handled = false;
 		if (event.kind === InputEvtType.PointerDownEvt) {
+			let canOnlySendToActiveTool = false;
+			if (this.activeTool && !this.activeTool.eventCanBeDeliveredToNonActiveTool(event)) {
+				canOnlySendToActiveTool = true;
+			}
+
 			for (const tool of this.tools) {
-				if (tool.isEnabled() && tool.onPointerDown(event)) {
+				if (canOnlySendToActiveTool && tool !== this.activeTool) {
+					continue;
+				}
+
+				if (tool.isEnabled() && tool.onEvent(event)) {
 					if (this.activeTool !== tool) {
-						this.activeTool?.onGestureCancel();
+						this.activeTool?.onEvent({ kind: InputEvtType.GestureCancelEvt });
 					}
 
 					this.activeTool = tool;
@@ -127,48 +151,32 @@ export default class ToolController {
 				}
 			}
 		} else if (event.kind === InputEvtType.PointerUpEvt) {
-			this.activeTool?.onPointerUp(event);
-			this.activeTool = null;
+			const upResult = this.activeTool?.onEvent(event);
+			const continueHandlingEvents = upResult && event.allPointers.length > 1;
+
+			// Should the active tool continue handling events (without an additional pointer down?)
+			if (!continueHandlingEvents) {
+				// No -- Remove the current tool
+				this.activeTool = null;
+			}
 			handled = true;
 		} else if (event.kind === InputEvtType.PointerMoveEvt) {
 			if (this.activeTool !== null) {
-				this.activeTool.onPointerMove(event);
+				this.activeTool.onEvent(event);
 				handled = true;
 			}
 		} else if (event.kind === InputEvtType.GestureCancelEvt) {
 			if (this.activeTool !== null) {
-				this.activeTool.onGestureCancel();
+				this.activeTool.onEvent(event);
 				this.activeTool = null;
 			}
 		} else {
-			let allCasesHandledGuard: never;
-
 			for (const tool of this.tools) {
 				if (!tool.isEnabled()) {
 					continue;
 				}
 
-				switch (event.kind) {
-				case InputEvtType.KeyPressEvent:
-					handled = tool.onKeyPress(event);
-					break;
-				case InputEvtType.KeyUpEvent:
-					handled = tool.onKeyUp(event);
-					break;
-				case InputEvtType.WheelEvt:
-					handled = tool.onWheel(event);
-					break;
-				case InputEvtType.CopyEvent:
-					handled = tool.onCopy(event);
-					break;
-				case InputEvtType.PasteEvent:
-					handled = tool.onPaste(event);
-					break;
-				default:
-					allCasesHandledGuard = event;
-					return allCasesHandledGuard;
-				}
-
+				handled = tool.onEvent(event);
 				if (handled) {
 					break;
 				}
@@ -176,6 +184,29 @@ export default class ToolController {
 		}
 
 		return handled;
+	}
+
+	/** Alias for {@link dispatchInputEvent}. */
+	public onEvent(event: InputEvt) {
+		return this.dispatchInputEvent(event);
+	}
+
+	// Returns true if the event was handled.
+	public dispatchInputEvent(event: InputEvt): boolean {
+		// Feed the event through the input pipeline
+		return this.inputPipeline.onEvent(event);
+	}
+
+	/**
+	 * Adds a new `InputMapper` to this' input pipeline.
+	 *
+	 * A `mapper` is really a relation that maps each event to no, one,
+	 * or many other events.
+	 *
+	 * @see {@link InputMapper}.
+	 */
+	public addInputMapper(mapper: InputMapper) {
+		this.inputPipeline.addToTail(mapper);
 	}
 
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {

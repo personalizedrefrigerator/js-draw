@@ -1,0 +1,19 @@
+{
+	"name": "@js-draw/debug-stroke-logging",
+	"version": "0.25.1",
+	"description": "Allows sending logs",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"bundle": "ts-node scripts/bundle.ts",
+		"watchBundle": "ts-node scripts/watchBundle.ts",
+		"build": "build-tool build",
+		"watch": "build-tool watch"
+	},
+	"dependencies": {
+		"js-draw": "^0.25.1"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^0.25.0"
+	}
+}

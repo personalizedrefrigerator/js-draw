@@ -1,5 +1,6 @@
 import Editor from '../Editor';
-import { EditorEventType, HTMLPointerEventName } from '../types';
+import { EditorEventType } from '../types';
+import { HTMLPointerEventName } from '../inputEvents';
 
 import { coloris, close as closeColoris, init as colorisInit } from '@melloware/coloris';
 import Color4 from '../Color4';

@@ -2,7 +2,7 @@
 // @packageDocumentation
 
 import Editor from '../Editor';
-import { KeyPressEvent } from '../types';
+import { KeyPressEvent } from '../inputEvents';
 import BaseTool from './BaseTool';
 
 // Returns true if the event was handled, false otherwise.

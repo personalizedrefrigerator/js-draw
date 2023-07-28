@@ -4,7 +4,7 @@ import { EditorImage, Rect2, StrokeComponent } from '../lib';
 import { Vec2 } from '../math/Vec2';
 import createEditor from '../testing/createEditor';
 import sendPenEvent from '../testing/sendPenEvent';
-import { InputEvtType } from '../types';
+import { InputEvtType } from '../inputEvents';
 import Eraser from './Eraser';
 
 const selectEraser = (editor: Editor) => {

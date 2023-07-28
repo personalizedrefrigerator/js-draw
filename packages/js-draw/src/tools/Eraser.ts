@@ -1,4 +1,5 @@
-import { EditorEventType, KeyPressEvent, PointerEvt } from '../types';
+import { EditorEventType } from '../types';
+import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
 import { Point2, Vec2 } from '../math/Vec2';

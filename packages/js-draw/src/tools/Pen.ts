@@ -3,13 +3,13 @@ import Editor from '../Editor';
 import EditorImage from '../EditorImage';
 import Pointer, { PointerDevice } from '../Pointer';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
-import { EditorEventType, KeyPressEvent, KeyUpEvent, PointerEvt, StrokeDataPoint } from '../types';
+import { EditorEventType, StrokeDataPoint } from '../types';
+import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 import { ComponentBuilder, ComponentBuilderFactory } from '../components/builders/types';
 import { undoKeyboardShortcutId } from './keybindings';
-import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId, lineLockKeyboardShortcutId, snapToGridKeyboardShortcutId } from './keybindings';
-
-
+import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
+import InputStabilizer from './InputFilter/InputStabilizer';
 
 export interface PenStyle {
 	color: Color4;
@@ -20,9 +20,7 @@ export default class Pen extends BaseTool {
 	protected builder: ComponentBuilder|null = null;
 	private lastPoint: StrokeDataPoint|null = null;
 	private startPoint: StrokeDataPoint|null = null;
-
-	private snapToGridEnabled: boolean = false;
-	private angleLockEnabled: boolean = false;
+	private currentDeviceType: PointerDevice|null = null;
 
 	public constructor(
 		private editor: Editor,
@@ -37,26 +35,8 @@ export default class Pen extends BaseTool {
 		return 1 / this.editor.viewport.getScaleFactor() * this.style.thickness;
 	}
 
-	// Snap the given pointer to the nearer of the x/y axes.
-	private xyAxesSnap(pointer: Pointer) {
-		if (!this.startPoint) {
-			return pointer;
-		}
-
-		const screenPos = this.editor.viewport.canvasToScreen(this.startPoint.pos);
-		return pointer.lockedToXYAxesScreen(screenPos, this.editor.viewport);
-	}
-
 	// Converts a `pointer` to a `StrokeDataPoint`.
 	protected toStrokePoint(pointer: Pointer): StrokeDataPoint {
-		if (this.angleLockEnabled && this.lastPoint) {
-			pointer = this.xyAxesSnap(pointer);
-		}
-
-		if (this.snapToGridEnabled) {
-			pointer = pointer.snappedToGrid(this.editor.viewport);
-		}
-
 		const minPressure = 0.3;
 		let pressure = Math.max(pointer.pressure ?? 1.0, minPressure);
 
@@ -94,7 +74,8 @@ export default class Pen extends BaseTool {
 		this.previewStroke();
 	}
 
-	public override onPointerDown({ current, allPointers }: PointerEvt): boolean {
+	public override onPointerDown(event: PointerEvt): boolean {
+		const { current, allPointers } = event;
 		const isEraser = current.device === PointerDevice.Eraser;
 
 		let anyDeviceIsStylus = false;
@@ -105,24 +86,57 @@ export default class Pen extends BaseTool {
 			}
 		}
 
+		// Avoid canceling an existing stroke
+		if (this.builder && !this.eventCanCancelStroke(event)) {
+			return true;
+		}
+
 		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
 			this.startPoint = this.toStrokePoint(current);
 			this.builder = this.builderFactory(this.startPoint, this.editor.viewport);
+			this.currentDeviceType = current.device;
 			return true;
 		}
 
 		return false;
 	}
 
+	private eventCanCancelStroke(event: PointerEvt) {
+		// If there has been a delay since the last input event,
+		// it's always okay to cancel
+		const lastInputTime = this.lastPoint?.time ?? 0;
+		if (event.current.timeStamp - lastInputTime > 1000) {
+			return true;
+		}
+
+		const isPenStroke = this.currentDeviceType === PointerDevice.Pen;
+		const isTouchEvent = event.current.device === PointerDevice.Touch;
+
+		// Don't allow pen strokes to be cancelled by touch events.
+		if (isPenStroke && isTouchEvent) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public override eventCanBeDeliveredToNonActiveTool(event: PointerEvt) {
+		return this.eventCanCancelStroke(event);
+	}
+
 	public override onPointerMove({ current }: PointerEvt): void {
 		if (!this.builder) return;
+		if (current.device !== this.currentDeviceType) return;
 
 		this.addPointToStroke(this.toStrokePoint(current));
 	}
 
-	public override onPointerUp({ current }: PointerEvt): void {
-		if (!this.builder) {
-			return;
+	public override onPointerUp({ current }: PointerEvt) {
+		if (!this.builder) return false;
+		if (current.device !== this.currentDeviceType) {
+			// this.builder still exists, so we're handling events from another
+			// device type.
+			return true;
 		}
 
 		// onPointerUp events can have zero pressure. Use the last pressure instead.
@@ -137,9 +151,12 @@ export default class Pen extends BaseTool {
 		if (current.isPrimary) {
 			this.finalizeStroke();
 		}
+
+		return false;
 	}
 
 	public override onGestureCancel() {
+		this.builder = null;
 		this.editor.clearWetInk();
 	}
 
@@ -195,14 +212,28 @@ export default class Pen extends BaseTool {
 		}
 	}
 
+	public setHasStabilization(hasStabilization: boolean) {
+		const hasInputMapper = !!this.getInputMapper();
+
+		// TODO: Currently, this assumes that there is no other input mapper.
+		if (hasStabilization === hasInputMapper) {
+			return;
+		}
+
+		if (hasInputMapper) {
+			this.setInputMapper(null);
+		} else {
+			this.setInputMapper(new InputStabilizer(this.editor.viewport));
+		}
+		this.noteUpdated();
+	}
+
 	public getThickness() { return this.style.thickness; }
 	public getColor() { return this.style.color; }
 	public getStrokeFactory() { return this.builderFactory; }
 
 	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
-
-		this.snapToGridEnabled = false;
 	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
@@ -228,32 +259,6 @@ export default class Pen extends BaseTool {
 		if (newThickness !== undefined) {
 			newThickness = Math.min(Math.max(1, newThickness), 256);
 			this.setThickness(newThickness);
-			return true;
-		}
-
-		if (shortcuts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
-			this.snapToGridEnabled = true;
-			return true;
-		}
-
-		if (shortcuts.matchesShortcut(lineLockKeyboardShortcutId, event)) {
-			this.angleLockEnabled = true;
-			return true;
-		}
-
-		return false;
-	}
-
-	public override onKeyUp(event: KeyUpEvent): boolean {
-		const shortcuts = this.editor.shortcuts;
-
-		if (shortcuts.matchesShortcut(snapToGridKeyboardShortcutId, event)) {
-			this.snapToGridEnabled = false;
-			return true;
-		}
-
-		if (shortcuts.matchesShortcut(lineLockKeyboardShortcutId, event)) {
-			this.angleLockEnabled = false;
 			return true;
 		}
 

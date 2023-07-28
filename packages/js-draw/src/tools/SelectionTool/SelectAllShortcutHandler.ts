@@ -1,5 +1,5 @@
 import Editor from '../../Editor';
-import { KeyPressEvent } from '../../types';
+import { KeyPressEvent } from '../../inputEvents';
 import BaseTool from '../BaseTool';
 import { selectAllKeyboardShortcut } from '../keybindings';
 import SelectionTool from './SelectionTool';

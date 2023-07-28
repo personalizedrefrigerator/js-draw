@@ -2,7 +2,7 @@
 
 import Color4 from '../Color4';
 import Editor from '../Editor';
-import { PointerEvt } from '../types';
+import { PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 
 type ColorListener = (color: Color4|null)=>void;

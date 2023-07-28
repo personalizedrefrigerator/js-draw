@@ -4,7 +4,7 @@ import Editor from '../../Editor';
 import EditorImage from '../../EditorImage';
 import Path from '../../math/shapes/Path';
 import { Vec2 } from '../../math/Vec2';
-import { InputEvtType } from '../../types';
+import { InputEvtType } from '../../inputEvents';
 import Selection from './Selection';
 import SelectionTool from './SelectionTool';
 import createEditor from '../../testing/createEditor';

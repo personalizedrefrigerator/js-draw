@@ -41,4 +41,11 @@ describe('Vec3', () => {
 		expect(Vec3.unitX.orthog().magnitude()).toBe(1);
 		expect(Vec3.unitY.orthog().magnitude()).toBe(1);
 	});
+
+	it('.normalizedOrZero should normalize the given vector or return zero', () => {
+		expect(Vec3.zero.normalizedOrZero()).objEq(Vec3.zero);
+		expect(Vec3.unitX.normalizedOrZero()).objEq(Vec3.unitX);
+		expect(Vec3.unitX.times(22).normalizedOrZero()).objEq(Vec3.unitX);
+		expect(Vec3.of(1, 1, 1).times(22).normalizedOrZero().length()).toBeCloseTo(1);
+	});
 });

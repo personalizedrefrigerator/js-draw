@@ -1,6 +1,7 @@
 import EditorImage from './EditorImage';
 import ToolController from './tools/ToolController';
-import { InputEvtType, PointerEvt, EditorNotifier, EditorEventType, ImageLoader, HTMLPointerEventName, HTMLPointerEventFilter } from './types';
+import { EditorNotifier, EditorEventType, ImageLoader } from './types';
+import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent } from './inputEvents';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
@@ -32,6 +33,8 @@ import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import AbstractToolbar from './toolbar/AbstractToolbar';
 import SidebarToolbar from './toolbar/SidebarToolbar';
+import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
+import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -253,6 +256,9 @@ export class Editor {
 		this.image = new EditorImage();
 		this.history = new UndoRedoHistory(this, this.announceRedoCallback, this.announceUndoCallback);
 		this.toolController = new ToolController(this, this.localization);
+
+		// TODO: Make this pipeline configurable (e.g. allow users to add global input stabilization)
+		this.toolController.addInputMapper(StrokeKeyboardControl.fromEditor(this));
 
 		parent.appendChild(this.container);
 
@@ -671,30 +677,22 @@ export class Editor {
 
 	/** Adds event listners for keypresses to `elem` and forwards those events to the editor. */
 	public handleKeyEventsFrom(elem: HTMLElement) {
-		elem.addEventListener('keydown', evt => {
-			if (evt.key === 't' || evt.key === 'T') {
-				evt.preventDefault();
+		elem.addEventListener('keydown', htmlEvent => {
+			const event = keyPressEventFromHTMLEvent(htmlEvent);
+			if (event.key === 't' || event.key === 'T') {
+				htmlEvent.preventDefault();
 				this.display.rerenderAsText();
-			} else if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.KeyPressEvent,
-				key: evt.key,
-				ctrlKey: evt.ctrlKey || evt.metaKey,
-				altKey: evt.altKey,
-			})) {
-				evt.preventDefault();
-			} else if (evt.key === 'Escape') {
+			} else if (this.toolController.dispatchInputEvent(event)) {
+				htmlEvent.preventDefault();
+			} else if (event.key === 'Escape') {
 				this.renderingRegion.blur();
 			}
 		});
 
-		elem.addEventListener('keyup', evt => {
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.KeyUpEvent,
-				key: evt.key,
-				ctrlKey: evt.ctrlKey || evt.metaKey,
-				altKey: evt.altKey,
-			})) {
-				evt.preventDefault();
+		elem.addEventListener('keyup', htmlEvent => {
+			const event = keyUpEventFromHTMLEvent(htmlEvent);
+			if (this.toolController.dispatchInputEvent(event)) {
+				htmlEvent.preventDefault();
 			}
 		});
 
@@ -923,19 +921,34 @@ export class Editor {
 		return styleSheet;
 	}
 
-	// Dispatch a keyboard event to the currently selected tool.
-	// Intended for unit testing
+	/**
+	 * Dispatch a keyboard event to the currently selected tool.
+	 * Intended for unit testing.
+	 *
+	 * If `shiftKey` is undefined, it is guessed from `key`.
+	 *
+	 * At present, the **key code** dispatched is guessed from the given key and,
+	 * while this works for ASCII alphanumeric characters, this does not work for
+	 * most non-alphanumeric keys.
+	 *
+	 * Because guessing the key code from `key` is problematic, **only use this for testing**.
+	 */
 	public sendKeyboardEvent(
 		eventType: InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent,
 		key: string,
 		ctrlKey: boolean = false,
 		altKey: boolean = false,
+		shiftKey: boolean|undefined = undefined,
 	) {
+		shiftKey ??= key.toUpperCase() === key && key.toLowerCase() !== key;
+
 		this.toolController.dispatchInputEvent({
 			kind: eventType,
 			key,
+			code: guessKeyCodeFromKey(key),
 			ctrlKey,
 			altKey,
+			shiftKey,
 		});
 	}
 

@@ -18,6 +18,11 @@ describe('Color4', () => {
 		expect(Color4.fromString('rgba( 0, 0, 128, 0)')).objEq(Color4.ofRGBA(0, 0, 128/255, 0));
 	});
 
+	it('should parse transparent/none as completely transparent', () => {
+		expect(Color4.fromString('none')).toBe(Color4.transparent);
+		expect(Color4.fromString('transparent')).toBe(Color4.transparent);
+	});
+
 	it('should mix blue and red to get dark purple', () => {
 		expect(Color4.ofRGB(1, 0, 0).mix(Color4.ofRGB(0, 0, 1), 0.5)).objEq(Color4.ofRGB(0.5, 0, 0.5));
 		expect(Color4.ofRGB(1, 0, 0).mix(Color4.ofRGB(0, 0, 1), 0.1)).objEq(Color4.ofRGB(0.9, 0, 0.1));

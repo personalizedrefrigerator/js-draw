@@ -8,7 +8,7 @@ describe('KeyboardShortcutManager', () => {
 				KeyboardShortcutManager.getShortcutDefaultKeybindings(undoKeyboardShortcutId);
 		expect(defaultUndoShortcutKeybinds.length).toBeGreaterThanOrEqual(1);
 		expect(defaultUndoShortcutKeybinds.some(shortcut => {
-			return shortcut.key === 'z' && shortcut.controlOrMeta;
+			return shortcut.key === 'KeyZ' && shortcut.controlOrMeta;
 		})).toBe(true);
 	});
 

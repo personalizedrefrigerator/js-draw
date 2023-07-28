@@ -3,7 +3,7 @@ import Editor from '../Editor';
 import { Mat33, Vec2 } from '../lib';
 import createEditor from '../testing/createEditor';
 import sendTouchEvent from '../testing/sendTouchEvent';
-import { InputEvtType } from '../types';
+import { InputEvtType } from '../inputEvents';
 import waitForTimeout from '../util/waitForTimeout';
 import PanZoom, { PanZoomMode } from './PanZoom';
 
@@ -328,21 +328,11 @@ describe('PanZoom', () => {
 
 		expect(transformedVec(Vec2.unitX).length()).toBeCloseTo(1);
 
-		editor.toolController.dispatchInputEvent({
-			kind: InputEvtType.KeyPressEvent,
-			ctrlKey: false,
-			altKey: false,
-			key: 'r',
-		});
+		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'r');
 		expect(transformedVec(Vec2.unitX).length()).toBeCloseTo(1);
 		expect(transformedVec(Vec2.unitX)).not.objEq(Vec2.unitX, tolerableError);
 
-		editor.toolController.dispatchInputEvent({
-			kind: InputEvtType.KeyPressEvent,
-			ctrlKey: false,
-			altKey: false,
-			key: 'R',
-		});
+		editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'R');
 		expect(transformedVec(Vec2.unitX).length()).toBeCloseTo(1);
 		expect(transformedVec(Vec2.unitX)).objEq(Vec2.unitX, tolerableError);
 	});
