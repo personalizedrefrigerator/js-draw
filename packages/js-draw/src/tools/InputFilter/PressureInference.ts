@@ -24,7 +24,7 @@ export default class PressureInference extends InputMapper {
 
 					if (deltaPressure === 0) {
 						// Guess the pressure based on velocity
-						pressure = - Math.atan(velocity.dot(Vec2.of(1, -1)) * 4) / Math.PI + 0.5;
+						pressure = -Math.atan(velocity.dot(Vec2.of(1, 1)) * 4) / Math.PI + 0.5;
 					}
 				}
 			}
