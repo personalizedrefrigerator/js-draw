@@ -1,5 +1,5 @@
 import Editor from '../Editor';
-import { Vec2 } from '../math/Vec2';
+import { Vec2 } from '@js-draw/math';
 import Pointer, { PointerDevice } from '../Pointer';
 import { InputEvtType } from '../inputEvents';
 import getUniquePointerId from './getUniquePointerId';

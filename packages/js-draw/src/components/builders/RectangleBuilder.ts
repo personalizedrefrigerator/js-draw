@@ -1,7 +1,6 @@
-import Mat33 from '../../math/Mat33';
-import Path from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
+import { Mat33, Rect2, Path } from '@js-draw/math';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
+import { pathToRenderable } from '../../rendering/RenderablePathSpec';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
@@ -52,7 +51,7 @@ export default class RectangleBuilder implements ComponentBuilder {
 		).mapPoints(point => this.viewport.roundPoint(point));
 
 		const preview = new Stroke([
-			path.toRenderable({
+			pathToRenderable(path, {
 				fill: this.endPoint.color
 			}),
 		]);

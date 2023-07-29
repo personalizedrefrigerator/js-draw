@@ -1,10 +1,7 @@
-import Color4 from '../Color4';
 import TextComponent from '../components/TextComponent';
 import Editor from '../Editor';
 import EditorImage from '../EditorImage';
-import Rect2 from '../math/shapes/Rect2';
-import Mat33 from '../math/Mat33';
-import { Vec2 } from '../math/Vec2';
+import { Rect2, Mat33, Vec2, Color4 } from '@js-draw/math';
 import { PointerDevice } from '../Pointer';
 import { EditorEventType } from '../types';
 import { PointerEvt } from '../inputEvents';

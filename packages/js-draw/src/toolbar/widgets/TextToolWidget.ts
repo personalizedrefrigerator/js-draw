@@ -1,4 +1,4 @@
-import Color4 from '../../Color4';
+import { Color4 } from '@js-draw/math';
 import Editor from '../../Editor';
 import TextTool from '../../tools/TextTool';
 import { EditorEventType } from '../../types';

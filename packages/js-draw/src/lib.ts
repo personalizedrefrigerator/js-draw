@@ -50,10 +50,9 @@ export * from './inputEvents';
 export { default as getLocalizationTable, matchingLocalizationTable } from './localizations/getLocalizationTable';
 export * from './localization';
 
-export { default as Color4 } from './Color4';
 export { default as SVGLoader } from './SVGLoader';
 export { default as Viewport } from './Viewport';
-export * from './math/lib';
+export * from '@js-draw/math';
 export * from './components/lib';
 export * from './commands/lib';
 export * from './tools/lib';

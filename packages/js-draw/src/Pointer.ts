@@ -1,4 +1,4 @@
-import { Point2, Vec2 } from './math/Vec2';
+import { Point2, Vec2 } from '@js-draw/math';
 import Viewport from './Viewport';
 
 export enum PointerDevice {

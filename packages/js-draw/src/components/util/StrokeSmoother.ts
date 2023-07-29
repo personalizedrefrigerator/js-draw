@@ -1,8 +1,5 @@
-import { Point2, Vec2 } from '../../math/Vec2';
-import Rect2 from '../../math/shapes/Rect2';
-import LineSegment2 from '../../math/shapes/LineSegment2';
+import { Point2, Vec2, Rect2, LineSegment2, QuadraticBezier } from '@js-draw/math';
 import { StrokeDataPoint } from '../../types';
-import QuadraticBezier from '../../math/shapes/QuadraticBezier';
 
 export interface Curve {
 	startPoint: Vec2;

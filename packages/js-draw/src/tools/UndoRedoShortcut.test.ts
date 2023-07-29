@@ -1,14 +1,14 @@
 /* @jest-environment jsdom */
 
-import Color4 from '../Color4';
 import Stroke from '../components/Stroke';
 import EditorImage from '../EditorImage';
-import Path from '../math/shapes/Path';
+import { Path, Color4 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import { InputEvtType } from '../inputEvents';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 describe('UndoRedoShortcut', () => {
-	const testStroke = new Stroke([Path.fromString('M0,0L10,10').toRenderable({ fill: Color4.red })]);
+	const testStroke = new Stroke([pathToRenderable(Path.fromString('M0,0L10,10'), { fill: Color4.red })]);
 	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
 	it('ctrl+z should undo', () => {

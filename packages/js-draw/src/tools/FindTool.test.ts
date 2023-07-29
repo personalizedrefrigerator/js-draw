@@ -1,7 +1,6 @@
 import { InputEvtType } from '../inputEvents';
 import TextComponent from '../components/TextComponent';
-import Color4 from '../Color4';
-import Mat33 from '../math/Mat33';
+import { Mat33, Color4 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import FindTool from './FindTool';
 

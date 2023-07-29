@@ -1,7 +1,6 @@
 /* @jest-environment jsdom */
 
-import Rect2 from '../../math/shapes/Rect2';
-import { Vec2 } from '../../math/Vec2';
+import { Rect2, Vec2 } from '@js-draw/math';
 import CacheRecord from './CacheRecord';
 import { createCache } from './testUtils';
 

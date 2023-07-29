@@ -1,4 +1,4 @@
-import Rect2 from '../math/shapes/Rect2';
+import { Rect2 } from '@js-draw/math';
 
 export interface CommandLocalization {
 	movedLeft: string;

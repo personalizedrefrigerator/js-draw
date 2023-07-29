@@ -1,4 +1,4 @@
-import Color4 from '../Color4';
+import { Color4 } from '@js-draw/math';
 
 interface RenderingStyle {
 	readonly fill: Color4;

@@ -1,4 +1,5 @@
 import { EditorEventType } from '../types';
+import { Color4 } from '@js-draw/math';
 import Editor from '../Editor';
 import BaseTool from './BaseTool';
 import PanZoom, { PanZoomMode } from './PanZoom';
@@ -6,7 +7,6 @@ import Pen from './Pen';
 import ToolEnabledGroup from './ToolEnabledGroup';
 import Eraser from './Eraser';
 import SelectionTool from './SelectionTool/SelectionTool';
-import Color4 from '../Color4';
 import { ToolLocalization } from './localization';
 import UndoRedoShortcut from './UndoRedoShortcut';
 import TextTool from './TextTool';

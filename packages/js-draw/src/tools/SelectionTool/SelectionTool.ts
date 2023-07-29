@@ -1,8 +1,6 @@
 import AbstractComponent from '../../components/AbstractComponent';
 import Editor from '../../Editor';
-import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/shapes/Rect2';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Mat33, Rect2, Point2, Vec2 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
 import { CopyEvent,  KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
 import Viewport from '../../Viewport';

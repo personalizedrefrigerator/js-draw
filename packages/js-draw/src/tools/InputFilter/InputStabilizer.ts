@@ -2,7 +2,7 @@ import { GestureCancelEvt, InputEvt, InputEvtType, PointerEvt, PointerMoveEvt, i
 import InputMapper from './InputMapper';
 import Viewport from '../../Viewport';
 import Editor from '../../Editor';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Point2, Vec2 } from '@js-draw/math';
 import untilNextAnimationFrame from '../../util/untilNextAnimationFrame';
 
 enum StabilizerType {

@@ -3,7 +3,6 @@ import { EditorEventType } from '../types';
 import { HTMLPointerEventName } from '../inputEvents';
 
 import { coloris, close as closeColoris, init as colorisInit } from '@melloware/coloris';
-import Color4 from '../Color4';
 import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
 import SelectionTool from '../tools/SelectionTool/SelectionTool';
@@ -22,7 +21,7 @@ import InsertImageWidget from './widgets/InsertImageWidget';
 import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
 import OverflowWidget from './widgets/OverflowWidget';
 import { DispatcherEventListener } from '../EventDispatcher';
-import { Point2, Vec2 } from '../math/Vec2';
+import { Point2, Vec2, Color4 } from '@js-draw/math';
 
 export const toolbarCSSPrefix = 'toolbar-';
 

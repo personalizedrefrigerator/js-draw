@@ -3,10 +3,9 @@ import CanvasRenderer from './renderers/CanvasRenderer';
 import { Editor } from '../Editor';
 import { EditorEventType } from '../types';
 import DummyRenderer from './renderers/DummyRenderer';
-import { Point2, Vec2 } from '../math/Vec2';
+import { Point2, Vec2, Color4 } from '@js-draw/math';
 import RenderingCache from './caching/RenderingCache';
 import TextOnlyRenderer from './renderers/TextOnlyRenderer';
-import Color4 from '../Color4';
 
 export enum RenderingMode {
 	DummyRenderer,

@@ -1,11 +1,12 @@
 
 import { Color4, EditorImage, Path, Stroke, Mat33, Vec2 } from './lib';
+import { pathToRenderable } from './rendering/RenderablePathSpec';
 import createEditor from './testing/createEditor';
 
 describe('UndoRedoHistory', () => {
 	it('should keep history size below maximum', () => {
 		const editor = createEditor();
-		const stroke = new Stroke([ Path.fromString('m0,0 10,10').toRenderable({ fill: Color4.red }) ]);
+		const stroke = new Stroke([ pathToRenderable(Path.fromString('m0,0 10,10'), { fill: Color4.red }) ]);
 		editor.dispatch(EditorImage.addElement(stroke));
 
 		for (let i = 0; i < editor.history['maxUndoRedoStackSize'] + 10; i++) {

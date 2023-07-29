@@ -1,14 +1,10 @@
-import Color4 from '../../Color4';
 import TextComponent from '../../components/TextComponent';
-import Mat33 from '../../math/Mat33';
-import Path from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
-import { Point2, Vec2 } from '../../math/Vec2';
-import Vec3 from '../../math/Vec3';
+import { Mat33, Rect2, Point2, Vec2, Vec3, Color4 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
-import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
+import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
+import RenderablePathSpec, { visualEquivalent } from '../RenderablePathSpec';
 
 /**
  * Renders onto a `CanvasRenderingContext2D`.
@@ -181,7 +177,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		// If part of a huge object, it might be worth trimming the path
 		if (this.currentObjectBBox?.containsRect(this.getViewport().visibleRect)) {
 			// Try to trim/remove parts of the path outside of the bounding box.
-			path = Path.visualEquivalent(
+			path = visualEquivalent(
 				path,
 				this.getViewport().visibleRect
 			);

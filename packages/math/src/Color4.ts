@@ -1,4 +1,4 @@
-import Vec3 from './math/Vec3';
+import Vec3 from './Vec3';
 
 export default class Color4 {
 	private constructor(

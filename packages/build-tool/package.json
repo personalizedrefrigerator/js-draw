@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/build-tool",
-	"version": "0.25.0",
+	"version": "0.25.1",
 	"description": "Tool to facilitate building and bundling TypeScript for js-draw.",
 	"license": "MIT",
 	"private": true,

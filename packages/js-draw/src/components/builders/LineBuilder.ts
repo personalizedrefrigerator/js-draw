@@ -1,6 +1,6 @@
-import Path, { PathCommandType } from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
+import { Path, PathCommandType, Rect2 } from '@js-draw/math';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
+import { pathToRenderable } from '../../rendering/RenderablePathSpec';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
@@ -57,7 +57,7 @@ export default class LineBuilder implements ComponentBuilder {
 		]).mapPoints(point => this.viewport.roundPoint(point));
 
 		const preview = new Stroke([
-			path.toRenderable({ fill: this.startPoint.color })
+			pathToRenderable(path, { fill: this.startPoint.color })
 		]);
 
 		return preview;

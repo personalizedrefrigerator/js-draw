@@ -1,11 +1,10 @@
-import Color4 from '../../Color4';
 import Erase from '../../commands/Erase';
 import SerializableCommand from '../../commands/SerializableCommand';
 import uniteCommands from '../../commands/uniteCommands';
 import BackgroundComponent, { BackgroundType } from '../../components/BackgroundComponent';
 import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
-import Rect2 from '../../math/shapes/Rect2';
+import { Rect2, Color4 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';

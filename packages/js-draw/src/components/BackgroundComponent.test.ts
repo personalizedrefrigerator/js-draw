@@ -1,5 +1,4 @@
-import Color4 from '../Color4';
-import { Path, Rect2 } from '../math/lib';
+import { Path, Rect2, Color4 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import AbstractComponent from './AbstractComponent';
 import BackgroundComponent, { BackgroundType, imageBackgroundCSSClassName } from './BackgroundComponent';

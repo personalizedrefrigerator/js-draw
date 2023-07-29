@@ -1,16 +1,14 @@
-import Color4 from '../../Color4';
 import Stroke from '../../components/Stroke';
 import Editor from '../../Editor';
 import EditorImage from '../../EditorImage';
-import Path from '../../math/shapes/Path';
-import { Vec2 } from '../../math/Vec2';
 import { InputEvtType } from '../../inputEvents';
 import Selection from './Selection';
 import SelectionTool from './SelectionTool';
 import createEditor from '../../testing/createEditor';
 import Pointer from '../../Pointer';
-import { Rect2 } from '../../lib';
+import { Rect2, Vec2, Path, Color4 } from '@js-draw/math';
 import sendPenEvent from '../../testing/sendPenEvent';
+import { pathToRenderable } from '../../rendering/RenderablePathSpec';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(SelectionTool)[0];
@@ -19,7 +17,7 @@ const getSelectionTool = (editor: Editor): SelectionTool => {
 const createSquareStroke = (size: number = 1) => {
 	const testStroke = new Stroke([
 		// A filled square
-		Path.fromString(`M0,0 L${size},0 L${size},${size} L0,${size} Z`).toRenderable({ fill: Color4.blue }),
+		pathToRenderable(Path.fromString(`M0,0 L${size},0 L${size},${size} L0,${size} Z`), { fill: Color4.blue }),
 	]);
 	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 

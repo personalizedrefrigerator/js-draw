@@ -3,15 +3,14 @@
 import DummyRenderer from '../renderers/DummyRenderer';
 import { createCache } from './testUtils';
 import Stroke from '../../components/Stroke';
-import Path from '../../math/shapes/Path';
-import Color4 from '../../Color4';
+import { Path, Mat33, Color4 } from '@js-draw/math';
 import EditorImage from '../../EditorImage';
 import Viewport from '../../Viewport';
-import Mat33 from '../../math/Mat33';
+import { pathToRenderable } from '../RenderablePathSpec';
 
 describe('RenderingCache', () => {
 	const testPath = Path.fromString('M0,0 l100,500 l-20,20 L-100,-100');
-	const testStroke = new Stroke([ testPath.toRenderable({ fill: Color4.purple }) ]);
+	const testStroke = new Stroke([ pathToRenderable(testPath, { fill: Color4.purple }) ]);
 
 	it('should create a root node large enough to contain the viewport', () => {
 		let lastRenderer: DummyRenderer|null = null;

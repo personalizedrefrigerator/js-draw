@@ -1,11 +1,9 @@
 
 import PenTool from './Pen';
-import { Vec2 } from '../math/Vec2';
+import { Mat33, Rect2, Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import { InputEvtType } from '../inputEvents';
-import Rect2 from '../math/shapes/Rect2';
 import StrokeComponent from '../components/Stroke';
-import Mat33 from '../math/Mat33';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import sendPenEvent from '../testing/sendPenEvent';
 import sendTouchEvent from '../testing/sendTouchEvent';

@@ -1,5 +1,5 @@
 import Color4 from './Color4';
-import Vec3 from './math/Vec3';
+import Vec3 from './Vec3';
 
 describe('Color4', () => {
 	it('should convert to #RRGGBB-format hex strings (when no alpha)', () => {

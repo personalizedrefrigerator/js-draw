@@ -1,12 +1,10 @@
-import Color4 from '../Color4';
-import Path from '../math/shapes/Path';
-import { Vec2 } from '../math/Vec2';
+import { Path, Vec2, Mat33, Color4 } from '@js-draw/math';
 import Stroke from './Stroke';
 import createEditor from '../testing/createEditor';
-import Mat33 from '../math/Mat33';
 import EditorImage from '../EditorImage';
 import AbstractComponent from './AbstractComponent';
 import { DummyRenderer, SerializableCommand } from '../lib';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 describe('Stroke', () => {
 	it('empty stroke should have an empty bounding box', () => {
@@ -24,7 +22,7 @@ describe('Stroke', () => {
 
 	it('cloned strokes should have the same points', () => {
 		const stroke = new Stroke([
-			Path.fromString('m1,1 2,2 3,3 z').toRenderable({ fill: Color4.red })
+			pathToRenderable(Path.fromString('m1,1 2,2 3,3 z'), { fill: Color4.red })
 		]);
 		const clone = stroke.clone();
 
@@ -38,7 +36,7 @@ describe('Stroke', () => {
 	it('transforming a cloned stroke should not affect the original', () => {
 		const editor = createEditor();
 		const stroke = new Stroke([
-			Path.fromString('m1,1 2,2 3,3 z').toRenderable({ fill: Color4.red })
+			pathToRenderable(Path.fromString('m1,1 2,2 3,3 z'), { fill: Color4.red })
 		]);
 		const origBBox = stroke.getBBox();
 		expect(origBBox).toMatchObject({

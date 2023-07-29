@@ -1,6 +1,5 @@
-import Color4 from '../Color4';
 import { ComponentBuilderFactory } from '../components/builders/types';
-import { Vec2 } from '../math/Vec2';
+import { Vec2, Color4 } from '@js-draw/math';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import Pen from '../tools/Pen';

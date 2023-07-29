@@ -4,7 +4,7 @@ import Erase from '../../commands/Erase';
 import EditorImage from '../../EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
 import SelectionTool from '../../tools/SelectionTool/SelectionTool';
-import Mat33 from '../../math/Mat33';
+import { Mat33 } from '@js-draw/math';
 import fileToBase64 from '../../util/fileToBase64';
 import { ToolbarLocalization } from '../localization';
 import ActionButtonWidget from './ActionButtonWidget';

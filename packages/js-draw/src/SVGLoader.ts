@@ -1,4 +1,4 @@
-import Color4 from './Color4';
+import { Color4, Mat33, Path, Rect2, Vec2 } from '@js-draw/math';
 import AbstractComponent from './components/AbstractComponent';
 import BackgroundComponent, { BackgroundType, backgroundTypeToClassNameMap, imageBackgroundCSSClassName, imageBackgroundGridSizeCSSPrefix, imageBackgroundNonAutomaticSecondaryColorCSSClassName } from './components/BackgroundComponent';
 import ImageComponent from './components/ImageComponent';
@@ -6,14 +6,10 @@ import Stroke from './components/Stroke';
 import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
 import TextComponent, { TextTransformMode } from './components/TextComponent';
 import UnknownSVGObject from './components/UnknownSVGObject';
-import Mat33 from './math/Mat33';
-import Path from './math/shapes/Path';
-import Rect2 from './math/shapes/Rect2';
-import { Vec2 } from './math/Vec2';
-import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
 import RenderingStyle from './rendering/RenderingStyle';
 import TextRenderingStyle from './rendering/TextRenderingStyle';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
+import RenderablePathSpec, { pathToRenderable } from './rendering/RenderablePathSpec';
 
 type OnFinishListener = ()=> void;
 
@@ -109,7 +105,7 @@ export default class SVGLoader implements ImageLoader {
 				const current = !isFirst ? `M${part}` : part;
 
 				const path = Path.fromString(current);
-				const spec = path.toRenderable(style);
+				const spec = pathToRenderable(path, style);
 				result.push(spec);
 			}
 

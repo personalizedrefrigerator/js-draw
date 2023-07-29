@@ -1,5 +1,5 @@
 import Editor from '../../Editor';
-import Mat33 from '../../math/Mat33';
+import { Mat33 } from '@js-draw/math';
 import PanZoom, { PanZoomMode } from '../../tools/PanZoom';
 import ToolController from '../../tools/ToolController';
 import { EditorEventType } from '../../types';

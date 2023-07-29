@@ -1,5 +1,5 @@
 import { assertUnreachable } from '../../util/assertions';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Point2, Vec2 } from '@js-draw/math';
 import { cssPrefix } from './SelectionTool';
 import Selection from './Selection';
 import Pointer from '../../Pointer';

@@ -1,14 +1,11 @@
 import EditorImage from './EditorImage';
 import Stroke from './components/Stroke';
-import { Vec2 } from './math/Vec2';
-import Path, { PathCommandType } from './math/shapes/Path';
-import Color4 from './Color4';
+import { Vec2, Color4, Path, PathCommandType, Rect2, Mat33 } from '@js-draw/math';
 import DummyRenderer from './rendering/renderers/DummyRenderer';
 import createEditor from './testing/createEditor';
 import RenderingStyle from './rendering/RenderingStyle';
-import Rect2 from './math/shapes/Rect2';
-import Mat33 from './math/Mat33';
 import { SerializableCommand } from './lib';
+import { pathToRenderable } from './rendering/RenderablePathSpec';
 
 describe('EditorImage', () => {
 	const testStroke = new Stroke([
@@ -60,12 +57,12 @@ describe('EditorImage', () => {
 		const image = editor.image;
 
 		const leftmostStroke = new Stroke([
-			Path.fromString('M0,0L1,1L0,1').toRenderable(testFill),
+			pathToRenderable(Path.fromString('M0,0L1,1L0,1'), testFill),
 		]);
 
 		// Lowercase ls: lineTo(Δx, Δy) instead of lineTo(x, y)
 		const rightmostStroke = new Stroke([
-			Path.fromString('M-10,0 l1,1 l0,-1').toRenderable(testFill),
+			pathToRenderable(Path.fromString('M-10,0 l1,1 l0,-1'), testFill),
 		]);
 
 		expect(!leftmostStroke.getBBox().intersects(rightmostStroke.getBBox()));

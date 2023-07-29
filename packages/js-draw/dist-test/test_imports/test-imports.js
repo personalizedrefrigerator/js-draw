@@ -1,6 +1,5 @@
 console.log('Testing imports...');
 
-import { Vec2 } from '../../dist/mjs/math/Vec2.mjs';
 import { Color4 } from 'js-draw/Color4';
 import { Mat33 } from 'js-draw/math';
 

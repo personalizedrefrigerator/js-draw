@@ -1,6 +1,6 @@
-import { Vec2 } from '../../math/Vec2';
-import AbstractRenderer from '../renderers/AbstractRenderer';
-import { CacheRecordManager } from './CacheRecordManager';
+import type { Vec2 } from '@js-draw/math';
+import type AbstractRenderer from '../renderers/AbstractRenderer';
+import type { CacheRecordManager } from './CacheRecordManager';
 
 
 export type CacheAddress = number;

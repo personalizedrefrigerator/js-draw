@@ -1,19 +1,14 @@
-import Color4 from '../Color4';
 import Editor from '../Editor';
 import EditorImage, { EditorImageEventType } from '../EditorImage';
 import { DispatcherEventListener } from '../EventDispatcher';
 import SerializableCommand from '../commands/SerializableCommand';
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33 from '../math/Mat33';
-import Rect2 from '../math/shapes/Rect2';
+import { LineSegment2, Mat33, Rect2, Color4, toRoundedString, Path, PathCommandType, Vec2, PathCommand } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
-import Path, { PathCommand, PathCommandType } from '../math/shapes/Path';
-import { Vec2 } from '../math/Vec2';
 import Viewport from '../Viewport';
-import { toRoundedString } from '../math/rounding';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 export enum BackgroundType {
 	SolidColor,
@@ -246,7 +241,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 				fill: Color4.transparent,
 				stroke: { width: this.gridStrokeWidth, color: gridColor }
 			};
-			canvas.drawPath(this.generateGridPath(visibleRect).toRenderable(style));
+			canvas.drawPath(pathToRenderable(this.generateGridPath(visibleRect), style));
 		}
 
 		const backgroundTypeCSSClass = backgroundTypeToClassNameMap[this.backgroundType];

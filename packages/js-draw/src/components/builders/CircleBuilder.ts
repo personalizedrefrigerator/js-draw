@@ -1,13 +1,11 @@
-import { Vec2 } from '../../math/Vec2';
-import Path, { PathCommand, PathCommandType } from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
+import { Vec2, Path, PathCommand, PathCommandType, Rect2, Color4 } from '@js-draw/math';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
+import { pathToRenderable } from '../../rendering/RenderablePathSpec';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
-import Color4 from '../../Color4';
 
 export const makeOutlinedCircleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
 	return new CircleBuilder(initialPoint, viewport);
@@ -76,7 +74,7 @@ class CircleBuilder implements ComponentBuilder {
 			.mapPoints(point => this.viewport.roundPoint(point));
 
 		const preview = new Stroke([
-			path.toRenderable({
+			pathToRenderable(path, {
 				fill: Color4.transparent,
 				stroke: {
 					width: strokeWidth,

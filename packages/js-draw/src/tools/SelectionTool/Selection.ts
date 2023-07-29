@@ -5,14 +5,11 @@
 
 import SerializableCommand from '../../commands/SerializableCommand';
 import Editor from '../../Editor';
-import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/shapes/Rect2';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Mat33, Rect2, Point2, Vec2, Mat33Array } from '@js-draw/math';
 import Pointer from '../../Pointer';
 import SelectionHandle, { HandleShape, handleSize } from './SelectionHandle';
 import { cssPrefix } from './SelectionTool';
 import AbstractComponent from '../../components/AbstractComponent';
-import { Mat33Array } from '../../math/Mat33';
 import { EditorLocalization } from '../../localization';
 import Viewport from '../../Viewport';
 import Erase from '../../commands/Erase';

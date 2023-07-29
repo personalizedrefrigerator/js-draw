@@ -6,21 +6,15 @@ import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
-import { Point2, Vec2 } from './math/Vec2';
-import Vec3 from './math/Vec3';
+import { Point2, Vec2, Vec3, Color4, Mat33, Rect2, toRoundedString } from '@js-draw/math';
 import HTMLToolbar from './toolbar/HTMLToolbar';
-import { RenderablePathSpec } from './rendering/renderers/AbstractRenderer';
 import Display, { RenderingMode } from './rendering/Display';
 import SVGRenderer from './rendering/renderers/SVGRenderer';
-import Color4 from './Color4';
 import SVGLoader from './SVGLoader';
 import Pointer from './Pointer';
-import Mat33 from './math/Mat33';
-import Rect2 from './math/shapes/Rect2';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
-import { toRoundedString } from './math/rounding';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 import untilNextAnimationFrame from './util/untilNextAnimationFrame';
 import fileToBase64 from './util/fileToBase64';
@@ -34,6 +28,7 @@ import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
+import RenderablePathSpec from './rendering/RenderablePathSpec';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */

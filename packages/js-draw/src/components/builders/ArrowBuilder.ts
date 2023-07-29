@@ -1,5 +1,4 @@
-import Path, { PathCommandType } from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
+import { Path, PathCommandType, Rect2 } from '@js-draw/math';
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';

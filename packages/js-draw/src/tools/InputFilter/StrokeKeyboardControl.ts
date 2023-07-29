@@ -4,7 +4,7 @@ import KeyboardShortcutManager from '../../shortcuts/KeyboardShortcutManager';
 import { lineLockKeyboardShortcutId, snapToGridKeyboardShortcutId } from '../keybindings';
 import Viewport from '../../Viewport';
 import Pointer from '../../Pointer';
-import { Point2 } from '../../math/Vec2';
+import { Point2 } from '@js-draw/math';
 import Editor from '../../Editor';
 
 /**

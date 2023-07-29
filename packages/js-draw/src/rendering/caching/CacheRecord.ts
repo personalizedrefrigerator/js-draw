@@ -1,5 +1,4 @@
-import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/shapes/Rect2';
+import { Mat33, Rect2 } from '@js-draw/math';
 import AbstractRenderer from '../renderers/AbstractRenderer';
 import { BeforeDeallocCallback, CacheState } from './types';
 

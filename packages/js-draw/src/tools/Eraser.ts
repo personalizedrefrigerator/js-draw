@@ -2,13 +2,10 @@ import { EditorEventType } from '../types';
 import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
-import { Point2, Vec2 } from '../math/Vec2';
-import LineSegment2 from '../math/shapes/LineSegment2';
+import { Point2, Vec2, LineSegment2, Color4, Rect2 } from '@js-draw/math';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import { PointerDevice } from '../Pointer';
-import Color4 from '../Color4';
-import Rect2 from '../math/shapes/Rect2';
 import RenderingStyle from '../rendering/RenderingStyle';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 

@@ -13,7 +13,7 @@ import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
-import Color4 from '../../Color4';
+import { Color4 } from '@js-draw/math';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
 

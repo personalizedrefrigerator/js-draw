@@ -1,6 +1,5 @@
 import Pointer from './Pointer';
-import { Point2 } from './math/Vec2';
-import Vec3 from './math/Vec3';
+import { Point2, Vec3 } from '@js-draw/math';
 
 export type HTMLPointerEventName = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
 export type HTMLPointerEventFilter = (eventName: HTMLPointerEventName, event: PointerEvent)=>boolean;

@@ -1,4 +1,4 @@
-import Color4 from '../Color4';
+import { Color4 } from '@js-draw/math';
 import Editor from '../Editor';
 import PipetteTool from '../tools/PipetteTool';
 import { EditorEventType } from '../types';

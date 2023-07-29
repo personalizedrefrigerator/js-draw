@@ -1,6 +1,5 @@
-import Color4 from '../../Color4';
 import Viewport from '../../Viewport';
-import { Vec2 } from '../../math/Vec2';
+import { Vec2, Color4 } from '@js-draw/math';
 import { StrokeDataPoint } from '../../types';
 import { makeFreehandLineBuilder } from './FreehandLineBuilder';
 

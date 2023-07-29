@@ -1,5 +1,3 @@
-import { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
-import RenderingStyle from '../../rendering/RenderingStyle';
 import { toRoundedString, toStringOfSamePrecision } from '../rounding';
 import LineSegment2 from './LineSegment2';
 import Mat33 from '../Mat33';
@@ -205,11 +203,12 @@ export default class Path {
 		const lineLength = line.length;
 
 		type DistanceFunction = (point: Point2) => number;
-		const partDistFunctionRecords: {
+		type DistanceFunctionRecord = {
 			part: GeometryType,
 			bbox: Rect2,
 			distFn: DistanceFunction,
-		}[] = [];
+		};
+		const partDistFunctionRecords: DistanceFunctionRecord[] = [];
 
 		// Determine distance functions for all parts that the given line could possibly intersect with
 		for (const part of this.geometry) {
@@ -246,9 +245,9 @@ export default class Path {
 		// line could intersect are considered.
 		const sdf = (point: Point2): [GeometryType|null, number] => {
 			let minDist = Infinity;
-			let minDistPart = null;
+			let minDistPart: Abstract2DShape|null = null;
 
-			const uncheckedDistFunctions = [];
+			const uncheckedDistFunctions: DistanceFunctionRecord[] = [];
 
 			// First pass: only curves for which the current point is inside
 			// the bounding box.
@@ -588,7 +587,7 @@ export default class Path {
 
 		// Grow the rectangle for possible additional precision.
 		const grownRect = rect.grownBy(Math.min(rect.size.x, rect.size.y));
-		const edges = [];
+		const edges: LineSegment2[] = [];
 		for (const subrect of grownRect.divideIntoGrid(4, 4)) {
 			edges.push(...subrect.getEdges());
 		}
@@ -652,79 +651,6 @@ export default class Path {
 		});
 
 		return new Path(startPoint, commands);
-	}
-
-	public static fromRenderable(renderable: RenderablePathSpec): Path {
-		if (renderable.path) {
-			return renderable.path;
-		}
-
-		return new Path(renderable.startPoint, renderable.commands);
-	}
-
-	public toRenderable(fill: RenderingStyle): RenderablePathSpec {
-		return {
-			startPoint: this.startPoint,
-			style: fill,
-			commands: this.parts,
-			path: this,
-		};
-	}
-
-	/**
-	 * @returns a Path that, when rendered, looks roughly equivalent to the given path.
-	 */
-	public static visualEquivalent(renderablePath: RenderablePathSpec, visibleRect: Rect2): RenderablePathSpec {
-		const path = Path.fromRenderable(renderablePath);
-		const strokeWidth = renderablePath.style.stroke?.width ?? 0;
-		const onlyStroked = strokeWidth > 0 && renderablePath.style.fill.a === 0;
-
-		// Scale the expanded rect --- the visual equivalent is only close for huge strokes.
-		const expandedRect = visibleRect.grownBy(strokeWidth)
-			.transformedBoundingBox(Mat33.scaling2D(4, visibleRect.center));
-
-		// TODO: Handle simplifying very small paths.
-		if (expandedRect.containsRect(path.bbox.grownBy(strokeWidth))) {
-			return renderablePath;
-		}
-		const parts: PathCommand[] = [];
-		let startPoint = path.startPoint;
-
-		for (const part of path.parts) {
-			const partBBox = Path.computeBBoxForSegment(startPoint, part).grownBy(strokeWidth);
-			let endPoint;
-
-			if (part.kind === PathCommandType.LineTo || part.kind === PathCommandType.MoveTo) {
-				endPoint = part.point;
-			} else {
-				endPoint = part.endPoint;
-			}
-
-			const intersectsVisible = partBBox.intersects(visibleRect);
-
-			if (intersectsVisible) {
-				// TODO: Can we trim parts of paths that intersect the visible rectangle?
-				parts.push(part);
-			} else if (onlyStroked || part.kind === PathCommandType.MoveTo) {
-				// We're stroking (not filling) and the path doesn't intersect the bounding box.
-				// Don't draw it, but preserve the endpoints.
-				parts.push({
-					kind: PathCommandType.MoveTo,
-					point: endPoint,
-				});
-			}
-			else {
-				// Otherwise, we may be filling. Try to roughly preserve the filled region.
-				parts.push({
-					kind: PathCommandType.LineTo,
-					point: endPoint,
-				});
-			}
-
-			startPoint = endPoint;
-		}
-
-		return new Path(path.startPoint, parts).toRenderable(renderablePath.style);
 	}
 
 	private cachedStringVersion: string|null = null;

@@ -1,14 +1,12 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33 from '../math/Mat33';
-import Path from '../math/shapes/Path';
-import Rect2 from '../math/shapes/Rect2';
+import { Mat33, Path, Rect2, LineSegment2 } from '@js-draw/math';
 import Editor from '../Editor';
-import AbstractRenderer, { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
+import RenderablePathSpec, { pathFromRenderable, pathToRenderable } from '../rendering/RenderablePathSpec';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -64,7 +62,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		this.parts = [];
 
 		for (const section of parts) {
-			const path = Path.fromRenderable(section);
+			const path = pathFromRenderable(section);
 			const pathBBox = this.bboxForPart(path.bbox, section.style);
 
 			if (!this.contentBBox) {
@@ -287,7 +285,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 		const pathSpec: RenderablePathSpec[] = json.map((part: any) => {
 			const style = styleFromJSON(part.style);
-			return Path.fromString(part.path).toRenderable(style);
+			return pathToRenderable(Path.fromString(part.path), style);
 		});
 		return new Stroke(pathSpec);
 	}

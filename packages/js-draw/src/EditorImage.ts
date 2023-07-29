@@ -2,13 +2,11 @@ import Editor from './Editor';
 import AbstractRenderer from './rendering/renderers/AbstractRenderer';
 import Viewport from './Viewport';
 import AbstractComponent from './components/AbstractComponent';
-import Rect2 from './math/shapes/Rect2';
+import { Rect2, Vec2, Mat33, Mat33Array } from '@js-draw/math';
 import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';
 import EventDispatcher from './EventDispatcher';
-import { Vec2 } from './math/Vec2';
-import Mat33, { Mat33Array } from './math/Mat33';
 import { assertIsNumber, assertIsNumberArray } from './util/assertions';
 
 // @internal Sort by z-index, low to high

@@ -1,12 +1,9 @@
 // Types related to the image editor
 
 import EventDispatcher from './EventDispatcher';
-import Mat33 from './math/Mat33';
-import { Point2, Vec2 } from './math/Vec2';
+import { Mat33, Point2, Vec2, Rect2, Color4 } from '@js-draw/math';
 import BaseTool from './tools/BaseTool';
 import AbstractComponent from './components/AbstractComponent';
-import Rect2 from './math/shapes/Rect2';
-import Color4 from './Color4';
 import Command from './commands/Command';
 import BaseWidget from './toolbar/widgets/BaseWidget';
 

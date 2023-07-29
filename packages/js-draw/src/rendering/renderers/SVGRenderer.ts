@@ -1,15 +1,11 @@
-
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
-import Mat33 from '../../math/Mat33';
-import Path from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
-import { toRoundedString } from '../../math/rounding';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Mat33, Rect2, Point2, Vec2, toRoundedString } from '@js-draw/math';
 import { svgAttributesDataKey, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
-import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
+import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
+import RenderablePathSpec, { pathFromRenderable } from '../RenderablePathSpec';
 
 export const renderedStylesheetId = 'js-draw-style-sheet';
 
@@ -134,7 +130,7 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	public override drawPath(pathSpec: RenderablePathSpec) {
 		const style = pathSpec.style;
-		const path = Path.fromRenderable(pathSpec).transformedBy(this.getCanvasToScreenTransform());
+		const path = pathFromRenderable(pathSpec).transformedBy(this.getCanvasToScreenTransform());
 
 		// Try to extend the previous path, if possible
 		if (

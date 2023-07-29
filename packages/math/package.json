@@ -1,7 +1,7 @@
 {
-  "name": "js-draw",
+  "name": "@js-draw/math",
   "version": "0.25.1",
-  "description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
+  "description": "A math library for js-draw. ",
   "types": "./dist/mjs/lib.d.ts",
   "main": "./dist/cjs/lib.js",
   "exports": {
@@ -69,14 +69,10 @@
     "dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
     "dist": "npm run build && npm run dist-test",
     "build": "rm -rf ./dist && mkdir dist && build-tool build",
-    "watch": "rm -rf ./dist && mkdir dist && build-tool watch",
-    "build-translation-template": "build-tool build-translation-template",
-    "prepack": "npm run dist && cd ../../ && npm run test && cd packages/js-draw && ts-node tools/copyREADME.ts copy",
-    "postpack": "ts-node tools/copyREADME.ts revert"
+    "watch": "rm -rf ./dist && mkdir dist && build-tool watch"
   },
   "dependencies": {
-    "@melloware/coloris": "0.21.0",
-    "@js-draw/math": "^0.25.0"
+    "bezier-js": "6.1.3"
   },
   "devDependencies": {
     "@js-draw/build-tool": "^0.25.0",

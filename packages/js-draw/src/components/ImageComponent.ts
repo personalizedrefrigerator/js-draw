@@ -1,6 +1,4 @@
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33, { Mat33Array } from '../math/Mat33';
-import Rect2 from '../math/shapes/Rect2';
+import { Mat33Array, Rect2, Mat33, LineSegment2 } from '@js-draw/math';
 import AbstractRenderer, { RenderableImage } from '../rendering/renderers/AbstractRenderer';
 import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';

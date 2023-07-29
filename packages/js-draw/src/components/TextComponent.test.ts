@@ -1,7 +1,5 @@
-import Color4 from '../Color4';
 import EditorImage from '../EditorImage';
-import Mat33 from '../math/Mat33';
-import { Vec2 } from '../math/Vec2';
+import { Vec2, Mat33, Color4 } from '@js-draw/math';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import createEditor from '../testing/createEditor';
 import AbstractComponent from './AbstractComponent';
