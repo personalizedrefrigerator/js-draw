@@ -21,8 +21,13 @@ const formatHost: ts.FormatDiagnosticsHost = {
 	getNewLine: () => ts.sys.newLine,
 };
 
+interface TSConfigData {
+	compilerOptions: ts.CompilerOptions;
+	fileNames: string[]|null;
+}
+
 class TranspiledDirectory {
-	private rootConfig: Record<string, any>;
+	private rootConfig: TSConfigData;
 	public constructor(private inDir: string, private outDir: string) {
 		this.rootConfig = this.getCompilerOptionsFromConfig();
 	}
@@ -39,7 +44,7 @@ class TranspiledDirectory {
 		return tsFiles;
 	}
 
-	private getCompilerOptionsFromConfig(): ts.CompilerOptions {
+	private getCompilerOptionsFromConfig(): TSConfigData {
 		const searchPath = './';
 		let path = ts.findConfigFile(
 			searchPath,
@@ -72,16 +77,26 @@ class TranspiledDirectory {
 				throw new Error('Unable to parse config file.');
 			}
 
-			return compilerOpts.options;
+			const fileNames = compilerOpts.fileNames;
+
+			return {
+				compilerOptions: compilerOpts.options,
+
+				// null ⟹ All .ts files in the current directory
+				fileNames: fileNames.length > 0 ? fileNames : null,
+			};
 		} else {
-			console.warn('No tsconfig.json file found!');
-			return defaultConfig;
+			console.warn('[⚠️] No tsconfig.json file found!');
+			return {
+				compilerOptions: defaultConfig,
+				fileNames: null,
+			};
 		}
 	}
 
 	private reportDiagnostic(diagnostic: ts.Diagnostic) {
 		console.error(
-			'🛑 Error 🛑',
+			'[🛑] Error',
 			diagnostic.code,
 			ts.formatDiagnostic(diagnostic, formatHost)
 		);
@@ -122,7 +137,7 @@ class TranspiledDirectory {
 		// Largely based on
 		// https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#incremental-build-support-using-the-language-services
 		const fileVersions: ts.MapLike<{ version: number }> = {};
-		const targetFiles = await this.getTargetFiles();
+		const targetFiles = this.rootConfig.fileNames ?? await this.getTargetFiles();
 
 		const documentRegistry = ts.createDocumentRegistry();
 		const makeLanguageService = (additionalOptions: ts.CompilerOptions) => {
@@ -175,15 +190,16 @@ class TranspiledDirectory {
 			const languageService = langServices[moduleType];
 			const output = languageService.getEmitOutput(fileName);
 
-			// Errors?
-			if (output.emitSkipped) {
-				console.error(`💥 Failed to transpile ${fileName} 💥`);
-				const diagnostics = languageService
-					.getCompilerOptionsDiagnostics()
-					.concat(languageService.getSyntacticDiagnostics(fileName))
-					.concat(languageService.getSemanticDiagnostics(fileName));
+			const diagnostics = languageService
+				.getCompilerOptionsDiagnostics()
+				.concat(languageService.getSyntacticDiagnostics(fileName))
+				.concat(languageService.getSemanticDiagnostics(fileName));
 
+			// Errors?
+			if (diagnostics.length > 0 || output.emitSkipped) {
+				console.error(`[💥] Failed to transpile ${fileName}`);
 				diagnostics.forEach(this.reportDiagnostic.bind(this));
+				return false;
 			}
 
 			const writeFilePromises = output.outputFiles.map(async (outFile) => {
@@ -207,6 +223,7 @@ class TranspiledDirectory {
 			});
 
 			await Promise.all(writeFilePromises);
+			return true;
 		};
 
 		// Emit all files
@@ -216,7 +233,11 @@ class TranspiledDirectory {
 			emitFilePromises.push(emitFile('cjs', fileName));
 			emitFilePromises.push(emitFile('mjs', fileName));
 		}
-		await Promise.all(emitFilePromises);
+
+		// If there were any errors emitting,
+		if (!(await Promise.all(emitFilePromises)).every(v => v)) {
+			throw new Error('[😱] There were transpilation errors!');
+		}
 
 		if (watch) {
 			// Maps from file paths to whether that file is being processed
@@ -228,7 +249,7 @@ class TranspiledDirectory {
 			}
 
 			// TODO: This currently doesn't watch for added/removed files.
-			console.warn('Warning: This watcher currently doesn\'t check for added/removed files and directories');
+			console.warn('[⚠️] Warning: This watcher currently doesn\'t check for added/removed files and directories');
 
 			const watchers: ts.FileWatcher[] = [];
 
@@ -277,6 +298,8 @@ class TranspiledDirectory {
 					watchers.forEach(watcher => watcher.close());
 				}
 			};
+		} else {
+			console.info('[✅] Built successfully!');
 		}
 
 		return null;
