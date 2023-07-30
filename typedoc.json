@@ -1,21 +1,14 @@
 {
 	"entryPoints": [
-		"./packages/js-draw/src/lib.ts",
-		"./packages/js-draw/src/bundle/bundled.ts"
+		"./packages/js-draw",
+		"./packages/math",
 	],
-	"exclude": [
-		"**/*.test.ts",
-		"node_modules/**",
-		"**/dist/**",
-		"**/dist-test/**",
-		"src/testing/"
-	],
-	"excludePrivate": true,
-	"excludeInternal": true,
-	"commentStyle": "all",
-	"readme": "README.md",
-	"entryPointStrategy": "expand",
+	"entryPointStrategy": "packages",
+	"name": "js-draw",
 	"out": "docs/typedoc/",
+	"includeVersion": false,
+
+	"readme": "README.md",
 	"tsconfig": "tsconfig-typedoc.json",
 
 	"validation": {

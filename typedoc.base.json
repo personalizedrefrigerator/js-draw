@@ -1,0 +1,22 @@
+{
+	"exclude": [
+		"**/*.test.ts",
+		"node_modules/**",
+		"**/dist/**",
+		"**/dist-test/**",
+		"src/testing/"
+	],
+	"excludePrivate": true,
+	"excludeInternal": true,
+	"includeVersion": true,
+	"commentStyle": "all",
+	"readme": "README.md",
+	"entryPointStrategy": "expand",
+	"tsconfig": "tsconfig-typedoc.json",
+
+	"validation": {
+		"notExported": false,
+		"invalidLink": true,
+		"notDocumented": false
+	}
+}
