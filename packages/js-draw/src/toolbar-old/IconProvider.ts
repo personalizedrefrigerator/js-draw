@@ -2,10 +2,9 @@ import { ComponentBuilderFactory } from '../components/builders/types';
 import { Vec2, Color4 } from '@js-draw/math';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
-import type { PenStyle } from '../tools/Pen';
+import Pen from '../tools/Pen';
 import { StrokeDataPoint } from '../types';
 import Viewport from '../Viewport';
-import { makeFreehandLineBuilder } from '../lib';
 
 export type IconType = HTMLImageElement|SVGElement;
 
@@ -412,11 +411,10 @@ export default class IconProvider {
 		return icon;
 	}
 
-	public makePenIcon(penStyle: PenStyle): IconType {
-		const color = penStyle.color;
-		// Use a square-root scale to prevent the pen's tip from overflowing.
-		const strokeSize = Math.round(Math.sqrt(penStyle.thickness) * 4);
-		const rounded = penStyle.factory === makeFreehandLineBuilder;
+	public makePenIcon(strokeSize: number, color: string|Color4, rounded?: boolean): IconType {
+		if (color instanceof Color4) {
+			color = color.toHexString();
+		}
 
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
@@ -457,7 +455,7 @@ export default class IconProvider {
 
 		const pencilTipColor = Color4.fromHex('#f4d7d7');
 		const tipColor = pencilTipColor.mix(
-			color, tipThickness / 40 - 0.1
+			Color4.fromString(color), tipThickness / 40 - 0.1
 		).toHexString();
 
 		const checkerboardPattern = makeCheckerboardPattern();
@@ -534,27 +532,27 @@ export default class IconProvider {
 	}
 
 	public makeIconFromFactory(
-		style: PenStyle,
-		factory: ComponentBuilderFactory
-	): IconType {
-		// If any transparency, show a background grid.
-		const includeTransparencyGrid = style.color.a < 1;
+		pen: Pen,
+		factory: ComponentBuilderFactory,
 
+		// If true, attempts to guess the location of a transparency grid
+		includeTransparencyGrid: boolean = false
+	): IconType {
 		// Increase the thickness we use to generate the icon less with larger actual thicknesses.
 		// We want the icon to be recognisable with a large range of thicknesses.
-		const thickness = Math.sqrt(style.thickness) * 3;
+		const thickness = Math.sqrt(pen.getThickness()) * 3;
 
 		const nowTime = (new Date()).getTime();
 		const startPoint: StrokeDataPoint = {
 			pos: Vec2.of(10, 10),
 			width: thickness,
-			color: style.color,
+			color: pen.getColor(),
 			time: nowTime - 100,
 		};
 		const endPoint: StrokeDataPoint = {
 			pos: Vec2.of(90, 90),
 			width: thickness,
-			color: style.color,
+			color: pen.getColor(),
 			time: nowTime,
 		};
 

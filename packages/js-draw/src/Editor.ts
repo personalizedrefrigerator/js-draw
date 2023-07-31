@@ -7,7 +7,7 @@ import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2, Vec3, Color4, Mat33, Rect2, toRoundedString } from '@js-draw/math';
-import HTMLToolbar from './toolbar/HTMLToolbar';
+import HTMLToolbar from './toolbar-old/HTMLToolbar';
 import Display, { RenderingMode } from './rendering/Display';
 import SVGRenderer from './rendering/renderers/SVGRenderer';
 import SVGLoader from './SVGLoader';

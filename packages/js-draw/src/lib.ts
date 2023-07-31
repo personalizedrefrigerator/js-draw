@@ -56,13 +56,13 @@ export * from '@js-draw/math';
 export * from './components/lib';
 export * from './commands/lib';
 export * from './tools/lib';
-export * from './toolbar/lib';
+export * from './toolbar-old/lib';
 export * from './rendering/lib';
 export * from './testing/lib';
 export * from './shortcuts/lib';
 export { default as EventDispatcher } from './EventDispatcher';
 export { default as Pointer, PointerDevice } from './Pointer';
-export { default as HTMLToolbar } from './toolbar/HTMLToolbar';
+export { default as HTMLToolbar } from './toolbar-old/HTMLToolbar';
 export { default as UndoRedoHistory } from './UndoRedoHistory';
 
 export { Editor, EditorSettings };

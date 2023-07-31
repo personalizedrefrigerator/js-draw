@@ -5,13 +5,19 @@ import { Mat33, Point2, Vec2, Rect2, Color4 } from '@js-draw/math';
 import BaseTool from './tools/BaseTool';
 import AbstractComponent from './components/AbstractComponent';
 import Command from './commands/Command';
-import BaseWidget from './toolbar/widgets/BaseWidget';
+import BaseWidget from './toolbar-old/widgets/BaseWidget';
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
 export enum EditorEventType {
 	ToolEnabled,
 	ToolDisabled,
+
+	/**
+	 * Most tools now use `ResponsiveValue`s to manage their state.
+	 * Listen for changes using these values' built-in listeners instead.
+	 * @deprecated
+	 */
 	ToolUpdated,
 
 	UndoRedoStackUpdated,

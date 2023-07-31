@@ -1,0 +1,32 @@
+
+.toolbar-overflow-widget-overflow-list {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.toolbar-overflow-widget-overflow-list > .toolbar-toolContainer > .toolbar-button {
+	height: var(--toolbar-button-height);
+}
+
+.toolbar-overflow-widget.horizontal .toolbar-overflow-widget-overflow-list {
+	flex-direction: row;
+}
+
+.toolbar-overflow-widget.horizontal > .toolbar-dropdown {
+	max-width: 100%;
+	left: 15px;
+	right: 15px;
+
+	/*
+	 Override the default transform and margin-left.
+
+	 Setting translate to none prevents the dropdown from being shifted off the
+	 screen on window resize by dropdown-repositioning logic.
+	*/
+	margin-left: 0 !important;
+	translate: none !important;
+
+	padding: 4px;
+}

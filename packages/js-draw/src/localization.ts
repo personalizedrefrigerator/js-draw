@@ -1,7 +1,7 @@
 import { CommandLocalization, defaultCommandLocalization } from './commands/localization';
 import { defaultComponentLocalization, ImageComponentLocalization } from './components/localization';
 import { defaultTextRendererLocalization, TextRendererLocalization } from './rendering/localization';
-import { defaultToolbarLocalization, ToolbarLocalization } from './toolbar/localization';
+import { defaultToolbarLocalization, ToolbarLocalization } from './toolbar-old/localization';
 import { defaultToolLocalization, ToolLocalization } from './tools/localization';
 
 
