@@ -150,4 +150,75 @@ export const reactiveValueFromImmutable = <T> (
 	};
 };
 
+export const reactiveValueFromPropertyMutable = <SourceType extends object, Name extends keyof SourceType> (
+	sourceValue: MutableReactiveValue<SourceType>,
+	propertyName: Name,
+): MutableReactiveValue<SourceType[Name]> => {
+	const child = reactiveValueFromInitialValue(
+		sourceValue.getValue()[propertyName]
+	);
+	const childRef = new WeakRef(child);
+
+	// When the source is updated...
+	const sourceListener = sourceValue.addUpdateListener(newValue => {
+		const childValue = childRef.deref();
+
+		if (childValue) {
+			childValue.setValue(newValue[propertyName]);
+		} else {
+			// TODO: What if `sourceValue` would be dropped before
+			// the child value?
+			sourceListener.remove();
+		}
+	});
+
+	// When the child is updated, also apply the update to the
+	// parent.
+	child.addUpdateListener(newValue => {
+		sourceValue.setValue({
+			...sourceValue.getValue(),
+			[propertyName]: newValue,
+		});
+	});
+
+	return child;
+};
+
+export const mapReactiveValueMutable = <A, B> (
+	source: MutableReactiveValue<A>,
+	map: (a: A)=>B,
+	inverseMap: (b: B)=>A,
+): MutableReactiveValue<B> => {
+	const result = reactiveValueFromInitialValue(map(source.getValue()));
+
+	let expectedResultValue = result.getValue();
+	source.addUpdateListener(newValue => {
+		expectedResultValue = map(newValue);
+		result.setValue(expectedResultValue);
+	});
+
+	result.addUpdateListener(newValue => {
+		// Prevent infinite loops if inverseMap is not a true
+		// inverse.
+		if (newValue !== expectedResultValue) {
+			source.setValue(inverseMap(newValue));
+		}
+	});
+
+	return result;
+};
+
+export const mapReactiveValue = <A, B> (
+	source: ReactiveValue<A>,
+	map: (a: A)=>B,
+): ReactiveValue<B> => {
+	const result = reactiveValueFromInitialValue(map(source.getValue()));
+
+	source.addUpdateListener(newValue => {
+		result.setValue(map(newValue));
+	});
+
+	return result;
+};
+
 export default ReactiveValue;

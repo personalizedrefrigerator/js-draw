@@ -1,4 +1,4 @@
-import { reactiveValueFromCallback, reactiveValueFromImmutable, reactiveValueFromInitialValue } from './ReactiveValue';
+import { mapReactiveValue, mapReactiveValueMutable, reactiveValueFromCallback, reactiveValueFromImmutable, reactiveValueFromInitialValue, reactiveValueFromPropertyMutable } from './ReactiveValue';
 
 describe('ReactiveValue', () => {
 	it('should fire update listeners on update', () => {
@@ -75,5 +75,94 @@ describe('ReactiveValue', () => {
 
 		expect(derivedValue1.getValue()).toBe('1,2,3');
 		expect(derivedValue2.getValue()).toBe('1,2,3!');
+	});
+
+	it('should be able to create values from properties', () => {
+		const sourceValue = reactiveValueFromInitialValue({
+			a: 1,
+			b: 2,
+			c: { d: 3 },
+		});
+
+		const destValue1 = reactiveValueFromPropertyMutable(sourceValue, 'c');
+		const destValue2 = reactiveValueFromPropertyMutable(sourceValue, 'b');
+		expect(destValue1.getValue()).toBe(sourceValue.getValue().c);
+		expect(destValue2.getValue()).toBe(2);
+
+		// Updating the source value should update the destination values.
+		sourceValue.setValue({
+			...sourceValue.getValue(),
+			c: { d: 4 },
+		});
+
+		expect(destValue1.getValue()).toBe(sourceValue.getValue().c);
+		expect(destValue1.getValue().d).toBe(4);
+		expect(destValue2.getValue()).toBe(2);
+
+		sourceValue.setValue({
+			a: 3,
+			b: 4,
+			c: { d: 5 },
+		});
+		expect(destValue1.getValue().d).toBe(5);
+		expect(destValue2.getValue()).toBe(4);
+
+		// Updating the destination values should update the source values
+		destValue1.setValue({ d: 8 });
+		expect(sourceValue.getValue().c.d).toBe(8);
+
+		destValue2.setValue(5);
+		expect(sourceValue.getValue().b).toBe(5);
+	});
+
+	it('mutable map should be bidirectional', () => {
+		const sourceValue = reactiveValueFromInitialValue(5);
+		const mappedValue = mapReactiveValueMutable(
+			sourceValue, a => a ** 2, b => Math.sqrt(b),
+		);
+
+		expect(mappedValue.getValue()).toBeCloseTo(25);
+
+		// Changing the destination should change the source
+		mappedValue.setValue(26);
+		expect(sourceValue.getValue()).toBeCloseTo(Math.sqrt(26));
+
+		// Changing the source should change the destination
+		sourceValue.setValue(10);
+		expect(mappedValue.getValue()).toBeCloseTo(100);
+	});
+
+	it('single-directional map should apply the given mapping function', () => {
+		const sourceValue = reactiveValueFromInitialValue(1);
+		const midValue = mapReactiveValue(sourceValue, a => a * 2);
+		const destValue = mapReactiveValue(midValue, _ => 0);
+
+		const sourceUpdateFn = jest.fn();
+		const midUpdateFn = jest.fn();
+		const destUpdateFn = jest.fn();
+
+		sourceValue.addUpdateListener(sourceUpdateFn);
+		midValue.addUpdateListener(midUpdateFn);
+		destValue.addUpdateListener(destUpdateFn);
+
+		// Initial value checking
+		expect(destValue.getValue()).toBe(0);
+		expect(sourceUpdateFn).toHaveBeenCalledTimes(0);
+		expect(midUpdateFn).toHaveBeenCalledTimes(0);
+		expect(destUpdateFn).toHaveBeenCalledTimes(0);
+
+		// Setting to the same value should trigger no listeners
+		sourceValue.setValue(1);
+		expect(sourceUpdateFn).toHaveBeenCalledTimes(0);
+		expect(midUpdateFn).toHaveBeenCalledTimes(0);
+		expect(destUpdateFn).toHaveBeenCalledTimes(0);
+
+		// Changing the initial value should only fire listeners that
+		// result in a different value
+		sourceValue.setValue(2);
+		expect(sourceUpdateFn).toHaveBeenCalledTimes(1);
+		expect(midUpdateFn).toHaveBeenCalledTimes(1);
+		expect(destUpdateFn).toHaveBeenCalledTimes(0);
+		expect(midValue.getValue()).toBe(4);
 	});
 });
