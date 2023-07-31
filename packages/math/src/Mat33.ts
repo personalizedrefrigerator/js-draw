@@ -17,11 +17,13 @@ export default class Mat33 {
 
 	/**
 	 * Creates a matrix from inputs in the form,
-	 * ```
-	 * ⎡ a1 a2 a3 ⎤
-	 * ⎢ b1 b2 b3 ⎥
-	 * ⎣ c1 c2 c3 ⎦
-	 * ```
+	 * $$
+	 * \begin{bmatrix}
+	 *   a1 & a2 & a3 \\
+	 *   b1 & b2 & b3 \\
+	 *   c1 & c2 & c3
+	 * \end{bmatrix}
+	 * $$
 	 */
 	public constructor(
 		public readonly a1: number,
@@ -45,11 +47,13 @@ export default class Mat33 {
 
 	/**
 	 * Creates a matrix from the given rows:
-	 * ```
-	 *  ⎡ r1.x r1.y r1.z ⎤
-	 *  ⎢ r2.x r2.y r2.z ⎥
-	 *  ⎣ r3.x r3.y r3.z ⎦
-	 * ```
+	 * $$
+	 * \begin{bmatrix}
+	 *  \texttt{r1.x} & \texttt{r1.y} & \texttt{r1.z}\\
+	 *  \texttt{r2.x} & \texttt{r2.y} & \texttt{r2.z}\\
+	 *  \texttt{r3.x} & \texttt{r3.y} & \texttt{r3.z}\\
+	 * \end{bmatrix}
+	 * $$
 	 */
 	public static ofRows(r1: Vec3, r2: Vec3, r3: Vec3): Mat33 {
 		return new Mat33(

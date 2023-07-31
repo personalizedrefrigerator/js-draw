@@ -303,7 +303,7 @@ class CompiledTypeScriptDirectory {
 				}
 			};
 		} else {
-			console.info('[✅] Compiled successfully!');
+			console.info('[✅] Transpiled successfully!');
 		}
 
 		return null;

@@ -1,0 +1,42 @@
+{
+	"name": "@js-draw/typedoc-extensions",
+	"version": "0.25.1",
+	"description": "Internal extensions for TypeDoc in js-draw.",
+	"types": "./dist/mjs/index.d.ts",
+	"main": "./dist/cjs/index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/personalizedrefrigerator/js-draw.git"
+	},
+	"author": "Henry Heino",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
+		"dist": "npm run build && npm run dist-test",
+		"build": "rm -rf ./dist && mkdir dist && build-tool build",
+		"watch": "rm -rf ./dist && mkdir dist && build-tool watch"
+	},
+	"dependencies": {
+		"katex": "0.16.8"
+	},
+	"peerDependencies": {
+		"typedoc": "0.24.x"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^0.25.0",
+		"react": "18.2.0",
+		"@types/react": "18.2.17",
+		"@types/katex": "0.16.2"
+	},
+	"bugs": {
+		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"
+	},
+	"homepage": "https://github.com/personalizedrefrigerator/js-draw#readme",
+	"directories": {
+		"doc": "docs"
+	},
+	"keywords": [
+		"documentation"
+	]
+}

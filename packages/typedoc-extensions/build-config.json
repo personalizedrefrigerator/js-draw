@@ -1,0 +1,12 @@
+{
+    "inDirectory": "./src",
+    "outDirectory": "./dist",
+
+    "bundledFiles": [
+        {
+            "name": "browser",
+	        "inPath": "./src/browser.ts",
+            "outPath": "./dist/browser.js"
+        }
+    ]
+}
