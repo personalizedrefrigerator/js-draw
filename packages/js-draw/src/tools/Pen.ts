@@ -10,10 +10,12 @@ import { ComponentBuilder, ComponentBuilderFactory } from '../components/builder
 import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 import InputStabilizer from './InputFilter/InputStabilizer';
+import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/ReactiveValue';
 
 export interface PenStyle {
-	color: Color4;
-	thickness: number;
+	readonly color: Color4;
+	readonly thickness: number;
+	readonly factory: ComponentBuilderFactory;
 }
 
 export default class Pen extends BaseTool {
@@ -21,18 +23,32 @@ export default class Pen extends BaseTool {
 	private lastPoint: StrokeDataPoint|null = null;
 	private startPoint: StrokeDataPoint|null = null;
 	private currentDeviceType: PointerDevice|null = null;
+	private styleValue: MutableReactiveValue<PenStyle>;
+	private style: PenStyle;
 
 	public constructor(
 		private editor: Editor,
 		description: string,
-		private style: PenStyle,
-		private builderFactory: ComponentBuilderFactory = makeFreehandLineBuilder,
+		style: Partial<PenStyle>,
 	) {
 		super(editor.notifier, description);
+
+		this.styleValue = reactiveValueFromInitialValue<PenStyle>({
+			factory: makeFreehandLineBuilder,
+			color: Color4.blue,
+			thickness: 4,
+			...style,
+		});
+
+		this.styleValue.onUpdateAndNow(newValue => {
+			this.noteUpdated();
+			this.style = newValue;
+		});
 	}
 
 	private getPressureMultiplier() {
-		return 1 / this.editor.viewport.getScaleFactor() * this.style.thickness;
+		const thickness = this.style.thickness;
+		return 1 / this.editor.viewport.getScaleFactor() * thickness;
 	}
 
 	// Converts a `pointer` to a `StrokeDataPoint`.
@@ -93,7 +109,7 @@ export default class Pen extends BaseTool {
 
 		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
 			this.startPoint = this.toStrokePoint(current);
-			this.builder = this.builderFactory(this.startPoint, this.editor.viewport);
+			this.builder = this.style.factory(this.startPoint, this.editor.viewport);
 			this.currentDeviceType = current.device;
 			return true;
 		}
@@ -187,28 +203,28 @@ export default class Pen extends BaseTool {
 
 	public setColor(color: Color4): void {
 		if (color.toHexString() !== this.style.color.toHexString()) {
-			this.style = {
+			this.styleValue.setValue({
 				...this.style,
 				color,
-			};
-			this.noteUpdated();
+			});
 		}
 	}
 
 	public setThickness(thickness: number) {
 		if (thickness !== this.style.thickness) {
-			this.style = {
+			this.styleValue.setValue({
 				...this.style,
 				thickness,
-			};
-			this.noteUpdated();
+			});
 		}
 	}
 
 	public setStrokeFactory(factory: ComponentBuilderFactory) {
-		if (factory !== this.builderFactory) {
-			this.builderFactory = factory;
-			this.noteUpdated();
+		if (factory !== this.style.factory) {
+			this.styleValue.setValue({
+				...this.style,
+				factory,
+			});
 		}
 	}
 
@@ -230,7 +246,8 @@ export default class Pen extends BaseTool {
 
 	public getThickness() { return this.style.thickness; }
 	public getColor() { return this.style.color; }
-	public getStrokeFactory() { return this.builderFactory; }
+	public getStrokeFactory() { return this.style.factory; }
+	public getStyleValue() { return this.styleValue; }
 
 	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);

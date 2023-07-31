@@ -53,7 +53,15 @@ export default class ToolController implements InputEventListener {
 			secondaryPenTool,
 
 			// Highlighter-like pen with width=40
-			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 40 }, makePressureSensitiveFreehandLineBuilder),
+			new Pen(
+				editor,
+				localization.penTool(3),
+				{
+					color: Color4.ofRGBA(1, 1, 0, 0.5),
+					thickness: 40,
+					factory: makePressureSensitiveFreehandLineBuilder
+				}
+			),
 
 			new Eraser(editor, localization.eraserTool),
 			new SelectionTool(editor, localization.selectionTool),
