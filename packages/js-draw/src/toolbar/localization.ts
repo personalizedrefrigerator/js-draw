@@ -28,6 +28,8 @@ export interface ToolbarLocalization {
 	deleteSelection: string;
 	duplicateSelection: string;
 
+	toolProperties: string;
+
 	pickColorFromScreen: string;
 	clickToPickColorAnnouncement: string;
 	colorSelectionCanceledAnnouncement: string;
@@ -107,6 +109,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	lockRotation: 'Lock rotation',
 
 	paste: 'Paste',
+
+	toolProperties: 'Tool Properties',
 
 	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
 	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,

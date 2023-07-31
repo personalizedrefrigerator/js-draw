@@ -19,15 +19,14 @@ import BaseWidget from './widgets/BaseWidget';
 import ActionButtonWidget from './widgets/ActionButtonWidget';
 import InsertImageWidget from './widgets/InsertImageWidget';
 import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
-import OverflowWidget from './widgets/OverflowWidget';
 import { DispatcherEventListener } from '../EventDispatcher';
 import { Point2, Vec2, Color4 } from '@js-draw/math';
-
-export const toolbarCSSPrefix = 'toolbar-';
+import { toolbarCSSPrefix } from './constants';
 
 type UpdateColorisCallback = ()=>void;
+type WidgetByIdMap = Record<string, BaseWidget>;
 
-interface SpacerOptions {
+export interface SpacerOptions {
 	// Defaults to 0. If a non-zero number, determines the rate at which the
 	// spacer should grow (like flexGrow).
 	grow: number;
@@ -39,47 +38,24 @@ interface SpacerOptions {
 	maxSize: string;
 }
 
-export default class HTMLToolbar {
-	private container: HTMLElement;
-	private resizeObserver: ResizeObserver;
-	private listeners: DispatcherEventListener[] = [];
+export default abstract class AbstractToolbar {
+	#listeners: DispatcherEventListener[] = [];
 
-	// Flex-order of the next widget to be added.
-	private widgetOrderCounter: number = 0;
-
-	private widgetsById: Record<string, BaseWidget> = {};
-	private widgetList: Array<BaseWidget> = [];
-
-	// Widget to toggle overflow menu.
-	private overflowWidget: OverflowWidget|null = null;
+	#widgetsById: WidgetByIdMap = {};
+	#widgetList: Array<BaseWidget> = [];
 
 	private static colorisStarted: boolean = false;
-	private updateColoris: UpdateColorisCallback|null = null;
+	#updateColoris: UpdateColorisCallback|null = null;
 
 	/** @internal */
 	public constructor(
-		private editor: Editor, parent: HTMLElement,
-		private localizationTable: ToolbarLocalization = defaultToolbarLocalization,
+		protected editor: Editor, protected localizationTable: ToolbarLocalization = defaultToolbarLocalization,
 	) {
-		this.container = document.createElement('div');
-		this.container.classList.add(`${toolbarCSSPrefix}root`);
-		this.container.setAttribute('role', 'toolbar');
-		parent.appendChild(this.container);
-
-		if (!HTMLToolbar.colorisStarted) {
+		if (!AbstractToolbar.colorisStarted) {
 			colorisInit();
-			HTMLToolbar.colorisStarted = true;
+			AbstractToolbar.colorisStarted = true;
 		}
 		this.setupColorPickers();
-
-		if ('ResizeObserver' in window) {
-			this.resizeObserver = new ResizeObserver((_entries) => {
-				this.reLayout();
-			});
-			this.resizeObserver.observe(this.container);
-		} else {
-			console.warn('ResizeObserver not supported. Toolbar will not resize.');
-		}
 	}
 
 	private closeColorPickerOverlay: HTMLElement|null = null;
@@ -96,7 +72,7 @@ export default class HTMLToolbar {
 		let gestureStartPos: Point2|null = null;
 
 		// Hide the color picker when attempting to draw on the overlay.
-		this.listeners.push(this.editor.handlePointerEventsFrom(this.closeColorPickerOverlay, (eventName, event) => {
+		this.#listeners.push(this.editor.handlePointerEventsFrom(this.closeColorPickerOverlay, (eventName, event) => {
 			// Position of the current event.
 			const currentPos = Vec2.of(event.pageX, event.pageY);
 
@@ -158,8 +134,8 @@ export default class HTMLToolbar {
 	// @internal
 	public setupColorPickers() {
 		// Much of the setup only needs to be done once.
-		if (this.updateColoris) {
-			this.updateColoris();
+		if (this.#updateColoris) {
+			this.#updateColoris();
 			return;
 		}
 
@@ -189,7 +165,7 @@ export default class HTMLToolbar {
 			});
 		};
 		initColoris();
-		this.updateColoris = initColoris;
+		this.#updateColoris = initColoris;
 
 		const addColorToSwatch = (newColor: string) => {
 			let alreadyPresent = false;
@@ -209,7 +185,7 @@ export default class HTMLToolbar {
 			}
 		};
 
-		this.listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerToggled, event => {
+		this.#listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerToggled, event => {
 			if (event.kind !== EditorEventType.ColorPickerToggled) {
 				return;
 			}
@@ -222,143 +198,24 @@ export default class HTMLToolbar {
 		}));
 
 		// Add newly-selected colors to the swatch.
-		this.listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerColorSelected, event => {
+		this.#listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerColorSelected, event => {
 			if (event.kind === EditorEventType.ColorPickerColorSelected) {
 				addColorToSwatch(event.color.toHexString());
 			}
 		}));
 	}
 
-	private reLayoutQueued: boolean = false;
-	private queueReLayout() {
-		if (!this.reLayoutQueued) {
-			this.reLayoutQueued = true;
-			requestAnimationFrame(() => this.reLayout());
-		}
+	protected getWidgetUniqueId(widget: BaseWidget) {
+		return widget.getUniqueIdIn(this.#widgetsById);
 	}
 
-	private reLayout() {
-		this.reLayoutQueued = false;
-
-		if (!this.overflowWidget) {
-			return;
-		}
-
-		const getTotalWidth = (widgetList: Array<BaseWidget>) => {
-			let totalWidth = 0;
-			for (const widget of widgetList) {
-				if (!widget.isHidden()) {
-					totalWidth += widget.getButtonWidth();
-				}
-			}
-
-			return totalWidth;
-		};
-
-		// Returns true if there is enough empty space to move the first child
-		// from the overflow menu to the main menu.
-		const canRemoveFirstChildFromOverflow = (freeSpaceInMainMenu: number) => {
-			const overflowChildren = this.overflowWidget?.getChildWidgets() ?? [];
-
-			if (overflowChildren.length === 0) {
-				return false;
-			}
-
-			return overflowChildren[0].getButtonWidth() <= freeSpaceInMainMenu;
-		};
-
-		let overflowWidgetsWidth = getTotalWidth(this.overflowWidget.getChildWidgets());
-		let shownWidgetWidth = getTotalWidth(this.widgetList) - overflowWidgetsWidth;
-		let availableWidth = this.container.clientWidth * 0.87;
-
-		// If on a device that has enough vertical space, allow
-		// showing two rows of buttons.
-		// TODO: Fix magic numbers
-		if (window.innerHeight > availableWidth * 1.75) {
-			availableWidth *= 1.75;
-		}
-
-		let updatedChildren = false;
-
-		// If we can remove at least one child from the overflow menu,
-		if (canRemoveFirstChildFromOverflow(availableWidth - shownWidgetWidth)) {
-			// Move widgets to the main menu.
-			const overflowChildren = this.overflowWidget.clearChildren();
-
-			for (const child of overflowChildren) {
-				child.addTo(this.container);
-				child.setIsToplevel(true);
-
-				if (!child.isHidden()) {
-					shownWidgetWidth += child.getButtonWidth();
-				}
-			}
-
-			overflowWidgetsWidth = 0;
-			updatedChildren = true;
-		}
-
-		if (shownWidgetWidth >= availableWidth) {
-			// Move widgets to the overflow menu.
-
-			// Start with the rightmost widget, move to the leftmost
-			for (
-				let i = this.widgetList.length - 1;
-				i >= 0 && shownWidgetWidth >= availableWidth;
-				i--
-			) {
-				const child = this.widgetList[i];
-
-				if (this.overflowWidget.hasAsChild(child)) {
-					continue;
-				}
-
-				if (child.canBeInOverflowMenu()) {
-					shownWidgetWidth -= child.getButtonWidth();
-					this.overflowWidget.addToOverflow(child);
-				}
-			}
-
-			updatedChildren = true;
-		}
-
-		// Hide/show the overflow widget.
-		this.overflowWidget.setHidden(this.overflowWidget.getChildWidgets().length === 0);
-
-		if (updatedChildren) {
-			this.setupColorPickers();
-		}
+	protected getWidgetFromId(id: string): BaseWidget|undefined {
+		return this.#widgetsById[id];
 	}
 
-
-	/**
-	 * Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
-	 * (i.e. its `addTo` method should not have been called).
-	 *
-	 * @example
-	 * ```ts
-	 * const toolbar = editor.addToolbar();
-	 * const insertImageWidget = new InsertImageWidget(editor);
-	 * toolbar.addWidget(insertImageWidget);
-	 * ```
-	 */
-	public addWidget(widget: BaseWidget) {
-		// Prevent name collisions
-		const id = widget.getUniqueIdIn(this.widgetsById);
-
-		// Add the widget
-		this.widgetsById[id] = widget;
-		this.widgetList.push(widget);
-
-		// Add HTML elements.
-		const container = widget.addTo(this.container);
-		this.setupColorPickers();
-
-		// Ensure that the widget gets displayed in the correct
-		// place in the toolbar, even if it's removed and re-added.
-		container.style.order = `${this.widgetOrderCounter++}`;
-
-		this.queueReLayout();
+	/** Do **not** modify the return value. */
+	protected getAllWidgets(): Array<BaseWidget> {
+		return this.#widgetList;
 	}
 
 	/**
@@ -382,31 +239,53 @@ export default class HTMLToolbar {
 	 * });
 	 * ```
 	 */
-	public addSpacer(options: Partial<SpacerOptions> = {}) {
-		const spacer = document.createElement('div');
-		spacer.classList.add(`${toolbarCSSPrefix}spacer`);
+	public abstract addSpacer(options?: Partial<SpacerOptions>): void;
 
-		if (options.grow) {
-			spacer.style.flexGrow = `${options.grow}`;
-		}
+	/**
+	 * Adds an `ActionButtonWidget` or `BaseToolWidget`. The widget should not have already have a parent
+	 * (i.e. its `addTo` method should not have been called).
+	 *
+	 * @example
+	 * ```ts
+	 * const toolbar = editor.addToolbar();
+	 * const insertImageWidget = new InsertImageWidget(editor);
+	 * toolbar.addWidget(insertImageWidget);
+	 * ```
+	 */
+	public addWidget(widget: BaseWidget) {
+		// Prevent name collisions
+		const id = widget.getUniqueIdIn(this.#widgetsById);
 
-		if (options.minSize) {
-			spacer.style.minWidth = options.minSize;
-		}
+		// Add the widget
+		this.#widgetsById[id] = widget;
+		this.#widgetList.push(widget);
 
-		if (options.maxSize) {
-			spacer.style.maxWidth = options.maxSize;
-		}
-
-		spacer.style.order = `${this.widgetOrderCounter++}`;
-		this.container.appendChild(spacer);
+		this.addWidgetInternal(widget);
+		this.setupColorPickers();
 	}
 
+	/** Called by `addWidget`. Implement this to add a new widget to the toolbar. */
+	protected abstract addWidgetInternal(widget: BaseWidget): void;
+
+	/** Removes the given `widget` from this toolbar. */
+	public removeWidget(widget: BaseWidget) {
+		const id = widget.getUniqueIdIn(this.#widgetsById);
+		this.removeWidgetInternal(widget);
+
+		delete this.#widgetsById[id];
+		this.#widgetList = this.#widgetList.filter(otherWidget => otherWidget !== widget);
+	}
+
+
+	/** Called by `removeWidget`. Implement this to remove a new widget from the toolbar. */
+	protected abstract removeWidgetInternal(widget: BaseWidget): void;
+
+	/** Returns a snapshot of the state of widgets in the toolbar. */
 	public serializeState(): string {
 		const result: Record<string, any> = {};
 
-		for (const widgetId in this.widgetsById) {
-			result[widgetId] = this.widgetsById[widgetId].serializeState();
+		for (const widgetId in this.#widgetsById) {
+			result[widgetId] = this.#widgetsById[widgetId].serializeState();
 		}
 
 		return JSON.stringify(result);
@@ -420,11 +299,11 @@ export default class HTMLToolbar {
 		const data = JSON.parse(state);
 
 		for (const widgetId in data) {
-			if (!(widgetId in this.widgetsById)) {
+			if (!(widgetId in this.#widgetsById)) {
 				console.warn(`Unable to deserialize widget ${widgetId} ­— no such widget.`);
 			}
 
-			this.widgetsById[widgetId].deserializeFrom(data[widgetId]);
+			this.#widgetsById[widgetId].deserializeFrom(data[widgetId]);
 		}
 	}
 
@@ -524,24 +403,6 @@ export default class HTMLToolbar {
 	}
 
 	/**
-	 * Adds a widget that toggles the overflow menu. Call `addOverflowWidget` to ensure
-	 * that this widget is in the correct space (if shown).
-	 *
-	 * @example
-	 * ```ts
-	 * toolbar.addDefaultToolWidgets();
-	 * toolbar.addOverflowWidget();
-	 * toolbar.addDefaultActionButtons();
-	 * ```
-	 * shows the overflow widget between the default tool widgets and the default action buttons,
-	 * if shown.
-	 */
-	public addOverflowWidget() {
-		this.overflowWidget = new OverflowWidget(this.editor, this.localizationTable);
-		this.addWidget(this.overflowWidget);
-	}
-
-	/**
 	 * Adds both the default tool widgets and action buttons. Equivalent to
 	 * ```ts
 	 * toolbar.addDefaultToolWidgets();
@@ -549,19 +410,22 @@ export default class HTMLToolbar {
 	 * toolbar.addDefaultActionButtons();
 	 * ```
 	 */
-	public addDefaults() {
-		this.addDefaultToolWidgets();
-		this.addOverflowWidget();
-		this.addDefaultActionButtons();
-	}
+	public abstract addDefaults(): void;
 
+	/** Remove this toolbar from its container and clean up listeners. */
 	public remove() {
-		this.container.remove();
-		this.resizeObserver.disconnect();
 		this.closeColorPickerOverlay?.remove();
 
-		for (const listener of this.listeners) {
+		for (const listener of this.#listeners) {
 			listener.remove();
 		}
+
+		this.onRemove();
 	}
+
+	/**
+	 * Internal logic for {@link remove}. Implementers should remove the toolbar
+	 * from its container.
+	 */
+	protected abstract onRemove(): void;
 }

@@ -7,7 +7,6 @@ import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2, Vec3, Color4, Mat33, Rect2, toRoundedString } from '@js-draw/math';
-import HTMLToolbar from './toolbar/HTMLToolbar';
 import Display, { RenderingMode } from './rendering/Display';
 import SVGRenderer from './rendering/renderers/SVGRenderer';
 import SVGLoader from './SVGLoader';
@@ -26,6 +25,8 @@ import BackgroundComponent, { BackgroundType } from './components/BackgroundComp
 import sendPenEvent from './testing/sendPenEvent';
 import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
+import AbstractToolbar from './toolbar/AbstractToolbar';
+import SidebarToolbar from './toolbar/SidebarToolbar';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
 import RenderablePathSpec from './rendering/RenderablePathSpec';
@@ -328,8 +329,8 @@ export class Editor {
 	 * Creates a toolbar. If `defaultLayout` is true, default buttons are used.
 	 * @returns a reference to the toolbar.
 	 */
-	public addToolbar(defaultLayout: boolean = true): HTMLToolbar {
-		const toolbar = new HTMLToolbar(this, this.container, this.localization);
+	public addToolbar(defaultLayout: boolean = true): AbstractToolbar {
+		const toolbar = new SidebarToolbar(this, this.container, this.localization);
 
 		if (defaultLayout) {
 			toolbar.addDefaults();

@@ -5,7 +5,7 @@ import { Mat33, Point2, Vec2, Rect2, Color4 } from '@js-draw/math';
 import BaseTool from './tools/BaseTool';
 import AbstractComponent from './components/AbstractComponent';
 import Command from './commands/Command';
-import BaseWidget from './toolbar/widgets/BaseWidget';
+import { WidgetContentLayoutManager } from './toolbar/widgets/layout/types';
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
@@ -93,7 +93,10 @@ export interface ColorPickerColorSelected {
 
 export interface ToolbarDropdownShownEvent {
 	readonly kind: EditorEventType.ToolbarDropdownShown;
-	readonly parentWidget: BaseWidget;
+
+	// True iff the source dropdown is toplevel.
+	readonly fromToplevelDropdown: boolean;
+	readonly layoutManager: WidgetContentLayoutManager;
 }
 
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent

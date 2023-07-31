@@ -4,7 +4,7 @@ import PanZoom, { PanZoomMode } from '../../tools/PanZoom';
 import ToolController from '../../tools/ToolController';
 import { EditorEventType } from '../../types';
 import Viewport from '../../Viewport';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';

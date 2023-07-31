@@ -2,7 +2,7 @@ import { Color4 } from '@js-draw/math';
 import Editor from '../../Editor';
 import TextTool from '../../tools/TextTool';
 import { EditorEventType } from '../../types';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';

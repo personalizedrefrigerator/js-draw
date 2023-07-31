@@ -1,10 +1,10 @@
 import Editor from '../../Editor';
-import { DispatcherEventListener } from '../../EventDispatcher';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
-import { EditorEventType } from '../../types';
 import { KeyPressEvent, keyPressEventFromHTMLEvent, keyUpEventFromHTMLEvent } from '../../inputEvents';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
+import DropdownLayoutManager from './layout/DropdownLayoutManager';
+import { WidgetContentDisplay, WidgetContentLayoutManager } from './layout/types';
 
 export type SavedToolbuttonState = Record<string, any>;
 
@@ -12,7 +12,9 @@ export default abstract class BaseWidget {
 	protected readonly container: HTMLElement;
 	private button: HTMLElement;
 	private icon: Element|null;
-	private dropdownContainer: HTMLElement;
+	private layoutManager: WidgetContentLayoutManager;
+	private dropdown: WidgetContentDisplay|null = null;
+	private dropdownContent: HTMLElement;
 	private dropdownIcon: Element;
 	private label: HTMLLabelElement;
 	#hasDropdown: boolean;
@@ -27,16 +29,22 @@ export default abstract class BaseWidget {
 	public constructor(
 		protected editor: Editor,
 		protected id: string,
-		localizationTable?: ToolbarLocalization,
+		localizationTable?: ToolbarLocalization
 	) {
 		this.localizationTable = localizationTable ?? editor.localization;
+
+		// Default layout manager
+		const defaultLayoutManager = new DropdownLayoutManager(
+			(text) => this.editor.announceForAccessibility(text),
+			this.localizationTable
+		);
+		defaultLayoutManager.connectToEditorNotifier(editor.notifier);
+		this.layoutManager = defaultLayoutManager;
 
 		this.icon = null;
 		this.container = document.createElement('div');
 		this.container.classList.add(`${toolbarCSSPrefix}toolContainer`);
-		this.dropdownContainer = document.createElement('div');
-		this.dropdownContainer.classList.add(`${toolbarCSSPrefix}dropdown`);
-		this.dropdownContainer.classList.add('hidden');
+		this.dropdownContent = document.createElement('div');
 		this.#hasDropdown = false;
 
 		this.button = document.createElement('div');
@@ -66,6 +74,8 @@ export default abstract class BaseWidget {
 	 * `container = { 'foo': somethingNotThis, 'foo-1': somethingElseNotThis }`, this method
 	 * returns `foo-2` because elements with IDs `foo` and `foo-1` are already present in
 	 * `container`.
+	 *
+	 * If `this` is already in `container`, returns the id given to `this` in the container.
 	 */
 	public getUniqueIdIn(container: Record<string, BaseWidget>): string {
 		let id = this.getId();
@@ -162,7 +172,17 @@ export default abstract class BaseWidget {
 		this.subWidgets[id] = widget;
 	}
 
-	private toolbarWidgetToggleListener: DispatcherEventListener|null = null;
+	public setLayoutManager(manager: WidgetContentLayoutManager) {
+		if (manager === this.layoutManager) {
+			return;
+		}
+
+		this.layoutManager = manager;
+		if (this.container.parentElement) {
+			this.addTo(this.container.parentElement);
+		}
+	}
+
 
 	/**
 	 * Adds this to `parent`.
@@ -193,29 +213,22 @@ export default abstract class BaseWidget {
 
 		// Clear the dropdownContainer in case this element is being moved to another
 		// parent.
-		this.dropdownContainer.replaceChildren();
-		this.#hasDropdown = this.fillDropdown(this.dropdownContainer);
+		this.dropdownContent.replaceChildren();
+		this.#hasDropdown = this.fillDropdown(this.dropdownContent);
 		if (this.#hasDropdown) {
+			// We're re-creating the dropdown.
+			this.dropdown?.destroy();
+
 			this.dropdownIcon = this.createDropdownIcon();
 			this.button.appendChild(this.dropdownIcon);
-			this.container.appendChild(this.dropdownContainer);
 
-			if (this.toolbarWidgetToggleListener) {
-				this.toolbarWidgetToggleListener.remove();
-			}
-
-			this.toolbarWidgetToggleListener = this.editor.notifier.on(EditorEventType.ToolbarDropdownShown, (evt) => {
-				if (
-					evt.kind === EditorEventType.ToolbarDropdownShown
-					&& evt.parentWidget !== this
-
-					// Don't hide if a submenu wash shown (it might be a submenu of
-					// the current menu).
-					&& evt.parentWidget.toplevel
-				) {
-					this.setDropdownVisible(false);
-				}
+			this.dropdown = this.layoutManager.createContentDisplay({
+				target: this.button,
+				getTitle: () => this.getTitle(),
+				isToplevel: () => this.toplevel,
 			});
+
+			this.dropdown.addItem(this.dropdownContent);
 		}
 
 		this.setDropdownVisible(false);
@@ -228,6 +241,9 @@ export default abstract class BaseWidget {
 		return this.container;
 	}
 
+	public remove() {
+		this.container.remove();
+	}
 
 	protected updateIcon() {
 		const newIcon = this.createIcon();
@@ -274,62 +290,21 @@ export default abstract class BaseWidget {
 		}
 	}
 
-	private hideDropdownTimeout: any|null = null;
 
 	protected setDropdownVisible(visible: boolean) {
-		const currentlyVisible = this.container.classList.contains('dropdownVisible');
-		if (currentlyVisible === visible) {
-			return;
-		}
-
-		// If waiting to hide the dropdown, cancel it.
-		if (this.hideDropdownTimeout) {
-			clearTimeout(this.hideDropdownTimeout);
-			this.hideDropdownTimeout = null;
-			this.dropdownContainer.classList.remove('hiding');
-			this.repositionDropdown();
-		}
-
-
-		const animationDuration = 150; // ms
-
 		if (visible) {
-			this.dropdownContainer.classList.remove('hidden');
-			this.container.classList.add('dropdownVisible');
-			this.editor.announceForAccessibility(
-				this.localizationTable.dropdownShown(this.getTitle())
-			);
-
-			this.editor.notifier.dispatch(EditorEventType.ToolbarDropdownShown, {
-				kind: EditorEventType.ToolbarDropdownShown,
-				parentWidget: this,
-			});
-
-			this.repositionDropdown();
+			this.dropdown?.requestShow();
 		} else {
-			this.container.classList.remove('dropdownVisible');
-			this.editor.announceForAccessibility(
-				this.localizationTable.dropdownHidden(this.getTitle())
-			);
-
-			this.dropdownContainer.classList.add('hiding');
-
-			// Hide the dropdown *slightly* before the animation finishes. This
-			// prevents flickering in some browsers.
-			const hideDelay = animationDuration * 0.95;
-
-			this.hideDropdownTimeout = setTimeout(() => {
-				this.dropdownContainer.classList.add('hidden');
-				this.dropdownContainer.classList.remove('hiding');
-				this.repositionDropdown();
-			}, hideDelay);
+			this.dropdown?.requestHide();
 		}
+	}
 
-		// Animate
-		const animationName = `var(--dropdown-${
-			visible ? 'show' : 'hide'
-		}-animation)`;
-		this.dropdownContainer.style.animation = `${animationDuration}ms ease ${animationName}`;
+	/**
+	 * Only used by some layout managers.
+	 * In those layout managers, makes this dropdown visible.
+	 */
+	protected activateDropdown() {
+		this.dropdown?.noteActivated();
 	}
 
 	public canBeInOverflowMenu(): boolean {
@@ -348,26 +323,13 @@ export default abstract class BaseWidget {
 		this.container.style.display = hidden ? 'none' : '';
 	}
 
-	protected repositionDropdown() {
-		const dropdownBBox = this.dropdownContainer.getBoundingClientRect();
-		const screenWidth = document.body.clientWidth;
-
-		if (dropdownBBox.left > screenWidth / 2) {
-			// Use .translate so as not to conflict with CSS animating the
-			// transform property.
-			this.dropdownContainer.style.translate = `calc(${this.button.clientWidth + 'px'} - 100%) 0`;
-		} else {
-			this.dropdownContainer.style.translate = '';
-		}
-	}
-
 	/** Set whether the widget is contained within another. @internal */
 	public setIsToplevel(toplevel: boolean) {
 		this.toplevel = toplevel;
 	}
 
 	protected isDropdownVisible(): boolean {
-		return !this.dropdownContainer.classList.contains('hidden');
+		return this.dropdown?.isVisible() ?? false;
 	}
 
 	protected isSelected(): boolean {

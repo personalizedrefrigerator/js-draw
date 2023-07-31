@@ -9,13 +9,13 @@ import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
 import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 import { Color4 } from '@js-draw/math';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
+import { toolbarCSSPrefix } from '../constants';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')

@@ -6,7 +6,7 @@ import Editor from '../../Editor';
 import { EditorImageEventType } from '../../EditorImage';
 import { Rect2, Color4 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from '../makeColorInput';
 import BaseWidget from './BaseWidget';
