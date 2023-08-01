@@ -168,8 +168,46 @@ export default class SidebarToolbar extends DropdownToolbar {
 			return event.target === this.mainContainer;
 		}));
 
-		this.sidebarContainer.onpointerdown = event => {
-			if (event.isPrimary && dragElements.includes(event.target as HTMLElement)) {
+		const isDraggableElement = (element: HTMLElement|null) => {
+			if (!element) {
+				return false;
+			}
+
+			if (dragElements.includes(element)) {
+				return true;
+			}
+
+			const draggableElementTypes = [ 'DIV' ];
+
+			let hasSuitableAncestors = false;
+			let ancestor = element.parentElement;
+			while (ancestor) {
+				if (!draggableElementTypes.includes(ancestor.tagName)) {
+					break;
+				}
+				if (ancestor === this.sidebarContainer) {
+					hasSuitableAncestors = true;
+					break;
+				}
+				ancestor = ancestor.parentElement;
+			}
+
+			return draggableElementTypes.includes(element.tagName) && hasSuitableAncestors;
+		};
+
+		// Required on iOS -- allow touch events to drag the toolbar without being canceled.
+		this.sidebarContainer.ontouchstart = event => {
+			if (isDraggableElement(event.target as HTMLElement)) {
+				event.preventDefault();
+			}
+		};
+
+		this.sidebarContainer.addEventListener('pointerdown', event => {
+			if (event.defaultPrevented || !isDraggableElement(event.target as HTMLElement)) {
+				return;
+			}
+
+			if (event.isPrimary) {
 				event.preventDefault();
 				lastX = event.clientX;
 				lastY = event.clientY;
@@ -185,7 +223,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 			}
 
 			return undefined;
-		};
+		});
 
 		this.sidebarContainer.onpointermove = event => {
 			if (!event.isPrimary || !pointerDown) {
@@ -206,18 +244,14 @@ export default class SidebarToolbar extends DropdownToolbar {
 		};
 
 		let gestureEndTimestamp = 0;
-		const onGestureEnd = () => {
+		const onGestureEnd = (event: Event) => {
 			// If the pointerup/pointercancel event was for a pointer not being tracked,
 			if (!pointerDown) {
 				return;
 			}
 
+			event.preventDefault();
 			gestureEndTimestamp = Date.now();
-
-			// Roughly a click? Close the sidebar
-			if (Math.hypot(lastX - startX, lastY - startY) < 5) {
-				this.sidebarVisible.set(false);
-			}
 
 			if (capturedPointerId !== null) {
 				this.sidebarContainer.releasePointerCapture(capturedPointerId);
@@ -230,9 +264,10 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 		this.closeButton.onclick = () => {
 			const wasJustDragging = Date.now() - gestureEndTimestamp < 100;
+			const roughlyClick = Math.hypot(lastX - startX, lastY - startY) < 5;
 
 			// Ignore the click event if it was caused by dragging the button.
-			if (!wasJustDragging) {
+			if (wasJustDragging && roughlyClick || !wasJustDragging) {
 				this.sidebarVisible.set(false);
 			}
 		};
@@ -259,7 +294,17 @@ export default class SidebarToolbar extends DropdownToolbar {
 		if (this.sidebarY.get() > this.sidebarContainer.clientHeight / 2) {
 			this.sidebarVisible.set(false);
 		} else {
-			this.sidebarY.set(0);
+			const y = this.sidebarY.get();
+			const minY = -100;
+
+			// Clamp the sidebar's y position to reasonable values.
+			if (y < minY) {
+				// Allow small negative values -- on some devices, the address bar
+				// covers the bottom regions of the screen.
+				this.sidebarY.set(minY);
+			} else if (y > 0) {
+				this.sidebarY.set(0);
+			}
 		}
 	}
 }

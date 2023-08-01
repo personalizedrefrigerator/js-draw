@@ -33,6 +33,7 @@
 }
 
 .toolbar-sidebar {
+	touch-action: manipulation;
 	background-color: var(--primary-background-color);
 	--icon-color: var(--primary-foreground-color);
 

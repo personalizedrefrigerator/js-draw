@@ -33,7 +33,8 @@ export default class SidebarLayoutManager implements WidgetContentLayoutManager 
 				this.visibleWidgetContent.set(result);
 			},
 			onToolActivated: () => {
-				result?.requestShow();
+				// TODO: Only request show when in sidebar mode
+				//result?.requestShow();
 			},
 			requestHide: () => {
 				if (visible.get()) {
