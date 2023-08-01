@@ -56,6 +56,13 @@ export default class SidebarToolbar extends DropdownToolbar {
 		this.closeButton.classList.add('drag-elem');
 		this.closeButton.setAttribute('alt', localizationTable.closeToolProperties);
 
+		// The close button has default focus -- forward its events to the main editor so that keyboard
+		// shortcuts still work.
+		this.editor.handleKeyEventsFrom(this.closeButton, event => {
+			// Don't send
+			return event.code !== 'Space' && event.code !== 'Enter' && event.code !== 'Tab';
+		});
+
 		this.initDragListeners();
 
 		// Initialize the layout manager
@@ -139,9 +146,29 @@ export default class SidebarToolbar extends DropdownToolbar {
 		let pointerDown = false;
 		let capturedPointerId: number|null = null;
 
-		const dragElements = [ this.closeButton, this.mainContainer ];
+		const dragElements = [ this.closeButton, this.sidebarContainer, this.sidebarContent ];
 
-		this.mainContainer.onpointerdown = event => {
+		this.manageListener(this.editor.handlePointerEventsExceptClicksFrom(this.mainContainer, (eventName, event) => {
+			if (event.target === this.mainContainer) {
+				if (eventName === 'pointerdown') {
+					this.sidebarVisible.set(false);
+				}
+
+				if (eventName === 'pointerup') {
+					this.editor.focus();
+				}
+
+				return true;
+			}
+
+			// Don't send pointer events that don't directly target mainContainer
+			// to the editor
+			return false;
+		}, (_eventName, event) => {
+			return event.target === this.mainContainer;
+		}));
+
+		this.sidebarContainer.onpointerdown = event => {
 			if (event.isPrimary && dragElements.includes(event.target as HTMLElement)) {
 				event.preventDefault();
 				lastX = event.clientX;
@@ -150,16 +177,19 @@ export default class SidebarToolbar extends DropdownToolbar {
 				startX = event.clientX;
 				startY = event.clientY;
 
-				this.mainContainer.setPointerCapture(event.pointerId);
+				this.sidebarContainer.setPointerCapture(event.pointerId);
 				capturedPointerId = event.pointerId;
 
 				pointerDown = true;
+				return true;
 			}
+
+			return undefined;
 		};
 
-		this.mainContainer.onpointermove = event => {
+		this.sidebarContainer.onpointermove = event => {
 			if (!event.isPrimary || !pointerDown) {
-				return;
+				return undefined;
 			}
 			event.preventDefault();
 
@@ -172,6 +202,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 			lastX = x;
 			lastY = y;
+			return true;
 		};
 
 		let gestureEndTimestamp = 0;
@@ -189,7 +220,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 			}
 
 			if (capturedPointerId !== null) {
-				this.mainContainer.releasePointerCapture(capturedPointerId);
+				this.sidebarContainer.releasePointerCapture(capturedPointerId);
 				capturedPointerId = null;
 			}
 
@@ -206,8 +237,8 @@ export default class SidebarToolbar extends DropdownToolbar {
 			}
 		};
 
-		this.mainContainer.onpointerup = onGestureEnd;
-		this.mainContainer.onpointercancel = onGestureEnd;
+		this.sidebarContainer.onpointerup = onGestureEnd;
+		this.sidebarContainer.onpointercancel = onGestureEnd;
 	}
 
 	/**

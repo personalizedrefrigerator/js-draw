@@ -1,17 +1,3 @@
-
-.toolbar-sidebar-container {
-	background-color: rgba(0, 0, 0, 0.5);
-
-	position: absolute;
-	width: 100%;
-	height: 100%;
-
-	display: flex;
-	flex-direction: column-reverse;
-	align-items: center;
-	z-index: 1;
-}
-
 @keyframes toolbar--sidebar-transition-in {
 	from { translate: 0 100%; }
 	to { translate: 0; }
@@ -33,6 +19,19 @@
 	to { opacity: 0; }
 }
 
+.toolbar-sidebar-container {
+	background-color: rgba(0, 0, 0, 0.25);
+
+	position: absolute;
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: column-reverse;
+	align-items: center;
+	z-index: 2;
+}
+
 .toolbar-sidebar {
 	background-color: var(--primary-background-color);
 	--icon-color: var(--primary-foreground-color);
@@ -43,8 +42,9 @@
 	padding-right: 10px;
 	max-width: 400px;
 
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
+	$border-radius: 20px;
+	border-top-left-radius: $border-radius;
+	border-top-right-radius: $border-radius;
 	transition: translate 0.1s ease, padding-bottom 0.1s ease;
 
 	.toolbar-toolContainer {
@@ -52,11 +52,13 @@
 	}
 
 	.drag-elem {
-		height: 30px;
+		height: 40px;
 		display: block;
 
+		cursor: ns-resize;
+
 		position: relative;
-		top: -5px;
+		margin-top: -15px;
 
 		width: 100%;
 		border: none;
@@ -68,13 +70,16 @@
 			content: "";
 
 			background-color: var(--icon-color);
-			opacity: 0.5;
+			opacity: 0.2;
 			display: block;
+
+			position: relative;
+			top: 10px;
 
 			height: 5px;
 			border-radius: 5px;
 
-			width: 80%;
+			width: min(80%, 40px);
 			margin-left: auto;
 			margin-right: auto;
 		}

@@ -612,6 +612,13 @@ export class Editor {
 	 * Forward pointer events from `elem` to this editor. Such that right-click/right-click drag
 	 * events are also forwarded, `elem`'s contextmenu is disabled.
 	 *
+	 * `filter` is called once per pointer event, before doing any other processing. If `filter` returns `true` the event is
+	 * forwarded to the editor.
+	 *
+	 * **Note**: `otherEventsFilter` is like `filter`, but is called for other pointer-related
+	 * events that could also be forwarded to the editor. To forward just pointer events,
+	 * for example, `otherEventsFilter` could be given as `()=>false`.
+	 *
 	 * @example
 	 * ```ts
 	 * const overlay = document.createElement('div');
@@ -627,11 +634,25 @@ export class Editor {
 	 * });
 	 * ```
 	 */
-	public handlePointerEventsFrom(elem: HTMLElement, filter?: HTMLPointerEventFilter) {
+	public handlePointerEventsFrom(
+		elem: HTMLElement,
+		filter?: HTMLPointerEventFilter,
+		otherEventsFilter?: (eventName: string, event: Event)=>boolean,
+	) {
 		// May be required to prevent text selection on iOS/Safari:
 		// See https://stackoverflow.com/a/70992717/17055750
-		const touchstartListener = (evt: Event) => evt.preventDefault();
+		const touchstartListener = (evt: Event) => {
+			if (otherEventsFilter && !otherEventsFilter('touchstart', evt)) {
+				return;
+			}
+
+			evt.preventDefault();
+		};
 		const contextmenuListener = (evt: Event) => {
+			if (otherEventsFilter && !otherEventsFilter('contextmenu', evt)) {
+				return;
+			}
+
 			// Don't show a context menu
 			evt.preventDefault();
 		};
@@ -648,7 +669,7 @@ export class Editor {
 				const event = evt as PointerEvent;
 
 				if (filter && !filter(eventName, event)) {
-					return true;
+					return undefined;
 				}
 
 				return this.handleHTMLPointerEvent(eventName, event);
@@ -670,9 +691,91 @@ export class Editor {
 		};
 	}
 
-	/** Adds event listners for keypresses to `elem` and forwards those events to the editor. */
-	public handleKeyEventsFrom(elem: HTMLElement) {
+	/**
+	 * Like {@link handlePointerEventsFrom} except ignores short input gestures like clicks.
+	 *
+	 * `filter` is called once per event, before doing any other processing. If `filter` returns `true` the event is
+	 * forwarded to the editor.
+	 *
+	 * `otherEventsFilter` is passed unmodified to `handlePointerEventsFrom`.
+	 */
+	public handlePointerEventsExceptClicksFrom(
+		elem: HTMLElement,
+		filter?: HTMLPointerEventFilter,
+		otherEventsFilter?: (eventName: string, event: Event)=>boolean,
+	) {
+		// Buffer events: Send events to the editor only if the pointer has moved enough to
+		// suggest that the user is attempting to draw, rather than click to close the color picker.
+		let eventBuffer: [ HTMLPointerEventName, PointerEvent ][] = [];
+		let gestureStartPos: Point2|null = null;
+
+		return this.handlePointerEventsFrom(elem, (eventName, event) => {
+			if (filter && !filter(eventName, event)) {
+				return false;
+			}
+
+			// Position of the current event.
+			const currentPos = Vec2.of(event.pageX, event.pageY);
+
+			// Whether to send the current event to the editor
+			let sendToEditor = true;
+
+			if (eventName === 'pointerdown') {
+				// Buffer the event, but don't send it to the editor yet.
+				// We don't want to send single-click events, but we do want to send full strokes.
+				eventBuffer = [];
+				eventBuffer.push([ eventName, event ]);
+				gestureStartPos = currentPos;
+
+				// Capture the pointer so we receive future events even if the overlay is hidden.
+				elem.setPointerCapture(event.pointerId);
+
+				// Don't send to the editor.
+				sendToEditor = false;
+			}
+			else if (eventName === 'pointermove') {
+				// Skip if the pointer hasn't moved enough to not be a "click".
+				const strokeStartThreshold = 10;
+				if (gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold) {
+					eventBuffer.push([ eventName, event ]);
+					sendToEditor = false;
+				} else {
+					// Send all buffered events to the editor -- start the stroke.
+					for (const [ eventName, event ] of eventBuffer) {
+						this.handleHTMLPointerEvent(eventName, event);
+					}
+
+					eventBuffer = [];
+					sendToEditor = true;
+				}
+			}
+			// Otherwise, if we received a pointerup/pointercancel without flushing all pointerevents from the
+			// buffer, the gesture wasn't recognised as a stroke. Thus, the editor isn't expecting a pointerup/
+			// pointercancel event.
+			else if ((eventName === 'pointerup' || eventName === 'pointercancel') && eventBuffer.length > 0) {
+				elem.releasePointerCapture(event.pointerId);
+				eventBuffer = [];
+
+				// Don't send to the editor.
+				sendToEditor = false;
+			}
+
+			// Forward all other events to the editor.
+			return sendToEditor;
+		}, otherEventsFilter);
+	}
+
+	/**
+	 * Adds event listners for keypresses to `elem` and forwards those events to the editor.
+	 *
+	 * If the given `filter` returns `false` for an event, the event is ignored and not passed to the editor.
+	 */
+	public handleKeyEventsFrom(elem: HTMLElement, filter: (event: KeyboardEvent)=>boolean = ()=>true) {
 		elem.addEventListener('keydown', htmlEvent => {
+			if (!filter(htmlEvent)) {
+				return;
+			}
+
 			const event = keyPressEventFromHTMLEvent(htmlEvent);
 			if (event.key === 't' || event.key === 'T') {
 				htmlEvent.preventDefault();
@@ -685,6 +788,10 @@ export class Editor {
 		});
 
 		elem.addEventListener('keyup', htmlEvent => {
+			if (!filter(htmlEvent)) {
+				return;
+			}
+
 			const event = keyUpEventFromHTMLEvent(htmlEvent);
 			if (this.toolController.dispatchInputEvent(event)) {
 				htmlEvent.preventDefault();
