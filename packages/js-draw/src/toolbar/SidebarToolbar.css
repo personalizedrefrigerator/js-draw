@@ -23,6 +23,7 @@
 	max-width: 400px;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
+	transition: translate 0.1s ease;
 }
 
 .toolbar-sidebar .toolbar-toolContainer {

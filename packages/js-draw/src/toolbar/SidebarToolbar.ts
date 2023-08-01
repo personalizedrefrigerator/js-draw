@@ -11,7 +11,9 @@ export default class SidebarToolbar extends DropdownToolbar {
 	private mainContainer: HTMLElement;
 	private sidebarContainer: HTMLElement;
 	private layoutManager: SidebarLayoutManager;
+
 	private sidebarVisible: MutableReactiveValue<boolean>;
+	private sidebarY: MutableReactiveValue<number>;
 
 	/** @internal */
 	public constructor(
@@ -21,7 +23,9 @@ export default class SidebarToolbar extends DropdownToolbar {
 		super(editor, parent, localizationTable);
 
 		this.sidebarVisible = reactiveValueFromInitialValue(false);
+		this.sidebarY = reactiveValueFromInitialValue(0);
 
+		// Create the container elements
 		this.mainContainer = document.createElement('div');
 		this.mainContainer.classList.add(`${toolbarCSSPrefix}sidebar-container`);
 
@@ -32,6 +36,11 @@ export default class SidebarToolbar extends DropdownToolbar {
 		);
 		this.sidebarContainer.classList.add(`${toolbarCSSPrefix}tool-properties`);
 
+		this.sidebarY.onUpdateAndNow(y => {
+			this.sidebarContainer.style.translate = `0 ${y}px`;
+		});
+
+		// Initialize the layout manager
 		const setSidebarContent = (...content: HTMLElement[]) => {
 			this.sidebarContainer.replaceChildren(...content);
 			this.setupColorPickers();
@@ -44,9 +53,8 @@ export default class SidebarToolbar extends DropdownToolbar {
 			localizationTable,
 		);
 
-		this.mainContainer.replaceChildren(this.sidebarContainer);
-		parent.appendChild(this.mainContainer);
 
+		// Make things visible/keep hidden.
 		this.sidebarVisible.onUpdateAndNow(visible => {
 			if (visible) {
 				this.mainContainer.style.display = '';
@@ -54,6 +62,11 @@ export default class SidebarToolbar extends DropdownToolbar {
 				this.mainContainer.style.display = 'none';
 			}
 		});
+
+		this.mainContainer.replaceChildren(this.sidebarContainer);
+		parent.appendChild(this.mainContainer);
+
+		this.initDragListeners();
 	}
 
 	protected override addWidgetInternal(widget: BaseWidget) {
@@ -68,5 +81,64 @@ export default class SidebarToolbar extends DropdownToolbar {
 	protected override onRemove() {
 		super.onRemove();
 		this.mainContainer.remove();
+	}
+
+	private initDragListeners() {
+		let lastX = 0;
+		let lastY = 0;
+		let pointerDown = false;
+
+		this.mainContainer.onpointerdown = event => {
+			if (event.isPrimary && event.target === this.mainContainer) {
+				lastX = event.clientX;
+				lastY = event.clientY;
+
+				pointerDown = true;
+			}
+		};
+
+		this.mainContainer.onpointermove = event => {
+			if (!event.isPrimary || !pointerDown) {
+				return;
+			}
+
+			const x = event.clientX;
+			const y = event.clientY;
+			const dx = x - lastX;
+			const dy = y - lastY;
+
+			this.handleDrag(dx, dy);
+
+			lastX = x;
+			lastY = y;
+		};
+
+		const onGestureEnd = () => {
+			this.finalizeDrag();
+			pointerDown = false;
+		};
+
+		this.mainContainer.onpointerup = onGestureEnd;
+		this.mainContainer.onpointercancel = onGestureEnd;
+	}
+
+	/**
+	 * Updates the position of this menu **during** a drag. After a drag ends,
+	 * {@link finalizeDrag} should be called.
+	 */
+	private handleDrag(_deltaX: number, deltaY: number) {
+		this.sidebarY.set(this.sidebarY.get() + deltaY);
+	}
+
+	/**
+	 * Moves the menu to a valid location or closes it, depending on
+	 * the position set by the drag.
+	 */
+	private finalizeDrag() {
+		if (this.sidebarY.get() > this.sidebarContainer.clientHeight / 2) {
+			this.sidebarVisible.set(false);
+		}
+
+		this.sidebarY.set(0);
 	}
 }
