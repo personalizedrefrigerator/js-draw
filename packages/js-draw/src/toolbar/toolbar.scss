@@ -1,8 +1,8 @@
-@import url(./widgets/InsertImageWidget.css);
-@import url(./widgets/OverflowWidget.css);
-@import url(./widgets/PenToolWidget.css);
-@import url(./SidebarToolbar.css);
-@import url(./DropdownToolbar.css);
+@use "./widgets/InsertImageWidget.css";
+@use "./widgets/OverflowWidget.css";
+@use "./widgets/PenToolWidget.css";
+@use "./SidebarToolbar.scss";
+@use "./DropdownToolbar.css";
 
 /* The *main* root toolbar element */
 .toolbar-root {

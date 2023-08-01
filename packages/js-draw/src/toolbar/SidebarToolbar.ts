@@ -43,7 +43,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 		// Setup resizing/dragging
 		this.sidebarY.onUpdateAndNow(y => {
-			if (y > 0) {
+			if (y >= 0) {
 				this.sidebarContainer.style.translate = `0 ${y}px`;
 				this.sidebarContainer.style.paddingBottom = '';
 			} else {
@@ -73,21 +73,48 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 
 		// Make things visible/keep hidden.
-		this.sidebarVisible.onUpdateAndNow(visible => {
-			if (visible) {
-				this.mainContainer.style.display = '';
-
-				// Focus the close button when first shown.
-				this.closeButton.focus();
-			} else {
-				this.mainContainer.style.display = 'none';
-			}
-		});
+		this.listenForVisibilityChanges();
 
 		this.sidebarContainer.replaceChildren(this.closeButton, this.sidebarContent);
 		this.mainContainer.replaceChildren(this.sidebarContainer);
 		parent.appendChild(this.mainContainer);
+	}
 
+	protected listenForVisibilityChanges() {
+		let animationTimeout: ReturnType<typeof setTimeout>|null = null;
+		const animationDuration = 150;
+
+		if (!this.sidebarVisible.get()) {
+			this.mainContainer.style.display = 'none';
+		}
+
+		this.sidebarVisible.onUpdate(visible => {
+			const animationProperties = `${animationDuration}ms ease`;
+
+			if (visible) {
+				this.sidebarY.set(0);
+				if (animationTimeout) {
+					clearTimeout(animationTimeout);
+					animationTimeout = null;
+				}
+
+				this.mainContainer.style.display = '';
+				this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-in`;
+				this.mainContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-in`;
+
+
+				// Focus the close button when first shown.
+				this.closeButton.focus();
+			} else if (animationTimeout === null) {
+				this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-out`;
+				this.mainContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-out`;
+
+				animationTimeout = setTimeout(() => {
+					this.mainContainer.style.display = 'none';
+					animationTimeout = null;
+				}, animationDuration);
+			}
+		});
 	}
 
 	protected override addWidgetInternal(widget: BaseWidget) {
@@ -200,8 +227,8 @@ export default class SidebarToolbar extends DropdownToolbar {
 		this.sidebarContainer.style.transition = '';
 		if (this.sidebarY.get() > this.sidebarContainer.clientHeight / 2) {
 			this.sidebarVisible.set(false);
+		} else {
+			this.sidebarY.set(0);
 		}
-
-		this.sidebarY.set(0);
 	}
 }
