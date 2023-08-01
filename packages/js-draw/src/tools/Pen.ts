@@ -41,8 +41,8 @@ export default class Pen extends BaseTool {
 		});
 
 		this.styleValue.onUpdateAndNow(newValue => {
-			this.noteUpdated();
 			this.style = newValue;
+			this.noteUpdated();
 		});
 	}
 
