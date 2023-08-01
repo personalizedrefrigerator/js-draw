@@ -21,11 +21,41 @@
 	padding-left: 10px;
 	padding-right: 10px;
 	max-width: 400px;
+
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
-	transition: translate 0.1s ease;
+	transition: translate 0.1s ease, padding-bottom 0.1s ease;
 }
 
 .toolbar-sidebar .toolbar-toolContainer {
 	display: inline-block;
+}
+
+.toolbar-sidebar .drag-elem {
+	height: 30px;
+	display: block;
+
+	position: relative;
+	top: -5px;
+
+	width: 100%;
+	border: none;
+	box-shadow: none;
+
+	background: transparent;
+}
+
+.toolbar-sidebar .drag-elem::before {
+	content: "";
+
+	background-color: var(--icon-color);
+	opacity: 0.5;
+	display: block;
+
+	height: 5px;
+	border-radius: 5px;
+
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
 }

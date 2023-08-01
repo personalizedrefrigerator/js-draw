@@ -10,6 +10,9 @@ import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/Rea
 export default class SidebarToolbar extends DropdownToolbar {
 	private mainContainer: HTMLElement;
 	private sidebarContainer: HTMLElement;
+	private sidebarContent: HTMLElement;
+	private closeButton: HTMLElement;
+
 	private layoutManager: SidebarLayoutManager;
 
 	private sidebarVisible: MutableReactiveValue<boolean>;
@@ -36,13 +39,28 @@ export default class SidebarToolbar extends DropdownToolbar {
 		);
 		this.sidebarContainer.classList.add(`${toolbarCSSPrefix}tool-properties`);
 
+		this.sidebarContent = document.createElement('div');
+
+		// Setup resizing/dragging
 		this.sidebarY.onUpdateAndNow(y => {
-			this.sidebarContainer.style.translate = `0 ${y}px`;
+			if (y > 0) {
+				this.sidebarContainer.style.translate = `0 ${y}px`;
+				this.sidebarContainer.style.paddingBottom = '';
+			} else {
+				this.sidebarContainer.style.translate = '';
+				this.sidebarContainer.style.paddingBottom = `${-y}px`;
+			}
 		});
+
+		this.closeButton = document.createElement('button');
+		this.closeButton.classList.add('drag-elem');
+		this.closeButton.setAttribute('alt', localizationTable.closeToolProperties);
+
+		this.initDragListeners();
 
 		// Initialize the layout manager
 		const setSidebarContent = (...content: HTMLElement[]) => {
-			this.sidebarContainer.replaceChildren(...content);
+			this.sidebarContent.replaceChildren(...content);
 			this.setupColorPickers();
 		};
 
@@ -58,15 +76,18 @@ export default class SidebarToolbar extends DropdownToolbar {
 		this.sidebarVisible.onUpdateAndNow(visible => {
 			if (visible) {
 				this.mainContainer.style.display = '';
+
+				// Focus the close button when first shown.
+				this.closeButton.focus();
 			} else {
 				this.mainContainer.style.display = 'none';
 			}
 		});
 
+		this.sidebarContainer.replaceChildren(this.closeButton, this.sidebarContent);
 		this.mainContainer.replaceChildren(this.sidebarContainer);
 		parent.appendChild(this.mainContainer);
 
-		this.initDragListeners();
 	}
 
 	protected override addWidgetInternal(widget: BaseWidget) {
@@ -86,12 +107,24 @@ export default class SidebarToolbar extends DropdownToolbar {
 	private initDragListeners() {
 		let lastX = 0;
 		let lastY = 0;
+		let startX = 0;
+		let startY = 0;
 		let pointerDown = false;
+		let capturedPointerId: number|null = null;
+
+		const dragElements = [ this.closeButton, this.mainContainer ];
 
 		this.mainContainer.onpointerdown = event => {
-			if (event.isPrimary && event.target === this.mainContainer) {
+			if (event.isPrimary && dragElements.includes(event.target as HTMLElement)) {
+				event.preventDefault();
 				lastX = event.clientX;
 				lastY = event.clientY;
+
+				startX = event.clientX;
+				startY = event.clientY;
+
+				this.mainContainer.setPointerCapture(event.pointerId);
+				capturedPointerId = event.pointerId;
 
 				pointerDown = true;
 			}
@@ -101,6 +134,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 			if (!event.isPrimary || !pointerDown) {
 				return;
 			}
+			event.preventDefault();
 
 			const x = event.clientX;
 			const y = event.clientY;
@@ -113,9 +147,36 @@ export default class SidebarToolbar extends DropdownToolbar {
 			lastY = y;
 		};
 
+		let gestureEndTimestamp = 0;
 		const onGestureEnd = () => {
+			// If the pointerup/pointercancel event was for a pointer not being tracked,
+			if (!pointerDown) {
+				return;
+			}
+
+			gestureEndTimestamp = Date.now();
+
+			// Roughly a click? Close the sidebar
+			if (Math.hypot(lastX - startX, lastY - startY) < 5) {
+				this.sidebarVisible.set(false);
+			}
+
+			if (capturedPointerId !== null) {
+				this.mainContainer.releasePointerCapture(capturedPointerId);
+				capturedPointerId = null;
+			}
+
 			this.finalizeDrag();
 			pointerDown = false;
+		};
+
+		this.closeButton.onclick = () => {
+			const wasJustDragging = Date.now() - gestureEndTimestamp < 100;
+
+			// Ignore the click event if it was caused by dragging the button.
+			if (!wasJustDragging) {
+				this.sidebarVisible.set(false);
+			}
 		};
 
 		this.mainContainer.onpointerup = onGestureEnd;
@@ -127,6 +188,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 	 * {@link finalizeDrag} should be called.
 	 */
 	private handleDrag(_deltaX: number, deltaY: number) {
+		this.sidebarContainer.style.transition = 'none';
 		this.sidebarY.set(this.sidebarY.get() + deltaY);
 	}
 
@@ -135,6 +197,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 	 * the position set by the drag.
 	 */
 	private finalizeDrag() {
+		this.sidebarContainer.style.transition = '';
 		if (this.sidebarY.get() > this.sidebarContainer.clientHeight / 2) {
 			this.sidebarVisible.set(false);
 		}

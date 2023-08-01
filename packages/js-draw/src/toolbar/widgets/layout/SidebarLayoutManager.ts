@@ -28,12 +28,9 @@ export default class SidebarLayoutManager implements WidgetContentLayoutManager 
 			visible,
 			requestShow: () => {
 				this.sidebarVisibility.set(true);
-				const header = document.createElement('h2');
-				header.innerText = this.localization.toolProperties;
-				this.setSidebarContent(header, contentElem);
+				this.setSidebarContent(contentElem);
 				this.announceForAccessibility(this.localization.dropdownShown(parent.getTitle()));
 				this.visibleWidgetContent.set(result);
-				// this.sidebarContent.focus();
 			},
 			onToolActivated: () => {
 				result?.requestShow();
