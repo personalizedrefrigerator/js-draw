@@ -22,8 +22,8 @@
 
 		"baseUrl": "./packages",
 		"paths": {
-			"js-draw": ["packages/js-draw/src"],
-			"@js-draw/*": ["packages/*/src"]
+			"js-draw": ["js-draw/src"],
+			"@js-draw/*": ["*/src"]
 		}
 	},
 	"exclude": [

@@ -136,7 +136,7 @@ class TranspiledDirectory {
 	private async runBuild(watch: boolean) {
 		// Largely based on
 		// https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#incremental-build-support-using-the-language-services
-		const fileVersions: ts.MapLike<{ version: number }> = {};
+		const fileVersions: Record<string, number> = {};
 		const targetFiles = this.rootConfig.fileNames ?? await this.getTargetFiles();
 
 		const documentRegistry = ts.createDocumentRegistry();
@@ -149,7 +149,9 @@ class TranspiledDirectory {
 
 			const servicesHost: ts.LanguageServiceHost = {
 				getScriptFileNames: () => targetFiles,
-				getScriptVersion: filePath => fileVersions[filePath]?.version?.toString(),
+				getScriptVersion: filePath => {
+					return fileVersions[path.resolve(filePath)]?.toString();
+				},
 				getScriptSnapshot: fileName => {
 					if (!fs.existsSync(fileName)) {
 						return undefined;
@@ -197,7 +199,7 @@ class TranspiledDirectory {
 
 			// Errors?
 			if (diagnostics.length > 0 || output.emitSkipped) {
-				console.error(`[💥] Failed to transpile ${fileName}`);
+				console.error(`[💥] Failed to compile ${fileName}`);
 				diagnostics.forEach(this.reportDiagnostic.bind(this));
 				return false;
 			}
@@ -253,39 +255,41 @@ class TranspiledDirectory {
 
 			const watchers: ts.FileWatcher[] = [];
 
-			for (const fileName of targetFiles) {
-				fileVersions[fileName] ??= { version: 0 };
+			for (const filePath of targetFiles) {
+				const absolutePath = path.resolve(filePath);
+				fileVersions[absolutePath] ??= 0;
 
 				const pollInterval = 1000;
-				const watcher = ts.sys.watchFile(fileName, () => {
-					console.log(`Watcher: ${fileName} updated`);
-					fileVersions[fileName] ??= { version: 0 };
-					fileVersions[fileName].version ++;
+				const watcher = ts.sys.watchFile(filePath, () => {
+					console.log(`[ ] Watcher: ${filePath} updated`);
+					fileVersions[absolutePath] ++;
 
 					const updateFile = async () => {
-						if (fs.existsSync(fileName)) {
-							associatedFiles[fileName] = [];
+						if (fs.existsSync(filePath)) {
+							associatedFiles[filePath] = [];
 							try {
-								updatingFile[fileName] = true;
-								await emitFile('cjs', fileName);
-								await emitFile('mjs', fileName);
+								updatingFile[filePath] = true;
+								await emitFile('cjs', filePath);
+								await emitFile('mjs', filePath);
+
+								console.log(`[✅] Emitted ${filePath}`);
 							} finally {
-								updatingFile[fileName] = false;
+								updatingFile[filePath] = false;
 							}
 
-							if (postUpdateFile[fileName]) {
-								void postUpdateFile[fileName]();
-								delete postUpdateFile[fileName];
+							if (postUpdateFile[filePath]) {
+								void postUpdateFile[filePath]();
+								delete postUpdateFile[filePath];
 							}
 						} else {
-							for (const path of associatedFiles[fileName] ?? []) {
+							for (const path of associatedFiles[filePath] ?? []) {
 								fs.unlinkSync(path);
 							}
 						}
 					};
 
-					if (updatingFile[fileName]) {
-						postUpdateFile[fileName] = updateFile;
+					if (updatingFile[filePath]) {
+						postUpdateFile[filePath] = updateFile;
 					} else {
 						updateFile();
 					}
@@ -299,7 +303,7 @@ class TranspiledDirectory {
 				}
 			};
 		} else {
-			console.info('[✅] Built successfully!');
+			console.info('[✅] Compiled successfully!');
 		}
 
 		return null;
