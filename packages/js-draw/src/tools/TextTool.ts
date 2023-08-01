@@ -38,7 +38,7 @@ export default class TextTool extends BaseTool {
 			},
 		});
 		this.textStyleValue.onUpdateAndNow(() => {
-			this.textStyle = this.textStyleValue.getValue();
+			this.textStyle = this.textStyleValue.get();
 
 			this.updateTextInput();
 			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
@@ -297,7 +297,7 @@ export default class TextTool extends BaseTool {
 
 	public setFontFamily(fontFamily: string) {
 		if (fontFamily !== this.textStyle.fontFamily) {
-			this.textStyleValue.setValue({
+			this.textStyleValue.set({
 				...this.textStyle,
 				fontFamily: fontFamily,
 			});
@@ -306,7 +306,7 @@ export default class TextTool extends BaseTool {
 
 	public setColor(color: Color4) {
 		if (!color.eq(this.textStyle.renderingStyle.fill)) {
-			this.textStyleValue.setValue({
+			this.textStyleValue.set({
 				...this.textStyle,
 				renderingStyle: {
 					...this.textStyle.renderingStyle,
@@ -318,7 +318,7 @@ export default class TextTool extends BaseTool {
 
 	public setFontSize(size: number) {
 		if (size !== this.textStyle.size) {
-			this.textStyleValue.setValue({
+			this.textStyleValue.set({
 				...this.textStyle,
 				size,
 			});
@@ -334,6 +334,6 @@ export default class TextTool extends BaseTool {
 	}
 
 	private setTextStyle(style: TextRenderingStyle) {
-		this.textStyleValue.setValue(style);
+		this.textStyleValue.set(style);
 	}
 }

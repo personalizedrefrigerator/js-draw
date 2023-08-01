@@ -4,12 +4,14 @@ import BaseWidget from './widgets/BaseWidget';
 import { toolbarCSSPrefix } from './constants';
 import DropdownToolbar from './DropdownToolbar';
 import SidebarLayoutManager from './widgets/layout/SidebarLayoutManager';
+import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/ReactiveValue';
 
 // TODO(!): Doesn't make sense to extend DropdownToolbar
 export default class SidebarToolbar extends DropdownToolbar {
 	private mainContainer: HTMLElement;
 	private sidebarContainer: HTMLElement;
 	private layoutManager: SidebarLayoutManager;
+	private sidebarVisible: MutableReactiveValue<boolean>;
 
 	/** @internal */
 	public constructor(
@@ -18,6 +20,10 @@ export default class SidebarToolbar extends DropdownToolbar {
 	) {
 		super(editor, parent, localizationTable);
 
+		this.sidebarVisible = reactiveValueFromInitialValue(false);
+
+		this.mainContainer = document.createElement('div');
+		this.mainContainer.classList.add(`${toolbarCSSPrefix}sidebar-container`);
 
 		this.sidebarContainer = document.createElement('div');
 		this.sidebarContainer.classList.add(
@@ -33,30 +39,21 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 		this.layoutManager = new SidebarLayoutManager(
 			setSidebarContent,
-			this.setSidebarVisible.bind(this),
-			this.isSidebarVisible.bind(this),
+			this.sidebarVisible,
 			editor.announceForAccessibility.bind(editor),
 			localizationTable,
 		);
 
-		parent.appendChild(this.sidebarContainer);
-	}
+		this.mainContainer.replaceChildren(this.sidebarContainer);
+		parent.appendChild(this.mainContainer);
 
-	private isSidebarVisible() {
-		return this.sidebarContainer.style.display === 'block';
-	}
-
-	private setSidebarVisible(visible: boolean) {
-		const currentlyVisible = this.isSidebarVisible();
-		if (currentlyVisible === visible) {
-			return;
-		}
-
-		if (visible) {
-			this.sidebarContainer.style.display = 'block';
-		} else {
-			this.sidebarContainer.style.display = 'none';
-		}
+		this.sidebarVisible.onUpdateAndNow(visible => {
+			if (visible) {
+				this.mainContainer.style.display = '';
+			} else {
+				this.mainContainer.style.display = 'none';
+			}
+		});
 	}
 
 	protected override addWidgetInternal(widget: BaseWidget) {

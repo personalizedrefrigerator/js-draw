@@ -1,14 +1,14 @@
+import { MutableReactiveValue, reactiveValueFromCallback, reactiveValueFromInitialValue } from '../../../util/ReactiveValue';
 import { ToolbarLocalization } from '../../localization';
-import { WidgetContentDisplay, WidgetContentLayoutManager, WidgetContentParent } from './types';
+import { ToolMenu, WidgetContentLayoutManager, ToolMenuParent } from './types';
 
 export default class SidebarLayoutManager implements WidgetContentLayoutManager {
-	private visibleWidgetContent: WidgetContentDisplay|null = null;
+	private visibleWidgetContent: MutableReactiveValue<ToolMenu|null> = reactiveValueFromInitialValue(null);
 
 
 	public constructor(
 		private setSidebarContent: (...content: HTMLElement[])=>void,
-		private setSidebarVisible: (visible: boolean)=>void,
-		private isSidebarVisible: ()=>boolean,
+		private sidebarVisibility: MutableReactiveValue<boolean>,
 		private announceForAccessibility: (text: string)=>void,
 		private localization: ToolbarLocalization,
 	) {
@@ -16,47 +16,50 @@ export default class SidebarLayoutManager implements WidgetContentLayoutManager 
 	}
 
 	/** Creates a dropdown within `parent`. */
-	public createContentDisplay(parent: WidgetContentParent): WidgetContentDisplay {
+	public createToolMenu(parent: ToolMenuParent): ToolMenu {
 		const contentElem = document.createElement('div');
+		let result: ToolMenu|null = null;
 
-		const result: WidgetContentDisplay = {
+		const visible = reactiveValueFromCallback(() => {
+			return this.visibleWidgetContent.get() === result && this.sidebarVisibility.get();
+		}, [ this.visibleWidgetContent, this.sidebarVisibility ]);
+
+		result = {
+			visible,
 			requestShow: () => {
-				this.setSidebarVisible(true);
+				this.sidebarVisibility.set(true);
 				const header = document.createElement('h2');
 				header.innerText = this.localization.toolProperties;
 				this.setSidebarContent(header, contentElem);
 				this.announceForAccessibility(this.localization.dropdownShown(parent.getTitle()));
-				this.visibleWidgetContent = result;
+				this.visibleWidgetContent.set(result);
 				// this.sidebarContent.focus();
 			},
-			noteActivated: () => {
-				result.requestShow();
+			onToolActivated: () => {
+				result?.requestShow();
 			},
 			requestHide: () => {
-				if (result.isVisible()) {
-					this.setSidebarVisible(false);
+				if (visible.get()) {
+					this.sidebarVisibility.set(false);
 				}
 			},
-			isVisible: () => {
-				return this.visibleWidgetContent === result && this.isSidebarVisible();
-			},
-			addItem: (item: HTMLElement) => {
+			appendChild: (item: HTMLElement) => {
 				contentElem.appendChild(item);
 			},
 			clearChildren: () => {
 				contentElem.replaceChildren();
 			},
 			destroy: () => {
-				result.requestHide();
+				result?.requestHide();
 
 				if (contentElem.parentElement) {
 					contentElem.remove();
 				}
 
-				if (this.visibleWidgetContent === result) {
-					this.visibleWidgetContent = null;
+				if (this.visibleWidgetContent.get() === result) {
+					this.visibleWidgetContent.set(null);
 				}
-			}
+			},
 		};
 
 		return result;

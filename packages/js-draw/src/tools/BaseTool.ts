@@ -12,7 +12,7 @@ export default abstract class BaseTool implements InputEventListener {
 
 	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
 		this.#enabled = reactiveValueFromInitialValue(true);
-		this.#enabled.addUpdateListener(enabled => {
+		this.#enabled.onUpdate(enabled => {
 			// Ensure that at most one tool in the group is enabled.
 			if (enabled) {
 				this.#group?.notifyEnabled(this);
@@ -125,11 +125,11 @@ export default abstract class BaseTool implements InputEventListener {
 	}
 
 	public setEnabled(enabled: boolean) {
-		this.#enabled.setValue(enabled);
+		this.#enabled.set(enabled);
 	}
 
 	public isEnabled(): boolean {
-		return this.#enabled.getValue();
+		return this.#enabled.get();
 	}
 
 	/**

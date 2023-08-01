@@ -203,7 +203,7 @@ export default class Pen extends BaseTool {
 
 	public setColor(color: Color4): void {
 		if (color.toHexString() !== this.style.color.toHexString()) {
-			this.styleValue.setValue({
+			this.styleValue.set({
 				...this.style,
 				color,
 			});
@@ -212,7 +212,7 @@ export default class Pen extends BaseTool {
 
 	public setThickness(thickness: number) {
 		if (thickness !== this.style.thickness) {
-			this.styleValue.setValue({
+			this.styleValue.set({
 				...this.style,
 				thickness,
 			});
@@ -221,7 +221,7 @@ export default class Pen extends BaseTool {
 
 	public setStrokeFactory(factory: ComponentBuilderFactory) {
 		if (factory !== this.style.factory) {
-			this.styleValue.setValue({
+			this.styleValue.set({
 				...this.style,
 				factory,
 			});

@@ -4,7 +4,7 @@ import { KeyPressEvent, keyPressEventFromHTMLEvent, keyUpEventFromHTMLEvent } fr
 import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import DropdownLayoutManager from './layout/DropdownLayoutManager';
-import { WidgetContentDisplay, WidgetContentLayoutManager } from './layout/types';
+import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
 
 export type SavedToolbuttonState = Record<string, any>;
 
@@ -13,7 +13,7 @@ export default abstract class BaseWidget {
 	private button: HTMLElement;
 	private icon: Element|null;
 	private layoutManager: WidgetContentLayoutManager;
-	private dropdown: WidgetContentDisplay|null = null;
+	private dropdown: ToolMenu|null = null;
 	private dropdownContent: HTMLElement;
 	private dropdownIcon: Element;
 	private label: HTMLLabelElement;
@@ -222,13 +222,13 @@ export default abstract class BaseWidget {
 			this.dropdownIcon = this.createDropdownIcon();
 			this.button.appendChild(this.dropdownIcon);
 
-			this.dropdown = this.layoutManager.createContentDisplay({
+			this.dropdown = this.layoutManager.createToolMenu({
 				target: this.button,
 				getTitle: () => this.getTitle(),
 				isToplevel: () => this.toplevel,
 			});
 
-			this.dropdown.addItem(this.dropdownContent);
+			this.dropdown.appendChild(this.dropdownContent);
 		}
 
 		this.setDropdownVisible(false);
@@ -304,7 +304,7 @@ export default abstract class BaseWidget {
 	 * In those layout managers, makes this dropdown visible.
 	 */
 	protected activateDropdown() {
-		this.dropdown?.noteActivated();
+		this.dropdown?.onToolActivated();
 	}
 
 	public canBeInOverflowMenu(): boolean {
@@ -329,7 +329,7 @@ export default abstract class BaseWidget {
 	}
 
 	protected isDropdownVisible(): boolean {
-		return this.dropdown?.isVisible() ?? false;
+		return this.dropdown?.visible?.get() ?? false;
 	}
 
 	protected isSelected(): boolean {

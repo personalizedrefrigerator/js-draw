@@ -1,3 +1,4 @@
+import ReactiveValue from 'js-draw/src/util/ReactiveValue';
 
 /**
  * A class that manages whether/what content is shown for a widget.
@@ -7,7 +8,7 @@
  * TODO: Shouldn't be an interface, unless always internal.
  * @internal
  */
-export interface WidgetContentDisplay {
+export interface ToolMenu {
 	/**
 	 * Request that the layout manager show the dropdown. In general,
 	 * this makes the content of the dropdown visible.
@@ -20,14 +21,14 @@ export interface WidgetContentDisplay {
 	 */
 	requestHide(): void;
 
-	/** Returns whether the dropdown is visible (not hidden). */
-	isVisible(): boolean;
+	/** Whether the dropdown is visible (not hidden). */
+	readonly visible: ReactiveValue<boolean>;
 
 	/** Note that the tool associated with this dropdown has been activated. */
-	noteActivated(): void;
+	onToolActivated(): void;
 
-	/** Adds the given `item` to the content of the dropdown. */
-	addItem(item: HTMLElement): void;
+	/** Adds the given `child` to the content of the dropdown. */
+	appendChild(child: HTMLElement): void;
 
 	/** Removes all children from this dropdown. */
 	clearChildren(): void;
@@ -39,7 +40,10 @@ export interface WidgetContentDisplay {
 	destroy(): void;
 }
 
-export interface WidgetContentParent {
+/**
+ * Provides information about the element a tool menu is attached to.
+ */
+export interface ToolMenuParent {
 	/** The dropdown may be added **after** this element. */
 	target: HTMLElement;
 
@@ -60,11 +64,11 @@ export interface WidgetContentParent {
 
 export interface WidgetContentLayoutManager {
 	/**
-	 * Creates a ~~dropdown~~ content display. The dropdown *may* be added to `parent` or addded
+	 * Creates a tool menu (e.g. a dropdown). The dropdown *may* be added to `parent` or addded
 	 * elsewhere (this depends on the layout manager).
 	 *
 	 * Regardless, `parent` should be a place where an absolutely-positioned dropdown
 	 * element could be added.
 	 */
-	createContentDisplay(parent: WidgetContentParent): WidgetContentDisplay;
+	createToolMenu(parent: ToolMenuParent): ToolMenu;
 }

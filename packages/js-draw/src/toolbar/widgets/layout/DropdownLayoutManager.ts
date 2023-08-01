@@ -1,8 +1,9 @@
 import { EditorEventType, EditorNotifier } from '../../../types';
 import EventDispatcher, { DispatcherEventListener } from '../../../EventDispatcher';
 import { ToolbarLocalization } from '../../localization';
-import { WidgetContentDisplay, WidgetContentLayoutManager, WidgetContentParent } from './types';
+import { ToolMenu, WidgetContentLayoutManager, ToolMenuParent } from './types';
 import { toolbarCSSPrefix } from '../../constants';
+import { MutableReactiveValue, reactiveValueFromInitialValue } from '../../../util/ReactiveValue';
 
 enum DropdownEventType {
 	DropdownShown,
@@ -18,16 +19,19 @@ interface DropdownShownEvent {
 
 type NotifierType = EventDispatcher<DropdownEventType, DropdownShownEvent>;
 
-class Dropdown implements WidgetContentDisplay {
+class Dropdown implements ToolMenu {
 	private dropdownContainer: HTMLElement;
+	public readonly visible: MutableReactiveValue<boolean>;
 
 	private dropdownToggleListener: DispatcherEventListener|null = null;
 
 	public constructor(
-		public parent: WidgetContentParent,
+		public parent: ToolMenuParent,
 		private notifier: NotifierType,
 		private onDestroy: ()=>void,
 	) {
+		this.visible = reactiveValueFromInitialValue(false);
+
 		this.dropdownContainer = document.createElement('div');
 		this.dropdownContainer.classList.add(`${toolbarCSSPrefix}dropdown`);
 		this.dropdownContainer.classList.add('hidden');
@@ -48,19 +52,32 @@ class Dropdown implements WidgetContentDisplay {
 		});
 	}
 
-	public noteActivated(): void {
+	public onToolActivated(): void {
 		// Do nothing.
 	}
 
 	protected repositionDropdown() {
 		const dropdownBBox = this.dropdownContainer.getBoundingClientRect();
 		const screenWidth = document.body.clientWidth;
+		const screenHeight = document.body.clientHeight;
+
+		let translateX = undefined;
+		let translateY = undefined;
 
 		if (dropdownBBox.left > screenWidth / 2) {
-			// Use .translate so as not to conflict with CSS animating the
-			// transform property.
 			const targetElem = this.parent.target;
-			this.dropdownContainer.style.translate = `calc(${targetElem.clientWidth + 'px'} - 100%) 0`;
+			translateX = `calc(${targetElem.clientWidth + 'px'} - 100%)`;
+		}
+
+		if (dropdownBBox.bottom > screenHeight) {
+			const targetElem = this.parent.target;
+			translateY = `calc(-${targetElem.clientHeight}px - 100%)`;
+		}
+
+		// Use .translate so as not to conflict with CSS animating the
+		// transform property.
+		if (translateX || translateY) {
+			this.dropdownContainer.style.translate = `${translateX ?? '0'} ${translateY ?? '0'}`;
 		} else {
 			this.dropdownContainer.style.translate = '';
 		}
@@ -70,7 +87,7 @@ class Dropdown implements WidgetContentDisplay {
 	private setVisible(visible: boolean) {
 		// TODO(!): Avoid modifying parent.classList
 		const parentElem = this.parent.target.parentElement!;
-		const currentlyVisible = this.isVisible();
+		const currentlyVisible = this.visible.get();
 		if (currentlyVisible === visible) {
 			return;
 		}
@@ -86,6 +103,7 @@ class Dropdown implements WidgetContentDisplay {
 
 		const animationDuration = 150; // ms
 
+		this.visible.set(visible);
 		if (visible) {
 			this.dropdownContainer.classList.remove('hidden');
 			parentElem.classList.add('dropdownVisible');
@@ -132,11 +150,7 @@ class Dropdown implements WidgetContentDisplay {
 		this.setVisible(false);
 	}
 
-	public isVisible(): boolean {
-		return !this.dropdownContainer.classList.contains('hidden');
-	}
-
-	public addItem(item: HTMLElement): void {
+	public appendChild(item: HTMLElement): void {
 		this.dropdownContainer.appendChild(item);
 	}
 
@@ -198,7 +212,7 @@ export default class DropdownLayoutManager implements WidgetContentLayoutManager
 	}
 
 	/** Creates a dropdown within `parent`. */
-	public createContentDisplay(parent: WidgetContentParent): WidgetContentDisplay {
+	public createToolMenu(parent: ToolMenuParent): ToolMenu {
 		const dropdown = new Dropdown(
 			parent,
 			this.notifier,

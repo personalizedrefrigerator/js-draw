@@ -1,5 +1,3 @@
-
-
 import KeyboardShortcutManager from '../../shortcuts/KeyboardShortcutManager';
 
 // Selection

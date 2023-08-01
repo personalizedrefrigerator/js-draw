@@ -24,7 +24,7 @@ export default class Eraser extends BaseTool {
 		super(editor.notifier, description);
 
 		this.thicknessValue = reactiveValueFromInitialValue(this.thickness);
-		this.thicknessValue.addUpdateListener(value => {
+		this.thicknessValue.onUpdate(value => {
 			this.thickness = value;
 
 			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
@@ -168,6 +168,6 @@ export default class Eraser extends BaseTool {
 	}
 
 	public setThickness(thickness: number) {
-		this.thicknessValue.setValue(thickness);
+		this.thicknessValue.set(thickness);
 	}
 }

@@ -17,17 +17,17 @@ export interface ReactiveValue<T> {
 	 *
 	 * The result of this **should not be modified** (use `setValue` instead).
 	 */
-	getValue(): T;
+	get(): T;
 
 	/**
 	 * Registers a listener that is notified when the value of this changes.
 	 */
-	addUpdateListener(listener: UpdateCallback<T>): ListenerResult;
+	onUpdate(listener: UpdateCallback<T>): ListenerResult;
 
 	/**
 	 * Calls `callback` immediately, then registers `callback` as an onUpdateListener.
 	 *
-	 * @see {@link addUpdateListener}.
+	 * @see {@link onUpdate}.
 	 */
 	onUpdateAndNow(callback: UpdateCallback<T>): ListenerResult;
 }
@@ -36,9 +36,9 @@ export interface MutableReactiveValue<T> extends ReactiveValue<T> {
 	/**
 	 * Changes the value of this and fires all update listeners.
 	 *
-	 * @see {@link addUpdateListener}
+	 * @see {@link onUpdate}
 	 */
-	setValue(newValue: T): void;
+	set(newValue: T): void;
 }
 
 const noOpUpdateListenerResult = {
@@ -63,7 +63,7 @@ class ReactiveValueImpl<T> implements MutableReactiveValue<T> {
 		this.#onUpdateListeners = [];
 	}
 
-	public setValue(newValue: T) {
+	public set(newValue: T) {
 		if (this.#value === newValue) {
 			return;
 		}
@@ -75,11 +75,11 @@ class ReactiveValueImpl<T> implements MutableReactiveValue<T> {
 		}
 	}
 
-	public getValue() {
+	public get() {
 		return this.#value;
 	}
 
-	public addUpdateListener(listener: (value: T)=>void) {
+	public onUpdate(listener: (value: T)=>void) {
 		// **Note**: If memory is a concern, listeners should avoid referencing this
 		// reactive value directly. Doing so allows the value to be garbage collected when
 		// no longer referenced.
@@ -96,8 +96,8 @@ class ReactiveValueImpl<T> implements MutableReactiveValue<T> {
 	}
 
 	public onUpdateAndNow(callback: (value: T)=>void) {
-		callback(this.getValue());
-		return this.addUpdateListener(callback);
+		callback(this.get());
+		return this.onUpdate(callback);
 	}
 }
 
@@ -114,12 +114,12 @@ export const reactiveValueFromCallback = <T> (
 	const resultRef = new WeakRef(result);
 
 	for (const value of sourceValues) {
-		const listener = value.addUpdateListener(() => {
+		const listener = value.onUpdate(() => {
 			// Use resultRef to allow `result` to be garbage collected
 			// despite this listener.
 			const value = resultRef.deref();
 			if (value) {
-				value.setValue(callback());
+				value.set(callback());
 			} else {
 				listener.remove();
 			}
@@ -141,8 +141,8 @@ export const reactiveValueFromImmutable = <T> (
 	value: T
 ): ReactiveValue<T> => {
 	return {
-		getValue: () => value,
-		addUpdateListener: noOpSetUpdateListener,
+		get: () => value,
+		onUpdate: noOpSetUpdateListener,
 		onUpdateAndNow: callback => {
 			callback(value);
 			return noOpUpdateListenerResult;
@@ -155,16 +155,16 @@ export const reactiveValueFromPropertyMutable = <SourceType extends object, Name
 	propertyName: Name,
 ): MutableReactiveValue<SourceType[Name]> => {
 	const child = reactiveValueFromInitialValue(
-		sourceValue.getValue()[propertyName]
+		sourceValue.get()[propertyName]
 	);
 	const childRef = new WeakRef(child);
 
 	// When the source is updated...
-	const sourceListener = sourceValue.addUpdateListener(newValue => {
+	const sourceListener = sourceValue.onUpdate(newValue => {
 		const childValue = childRef.deref();
 
 		if (childValue) {
-			childValue.setValue(newValue[propertyName]);
+			childValue.set(newValue[propertyName]);
 		} else {
 			// TODO: What if `sourceValue` would be dropped before
 			// the child value?
@@ -174,9 +174,9 @@ export const reactiveValueFromPropertyMutable = <SourceType extends object, Name
 
 	// When the child is updated, also apply the update to the
 	// parent.
-	child.addUpdateListener(newValue => {
-		sourceValue.setValue({
-			...sourceValue.getValue(),
+	child.onUpdate(newValue => {
+		sourceValue.set({
+			...sourceValue.get(),
 			[propertyName]: newValue,
 		});
 	});
@@ -189,19 +189,19 @@ export const mapReactiveValueMutable = <A, B> (
 	map: (a: A)=>B,
 	inverseMap: (b: B)=>A,
 ): MutableReactiveValue<B> => {
-	const result = reactiveValueFromInitialValue(map(source.getValue()));
+	const result = reactiveValueFromInitialValue(map(source.get()));
 
-	let expectedResultValue = result.getValue();
-	source.addUpdateListener(newValue => {
+	let expectedResultValue = result.get();
+	source.onUpdate(newValue => {
 		expectedResultValue = map(newValue);
-		result.setValue(expectedResultValue);
+		result.set(expectedResultValue);
 	});
 
-	result.addUpdateListener(newValue => {
+	result.onUpdate(newValue => {
 		// Prevent infinite loops if inverseMap is not a true
 		// inverse.
 		if (newValue !== expectedResultValue) {
-			source.setValue(inverseMap(newValue));
+			source.set(inverseMap(newValue));
 		}
 	});
 
@@ -212,10 +212,10 @@ export const mapReactiveValue = <A, B> (
 	source: ReactiveValue<A>,
 	map: (a: A)=>B,
 ): ReactiveValue<B> => {
-	const result = reactiveValueFromInitialValue(map(source.getValue()));
+	const result = reactiveValueFromInitialValue(map(source.get()));
 
-	source.addUpdateListener(newValue => {
-		result.setValue(map(newValue));
+	source.onUpdate(newValue => {
+		result.set(map(newValue));
 	});
 
 	return result;
