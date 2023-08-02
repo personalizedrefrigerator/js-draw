@@ -177,12 +177,14 @@ export default class SidebarToolbar extends DropdownToolbar {
 				return true;
 			}
 
-			const draggableElementTypes = [ 'DIV' ];
+			// Some inputs handle dragging themselves. Don't also interpret such gestures
+			// as dragging the dropdown.
+			const undraggableElementTypes = [ 'INPUT' ];
 
 			let hasSuitableAncestors = false;
 			let ancestor = element.parentElement;
 			while (ancestor) {
-				if (!draggableElementTypes.includes(ancestor.tagName)) {
+				if (undraggableElementTypes.includes(ancestor.tagName)) {
 					break;
 				}
 				if (ancestor === this.sidebarContainer) {
@@ -192,14 +194,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 				ancestor = ancestor.parentElement;
 			}
 
-			return draggableElementTypes.includes(element.tagName) && hasSuitableAncestors;
-		};
-
-		// Required on iOS -- allow touch events to drag the toolbar without being canceled.
-		this.sidebarContainer.ontouchstart = event => {
-			if (isDraggableElement(event.target as HTMLElement)) {
-				event.preventDefault();
-			}
+			return !undraggableElementTypes.includes(element.tagName) && hasSuitableAncestors;
 		};
 
 		this.sidebarContainer.addEventListener('pointerdown', event => {
@@ -208,7 +203,6 @@ export default class SidebarToolbar extends DropdownToolbar {
 			}
 
 			if (event.isPrimary) {
-				event.preventDefault();
 				lastX = event.clientX;
 				lastY = event.clientY;
 
@@ -219,7 +213,6 @@ export default class SidebarToolbar extends DropdownToolbar {
 				capturedPointerId = event.pointerId;
 
 				pointerDown = true;
-				return true;
 			}
 
 			return undefined;
@@ -229,7 +222,6 @@ export default class SidebarToolbar extends DropdownToolbar {
 			if (!event.isPrimary || !pointerDown) {
 				return undefined;
 			}
-			event.preventDefault();
 
 			const x = event.clientX;
 			const y = event.clientY;
@@ -240,17 +232,15 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 			lastX = x;
 			lastY = y;
-			return true;
 		};
 
 		let gestureEndTimestamp = 0;
-		const onGestureEnd = (event: Event) => {
+		const onGestureEnd = (_event: Event) => {
 			// If the pointerup/pointercancel event was for a pointer not being tracked,
 			if (!pointerDown) {
 				return;
 			}
 
-			event.preventDefault();
 			gestureEndTimestamp = Date.now();
 
 			if (capturedPointerId !== null) {

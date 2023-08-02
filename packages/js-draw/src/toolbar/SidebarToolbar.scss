@@ -33,7 +33,9 @@
 }
 
 .toolbar-sidebar {
-	touch-action: manipulation;
+	touch-action: none;
+	user-select: none;
+
 	background-color: var(--primary-background-color);
 	--icon-color: var(--primary-foreground-color);
 
@@ -41,12 +43,19 @@
 
 	padding-left: 10px;
 	padding-right: 10px;
-	max-width: 400px;
 
-	$border-radius: 20px;
+	width: min(420px, 100vw);
+	box-sizing: border-box;
+
+	$border-radius: 30px;
 	border-top-left-radius: $border-radius;
 	border-top-right-radius: $border-radius;
+
 	transition: translate 0.1s ease, padding-bottom 0.1s ease;
+
+	input, textarea {
+		user-select: auto;
+	}
 
 	.toolbar-toolContainer {
 		display: inline-block;
