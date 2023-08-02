@@ -1,8 +1,8 @@
-import { mapReactiveValue, mapReactiveValueMutable, reactiveValueFromCallback, reactiveValueFromImmutable, reactiveValueFromInitialValue, reactiveValueFromPropertyMutable } from './ReactiveValue';
+import { ReactiveValue, MutableReactiveValue } from './ReactiveValue';
 
 describe('ReactiveValue', () => {
 	it('should fire update listeners on update', () => {
-		const value = reactiveValueFromInitialValue(3);
+		const value = ReactiveValue.fromInitialValue(3);
 		const listener = jest.fn();
 		const { remove: removeListener } = value.onUpdateAndNow(listener);
 
@@ -25,12 +25,12 @@ describe('ReactiveValue', () => {
 	});
 
 	it('values from callbacks should derive values from the callback', () => {
-		const sourceValue1 = reactiveValueFromInitialValue('test');
-		const sourceValue2 = reactiveValueFromInitialValue('test2');
-		const sourceValue3 = reactiveValueFromImmutable(3);
+		const sourceValue1 = ReactiveValue.fromInitialValue('test');
+		const sourceValue2 = ReactiveValue.fromInitialValue('test2');
+		const sourceValue3 = ReactiveValue.fromImmutable(3);
 
 		// Create a value that is computed from the three above values.
-		const derivedValue1 = reactiveValueFromCallback(() => {
+		const derivedValue1 = ReactiveValue.fromCallback(() => {
 			return [
 				sourceValue1.get(),
 				sourceValue2.get(),
@@ -45,7 +45,7 @@ describe('ReactiveValue', () => {
 		expect(derivedValue1Listener).toHaveBeenCalledTimes(0);
 
 		// Create a value that is computed just from derivedValue1
-		const derivedValue2 = reactiveValueFromCallback(() => {
+		const derivedValue2 = ReactiveValue.fromCallback(() => {
 			return derivedValue1.get() + '!';
 		}, [ derivedValue1 ]);
 
@@ -78,14 +78,14 @@ describe('ReactiveValue', () => {
 	});
 
 	it('should be able to create values from properties', () => {
-		const sourceValue = reactiveValueFromInitialValue({
+		const sourceValue = ReactiveValue.fromInitialValue({
 			a: 1,
 			b: 2,
 			c: { d: 3 },
 		});
 
-		const destValue1 = reactiveValueFromPropertyMutable(sourceValue, 'c');
-		const destValue2 = reactiveValueFromPropertyMutable(sourceValue, 'b');
+		const destValue1 = MutableReactiveValue.fromProperty(sourceValue, 'c');
+		const destValue2 = MutableReactiveValue.fromProperty(sourceValue, 'b');
 		expect(destValue1.get()).toBe(sourceValue.get().c);
 		expect(destValue2.get()).toBe(2);
 
@@ -116,8 +116,8 @@ describe('ReactiveValue', () => {
 	});
 
 	it('mutable map should be bidirectional', () => {
-		const sourceValue = reactiveValueFromInitialValue(5);
-		const mappedValue = mapReactiveValueMutable(
+		const sourceValue = ReactiveValue.fromInitialValue(5);
+		const mappedValue = MutableReactiveValue.map(
 			sourceValue, a => a ** 2, b => Math.sqrt(b),
 		);
 
@@ -133,9 +133,9 @@ describe('ReactiveValue', () => {
 	});
 
 	it('single-directional map should apply the given mapping function', () => {
-		const sourceValue = reactiveValueFromInitialValue(1);
-		const midValue = mapReactiveValue(sourceValue, a => a * 2);
-		const destValue = mapReactiveValue(midValue, _ => 0);
+		const sourceValue = ReactiveValue.fromInitialValue(1);
+		const midValue = ReactiveValue.map(sourceValue, a => a * 2);
+		const destValue = ReactiveValue.map(midValue, _ => 0);
 
 		const sourceUpdateFn = jest.fn();
 		const midUpdateFn = jest.fn();

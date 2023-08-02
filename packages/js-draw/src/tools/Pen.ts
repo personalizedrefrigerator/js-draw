@@ -10,7 +10,7 @@ import { ComponentBuilder, ComponentBuilderFactory } from '../components/builder
 import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 import InputStabilizer from './InputFilter/InputStabilizer';
-import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/ReactiveValue';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 export interface PenStyle {
 	readonly color: Color4;
@@ -33,7 +33,7 @@ export default class Pen extends BaseTool {
 	) {
 		super(editor.notifier, description);
 
-		this.styleValue = reactiveValueFromInitialValue<PenStyle>({
+		this.styleValue = ReactiveValue.fromInitialValue<PenStyle>({
 			factory: makeFreehandLineBuilder,
 			color: Color4.blue,
 			thickness: 4,

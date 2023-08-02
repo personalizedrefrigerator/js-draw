@@ -10,7 +10,7 @@ import { ToolLocalization } from './localization';
 import Erase from '../commands/Erase';
 import uniteCommands from '../commands/uniteCommands';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
-import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/ReactiveValue';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 const overlayCSSClass = 'textEditorOverlay';
 export default class TextTool extends BaseTool {
@@ -30,7 +30,7 @@ export default class TextTool extends BaseTool {
 
 	public constructor(private editor: Editor, description: string, private localizationTable: ToolLocalization) {
 		super(editor.notifier, description);
-		this.textStyleValue = reactiveValueFromInitialValue({
+		this.textStyleValue = ReactiveValue.fromInitialValue({
 			size: 32,
 			fontFamily: 'sans-serif',
 			renderingStyle: {

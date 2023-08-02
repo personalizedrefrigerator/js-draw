@@ -2,7 +2,7 @@ import { EditorNotifier, EditorEventType } from '../types';
 import { WheelEvt, PointerEvt, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent, InputEvt, InputEvtType, GestureCancelEvt, PointerDownEvt, PointerMoveEvt, PointerUpEvt } from '../inputEvents';
 import ToolEnabledGroup from './ToolEnabledGroup';
 import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
-import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/ReactiveValue';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 export default abstract class BaseTool implements InputEventListener {
 	#enabled: MutableReactiveValue<boolean>;
@@ -11,7 +11,7 @@ export default abstract class BaseTool implements InputEventListener {
 	#inputMapper: InputMapper|null = null;
 
 	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
-		this.#enabled = reactiveValueFromInitialValue(true);
+		this.#enabled = ReactiveValue.fromInitialValue(true);
 		this.#enabled.onUpdate(enabled => {
 			// Ensure that at most one tool in the group is enabled.
 			if (enabled) {

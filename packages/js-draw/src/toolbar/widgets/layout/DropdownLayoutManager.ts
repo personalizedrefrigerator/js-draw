@@ -3,7 +3,7 @@ import EventDispatcher, { DispatcherEventListener } from '../../../EventDispatch
 import { ToolbarLocalization } from '../../localization';
 import { ToolMenu, WidgetContentLayoutManager, ToolMenuParent } from './types';
 import { toolbarCSSPrefix } from '../../constants';
-import { MutableReactiveValue, reactiveValueFromInitialValue } from '../../../util/ReactiveValue';
+import { MutableReactiveValue, ReactiveValue } from '../../../util/ReactiveValue';
 
 enum DropdownEventType {
 	DropdownShown,
@@ -30,7 +30,7 @@ class Dropdown implements ToolMenu {
 		private notifier: NotifierType,
 		private onDestroy: ()=>void,
 	) {
-		this.visible = reactiveValueFromInitialValue(false);
+		this.visible = ReactiveValue.fromInitialValue(false);
 
 		this.dropdownContainer = document.createElement('div');
 		this.dropdownContainer.classList.add(`${toolbarCSSPrefix}dropdown`);

@@ -8,7 +8,7 @@ import AbstractComponent from '../components/AbstractComponent';
 import { PointerDevice } from '../Pointer';
 import RenderingStyle from '../rendering/RenderingStyle';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
-import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/ReactiveValue';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2|null = null;
@@ -23,7 +23,7 @@ export default class Eraser extends BaseTool {
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
 
-		this.thicknessValue = reactiveValueFromInitialValue(this.thickness);
+		this.thicknessValue = ReactiveValue.fromInitialValue(this.thickness);
 		this.thicknessValue.onUpdate(value => {
 			this.thickness = value;
 

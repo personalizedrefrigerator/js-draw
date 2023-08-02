@@ -4,7 +4,7 @@ import BaseWidget from './widgets/BaseWidget';
 import { toolbarCSSPrefix } from './constants';
 import DropdownToolbar from './DropdownToolbar';
 import SidebarLayoutManager from './widgets/layout/SidebarLayoutManager';
-import { MutableReactiveValue, reactiveValueFromInitialValue } from '../util/ReactiveValue';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 // TODO(!): Doesn't make sense to extend DropdownToolbar
 export default class SidebarToolbar extends DropdownToolbar {
@@ -25,8 +25,8 @@ export default class SidebarToolbar extends DropdownToolbar {
 	) {
 		super(editor, parent, localizationTable);
 
-		this.sidebarVisible = reactiveValueFromInitialValue(false);
-		this.sidebarY = reactiveValueFromInitialValue(0);
+		this.sidebarVisible = ReactiveValue.fromInitialValue(false);
+		this.sidebarY = ReactiveValue.fromInitialValue(0);
 
 		// Create the container elements
 		this.mainContainer = document.createElement('div');
