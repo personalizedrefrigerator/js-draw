@@ -179,7 +179,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 			// Some inputs handle dragging themselves. Don't also interpret such gestures
 			// as dragging the dropdown.
-			const undraggableElementTypes = [ 'INPUT' ];
+			const undraggableElementTypes = [ 'INPUT', 'SELECT' ];
 
 			let hasSuitableAncestors = false;
 			let ancestor = element.parentElement;
