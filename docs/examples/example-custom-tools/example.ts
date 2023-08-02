@@ -116,7 +116,7 @@ class CustomPenToolbarWidget extends jsdraw.BaseToolWidget {
 	}
 	protected createIcon(): Element {
 		const style = this.pen.getStyle();
-		return editor.icons.makePenIcon(style.thickness, style.color);
+		return editor.icons.makePenIcon(style);
 	}
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
@@ -148,7 +148,17 @@ class CustomPenToolbarWidget extends jsdraw.BaseToolWidget {
 	}
 }
 
-const pen = new CustomPenTool(editor, strings.customPenDescription, { thickness: 1, color: jsdraw.Color4.red });
+const penStyle = {
+	thickness: 1,
+	color: jsdraw.Color4.red,
+	factory: jsdraw.makeFreehandLineBuilder
+};
+
+const pen = new CustomPenTool(
+	editor,
+	strings.customPenDescription,
+	penStyle,
+);
 const eraser = new jsdraw.EraserTool(editor, strings.eraser);
 const panZoom = new jsdraw.PanZoomTool(editor, jsdraw.PanZoomMode.TwoFingerTouchGestures | jsdraw.PanZoomMode.Keyboard, strings.panZoomDescription);
 

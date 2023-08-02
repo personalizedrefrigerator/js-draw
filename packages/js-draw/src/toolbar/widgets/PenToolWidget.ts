@@ -129,18 +129,13 @@ export default class PenToolWidget extends BaseToolWidget {
 	}
 
 	private createIconForRecord(record: PenTypeRecord|null) {
-		const color = this.tool.getColor();
+		const style = this.tool.getStyleValue().get();
 
 		const strokeFactory = record?.factory;
 		if (!strokeFactory || strokeFactory === makeFreehandLineBuilder || strokeFactory === makePressureSensitiveFreehandLineBuilder) {
-			// Use a square-root scale to prevent the pen's tip from overflowing.
-			const scale = Math.round(Math.sqrt(this.tool.getThickness()) * 4);
-			const roundedTip = strokeFactory === makeFreehandLineBuilder;
-
-			return this.editor.icons.makePenIcon(scale, color.toHexString(), roundedTip);
+			return this.editor.icons.makePenIcon(style);
 		} else {
-			const hasTransparency = color.a < 1;
-			return this.editor.icons.makeIconFromFactory(this.tool, strokeFactory, hasTransparency);
+			return this.editor.icons.makeIconFromFactory(style);
 		}
 	}
 

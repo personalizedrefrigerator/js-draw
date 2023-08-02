@@ -37,6 +37,9 @@ const makeAboutDialog = (editor: Editor, entries: AboutDialogEntry[]) => {
 	const licenseContainer = document.createElement('div');
 	licenseContainer.classList.add('about-entry-container');
 
+	// Allow scrolling in the license container -- don't forward wheel events.
+	licenseContainer.onwheel = evt => evt.stopPropagation();
+
 	for (const entry of entries) {
 		const container = document.createElement(entry.minimized ? 'details' : 'div');
 		container.classList.add('about-entry');

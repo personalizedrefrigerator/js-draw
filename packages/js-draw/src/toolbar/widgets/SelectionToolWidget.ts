@@ -102,7 +102,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 
 		const resizeButton = new ActionButtonWidget(
 			editor, 'resize-btn',
-			() => editor.icons.makeResizeViewportIcon(),
+			() => editor.icons.makeResizeImageToSelectionIcon(),
 			this.localizationTable.resizeImageToSelection,
 			() => {
 				this.resizeImageToSelection();

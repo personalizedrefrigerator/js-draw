@@ -10,7 +10,8 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"js-draw": "^0.25.1"
+		"js-draw": "^0.25.1",
+		"@js-draw/material-icons": "^0.25.1"
 	},
 	"devDependencies": {
 		"@js-draw/build-tool": "^0.25.0"

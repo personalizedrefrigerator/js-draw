@@ -26,6 +26,11 @@ export interface TranslationSourcePair {
 export interface BuildConfig {
 	bundledFiles: BundledFileRecord[];
 
+	prebuild: {
+		// A path to a script to be run just before building
+		scriptPath: string;
+	}|null;
+
 	translationSourceFiles: TranslationSourcePair[];
 	translationDestPath: string;
 

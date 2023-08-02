@@ -1,0 +1,5 @@
+{
+    "inDirectory": "./src",
+    "outDirectory": "./dist",
+	"prebuild": { "scriptPath": "./tools/prebuild.js" }
+}

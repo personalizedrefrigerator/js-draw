@@ -108,10 +108,7 @@ const readConfig = (): BuildConfig => {
 
 	let translationDestPath = path.join(rootDir, '.github/ISSUE_TEMPLATE');
 	if ('translationDestPath' in config) {
-		if (typeof (config.translationDestPath) !== 'string') {
-			throw new Error('config.translationDestPath is not a string');
-		}
-
+		assertPropertyHasType(config, 'translationDestPath', 'string');
 		if (!existsSync(config.translationDestPath)) {
 			throw new Error('config.translationDestPath does not exist');
 		}
@@ -119,11 +116,26 @@ const readConfig = (): BuildConfig => {
 		translationDestPath = path.resolve(config.translationDestPath);
 	}
 
+	let prebuild: { scriptPath: string }|null = null;
+	if ('prebuild' in config) {
+		assertPropertyHasType(config, 'prebuild', 'object');
+		assertPropertyHasType(config.prebuild, 'scriptPath', 'string');
+
+		const scriptPath = config.prebuild.scriptPath;
+
+		if (!existsSync(scriptPath)) {
+			throw new Error('config.prebuild.scriptPath must be a path to a valid JavaScript file.');
+		}
+
+		prebuild = { scriptPath: scriptPath };
+	}
+
 	return {
 		inDirectory: inDirectory ? path.resolve(inDirectory) : undefined,
 		outDirectory: outDirectory ? path.resolve(outDirectory) : undefined,
 		translationSourceFiles,
 		translationDestPath,
+		prebuild,
 
 		bundledFiles,
 	};
@@ -151,34 +163,50 @@ const transpileDirectory = async (inDir: string, outDir: string, buildMode: Buil
 	}
 };
 
-if (argv.length === 1) {
-	printUsage();
-	console.error(`ERROR: ${argv[0]} requires at least 1 argument.`);
-	exit(1);
-}
-
-let buildMode = argv[1];
-// If not a build mode, we may be running with `ts-node path/to/thing.ts command`.
-// skip to the next argument.
-if (!isBuildCommand(buildMode)) {
-	buildMode = argv[2];
-}
-
-if (!isBuildCommand(buildMode)) {
-	console.warn('build mode: ', buildMode);
-	throw new Error('argv[1] must be either build or watch');
-}
-
-const config = readConfig();
-if (buildMode === 'build-translation-template') {
-	console.log('Building translation templates...');
-	buildTranslationTemplates(config);
-} else {
-	void bundleFiles(config, buildMode);
-
-	if (config.inDirectory && config.outDirectory) {
-		void transpileDirectory(config.inDirectory, config.outDirectory, buildMode);
+const main = async () => {
+	if (argv.length === 1) {
+		printUsage();
+		console.error(`ERROR: ${argv[0]} requires at least 1 argument.`);
+		exit(1);
 	}
-}
 
+	let buildMode = argv[1];
+	// If not a build mode, we may be running with `ts-node path/to/thing.ts command`.
+	// skip to the next argument.
+	if (!isBuildCommand(buildMode)) {
+		buildMode = argv[2];
+	}
 
+	if (!isBuildCommand(buildMode)) {
+		console.warn('build mode: ', buildMode);
+		throw new Error('argv[1] must be either build or watch');
+	}
+
+	const config = readConfig();
+
+	if (config.prebuild) {
+		console.log('Prebuild: Executing ', config.prebuild.scriptPath);
+		const scriptResult = require(path.resolve(config.prebuild.scriptPath));
+
+		if (scriptResult && scriptResult.default) {
+			await scriptResult.default;
+		} else {
+			await scriptResult;
+		}
+
+		console.log('Done.');
+	}
+
+	if (buildMode === 'build-translation-template') {
+		console.log('Building translation templates...');
+		buildTranslationTemplates(config);
+	} else {
+		void bundleFiles(config, buildMode);
+
+		if (config.inDirectory && config.outDirectory) {
+			void transpileDirectory(config.inDirectory, config.outDirectory, buildMode);
+		}
+	}
+};
+
+void main();

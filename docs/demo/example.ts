@@ -17,6 +17,7 @@ import makeNewImageDialog from './ui/makeNewImageDialog';
 import { AppNotifier } from './types';
 import { loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
 import makeSettingsDialog from './ui/makeSettingsDialog';
+import MaterialIconProvider from '@js-draw/material-icons';
 
 // Creates and sets up a new Editor
 const createEditor = (
@@ -33,7 +34,8 @@ const createEditor = (
 ): Editor => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement, {
-		keyboardShortcutOverrides: loadKeybindingOverrides()
+		keyboardShortcutOverrides: loadKeybindingOverrides(),
+		iconProvider: new MaterialIconProvider(),
 	});
 
 	// Although new Editor(parentElement) created an Editor, it doesn't have a toolbar
