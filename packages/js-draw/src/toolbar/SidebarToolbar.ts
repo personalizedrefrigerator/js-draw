@@ -242,6 +242,14 @@ export default class SidebarToolbar extends DropdownToolbar {
 			lastY = y;
 		};
 
+		this.sidebarContainer.onpointerleave = event => {{
+			// Capture the pointer if it exits the container while dragging.
+			if (capturedPointerId === null && pointerDown && event.isPrimary) {
+				this.sidebarContainer.setPointerCapture(event.pointerId);
+				capturedPointerId = event.pointerId;
+			}
+		}};
+
 		let gestureEndTimestamp = 0;
 		const onGestureEnd = (_event: Event) => {
 			// If the pointerup/pointercancel event was for a pointer not being tracked,
