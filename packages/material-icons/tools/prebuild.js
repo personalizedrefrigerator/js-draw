@@ -1,9 +1,10 @@
-
-// Converts all SVG icons in src/icons into importable .ts files.
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('node:fs/promises');
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { dirname, join, resolve, basename } = require('node:path');
 
+// Converts all SVG icons in src/icons into importable .ts files.
 const convertIcons = async () => {
 	const iconsDir = join(dirname(__dirname), 'src', 'icons');
 

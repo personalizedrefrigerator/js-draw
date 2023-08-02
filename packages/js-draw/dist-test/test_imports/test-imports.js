@@ -1,7 +1,7 @@
 console.log('Testing imports...');
 
 import { Color4 } from 'js-draw/Color4';
-import { Mat33 } from 'js-draw/math';
+import { Mat33, Vec2 } from 'js-draw/math';
 
 if (Vec2.of(1, 1).x !== 1) {
 	throw new Error('Failed to import module Vec2');

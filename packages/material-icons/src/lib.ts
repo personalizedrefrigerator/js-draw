@@ -2,7 +2,6 @@
 import { IconProvider, IconElemType, TextRenderingStyle } from 'js-draw';
 
 import README from './icons/README.md';
-//import DrawIcon from './icons/Draw.svg';
 import ExpandMore from './icons/ExpandMore.svg';
 import Undo from './icons/Undo.svg';
 import Redo from './icons/Redo.svg';
@@ -67,7 +66,6 @@ class MaterialIconProvider extends IconProvider {
 	public override makeDuplicateSelectionIcon(): IconElemType {
 		return icon(ContentCopy);
 	}
-	// makePasteIcon(): IconElemType;
 	public override makeDeleteSelectionIcon(): IconElemType {
 		return icon(Delete);
 	}
