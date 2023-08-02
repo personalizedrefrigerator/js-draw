@@ -1,0 +1,10 @@
+
+.toolbar-thicknessSliderContainer {
+	display: flex;
+	flex-direction: row;
+
+	input {
+		margin-left: 20px;
+		flex-grow: 1;
+	}
+}

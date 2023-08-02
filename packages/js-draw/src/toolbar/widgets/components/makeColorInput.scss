@@ -1,0 +1,30 @@
+
+/* Make color selection buttons fill their containing label */
+.toolbar-element .clr-field button {
+	width: 100%;
+	height: 100%;
+	border-radius: 2px;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.color-input-container {
+	display: inline-flex;
+	flex-direction: row;
+}
+
+.color-input-container .pipetteButton {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	display: inline-flex;
+}
+
+.color-input-container .pipetteButton > svg {
+	width: 100%;
+}
+
+.color-input-container .pipetteButton.active {
+	background-color: var(--secondary-background-color);
+	--icon-color: var(--secondary-foreground-color);
+}

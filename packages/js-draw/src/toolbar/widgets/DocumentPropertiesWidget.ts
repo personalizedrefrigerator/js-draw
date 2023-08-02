@@ -8,7 +8,7 @@ import { Rect2, Color4 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
-import makeColorInput from '../makeColorInput';
+import makeColorInput from './components/makeColorInput';
 import BaseWidget from './BaseWidget';
 
 export default class DocumentPropertiesWidget extends BaseWidget {

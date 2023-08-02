@@ -6,7 +6,7 @@ import SelectionTool from '../../tools/SelectionTool/SelectionTool';
 import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
-import makeColorInput from '../makeColorInput';
+import makeColorInput from './components/makeColorInput';
 import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget from './BaseWidget';

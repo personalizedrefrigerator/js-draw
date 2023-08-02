@@ -10,12 +10,13 @@ import Pen from '../../tools/Pen';
 import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
-import makeColorInput from '../makeColorInput';
+import makeColorInput from './components/makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 import { Color4 } from '@js-draw/math';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
 import { toolbarCSSPrefix } from '../constants';
+import makeThicknessSlider from './components/makeThicknessSlider';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -319,32 +320,12 @@ export default class PenToolWidget extends BaseToolWidget {
 		const container = document.createElement('div');
 		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 
-		const thicknessRow = document.createElement('div');
-
 		// Thickness: Value of the input is squared to allow for finer control/larger values.
-		const thicknessLabel = document.createElement('label');
-		const thicknessInput = document.createElement('input');
+		const { container: thicknessRow, setValue: setThickness } = makeThicknessSlider(this.editor, thickness => {
+			this.tool.setThickness(thickness);
+		});
+
 		const penTypeSelect = this.createPenTypeSelector();
-
-		// Give inputs IDs so we can label them with a <label for=...>Label text</label>
-		thicknessInput.id = `${toolbarCSSPrefix}penThicknessInput${PenToolWidget.idCounter++}`;
-
-		thicknessLabel.innerText = this.localizationTable.thicknessLabel;
-		thicknessLabel.setAttribute('for', thicknessInput.id);
-
-		// Use a logarithmic scale for thicknessInput (finer control over thinner strokewidths.)
-		const inverseThicknessInputFn = (t: number) => Math.log10(t);
-		const thicknessInputFn = (t: number) => 10**t;
-
-		thicknessInput.type = 'range';
-		thicknessInput.min = `${inverseThicknessInputFn(2)}`;
-		thicknessInput.max = `${inverseThicknessInputFn(400)}`;
-		thicknessInput.step = '0.1';
-		thicknessInput.oninput = () => {
-			this.tool.setThickness(thicknessInputFn(parseFloat(thicknessInput.value)));
-		};
-		thicknessRow.appendChild(thicknessLabel);
-		thicknessRow.appendChild(thicknessInput);
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
@@ -363,7 +344,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		this.updateInputs = () => {
 			setColorInputValue(this.tool.getColor());
-			thicknessInput.value = inverseThicknessInputFn(this.tool.getThickness()).toString();
+			setThickness(this.tool.getThickness());
 
 			penTypeSelect.updateIcons();
 

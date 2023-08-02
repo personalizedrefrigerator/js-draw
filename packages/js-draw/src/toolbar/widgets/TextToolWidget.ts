@@ -4,7 +4,7 @@ import TextTool from '../../tools/TextTool';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
-import makeColorInput from '../makeColorInput';
+import makeColorInput from './components/makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 import { SavedToolbuttonState } from './BaseWidget';
 

@@ -1,13 +1,14 @@
 import Editor from '../../Editor';
 import Eraser from '../../tools/Eraser';
 import { EditorEventType } from '../../types';
-import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import { SavedToolbuttonState } from './BaseWidget';
+import makeThicknessSlider from './components/makeThicknessSlider';
 
 export default class EraserToolWidget extends BaseToolWidget {
-	private thicknessInput: HTMLInputElement|null = null;
+	private updateInputs: ()=>void = () => {};
+
 	public constructor(
 		editor: Editor,
 		private tool: Eraser,
@@ -31,31 +32,18 @@ export default class EraserToolWidget extends BaseToolWidget {
 		return this.editor.icons.makeEraserIcon(this.tool.getThickness());
 	}
 
-	private updateInputs() {
-		if (this.thicknessInput) {
-			this.thicknessInput.value = `${this.tool.getThickness()}`;
-		}
-	}
-
-	private static nextThicknessInputId = 0;
-
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
-		const thicknessLabel = document.createElement('label');
-		this.thicknessInput = document.createElement('input');
+		const thicknessSlider = makeThicknessSlider(this.editor, thickness => {
+			this.tool.setThickness(thickness);
+		});
+		thicknessSlider.setBounds(10, 55);
 
-		this.thicknessInput.type = 'range';
-		this.thicknessInput.min = '4';
-		this.thicknessInput.max = '40';
-		this.thicknessInput.oninput = () => {
-			this.tool.setThickness(parseFloat(this.thicknessInput!.value));
+		this.updateInputs = () => {
+			thicknessSlider.setValue(this.tool.getThickness());
 		};
-		this.thicknessInput.id = `${toolbarCSSPrefix}eraserThicknessInput${EraserToolWidget.nextThicknessInputId++}`;
-
-		thicknessLabel.innerText = this.localizationTable.thicknessLabel;
-		thicknessLabel.htmlFor = this.thicknessInput.id;
 
 		this.updateInputs();
-		dropdown.replaceChildren(thicknessLabel, this.thicknessInput);
+		dropdown.replaceChildren(thicknessSlider.container);
 		return true;
 	}
 

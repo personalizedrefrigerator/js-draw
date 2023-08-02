@@ -1,7 +1,7 @@
 import { Color4 } from '@js-draw/math';
-import Editor from '../Editor';
-import PipetteTool from '../tools/PipetteTool';
-import { EditorEventType } from '../types';
+import Editor from '../../../Editor';
+import PipetteTool from '../../../tools/PipetteTool';
+import { EditorEventType } from '../../../types';
 
 type OnColorChangeListener = (color: Color4)=>void;
 type SetColorCallback = (color: Color4|string) => void;
