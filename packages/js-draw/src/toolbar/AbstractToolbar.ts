@@ -230,6 +230,8 @@ export default abstract class AbstractToolbar {
 	/** Called by `removeWidget`. Implement this to remove a new widget from the toolbar. */
 	protected abstract removeWidgetInternal(widget: BaseWidget): void;
 
+	private static rootToolbarId = 'root-toolbar--';
+
 	/** Returns a snapshot of the state of widgets in the toolbar. */
 	public serializeState(): string {
 		const result: Record<string, any> = {};
@@ -237,6 +239,8 @@ export default abstract class AbstractToolbar {
 		for (const widgetId in this.#widgetsById) {
 			result[widgetId] = this.#widgetsById[widgetId].serializeState();
 		}
+
+		result[AbstractToolbar.rootToolbarId] = this.serializeInternal();
 
 		return JSON.stringify(result);
 	}
@@ -248,14 +252,36 @@ export default abstract class AbstractToolbar {
 	public deserializeState(state: string) {
 		const data = JSON.parse(state);
 
+		const rootId = AbstractToolbar.rootToolbarId;
+		this.deserializeInternal(data[rootId]);
+
 		for (const widgetId in data) {
+			if (widgetId === rootId) {
+				continue;
+			}
+
 			if (!(widgetId in this.#widgetsById)) {
 				console.warn(`Unable to deserialize widget ${widgetId} ­— no such widget.`);
+				continue;
 			}
 
 			this.#widgetsById[widgetId].deserializeFrom(data[widgetId]);
 		}
 	}
+
+	/**
+	 * Called by `serializeState` to attach any additional JSONifyable data
+	 * to the serialized result.
+	 *
+	 * @reutrns an object that can be converted to JSON with `JSON.stringify`.
+	 */
+	protected serializeInternal(): any {}
+
+	/**
+	 * Called by `deserializeState` with a version of the JSON outputted
+	 * previously by `serializeInternal`.
+	 */
+	protected deserializeInternal(_json: any) {}
 
 	/**
 	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).

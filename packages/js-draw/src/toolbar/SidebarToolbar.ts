@@ -99,7 +99,6 @@ export default class SidebarToolbar extends DropdownToolbar {
 			const animationProperties = `${animationDuration}ms ease`;
 
 			if (visible) {
-				this.sidebarY.set(0);
 				if (animationTimeout) {
 					clearTimeout(animationTimeout);
 					animationTimeout = null;
@@ -275,6 +274,22 @@ export default class SidebarToolbar extends DropdownToolbar {
 		this.sidebarY.set(this.sidebarY.get() + deltaY);
 	}
 
+	/** Returns `this.sidebarY` rounded to a valid value. */
+	private snappedSidebarY(sidebarY?: number) {
+		const y = sidebarY ?? this.sidebarY.get();
+
+		const snapYs = [ -100, 0 ];
+
+		let closestSnap = snapYs[0];
+		for (const snapY of snapYs) {
+			if (Math.abs(snapY - y) < Math.abs(closestSnap - y)) {
+				closestSnap = snapY;
+			}
+		}
+
+		return closestSnap;
+	}
+
 	/**
 	 * Moves the menu to a valid location or closes it, depending on
 	 * the position set by the drag.
@@ -284,19 +299,21 @@ export default class SidebarToolbar extends DropdownToolbar {
 		if (this.sidebarY.get() > this.sidebarContainer.clientHeight / 2) {
 			this.sidebarVisible.set(false);
 		} else {
-			const y = this.sidebarY.get();
-
-			const snapYs = [ -100, 0 ];
-
-			let closestSnap = snapYs[0];
-			for (const snapY of snapYs) {
-				if (Math.abs(snapY - y) < Math.abs(closestSnap - y)) {
-					closestSnap = snapY;
-				}
-			}
-
 			// Snap to the closest valid Y.
-			this.sidebarY.set(closestSnap);
+			this.sidebarY.set(this.snappedSidebarY());
+		}
+	}
+
+	protected override serializeInternal() {
+		return {
+			menuSizeY: this.snappedSidebarY(),
+		};
+	}
+
+	protected override deserializeInternal(json: any) {
+		if (typeof json === 'object' && typeof json['menuSizeY'] === 'number') {
+			// Load the y-position of the sidebar  -- call snappedSidebarY to ensure validity.
+			this.sidebarY.set(this.snappedSidebarY(json['menuSizeY']));
 		}
 	}
 }
