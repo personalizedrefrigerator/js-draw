@@ -99,6 +99,8 @@ export default class SidebarToolbar extends DropdownToolbar {
 			const animationProperties = `${animationDuration}ms ease`;
 
 			if (visible) {
+				this.sidebarY.set(this.snappedSidebarY());
+
 				if (animationTimeout) {
 					clearTimeout(animationTimeout);
 					animationTimeout = null;
