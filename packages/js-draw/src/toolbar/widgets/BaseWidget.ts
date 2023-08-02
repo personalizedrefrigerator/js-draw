@@ -179,6 +179,7 @@ export default abstract class BaseWidget {
 
 		this.layoutManager = manager;
 		if (this.container.parentElement) {
+			// Trigger a re-creation of this' content
 			this.addTo(this.container.parentElement);
 		}
 	}
@@ -226,6 +227,15 @@ export default abstract class BaseWidget {
 				target: this.button,
 				getTitle: () => this.getTitle(),
 				isToplevel: () => this.toplevel,
+			});
+
+			// Auto-focus this component's button when the dropdown hides --
+			// this ensures that keyboard focus goes to a reasonable location when
+			// the user closes a menu.
+			this.dropdown.visible.onUpdate(visible => {
+				if (!visible) {
+					this.button.focus();
+				}
 			});
 
 			this.dropdown.appendChild(this.dropdownContent);

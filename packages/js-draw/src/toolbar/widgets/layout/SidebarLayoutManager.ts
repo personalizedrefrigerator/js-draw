@@ -1,9 +1,9 @@
-import { MutableReactiveValue, reactiveValueFromCallback, reactiveValueFromInitialValue } from '../../../util/ReactiveValue';
+import { MutableReactiveValue, ReactiveValue } from '../../../util/ReactiveValue';
 import { ToolbarLocalization } from '../../localization';
 import { ToolMenu, WidgetContentLayoutManager, ToolMenuParent } from './types';
 
 export default class SidebarLayoutManager implements WidgetContentLayoutManager {
-	private visibleWidgetContent: MutableReactiveValue<ToolMenu|null> = reactiveValueFromInitialValue(null);
+	private visibleWidgetContent: MutableReactiveValue<ToolMenu|null> = ReactiveValue.fromInitialValue(null);
 
 
 	public constructor(
@@ -20,17 +20,21 @@ export default class SidebarLayoutManager implements WidgetContentLayoutManager 
 		const contentElem = document.createElement('div');
 		let result: ToolMenu|null = null;
 
-		const visible = reactiveValueFromCallback(() => {
+		const visible = ReactiveValue.fromCallback(() => {
 			return this.visibleWidgetContent.get() === result && this.sidebarVisibility.get();
 		}, [ this.visibleWidgetContent, this.sidebarVisibility ]);
 
 		result = {
 			visible,
 			requestShow: () => {
-				this.sidebarVisibility.set(true);
 				this.setSidebarContent(contentElem);
-				this.announceForAccessibility(this.localization.dropdownShown(parent.getTitle()));
+
+				// Set visibleWidgetContent first -- this causes the previously visible (if any)
+				// item to not be sent a shown event.
 				this.visibleWidgetContent.set(result);
+				this.sidebarVisibility.set(true);
+
+				this.announceForAccessibility(this.localization.dropdownShown(parent.getTitle()));
 			},
 			onToolActivated: () => {
 				// TODO: Only request show when in sidebar mode
