@@ -127,6 +127,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		const container = document.createElement('div');
 		container.classList.add(`${toolbarCSSPrefix}spacedList`);
 
+		// Background color input
 		const backgroundColorRow = document.createElement('div');
 		const backgroundColorLabel = document.createElement('label');
 
@@ -143,6 +144,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 		backgroundColorRow.replaceChildren(backgroundColorLabel, backgroundColorInputContainer);
 
+		// Background style selector
 		const useGridRow = document.createElement('div');
 		const useGridLabel = document.createElement('label');
 		const useGridCheckbox = document.createElement('input');
@@ -172,6 +174,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 		useGridRow.replaceChildren(useGridLabel, useGridCheckbox);
 
+		// Adds a width/height input
 		const addDimensionRow = (labelContent: string, onChange: (value: number)=>void) => {
 			const row = document.createElement('div');
 			const label = document.createElement('label');
@@ -211,6 +214,17 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			this.updateImportExportRectSize({ height: value });
 		});
 
+		// The "About..." button
+		const aboutButton = document.createElement('button');
+		aboutButton.innerText = this.localizationTable.about;
+		aboutButton.style.width = '100%';
+		aboutButton.style.display = 'block';
+
+		aboutButton.onclick = () => {
+			this.editor.showAboutDialog();
+		};
+
+
 		this.updateDropdownContent = () => {
 			setBgColorInputValue(this.getBackgroundColor());
 
@@ -224,7 +238,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 
 		container.replaceChildren(
-			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element
+			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element, aboutButton,
 		);
 		dropdown.replaceChildren(container);
 

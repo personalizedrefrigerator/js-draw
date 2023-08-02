@@ -30,6 +30,8 @@ import SidebarToolbar from './toolbar/SidebarToolbar';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
 import RenderablePathSpec from './rendering/RenderablePathSpec';
+import makeAboutDialog, { AboutDialogEntry } from './dialogs/makeAboutDialog';
+import version from './version';
 
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
@@ -62,6 +64,8 @@ export interface EditorSettings {
 	keyboardShortcutOverrides: Record<string, Array<KeyBinding>>,
 
 	iconProvider: IconProvider,
+
+	notices: AboutDialogEntry[],
 }
 
 /**
@@ -206,6 +210,7 @@ export class Editor {
 			maxZoom: settings.maxZoom ?? 1e12,
 			keyboardShortcutOverrides: settings.keyboardShortcutOverrides ?? {},
 			iconProvider: settings.iconProvider ?? new IconProvider(),
+			notices: [],
 		};
 		this.icons = this.settings.iconProvider;
 
@@ -1273,7 +1278,7 @@ export class Editor {
 	}
 
 	/**
-	 * Alias for loadFrom(SVGLoader.fromString).
+	 * Alias for `loadFrom(SVGLoader.fromString)`.
 	 *
 	 * This is particularly useful when accessing a bundled version of the editor,
 	 * where `SVGLoader.fromString` is unavailable.
@@ -1281,6 +1286,52 @@ export class Editor {
 	public async loadFromSVG(svgData: string, sanitize: boolean = false) {
 		const loader = SVGLoader.fromString(svgData, sanitize);
 		await this.loadFrom(loader);
+	}
+
+	private closeAboutDialog: (()=>void)|null = null;
+
+	/**
+	 * Shows an information dialog with legal notices.
+	 */
+	public showAboutDialog() {
+		const iconLicenseText = this.icons.licenseInfo();
+
+		const notices: AboutDialogEntry[] = [];
+		notices.push({
+			heading: { kind: 'link', text: 'js-draw', href: 'https://github.com/personalizedrefrigerator/js-draw' },
+			text: [
+				`v${version.number}`,
+				'',
+				'Image debug information (from when this dialog was opened):',
+				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()} rotation`,
+				`    ${this.image.estimateNumElements()} components`,
+				`    ${this.getImportExportRect().w}x${this.getImportExportRect().h} size`,
+			].join('\n'),
+		});
+
+		notices.push({
+			heading: 'Libraries',
+			text: [
+				'js-draw uses several libraries at runtime. Particularly noteworthy are:',
+				' - The Coloris color picker: https://github.com/mdbassit/Coloris',
+				' - The bezier.js Bézier curve library: https://github.com/Pomax/bezierjs'
+			].join('\n'),
+			minimized: true,
+		});
+
+		if (iconLicenseText) {
+			notices.push({
+				heading: 'Icon Pack',
+				text: iconLicenseText,
+				minimized: true,
+			});
+		}
+
+		notices.push(...this.settings.notices);
+
+
+		this.closeAboutDialog?.();
+		this.closeAboutDialog = makeAboutDialog(this, notices).close;
 	}
 }
 

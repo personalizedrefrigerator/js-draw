@@ -1,0 +1,37 @@
+
+.about-dialog-container {
+	.close-button {
+		// Center the close button
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.about-entry-container {
+		max-height: 500px;
+		overflow-y: auto;
+
+		margin-left: 20px;
+		margin-right: 20px;
+
+		padding-bottom: 20px;
+
+		white-space: pre-wrap;
+		font-family: monospace;
+
+		& > h2, & > details > summary {
+			cursor: pointer;
+			margin-top: 15px;
+
+			font-size: 1.2em;
+			font-weight: bold;
+
+			a {
+				color: var(--primary-foreground-color);
+				text-decoration: underline;
+			}
+		}
+	}
+
+
+}

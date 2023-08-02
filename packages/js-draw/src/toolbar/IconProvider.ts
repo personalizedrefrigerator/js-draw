@@ -801,4 +801,6 @@ export default class IconProvider {
 		`);
 	}
 
+	/** Must be overridden by icon packs that need attribution. ==TODO== */
+	public licenseInfo(): string|null { return null; }
 }

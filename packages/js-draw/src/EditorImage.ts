@@ -25,6 +25,7 @@ export default class EditorImage {
 	private root: ImageNode;
 	private background: ImageNode;
 	private componentsById: Record<string, AbstractComponent>;
+	private componentCount: number = 0;
 
 	/** Viewport for the exported/imported image. */
 	private importExportViewport: Viewport;
@@ -115,6 +116,11 @@ export default class EditorImage {
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
+	/** Returns the number of elements added to this image. @internal */
+	public estimateNumElements() {
+		return this.componentCount;
+	}
+
 	/** @returns a list of `AbstractComponent`s intersecting `region`, sorted by z-index. */
 	public getElementsIntersectingRegion(region: Rect2): AbstractComponent[] {
 		const leaves = this.root.getLeavesIntersectingRegion(region);
@@ -123,8 +129,9 @@ export default class EditorImage {
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
-	/** @internal */
+	/** Called whenever an element is completely removed. @internal */
 	public onDestroyElement(elem: AbstractComponent) {
+		this.componentCount --;
 		delete this.componentsById[elem.getId()];
 	}
 
@@ -140,6 +147,7 @@ export default class EditorImage {
 	private addElementDirectly(elem: AbstractComponent): ImageNode {
 		elem.onAddToImage(this);
 
+		this.componentCount ++;
 		this.componentsById[elem.getId()] = elem;
 
 		// If a background component, add to the background. Else,

@@ -81,7 +81,7 @@ export default class FindTool extends BaseTool {
 
 		label.innerText = this.editor.localization.findLabel;
 		nextBtn.innerText = this.editor.localization.toNextMatch;
-		closeBtn.innerText = this.editor.localization.closeFindDialog;
+		closeBtn.innerText = this.editor.localization.closeDialog;
 
 		this.searchInput.onkeydown = (ev: KeyboardEvent) => {
 			if (ev.key === 'Enter') {

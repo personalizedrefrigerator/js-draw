@@ -48,6 +48,7 @@ export interface ToolbarLocalization {
 	useGridOption: string;
 	toggleOverflow: string,
 
+	about: string;
 	advanced: string;
 	inputStabilization: string;
 
@@ -95,6 +96,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	useGridOption: 'Grid: ',
 	toggleOverflow: 'More',
 	advanced: 'Advanced',
+	about: 'About',
 	inputStabilization: 'Input stabilization',
 
 	touchPanning: 'Touchscreen panning',

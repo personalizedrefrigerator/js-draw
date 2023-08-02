@@ -22,7 +22,7 @@ export interface ToolLocalization {
 
 	findLabel: string;
 	toNextMatch: string;
-	closeFindDialog: string;
+	closeDialog: string;
 	findDialogShown: string;
 	findDialogHidden: string;
 	focusedFoundText: (currentMatchNumber: number, totalMatches: number)=> string;
@@ -59,7 +59,7 @@ export const defaultToolLocalization: ToolLocalization = {
 
 	findLabel: 'Find',
 	toNextMatch: 'Next',
-	closeFindDialog: 'Close',
+	closeDialog: 'Close',
 	findDialogShown: 'Find dialog shown',
 	findDialogHidden: 'Find dialog hidden',
 	focusedFoundText: (matchIdx: number, totalMatches: number) => `Viewing match ${matchIdx} of ${totalMatches}`,
