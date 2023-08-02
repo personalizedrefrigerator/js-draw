@@ -94,4 +94,27 @@
 			margin-right: auto;
 		}
 	}
+
+	.toolbar-toolContainer {
+		display: block;
+
+		.toolbar-button {
+			flex-direction: row;
+			max-width: unset;
+			width: 100%;
+			box-sizing: border-box;
+			justify-content: flex-start;
+
+			& > .toolbar-icon {
+				height: 40px;
+				padding: 10px;
+				margin-right: 20px;
+			}
+
+			// No special sizing for long labels
+			label, & > label.long-label {
+				font-size: 1em;
+			}
+		}
+	}
 }

@@ -92,8 +92,7 @@
 }
 
 /* Decrease the font size of labels in the main toolbar if they're long. */
-:not(.toolbar-dropdown) > .toolbar-toolContainer >
-		.toolbar-button > label.long-label {
+.toolbar-root > .toolbar-toolContainer > .toolbar-button > label.long-label {
 	font-size: 0.75em;
 }
 
