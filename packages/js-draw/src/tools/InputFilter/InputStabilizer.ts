@@ -175,7 +175,9 @@ export default class InputStabilizer extends InputMapper {
 	}
 
 	private mapPointerEvent(event: PointerEvt|GestureCancelEvt) {
-		if (isPointerEvt(event)) {
+		// Don't store the last pointer event for use with pressure/button data --
+		// this information can be very different for a pointerup event.
+		if (isPointerEvt(event) && event.kind !== InputEvtType.PointerUpEvt) {
 			this.lastPointerEvent = event;
 		}
 
