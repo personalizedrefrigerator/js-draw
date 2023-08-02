@@ -87,7 +87,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 		parent.appendChild(this.mainContainer);
 	}
 
-	protected listenForVisibilityChanges() {
+	private listenForVisibilityChanges() {
 		let animationTimeout: ReturnType<typeof setTimeout>|null = null;
 		const animationDuration = 150;
 
@@ -295,16 +295,18 @@ export default class SidebarToolbar extends DropdownToolbar {
 			this.sidebarVisible.set(false);
 		} else {
 			const y = this.sidebarY.get();
-			const minY = -100;
 
-			// Clamp the sidebar's y position to reasonable values.
-			if (y < minY) {
-				// Allow small negative values -- on some devices, the address bar
-				// covers the bottom regions of the screen.
-				this.sidebarY.set(minY);
-			} else if (y > 0) {
-				this.sidebarY.set(0);
+			const snapYs = [ -100, 0 ];
+
+			let closestSnap = snapYs[0];
+			for (const snapY of snapYs) {
+				if (Math.abs(snapY - y) < Math.abs(closestSnap - y)) {
+					closestSnap = snapY;
+				}
 			}
+
+			// Snap to the closest valid Y.
+			this.sidebarY.set(closestSnap);
 		}
 	}
 }
