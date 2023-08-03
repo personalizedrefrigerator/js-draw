@@ -16,6 +16,7 @@ import Resize from './icons/Resize.svg';
 import Delete from './icons/Delete.svg';
 import ContentCopy from './icons/ContentCopy.svg';
 import EditDocument from './icons/EditDocument.svg';
+import Check from './icons/Check.svg';
 
 
 const icon = (data: string) => {
@@ -70,7 +71,9 @@ class MaterialIconProvider extends IconProvider {
 	public override makeDeleteSelectionIcon(): IconElemType {
 		return icon(Delete);
 	}
-	// makeSaveIcon(): IconElemType;
+	public override makeSaveIcon(): IconElemType {
+		return icon(Check);
+	}
 	public override makeConfigureDocumentIcon(): IconElemType {
 		return icon(EditDocument);
 	}
