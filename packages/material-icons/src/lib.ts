@@ -1,5 +1,5 @@
 
-import { IconProvider, IconElemType, TextRenderingStyle } from 'js-draw';
+import { IconProvider, IconElemType, TextRenderingStyle, PenStyle } from 'js-draw';
 
 import README from './icons/README.md';
 import ExpandMore from './icons/ExpandMore.svg';
@@ -17,6 +17,8 @@ import Delete from './icons/Delete.svg';
 import ContentCopy from './icons/ContentCopy.svg';
 import EditDocument from './icons/EditDocument.svg';
 import Check from './icons/Check.svg';
+import InkHighlighter from './icons/InkHighlighter.svg';
+import Edit from './icons/Edit.svg';
 
 
 const icon = (data: string) => {
@@ -58,7 +60,37 @@ class MaterialIconProvider extends IconProvider {
 	public override makeTextIcon(_textStyle: TextRenderingStyle): IconElemType {
 		return icon(Title);
 	}
-	// makePenIcon(strokeSize: number, color: string | Color4, rounded?: boolean): IconElemType;
+	public override makePenIcon(style: PenStyle): IconElemType {
+		const svg = icon(this.isRoundedTipPen(style) ? Edit : InkHighlighter);
+
+		const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		line.setAttribute('d', `
+			M80,-100 L880,-100
+		`);
+		line.style.stroke = style.color.toHexString();
+		line.style.strokeWidth = `${Math.sqrt(style.thickness) * 15}`;
+
+		if (this.isRoundedTipPen(style)) {
+			line.style.strokeLinecap = 'butt';
+		}
+
+		svg.insertAdjacentElement('afterbegin', line);
+
+		// Add a grid background to make transparency visible
+		if (style.color.a < 1) {
+			const checkerboard = this.makeCheckerboardPattern();
+			const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+			defs.innerHTML = checkerboard.patternDef;
+			svg.appendChild(defs);
+
+			const lineBackground = line.cloneNode() as SVGPathElement;
+			lineBackground.style.stroke = checkerboard.patternRef;
+
+			svg.insertAdjacentElement('afterbegin', lineBackground);
+		}
+
+		return svg;
+	}
 	// makeIconFromFactory(pen: Pen, factory: ComponentBuilderFactory, includeTransparencyGrid?: boolean): IconElemType;
 	// makePipetteIcon(color?: Color4): IconElemType;
 	// makeFormatSelectionIcon(): IconElemType;

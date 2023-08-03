@@ -27,9 +27,9 @@ const makeCheckerboardPattern = () => {
 			height='20%'
 			patternUnits='userSpaceOnUse'
 		>
-			<rect x=0 y=0 width=10 height=10 fill='white'/>
-			<rect x=0 y=0 width=5 height=5 fill='gray'/>
-			<rect x=5 y=5 width=5 height=5 fill='gray'/>
+			<rect x='0' y='0' width='10' height='10' fill='white'/>
+			<rect x='0' y='0' width='5' height='5' fill='gray'/>
+			<rect x='5' y='5' width='5' height='5' fill='gray'/>
 		</pattern>
 	`;
 	const patternRef = `url(#${id})`;
@@ -168,28 +168,6 @@ export default class IconProvider {
 			<rect x=75 y=75 width=10 height=10 fill='white' stroke='black'/>
 		</g>
 		`;
-		icon.setAttribute('viewBox', '0 0 100 100');
-
-		return icon;
-	}
-
-	/**
-	 * @param pathData - SVG path data (e.g. `m10,10l30,30z`)
-	 * @param fill - A valid CSS color (e.g. `var(--icon-color)` or `#f0f`). This can be `none`.
-	 */
-	protected makeIconFromPath(
-		pathData: string,
-		fill: string = 'var(--icon-color)',
-		strokeColor: string = 'none',
-		strokeWidth: string = '0px',
-	): IconElemType {
-		const icon = document.createElementNS(svgNamespace, 'svg');
-		const path = document.createElementNS(svgNamespace, 'path');
-		path.setAttribute('d', pathData);
-		path.style.fill = fill;
-		path.style.stroke = strokeColor;
-		path.style.strokeWidth = strokeWidth;
-		icon.appendChild(path);
 		icon.setAttribute('viewBox', '0 0 100 100');
 
 		return icon;
@@ -419,7 +397,7 @@ export default class IconProvider {
 		// Use a square-root scale to prevent the pen's tip from overflowing.
 		const strokeSize = Math.round(Math.sqrt(penStyle.thickness) * 4);
 		const color = penStyle.color;
-		const rounded = penStyle.factory === makeFreehandLineBuilder;
+		const rounded = this.isRoundedTipPen(penStyle);
 
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');
@@ -810,6 +788,44 @@ export default class IconProvider {
 		`);
 	}
 
-	/** Must be overridden by icon packs that need attribution. ==TODO== */
+	/**
+	 * @param pathData - SVG path data (e.g. `m10,10l30,30z`)
+	 * @param fill - A valid CSS color (e.g. `var(--icon-color)` or `#f0f`). This can be `none`.
+	 */
+	protected makeIconFromPath(
+		pathData: string,
+		fill: string = 'var(--icon-color)',
+		strokeColor: string = 'none',
+		strokeWidth: string = '0px',
+	): IconElemType {
+		const icon = document.createElementNS(svgNamespace, 'svg');
+		const path = document.createElementNS(svgNamespace, 'path');
+		path.setAttribute('d', pathData);
+		path.style.fill = fill;
+		path.style.stroke = strokeColor;
+		path.style.strokeWidth = strokeWidth;
+		icon.appendChild(path);
+		icon.setAttribute('viewBox', '0 0 100 100');
+
+		return icon;
+	}
+
+	/**
+	 * @returns An object with both the definition of a checkerboard pattern and the syntax to
+	 * reference that pattern. The defs provided by this function should be wrapped within a
+	 * `<defs></defs>` element.
+	 */
+	protected makeCheckerboardPattern() {
+		return makeCheckerboardPattern();
+	}
+
+	/**
+	 * @returns true if the given `penStyle` is known to match a rounded tip type of pen.
+	 */
+	protected isRoundedTipPen(penStyle: PenStyle) {
+		return penStyle.factory === makeFreehandLineBuilder;
+	}
+
+	/** Must be overridden by icon packs that need attribution. */
 	public licenseInfo(): string|null { return null; }
 }
