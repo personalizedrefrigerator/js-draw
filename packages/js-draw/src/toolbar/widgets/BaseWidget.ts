@@ -108,7 +108,12 @@ export default abstract class BaseWidget {
 		return true;
 	}
 
+	/** @deprecated Renamed to `setUpButtonEventListeners`. */
 	protected setupActionBtnClickListener(button: HTMLElement) {
+		return this.setUpButtonEventListeners(button);
+	}
+
+	protected setUpButtonEventListeners(button: HTMLElement) {
 		const clickTriggers = { Enter: true, ' ': true, };
 		button.onkeydown = (evt) => {
 			let handled = false;
@@ -148,6 +153,11 @@ export default abstract class BaseWidget {
 			if (!this.disabled) {
 				this.handleClick();
 			}
+		};
+
+		// Prevent double-click zoom on some devices.
+		button.ondblclick = event => {
+			event.preventDefault();
 		};
 	}
 
@@ -204,7 +214,7 @@ export default abstract class BaseWidget {
 		}
 
 		// Click functionality
-		this.setupActionBtnClickListener(this.button);
+		this.setUpButtonEventListeners(this.button);
 
 		// Clear anything already in this.container.
 		this.container.replaceChildren();
@@ -217,6 +227,8 @@ export default abstract class BaseWidget {
 		this.dropdownContent.replaceChildren();
 		this.#hasDropdown = this.fillDropdown(this.dropdownContent);
 		if (this.#hasDropdown) {
+			this.button.classList.add('has-dropdown');
+
 			// We're re-creating the dropdown.
 			this.dropdown?.destroy();
 

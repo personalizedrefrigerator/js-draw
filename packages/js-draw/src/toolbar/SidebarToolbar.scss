@@ -19,8 +19,19 @@
 	to { opacity: 0; }
 }
 
-.toolbar-sidebar-toolbar {
+.toolbar-element.toolbar-sidebar-toolbar {
+	--toolbar-button-height: min(20vh, 48px);
+	box-sizing: border-box;
+
+	.toolbar-toolContainer.selected > .toolbar-button {
+		background-color: var(--secondary-background-color);
+		color: var(--secondary-foreground-color);
+	}
+
 	.toolbar-button {
+		box-sizing: border-box;
+		background-color: transparent;
+
 		$label-hover-offset: calc(var(--toolbar-button-height) + 10px);
 		$label-visible-opacity: 0.8;
 
@@ -75,6 +86,35 @@
 				transition: none;
 			}
 		}
+
+		.toolbar-showHideDropdownIcon {
+			// Shrink, but not as fast as everything else.
+			flex-shrink: 0.01;
+
+			height: 12px;
+		}
+	}
+
+	& > .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
+		display: block;
+		visibility: hidden;
+	}
+
+	.toolbar-toolContainer > .toolbar-button {
+		margin: 0;
+		border-radius: 0;
+
+		padding: 8px;
+
+		&.has-dropdown {
+			padding-left: 8px;
+			padding-right: 8px;
+			padding-top: 8px;
+			padding-bottom: 0px;
+		}
+
+
+		box-shadow: none;
 	}
 }
 
