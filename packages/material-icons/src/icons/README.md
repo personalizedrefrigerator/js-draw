@@ -1,4 +1,4 @@
-`@js-draw/material-icons`
+`@js-draw/material-icons`: Material icon integration for `js-draw`.
 
 All icons in `@js-draw/material-icons` were found using [Google WebFonts search](https://fonts.google.com/icons) and downloaded from there.
 

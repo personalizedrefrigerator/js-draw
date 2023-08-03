@@ -15,6 +15,7 @@ import Title from './icons/Title.svg';
 import Resize from './icons/Resize.svg';
 import Delete from './icons/Delete.svg';
 import ContentCopy from './icons/ContentCopy.svg';
+import EditDocument from './icons/EditDocument.svg';
 
 
 const icon = (data: string) => {
@@ -70,7 +71,9 @@ class MaterialIconProvider extends IconProvider {
 		return icon(Delete);
 	}
 	// makeSaveIcon(): IconElemType;
-	// makeConfigureDocumentIcon(): IconElemType;
+	public override makeConfigureDocumentIcon(): IconElemType {
+		return icon(EditDocument);
+	}
 	// makeOverflowIcon(): IconElemType;
 
 	public override licenseInfo() {
