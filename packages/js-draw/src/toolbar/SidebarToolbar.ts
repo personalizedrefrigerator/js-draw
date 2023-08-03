@@ -198,10 +198,16 @@ export default class SidebarToolbar extends DropdownToolbar {
 			return !undraggableElementTypes.includes(element.tagName) && hasSuitableAncestors;
 		};
 
-		// Returns whether the current (or if no current, the last) gesture is roughly a click.
+		const clickThreshold = 5;
+
+		// Returns whether the current (or if no current, **the last**) gesture is roughly a click.
+		// Because this can be called **after** a gesture has just ended, it should not require
+		// the gesture to be in progress.
 		const isRoughlyClick = () => {
-			return Math.hypot(lastX - startX, lastY - startY) < 5;
+			return Math.hypot(lastX - startX, lastY - startY) < clickThreshold;
 		};
+
+		let startedDragging = false;
 
 		this.sidebarContainer.addEventListener('pointerdown', event => {
 			if (event.defaultPrevented || !isDraggableElement(event.target as HTMLElement)) {
@@ -209,6 +215,8 @@ export default class SidebarToolbar extends DropdownToolbar {
 			}
 
 			if (event.isPrimary) {
+				startedDragging = false;
+
 				lastX = event.clientX;
 				lastY = event.clientY;
 
@@ -236,10 +244,14 @@ export default class SidebarToolbar extends DropdownToolbar {
 			const dx = x - lastX;
 			const dy = y - lastY;
 
-			this.handleDrag(dx, dy);
+			if (Math.abs(y - startY) > clickThreshold || startedDragging) {
+				this.handleDrag(dx, dy);
 
-			lastX = x;
-			lastY = y;
+				lastX = x;
+				lastY = y;
+
+				startedDragging = true;
+			}
 		};
 
 		this.sidebarContainer.onpointerleave = event => {{
@@ -266,6 +278,7 @@ export default class SidebarToolbar extends DropdownToolbar {
 
 			this.finalizeDrag();
 			pointerDown = false;
+			startedDragging = false;
 		};
 
 		this.closeButton.onclick = () => {
