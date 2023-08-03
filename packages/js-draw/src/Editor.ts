@@ -709,10 +709,15 @@ export class Editor {
 		filter?: HTMLPointerEventFilter,
 		otherEventsFilter?: (eventName: string, event: Event)=>boolean,
 	) {
-		// Buffer events: Send events to the editor only if the pointer has moved enough to
-		// suggest that the user is attempting to draw, rather than click to close the color picker.
-		let eventBuffer: [ HTMLPointerEventName, PointerEvent ][] = [];
-		let gestureStartPos: Point2|null = null;
+		type GestureRecord = {
+			// Buffer events: Send events to the editor only if the pointer has moved enough to
+			// suggest that the user is attempting to draw, rather than click to close the color picker.
+			eventBuffer: [ HTMLPointerEventName, PointerEvent ][];
+			startPoint: Point2;
+		};
+
+		// Maps pointer IDs to gesture start points
+		const gestureData: Record<number, GestureRecord> = Object.create(null);
 
 		return this.handlePointerEventsFrom(elem, (eventName, event) => {
 			if (filter && !filter(eventName, event)) {
@@ -722,15 +727,18 @@ export class Editor {
 			// Position of the current event.
 			const currentPos = Vec2.of(event.pageX, event.pageY);
 
+			const pointerId = event.pointerId ?? 0;
+
 			// Whether to send the current event to the editor
 			let sendToEditor = true;
 
 			if (eventName === 'pointerdown') {
 				// Buffer the event, but don't send it to the editor yet.
 				// We don't want to send single-click events, but we do want to send full strokes.
-				eventBuffer = [];
-				eventBuffer.push([ eventName, event ]);
-				gestureStartPos = currentPos;
+				gestureData[pointerId] = {
+					eventBuffer: [ [eventName, event] ],
+					startPoint: currentPos,
+				};
 
 				// Capture the pointer so we receive future events even if the overlay is hidden.
 				elem.setPointerCapture(event.pointerId);
@@ -738,10 +746,14 @@ export class Editor {
 				// Don't send to the editor.
 				sendToEditor = false;
 			}
-			else if (eventName === 'pointermove') {
+			else if (eventName === 'pointermove' && gestureData[pointerId]) {
+				const gestureStartPos = gestureData[pointerId].startPoint;
+				const eventBuffer = gestureData[pointerId].eventBuffer;
+
 				// Skip if the pointer hasn't moved enough to not be a "click".
 				const strokeStartThreshold = 10;
-				if (gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold) {
+				const isWithinClickThreshold = gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold;
+				if (isWithinClickThreshold) {
 					eventBuffer.push([ eventName, event ]);
 					sendToEditor = false;
 				} else {
@@ -750,19 +762,27 @@ export class Editor {
 						this.handleHTMLPointerEvent(eventName, event);
 					}
 
-					eventBuffer = [];
+					gestureData[pointerId].eventBuffer = [];
 					sendToEditor = true;
 				}
+			}
+			// Pointers that aren't down -- send to the editor.
+			else if (eventName === 'pointermove') {
+				sendToEditor = true;
 			}
 			// Otherwise, if we received a pointerup/pointercancel without flushing all pointerevents from the
 			// buffer, the gesture wasn't recognised as a stroke. Thus, the editor isn't expecting a pointerup/
 			// pointercancel event.
-			else if ((eventName === 'pointerup' || eventName === 'pointercancel') && eventBuffer.length > 0) {
+			else if (
+				(eventName === 'pointerup' || eventName === 'pointercancel')
+				&& gestureData[pointerId] && gestureData[pointerId].eventBuffer.length > 0
+			) {
 				elem.releasePointerCapture(event.pointerId);
-				eventBuffer = [];
 
 				// Don't send to the editor.
 				sendToEditor = false;
+
+				delete gestureData[pointerId];
 			}
 
 			// Forward all other events to the editor.
