@@ -117,10 +117,13 @@ export default class SidebarToolbar extends DropdownToolbar {
 				this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-out`;
 				this.mainContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-out`;
 
+				// Hide the container completely slightly before the animation stops to prevent flickering
+				const epsilon = 10;
+
 				animationTimeout = setTimeout(() => {
 					this.mainContainer.style.display = 'none';
 					animationTimeout = null;
-				}, animationDuration);
+				}, animationDuration - epsilon);
 			}
 		});
 	}
