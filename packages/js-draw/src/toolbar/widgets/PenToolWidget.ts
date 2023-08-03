@@ -129,7 +129,13 @@ export default class PenToolWidget extends BaseToolWidget {
 	}
 
 	private createIconForRecord(record: PenTypeRecord|null) {
-		const style = this.tool.getStyleValue().get();
+		const style = {
+			...this.tool.getStyleValue().get(),
+		};
+
+		if (record?.factory) {
+			style.factory = record.factory;
+		}
 
 		const strokeFactory = record?.factory;
 		if (!strokeFactory || strokeFactory === makeFreehandLineBuilder || strokeFactory === makePressureSensitiveFreehandLineBuilder) {
