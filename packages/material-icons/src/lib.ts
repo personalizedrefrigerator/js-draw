@@ -63,15 +63,17 @@ class MaterialIconProvider extends IconProvider {
 	public override makePenIcon(style: PenStyle): IconElemType {
 		const svg = icon(this.isRoundedTipPen(style) ? Edit : InkHighlighter);
 
+		svg.setAttribute('viewBox', '0 -880 960 1000');
+
 		const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		line.setAttribute('d', `
-			M80,-100 L880,-100
+			M110,-25 L850,-25
 		`);
 		line.style.stroke = style.color.toHexString();
-		line.style.strokeWidth = `${Math.sqrt(style.thickness) * 15}`;
+		line.style.strokeWidth = `${Math.sqrt(style.thickness) * 20}`;
 
-		if (this.isRoundedTipPen(style)) {
-			line.style.strokeLinecap = 'butt';
+		if (!this.isRoundedTipPen(style)) {
+			line.style.strokeLinecap = 'square';
 		}
 
 		svg.insertAdjacentElement('afterbegin', line);
