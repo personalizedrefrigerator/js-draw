@@ -145,6 +145,8 @@
 }
 
 .toolbar-sidebar-container .toolbar-sidebar {
+	--toolbar-button-height: 48px;
+
 	touch-action: none;
 	user-select: none;
 
@@ -217,11 +219,16 @@
 			width: 100%;
 			box-sizing: border-box;
 			justify-content: flex-start;
+			box-shadow: none;
+
+			padding: 2px;
 
 			& > .toolbar-icon {
-				height: 40px;
-				padding: 10px;
-				margin-right: 20px;
+				width: 36px;
+				height: 36px;
+				padding: 8px;
+
+				margin-right: 15px;
 			}
 
 			// No special sizing for long labels
