@@ -25,6 +25,8 @@ export default class SidebarToolbar extends DropdownToolbar {
 	) {
 		super(editor, parent, localizationTable);
 
+		this.container.classList.add(`${toolbarCSSPrefix}sidebar-toolbar`);
+
 		this.sidebarVisible = ReactiveValue.fromInitialValue(false);
 		this.sidebarY = ReactiveValue.fromInitialValue(0);
 

@@ -89,6 +89,7 @@
 .toolbar-button > label {
 	cursor: inherit;
 	user-select: none;
+	-webkit-user-select: none;
 }
 
 /* Decrease the font size of labels in the main toolbar if they're long. */

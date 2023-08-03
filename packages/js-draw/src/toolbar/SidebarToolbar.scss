@@ -19,6 +19,65 @@
 	to { opacity: 0; }
 }
 
+.toolbar-sidebar-toolbar {
+	.toolbar-button {
+		$label-hover-offset: calc(var(--toolbar-button-height) + 10px);
+		$label-visible-opacity: 0.8;
+
+		width: var(--toolbar-button-height);
+		height: var(--toolbar-button-height);
+
+		@keyframes rehide-label {
+			0% { opacity: $label-visible-opacity; }
+			80% { opacity: $label-visible-opacity; }
+			100% { opacity: 0.1; }
+		}
+
+		@keyframes show-label {
+			0% { opacity: 0; }
+			// Keep the label hidden before showing
+			80% { opacity: 0; }
+			100% { opacity: $label-visible-opacity; }
+		}
+
+		@keyframes keep-label-hidden {
+			0% { opacity: 0; }
+			100% { opacity: 0; }
+		}
+		// Only show an animation when opening the label due to a hover --
+		// show the label immediately otherwise.
+		&:hover > label {
+			opacity: $label-visible-opacity;
+
+			$animation-length: 1s;
+			animation: $animation-length ease show-label;
+		}
+
+		&:focus-visible > label {
+			// Show, then hide labels on keyboard focus
+			animation: 1.5s ease rehide-label;
+			opacity: 0;
+		}
+
+		& > label {
+			opacity: 0;
+			position: absolute;
+			margin-top: $label-hover-offset;
+
+			background-color: var(--primary-background-color);
+			color: var(--primary-foreground-color);
+			border-radius: 25px;
+			padding: 10px;
+
+			transition: 0.2s ease opacity, 0.2s ease margin-top;
+
+			@media (prefers-reduced-motion: reduce) {
+				transition: none;
+			}
+		}
+	}
+}
+
 .toolbar-sidebar-container {
 	background-color: var(--primary-background-color-transparent);
 
