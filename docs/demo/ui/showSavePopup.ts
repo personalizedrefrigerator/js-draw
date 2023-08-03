@@ -25,7 +25,7 @@ const showSavePopup = (
 ) => {
 	let imgHTML = img.outerHTML;
 
-	const popupContainer = document.createElement('div');
+	const popupContainer = document.createElement('dialog');
 	popupContainer.classList.add('popupContainer');
 	popupContainer.appendChild(document.createTextNode('Saving...'));
 	document.body.appendChild(popupContainer);
@@ -159,6 +159,8 @@ const showSavePopup = (
 		</html>`
 	);
 	popupDoc.close();
+
+	popupContainer.show();
 
 	// Loading the preview can be much slower than saving the image.
 	// Only do so if requested.
