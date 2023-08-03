@@ -7,10 +7,10 @@ import SelectionTool from '../../tools/SelectionTool/SelectionTool';
 import { Mat33 } from '@js-draw/math';
 import fileToBase64 from '../../util/fileToBase64';
 import { ToolbarLocalization } from '../localization';
-import ActionButtonWidget from './ActionButtonWidget';
+import BaseWidget from './BaseWidget';
+import { EditorEventType } from '../../types';
 
-export default class InsertImageWidget extends ActionButtonWidget {
-	private imageSelectionOverlay: HTMLElement;
+export default class InsertImageWidget extends BaseWidget {
 	private imagePreview: HTMLImageElement;
 	private imageFileInput: HTMLInputElement;
 	private imageAltTextInput: HTMLInputElement;
@@ -21,25 +21,44 @@ export default class InsertImageWidget extends ActionButtonWidget {
 	public constructor(editor: Editor, localization?: ToolbarLocalization) {
 		localization ??= editor.localization;
 
-		super(editor,
-			'insert-image-widget',
-			() => editor.icons.makeInsertImageIcon(),
-			localization.image,
-			() => this.onClicked()
-		);
+		super(editor, 'insert-image-widget');
 
-		this.imageSelectionOverlay = document.createElement('div');
-		this.imageSelectionOverlay.classList.add('toolbar-image-selection-overlay');
-		this.fillOverlay();
+		// Make the dropdown showable
+		this.container.classList.add('dropdownShowable');
 
-		this.editor.createHTMLOverlay(this.imageSelectionOverlay);
-		this.imageSelectionOverlay.style.display = 'none';
+		editor.notifier.on(EditorEventType.SelectionUpdated, event => {
+			if (event.kind === EditorEventType.SelectionUpdated && this.isDropdownVisible()) {
+				this.updateInputs();
+			}
+		});
+	}
+
+	protected override getTitle(): string {
+		return this.localizationTable.image;
+	}
+
+	protected override createIcon(): Element | null {
+		return this.editor.icons.makeInsertImageIcon();
+	}
+
+	protected override setDropdownVisible(visible: boolean): void {
+		super.setDropdownVisible(visible);
+
+		// Update the dropdown just before showing.
+		if (this.isDropdownVisible()) {
+			this.updateInputs();
+		}
+	}
+
+	protected override handleClick() {
+		this.setDropdownVisible(!this.isDropdownVisible());
 	}
 
 	private static nextInputId = 0;
 
-	private fillOverlay() {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
+		container.classList.add('insert-image-widget-dropdown-content');
 
 		const chooseImageRow = document.createElement('div');
 		const altTextRow = document.createElement('div');
@@ -50,7 +69,6 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		actionButtonRow.classList.add('action-button-row');
 
 		this.submitButton = document.createElement('button');
-		const cancelButton = document.createElement('button');
 
 		this.imageFileInput = document.createElement('input');
 		this.imageAltTextInput = document.createElement('input');
@@ -75,7 +93,6 @@ export default class InsertImageWidget extends ActionButtonWidget {
 
 		this.statusView.setAttribute('aria-live', 'polite');
 
-		cancelButton.innerText = this.localizationTable.cancel;
 		this.submitButton.innerText = this.localizationTable.submit;
 
 		this.imageFileInput.onchange = async () => {
@@ -109,30 +126,20 @@ export default class InsertImageWidget extends ActionButtonWidget {
 			}
 		};
 
-		cancelButton.onclick = () => {
-			this.hideDialog();
-		};
-
-		this.imageSelectionOverlay.onclick = (evt: MouseEvent) => {
-			// If clicking on the backdrop
-			if (evt.target === this.imageSelectionOverlay) {
-				this.hideDialog();
-			}
-		};
-
 		chooseImageRow.replaceChildren(imageFileInputLabel, this.imageFileInput);
 		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
-		actionButtonRow.replaceChildren(cancelButton, this.submitButton);
+		actionButtonRow.replaceChildren(this.submitButton);
 
 		container.replaceChildren(
 			chooseImageRow, altTextRow, this.imagePreview, this.statusView, actionButtonRow
 		);
 
-		this.imageSelectionOverlay.replaceChildren(container);
+		dropdown.replaceChildren(container);
+		return true;
 	}
 
 	private hideDialog() {
-		this.imageSelectionOverlay.style.display = 'none';
+		this.setDropdownVisible(false);
 	}
 
 	private updateImageSizeDisplay() {
@@ -154,18 +161,20 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		);
 	}
 
-	private clearInputs() {
-		this.imageFileInput.value = '';
-		this.imageAltTextInput.value = '';
-		this.imagePreview.style.display = 'none';
-		this.submitButton.disabled = true;
-		this.statusView.innerText = '';
-	}
+	private updateInputs() {
+		const resetInputs = () => {
+			this.imageFileInput.value = '';
+			this.imageAltTextInput.value = '';
+			this.imagePreview.style.display = 'none';
+			this.submitButton.disabled = true;
+			this.statusView.innerText = '';
 
-	private onClicked() {
-		this.imageSelectionOverlay.style.display = '';
-		this.clearInputs();
-		this.imageFileInput.focus();
+			this.submitButton.style.display = '';
+
+			this.imageAltTextInput.oninput = null;
+			this.imageFileInput.oninput = null;
+		};
+		resetInputs();
 
 		const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
 		const selectedObjects = selectionTools.map(tool => tool.getSelectedObjects()).flat();
@@ -186,6 +195,15 @@ export default class InsertImageWidget extends ActionButtonWidget {
 			selectionTools.forEach(tool => tool.clearSelection());
 		}
 
+		this.imageAltTextInput.oninput = () => {
+			this.submitButton.style.display = '';
+		};
+
+		this.imageFileInput.oninput = () => {
+			this.submitButton.style.display = '';
+		};
+		this.submitButton.style.display = 'none';
+
 		this.submitButton.onclick = async () => {
 			if (!this.imageBase64URL) {
 				return;
@@ -202,7 +220,7 @@ export default class InsertImageWidget extends ActionButtonWidget {
 				return;
 			}
 
-			this.imageSelectionOverlay.style.display = 'none';
+			this.hideDialog();
 
 			if (editingImage) {
 				const eraseCommand = new Erase([ editingImage ]);

@@ -1,11 +1,11 @@
 // Types related to the image editor
 
-import EventDispatcher from './EventDispatcher';
-import { Mat33, Point2, Vec2, Rect2, Color4 } from '@js-draw/math';
-import BaseTool from './tools/BaseTool';
-import AbstractComponent from './components/AbstractComponent';
-import Command from './commands/Command';
-import { WidgetContentLayoutManager } from './toolbar/widgets/layout/types';
+import type EventDispatcher from './EventDispatcher';
+import type { Mat33, Point2, Vec2, Rect2, Color4 } from '@js-draw/math';
+import type BaseTool from './tools/BaseTool';
+import type AbstractComponent from './components/AbstractComponent';
+import type Command from './commands/Command';
+import type { WidgetContentLayoutManager } from './toolbar/widgets/layout/types';
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
@@ -22,8 +22,15 @@ export enum EditorEventType {
 	ViewportChanged,
 	DisplayResized,
 
+	SelectionUpdated,
+
+	/** @internal */
 	ColorPickerToggled,
+
+	/** @internal */
 	ColorPickerColorSelected,
+
+	/** @deprecated @internal */
 	ToolbarDropdownShown,
 }
 
@@ -81,6 +88,12 @@ export interface CommandUndoneEvent {
 	readonly command: Command;
 }
 
+export interface SelectionUpdated {
+	readonly kind: EditorEventType.SelectionUpdated;
+	readonly selectedComponents: AbstractComponent[];
+	readonly tool: BaseTool;
+}
+
 export interface ColorPickerToggled {
 	readonly kind: EditorEventType.ColorPickerToggled;
 	readonly open: boolean;
@@ -102,6 +115,7 @@ export interface ToolbarDropdownShownEvent {
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
 	| EditorViewportChangedEvent | DisplayResizedEvent
 	| EditorUndoStackUpdated | CommandDoneEvent | CommandUndoneEvent
+	| SelectionUpdated
 	| ColorPickerToggled | ColorPickerColorSelected
 	| ToolbarDropdownShownEvent;
 

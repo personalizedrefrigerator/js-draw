@@ -1,0 +1,27 @@
+
+.insert-image-widget-dropdown-content {
+	& > div > div {
+		padding: 5px;
+	}
+	
+	img {
+		max-width: min(50vw, 75%);
+		max-height: 50vh;
+	
+		/* Center */
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	
+	.action-button-row {
+		margin-top: 4px;
+		display: flex;
+		flex-direction: row;
+	}
+	
+	.action-button-row > button {
+		flex-grow: 1;
+		text-align: end;
+	}
+}

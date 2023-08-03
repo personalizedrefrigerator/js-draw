@@ -135,6 +135,8 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
+	private lastSelectedObjects: AbstractComponent[] = [];
+
 	private onSelectionUpdated() {
 		// Note that the selection has changed
 		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
@@ -143,6 +145,22 @@ export default class SelectionTool extends BaseTool {
 		});
 
 		const selectedItemCount = this.selectionBox?.getSelectedItemCount() ?? 0;
+		const selectedObjects = this.selectionBox?.getSelectedObjects() ?? [];
+		const hasDifferentSelection =
+			this.lastSelectedObjects.length !== selectedItemCount
+			|| selectedObjects.some((obj, i) => this.lastSelectedObjects[i] !== obj);
+
+		if (hasDifferentSelection) {
+			// Only fire the SelectionUpdated event if the selection really updated.
+			this.editor.notifier.dispatch(EditorEventType.SelectionUpdated, {
+				kind: EditorEventType.SelectionUpdated,
+				selectedComponents: selectedObjects,
+				tool: this,
+			});
+
+			this.lastSelectedObjects = selectedObjects;
+		}
+
 		if (selectedItemCount > 0) {
 			this.editor.announceForAccessibility(
 				this.editor.localization.selectedElements(selectedItemCount)

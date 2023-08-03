@@ -9,6 +9,7 @@ import Pointer from '../../Pointer';
 import { Rect2, Vec2, Path, Color4 } from '@js-draw/math';
 import sendPenEvent from '../../testing/sendPenEvent';
 import { pathToRenderable } from '../../rendering/RenderablePathSpec';
+import { EditorEventType } from '../../types';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(SelectionTool)[0];
@@ -255,5 +256,56 @@ describe('SelectionTool', () => {
 
 		expect(editor.image.findParent(testStroke)).not.toBeNull();
 		expect(testStroke.getBBox()).objEq(new Rect2(30, 10, 150, 150));
+	});
+
+	it('should only fire the SelectionChanged event if the selection changed', () => {
+		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(150);
+
+		selectionTool.clearSelection();
+
+		const updatedListener = jest.fn();
+		editor.notifier.on(EditorEventType.SelectionUpdated, updatedListener);
+
+		expect(updatedListener).toHaveBeenCalledTimes(0);
+
+		selectionTool.setEnabled(true);
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+
+		// Should not be notified until the selection ends
+		expect(updatedListener).toHaveBeenCalledTimes(0);
+
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(5, 5));
+
+		expect(updatedListener).toHaveBeenCalledTimes(1);
+		expect(updatedListener).toHaveBeenLastCalledWith({
+			kind: EditorEventType.SelectionUpdated,
+			tool: selectionTool,
+			selectedComponents: [ testStroke ]
+		});
+
+		// Selecting the same content should not re-fire the listener
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(5, 5));
+
+		expect(updatedListener).toHaveBeenCalledTimes(1);
+
+		// ...but selecting a different item should
+		const secondStroke = createSquareStroke(30);
+		editor.dispatch(secondStroke.addTestStrokeCommand);
+
+		expect(updatedListener).toHaveBeenCalledTimes(1);
+
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(29, 29));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(31, 31));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(32, 32));
+
+		expect(updatedListener).toHaveBeenCalledTimes(2);
+		expect(updatedListener).toHaveBeenLastCalledWith({
+			kind: EditorEventType.SelectionUpdated,
+			tool: selectionTool,
+			selectedComponents: [ secondStroke.testStroke ],
+		});
 	});
 });
