@@ -18,10 +18,14 @@
 		margin-top: 4px;
 		display: flex;
 		flex-direction: row;
+		justify-content: flex-end;
 	}
 	
 	.action-button-row > button {
 		flex-grow: 1;
 		text-align: end;
+		color: var(--primary-action-foreground-color);
+		max-width: 50%;
+		min-width: min(100%, 40px);
 	}
 }

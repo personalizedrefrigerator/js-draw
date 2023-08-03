@@ -196,7 +196,9 @@ export default class InsertImageWidget extends BaseWidget {
 		}
 
 		this.imageAltTextInput.oninput = () => {
-			this.submitButton.style.display = '';
+			if (this.imagePreview.src?.length > 0) {
+				this.submitButton.style.display = '';
+			}
 		};
 
 		this.imageFileInput.oninput = () => {

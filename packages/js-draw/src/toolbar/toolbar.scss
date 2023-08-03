@@ -210,7 +210,7 @@
 	}
 
 	/* ...and background color animation. */
-	.toolbar-button, .toolbar-root button {
+	:root .toolbar-button, .toolbar-root button {
 		transition: none;
 	}
 }

@@ -21,6 +21,11 @@
 
 	// Used for shadows
 	--primary-shadow-color: rgba(0, 0, 0, 0.5);
+
+	// Color used for some button foregrounds
+	--primary-action-foreground-color: color-mix(
+		in srgb, var(--primary-foreground-color), #0070ea
+	);
 }
 
 @media (prefers-color-scheme: dark) {

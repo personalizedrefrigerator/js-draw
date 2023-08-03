@@ -30,9 +30,22 @@
 	flex-direction: column-reverse;
 	align-items: center;
 	z-index: 2;
+
+	.toolbar-element button {
+		font-size: 1.2em;
+		box-shadow: none;
+		border: none;
+		padding: 10px;
+
+		transition: 0.2s ease box-shadow;
+
+		&:hover {
+			box-shadow: 0 1px 2px var(--primary-shadow-color);
+		}
+	}
 }
 
-.toolbar-sidebar {
+.toolbar-sidebar-container .toolbar-sidebar {
 	touch-action: none;
 	user-select: none;
 
@@ -61,7 +74,7 @@
 		display: inline-block;
 	}
 
-	.drag-elem {
+	& > button.drag-elem {
 		height: 40px;
 		display: block;
 
