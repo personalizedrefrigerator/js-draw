@@ -543,9 +543,28 @@ export default class Selection {
 		return new Erase(this.selectedElems);
 	}
 
+	private selectionDuplicatedAnimationTimeout: ReturnType<typeof setTimeout>|null = null;
+	private runSelectionDuplicatedAnimation() {
+		if (this.selectionDuplicatedAnimationTimeout) {
+			clearTimeout(this.selectionDuplicatedAnimationTimeout);
+		}
+
+		const animationDuration = 400; // ms
+		this.backgroundElem.style.animation = `${animationDuration}ms ease selection-duplicated-animation`;
+
+		this.selectionDuplicatedAnimationTimeout = setTimeout(() => {
+			this.backgroundElem.style.animation = '';
+			this.selectionDuplicatedAnimationTimeout = null;
+		}, animationDuration);
+	}
+
 	public async duplicateSelectedObjects(): Promise<Command> {
 		const wasTransforming = this.backgroundDragging || this.targetHandle;
 		let tmpApplyCommand: Command|null = null;
+
+		if (!wasTransforming) {
+			this.runSelectionDuplicatedAnimation();
+		}
 
 		if (wasTransforming) {
 			// Don't update the selection's focus when redoing/undoing

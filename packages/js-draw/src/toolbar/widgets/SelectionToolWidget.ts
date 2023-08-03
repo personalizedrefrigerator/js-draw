@@ -127,6 +127,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			async () => {
 				const selection = this.tool.getSelection();
 				this.editor.dispatch(await selection!.duplicateSelectedObjects());
+				this.setDropdownVisible(false);
 			},
 			localization,
 		);
