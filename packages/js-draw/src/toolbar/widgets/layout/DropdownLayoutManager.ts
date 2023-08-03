@@ -85,8 +85,6 @@ class Dropdown implements ToolMenu {
 
 	private hideDropdownTimeout: any|null = null;
 	private setVisible(visible: boolean) {
-		// TODO(!): Avoid modifying parent.classList
-		const parentElem = this.parent.target.parentElement!;
 		const currentlyVisible = this.visible.get();
 		if (currentlyVisible === visible) {
 			return;
@@ -106,7 +104,6 @@ class Dropdown implements ToolMenu {
 		this.visible.set(visible);
 		if (visible) {
 			this.dropdownContainer.classList.remove('hidden');
-			parentElem.classList.add('dropdownVisible');
 
 			this.notifier.dispatch(DropdownEventType.DropdownShown, {
 				dropdown: this,
@@ -115,8 +112,6 @@ class Dropdown implements ToolMenu {
 
 			this.repositionDropdown();
 		} else {
-			parentElem.classList.remove('dropdownVisible');
-
 			this.notifier.dispatch(DropdownEventType.DropdownHidden, {
 				dropdown: this,
 				fromToplevelDropdown: this.parent.isToplevel(),

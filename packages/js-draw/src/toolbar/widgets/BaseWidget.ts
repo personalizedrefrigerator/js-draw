@@ -245,6 +245,13 @@ export default abstract class BaseWidget {
 			// this ensures that keyboard focus goes to a reasonable location when
 			// the user closes a menu.
 			this.dropdown.visible.onUpdate(visible => {
+				if (visible) {
+					this.container.classList.add('dropdownVisible');
+				} else {
+					this.container.classList.remove('dropdownVisible');
+				}
+
+
 				if (!visible) {
 					this.button.focus();
 				}
