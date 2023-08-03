@@ -2,7 +2,7 @@
 @use './makeAboutDialog.scss';
 
 .dialog-container {
-	background-color: var(--primary-shadow-color);
+	background-color: var( --primary-background-color-transparent);
 
 	backdrop-filter: blur(5px);
 
