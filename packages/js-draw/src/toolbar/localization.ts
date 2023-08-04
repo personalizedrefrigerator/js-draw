@@ -13,6 +13,7 @@ export interface ToolbarLocalization {
 	image: string;
 	inputAltText: string;
 	chooseFile: string;
+	dragAndDropHereOrBrowse: string; // Uses {{curly braces}} to bold text
 	cancel: string;
 	submit: string;
 	roundedTipPen: string;
@@ -72,6 +73,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	reformatSelection: 'Format selection',
 	inputAltText: 'Alt text: ',
 	chooseFile: 'Choose file: ',
+	dragAndDropHereOrBrowse: 'Drag and drop here\nor\n{{browse}}',
 	submit: 'Submit',
 	cancel: 'Cancel',
 	resetView: 'Reset view',

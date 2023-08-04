@@ -370,6 +370,16 @@ export default class IconProvider {
 		`);
 	}
 
+	public makeUploadFileIcon(): IconElemType {
+		return this.makeIconFromPath(`
+			M 48,10 32,34 43,33 42,68
+			H 54
+			L 53,33 64,34 Z
+	
+			M 8,66 V 86 H 88 V 66 H 78 V 76 H 18 V 66 Z
+		`);
+	}
+
 	public makeTextIcon(textStyle: TextRenderingStyle): IconElemType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		icon.setAttribute('viewBox', '0 0 100 100');

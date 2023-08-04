@@ -192,7 +192,7 @@ export default class EdgeToolbar extends DropdownToolbar {
 
 			// Some inputs handle dragging themselves. Don't also interpret such gestures
 			// as dragging the dropdown.
-			const undraggableElementTypes = [ 'INPUT', 'SELECT' ];
+			const undraggableElementTypes = [ 'INPUT', 'SELECT', 'IMG' ];
 
 			let hasSuitableAncestors = false;
 			let ancestor = element.parentElement;

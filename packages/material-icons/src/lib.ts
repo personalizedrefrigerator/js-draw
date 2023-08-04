@@ -19,6 +19,7 @@ import EditDocument from './icons/EditDocument.svg';
 import Check from './icons/Check.svg';
 import InkHighlighter from './icons/InkHighlighter.svg';
 import Edit from './icons/Edit.svg';
+import CloudUpload from './icons/CloudUpload.svg';
 
 
 const icon = (data: string) => {
@@ -56,6 +57,9 @@ class MaterialIconProvider extends IconProvider {
 	}
 	public override makeInsertImageIcon(): IconElemType {
 		return icon(Imagesmode);
+	}
+	public override makeUploadFileIcon(): IconElemType {
+		return icon(CloudUpload);
 	}
 	public override makeTextIcon(_textStyle: TextRenderingStyle): IconElemType {
 		return icon(Title);

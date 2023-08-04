@@ -10,10 +10,12 @@ import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../constants';
+import makeFileInput from './components/makeFileInput';
+import { MutableReactiveValue } from '../../util/ReactiveValue';
 
 export default class InsertImageWidget extends BaseWidget {
 	private imagePreview: HTMLImageElement;
-	private imageFileInput: HTMLInputElement;
+	private selectedFiles: MutableReactiveValue<File[]>|null;
 	private imageAltTextInput: HTMLInputElement;
 	private statusView: HTMLElement;
 	private imageBase64URL: string|null;
@@ -61,7 +63,14 @@ export default class InsertImageWidget extends BaseWidget {
 		const container = document.createElement('div');
 		container.classList.add('insert-image-widget-dropdown-content', `${toolbarCSSPrefix}spacedList`);
 
-		const chooseImageRow = document.createElement('div');
+		const {
+			container: chooseImageRow,
+			selectedFiles,
+		} = makeFileInput(
+			this.localizationTable.chooseFile,
+			this.editor,
+			'image/*',
+		);
 		const altTextRow = document.createElement('div');
 		this.imagePreview = document.createElement('img');
 		this.statusView = document.createElement('div');
@@ -70,42 +79,34 @@ export default class InsertImageWidget extends BaseWidget {
 		actionButtonRow.classList.add('action-button-row');
 
 		this.submitButton = document.createElement('button');
-
-		this.imageFileInput = document.createElement('input');
+		this.selectedFiles = selectedFiles;
 		this.imageAltTextInput = document.createElement('input');
-		const imageFileInputLabel = document.createElement('label');
+
+		// Label the alt text input
 		const imageAltTextLabel = document.createElement('label');
 
-		const fileInputId = `insert-image-file-input-${InsertImageWidget.nextInputId ++}`;
 		const altTextInputId = `insert-image-alt-text-input-${InsertImageWidget.nextInputId++}`;
-
-		this.imageFileInput.setAttribute('id', fileInputId);
 		this.imageAltTextInput.setAttribute('id', altTextInputId);
 		imageAltTextLabel.htmlFor = altTextInputId;
-		imageFileInputLabel.htmlFor = fileInputId;
-
-		this.imageFileInput.accept = 'image/*';
 
 		imageAltTextLabel.innerText = this.localizationTable.inputAltText;
-		imageFileInputLabel.innerText = this.localizationTable.chooseFile;
-
-		this.imageFileInput.type = 'file';
 		this.imageAltTextInput.type = 'text';
 
 		this.statusView.setAttribute('aria-live', 'polite');
 
 		this.submitButton.innerText = this.localizationTable.submit;
 
-		this.imageFileInput.onchange = async () => {
-			if (this.imageFileInput.value === '' || !this.imageFileInput.files || !this.imageFileInput.files[0]) {
+		this.selectedFiles.onUpdateAndNow(async files => {
+			if (files.length === 0) {
 				this.imagePreview.style.display = 'none';
 				this.submitButton.disabled = true;
+				this.submitButton.style.display = 'none';
 				return;
 			}
 
 			this.imagePreview.style.display = 'block';
 
-			const image = this.imageFileInput.files[0];
+			const image = files[0];
 
 			let data: string|null = null;
 
@@ -120,14 +121,15 @@ export default class InsertImageWidget extends BaseWidget {
 			if (data) {
 				this.imagePreview.src = data;
 				this.submitButton.disabled = false;
+				this.submitButton.style.display = '';
 				this.updateImageSizeDisplay();
 			} else {
 				this.submitButton.disabled = true;
+				this.submitButton.style.display = 'none';
 				this.statusView.innerText = '';
 			}
-		};
+		});
 
-		chooseImageRow.replaceChildren(imageFileInputLabel, this.imageFileInput);
 		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
 		actionButtonRow.replaceChildren(this.submitButton);
 
@@ -164,7 +166,7 @@ export default class InsertImageWidget extends BaseWidget {
 
 	private updateInputs() {
 		const resetInputs = () => {
-			this.imageFileInput.value = '';
+			this.selectedFiles?.set([]);
 			this.imageAltTextInput.value = '';
 			this.imagePreview.style.display = 'none';
 			this.submitButton.disabled = true;
@@ -173,7 +175,6 @@ export default class InsertImageWidget extends BaseWidget {
 			this.submitButton.style.display = '';
 
 			this.imageAltTextInput.oninput = null;
-			this.imageFileInput.oninput = null;
 		};
 		resetInputs();
 
@@ -204,10 +205,6 @@ export default class InsertImageWidget extends BaseWidget {
 			if (this.imagePreview.src?.length > 0) {
 				this.submitButton.style.display = '';
 			}
-		};
-
-		this.imageFileInput.oninput = () => {
-			this.submitButton.style.display = '';
 		};
 
 		this.submitButton.onclick = async () => {
