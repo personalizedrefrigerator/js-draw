@@ -179,6 +179,7 @@ export default class InsertImageWidget extends BaseWidget {
 		const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
 		const selectedObjects = selectionTools.map(tool => tool.getSelectedObjects()).flat();
 
+		// Check: Is there a selected image that can be edited?
 		let editingImage: ImageComponent|null = null;
 		if (selectedObjects.length === 1 && selectedObjects[0] instanceof ImageComponent) {
 			editingImage = selectedObjects[0];
@@ -192,9 +193,12 @@ export default class InsertImageWidget extends BaseWidget {
 
 			this.updateImageSizeDisplay();
 		} else if (selectedObjects.length > 0) {
+			// If not, clear the selection.
 			selectionTools.forEach(tool => tool.clearSelection());
 		}
 
+		// Show the submit button only when there is data to submit.
+		this.submitButton.style.display = 'none';
 		this.imageAltTextInput.oninput = () => {
 			if (this.imagePreview.src?.length > 0) {
 				this.submitButton.style.display = '';
@@ -204,7 +208,6 @@ export default class InsertImageWidget extends BaseWidget {
 		this.imageFileInput.oninput = () => {
 			this.submitButton.style.display = '';
 		};
-		this.submitButton.style.display = 'none';
 
 		this.submitButton.onclick = async () => {
 			if (!this.imageBase64URL) {

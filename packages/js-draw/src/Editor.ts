@@ -26,7 +26,7 @@ import sendPenEvent from './testing/sendPenEvent';
 import KeyboardShortcutManager from './shortcuts/KeyboardShortcutManager';
 import KeyBinding from './shortcuts/KeyBinding';
 import AbstractToolbar from './toolbar/AbstractToolbar';
-import SidebarToolbar from './toolbar/SidebarToolbar';
+import EdgeToolbar from './toolbar/EdgeToolbar';
 import StrokeKeyboardControl from './tools/InputFilter/StrokeKeyboardControl';
 import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
 import RenderablePathSpec from './rendering/RenderablePathSpec';
@@ -335,7 +335,7 @@ export class Editor {
 	 * @returns a reference to the toolbar.
 	 */
 	public addToolbar(defaultLayout: boolean = true): AbstractToolbar {
-		const toolbar = new SidebarToolbar(this, this.container, this.localization);
+		const toolbar = new EdgeToolbar(this, this.container, this.localization);
 
 		if (defaultLayout) {
 			toolbar.addDefaults();

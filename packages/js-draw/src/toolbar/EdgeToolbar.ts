@@ -7,7 +7,7 @@ import SidebarLayoutManager from './widgets/layout/SidebarLayoutManager';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 // TODO(!): Doesn't make sense to extend DropdownToolbar
-export default class SidebarToolbar extends DropdownToolbar {
+export default class EdgeToolbar extends DropdownToolbar {
 	private mainContainer: HTMLElement;
 	private sidebarContainer: HTMLElement;
 	private sidebarContent: HTMLElement;
