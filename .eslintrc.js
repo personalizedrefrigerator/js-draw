@@ -61,6 +61,12 @@ module.exports = {
 	'ignorePatterns': [
 		'**/*.bundle.js',
 		'**/dist/',
-		'docs/typedoc/'
+		'docs/typedoc/',
+
+		// Auto-generated icon files (e.g. in @js-draw/material-icons)
+		'**/icons/*.svg.ts',
+
+		// Files auto-generated from markdown files:
+		'**/*.md.ts',
 	],
 };

@@ -22,7 +22,7 @@ export default class InsertImageWidget extends BaseWidget {
 	public constructor(editor: Editor, localization?: ToolbarLocalization) {
 		localization ??= editor.localization;
 
-		super(editor, 'insert-image-widget');
+		super(editor, 'insert-image-widget', localization);
 
 		// Make the dropdown showable
 		this.container.classList.add('dropdownShowable');

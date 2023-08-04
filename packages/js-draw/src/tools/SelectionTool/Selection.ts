@@ -379,10 +379,6 @@ export default class Selection {
 		return this.selectedElems.length;
 	}
 
-	public containsPointer(pointer: Pointer) {
-
-	}
-
 	// @internal
 	public updateUI() {
 		// Don't update old selections.
