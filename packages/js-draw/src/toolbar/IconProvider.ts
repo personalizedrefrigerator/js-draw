@@ -570,15 +570,13 @@ export default class IconProvider {
 						const copy = addedPath.cloneNode(true) as SVGPathElement;
 						copy.style.zIndex = '-1';
 
-						// Make the
-						if (copy.hasAttribute('fill')
-								&& copy.getAttribute('fill') !== 'transparent'
-								&& copy.getAttribute('fill') !== 'none') {
-							copy.setAttribute('fill', checkerboardPattern.patternRef);
-						}
-
 						if (copy.hasAttribute('stroke')) {
 							copy.setAttribute('stroke', checkerboardPattern.patternRef);
+						}
+						// Note: Assumes that the component wouldn't normally be both stroked
+						// and filled.
+						else if (copy.hasAttribute('fill')) {
+							copy.setAttribute('fill', checkerboardPattern.patternRef);
 						}
 
 						background.appendChild(copy);
