@@ -36,16 +36,30 @@ const makeFileInput = (labelText: string, context: ToolbarContext, accepts: stri
 	const selectedFiles: MutableReactiveValue<File[]> = ReactiveValue.fromInitialValue([]);
 
 	// Support droping files
-	for (const eventName of [ 'dragover', 'dragenter' ]) {
-		label.addEventListener(eventName, event => {
-			event.preventDefault();
-		});
-	}
+	label.addEventListener('dragover', event => {
+		event.preventDefault();
+	});
+	label.addEventListener('dragenter', event => {
+		event.preventDefault();
+		label.classList.add('drag-target');
+	});
+	label.addEventListener('dragleave', event => {
+		event.preventDefault();
+		label.classList.remove('drag-target');
+	});
+
+	// See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop#process_the_drop
 	label.addEventListener('drop', event => {
 		event.preventDefault();
+		label.classList.remove('drag-target');
 
-		const fileList = event.dataTransfer?.files ?? [];
-		selectedFiles.set([ ...fileList ]);
+		const fileList: File[] = [];
+
+		if (event.dataTransfer) {
+			fileList.push(...event.dataTransfer.files);
+		}
+
+		selectedFiles.set(fileList);
 	});
 	input.addEventListener('change', () => {
 		const fileList = input.files ?? [];
