@@ -1,0 +1,20 @@
+{
+	"name": "@js-draw/example-multiple-editors",
+	"version": "0.25.1",
+	"description": "Example demonstrating multiple editors in the same document",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"bundle": "ts-node scripts/bundle.ts",
+		"watchBundle": "ts-node scripts/watchBundle.ts",
+		"build": "build-tool build",
+		"watch": "build-tool watch"
+	},
+	"dependencies": {
+		"js-draw": "^0.25.1",
+		"@js-draw/material-icons": "^0.25.1"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^0.25.0"
+	}
+}
