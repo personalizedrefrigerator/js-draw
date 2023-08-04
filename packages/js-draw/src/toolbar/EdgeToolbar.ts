@@ -315,6 +315,12 @@ export default class EdgeToolbar extends DropdownToolbar {
 
 		const snapYs = [ -100, 0 ];
 
+		// Allow some amount of scrolling if the sidebar is too tall to fit entirely
+		// in the window.
+		if (this.sidebarContainer.clientHeight > window.innerHeight) {
+			snapYs.push(100);
+		}
+
 		let closestSnap = snapYs[0];
 		for (const snapY of snapYs) {
 			if (Math.abs(snapY - y) < Math.abs(closestSnap - y)) {
