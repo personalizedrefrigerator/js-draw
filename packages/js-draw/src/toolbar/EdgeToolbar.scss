@@ -246,20 +246,22 @@
 	}
 
 	.toolbar-spacedList {
-		display: table;
 		box-sizing: border-box;
-		width: 100%;
 
 		& > div {
 			display: flex;
-			margin-bottom: 15px;
 
+			// Space between items
+			margin-top: 15px;
+
+			// Align inputs (assumes labels come first)
 			& > label {
 				padding-right: 10px;
 				min-width: 100px;
 				flex-shrink: 1;
 			}
 
+			// If checkboxes have flex-grow, the checkbox region can become centered.
 			& > input:not([type="checkbox"]) {
 				flex-grow: 1;
 			}

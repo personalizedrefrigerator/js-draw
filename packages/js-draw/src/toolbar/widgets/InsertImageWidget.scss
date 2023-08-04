@@ -19,6 +19,11 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: flex-end;
+
+		// Ensure that (on toolbars that support it), the action button
+		// is touching the bottom edge of the screen.
+		padding-bottom: 0;
+		margin-bottom: 0;
 	}
 	
 	.action-button-row > button {
