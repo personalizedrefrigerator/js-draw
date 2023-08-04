@@ -5,6 +5,7 @@
 	background-color: var( --primary-background-color-transparent);
 
 	backdrop-filter: blur(5px);
+	-webkit-backdrop-filter: blur(5px);
 
 	// Show above other items
 	position: absolute;
