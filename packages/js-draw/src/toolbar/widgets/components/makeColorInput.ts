@@ -98,16 +98,22 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 	pipetteButton.title = editor.localization.pickColorFromScreen;
 	pipetteButton.setAttribute('alt', pipetteButton.title);
 
-	const updatePipetteIcon = (color?: Color4) => {
-		pipetteButton.replaceChildren(editor.icons.makePipetteIcon(color));
+	const pickColorLabel = document.createElement('span');
+	pickColorLabel.classList.add('pickColorInstructions');
+	pickColorLabel.innerText = editor.localization.clickToPickColorAnnouncement;
+
+	const updatePipetteButtonContent = (color?: Color4) => {
+		pipetteButton.replaceChildren(
+			editor.icons.makePipetteIcon(color), pickColorLabel
+		);
 	};
-	updatePipetteIcon();
+	updatePipetteButtonContent();
 
 	const pipetteTool: PipetteTool|undefined = editor.toolController.getMatchingTools(PipetteTool)[0];
 
 	const endColorSelectMode = () => {
 		pipetteTool?.clearColorListener();
-		updatePipetteIcon();
+		updatePipetteButtonContent();
 		pipetteButton.classList.remove('active');
 	};
 
@@ -121,9 +127,9 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 
 	const pipetteColorPreview = (color: Color4|null) => {
 		if (color) {
-			updatePipetteIcon(color);
+			updatePipetteButtonContent(color);
 		} else {
-			updatePipetteIcon();
+			updatePipetteButtonContent();
 		}
 	};
 
@@ -142,6 +148,7 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 
 		if (pipetteTool) {
 			pipetteButton.classList.add('active');
+
 			editor.announceForAccessibility(editor.localization.clickToPickColorAnnouncement);
 		}
 	};

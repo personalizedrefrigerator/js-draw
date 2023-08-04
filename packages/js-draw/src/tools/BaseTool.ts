@@ -133,18 +133,18 @@ export default abstract class BaseTool implements InputEventListener {
 	}
 
 	/**
-	 * Returns a {@link MutableReactiveValue} that updates based on whether this tool is
+	 * Returns a {@link ReactiveValue} that updates based on whether this tool is
 	 * enabled.
 	 *
 	 * @example
 	 * ```ts
 	 * const tool = new SomeTool();
 	 *
-	 * // The following is equivalent to tool.setEnabled(true);
-	 * tool.enabledValue().setValue(true);
+	 * // Watch for changes in enabled status
+	 * tool.enabledValue().onUpdate(enabled => doSomething(enabled));
 	 * ```
 	 */
-	public enabledValue(): MutableReactiveValue<boolean> {
+	public enabledValue(): ReactiveValue<boolean> {
 		return this.#enabled;
 	}
 

@@ -125,8 +125,26 @@
 	}
 }
 
+// Restyle the sidebar so that colors can be selected when the pipette tool is enabled.
+.imageEditorContainer.pipette--color-selection-in-progress {
+	.toolbar-sidebar-container {
+		background-color: transparent;
+		opacity: 0.5;
+		pointer-events: none;
+
+		.toolbar-sidebar {
+			pointer-events: unset;
+		}
+	}
+}
+
 .toolbar-sidebar-container {
 	background-color: var(--primary-background-color-transparent);
+
+	transition: 0.3s ease opacity;
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
 
 	position: absolute;
 	width: 100%;

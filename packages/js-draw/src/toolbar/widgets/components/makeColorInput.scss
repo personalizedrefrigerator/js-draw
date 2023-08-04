@@ -13,9 +13,11 @@
 	flex-direction: row;
 }
 
-.color-input-container button.pipetteButton {
-	width: 30px;
-	height: 30px;
+$pipette-button-size: 30px;
+
+:root .color-input-container > button.pipetteButton {
+	width: $pipette-button-size;
+	height: $pipette-button-size;
 	padding: 0;
 	display: inline-flex;
 }
@@ -24,7 +26,34 @@
 	width: 100%;
 }
 
+.color-input-container .pipetteButton {
+	.pickColorInstructions {
+		display: none;
+
+		font-size: 1em;
+		position: absolute;
+		margin-left: $pipette-button-size;
+
+		background-color: var(--primary-background-color);
+		border-radius: $pipette-button-size;
+		padding: 4px;
+
+		opacity: 0;
+
+		transition: 0.2s ease opacity;
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+}
+
 .color-input-container .pipetteButton.active {
 	background-color: var(--secondary-background-color);
 	--icon-color: var(--secondary-foreground-color);
+
+	.pickColorInstructions {
+		display: block;
+		opacity: 0.8;
+	}
 }
+
