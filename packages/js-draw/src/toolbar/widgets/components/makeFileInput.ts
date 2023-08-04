@@ -58,11 +58,17 @@ const makeFileInput = (labelText: string, context: ToolbarContext, accepts: stri
 		}
 	});
 
-	// Update the status text
+	// Update the status text and hide/show the icon.
 	selectedFiles.onUpdateAndNow(files => {
 		if (files.length > 0) {
 			descriptionText.innerText = files.map(file => file.name).join('\n');
+
+			// Only show the icon when there are files
+			icon.style.display = 'none';
 		} else {
+			// Show the icon
+			icon.style.display = '';
+
 			const text = context.localization.dragAndDropHereOrBrowse;
 
 			// Split into regions surrounded by {{curly braces}} and regions that are

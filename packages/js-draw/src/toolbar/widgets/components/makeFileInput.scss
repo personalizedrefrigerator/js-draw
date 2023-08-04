@@ -7,6 +7,8 @@
 		// input.
 		opacity: 0;
 		width: 0;
+		// Override the existing min-width set for other inputs
+		min-width: 0 !important;
 		max-width: 0;
 		height: 0;
 	}
@@ -23,7 +25,6 @@
 
 		> .toolbar--file-input-description {
 			border: 1px dashed var(--active-border-color);
-			margin-top: 10px;
 			padding: 10px;
 
 			display: flex;
@@ -35,8 +36,6 @@
 			--icon-color: var(--action-color);
 
 			> span {
-				margin-top: 6px;
-
 				// Allow `\n`s to create new lines
 				white-space: pre-wrap;
 
@@ -50,6 +49,8 @@
 				$size: min(50vw, 42px);
 				width: $size;
 				height: $size;
+
+				margin-bottom: 8px;
 
 				display: block;
 			}
