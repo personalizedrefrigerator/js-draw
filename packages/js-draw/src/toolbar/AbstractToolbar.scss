@@ -20,8 +20,11 @@
 
 /* Any root toolbar element */
 .toolbar-element {
-	/* Display above selection dialogs, etc. */
-	z-index: 2;
+	// Display above selection dialogs, etc.
+	// Note that this needs to be less than the
+	// z-index of dropdown menus (particularly when
+	// multiple editors can be displayed).
+	z-index: 1;
 
 	font-family: system-ui, -apple-system, sans-serif;
 }
