@@ -4,6 +4,13 @@
   "description": "A math library for js-draw. ",
   "types": "./dist/mjs/lib.d.ts",
   "main": "./dist/cjs/lib.js",
+  "exports": {
+    ".": {
+      "types": "./dist/mjs/lib.d.ts",
+      "import": "./dist/mjs/lib.mjs",
+      "require": "./dist/cjs/lib.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/personalizedrefrigerator/js-draw.git"

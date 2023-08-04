@@ -62,17 +62,18 @@ export * from './testing/lib';
 export * from './shortcuts/lib';
 export { default as EventDispatcher } from './EventDispatcher';
 export { default as Pointer, PointerDevice } from './Pointer';
+export { default as UndoRedoHistory } from './UndoRedoHistory';
+
+import AbstractToolbar from './toolbar/AbstractToolbar';
+
 export {
-	default as AbstractToolbar,
+	Editor, EditorSettings, AbstractToolbar,
 
 	/**
 	 * Using the HTMLToolbar alias is deprecated. Use
 	 * `AbstractToolbar` instead.
 	 * @deprecated
 	 */
-	default as HTMLToolbar,
-} from './toolbar/AbstractToolbar';
-export { default as UndoRedoHistory } from './UndoRedoHistory';
-
-export { Editor, EditorSettings };
+	AbstractToolbar as HTMLToolbar,
+};
 export default Editor;

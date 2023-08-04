@@ -33,28 +33,17 @@
     },
     "./localization": {
       "types": "./dist/mjs/localization.d.ts",
+      "require": "./dist/cjs/localization.js",
       "default": "./dist/mjs/localization.mjs"
-    },
-    "./toolbar/HTMLToolbar": {
-      "types": "./dist/mjs/toolbar/HTMLToolbar.d.ts",
-      "default": "./dist/mjs/toolbar/HTMLToolbar.mjs"
-    },
-    "./math": {
-      "types": "./dist/mjs/math/lib.d.ts",
-      "import": "./dist/mjs/math/lib.mjs",
-      "require": "./dist/cjs/math/lib.js"
-    },
-    "./Color4": {
-      "types": "./dist/mjs/Color4.d.ts",
-      "import": "./dist/mjs/Color4.mjs",
-      "require": "./dist/cjs/Color4.js"
     },
     "./components": {
       "types": "./dist/mjs/components/lib.d.ts",
+      "require": "./dist/cjs/components/lib.js",
       "default": "./dist/mjs/components/lib.mjs"
     },
     "./commands": {
       "types": "./dist/mjs/commands/lib.d.ts",
+      "require": "./dist/cjs/commands/lib.js",
       "default": "./dist/mjs/commands/lib.mjs"
     }
   },
