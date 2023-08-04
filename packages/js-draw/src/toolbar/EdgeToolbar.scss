@@ -142,7 +142,7 @@
 .toolbar-sidebar-container {
 	background-color: var(--primary-background-color-transparent);
 
-	transition: 0.15s ease height, 0.1s ease background-color;
+	transition: 0.15s ease-in-out height, 0.15s ease-in-out background-color;
 	@media (prefers-reduced-motion: reduce) {
 		transition: none;
 	}
