@@ -38,6 +38,7 @@ const makeFileInput = (labelText: string, context: ToolbarContext, accepts: stri
 	// Support droping files
 	label.addEventListener('dragover', event => {
 		event.preventDefault();
+		label.classList.add('drag-target');
 	});
 	label.addEventListener('dragenter', event => {
 		event.preventDefault();
@@ -45,7 +46,14 @@ const makeFileInput = (labelText: string, context: ToolbarContext, accepts: stri
 	});
 	label.addEventListener('dragleave', event => {
 		event.preventDefault();
-		label.classList.remove('drag-target');
+
+		// Ensure the event wasn't targeting a child.
+		// See https://stackoverflow.com/a/54271161 and
+		//     https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/relatedTarget
+		const enteringElement = event.relatedTarget as HTMLElement;
+		if (!enteringElement || !label.contains(enteringElement)) {
+			label.classList.remove('drag-target');
+		}
 	});
 
 	// See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop#process_the_drop

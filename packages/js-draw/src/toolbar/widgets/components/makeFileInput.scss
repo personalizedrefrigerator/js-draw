@@ -64,8 +64,8 @@
 			--active-border-color: var(--primary-foreground-color);
 		}
 
-		&.drag-target {
-			border-width: 3px;
+		&.drag-target > .toolbar--file-input-description {
+			border-width: 2px;
 		}
 	}
 }
