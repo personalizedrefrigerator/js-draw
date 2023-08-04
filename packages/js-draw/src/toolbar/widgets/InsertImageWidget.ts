@@ -191,7 +191,7 @@ export default class InsertImageWidget extends BaseWidget {
 			this.imagePreview.src = this.imageBase64URL;
 
 			this.updateImageSizeDisplay();
-		} else {
+		} else if (selectedObjects.length > 0) {
 			selectionTools.forEach(tool => tool.clearSelection());
 		}
 

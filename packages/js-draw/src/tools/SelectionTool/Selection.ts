@@ -645,7 +645,7 @@ export default class Selection {
 	}
 
 	public getSelectedObjects(): AbstractComponent[] {
-		return this.selectedElems;
+		return [...this.selectedElems];
 	}
 }
 
