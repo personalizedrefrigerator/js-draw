@@ -10,9 +10,9 @@
 	position: absolute;
 	z-index: 3;
 
-	// Fill the screen
-	width: 100%;
-	height: 100%;
+	// Fill the editor
+	width: inherit;
+	height: inherit;
 
 	display: flex;
 	flex-direction: column-reverse;
