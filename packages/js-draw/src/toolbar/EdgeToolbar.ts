@@ -3,7 +3,7 @@ import { ToolbarLocalization } from './localization';
 import BaseWidget from './widgets/BaseWidget';
 import { toolbarCSSPrefix } from './constants';
 import DropdownToolbar from './DropdownToolbar';
-import SidebarLayoutManager from './widgets/layout/SidebarLayoutManager';
+import EdgeToolbarLayoutManager from './widgets/layout/EdgeToolbarLayoutManager';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 // TODO(!): Doesn't make sense to extend DropdownToolbar
@@ -13,7 +13,7 @@ export default class EdgeToolbar extends DropdownToolbar {
 	private sidebarContent: HTMLElement;
 	private closeButton: HTMLElement;
 
-	private layoutManager: SidebarLayoutManager;
+	private layoutManager: EdgeToolbarLayoutManager;
 
 	private sidebarVisible: MutableReactiveValue<boolean>;
 	private sidebarY: MutableReactiveValue<number>;
@@ -73,7 +73,7 @@ export default class EdgeToolbar extends DropdownToolbar {
 			this.setupColorPickers();
 		};
 
-		this.layoutManager = new SidebarLayoutManager(
+		this.layoutManager = new EdgeToolbarLayoutManager(
 			setSidebarContent,
 			this.sidebarVisible,
 			editor.announceForAccessibility.bind(editor),

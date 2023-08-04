@@ -2,7 +2,7 @@ import { MutableReactiveValue, ReactiveValue } from '../../../util/ReactiveValue
 import { ToolbarLocalization } from '../../localization';
 import { ToolMenu, WidgetContentLayoutManager, ToolMenuParent } from './types';
 
-export default class SidebarLayoutManager implements WidgetContentLayoutManager {
+export default class EdgeToolbarLayoutManager implements WidgetContentLayoutManager {
 	private visibleWidgetContent: MutableReactiveValue<ToolMenu|null> = ReactiveValue.fromInitialValue(null);
 
 
