@@ -5,6 +5,13 @@ import { toolbarCSSPrefix } from './constants';
 import DropdownToolbar from './DropdownToolbar';
 import EdgeToolbarLayoutManager from './widgets/layout/EdgeToolbarLayoutManager';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
+import AbstractToolbar from './AbstractToolbar';
+
+
+export const makeEdgeToolbar = (editor: Editor): AbstractToolbar => {
+	return new EdgeToolbar(editor, editor.getRootElement(), editor.localization);
+};
+
 
 // TODO(!): Doesn't make sense to extend DropdownToolbar
 export default class EdgeToolbar extends DropdownToolbar {

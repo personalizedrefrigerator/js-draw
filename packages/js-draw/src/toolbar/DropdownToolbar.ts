@@ -5,6 +5,9 @@ import OverflowWidget from './widgets/OverflowWidget';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
 import { toolbarCSSPrefix } from './constants';
 
+export const makeDropdownToolbar = (editor: Editor): AbstractToolbar => {
+	return new DropdownToolbar(editor, editor.getRootElement());
+};
 
 export default class DropdownToolbar extends AbstractToolbar {
 	protected container: HTMLElement;
