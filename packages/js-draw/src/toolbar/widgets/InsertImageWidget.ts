@@ -9,6 +9,7 @@ import fileToBase64 from '../../util/fileToBase64';
 import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 import { EditorEventType } from '../../types';
+import { toolbarCSSPrefix } from '../constants';
 
 export default class InsertImageWidget extends BaseWidget {
 	private imagePreview: HTMLImageElement;
@@ -58,7 +59,7 @@ export default class InsertImageWidget extends BaseWidget {
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add('insert-image-widget-dropdown-content');
+		container.classList.add('insert-image-widget-dropdown-content', `${toolbarCSSPrefix}spacedList`);
 
 		const chooseImageRow = document.createElement('div');
 		const altTextRow = document.createElement('div');

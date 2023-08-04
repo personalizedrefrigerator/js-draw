@@ -178,7 +178,6 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		const addDimensionRow = (labelContent: string, onChange: (value: number)=>void) => {
 			const row = document.createElement('div');
 			const label = document.createElement('label');
-			const spacer = document.createElement('span');
 			const input = document.createElement('input');
 
 			label.innerText = labelContent;
@@ -187,7 +186,6 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			input.id = `${toolbarCSSPrefix}docPropertiesDimensionRow-${DocumentPropertiesWidget.idCounter++}`;
 			label.htmlFor = input.id;
 
-			spacer.style.flexGrow = '1';
 			input.style.flexGrow = '2';
 			input.style.width = '25px';
 
@@ -197,7 +195,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 				onChange(parseFloat(input.value));
 			};
 
-			row.replaceChildren(label, spacer, input);
+			row.replaceChildren(label, input);
 
 			return {
 				setValue: (value: number) => {
@@ -217,8 +215,9 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		// The "About..." button
 		const aboutButton = document.createElement('button');
 		aboutButton.innerText = this.localizationTable.about;
-		aboutButton.style.width = '100%';
 		aboutButton.style.display = 'block';
+		aboutButton.style.width = '100%';
+		aboutButton.style.textAlign = 'end';
 
 		aboutButton.onclick = () => {
 			this.editor.showAboutDialog();
@@ -238,7 +237,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 
 		container.replaceChildren(
-			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element, aboutButton,
+			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element, aboutButton
 		);
 		dropdown.replaceChildren(container);
 

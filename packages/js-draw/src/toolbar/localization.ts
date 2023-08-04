@@ -101,8 +101,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	touchPanning: 'Touchscreen panning',
 
-	roundedTipPen: 'Rounded Tip',
-	flatTipPen: 'Flat Tip',
+	roundedTipPen: 'Round',
+	flatTipPen: 'Flat',
 	arrowPen: 'Arrow',
 	linePen: 'Line',
 	outlinedRectanglePen: 'Outlined rectangle',

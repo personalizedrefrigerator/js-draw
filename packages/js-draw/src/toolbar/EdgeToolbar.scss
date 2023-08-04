@@ -237,4 +237,25 @@
 			}
 		}
 	}
+
+	.toolbar-spacedList {
+		display: table;
+		box-sizing: border-box;
+		width: 100%;
+
+		& > div {
+			display: flex;
+			margin-bottom: 15px;
+
+			& > label {
+				padding-right: 10px;
+				min-width: 100px;
+				flex-shrink: 1;
+			}
+
+			& > input:not([type="checkbox"]) {
+				flex-grow: 1;
+			}
+		}
+	}
 }

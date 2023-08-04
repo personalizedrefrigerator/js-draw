@@ -1,6 +1,7 @@
 import Editor from '../../Editor';
 import Eraser from '../../tools/Eraser';
 import { EditorEventType } from '../../types';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import { SavedToolbuttonState } from './BaseWidget';
@@ -33,6 +34,10 @@ export default class EraserToolWidget extends BaseToolWidget {
 	}
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
+		const container = document.createElement('div');
+
+		container.classList.add(`${toolbarCSSPrefix}spacedList`);
+
 		const thicknessSlider = makeThicknessSlider(this.editor, thickness => {
 			this.tool.setThickness(thickness);
 		});
@@ -43,7 +48,9 @@ export default class EraserToolWidget extends BaseToolWidget {
 		};
 
 		this.updateInputs();
-		dropdown.replaceChildren(thicknessSlider.container);
+		container.replaceChildren(thicknessSlider.container);
+
+		dropdown.replaceChildren(container);
 		return true;
 	}
 
