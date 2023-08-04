@@ -48,7 +48,11 @@ export default class EraserToolWidget extends BaseToolWidget {
 		};
 
 		this.updateInputs();
-		container.replaceChildren(thicknessSlider.container);
+
+		const spacer = document.createElement('div');
+		spacer.style.height = '5px';
+
+		container.replaceChildren(thicknessSlider.container, spacer);
 
 		dropdown.replaceChildren(container);
 		return true;
