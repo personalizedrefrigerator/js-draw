@@ -18,7 +18,6 @@ export default class SelectionTool extends BaseTool {
 	private handleOverlay: HTMLElement;
 	private prevSelectionBox: Selection|null;
 	private selectionBox: Selection|null;
-	private lastEvtTarget: EventTarget|null = null;
 
 	private startPoint: Vec2|null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
@@ -43,12 +42,7 @@ export default class SelectionTool extends BaseTool {
 		});
 
 		this.editor.handleKeyEventsFrom(this.handleOverlay);
-		this.editor.handlePointerEventsFrom(this.handleOverlay, (eventName, htmlEvent: PointerEvent) => {
-			if (eventName === 'pointerdown') {
-				this.lastEvtTarget = htmlEvent.target;
-			}
-			return true;
-		});
+		this.editor.handlePointerEventsFrom(this.handleOverlay);
 	}
 
 	private makeSelectionBox(selectionStartPos: Point2) {
@@ -89,12 +83,12 @@ export default class SelectionTool extends BaseTool {
 
 			let transforming = false;
 
-			if (this.lastEvtTarget && this.selectionBox) {
+			if (this.selectionBox) {
 				if (snapToGrid) {
 					this.snapSelectionToGrid();
 				}
 
-				const dragStartResult = this.selectionBox.onDragStart(current, this.lastEvtTarget);
+				const dragStartResult = this.selectionBox.onDragStart(current);
 
 				if (dragStartResult) {
 					transforming = true;
@@ -135,48 +129,8 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	private lastSelectedObjects: AbstractComponent[] = [];
-
-	private onSelectionUpdated() {
-		// Note that the selection has changed
-		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
-			kind: EditorEventType.ToolUpdated,
-			tool: this,
-		});
-
-		const selectedItemCount = this.selectionBox?.getSelectedItemCount() ?? 0;
-		const selectedObjects = this.selectionBox?.getSelectedObjects() ?? [];
-		const hasDifferentSelection =
-			this.lastSelectedObjects.length !== selectedItemCount
-			|| selectedObjects.some((obj, i) => this.lastSelectedObjects[i] !== obj);
-
-		if (hasDifferentSelection) {
-			// Only fire the SelectionUpdated event if the selection really updated.
-			this.editor.notifier.dispatch(EditorEventType.SelectionUpdated, {
-				kind: EditorEventType.SelectionUpdated,
-				selectedComponents: selectedObjects,
-				tool: this,
-			});
-
-			this.lastSelectedObjects = selectedObjects;
-		}
-
-		if (selectedItemCount > 0) {
-			this.editor.announceForAccessibility(
-				this.editor.localization.selectedElements(selectedItemCount)
-			);
-			this.zoomToSelection();
-		} else if (this.selectionBox) {
-			this.selectionBox.cancelSelection();
-			this.prevSelectionBox = this.selectionBox;
-			this.selectionBox = null;
-		}
-	}
-
 	// Called after a gestureCancel and a pointerUp
 	private onGestureEnd() {
-		this.lastEvtTarget = null;
-
 		if (!this.selectionBox) return;
 
 		if (!this.selectionBoxHandlingEvt) {
@@ -189,13 +143,6 @@ export default class SelectionTool extends BaseTool {
 
 
 		this.selectionBoxHandlingEvt = false;
-	}
-
-	private zoomToSelection() {
-		if (this.selectionBox) {
-			const selectionRect = this.selectionBox.region;
-			this.editor.dispatchNoAnnounce(this.editor.viewport.zoomTo(selectionRect, false), false);
-		}
 	}
 
 	public override onPointerUp(event: PointerEvt): void {
@@ -235,6 +182,51 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		this.expandingSelectionBox = false;
+	}
+
+	private lastSelectedObjects: AbstractComponent[] = [];
+
+	private onSelectionUpdated() {
+		// Note that the selection has changed
+		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+			kind: EditorEventType.ToolUpdated,
+			tool: this,
+		});
+
+		const selectedItemCount = this.selectionBox?.getSelectedItemCount() ?? 0;
+		const selectedObjects = this.selectionBox?.getSelectedObjects() ?? [];
+		const hasDifferentSelection =
+			this.lastSelectedObjects.length !== selectedItemCount
+			|| selectedObjects.some((obj, i) => this.lastSelectedObjects[i] !== obj);
+
+		if (hasDifferentSelection) {
+			// Only fire the SelectionUpdated event if the selection really updated.
+			this.editor.notifier.dispatch(EditorEventType.SelectionUpdated, {
+				kind: EditorEventType.SelectionUpdated,
+				selectedComponents: selectedObjects,
+				tool: this,
+			});
+
+			this.lastSelectedObjects = selectedObjects;
+		}
+
+		if (selectedItemCount > 0) {
+			this.editor.announceForAccessibility(
+				this.editor.localization.selectedElements(selectedItemCount)
+			);
+			this.zoomToSelection();
+		} else if (this.selectionBox) {
+			this.selectionBox.cancelSelection();
+			this.prevSelectionBox = this.selectionBox;
+			this.selectionBox = null;
+		}
+	}
+
+	private zoomToSelection() {
+		if (this.selectionBox) {
+			const selectionRect = this.selectionBox.region;
+			this.editor.dispatchNoAnnounce(this.editor.viewport.zoomTo(selectionRect, false), false);
+		}
 	}
 
 	private static handleableKeys = [

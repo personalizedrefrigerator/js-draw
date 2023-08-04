@@ -54,6 +54,7 @@ export default class Selection {
 			HandleShape.Square,
 			Vec2.of(1, 0.5),
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.HorizontalOnly),
 			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
 			() => this.transformers.resize.onDragEnd(),
@@ -63,6 +64,7 @@ export default class Selection {
 			HandleShape.Square,
 			Vec2.of(0.5, 1),
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.VerticalOnly),
 			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
 			() => this.transformers.resize.onDragEnd(),
@@ -72,6 +74,7 @@ export default class Selection {
 			HandleShape.Square,
 			Vec2.of(1, 1),
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.Both),
 			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
 			() => this.transformers.resize.onDragEnd(),
@@ -81,6 +84,7 @@ export default class Selection {
 			HandleShape.Circle,
 			Vec2.of(0.5, 0),
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.rotate.onDragStart(startPoint),
 			(currentPoint) => this.transformers.rotate.onDragUpdate(currentPoint),
 			() => this.transformers.rotate.onDragEnd(),
@@ -375,6 +379,10 @@ export default class Selection {
 		return this.selectedElems.length;
 	}
 
+	public containsPointer(pointer: Pointer) {
+
+	}
+
 	// @internal
 	public updateUI() {
 		// Don't update old selections.
@@ -456,28 +464,41 @@ export default class Selection {
 
 	private targetHandle: SelectionHandle|null = null;
 	private backgroundDragging: boolean = false;
-	public onDragStart(pointer: Pointer, target: EventTarget): boolean {
+	public onDragStart(pointer: Pointer): boolean {
 		// Clear the HTML selection (prevent HTML drag and drop being triggered by this drag)
 		document.getSelection()?.removeAllRanges();
 
-		this.removeDeletedElemsFromSelection();
-		this.addRemoveSelectionFromImage(false);
+		this.targetHandle = null;
+
+		let result = false;
 
 		for (const handle of this.handles) {
-			if (handle.isTarget(target)) {
-				handle.handleDragStart(pointer);
+			if (handle.containsPoint(pointer.canvasPos)) {
 				this.targetHandle = handle;
-				return true;
+				result = true;
 			}
 		}
 
-		if (this.backgroundElem === target) {
+		this.backgroundDragging = false;
+		if (this.region.containsPoint(pointer.canvasPos)) {
 			this.backgroundDragging = true;
-			this.transformers.drag.onDragStart(pointer.canvasPos);
-			return true;
+			result = true;
 		}
 
-		return false;
+		if (result) {
+			this.removeDeletedElemsFromSelection();
+			this.addRemoveSelectionFromImage(false);
+		}
+
+		if (this.targetHandle) {
+			this.targetHandle.handleDragStart(pointer);
+		}
+
+		if (this.backgroundDragging) {
+			this.transformers.drag.onDragStart(pointer.canvasPos);
+		}
+
+		return result;
 	}
 
 	public onDragUpdate(pointer: Pointer) {

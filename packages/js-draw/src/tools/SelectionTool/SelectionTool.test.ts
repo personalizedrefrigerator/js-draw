@@ -41,9 +41,7 @@ const createEditorWithSingleObjectSelection = (objectSize: number = 50) => {
 };
 
 const dragSelection = (editor: Editor, selection: Selection, startPt: Vec2, endPt: Vec2) => {
-	const backgroundElem = selection.getBackgroundElem();
-
-	selection.onDragStart(Pointer.ofCanvasPoint(startPt, true, editor.viewport), backgroundElem);
+	selection.onDragStart(Pointer.ofCanvasPoint(startPt, true, editor.viewport));
 	jest.advanceTimersByTime(100);
 
 	selection.onDragUpdate(Pointer.ofCanvasPoint(endPt, true, editor.viewport));
@@ -142,13 +140,13 @@ describe('SelectionTool', () => {
 		editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'Shift');
 
 		// Select the larger stroke without shift pressed
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 200));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(600, 600));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(600, 600));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(200, 200));
 		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
 
 		// Select nothing
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 200));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(201, 201));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(2000, 200));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(2001, 201));
 		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
 	});
 
@@ -156,8 +154,7 @@ describe('SelectionTool', () => {
 		const { editor, selectionTool } = createEditorWithSingleObjectSelection(50);
 
 		const selection = selectionTool.getSelection()!;
-		const backgroundElem = selection.getBackgroundElem();
-		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport), backgroundElem);
+		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
 		selection.onDragUpdate(Pointer.ofCanvasPoint(Vec2.of(20, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
@@ -196,15 +193,64 @@ describe('SelectionTool', () => {
 		expect(testStroke.getBBox().topLeft).objEq(Vec2.of(10, 0));
 	});
 
+	it('rotation handle should rotate the selection', () => {
+		const { addTestStrokeCommand: strokeCommand } = createSquareStroke(50);
+
+		const editor = createEditor();
+		editor.dispatch(strokeCommand);
+
+		// Select the first stroke
+		const selectionTool = getSelectionTool(editor);
+		selectionTool.setEnabled(true);
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(40, 40));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 100));
+
+		// Drag the rotate handle, which should be located halfway across
+		// the top of the selection box
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(25, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(30, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(0, 25));
+
+		// Rotate 45 degrees:
+		//  Drag start (resize circle)
+		//     ↓
+		// .---o---x ← y=0, drag end
+		// |       |
+		// |       |
+		// |       |
+		// .-------.
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(50, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(50, 0));
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
+
+		// Deselect & add the item back to the editor
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(1250, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(1250, 0));
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
+
+		const imageStrokes = editor.image.getAllElements();
+		expect(imageStrokes).toHaveLength(1);
+
+		const transformedStroke = imageStrokes[0] as Stroke;
+		const strokePoints = transformedStroke.getPath().polylineApproximation().map(line => line.p1);
+
+		// One point should now be just above the center of the square:
+		//      .  ←
+		//   .     .
+		//      .
+		//
+		expect(strokePoints.filter(point => point.eq(Vec2.of(Math.hypot(25, 0), 0)))).toHaveLength(1);
+	});
+
 	it('dragCancel should return a selection to its original position', () => {
 		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(150);
 
 		const selection = selectionTool.getSelection()!;
-		const dragBackground = selection.getBackgroundElem();
-
 		expect(testStroke.getBBox().topLeft).objEq(Vec2.zero);
 
-		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(10, 0), true, editor.viewport), dragBackground);
+		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(10, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
 		selection.onDragUpdate(Pointer.ofCanvasPoint(Vec2.of(200, 10), true, editor.viewport));
 		jest.advanceTimersByTime(100);
@@ -218,9 +264,7 @@ describe('SelectionTool', () => {
 		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(150);
 
 		const selection = selectionTool.getSelection()!;
-		const dragBackground = selection.getBackgroundElem();
-
-		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport), dragBackground);
+		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
 		selection.onDragUpdate(Pointer.ofCanvasPoint(Vec2.of(20, 0), true, editor.viewport));
 
@@ -291,15 +335,15 @@ describe('SelectionTool', () => {
 
 		expect(updatedListener).toHaveBeenCalledTimes(1);
 
-		// ...but selecting a different item should
-		const secondStroke = createSquareStroke(30);
+		// ...but selecting a different item should.
+		const secondStroke = createSquareStroke(3000); // Large to ensure that we don't drag the selection instead.
 		editor.dispatch(secondStroke.addTestStrokeCommand);
 
 		expect(updatedListener).toHaveBeenCalledTimes(1);
 
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(29, 29));
-		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(31, 31));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(32, 32));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(2999, 2999));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3001, 3001));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3002, 3002));
 
 		expect(updatedListener).toHaveBeenCalledTimes(2);
 		expect(updatedListener).toHaveBeenLastCalledWith({
