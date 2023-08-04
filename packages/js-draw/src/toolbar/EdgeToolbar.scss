@@ -283,6 +283,10 @@
 			// If checkboxes have flex-grow, the checkbox region can become centered.
 			& > input:not([type="checkbox"]) {
 				flex-grow: 1;
+
+				// Specify a minimum width to allow the input to shrink.
+				min-width: 48px;
+				flex-shrink: 1;
 			}
 		}
 	}
