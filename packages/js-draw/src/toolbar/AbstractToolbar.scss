@@ -234,19 +234,6 @@
 	z-index: 4;
 }
 
-.toolbar-element .toolbar-zoomLevelEditor {
-	display: flex;
-	flex-direction: row;
-}
-
-.toolbar-element .toolbar-zoomLevelEditor .zoomDisplay {
-	flex-grow: 1;
-}
-
-.toolbar-element .toolbar-zoomLevelEditor button {
-	min-width: 48px;
-}
-
 .toolbar-spacedList > * {
 	padding-bottom: 5px;
 	padding-top: 5px;

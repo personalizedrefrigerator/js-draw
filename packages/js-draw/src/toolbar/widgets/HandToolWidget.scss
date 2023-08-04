@@ -1,0 +1,14 @@
+
+.toolbar-zoomLevelEditor {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.toolbar-zoomLevelEditor .zoomDisplay {
+	flex-grow: 1;
+}
+
+.toolbar-zoomLevelEditor button {
+	min-width: 48px;
+}
