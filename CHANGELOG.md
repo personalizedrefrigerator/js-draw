@@ -1,3 +1,8 @@
+# 1.0.0 (work in progress)
+ * Breaking changes
+   * The `--seconary-foreground-color` and `--secondary-background-color` are no longer used for selected items. Use `--selection-foreground-color` and `--selection-background-color` instead.
+   * ==To-do==: Update this list
+
 # 0.25.1
  * Bug fixes
    * Fixes a bug in old versions of Chromium-based browsers: Strokes disappear on left mouse button up.

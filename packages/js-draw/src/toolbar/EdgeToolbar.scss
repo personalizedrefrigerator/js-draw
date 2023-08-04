@@ -24,8 +24,8 @@
 	box-sizing: border-box;
 
 	.toolbar-toolContainer.selected > .toolbar-button {
-		background-color: var(--secondary-background-color);
-		color: var(--secondary-foreground-color);
+		background-color: var(--selection-background-color);
+		color: var(--selection-foreground-color);
 	}
 
 	.toolbar-button {

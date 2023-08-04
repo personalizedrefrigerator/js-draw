@@ -26,6 +26,9 @@
 		);
 
 		> .toolbar--file-input-description {
+			background-color: var(--secondary-background-color);
+			color: var(--secondary-foreground-color);
+
 			border: 1px dashed var(--active-border-color);
 			padding: 10px;
 			margin-top: 10px;

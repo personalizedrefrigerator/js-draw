@@ -11,10 +11,15 @@
     --primary-background-color: white;
     --primary-foreground-color: black;
 
-	// The secondary background/foreground colors are used for selected
+	// The secondary foreground/background colors are used for some menu/toolbar
+	// backgrounds.
+    --secondary-background-color: #e5e5e5;
+    --secondary-foreground-color: #2c303a;
+
+	// The selection background/foreground colors are used for selected
 	// buttons.
-    --secondary-background-color: #faa;
-    --secondary-foreground-color: black;
+    --selection-background-color: #faa;
+    --selection-foreground-color: black;
 
 	// Used for dialog backgrounds
     --primary-background-color-transparent: rgba(105, 100, 100, 0.5);
@@ -31,9 +36,13 @@
 @media (prefers-color-scheme: dark) {
 	.imageEditorContainer {
 		--primary-background-color: #151515;
-		--secondary-background-color: #607;
 		--primary-foreground-color: white;
-		--secondary-foreground-color: white;
+
+		--secondary-background-color: #222;
+		--secondary-foreground-color: #efefef;
+
+		--selection-background-color: #607;
+		--selection-foreground-color: white;
 		--primary-shadow-color: rgba(250, 250, 250, 0.5);
 		--primary-background-color-transparent: rgba(50, 50, 50, 0.5);
 	}

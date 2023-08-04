@@ -5,9 +5,6 @@
 	--icon-color: var(--primary-foreground-color);
 	--toolbar-button-height: min(20vh, 60px);
 
-
-	border: 1px solid var(--secondary-background-color);
-	border-radius: 2px;
 	flex-wrap: wrap;
 
 	box-sizing: border-box;
@@ -117,9 +114,9 @@
 }
 
 .toolbar-toolContainer.selected > .toolbar-button {
-	background-color: var(--secondary-background-color);
-	color: var(--secondary-foreground-color);
-	--icon-color: var(--secondary-foreground-color);
+	background-color: var(--selection-background-color);
+	color: var(--selection-foreground-color);
+	--icon-color: var(--selection-foreground-color);
 }
 
 .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {

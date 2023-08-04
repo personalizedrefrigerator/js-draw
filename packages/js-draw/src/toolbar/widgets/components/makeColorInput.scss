@@ -48,8 +48,8 @@ $pipette-button-size: 30px;
 }
 
 .color-input-container .pipetteButton.active {
-	background-color: var(--secondary-background-color);
-	--icon-color: var(--secondary-foreground-color);
+	background-color: var(--selection-background-color);
+	--icon-color: var(--selection-foreground-color);
 
 	.pickColorInstructions {
 		display: block;

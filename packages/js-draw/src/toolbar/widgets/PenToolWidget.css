@@ -48,6 +48,6 @@
 }
 
 .toolbar-pen-type-selector .pen-type-button.checked {
-	background-color: var(--secondary-background-color);
-	color: var(--secondary-foreground-color);
+	background-color: var(--selection-background-color);
+	color: var(--selection-foreground-color);
 }

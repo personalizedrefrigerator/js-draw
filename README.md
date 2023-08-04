@@ -184,9 +184,9 @@ The editor's color theme is specified using CSS. Its default theme looks like th
 
     --primary-background-color: white;
     --primary-background-color-transparent: rgba(255, 255, 255, 0.5);
-    --secondary-background-color: #faf;
+    --selection-background-color: #faf;
     --primary-foreground-color: black;
-    --secondary-foreground-color: black;
+    --selection-foreground-color: black;
     --primary-shadow-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -196,9 +196,9 @@ The editor's color theme is specified using CSS. Its default theme looks like th
 
         --primary-background-color: #151515;
         --primary-background-color-transparent: rgba(50, 50, 50, 0.5);
-        --secondary-background-color: #607;
+        --selection-background-color: #607;
         --primary-foreground-color: white;
-        --secondary-foreground-color: white;
+        --selection-foreground-color: white;
         --primary-shadow-color: rgba(250, 250, 250, 0.5);
     }
 }
@@ -209,9 +209,9 @@ To override it, use a more specific CSS selector to set the theme variables. For
 body .imageEditorContainer {
     --primary-background-color: green;
     --primary-background-color-transparent: rgba(255, 240, 200, 0.5);
-    --secondary-background-color: yellow;
+    --selection-background-color: yellow;
     --primary-foreground-color: black;
-    --secondary-foreground-color: black;
+    --selection-foreground-color: black;
 }
 ```
 disables the dark theme and creates a theme that primarily uses yellow/green colors.
