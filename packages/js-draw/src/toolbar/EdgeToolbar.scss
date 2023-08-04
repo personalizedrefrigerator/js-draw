@@ -38,6 +38,8 @@
 		width: var(--toolbar-button-height);
 		height: var(--toolbar-button-height);
 
+		// Make the label hide only when hovering.
+
 		@keyframes rehide-label {
 			0% { opacity: $label-visible-opacity; }
 			80% { opacity: $label-visible-opacity; }
@@ -74,6 +76,11 @@
 			opacity: 0;
 			position: absolute;
 			margin-top: $label-hover-offset;
+
+			// The label is often mostly invisible/just below a toolbar item.
+			// If there are multiple toolbar rows, ensure that a label doesn't prevent
+			// clicking on items in the second row:
+			pointer-events: none;
 
 			background-color: var(--primary-background-color);
 			color: var(--primary-foreground-color);
