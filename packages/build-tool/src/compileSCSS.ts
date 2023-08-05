@@ -65,7 +65,13 @@ const compileSCSS = async (config: BuildConfig, buildMode: BuildMode) => {
 	// Watch and trigger listeners
 	await Promise.all(Object.keys(fileChangeListeners).map(async filePath => {
 		let compiling = false;
-		for await (const _event of fs.watch(filePath)) {
+		for await (const event of fs.watch(filePath)) {
+			if (event.eventType === 'rename') {
+				console.log('SCSS watcher: File renamed: ', filePath);
+				console.warn('Warning: The SCSS watcher doesn\'t support renaming files. Please restart the watcher');
+				continue;
+			}
+
 			// Don't run multiple compilations at the same time on the same
 			// file.
 			if (compiling) {
