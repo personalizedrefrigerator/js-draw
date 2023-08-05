@@ -118,6 +118,7 @@ export default class EdgeToolbar extends DropdownToolbar {
 				this.mainContainer.style.display = '';
 				this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-in`;
 				this.mainContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-in`;
+				this.mainContainer.style.opacity = '';
 
 
 				// Focus the close button when first shown.
@@ -126,13 +127,14 @@ export default class EdgeToolbar extends DropdownToolbar {
 				this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-out`;
 				this.mainContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-out`;
 
-				// Hide the container completely slightly before the animation stops to prevent flickering
-				const epsilon = 10;
+				// Manually set the container's opacity to prevent flickering when closing
+				// the toolbar.
+				this.mainContainer.style.opacity = '0';
 
 				animationTimeout = setTimeout(() => {
 					this.mainContainer.style.display = 'none';
 					animationTimeout = null;
-				}, animationDuration - epsilon);
+				}, animationDuration);
 			}
 		});
 	}
