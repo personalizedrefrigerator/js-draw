@@ -1,7 +1,7 @@
 import { readdir, stat } from 'fs/promises';
 import path from 'path';
 
-// Iterates over every JavaScript file in [directory].
+// Iterates over every file in [directory].
 const forEachFileInDirectory = async (directory: string, processFile: (filePath: string)=>Promise<void>) => {
 	const files = await readdir(directory);
 

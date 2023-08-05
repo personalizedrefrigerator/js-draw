@@ -1,6 +1,6 @@
 import * as jsdraw from 'js-draw';
 import MaterialIconProvider from '@js-draw/material-icons';
-import 'js-draw/styles';
+import 'js-draw/Editor.css';
 
 const defaultSettings: Partial<jsdraw.EditorSettings> = {
 	// Default to material icons

@@ -26,7 +26,7 @@ interface TSConfigData {
 	fileNames: string[]|null;
 }
 
-class TranspiledDirectory {
+class CompiledTypeScriptDirectory {
 	private rootConfig: TSConfigData;
 	public constructor(private inDir: string, private outDir: string) {
 		this.rootConfig = this.getCompilerOptionsFromConfig();
@@ -318,4 +318,4 @@ class TranspiledDirectory {
 	}
 }
 
-export default TranspiledDirectory;
+export default CompiledTypeScriptDirectory;

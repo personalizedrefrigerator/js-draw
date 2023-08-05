@@ -1,6 +1,7 @@
 {
     "inDirectory": "./src",
     "outDirectory": "./dist",
+    "scssFiles": [ "./src/Editor.scss" ],
     "bundledFiles": [
         {
             "name": "jsdraw",

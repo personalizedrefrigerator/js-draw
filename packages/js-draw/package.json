@@ -14,7 +14,7 @@
       "default": "./src/styles.js"
     },
     "./Editor.css": {
-      "default": "./src/Editor.css"
+      "default": "./dist/Editor.css"
     },
     "./bundle": {
       "types": "./dist/mjs/bundle/bundled.d.ts",

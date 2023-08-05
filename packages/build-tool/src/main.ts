@@ -2,12 +2,12 @@
 import { argv, exit } from 'node:process';
 import path from 'node:path';
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
-import TranspiledDirectory from './TranspiledDirectory';
+import CompiledTypeScriptDirectory from './CompiledTypeScriptDirectory';
 import BundledFile from './BundledFile';
 import buildTranslationTemplates from './buildTranslationTemplates';
-import { BuildConfig, BundledFileRecord, TranslationSourcePair } from './types';
+import { BuildConfig, BuildMode, BundledFileRecord, TranslationSourcePair } from './types';
+import compileSCSS from './compileSCSS';
 
-type BuildMode = 'build'|'watch';
 type BuildCommand = BuildMode|'build-translation-template';
 
 // TODO: These currently assume that build-tool is private to js-draw.
@@ -130,12 +130,30 @@ const readConfig = (): BuildConfig => {
 		prebuild = { scriptPath: scriptPath };
 	}
 
+	const scssFiles = [];
+	if ('scssFiles' in config) {
+		assertIsArray(config, 'scssFiles');
+
+		for (const file of config.scssFiles) {
+			if (!(typeof file === 'string')) {
+				throw new Error('scssFiles must be an array of strings');
+			}
+
+			if (!existsSync(file)) {
+				throw new Error('All scss files must exist (' + file + ' does not)');
+			}
+
+			scssFiles.push(path.resolve(file));
+		}
+	}
+
 	return {
 		inDirectory: inDirectory ? path.resolve(inDirectory) : undefined,
 		outDirectory: outDirectory ? path.resolve(outDirectory) : undefined,
 		translationSourceFiles,
 		translationDestPath,
 		prebuild,
+		scssFiles,
 
 		bundledFiles,
 	};
@@ -154,12 +172,12 @@ const bundleFiles = async (config: BuildConfig, buildMode: BuildMode) => {
 };
 
 const transpileDirectory = async (inDir: string, outDir: string, buildMode: BuildMode) => {
-	const transpiledDirectory = new TranspiledDirectory(inDir, outDir);
+	const tsCompiler = new CompiledTypeScriptDirectory(inDir, outDir);
 
 	if (buildMode === 'build') {
-		await transpiledDirectory.build();
+		await tsCompiler.build();
 	} else {
-		transpiledDirectory.watch();
+		tsCompiler.watch();
 	}
 };
 
@@ -204,6 +222,8 @@ const main = async () => {
 		buildTranslationTemplates(config);
 	} else {
 		void bundleFiles(config, buildMode);
+
+		void compileSCSS(config, buildMode);
 
 		if (config.inDirectory && config.outDirectory) {
 			void transpileDirectory(config.inDirectory, config.outDirectory, buildMode);
