@@ -2,10 +2,11 @@ import Editor from '../Editor';
 import { ToolbarLocalization } from './localization';
 import BaseWidget from './widgets/BaseWidget';
 import { toolbarCSSPrefix } from './constants';
-import DropdownToolbar from './DropdownToolbar';
 import EdgeToolbarLayoutManager from './widgets/layout/EdgeToolbarLayoutManager';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
-import AbstractToolbar from './AbstractToolbar';
+import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
+import { ActionButtonWidget } from './lib';
+import stopPropagationOfScrollingWheelEvents from '../util/stopPropagationOfScrollingWheelEvents';
 
 
 export const makeEdgeToolbar = (editor: Editor): AbstractToolbar => {
@@ -14,8 +15,18 @@ export const makeEdgeToolbar = (editor: Editor): AbstractToolbar => {
 
 
 // TODO(!): Doesn't make sense to extend DropdownToolbar
-export default class EdgeToolbar extends DropdownToolbar {
-	private mainContainer: HTMLElement;
+export default class EdgeToolbar extends AbstractToolbar {
+	private toolbarContainer: HTMLElement;
+
+	// Row that contains action buttons
+	private toolbarActionRow: HTMLElement;
+
+	// Row that contains tools
+	private toolbarToolRow: HTMLElement;
+
+	private toolRowResizeObserver: ResizeObserver;
+
+	private menuContainer: HTMLElement;
 	private sidebarContainer: HTMLElement;
 	private sidebarContent: HTMLElement;
 	private closeButton: HTMLElement;
@@ -30,16 +41,43 @@ export default class EdgeToolbar extends DropdownToolbar {
 		editor: Editor, parent: HTMLElement,
 		localizationTable: ToolbarLocalization,
 	) {
-		super(editor, parent, localizationTable);
+		super(editor, localizationTable);
 
-		this.container.classList.add(`${toolbarCSSPrefix}sidebar-toolbar`);
+		this.toolbarContainer = document.createElement('div');
+		this.toolbarContainer.classList.add(`${toolbarCSSPrefix}root`);
+		this.toolbarContainer.classList.add(`${toolbarCSSPrefix}element`);
+		this.toolbarContainer.classList.add(`${toolbarCSSPrefix}sidebar-toolbar`);
+		this.toolbarContainer.setAttribute('role', 'toolbar');
+
+		this.toolbarActionRow = document.createElement('div');
+		this.toolbarActionRow.classList.add('toolbar-element', 'toolbar-action-row');
+		this.toolbarToolRow = document.createElement('div');
+		this.toolbarToolRow.classList.add('toolbar-element', 'toolbar-tool-row');
+
+		stopPropagationOfScrollingWheelEvents(this.toolbarToolRow);
+
+		if ('ResizeObserver' in window) {
+			this.toolRowResizeObserver = new ResizeObserver((_entries) => {
+				if (this.toolbarToolRow.clientWidth < this.toolbarToolRow.scrollWidth) {
+					this.toolbarToolRow.classList.add('has-scroll');
+				} else {
+					this.toolbarToolRow.classList.remove('has-scroll');
+				}
+			});
+			this.toolRowResizeObserver.observe(this.toolbarToolRow);
+		} else {
+			console.warn('ResizeObserver not supported. Toolbar will not resize.');
+		}
+
+		this.toolbarContainer.replaceChildren(this.toolbarActionRow, this.toolbarToolRow);
+		parent.appendChild(this.toolbarContainer);
 
 		this.sidebarVisible = ReactiveValue.fromInitialValue(false);
 		this.sidebarY = ReactiveValue.fromInitialValue(0);
 
 		// Create the container elements
-		this.mainContainer = document.createElement('div');
-		this.mainContainer.classList.add(`${toolbarCSSPrefix}sidebar-container`);
+		this.menuContainer = document.createElement('div');
+		this.menuContainer.classList.add(`${toolbarCSSPrefix}sidebar-container`);
 
 		this.sidebarContainer = document.createElement('div');
 		this.sidebarContainer.classList.add(
@@ -92,8 +130,8 @@ export default class EdgeToolbar extends DropdownToolbar {
 		this.listenForVisibilityChanges();
 
 		this.sidebarContainer.replaceChildren(this.closeButton, this.sidebarContent);
-		this.mainContainer.replaceChildren(this.sidebarContainer);
-		parent.appendChild(this.mainContainer);
+		this.menuContainer.replaceChildren(this.sidebarContainer);
+		parent.appendChild(this.menuContainer);
 	}
 
 	private listenForVisibilityChanges() {
@@ -101,7 +139,7 @@ export default class EdgeToolbar extends DropdownToolbar {
 		const animationDuration = 150;
 
 		if (!this.sidebarVisible.get()) {
-			this.mainContainer.style.display = 'none';
+			this.menuContainer.style.display = 'none';
 		}
 
 		this.sidebarVisible.onUpdate(visible => {
@@ -115,42 +153,60 @@ export default class EdgeToolbar extends DropdownToolbar {
 					animationTimeout = null;
 				}
 
-				this.mainContainer.style.display = '';
+				this.menuContainer.style.display = '';
 				this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-in`;
-				this.mainContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-in`;
-				this.mainContainer.style.opacity = '';
+				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-in`;
+				this.menuContainer.style.opacity = '';
 
 
 				// Focus the close button when first shown.
 				this.closeButton.focus();
 			} else if (animationTimeout === null) {
 				this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-out`;
-				this.mainContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-out`;
+				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-out`;
 
 				// Manually set the container's opacity to prevent flickering when closing
 				// the toolbar.
-				this.mainContainer.style.opacity = '0';
+				this.menuContainer.style.opacity = '0';
 
 				animationTimeout = setTimeout(() => {
-					this.mainContainer.style.display = 'none';
+					this.menuContainer.style.display = 'none';
 					animationTimeout = null;
 				}, animationDuration);
 			}
 		});
 	}
 
+	public override addSpacer(_options?: Partial<SpacerOptions> | undefined): void {
+		//throw new Error('Method not implemented.');
+		// Unused for this toolbar.
+	}
+
+	public override addUndoRedoButtons(): void {
+		super.addUndoRedoButtons(false);
+	}
+
+	public override addDefaults(): void {
+		this.addDefaultActionButtons();
+		this.addDefaultToolWidgets();
+	}
+
 	protected override addWidgetInternal(widget: BaseWidget) {
 		widget.setLayoutManager(this.layoutManager);
-		super.addWidgetInternal(widget);
+		if (widget instanceof ActionButtonWidget) {
+			widget.addTo(this.toolbarActionRow);
+		} else {
+			widget.addTo(this.toolbarToolRow);
+		}
 	}
 
 	protected override removeWidgetInternal(widget: BaseWidget): void {
-		super.removeWidgetInternal(widget);
+		widget.remove();
 	}
 
 	protected override onRemove() {
-		super.onRemove();
-		this.mainContainer.remove();
+		this.menuContainer.remove();
+		this.toolRowResizeObserver.disconnect();
 	}
 
 	private initDragListeners() {
@@ -163,8 +219,8 @@ export default class EdgeToolbar extends DropdownToolbar {
 
 		const dragElements = [ this.closeButton, this.sidebarContainer, this.sidebarContent ];
 
-		this.manageListener(this.editor.handlePointerEventsExceptClicksFrom(this.mainContainer, (eventName, event) => {
-			if (event.target === this.mainContainer) {
+		this.manageListener(this.editor.handlePointerEventsExceptClicksFrom(this.menuContainer, (eventName, event) => {
+			if (event.target === this.menuContainer) {
 				if (eventName === 'pointerdown') {
 					this.sidebarVisible.set(false);
 				}
@@ -180,7 +236,7 @@ export default class EdgeToolbar extends DropdownToolbar {
 			// to the editor
 			return false;
 		}, (_eventName, event) => {
-			return event.target === this.mainContainer;
+			return event.target === this.menuContainer;
 		}));
 
 		const isDraggableElement = (element: HTMLElement|null) => {

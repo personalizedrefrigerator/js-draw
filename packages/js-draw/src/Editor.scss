@@ -13,8 +13,13 @@
 
 	// The secondary foreground/background colors are used for some menu/toolbar
 	// backgrounds.
-    --secondary-background-color: #e5e5e5;
+    --secondary-background-color: #f5f5f5;
     --secondary-foreground-color: #2c303a;
+
+	// The tertiary foreground/background colors are also used for some
+	// menu/toolbar backgrounds.
+    --tertiary-background-color: #e5e5e5;
+    --tertiary-foreground-color: #2c303a;
 
 	// The selection background/foreground colors are used for selected
 	// buttons.
@@ -40,6 +45,9 @@
 
 		--secondary-background-color: #222;
 		--secondary-foreground-color: #efefef;
+
+		--tertiary-background-color: #272627;
+		--tertiary-foreground-color: #eee;
 
 		--selection-background-color: #607;
 		--selection-foreground-color: white;

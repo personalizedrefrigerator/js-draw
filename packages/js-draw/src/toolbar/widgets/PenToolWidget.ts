@@ -17,6 +17,7 @@ import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
 import { toolbarCSSPrefix } from '../constants';
 import makeThicknessSlider from './components/makeThicknessSlider';
+import stopPropagationOfScrollingWheelEvents from '../../util/stopPropagationOfScrollingWheelEvents';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -159,21 +160,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		scrollingContainer.setAttribute('role', 'menu');
 		scrollingContainer.id = `${toolbarCSSPrefix}-pen-type-selector-id-${PenToolWidget.idCounter++}`;
 
-		scrollingContainer.onwheel = (event) => {
-			const hasScroll = scrollingContainer.clientWidth !== scrollingContainer.scrollWidth
-							&& event.deltaX !== 0;
-			const eventScrollsPastLeft =
-				scrollingContainer.scrollLeft + event.deltaX <= 0;
-			const scrollRight = scrollingContainer.scrollLeft + scrollingContainer.clientWidth;
-			const eventScrollsPastRight =
-				scrollRight + event.deltaX > scrollingContainer.scrollWidth;
-
-			// Stop the editor from receiving the event if it will scroll the pen type selector
-			// instead.
-			if (hasScroll && !eventScrollsPastLeft && !eventScrollsPastRight) {
-				event.stopPropagation();
-			}
-		};
+		stopPropagationOfScrollingWheelEvents(scrollingContainer);
 
 		const label = document.createElement('label');
 		label.innerText = this.localizationTable.selectPenType;

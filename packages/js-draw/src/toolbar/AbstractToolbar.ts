@@ -318,19 +318,33 @@ export default abstract class AbstractToolbar {
 		return widget;
 	}
 
-	public addUndoRedoButtons() {
-		const undoButton = this.addActionButton({
-			label: this.localizationTable.undo,
-			icon: this.editor.icons.makeUndoIcon()
-		}, () => {
-			this.editor.history.undo();
-		});
-		const redoButton = this.addActionButton({
-			label: this.localizationTable.redo,
-			icon: this.editor.icons.makeRedoIcon(),
-		}, () => {
-			this.editor.history.redo();
-		});
+	public addUndoRedoButtons(undoFirst = true) {
+		const makeUndo = () => {
+			return this.addActionButton({
+				label: this.localizationTable.undo,
+				icon: this.editor.icons.makeUndoIcon()
+			}, () => {
+				this.editor.history.undo();
+			});
+		};
+		const makeRedo = () => {
+			return this.addActionButton({
+				label: this.localizationTable.redo,
+				icon: this.editor.icons.makeRedoIcon(),
+			}, () => {
+				this.editor.history.redo();
+			});
+		};
+
+		let undoButton: BaseWidget;
+		let redoButton: BaseWidget;
+		if (undoFirst) {
+			undoButton = makeUndo();
+			redoButton = makeRedo();
+		} else {
+			redoButton = makeRedo();
+			undoButton = makeUndo();
+		}
 
 		undoButton.setDisabled(true);
 		redoButton.setDisabled(true);
@@ -370,21 +384,16 @@ export default abstract class AbstractToolbar {
 			this.addWidget(new HandToolWidget(this.editor, panZoomTool, this.localizationTable));
 		}
 
+		this.addWidget(new DocumentPropertiesWidget(this.editor, this.localizationTable));
 		this.addWidget(new InsertImageWidget(this.editor, this.localizationTable));
 	}
 
 	public addDefaultActionButtons() {
-		this.addWidget(new DocumentPropertiesWidget(this.editor, this.localizationTable));
 		this.addUndoRedoButtons();
 	}
 
 	/**
-	 * Adds both the default tool widgets and action buttons. Equivalent to
-	 * ```ts
-	 * toolbar.addDefaultToolWidgets();
-	 * toolbar.addOverflowWidget();
-	 * toolbar.addDefaultActionButtons();
-	 * ```
+	 * Adds both the default tool widgets and action buttons.
 	 */
 	public abstract addDefaults(): void;
 

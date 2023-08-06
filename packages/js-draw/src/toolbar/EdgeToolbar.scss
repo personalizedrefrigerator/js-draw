@@ -19,13 +19,51 @@
 	to { opacity: 0; }
 }
 
-.toolbar-element.toolbar-sidebar-toolbar {
+.toolbar-sidebar-toolbar {
 	--toolbar-button-height: min(20vh, 48px);
 	box-sizing: border-box;
+
+	> div.toolbar-element {
+		flex-direction: row;
+		display: flex;
+		flex-grow: 1;
+
+		justify-content: center;
+		background-color: var(--secondary-background-color);
+		color: var(--secondary-foreground-color);
+		--icon-color: var(--secondary-foreground-color);
+
+		
+		&.toolbar-tool-row {
+			overflow-x: auto;
+			overflow-y: hidden;
+			order: 1;
+			flex-grow: 100;
+		}
+
+		&.toolbar-action-row {
+			// Increase the z-index of the first item --
+			// hovering over the items should make labels appear
+			// on top of the buttons in the next item (not below).
+			z-index: 2;
+			order: 0;
+			background-color: var(--tertiary-background-color);
+			color: var(--tertiary-foreground-color);
+			--icon-color: var(--tertiary-foreground-color);
+		}
+
+		&.has-scroll {
+			justify-content: start;
+		}
+	}
+
+	flex-direction: row;
+	justify-content: space-around;
 
 	.toolbar-toolContainer.selected > .toolbar-button {
 		background-color: var(--selection-background-color);
 		color: var(--selection-foreground-color);
+		--icon-color: var(--selection-foreground-color);
 	}
 
 	.toolbar-button {
@@ -102,7 +140,7 @@
 		}
 	}
 
-	& > .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
+	& > div > .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
 		display: block;
 		visibility: hidden;
 	}
@@ -199,6 +237,10 @@
 
 	.toolbar-toolContainer {
 		display: inline-block;
+	}
+
+	button {
+		background-color: transparent;
 	}
 
 	& > button.drag-elem {
