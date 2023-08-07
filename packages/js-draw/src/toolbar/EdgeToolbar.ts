@@ -1,11 +1,10 @@
 import Editor from '../Editor';
 import { ToolbarLocalization } from './localization';
-import BaseWidget from './widgets/BaseWidget';
+import BaseWidget, { ToolbarWidgetTag } from './widgets/BaseWidget';
 import { toolbarCSSPrefix } from './constants';
 import EdgeToolbarLayoutManager from './widgets/layout/EdgeToolbarLayoutManager';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
-import { ActionButtonWidget } from './lib';
 import stopPropagationOfScrollingWheelEvents from '../util/stopPropagationOfScrollingWheelEvents';
 
 
@@ -14,7 +13,6 @@ export const makeEdgeToolbar = (editor: Editor): AbstractToolbar => {
 };
 
 
-// TODO(!): Doesn't make sense to extend DropdownToolbar
 export default class EdgeToolbar extends AbstractToolbar {
 	private toolbarContainer: HTMLElement;
 
@@ -192,8 +190,20 @@ export default class EdgeToolbar extends AbstractToolbar {
 	}
 
 	protected override addWidgetInternal(widget: BaseWidget) {
+		const tags = widget.getTags();
+
+		if (tags.includes(ToolbarWidgetTag.Save)) {
+			widget.addCSSClassToContainer('label-inline');
+			widget.addCSSClassToContainer('label-right');
+		}
+
+		if (tags.includes(ToolbarWidgetTag.Exit)) {
+			widget.addCSSClassToContainer('label-inline');
+			widget.addCSSClassToContainer('label-left');
+		}
+
 		widget.setLayoutManager(this.layoutManager);
-		if (widget instanceof ActionButtonWidget) {
+		if (!widget.canBeInOverflowMenu()) {
 			widget.addTo(this.toolbarActionRow);
 		} else {
 			widget.addTo(this.toolbarToolRow);

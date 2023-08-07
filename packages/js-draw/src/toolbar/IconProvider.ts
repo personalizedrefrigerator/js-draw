@@ -716,15 +716,23 @@ export default class IconProvider {
 		return icon;
 	}
 
-	public makeDeleteSelectionIcon(): IconElemType {
+	#makeXIcon(): IconElemType {
 		const strokeWidth = '5px';
 		const strokeColor = 'var(--icon-color)';
 		const fillColor = 'none';
 
 		return this.makeIconFromPath(`
-			M 10,10 90,90
-			M 10,90 90,10
+			M 15,15 85,85
+			M 15,85 85,15
 		`, fillColor, strokeColor, strokeWidth);
+	}
+
+	public makeDeleteSelectionIcon(): IconElemType {
+		return this.#makeXIcon();
+	}
+
+	public makeCloseIcon(): IconElemType {
+		return this.#makeXIcon();
 	}
 
 	public makeSaveIcon(): IconElemType {

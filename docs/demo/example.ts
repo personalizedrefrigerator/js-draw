@@ -1,5 +1,5 @@
 // If from an NPM package,
-import { Editor, EditorEventType, EventDispatcher } from 'js-draw';
+import { Editor, EditorEventType, EventDispatcher, makeEdgeToolbar, ToolbarWidgetTag } from 'js-draw';
 import 'js-draw/styles';
 
 import { Localization, getLocalizationTable } from './localization';
@@ -41,21 +41,36 @@ const createEditor = (
 	// Although new Editor(parentElement) created an Editor, it doesn't have a toolbar
 	// yet. `.addToolbar()` creates a toolbar and adds it to the document, using the
 	// default toolbar layout.
-	const toolbar = editor.addToolbar();
+	const toolbar = makeEdgeToolbar(editor);
 
-	// Add space between the save button and the other buttons.
-	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
-
-	// Show a "are you sure you want to leave this page" dialog
-	// if there could be unsaved changes.
-	setUpUnsavedChangesWarning(localization, editor, appNotifier);
-
-	toolbar.addActionButton({
+	toolbar.addTaggedActionButton([
+		ToolbarWidgetTag.Save,
+	], {
 		label: localization.save,
 		icon: editor.icons.makeSaveIcon(),
 	}, () => {
 		saveCallback();
 	});
+
+	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
+
+	toolbar.addDefaults();
+
+	// Add space between the save button and the other buttons.
+	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
+
+	// Also add a close button
+	toolbar.addTaggedActionButton([
+		ToolbarWidgetTag.Exit,
+	], {
+		label: localization.close,
+		icon: editor.icons.makeCloseIcon(),
+	}, () => {
+		saveCallback();
+		editor.remove();
+		reShowLaunchOptions();
+	});
+
 
 	// Save toolbar state whenever tool state changes (which could be caused by a
 	// change in the one of the toolbar widgets).
@@ -65,6 +80,10 @@ const createEditor = (
 
 	// Load toolbar widget state from localStorage.
 	restoreToolbarState(toolbar);
+
+	// Show a "are you sure you want to leave this page" dialog
+	// if there could be unsaved changes.
+	setUpUnsavedChangesWarning(localization, editor, appNotifier);
 
 	// Set focus to the main region of the editor.
 	// This allows keyboard shortcuts to work.
@@ -126,8 +145,16 @@ const saveImage = (
 };
 
 // Destroys the welcome screen.
+let launchScreen: HTMLElement|null = null;
 const hideLaunchOptions = () => {
-	document.querySelector('#launchOptions')?.remove();
+	launchScreen = document.querySelector('#launchOptions');
+	launchScreen?.remove();
+};
+
+const reShowLaunchOptions = () => {
+	if (launchScreen) {
+		document.body.appendChild(launchScreen);
+	}
 };
 
 

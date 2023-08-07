@@ -1353,6 +1353,13 @@ export class Editor {
 		this.closeAboutDialog?.();
 		this.closeAboutDialog = makeAboutDialog(this, notices).close;
 	}
+
+	/** Removes and destroys the editor */
+	public remove() {
+		this.container.remove();
+
+		// TODO: Is additional cleanup necessary here?
+	}
 }
 
 export default Editor;

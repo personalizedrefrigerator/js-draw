@@ -14,7 +14,7 @@ import EraserWidget from './widgets/EraserToolWidget';
 import SelectionToolWidget from './widgets/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
-import BaseWidget from './widgets/BaseWidget';
+import BaseWidget, { ToolbarWidgetTag } from './widgets/BaseWidget';
 import ActionButtonWidget from './widgets/ActionButtonWidget';
 import InsertImageWidget from './widgets/InsertImageWidget';
 import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
@@ -284,14 +284,15 @@ export default abstract class AbstractToolbar {
 	protected deserializeInternal(_json: any) {}
 
 	/**
-	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).
+	 * Creates, but does not add, an action button to this container.
 	 *
-	 * @return The added button.
+	 * @see
+	 * {@link addActionButton}
 	 */
-	public addActionButton(
+	protected makeActionButton(
 		title: string|ActionButtonIcon,
-		command: ()=> void,
-		mustBeToplevel: boolean = true
+		command: ()=>void,
+		mustBeToplevel: boolean = true,
 	): BaseWidget {
 		const titleString = typeof title === 'string' ? title : title.label;
 		const widgetId = 'action-button';
@@ -314,13 +315,46 @@ export default abstract class AbstractToolbar {
 			mustBeToplevel,
 		);
 
+		return widget;
+	}
+
+	/**
+	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).
+	 *
+	 * @return The added button.
+	 */
+	public addActionButton(
+		title: string|ActionButtonIcon,
+		command: ()=> void,
+		mustBeToplevel: boolean = true
+	): BaseWidget {
+		const widget = this.makeActionButton(title, command, mustBeToplevel);
 		this.addWidget(widget);
+		return widget;
+	}
+
+	/**
+	 * Like {@link addActionButton}, except associates `tags` with the button that allow
+	 * different toolbar styles to give the button tag-dependent styles.
+	 */
+	public addTaggedActionButton(
+		tags: (ToolbarWidgetTag|string)[],
+		title: string|ActionButtonIcon,
+		command: ()=>void,
+		mustBeToplevel = true
+	): BaseWidget {
+		const widget = this.makeActionButton(title, command, mustBeToplevel);
+		widget.setTags(tags);
+		this.addWidget(widget);
+
 		return widget;
 	}
 
 	public addUndoRedoButtons(undoFirst = true) {
 		const makeUndo = () => {
-			return this.addActionButton({
+			return this.addTaggedActionButton([
+				ToolbarWidgetTag.Undo,
+			], {
 				label: this.localizationTable.undo,
 				icon: this.editor.icons.makeUndoIcon()
 			}, () => {
@@ -328,7 +362,9 @@ export default abstract class AbstractToolbar {
 			});
 		};
 		const makeRedo = () => {
-			return this.addActionButton({
+			return this.addTaggedActionButton([
+				ToolbarWidgetTag.Redo,
+			], {
 				label: this.localizationTable.redo,
 				icon: this.editor.icons.makeRedoIcon(),
 			}, () => {
@@ -358,6 +394,9 @@ export default abstract class AbstractToolbar {
 		});
 	}
 
+	/**
+	 * Adds toolbar widgets based on the enabled tools.
+	 */
 	public addDefaultToolWidgets() {
 		const toolController = this.editor.toolController;
 		for (const tool of toolController.getMatchingTools(PenTool)) {

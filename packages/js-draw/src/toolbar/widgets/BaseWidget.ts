@@ -8,6 +8,16 @@ import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
 
 export type SavedToolbuttonState = Record<string, any>;
 
+/**
+ * A set of labels that allow toolbar themes to treat buttons differently.
+ */
+export enum ToolbarWidgetTag {
+	Save = 'save',
+	Exit = 'exit',
+	Undo = 'undo',
+	Redo = 'redo',
+}
+
 export default abstract class BaseWidget {
 	protected readonly container: HTMLElement;
 	private button: HTMLElement;
@@ -19,6 +29,8 @@ export default abstract class BaseWidget {
 	private label: HTMLLabelElement;
 	#hasDropdown: boolean;
 	private disabled: boolean = false;
+
+	#tags: (ToolbarWidgetTag|string)[] = [];
 
 	// Maps subWidget IDs to subWidgets.
 	private subWidgets: Record<string, BaseWidget> = {};
@@ -64,6 +76,43 @@ export default abstract class BaseWidget {
 
 	public getId(): string {
 		return this.id;
+	}
+
+	/**
+	 * Note: Tags should be set *before* a tool widget is added to a toolbar.
+	 *
+	 *
+	 * Associates tags with this widget that can be used by toolbar themes
+	 * to customize the layout/appearance of this button. Prefer tags in
+	 * the `ToolbarWidgetTag` enum, where possible.
+	 *
+	 * In addition to being readable from the {@link getTags} method, tags are
+	 * added to a button's main container as CSS classes with the `toolwidget-tag--` prefix.
+	 *
+	 * For example, the `undo` tag would result in `toolwidget-tag--undo`
+	 * being added to the button's container's class list.
+	 *
+	 */
+	public setTags(tags: (string|ToolbarWidgetTag)[]) {
+		const toClassName = (tag: string) => {
+			return `toolwidget-tag--${tag}`;
+		};
+
+		// Remove CSS classes associated with old tags
+		for (const tag of this.#tags) {
+			this.container.classList.remove(toClassName(tag));
+		}
+
+		this.#tags = [...tags];
+
+		// Add new CSS classes
+		for (const tag of this.#tags) {
+			this.container.classList.add(toClassName(tag));
+		}
+	}
+
+	public getTags() {
+		return [ ...this.#tags ];
 	}
 
 	/**
@@ -270,6 +319,13 @@ export default abstract class BaseWidget {
 		return this.container;
 	}
 
+	/**
+	 * @internal
+	 */
+	public addCSSClassToContainer(className: string) {
+		this.container.classList.add(className);
+	}
+
 	public remove() {
 		this.container.remove();
 	}
@@ -336,8 +392,23 @@ export default abstract class BaseWidget {
 		this.dropdown?.onToolActivated();
 	}
 
+	/**
+	 * Returns `true` if this widget must always be in a toplevel menu and not
+	 * in a scrolling/overflow menu.
+	 *
+	 * This method can be overidden to override the default of `true`.
+	 */
+	public mustBeInToplevelMenu(): boolean {
+		return false;
+	}
+
+	/**
+	 * Returns true iff this widget can be in a nontoplevel menu.
+	 *
+	 * @deprecated Use `!mustBeInToplevelMenu()` instead.
+	 */
 	public canBeInOverflowMenu(): boolean {
-		return true;
+		return !this.mustBeInToplevelMenu();
 	}
 
 	public getButtonWidth(): number {

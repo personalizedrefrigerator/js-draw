@@ -33,7 +33,7 @@ export default class ActionButtonWidget extends BaseWidget {
 		return false;
 	}
 
-	public override canBeInOverflowMenu(): boolean {
-		return !this.mustBeToplevel;
+	public override mustBeInToplevelMenu(): boolean {
+		return this.mustBeToplevel;
 	}
 }

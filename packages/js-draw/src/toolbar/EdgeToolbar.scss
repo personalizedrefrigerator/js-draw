@@ -57,7 +57,10 @@
 		}
 	}
 
-	flex-direction: row;
+	// row-reverse combined with setting one row's order to be less than the other allows
+	// the upper toolbar to be shown above the lower toolbar on small screens and to the
+	// right on large screens.
+	flex-direction: row-reverse;
 	justify-content: space-around;
 
 	.toolbar-toolContainer.selected > .toolbar-button {
@@ -70,6 +73,57 @@
 		box-sizing: border-box;
 		background-color: transparent;
 
+		.toolbar-showHideDropdownIcon {
+			// Shrink, but not as fast as everything else.
+			flex-shrink: 0.01;
+
+			height: 12px;
+		}
+	}
+
+	.toolbar-toolContainer {
+		// No inline label -- default to an order between the first
+		// and last button.
+		order: 1;
+	}
+
+	// Display some buttons' labels inline, rather than only on hover.
+	.toolbar-toolContainer.label-inline {
+		flex-grow: 1;
+		display: flex;
+
+		--button-flex-direction: row;
+
+
+		&.label-left { // Icon on the right
+			justify-content: end;
+			--button-flex-direction: row-reverse;
+
+			> .toolbar-button > .toolbar-icon {
+				margin-left: 10px;
+			}
+
+			// Show last
+			order: 100;
+		}
+
+		&.label-right { // Icon on the left
+			// Show first
+			order: -1;
+		}
+
+		> .toolbar-button {
+			width: auto;
+			flex-direction: var(--button-flex-direction);
+
+			> .toolbar-icon {
+				height: 100%;
+				margin-right: 10px;
+			}
+		}
+	}
+
+	.toolbar-toolContainer:not(.label-inline) .toolbar-button {
 		$label-hover-offset: calc(var(--toolbar-button-height) + 10px);
 		$label-visible-opacity: 0.8;
 
@@ -130,13 +184,6 @@
 			@media (prefers-reduced-motion: reduce) {
 				transition: none;
 			}
-		}
-
-		.toolbar-showHideDropdownIcon {
-			// Shrink, but not as fast as everything else.
-			flex-shrink: 0.01;
-
-			height: 12px;
 		}
 	}
 
