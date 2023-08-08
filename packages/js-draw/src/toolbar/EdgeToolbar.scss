@@ -37,7 +37,6 @@
 		&.toolbar-tool-row {
 			overflow-x: auto;
 			overflow-y: hidden;
-			order: 1;
 			flex-grow: 100;
 		}
 
@@ -46,7 +45,6 @@
 			// hovering over the items should make labels appear
 			// on top of the buttons in the next item (not below).
 			z-index: 2;
-			order: 0;
 			background-color: var(--tertiary-background-color);
 			color: var(--tertiary-foreground-color);
 			--icon-color: var(--tertiary-foreground-color);
@@ -60,7 +58,7 @@
 	// row-reverse combined with setting one row's order to be less than the other allows
 	// the upper toolbar to be shown above the lower toolbar on small screens and to the
 	// right on large screens.
-	flex-direction: row-reverse;
+	flex-direction: row;
 	justify-content: space-around;
 
 	.toolbar-toolContainer.selected > .toolbar-button {
