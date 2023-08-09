@@ -308,8 +308,35 @@ export default class EdgeToolbar extends AbstractToolbar {
 			}
 		}, { passive: true });
 
+		let gestureEndTimestamp = 0;
+		const onGestureEnd = (_event: Event) => {
+			// If the pointerup/pointercancel event was for a pointer not being tracked,
+			if (!pointerDown) {
+				return;
+			}
+
+			gestureEndTimestamp = Date.now();
+
+			if (capturedPointerId !== null) {
+				this.sidebarContainer.releasePointerCapture(capturedPointerId);
+				capturedPointerId = null;
+			}
+
+			this.finalizeDrag();
+			pointerDown = false;
+			startedDragging = false;
+		};
+
 		this.sidebarContainer.onpointermove = event => {
 			if (!event.isPrimary || !pointerDown) {
+				return undefined;
+			}
+
+			// Mouse event and no buttons pressed? Cancel the event.
+			// This can happen if the event was canceled by a focus change (e.g. by opening a
+			// right-click menu).
+			if (event.pointerType === 'mouse' && event.buttons === 0) {
+				onGestureEnd(event);
 				return undefined;
 			}
 
@@ -341,25 +368,6 @@ export default class EdgeToolbar extends AbstractToolbar {
 				capturedPointerId = event.pointerId;
 			}
 		}};
-
-		let gestureEndTimestamp = 0;
-		const onGestureEnd = (_event: Event) => {
-			// If the pointerup/pointercancel event was for a pointer not being tracked,
-			if (!pointerDown) {
-				return;
-			}
-
-			gestureEndTimestamp = Date.now();
-
-			if (capturedPointerId !== null) {
-				this.sidebarContainer.releasePointerCapture(capturedPointerId);
-				capturedPointerId = null;
-			}
-
-			this.finalizeDrag();
-			pointerDown = false;
-			startedDragging = false;
-		};
 
 		this.closeButton.onclick = () => {
 			const wasJustDragging = Date.now() - gestureEndTimestamp < 100;
