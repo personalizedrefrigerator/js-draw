@@ -1,24 +1,24 @@
 {
-    "inDirectory": "./src",
-    "outDirectory": "./dist",
-    "scssFiles": [ "./src/Editor.scss" ],
-    "bundledFiles": [
-        {
-            "name": "jsdraw",
-	        "inPath": "./src/bundle/bundled.ts",
-            "outPath": "./dist/bundle.js"
-        },
-        {
-            "name": "jsdrawStyles",
-            "inPath": "./src/styles.js",
-            "outPath": "./dist/bundledStyles.js"
-        }
-    ],
-    "translationSourceFiles": [
-        {
-            "name": "js-draw",
-            "path": "./tools/allLocales.js",
-            "defaultLocale": "en"
-        }
-    ]
+	"inDirectory": "./src",
+	"outDirectory": "./dist",
+	"scssFiles": [ "./src/Editor.scss" ],
+	"bundledFiles": [
+		{
+			"name": "jsdraw",
+			"inPath": "./src/bundle/bundled.ts",
+			"outPath": "./dist/bundle.js"
+		},
+		{
+			"name": "jsdrawStyles",
+			"inPath": "./src/styles.js",
+			"outPath": "./dist/bundledStyles.js"
+		}
+	],
+	"translationSourceFiles": [
+		{
+			"name": "js-draw",
+			"path": "./tools/allLocales.js",
+			"defaultLocale": "en"
+		}
+	]
 }

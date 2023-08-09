@@ -1,8 +1,8 @@
 {
-    "bundledFiles": [
-        {
-            "name": "jsdraw",
-	        "inPath": "./example.ts"
-        }
-    ]
+	"bundledFiles": [
+		{
+			"name": "jsdraw",
+			"inPath": "./example.ts"
+		}
+	]
 }

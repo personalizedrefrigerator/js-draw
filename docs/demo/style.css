@@ -28,30 +28,30 @@
 
 /* Dialogs */
 .dialog-background {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 
-    position: fixed;
+	position: fixed;
 
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
 
-    background-color: rgba(0, 0, 0, 0.2);
+	background-color: rgba(0, 0, 0, 0.2);
 }
 
 .dialog-background .dialog {
-    background-color: #ffe;
-    border-radius: 4px;
-    max-height: 100vh;
-    overflow-y: auto;
+	background-color: #ffe;
+	border-radius: 4px;
+	max-height: 100vh;
+	overflow-y: auto;
 
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 3px;
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 3px;
 
-    font-family: sans-serif;
-    padding: 20px;
+	font-family: sans-serif;
+	padding: 20px;
 }
 
 
@@ -103,6 +103,6 @@
 	}
 
 	.dialog-background .dialog {
-        background-color: #111;
-    }
+		background-color: #111;
+	}
 }
