@@ -30,8 +30,6 @@ const compileSCSS = async (config: BuildConfig, buildMode: BuildMode) => {
 		await fs.mkdir(outputParentDir, { recursive: true, });
 		await fs.writeFile(outputPath, result.css, 'utf-8');
 
-		//const dependsOn = result.loadedUrls;
-		//console.log(dependsOn);
 		const dependencies = result.loadedUrls.map(url => {
 			const dependencyPath = url.pathname ? path.resolve(url.pathname) : null;
 			if (dependencyPath && dependencyPath.startsWith(inDir)) {
@@ -55,7 +53,12 @@ const compileSCSS = async (config: BuildConfig, buildMode: BuildMode) => {
 				fileChangeListeners[depPath] ??= [];
 				fileChangeListeners[depPath].push(
 					async () => {
-						await compile(filePath);
+						try {
+							// TODO: Update dependency graph.
+							await compile(filePath);
+						} catch(error) {
+							console.error(error);
+						}
 					},
 				);
 			}
