@@ -10,6 +10,7 @@ import makeColorInput from './components/makeColorInput';
 import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
 import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
+import makeSeparator from './components/makeSeparator';
 
 const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizationTable: ToolbarLocalization) => {
 	const container = document.createElement('div');
@@ -171,6 +172,8 @@ export default class SelectionToolWidget extends BaseToolWidget {
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		super.fillDropdown(dropdown);
+
+		makeSeparator(this.localizationTable.reformatSelection).addTo(dropdown);
 
 		const formatMenu = makeFormatMenu(this.editor, this.tool, this.localizationTable);
 		formatMenu.addTo(dropdown);

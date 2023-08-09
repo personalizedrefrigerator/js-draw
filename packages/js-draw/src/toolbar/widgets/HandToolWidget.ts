@@ -8,6 +8,7 @@ import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
+import makeSeparator from './components/makeSeparator';
 
 const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
 	const zoomLevelRow = document.createElement('div');
@@ -193,6 +194,8 @@ export default class HandToolWidget extends BaseToolWidget {
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		super.fillDropdown(dropdown);
+
+		makeSeparator().addTo(dropdown);
 
 		dropdown.appendChild(makeZoomControl(this.localizationTable, this.editor));
 		return true;
