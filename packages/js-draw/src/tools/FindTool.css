@@ -1,7 +1,7 @@
 
 .find-tool-overlay {
-    /* Show at the bottom of the screen. */
-    order: -1;
+	/* Show at the bottom of the screen. */
+	order: -1;
 
-    position: absolute;
+	position: absolute;
 }

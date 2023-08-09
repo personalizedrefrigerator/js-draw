@@ -2,7 +2,7 @@
 /* Imports Coloris' CSS and makes additional changes to the color picker */
 
 #clr-picker {
-    --clr-slider-size: 30px;
+	--clr-slider-size: 30px;
 }
 
 /* Coloris: Try to avoid scrolling instead of updating the color input. */
@@ -24,10 +24,10 @@
 
 /* Also apply to Chrome/iOS */
 #clr-picker.clr-picker input[type="range"]::-webkit-slider-thumb {
-    /*
-     Note: This doesn't seem to take effect in iOS if it's combined with the
-           ::-moz-range-thumb rule above
-     */
+	/*
+	 Note: This doesn't seem to take effect in iOS if it's combined with the
+	       ::-moz-range-thumb rule above
+	 */
 	width: var(--clr-slider-size);
 	height: var(--clr-slider-size);
 }
@@ -45,8 +45,8 @@ Debugging: Uncommenting this rule makes Coloris' sliders more
 visible.
 
 #clr-picker.clr-picker input[type="range"] {
-    opacity: 0.5;
-    -webkit-appearance: auto;
-    appearance: auto;
+	opacity: 0.5;
+	-webkit-appearance: auto;
+	appearance: auto;
 }
 */

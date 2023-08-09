@@ -1,33 +1,33 @@
 .new-image-template-button {
-    background-color: #eee;
-    border: none;
-    color: black;
-    border-radius: 5px;
+	background-color: #eee;
+	border: none;
+	color: black;
+	border-radius: 5px;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
 
 .new-image-template-button div {
-    text-align: center;
+	text-align: center;
 }
 
 .new-image-template-button .icon {
-    width: 95%;
+	width: 95%;
 }
 
 .new-image-template-button:hover {
-    background-color: #ddd;
+	background-color: #ddd;
 }
 
 @media (prefers-color-scheme: dark) {
-    .new-image-template-button {
-        background-color: #222;
-        color: white;
-    }
+	.new-image-template-button {
+		background-color: #222;
+		color: white;
+	}
 
-    .new-image-template-button:hover {
-        background-color: #444;
-    }
+	.new-image-template-button:hover {
+		background-color: #444;
+	}
 }

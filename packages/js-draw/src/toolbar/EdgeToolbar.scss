@@ -239,11 +239,13 @@
 	align-items: center;
 	z-index: 2;
 
-	.toolbar-element button {
+	button {
 		font-size: 1.2em;
 		box-shadow: none;
 		border: none;
 		padding: 10px;
+
+		color: var(--primary-foreground-color);
 
 		transition: 0.2s ease box-shadow;
 

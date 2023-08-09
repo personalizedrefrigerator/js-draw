@@ -8,6 +8,7 @@ import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
+import makeSeparator from './components/makeSeparator';
 
 const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
 	const zoomLevelRow = document.createElement('div');
@@ -72,32 +73,6 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 
 	return zoomLevelRow;
 };
-
-class ZoomWidget extends BaseWidget {
-	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
-		super(editor, 'zoom-widget', localizationTable);
-
-		// Make it possible to open the dropdown, even if this widget isn't selected.
-		this.container.classList.add('dropdownShowable');
-	}
-
-	protected getTitle(): string {
-		return this.localizationTable.zoom;
-	}
-
-	protected createIcon(): Element {
-		return this.editor.icons.makeZoomIcon();
-	}
-
-	protected handleClick(): void {
-		this.setDropdownVisible(!this.isDropdownVisible());
-	}
-
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
-		dropdown.replaceChildren(makeZoomControl(this.localizationTable, this.editor));
-		return true;
-	}
-}
 
 class HandModeWidget extends BaseWidget {
 	public constructor(
@@ -193,9 +168,6 @@ export default class HandToolWidget extends BaseToolWidget {
 
 		this.addSubWidget(touchPanningWidget);
 		this.addSubWidget(rotationLockWidget);
-		this.addSubWidget(
-			new ZoomWidget(editor, localizationTable)
-		);
 	}
 
 	private static getPrimaryHandTool(toolController: ToolController): PanZoom|null {
@@ -218,6 +190,15 @@ export default class HandToolWidget extends BaseToolWidget {
 		} else {
 			this.setDropdownVisible(!this.isDropdownVisible());
 		}
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
+		super.fillDropdown(dropdown);
+
+		makeSeparator().addTo(dropdown);
+
+		dropdown.appendChild(makeZoomControl(this.localizationTable, this.editor));
+		return true;
 	}
 
 	public override setSelected(selected: boolean): void {

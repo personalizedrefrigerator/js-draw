@@ -9,92 +9,71 @@ import { ToolbarLocalization } from '../localization';
 import makeColorInput from './components/makeColorInput';
 import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
-import BaseWidget from './BaseWidget';
 import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
+import makeSeparator from './components/makeSeparator';
 
-class RestyleSelectionWidget extends BaseWidget {
-	private updateFormatData: ()=>void = () => {};
+const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizationTable: ToolbarLocalization) => {
+	const container = document.createElement('div');
+	container.classList.add('selection-format-menu');
 
-	public constructor(editor: Editor, private selectionTool: SelectionTool, localizationTable?: ToolbarLocalization) {
-		super(editor, 'restyle-selection', localizationTable);
+	const colorRow = document.createElement('div');
+	const colorLabel = document.createElement('label');
+	const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(editor, color => {
+		const selection = selectionTool.getSelection();
 
-		// Allow showing the dropdown even if this widget isn't selected yet
-		this.container.classList.add('dropdownShowable');
+		if (selection) {
+			const updateStyleCommands = [];
 
-		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
-			if (toolEvt.kind !== EditorEventType.ToolUpdated) {
-				throw new Error('Invalid event type!');
+			for (const elem of selection.getSelectedObjects()) {
+				if (isRestylableComponent(elem)) {
+					updateStyleCommands.push(elem.updateStyle({ color }));
+				}
 			}
 
-			if (toolEvt.tool === this.selectionTool) {
-				this.updateFormatData();
-			}
-		});
-	}
+			const unitedCommand = uniteCommands(updateStyleCommands);
+			editor.dispatch(unitedCommand);
+		}
+	});
 
-	protected getTitle(): string {
-		return this.localizationTable.reformatSelection;
-	}
+	colorLabel.innerText = localizationTable.colorLabel;
 
-	protected createIcon(){
-		return this.editor.icons.makeFormatSelectionIcon();
-	}
+	const update = () => {
+		const selection = selectionTool.getSelection();
+		if (selection && selection.getSelectedItemCount() > 0) {
+			colorInput.disabled = false;
+			container.classList.remove('disabled');
 
-	protected handleClick(): void {
-		this.setDropdownVisible(!this.isDropdownVisible());
-	}
-
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
-		const container = document.createElement('div');
-		const colorRow = document.createElement('div');
-		const colorLabel = document.createElement('label');
-		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
-			const selection = this.selectionTool.getSelection();
-
-			if (selection) {
-				const updateStyleCommands = [];
-
-				for (const elem of selection.getSelectedObjects()) {
-					if (isRestylableComponent(elem)) {
-						updateStyleCommands.push(elem.updateStyle({ color }));
+			const colors = [];
+			for (const elem of selection.getSelectedObjects()) {
+				if (isRestylableComponent(elem)) {
+					const color = elem.getStyle().color;
+					if (color) {
+						colors.push(color);
 					}
 				}
-
-				const unitedCommand = uniteCommands(updateStyleCommands);
-				this.editor.dispatch(unitedCommand);
 			}
-		});
+			setColorInputValue(Color4.average(colors));
+		} else {
+			colorInput.disabled = true;
+			container.classList.add('disabled');
+			setColorInputValue(Color4.transparent);
+		}
+	};
 
-		colorLabel.innerText = this.localizationTable.colorLabel;
+	colorRow.replaceChildren(colorLabel, colorInputContainer);
+	container.replaceChildren(colorRow);
 
-		this.updateFormatData = () => {
-			const selection = this.selectionTool.getSelection();
-			if (selection) {
-				colorInput.disabled = false;
-
-				const colors = [];
-				for (const elem of selection.getSelectedObjects()) {
-					if (isRestylableComponent(elem)) {
-						const color = elem.getStyle().color;
-						if (color) {
-							colors.push(color);
-						}
-					}
-				}
-				setColorInputValue(Color4.average(colors));
-			} else {
-				colorInput.disabled = true;
-			}
-		};
-
-		colorRow.replaceChildren(colorLabel, colorInputContainer);
-		container.replaceChildren(colorRow);
-		dropdown.replaceChildren(container);
-		return true;
-	}
-}
+	return {
+		addTo: (parent: HTMLElement) => {
+			parent.appendChild(container);
+		},
+		update,
+	};
+};
 
 export default class SelectionToolWidget extends BaseToolWidget {
+	private updateFormatMenu: ()=>void = () => {};
+
 	public constructor(
 		editor: Editor, private tool: SelectionTool, localization?: ToolbarLocalization
 	) {
@@ -131,22 +110,15 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			},
 			localization,
 		);
-		const restyleButton = new RestyleSelectionWidget(
-			editor,
-			this.tool,
-			localization,
-		);
 
 		this.addSubWidget(resizeButton);
 		this.addSubWidget(deleteButton);
 		this.addSubWidget(duplicateButton);
-		this.addSubWidget(restyleButton);
 
 		const updateDisabled = (disabled: boolean) => {
 			resizeButton.setDisabled(disabled);
 			deleteButton.setDisabled(disabled);
 			duplicateButton.setDisabled(disabled);
-			restyleButton.setDisabled(disabled);
 		};
 		updateDisabled(true);
 
@@ -161,6 +133,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 				const hasSelection = selection && selection.getSelectedItemCount() > 0;
 
 				updateDisabled(!hasSelection);
+				this.updateFormatMenu();
 			}
 		});
 	}
@@ -195,5 +168,19 @@ export default class SelectionToolWidget extends BaseToolWidget {
 
 	protected createIcon(): Element {
 		return this.editor.icons.makeSelectionIcon();
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
+		super.fillDropdown(dropdown);
+
+		makeSeparator(this.localizationTable.reformatSelection).addTo(dropdown);
+
+		const formatMenu = makeFormatMenu(this.editor, this.tool, this.localizationTable);
+		formatMenu.addTo(dropdown);
+		this.updateFormatMenu = () => formatMenu.update();
+
+		formatMenu.update();
+
+		return true;
 	}
 }

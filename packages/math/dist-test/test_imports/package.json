@@ -5,7 +5,7 @@
 	"author": "Henry Heino",
 	"license": "MIT",
 	"private": true,
-    "type": "module",
+	"type": "module",
 	"scripts": {
 		"test": "node test-imports.js && node test-require.cjs"
 	}
