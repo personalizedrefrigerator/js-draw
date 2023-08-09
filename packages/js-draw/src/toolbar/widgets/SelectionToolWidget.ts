@@ -13,6 +13,8 @@ import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 
 const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizationTable: ToolbarLocalization) => {
 	const container = document.createElement('div');
+	container.classList.add('selection-format-menu');
+
 	const colorRow = document.createElement('div');
 	const colorLabel = document.createElement('label');
 	const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(editor, color => {
@@ -36,7 +38,7 @@ const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizati
 
 	const update = () => {
 		const selection = selectionTool.getSelection();
-		if (selection) {
+		if (selection && selection.getSelectedItemCount() > 0) {
 			colorInput.disabled = false;
 			container.classList.remove('disabled');
 
@@ -53,6 +55,7 @@ const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizati
 		} else {
 			colorInput.disabled = true;
 			container.classList.add('disabled');
+			setColorInputValue(Color4.transparent);
 		}
 	};
 
@@ -172,6 +175,8 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		const formatMenu = makeFormatMenu(this.editor, this.tool, this.localizationTable);
 		formatMenu.addTo(dropdown);
 		this.updateFormatMenu = () => formatMenu.update();
+
+		formatMenu.update();
 
 		return true;
 	}
