@@ -14,7 +14,7 @@ import makeSeparator from './components/makeSeparator';
 
 const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizationTable: ToolbarLocalization) => {
 	const container = document.createElement('div');
-	container.classList.add('selection-format-menu');
+	container.classList.add('selection-format-menu', 'toolbar-spacedList');
 
 	const colorRow = document.createElement('div');
 	const colorLabel = document.createElement('label');

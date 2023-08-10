@@ -166,7 +166,7 @@ const editor = new Editor(document.body, {
         eraser: 'Borrador',
         select: 'Selecciona',
         thicknessLabel: 'Tamaño: ',
-        colorLabel: 'Color: ',
+        colorLabel: 'Color',
 
         ...
     },

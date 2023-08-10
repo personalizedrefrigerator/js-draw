@@ -19,8 +19,8 @@ const localization: EditorLocalization = {
 	pen: 'Lapiz',
 	eraser: 'Borrador',
 	select: 'Selecciona',
-	thicknessLabel: 'Tamaño: ',
-	colorLabel: 'Color: ',
+	thicknessLabel: 'Tamaño',
+	colorLabel: 'Color',
 	doneLoading: 'El cargado terminó',
 	fontLabel: 'Fuente: ',
 	anyDevicePanning: 'Mover la pantalla con todo dispotivo',
@@ -31,7 +31,7 @@ const localization: EditorLocalization = {
 	linePen: 'Línea',
 	arrowPen: 'Flecha',
 	roundedTipPen: 'Lapiz Redondeado',
-	selectPenType: 'Forma de dibuja:',
+	selectPenType: 'Forma de dibuja',
 	handTool: 'Mover',
 	zoom: 'Zoom',
 	resetView: 'Reiniciar vista',
@@ -66,8 +66,8 @@ const localization: EditorLocalization = {
 	toggleOverflow: 'Más',
 
 	documentProperties: 'Fondo',
-	imageWidthOption: 'Ancho: ',
-	imageHeightOption: 'Alto: ',
+	imageWidthOption: 'Ancho',
+	imageHeightOption: 'Alto',
 	backgroundColor: 'Color de fondo: '
 };
 

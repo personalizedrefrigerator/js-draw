@@ -1,6 +1,10 @@
 .tool-dropdown-separator {
-	font-size: 0.7em;
-	border-top: 1px solid color-mix(in srgb, var(--primary-foreground-color), transparent);
+	// A mostly-transparent version of the foreground color.
+	--border-color: color-mix(in srgb, var(--primary-foreground-color), rgba(0, 0, 0, 0) 80%);
+	border-top: 1px solid var(--border-color);
+
+	padding-left: 2px;
+
 	margin-top: 10px;
 	margin-bottom: 10px;
 }

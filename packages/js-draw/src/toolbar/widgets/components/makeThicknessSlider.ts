@@ -32,9 +32,12 @@ const makeThicknessSlider = (
 	container.appendChild(thicknessInput);
 
 	const setBounds = (min: number, max: number) => {
-		const round = (value: number) => Math.round(value * 100) / 100;
-		const sliderMin = round(inverseThicknessInputFn(min));
-		const sliderMax = round(inverseThicknessInputFn(max));
+		const round = (value: number, roundUp: boolean) => {
+			const roundFn = roundUp ? Math.ceil : Math.floor;
+			return roundFn(value * 100) / 100;
+		};
+		const sliderMin = round(inverseThicknessInputFn(min), false);
+		const sliderMax = round(inverseThicknessInputFn(max), true);
 
 		thicknessInput.min = `${sliderMin}`;
 		thicknessInput.max = `${sliderMax}`;
