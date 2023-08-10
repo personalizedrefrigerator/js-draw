@@ -195,9 +195,16 @@ export default class HandToolWidget extends BaseToolWidget {
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		super.fillDropdown(dropdown);
 
-		makeSeparator().addTo(dropdown);
+		// The container for all actions that come after the toolbar buttons.
+		const nonbuttonActionContainer = document.createElement('div');
+		nonbuttonActionContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
 
-		dropdown.appendChild(makeZoomControl(this.localizationTable, this.editor));
+		makeSeparator().addTo(nonbuttonActionContainer);
+		nonbuttonActionContainer.appendChild(
+			makeZoomControl(this.localizationTable, this.editor)
+		);
+		dropdown.appendChild(nonbuttonActionContainer);
+
 		return true;
 	}
 

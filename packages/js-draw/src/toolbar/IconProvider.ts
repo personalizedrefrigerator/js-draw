@@ -666,6 +666,7 @@ export default class IconProvider {
 		return icon;
 	}
 
+	/** Unused. @deprecated */
 	public makeFormatSelectionIcon(): IconElemType {
 		return this.makeIconFromPath(`
 			M 5 10

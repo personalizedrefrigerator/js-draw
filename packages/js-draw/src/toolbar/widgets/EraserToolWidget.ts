@@ -36,7 +36,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 
-		container.classList.add(`${toolbarCSSPrefix}spacedList`);
+		container.classList.add(`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`);
 
 		const thicknessSlider = makeThicknessSlider(this.editor, thickness => {
 			this.tool.setThickness(thickness);

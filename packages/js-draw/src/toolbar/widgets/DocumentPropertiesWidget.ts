@@ -125,7 +125,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add(`${toolbarCSSPrefix}spacedList`);
+		container.classList.add(`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`);
 
 		// Background color input
 		const backgroundColorRow = document.createElement('div');

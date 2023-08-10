@@ -33,7 +33,9 @@ export default class TextToolWidget extends BaseToolWidget {
 	private static idCounter: number = 0;
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add(`${toolbarCSSPrefix}spacedList`);
+		container.classList.add(
+			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
+		);
 		const fontRow = document.createElement('div');
 		const colorRow = document.createElement('div');
 		const sizeRow = document.createElement('div');

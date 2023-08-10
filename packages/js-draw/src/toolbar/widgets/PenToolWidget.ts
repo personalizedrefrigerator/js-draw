@@ -306,7 +306,9 @@ export default class PenToolWidget extends BaseToolWidget {
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add(`${toolbarCSSPrefix}spacedList`);
+		container.classList.add(
+			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
+		);
 
 		// Thickness: Value of the input is squared to allow for finer control/larger values.
 		const { container: thicknessRow, setValue: setThickness } = makeThicknessSlider(this.editor, thickness => {

@@ -295,11 +295,6 @@
 
 	transition: translate 0.1s ease, padding-bottom 0.1s ease;
 
-	& > div {
-		padding-left: 10px;
-		padding-right: 10px;
-	}
-
 	input, textarea {
 		user-select: auto;
 	}
@@ -365,10 +360,6 @@
 				height: 36px;
 				padding: 8px;
 
-				// No left padding -- helps the icon to line up with text
-				// added below the toolbar buttons.
-				padding-left: 0;
-
 				margin-right: 15px;
 			}
 
@@ -377,6 +368,11 @@
 				font-size: 1em;
 			}
 		}
+	}
+
+	.toolbar-nonbutton-controls-main-list {
+		padding-left: 10px;
+		padding-right: 10px;
 	}
 
 	.toolbar-spacedList {

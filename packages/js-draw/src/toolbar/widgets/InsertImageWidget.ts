@@ -61,7 +61,11 @@ export default class InsertImageWidget extends BaseWidget {
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add('insert-image-widget-dropdown-content', `${toolbarCSSPrefix}spacedList`);
+		container.classList.add(
+			'insert-image-widget-dropdown-content',
+			`${toolbarCSSPrefix}spacedList`,
+			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
+		);
 
 		const {
 			container: chooseImageRow,

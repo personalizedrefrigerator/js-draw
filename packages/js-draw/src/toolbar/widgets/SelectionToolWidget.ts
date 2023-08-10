@@ -11,6 +11,7 @@ import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
 import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
+import { toolbarCSSPrefix } from '../constants';
 
 const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizationTable: ToolbarLocalization) => {
 	const container = document.createElement('div');
@@ -173,10 +174,14 @@ export default class SelectionToolWidget extends BaseToolWidget {
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		super.fillDropdown(dropdown);
 
-		makeSeparator(this.localizationTable.reformatSelection).addTo(dropdown);
+		const controlsContainer = document.createElement('div');
+		controlsContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
+		dropdown.appendChild(controlsContainer);
+
+		makeSeparator(this.localizationTable.reformatSelection).addTo(controlsContainer);
 
 		const formatMenu = makeFormatMenu(this.editor, this.tool, this.localizationTable);
-		formatMenu.addTo(dropdown);
+		formatMenu.addTo(controlsContainer);
 		this.updateFormatMenu = () => formatMenu.update();
 
 		formatMenu.update();
