@@ -612,30 +612,39 @@ export default class IconProvider {
 
 	public makePipetteIcon(color?: Color4): IconElemType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
-		const pipette = document.createElementNS(svgNamespace, 'path');
 
-		pipette.setAttribute('d', `
-			M 47,6
-			C 35,5 25,15 35,30
-			c -9.2,1.3 -15,0 -15,3
-				0,2 5,5 15,7
-			V 81
-			L 40,90
-			h 6
-			L 40,80
-			V 40
-			h 15
-			v 40
-			l -6,10
-			h 6
-			l 5,-9.2
-			V 40
-			C 70,38 75,35 75,33
-				75,30 69.2,31.2 60,30
-				65,15 65,5      47,6
-			Z
-		`);
-		pipette.style.fill = 'var(--icon-color)';
+		const mainGroup = document.createElementNS(svgNamespace, 'g');
+		mainGroup.style.rotate = '45deg';
+		mainGroup.style.transformOrigin = 'center';
+
+		const pipette = document.createElementNS(svgNamespace, 'g');
+		pipette.innerHTML = `
+		<path
+			style="fill: var(--icon-color); stroke-linecap:round; stroke-linejoin:round;"
+			d="
+				m 32,12 v 68
+				c 0,1 0.5,2 1.33,2.5 1.67,1.15 3.67,2.1 5.17,3.2 1.4,1.1 2.3,2.1 2.5,3.1 0.6,2.1 1,4.6 1,6.2 0,3.7 5.45,4.1 6,0.4 l 0.9,-6.8
+				c 0.3,-0.9 1.1,-1.9 2.6,-2.9 1.5,-1.1 3.4,-2 5.1,-3.2
+				C 57.5,82 58,81 58,80
+				V 12 Z m 20,25 v 41.3
+				c 0,1.7 -2.5,1.6 -4,2.7 -1,0.76 -2.1,1.5 -3,2.6
+				C 44,82.5 43.02,81.75 42,81 40.51,79.92 38,80 38,78.34
+				V 51 Z
+			"
+		/>
+		<rect
+			style="fill: var(--icon-color);"
+			width="32"
+			height="9"
+			x="29"
+			y="2"
+			ry="4.5"
+		/>
+		<path
+			style="fill: var(--icon-color);"
+			d="m 45,-25 c -5.54,0 -11,4.26 -11,9 V 0 h 22 v -16 c 0,-4.74 -5.46,-9 -11,-9 z"
+		/>
+		`;
 
 		if (color) {
 			const checkerboardPattern = makeCheckerboardPattern();
@@ -648,7 +657,7 @@ export default class IconProvider {
 			const fluid = document.createElementNS(svgNamespace, 'path');
 
 			const fluidPathData = `
-				m 40,50 c 5,5 10,0 15,-5 V 80 L 50,90 H 45 L 40,80 Z
+				M 35,36 H 55 V 78.678012 83 L 45,87 35,83 Z
 			`;
 
 			fluid.setAttribute('d', fluidPathData);
@@ -657,12 +666,14 @@ export default class IconProvider {
 			fluid.style.fill = color.toHexString();
 			fluidBackground.style.fill = checkerboardPattern.patternRef;
 
-			icon.appendChild(fluidBackground);
-			icon.appendChild(fluid);
+			mainGroup.appendChild(fluidBackground);
+			mainGroup.appendChild(fluid);
 		}
-		icon.appendChild(pipette);
 
-		icon.setAttribute('viewBox', '0 0 100 100');
+		mainGroup.appendChild(pipette);
+		icon.appendChild(mainGroup);
+
+		icon.setAttribute('viewBox', '5 -40 140 140');
 		return icon;
 	}
 
