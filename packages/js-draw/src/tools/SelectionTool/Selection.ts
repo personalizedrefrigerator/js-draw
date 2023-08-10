@@ -180,7 +180,7 @@ export default class Selection {
 	}
 
 	// Applies the current transformation to the selection
-	public finalizeTransform() {
+	public async finalizeTransform() {
 		const fullTransform = this.transform;
 		const selectedElems = this.selectedElems;
 
@@ -189,7 +189,7 @@ export default class Selection {
 		this.transform = Mat33.identity;
 
 		// Make the commands undo-able
-		this.editor.dispatch(new Selection.ApplyTransformationCommand(
+		await this.editor.dispatch(new Selection.ApplyTransformationCommand(
 			this, selectedElems, fullTransform
 		));
 

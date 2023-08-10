@@ -150,6 +150,7 @@ export default abstract class AbstractComponent {
 
 	// Returns a command that, when applied, transforms this by [affineTransfm] and
 	// updates the editor.
+	// This also increases the element's z-index so that it is on top.
 	public transformBy(affineTransfm: Mat33): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);
 	}

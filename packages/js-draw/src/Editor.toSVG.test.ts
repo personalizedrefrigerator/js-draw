@@ -1,4 +1,4 @@
-import { Color4, Mat33, Rect2, TextComponent, EditorImage, Vec2 } from './lib';
+import { Color4, Mat33, Rect2, TextComponent, EditorImage, Vec2, StrokeComponent, SelectionTool, sendPenEvent, InputEvtType } from './lib';
 import TextRenderingStyle from './rendering/TextRenderingStyle';
 import SVGLoader from './SVGLoader';
 import createEditor from './testing/createEditor';
@@ -107,5 +107,189 @@ describe('Editor.toSVG', () => {
 		// TODO: Uncomment before some future major version release. Currently a "fill" is set for every
 		//  tspan to work around a loading bug.
 		//expect(secondChild.outerHTML).toBe(`<tspan x="0" y="72">${thirdLineText}</tspan>`);
+	});
+
+	it('should preserve group elements', async () => {
+		const editor = createEditor();
+		await editor.loadFrom(SVGLoader.fromString(`
+			<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+				<style id="js-draw-style-sheet">
+					path {
+						stroke-linecap:round;
+						stroke-linejoin:round;
+					}
+				</style>
+				<g id='main-group'>
+					<g id='sub-group-1'>
+						<path d='M0,0 L10,10 0,10' fill='#f00'/>
+						<path d='M20,0 L10,10 0,10'/>
+					</g>
+					<g id='empty-group-2'></g>
+				</g>
+				<g id='empty-group-3'></g>
+
+				<!-- Groups without IDs should also be preserved -->
+				<g><g><g id='marker-1'></g></g></g>
+				<g class='test'><g id='marker-2'/></g>
+
+				<!-- Groups with duplicate IDs should preserved (though IDs)
+					may be changed -->
+				<g id='empty-group-2'/>
+				<g id='empty-group-2'><g id='empty-group-2'/></g>
+			</svg>
+		`));
+
+		// Both paths should exist.
+		expect(
+			editor.image
+				.getElementsIntersectingRegion(new Rect2(-10, -10, 100, 100))
+				.filter(elem => elem instanceof StrokeComponent)
+		).toHaveLength(2);
+
+		const outputSVG = editor.toSVG();
+
+		// Should still have the expected number of groups
+		expect(outputSVG.querySelectorAll('g')).toHaveLength(12);
+
+		// Should preserve the empty group.
+		expect(outputSVG.querySelectorAll('g#empty-group-2')).toHaveLength(1);
+
+		// The empty group should still have the correct parent
+		expect(outputSVG.querySelectorAll('g#main-group > g#empty-group-2')).toHaveLength(1);
+
+		// Paths should still be children of sub-group-1
+		expect(outputSVG.querySelectorAll('g#sub-group-1 > path')).toHaveLength(2);
+
+		// sub-group-1 should have the correct parent
+		expect(outputSVG.querySelectorAll('g#main-group > g#sub-group-1')).toHaveLength(1);
+
+		// And these should be the only paths.
+		expect(outputSVG.querySelectorAll('path')).toHaveLength(2);
+
+		// Should also preserve groups without IDs
+		// Selector ref: https://stackoverflow.com/a/18607777
+		expect(outputSVG.querySelectorAll('svg > g > g > g#marker-1')).toHaveLength(1);
+		expect(outputSVG.querySelectorAll('svg > g > g#marker-2')).toHaveLength(1);
+
+		// Should preserve class names on `g` objects:
+		expect(outputSVG.querySelectorAll('svg > g.test > g#marker-2')).toHaveLength(1);
+
+		// Should preserve groups that had duplicate IDs
+		expect(outputSVG.querySelectorAll('svg > g#empty-group-2--1')).toHaveLength(1);
+		expect(outputSVG.querySelectorAll('svg > g#empty-group-2--2')).toHaveLength(1);
+		expect(outputSVG.querySelectorAll('svg > g#empty-group-2--2 > g#empty-group-2--3')).toHaveLength(1);
+	});
+
+	describe('should not preserve group elements when doing so would change the z order', () => {
+		it('in an image with few items', async () => {
+			const editor = createEditor();
+			await editor.loadFrom(SVGLoader.fromString(`
+				<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+					<g id='main-group-1'>
+						<path d='M0,0 L-10,10 0,10' fill='#f00'/>
+						<path d='M20,0 L10,10 0,10'/>
+					</g>
+					<path d='M40,40 l10,10 0,10'/>
+				</svg>
+			`));
+
+			// All paths should exist.
+			expect(
+				editor.image
+					.getElementsIntersectingRegion(new Rect2(-10, -10, 100, 100))
+					.filter(elem => elem instanceof StrokeComponent)
+			).toHaveLength(3);
+
+			// Before modifying, both paths should be within the main-group-1 group
+			expect(editor.toSVG().querySelectorAll('svg > g#main-group-1 > path')).toHaveLength(2);
+
+			const selectionTool = editor.toolController.getMatchingTools(SelectionTool)[0];
+			selectionTool.setEnabled(true);
+
+			// Select the bottommost stroke
+			sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-11, 9));
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(-9, 10));
+			sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(-9, 10));
+
+			// The stroke should be selected
+			expect(selectionTool.getSelectedObjects()).toHaveLength(1);
+			expect(selectionTool.getSelectedObjects()[0].getBBox())
+				.objEq(new Rect2(-10, 0, 10, 10));
+
+			// Drag the selection (moves the selected item to the top)
+			sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-11, 9));
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(0, 0));
+			sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(0, 0));
+
+			expect(selectionTool.getSelectedObjects()[0].getBBox())
+				.not.objEq(new Rect2(-10, 0, 10, 10));
+			selectionTool.setEnabled(false);
+
+			// One of the items should have been moved out of the main group
+			const outputSVG = editor.toSVG();
+			expect(outputSVG.querySelectorAll('svg > path')).toHaveLength(2);
+			expect(outputSVG.querySelectorAll('svg > g#main-group-1 > path')).toHaveLength(1);
+		});
+
+		it('in an image with many items in nested groups', async () => {
+			const editor = createEditor();
+			await editor.loadFrom(SVGLoader.fromString(`
+				<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+					<path d='M-100,-100 l 2,2 0,2'/>
+					<g id='group-1'>
+						<path d='M0,0 L-10,10 0,10' fill='#f00'/>
+						<path d='M20,0 L10,10 0,10'/>
+
+						<g id='group-2'>
+							<path d='M100,100 l 2,2 0,2'/>
+						</g>
+					</g>
+					<path d='M40,40 l10,10 0,10'/>
+				</svg>
+			`));
+
+			// .expects that all paths have their original parent groups.
+			const expectGroupParentsToBeOriginal = () => {
+				expect(
+					editor.image
+						.getAllElements()
+						.filter(elem => elem instanceof StrokeComponent)
+				).toHaveLength(5);
+
+				const output = editor.toSVG();
+				expect(
+					output.querySelectorAll('svg > g#group-1 path')
+				).toHaveLength(3);
+				expect(
+					output.querySelectorAll('svg > g#group-1 > g > path')
+				).toHaveLength(1);
+			};
+
+			expectGroupParentsToBeOriginal();
+
+			const nudgePathNear = async (pos: Vec2) => {
+				const targetElems = editor.image.getElementsIntersectingRegion(Rect2.bboxOf([ pos ], 5));
+
+				expect(targetElems).toHaveLength(1);
+
+				// Move the path to the top
+				const target = targetElems[0];
+				await editor.dispatch(target.transformBy(Mat33.scaling2D(1.01)));
+			};
+
+			// Moving a path that's below all groups should not change group parentings.
+			nudgePathNear(Vec2.of(-100, -100));
+			expectGroupParentsToBeOriginal();
+
+			// Moving a path that's within nested groups should move the path out of that group.
+			nudgePathNear(Vec2.of(100, 100));
+
+			const outputSVG = editor.toSVG();
+			console.log(outputSVG.outerHTML);
+			expect(outputSVG.querySelectorAll('svg > path')).toHaveLength(3);
+			expect(outputSVG.querySelectorAll('svg > g#group-1 > path')).toHaveLength(2);
+			expect(outputSVG.querySelectorAll('svg > g#group-1 > g')).toHaveLength(1);
+			expect(outputSVG.querySelectorAll('svg > g#group-1 > g > *')).toHaveLength(0);
+		});
 	});
 });

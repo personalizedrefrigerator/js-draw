@@ -18,7 +18,13 @@ export const defaultSVGViewRect = new Rect2(0, 0, 500, 500);
 
 // Key to retrieve unrecognised attributes from an AbstractComponent
 export const svgAttributesDataKey = 'svgAttrs';
+
+// Like {@link svgAttributesDataKey}, but for styles
 export const svgStyleAttributesDataKey = 'svgStyleAttrs';
+
+// Key that specifies the ID of an SVG element that contained a given node when the image
+// was first loaded.
+export const svgLoaderAttributeContainerID = 'svgContainerID';
 
 // [key, value]
 export type SVGLoaderUnknownAttribute = [ string, string ];
@@ -136,7 +142,11 @@ export default class SVGLoader implements ImageLoader {
 		}
 
 		if (supportedStyleAttrs && node.style) {
-			for (const attr of node.style) {
+			// Use a for loop instead of an iterator: js-dom seems to not
+			// support using node.style as an iterator.
+			for (let i = 0; i < node.style.length; i ++) {
+				const attr = node.style[i];
+
 				if (attr === '' || !attr) {
 					continue;
 				}
@@ -183,7 +193,7 @@ export default class SVGLoader implements ImageLoader {
 				return;
 			}
 		}
-		await this.onAddComponent?.(elem);
+		await this.addComponent(elem);
 	}
 
 	private async addBackground(node: SVGElement) {
@@ -248,13 +258,13 @@ export default class SVGLoader implements ImageLoader {
 			const elem = BackgroundComponent.ofGrid(
 				backgroundColor, gridSize, foregroundColor, gridStrokeWidth
 			);
-			await this.onAddComponent?.(elem);
+			await this.addComponent(elem);
 		}
 		// Otherwise, if just a <path/>, it's a solid color background.
 		else if (node.tagName.toLowerCase() === 'path') {
 			const fill = Color4.fromString(node.getAttribute('fill') ?? node.style.fill ?? 'black');
 			const elem = new BackgroundComponent(BackgroundType.SolidColor, fill);
-			await this.onAddComponent?.(elem);
+			await this.addComponent(elem);
 		}
 		else {
 			await this.addUnknownNode(node);
@@ -391,7 +401,7 @@ export default class SVGLoader implements ImageLoader {
 	private async addText(elem: SVGTextElement|SVGTSpanElement) {
 		try {
 			const textElem = this.makeText(elem);
-			await this.onAddComponent?.(textElem);
+			await this.addComponent(textElem);
 		} catch (e) {
 			console.error('Invalid text object in node', elem, '. Continuing.... Error:', e);
 			this.addUnknownNode(elem);
@@ -414,7 +424,7 @@ export default class SVGLoader implements ImageLoader {
 				new Set([ 'transform' ])
 			);
 
-			await this.onAddComponent?.(imageElem);
+			await this.addComponent(imageElem);
 		} catch (e) {
 			console.error('Error loading image:', e, '. Element: ', elem, '. Continuing...');
 			await this.addUnknownNode(elem);
@@ -424,8 +434,58 @@ export default class SVGLoader implements ImageLoader {
 	private async addUnknownNode(node: SVGElement) {
 		if (this.storeUnknown) {
 			const component = new UnknownSVGObject(node);
-			await this.onAddComponent?.(component);
+			await this.addComponent(component);
 		}
+	}
+
+	private containerGroupIDs: string[] = [];
+	private encounteredIDs: string[] = [];
+	private async startGroup(node: SVGGElement) {
+		node = node.cloneNode(false) as SVGGElement;
+
+		// Select a unique ID based on the node's ID property (if it exists).
+		// Use `||` and not `??` so that empty string IDs are also replaced.
+		let id = node.id || `id-${this.encounteredIDs.length}`;
+
+		// Make id unique.
+		let idSuffixCounter = 0;
+		let suffix = '';
+		while (this.encounteredIDs.includes(id + suffix)) {
+			idSuffixCounter ++;
+			suffix = '--' + idSuffixCounter;
+		}
+		id += suffix;
+
+		// Remove all children from the node -- children will be handled separately
+		// (not removing children here could cause duplicates in the result, when rendered).
+		node.replaceChildren();
+
+		node.id = id;
+
+		const component = new UnknownSVGObject(node);
+		this.addComponent(component);
+
+		// Add to IDs after -- we don't want the <g> element to be marked
+		// as its own container.
+		this.containerGroupIDs.push(node.id);
+		this.encounteredIDs.push(node.id);
+	}
+
+	// Ends the most recent group started by .startGroup
+	private async endGroup() {
+		this.containerGroupIDs.pop();
+	}
+
+	private async addComponent(component: AbstractComponent) {
+		// Attach the stack of container IDs
+		if (this.containerGroupIDs.length > 0) {
+			component.attachLoadSaveData(
+				svgLoaderAttributeContainerID,
+				[ ...this.containerGroupIDs ]
+			);
+		}
+
+		await this.onAddComponent?.(component);
 	}
 
 	private updateViewBox(node: SVGSVGElement) {
@@ -464,6 +524,8 @@ export default class SVGLoader implements ImageLoader {
 			if (node.classList.contains(imageBackgroundCSSClassName)) {
 				await this.addBackground(node as SVGElement);
 				visitChildren = false;
+			} else {
+				await this.startGroup(node as SVGGElement);
 			}
 			// Otherwise, continue -- visit the node's children.
 			break;
@@ -492,7 +554,7 @@ export default class SVGLoader implements ImageLoader {
 			await this.addUnknownNode(node as SVGStyleElement);
 			break;
 		default:
-			console.warn('Unknown SVG element,', node);
+			console.warn('Unknown SVG element,', node, node.tagName);
 			if (!(node instanceof SVGElement)) {
 				console.warn(
 					'Element', node, 'is not an SVGElement!', this.storeUnknown ? 'Continuing anyway.' : 'Skipping.'
@@ -506,6 +568,10 @@ export default class SVGLoader implements ImageLoader {
 		if (visitChildren) {
 			for (const child of node.children) {
 				await this.visit(child);
+			}
+
+			if (node.tagName.toLowerCase() === 'g') {
+				await this.endGroup();
 			}
 		}
 

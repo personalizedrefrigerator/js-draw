@@ -25,7 +25,9 @@ export default class UnknownSVGObject extends AbstractComponent {
 			return;
 		}
 
+		canvas.startObject(this.contentBBox);
 		canvas.drawSVGElem(this.svgObject);
+		canvas.endObject(this.getLoadSaveData());
 	}
 
 	public override intersects(lineSegment: LineSegment2): boolean {
