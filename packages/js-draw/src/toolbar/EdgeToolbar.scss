@@ -48,19 +48,40 @@
 		0% { opacity: 0; }
 		100% { opacity: 0; }
 	}
-	// Only show an animation when opening the label due to a hover --
-	// show the label immediately otherwise.
-	&:hover > #{$label-selector} {
-		opacity: $label-visible-opacity;
 
-		$animation-length: 1s;
-		animation: $animation-length ease show-label;
+
+	$hover-active-animation: ease show-label;
+
+	// Avoids sticky hover on touch devices. See
+	// https://css-tricks.com/solving-sticky-hover-states-with-media-hover-hover/
+	// When the primary device supports hover:
+	@media (hover: hover) {
+		// Only show an animation when opening the label due to a hover --
+		// show the label immediately otherwise.
+		&:hover > #{$label-selector} {
+			opacity: $label-visible-opacity;
+			animation: 1s $hover-active-animation;
+		}
 	}
 
-	&:focus-visible > #{$label-selector}, &:has(:focus-visible) > #{$label-selector} {
-		// Show, then hide labels on keyboard focus
-		animation: 1.5s ease rehide-label;
+	// When the user is pressing/long-pressing the button
+	&:active > #{$label-selector} {
+		opacity: $label-visible-opacity;
+		animation: 0.5s $hover-active-animation;
+	}
+
+	$keyboard-hide-animation: 1.5s ease rehide-label;
+
+	&:focus-visible > #{$label-selector} {
+		animation: $keyboard-hide-animation;
 		opacity: 0;
+	}
+
+	// Make the :has selector separate its own statement -- some browsers don't
+	// support :has, which would make the entire statement block have no effect.
+	&:has(:focus-visible) > #{$label-selector} {
+		animation: $keyboard-hide-animation;
+		opacity: 0;;
 	}
 
 	& > #{$label-selector} {
