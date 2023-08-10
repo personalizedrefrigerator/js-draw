@@ -66,9 +66,10 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 	};
 
 	resetViewButton.onclick = () => {
+		const addToHistory = false;
 		editor.dispatch(Viewport.transformBy(
 			editor.viewport.canvasToScreenTransform.inverse()
-		), true);
+		), addToHistory);
 	};
 
 	return zoomLevelRow;
