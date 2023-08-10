@@ -19,6 +19,75 @@
 	to { opacity: 0; }
 }
 
+// Shows a lable on hover
+// Uses the --button-label-hover-offset-y and --button-label-hover-offset-x
+// variables to determine the label's position.
+//
+// If the label is in a scrolling container, that container should have position: relative;
+// as this allows absolutely positioned children to scroll with the container (rather than
+// remaining stationary).
+@mixin label-visible-on-hover($label-selector) {
+	$label-visible-opacity: 0.8;
+
+	// Make the label hide only when hovering.
+
+	@keyframes rehide-label {
+		0% { opacity: $label-visible-opacity; }
+		80% { opacity: $label-visible-opacity; }
+		100% { opacity: 0.1; }
+	}
+
+	@keyframes show-label {
+		0% { opacity: 0; }
+		// Keep the label hidden before showing
+		80% { opacity: 0; }
+		100% { opacity: $label-visible-opacity; }
+	}
+
+	@keyframes keep-label-hidden {
+		0% { opacity: 0; }
+		100% { opacity: 0; }
+	}
+	// Only show an animation when opening the label due to a hover --
+	// show the label immediately otherwise.
+	&:hover > #{$label-selector} {
+		opacity: $label-visible-opacity;
+
+		$animation-length: 1s;
+		animation: $animation-length ease show-label;
+	}
+
+	&:focus-visible > #{$label-selector}, &:has(:focus-visible) > #{$label-selector} {
+		// Show, then hide labels on keyboard focus
+		animation: 1.5s ease rehide-label;
+		opacity: 0;
+	}
+
+	& > #{$label-selector} {
+		opacity: 0;
+		position: absolute;
+		margin-top: var(--button-label-hover-offset-y);
+		margin-left: var(--button-label-hover-offset-x);
+
+		// The label is often mostly invisible/just below a toolbar item.
+		// If there are multiple toolbar rows, ensure that a label doesn't prevent
+		// clicking on items in the second row:
+		pointer-events: none;
+
+		background-color: var(--primary-background-color);
+		color: var(--primary-foreground-color);
+		border-radius: 25px;
+		padding: 10px;
+
+		transition: 0.2s ease opacity, 0.2s ease margin-top;
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+}
+
+// The toolbar portion (the bar along the top of the screen)
 .toolbar-sidebar-toolbar {
 	--toolbar-button-height: min(20vh, 48px);
 	--label-hover-offset-size: calc(14px + var(--toolbar-button-height));
@@ -139,67 +208,10 @@
 	--button-label-hover-offset-x: 0;
 
 	.toolbar-toolContainer:not(.label-inline) .toolbar-button {
-		$label-visible-opacity: 0.8;
-
 		width: var(--toolbar-button-height);
 		height: var(--toolbar-button-height);
 
-		// Make the label hide only when hovering.
-
-		@keyframes rehide-label {
-			0% { opacity: $label-visible-opacity; }
-			80% { opacity: $label-visible-opacity; }
-			100% { opacity: 0.1; }
-		}
-
-		@keyframes show-label {
-			0% { opacity: 0; }
-			// Keep the label hidden before showing
-			80% { opacity: 0; }
-			100% { opacity: $label-visible-opacity; }
-		}
-
-		@keyframes keep-label-hidden {
-			0% { opacity: 0; }
-			100% { opacity: 0; }
-		}
-		// Only show an animation when opening the label due to a hover --
-		// show the label immediately otherwise.
-		&:hover > label {
-			opacity: $label-visible-opacity;
-
-			$animation-length: 1s;
-			animation: $animation-length ease show-label;
-		}
-
-		&:focus-visible > label {
-			// Show, then hide labels on keyboard focus
-			animation: 1.5s ease rehide-label;
-			opacity: 0;
-		}
-
-		& > label {
-			opacity: 0;
-			position: absolute;
-			margin-top: var(--button-label-hover-offset-y);
-			margin-left: var(--button-label-hover-offset-x);
-
-			// The label is often mostly invisible/just below a toolbar item.
-			// If there are multiple toolbar rows, ensure that a label doesn't prevent
-			// clicking on items in the second row:
-			pointer-events: none;
-
-			background-color: var(--primary-background-color);
-			color: var(--primary-foreground-color);
-			border-radius: 25px;
-			padding: 10px;
-
-			transition: 0.2s ease opacity, 0.2s ease margin-top;
-
-			@media (prefers-reduced-motion: reduce) {
-				transition: none;
-			}
-		}
+		@include label-visible-on-hover(label);
 	}
 
 	& > div > .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
@@ -239,6 +251,7 @@
 	}
 }
 
+// The popup menu
 .toolbar-sidebar-container {
 	background-color: var(--primary-background-color-transparent);
 
@@ -269,6 +282,12 @@
 		&:hover {
 			box-shadow: 0 1px 2px var(--primary-shadow-color);
 		}
+	}
+
+	// Special styles for the enum selector 
+	.toolbar-grid-selector .choice-button {
+		--button-label-hover-offset-y: var(--button-size);
+		@include label-visible-on-hover('label > .button-label-text');
 	}
 }
 

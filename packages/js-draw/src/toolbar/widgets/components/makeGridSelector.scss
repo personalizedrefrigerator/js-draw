@@ -1,0 +1,60 @@
+
+.toolbar-grid-selector {
+	position: relative;
+
+	& > div {
+		display: flex;
+		flex-direction: row;
+	
+		max-width: 350px;
+		flex-wrap: wrap;
+	
+		--button-size: 56px;
+	}
+
+	.choice-button {
+		display: flex;
+		flex-direction: column-reverse;
+		box-sizing: border-box;
+	
+		flex-shrink: 1;
+		margin: 2px;
+
+		&:focus-within {
+			outline: 2px solid var(--primary-foreground-color);
+		}
+
+		// The choice buttons use input[type=radio] internally.
+		input {
+			opacity: 0;
+			height: 0;
+		}
+
+		label {
+			display: flex;
+			flex-direction: column;
+			box-sizing: border-box;
+		
+			width: var(--button-size);
+			height: var(--button-size);
+		
+			font-size: 0.7rem;
+			align-items: center;
+			justify-content: center;
+			padding: 4px;
+		}
+
+		.icon {
+			flex-grow: 1;
+			flex-shrink: 1;
+			width: 100%;
+		}
+		
+		&.checked {
+			background-color: var(--selection-background-color);
+			color: var(--selection-foreground-color);
+		}
+	}
+	
+
+}

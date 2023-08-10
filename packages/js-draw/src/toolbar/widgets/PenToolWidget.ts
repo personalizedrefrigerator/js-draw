@@ -17,7 +17,7 @@ import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
 import { toolbarCSSPrefix } from '../constants';
 import makeThicknessSlider from './components/makeThicknessSlider';
-import stopPropagationOfScrollingWheelEvents from '../../util/stopPropagationOfScrollingWheelEvents';
+import makeGridSelector from './components/makeGridSelector';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -153,116 +153,35 @@ export default class PenToolWidget extends BaseToolWidget {
 
 	// Creates a widget that allows selecting different pen types
 	private createPenTypeSelector() {
-		const outerContainer = document.createElement('div');
-		outerContainer.classList.add(`${toolbarCSSPrefix}pen-type-selector`);
-
-		const scrollingContainer = document.createElement('div');
-		scrollingContainer.setAttribute('role', 'menu');
-		scrollingContainer.id = `${toolbarCSSPrefix}-pen-type-selector-id-${PenToolWidget.idCounter++}`;
-
-		stopPropagationOfScrollingWheelEvents(scrollingContainer);
-
-		const label = document.createElement('label');
-		label.innerText = this.localizationTable.selectPenType;
-		label.htmlFor = scrollingContainer.id;
-		outerContainer.appendChild(label);
-
-		// All buttons in a radiogroup need the same name attribute.
-		const radiogroupName = `${toolbarCSSPrefix}-pen-type-selector-${PenToolWidget.idCounter++}`;
-
-		const createTypeSelectorButton = (record: PenTypeRecord) => {
-			const buttonContainer = document.createElement('div');
-			buttonContainer.classList.add('pen-type-button');
-
-			const button = document.createElement('input');
-			button.type = 'radio';
-			button.name = radiogroupName;
-			button.id = `${toolbarCSSPrefix}-pen-type-button-${PenToolWidget.idCounter++}`;
-
-			const labelContainer = document.createElement('label');
-
-			const rebuildLabel = () => {
-				const labelText = document.createElement('span');
-
-				const icon = this.createIconForRecord(record);
-				icon.classList.add('icon');
-
-				// The title of the record
-				labelText.innerText = record.name;
-				labelContainer.htmlFor = button.id;
-
-				labelContainer.replaceChildren(icon, labelText);
+		const allChoices = this.penTypes.map((penType, index) => {
+			return {
+				id: index,
+				makeIcon: () => this.createIconForRecord(penType),
+				title: penType.name,
 			};
-			rebuildLabel();
+		});
 
-			const updateButtonCSS = () => {
-				if (button.checked) {
-					buttonContainer.classList.add('checked');
-				} else {
-					buttonContainer.classList.remove('checked');
-				}
-			};
+		const selector = makeGridSelector(
+			this.localizationTable.selectPenType,
+			this.getCurrentPenTypeIdx(),
+			allChoices,
+		);
 
-			button.oninput = () => {
-				// Setting the stroke factory fires an event that causes the value
-				// of this button to be set.
-				if (button.checked) {
-					this.tool.setStrokeFactory(record.factory);
-				}
-
-				updateButtonCSS();
-			};
-
-			buttonContainer.replaceChildren(button, labelContainer);
-			scrollingContainer.appendChild(buttonContainer);
-
-			// Set whether the button is checked, assuming the stroke factory associated
-			// with the button was set elsewhere.
-			const setChecked = (checked: boolean) => {
-				button.checked = checked;
-				updateButtonCSS();
-
-				if (checked) {
-					button.scrollIntoView();
-				}
-			};
-			setChecked(false);
-
-			// Updates the factory's icon based on the current style of the tool.
-			const updateIcon = () => {
-				rebuildLabel();
-			};
-
-			return { setChecked, updateIcon };
-		};
-
-		const buttons: Array<ReturnType<typeof createTypeSelectorButton>> = [];
-		for (const penType of this.penTypes) {
-			buttons.push(createTypeSelectorButton(penType));
-		}
-		// invariant: buttons.length = this.penTypes.length
-
-		outerContainer.appendChild(scrollingContainer);
+		selector.value.onUpdate(newValue => {
+			this.tool.setStrokeFactory(this.penTypes[newValue].factory);
+		});
 
 		return {
 			setValue: (penTypeIndex: number) => {
-				// Select the value specified
-				if (penTypeIndex < 0 || penTypeIndex >= this.penTypes.length) {
-					console.error('Invalid pen type index', penTypeIndex);
-					return;
-				}
-
-				for (let i = 0; i < buttons.length; i++) {
-					buttons[i].setChecked(i === penTypeIndex);
-				}
+				selector.value.set(penTypeIndex);
 			},
 
 			updateIcons: () => {
-				buttons.forEach(button => button.updateIcon());
+				selector.updateIcons();
 			},
 
 			addTo: (parent: HTMLElement) => {
-				parent.appendChild(outerContainer);
+				selector.addTo(parent);
 			},
 		};
 	}
