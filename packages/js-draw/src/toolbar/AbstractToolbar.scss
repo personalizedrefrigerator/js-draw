@@ -24,6 +24,11 @@
 	z-index: 1;
 
 	font-family: system-ui, -apple-system, sans-serif;
+
+
+	details > summary {
+		cursor: pointer;
+	}
 }
 
 .toolbar-element > .toolbar-toolContainer > .toolbar-button,
