@@ -193,31 +193,31 @@ export default class SelectionTool extends BaseTool {
 			this.lastSelectedObjects.length !== selectedItemCount
 			|| selectedObjects.some((obj, i) => this.lastSelectedObjects[i] !== obj);
 
-		if (!hasDifferentSelection) {
-			return;
-		}
+		if (hasDifferentSelection) {
+			this.lastSelectedObjects = selectedObjects;
 
-		this.lastSelectedObjects = selectedObjects;
+			// Note that the selection has changed
+			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+				kind: EditorEventType.ToolUpdated,
+				tool: this,
+			});
 
-		// Note that the selection has changed
-		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
-			kind: EditorEventType.ToolUpdated,
-			tool: this,
-		});
+			// Only fire the SelectionUpdated event if the selection really updated.
+			this.editor.notifier.dispatch(EditorEventType.SelectionUpdated, {
+				kind: EditorEventType.SelectionUpdated,
+				selectedComponents: selectedObjects,
+				tool: this,
+			});
 
-		// Only fire the SelectionUpdated event if the selection really updated.
-		this.editor.notifier.dispatch(EditorEventType.SelectionUpdated, {
-			kind: EditorEventType.SelectionUpdated,
-			selectedComponents: selectedObjects,
-			tool: this,
-		});
+			if (selectedItemCount > 0) {
+				this.editor.announceForAccessibility(
+					this.editor.localization.selectedElements(selectedItemCount)
+				);
+				this.zoomToSelection();
+			}
+	 	}
 
-		if (selectedItemCount > 0) {
-			this.editor.announceForAccessibility(
-				this.editor.localization.selectedElements(selectedItemCount)
-			);
-			this.zoomToSelection();
-		} else if (this.selectionBox) {
+		if (selectedItemCount === 0 && this.selectionBox) {
 			this.selectionBox.cancelSelection();
 			this.prevSelectionBox = this.selectionBox;
 			this.selectionBox = null;

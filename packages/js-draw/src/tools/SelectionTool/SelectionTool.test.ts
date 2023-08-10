@@ -352,4 +352,19 @@ describe('SelectionTool', () => {
 			selectedComponents: [ secondStroke.testStroke ],
 		});
 	});
+
+	it('should remove the selection box after ending an empty selection', () => {
+		const { editor, selectionTool } = createEditorWithSingleObjectSelection(150);
+
+		// Should have a selection when objects are selected
+		expect(selectionTool.getSelection()).not.toBe(null);
+
+		// Select nothing
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(2999, 2999));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3001, 3001));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3002, 3002));
+
+		// Should not have a selection after setting the selection to contain no objects
+		expect(selectionTool.getSelection()).toBe(null);
+	});
 });
