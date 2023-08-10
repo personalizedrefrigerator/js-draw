@@ -112,9 +112,15 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	protected endPath(style: RenderingStyle) {
-		this.ctx.save();
-		this.ctx.fillStyle = style.fill.toHexString();
-		this.ctx.fill();
+		// Saving and restoring can be slow in some browsers
+		// (e.g. 0.50ms). Avoid.
+		//this.ctx.save();
+
+		// If not a transparent fill
+		if (style.fill.a > 0) {
+			this.ctx.fillStyle = style.fill.toHexString();
+			this.ctx.fill();
+		}
 
 		if (style.stroke) {
 			this.ctx.strokeStyle = style.stroke.color.toHexString();
@@ -122,10 +128,12 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.ctx.lineCap = 'round';
 			this.ctx.lineJoin = 'round';
 			this.ctx.stroke();
+
+			this.ctx.lineWidth = 1;
 		}
 
 		this.ctx.closePath();
-		this.ctx.restore();
+		//this.ctx.restore();
 	}
 
 	protected lineTo(point: Point2) {
@@ -277,6 +285,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 				1.0,
 				0.5 + Math.cos(i * 0.2) / 4, 0.5
 			).toHexString();
+			this.ctx.lineWidth = 2;
 			this.ctx.fill();
 			this.ctx.stroke();
 			this.ctx.closePath();
