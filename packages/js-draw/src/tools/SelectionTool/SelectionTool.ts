@@ -432,6 +432,9 @@ export default class SelectionTool extends BaseTool {
 		super.setEnabled(enabled);
 
 		// Clear the selection
+		this.selectionBox?.cancelSelection();
+		this.onSelectionUpdated();
+
 		this.handleOverlay.replaceChildren();
 		this.selectionBox = null;
 
