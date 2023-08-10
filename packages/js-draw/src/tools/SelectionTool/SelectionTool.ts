@@ -2,7 +2,7 @@ import AbstractComponent from '../../components/AbstractComponent';
 import Editor from '../../Editor';
 import { Mat33, Rect2, Point2, Vec2 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
-import { CopyEvent,  KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
+import { CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
 import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
@@ -16,10 +16,10 @@ export const cssPrefix = 'selection-tool-';
 // With respect to `extend`ing, `SelectionTool` is not stable.
 export default class SelectionTool extends BaseTool {
 	private handleOverlay: HTMLElement;
-	private prevSelectionBox: Selection|null;
-	private selectionBox: Selection|null;
+	private prevSelectionBox: Selection | null;
+	private selectionBox: Selection | null;
 
-	private startPoint: Vec2|null = null; // canvas position
+	private startPoint: Vec2 | null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
 	private snapToGrid: boolean = false;
@@ -215,7 +215,7 @@ export default class SelectionTool extends BaseTool {
 				);
 				this.zoomToSelection();
 			}
-	 	}
+		}
 
 		if (selectedItemCount === 0 && this.selectionBox) {
 			this.selectionBox.cancelSelection();
@@ -404,7 +404,7 @@ export default class SelectionTool extends BaseTool {
 			return false;
 		}
 
-		const exportViewport = new Viewport(() => {});
+		const exportViewport = new Viewport(() => { });
 		exportViewport.updateScreenSize(Vec2.of(bbox.w, bbox.h));
 		exportViewport.resetTransform(Mat33.translation(bbox.topLeft.times(-1)));
 
@@ -453,7 +453,7 @@ export default class SelectionTool extends BaseTool {
 
 	// Get the object responsible for displaying this' selection.
 	// @internal
-	public getSelection(): Selection|null {
+	public getSelection(): Selection | null {
 		return this.selectionBox;
 	}
 
@@ -478,7 +478,7 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		});
 
-		let bbox: Rect2|null = null;
+		let bbox: Rect2 | null = null;
 		for (const object of objects) {
 			if (bbox) {
 				bbox = bbox.union(object.getBBox());
