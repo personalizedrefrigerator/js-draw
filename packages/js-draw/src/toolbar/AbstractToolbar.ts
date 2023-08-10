@@ -111,7 +111,7 @@ export default abstract class AbstractToolbar {
 				focusInput: false,
 				themeMode: 'auto',
 
-				swatches
+				swatches,
 			});
 		};
 		initColoris();
