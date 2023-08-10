@@ -17,6 +17,9 @@ export interface Localization {
 	pasteSVGTextDataHint: string;
 	submit: string;
 
+	saveUnsavedChanges: string;
+
+	exit: string;
 	save: string;
 	delete: string;
 	reallyDelete: (imageName: string) => string;
@@ -56,6 +59,9 @@ localizationTables.en = {
 	newImageHeading: 'New Image',
 	new: 'New',
 
+	saveUnsavedChanges: 'There may be unsaved changes. Save them?',
+
+	exit: 'Exit',
 	save: 'Save',
 	delete: 'Delete',
 	reallyDelete: (imageName) => `Are you sure you want to delete ${imageName}?`,

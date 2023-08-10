@@ -22,6 +22,9 @@ const showSavePopup = (
 
 	// Called when data has been saved successfully.
 	onSaveSuccess: ()=>void,
+
+	// Called when the dialog is closed
+	onDialogClose?: ()=>void,
 ) => {
 	let imgHTML = img.outerHTML;
 
@@ -282,6 +285,7 @@ const showSavePopup = (
 	const closePopup = () => {
 		updateTitle();
 		popupContainer.remove();
+		onDialogClose?.();
 	};
 
 	closeButton.onclick = () => {

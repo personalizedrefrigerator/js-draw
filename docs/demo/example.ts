@@ -30,13 +30,15 @@ const createEditor = (
 	appNotifier: AppNotifier,
 
 	// Function that can be called to save the content of the editor.
-	saveCallback: ()=>void,
+	saveCallback: (onComplete?: ()=>void)=>void,
 ): Editor => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement, {
 		keyboardShortcutOverrides: loadKeybindingOverrides(),
 		iconProvider: new MaterialIconProvider(),
 	});
+
+	const { hasChanges } = watchForChanges(editor, appNotifier);
 
 	// Although new Editor(parentElement) created an Editor, it doesn't have a toolbar
 	// yet. `.addToolbar()` creates a toolbar and adds it to the document, using the
@@ -60,15 +62,22 @@ const createEditor = (
 	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
 
 	// Also add a close button
+	const closeEditor = () => {
+		editor.remove();
+		void reShowLaunchOptions(localization, appNotifier);
+	};
+
 	toolbar.addTaggedActionButton([
 		ToolbarWidgetTag.Exit,
 	], {
-		label: localization.close,
+		label: localization.exit,
 		icon: editor.icons.makeCloseIcon(),
 	}, () => {
-		saveCallback();
-		editor.remove();
-		reShowLaunchOptions();
+		if (hasChanges() && confirm(localization.saveUnsavedChanges)) {
+			saveCallback(closeEditor);
+		} else {
+			closeEditor();
+		}
 	});
 
 
@@ -83,7 +92,7 @@ const createEditor = (
 
 	// Show a "are you sure you want to leave this page" dialog
 	// if there could be unsaved changes.
-	setUpUnsavedChangesWarning(localization, editor, appNotifier);
+	setUpUnsavedChangesWarning(localization, hasChanges);
 
 	// Set focus to the main region of the editor.
 	// This allows keyboard shortcuts to work.
@@ -92,21 +101,9 @@ const createEditor = (
 	return editor;
 };
 
-// Show a confirmation dialog if the user attemtps to close the page while there
-// are unsaved changes.
-const setUpUnsavedChangesWarning = (
-	localization: Localization, editor: Editor, appNotifier: AppNotifier
-) => {
+// Watches `editor` for changes.
+const watchForChanges = (editor: Editor, appNotifier: AppNotifier) => {
 	let hasChanges = false;
-
-	// Show a confirmation dialog when the user tries to close the page.
-	window.onbeforeunload = () => {
-		if (hasChanges) {
-			return localization.confirmUnsavedChanges;
-		}
-
-		return undefined;
-	};
 
 	// Watch for commands to be done or undone: If this happens, there are likely
 	// unsaved changes.
@@ -122,6 +119,26 @@ const setUpUnsavedChangesWarning = (
 	appNotifier.on('image-saved', () => {
 		hasChanges = false;
 	});
+
+	return {
+		hasChanges: () => hasChanges,
+	};
+};
+
+// Show a confirmation dialog if the user attemtps to close the page while there
+// are unsaved changes.
+const setUpUnsavedChangesWarning = (
+	localization: Localization, hasChanges: ()=>boolean,
+) => {
+	// Show a confirmation dialog when the user tries to close the page.
+	window.onbeforeunload = () => {
+		if (hasChanges()) {
+			return localization.confirmUnsavedChanges;
+		}
+
+		return undefined;
+	};
+
 };
 
 // Saves the contents of `editor` using the given `saveMethod` (an ImageSaver is an
@@ -135,13 +152,15 @@ const saveImage = (
 	editor: Editor,
 	saveMethod: ImageSaver,
 	appNotifier: AppNotifier,
+
+	onDialogClose?: ()=>void
 ) => {
 	const onSaveSuccess = () => {
 		// Notify other parts of the app that the image was saved successfully.
 		appNotifier.dispatch('image-saved', null);
 	};
 
-	showSavePopup(localization, editor.toSVG(), editor, saveMethod, onSaveSuccess);
+	showSavePopup(localization, editor.toSVG(), editor, saveMethod, onSaveSuccess, onDialogClose);
 };
 
 // Destroys the welcome screen.
@@ -151,12 +170,13 @@ const hideLaunchOptions = () => {
 	launchScreen?.remove();
 };
 
-const reShowLaunchOptions = () => {
+const reShowLaunchOptions = async (localization: Localization, appNotifier: AppNotifier) => {
 	if (launchScreen) {
+		launchScreen.replaceChildren();
+		await fillLaunchList(launchScreen, localization, appNotifier);
 		document.body.appendChild(launchScreen);
 	}
 };
-
 
 // PWA file access. At the time of this writing, TypeScript does not recognise window.launchQueue.
 declare let launchQueue: any;
@@ -187,7 +207,7 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 				localization,
 				appNotifier,
 
-				() => saveImage(localization, editor, fileSaver, appNotifier));
+				onClose => saveImage(localization, editor, fileSaver, appNotifier, onClose));
 
 			const data = await blob.text();
 
@@ -197,15 +217,10 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 	}
 };
 
-(async () => {
-	// Get a set of localized strings so that this app can be displayed in
-	// a language the user is familiar with.
-	const localization = getLocalizationTable();
-	const appNotifier: AppNotifier = new EventDispatcher();
-
-	// If launched with a file to open, open the file.
-	handlePWALaunching(localization, appNotifier);
-
+// Fills `launchButtonContainer` with a list of recent saves
+const fillLaunchList = async (
+	launchButtonContainer: HTMLElement, localization: Localization, appNotifier: AppNotifier
+) => {
 	// Load from a data store entry. `storeEntry` might be, for example,
 	// an image and its metadata as stored in this app's database.
 	const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
@@ -215,15 +230,12 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 			localization,
 			appNotifier,
 
-			() => saveImage(localization, editor, storeEntry, appNotifier)
+			onClose => saveImage(localization, editor, storeEntry, appNotifier, onClose)
 		);
 
 		// Load the SVG data
 		editor.loadFromSVG(await storeEntry.read());
 	};
-
-	// launchButtonContainer will contain a list of recent drawings
-	const launchButtonContainer = document.querySelector('#launchOptions');
 
 	// Wrap window.localStorage in a class that facilitates reading/writing to it.
 	const localStorageDataStore = new LocalStorageStore(localization);
@@ -243,7 +255,7 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 	const newImageFAB = new FloatingActionButton({
 		title: localization.new,
 		icon: makeIconFromText('+')
-	}, document.body);
+	}, launchButtonContainer);
 
 	newImageFAB.addClickListener(async () => {
 		// Disable the FAB while the "new image" dialog is open: We don't want
@@ -270,4 +282,18 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 	};
 	settingsButton.classList.add('settingsButton');
 	launchButtonContainer?.appendChild(settingsButton);
+};
+
+(async () => {
+	// Get a set of localized strings so that this app can be displayed in
+	// a language the user is familiar with.
+	const localization = getLocalizationTable();
+	const appNotifier: AppNotifier = new EventDispatcher();
+
+	// If launched with a file to open, open the file.
+	handlePWALaunching(localization, appNotifier);
+
+	// launchButtonContainer will contain a list of recent drawings
+	const launchButtonContainer = document.querySelector('#launchOptions') as HTMLElement;
+	await fillLaunchList(launchButtonContainer, localization, appNotifier);
 })();
