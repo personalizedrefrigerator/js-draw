@@ -72,7 +72,7 @@ class StylusInputStabilizer {
 	}
 
 	private async loop() {
-		this.lastUpdateTime = Date.now();
+		this.lastUpdateTime = performance.now();
 		while (this.runLoop) {
 			this.update(false);
 			await untilNextAnimationFrame();
@@ -105,7 +105,7 @@ class StylusInputStabilizer {
 	}
 
 	public update(force: boolean): boolean {
-		const nowTime = Date.now();
+		const nowTime = performance.now();
 		const deltaTime = nowTime - this.lastUpdateTime;
 
 		const reachedTarget = this.strokePoint.eq(this.targetPoint);
@@ -154,7 +154,7 @@ class StylusInputStabilizer {
 		const toTarget = this.targetPoint.minus(this.strokePoint);
 		if (this.velocity.dot(toTarget) > this.options.minSimilarityToFinalize) {
 			// Connect the stroke to its end point
-			this.updatePointer(this.targetPoint, Date.now());
+			this.updatePointer(this.targetPoint, performance.now());
 		}
 	}
 

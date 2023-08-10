@@ -46,7 +46,7 @@ class InertialScroller {
 		}
 
 		this.currentVelocity = this.initialVelocity;
-		let lastTime = Date.now();
+		let lastTime = performance.now();
 		this.running = true;
 
 		const maxSpeed = 5000; // units/s
@@ -56,7 +56,7 @@ class InertialScroller {
 		}
 
 		while (this.running && this.currentVelocity.magnitude() > minSpeed) {
-			const nowTime = Date.now();
+			const nowTime = performance.now();
 			const dt = (nowTime - lastTime) / 1000;
 
 			this.currentVelocity = this.currentVelocity.times(Math.pow(1/8, dt));
@@ -156,7 +156,7 @@ export default class PanZoom extends BaseTool {
 		}
 
 		if (handlingGesture) {
-			this.lastTimestamp = (new Date()).getTime();
+			this.lastTimestamp = performance.now();
 			this.transform ??= Viewport.transformBy(Mat33.identity);
 			this.editor.display.setDraftMode(true);
 		}
@@ -166,7 +166,7 @@ export default class PanZoom extends BaseTool {
 
 	private updateVelocity(currentCenter: Point2) {
 		const deltaPos = currentCenter.minus(this.lastScreenCenter);
-		let deltaTime = (Date.now() - this.lastTimestamp) / 1000;
+		let deltaTime = (performance.now() - this.lastTimestamp) / 1000;
 
 		// Ignore duplicate events, unless there has been enough time between them.
 		if (deltaPos.magnitude() === 0 && deltaTime < 0.1) {
@@ -278,7 +278,7 @@ export default class PanZoom extends BaseTool {
 		lastTransform.unapply(this.editor);
 		this.transform.apply(this.editor);
 
-		this.lastTimestamp = (new Date()).getTime();
+		this.lastTimestamp = performance.now();
 	}
 
 	public override onPointerUp(event: PointerEvt): void {

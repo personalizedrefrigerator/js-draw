@@ -442,7 +442,7 @@ export class Editor {
 
 	private pointers: Record<number, Pointer> = {};
 	private getPointerList() {
-		const nowTime = (new Date()).getTime();
+		const nowTime = performance.now();
 
 		const res: Pointer[] = [];
 		for (const id in this.pointers) {

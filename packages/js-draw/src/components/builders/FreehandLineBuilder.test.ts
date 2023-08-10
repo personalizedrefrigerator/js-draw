@@ -9,7 +9,7 @@ describe('FreehandLineBuilder', () => {
 		const startPoint: StrokeDataPoint = {
 			pos: Vec2.zero,
 			width: 1,
-			time: (new Date()).getTime(),
+			time: performance.now(),
 			color: Color4.red,
 		};
 		const lineBuilder = makeFreehandLineBuilder(startPoint, viewport);

@@ -145,7 +145,7 @@ export interface StrokeDataPoint {
 	pos: Point2;
 	width: number;
 
-	/** Time in milliseconds (e.g. as returned by `new Date().getTime()`). */
+	/** Time in milliseconds (e.g. as returned by `performance.now()`). */
 	time: number;
 	color: Color4;
 }

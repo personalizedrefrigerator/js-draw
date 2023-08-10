@@ -531,7 +531,7 @@ export default class IconProvider {
 		// We want the icon to be recognisable with a large range of thicknesses.
 		const thickness = Math.sqrt(penStyle.thickness) * 3;
 
-		const nowTime = (new Date()).getTime();
+		const nowTime = performance.now();
 		const startPoint: StrokeDataPoint = {
 			pos: Vec2.of(10, 10),
 			width: thickness,

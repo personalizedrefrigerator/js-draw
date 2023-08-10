@@ -1,6 +1,8 @@
 # 1.0.0 (work in progress)
  * Breaking changes
    * The `--seconary-foreground-color` and `--secondary-background-color` are no longer used for selected items. Use `--selection-foreground-color` and `--selection-background-color` instead.
+   * The `Pen` constructor now accepts parameters in a different format — the `PenStyle` should contain the pen factory.
+   * Timestamps in `Pointer`s and `StrokeDataPoint`s use `performance.now` instead of `Date.now`.
    * ==To-do==: Update this list
 
 # 0.25.1

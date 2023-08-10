@@ -56,11 +56,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		if ('ResizeObserver' in window) {
 			this.toolRowResizeObserver = new ResizeObserver((_entries) => {
-				if (this.toolbarToolRow.clientWidth < this.toolbarToolRow.scrollWidth) {
-					this.toolbarToolRow.classList.add('has-scroll');
-				} else {
-					this.toolbarToolRow.classList.remove('has-scroll');
-				}
+				this.onToolbarRowResize();
 			});
 			this.toolRowResizeObserver.observe(this.toolbarToolRow);
 		} else {
@@ -173,6 +169,44 @@ export default class EdgeToolbar extends AbstractToolbar {
 				}, animationDuration);
 			}
 		});
+	}
+
+	private onToolbarRowResize() {
+		if (this.toolbarToolRow.clientWidth < this.toolbarToolRow.scrollWidth) {
+			this.toolbarToolRow.classList.add('has-scroll');
+
+			// Determine whether extra spacing needs to be added so that one button is cut
+			// in half. Ideally, when there is scroll, one button will be cut in half to show
+			// that scrolling is possible.
+			//let sppaceAdjustment = 0;
+			let totalButtonWidth = 0;
+			let needsExtraPaddingToDivideButton = true;
+			for (const child of this.toolbarToolRow.children) {
+				const buttonWidth = child.children[0].clientWidth;
+				totalButtonWidth += buttonWidth;
+				const widthDifference = totalButtonWidth - this.toolbarToolRow.clientWidth;
+
+				if (Math.abs(widthDifference) < buttonWidth / 2) {
+					needsExtraPaddingToDivideButton = false;
+					break;
+				}
+
+				if (totalButtonWidth >= this.toolbarToolRow.clientWidth) {
+					break;
+				}
+			}
+
+			//const extraPadding = this.toolbarToolRow.clientWidth / (visibleButtonCount + 1) - 1/2;
+			//this.toolbarToolRow.style.setProperty('--extra-padding', extraPadding);
+
+			if (needsExtraPaddingToDivideButton) {
+				this.toolbarToolRow.classList.add('extra-padding');
+			} else {
+				this.toolbarToolRow.classList.remove('extra-padding');
+			}
+		} else {
+			this.toolbarToolRow.classList.remove('has-scroll', 'extra-padding');
+		}
 	}
 
 	public override addSpacer(_options?: Partial<SpacerOptions> | undefined): void {
@@ -315,7 +349,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 				return;
 			}
 
-			gestureEndTimestamp = Date.now();
+			gestureEndTimestamp = performance.now();
 
 			if (capturedPointerId !== null) {
 				this.sidebarContainer.releasePointerCapture(capturedPointerId);
@@ -370,7 +404,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 		}};
 
 		this.closeButton.onclick = () => {
-			const wasJustDragging = Date.now() - gestureEndTimestamp < 100;
+			const wasJustDragging = performance.now() - gestureEndTimestamp < 100;
 			const roughlyClick = isRoughlyClick();
 
 			// Ignore the click event if it was caused by dragging the button.

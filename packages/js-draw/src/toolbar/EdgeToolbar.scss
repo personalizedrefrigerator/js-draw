@@ -136,6 +136,13 @@
 				--button-label-hover-offset-x: var(--label-hover-offset-size);
 			}
 		}
+
+		&.extra-padding {
+			& > :nth-child(n + 1) {
+				padding-right: 4px;
+				padding-left: 4px;
+			}
+		}
 	}
 
 	// row-reverse combined with setting one row's order to be less than the other allows
