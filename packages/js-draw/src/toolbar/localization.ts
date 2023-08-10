@@ -18,7 +18,8 @@ export interface ToolbarLocalization {
 	submit: string;
 	roundedTipPen: string;
 	flatTipPen: string;
-	selectPenType: string;
+	selectPenTip: string;
+	selectShape: string;
 	colorLabel: string;
 	pen: string;
 	eraser: string;
@@ -86,7 +87,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	duplicateSelection: 'Duplicate selection',
 	undo: 'Undo',
 	redo: 'Redo',
-	selectPenType: 'Pen type',
+	selectPenTip: 'Pen tip',
+	selectShape: 'Shape',
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
 	colorSelectionCanceledAnnouncement: 'Color selection canceled',

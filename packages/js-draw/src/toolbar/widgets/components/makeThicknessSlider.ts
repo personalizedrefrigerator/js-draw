@@ -1,3 +1,4 @@
+import { toRoundedString } from '@js-draw/math';
 import { toolbarCSSPrefix } from '../../constants';
 import { ToolbarContext } from '../../types';
 
@@ -41,10 +42,10 @@ const makeThicknessSlider = (
 
 		thicknessInput.min = `${sliderMin}`;
 		thicknessInput.max = `${sliderMax}`;
-		thicknessInput.step = `${(sliderMax - sliderMin) / 20}`;
+		thicknessInput.step = `${toRoundedString((sliderMax - sliderMin) / 20)}`;
 	};
 
-	setBounds(2, 400);
+	setBounds(2, 262);
 
 	return {
 		container,

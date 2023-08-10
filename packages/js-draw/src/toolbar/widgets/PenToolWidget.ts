@@ -26,6 +26,10 @@ export interface PenTypeRecord {
 	// A unique ID for the facotory (e.g. 'chisel-tip-pen')
 	id: string;
 
+	// True if the pen type generates shapes (and should thus be shown in the GUI
+	// as a shape generator). Defaults to false.
+	isShapeBuilder?: boolean;
+
 	// Creates an `AbstractComponent` from pen input.
 	factory: ComponentBuilderFactory;
 }
@@ -33,6 +37,7 @@ export interface PenTypeRecord {
 export default class PenToolWidget extends BaseToolWidget {
 	private updateInputs: ()=> void = () => {};
 	protected penTypes: PenTypeRecord[];
+	protected shapelikeIDs: string[];
 
 	// A counter variable that ensures different HTML elements are given unique names/ids.
 	private static idCounter: number = 0;
@@ -41,6 +46,9 @@ export default class PenToolWidget extends BaseToolWidget {
 		editor: Editor, private tool: Pen, localization?: ToolbarLocalization
 	) {
 		super(editor, tool, 'pen', localization);
+
+		// Pen types that correspond to
+		this.shapelikeIDs = [ 'pressure-sensitive-pen', 'freehand-pen' ];
 
 		// Default pen types
 		this.penTypes = [
@@ -60,30 +68,35 @@ export default class PenToolWidget extends BaseToolWidget {
 				name: this.localizationTable.arrowPen,
 				id: 'arrow',
 
+				isShapeBuilder: true,
 				factory: makeArrowBuilder,
 			},
 			{
 				name: this.localizationTable.linePen,
 				id: 'line',
 
+				isShapeBuilder: true,
 				factory: makeLineBuilder,
 			},
 			{
 				name: this.localizationTable.filledRectanglePen,
 				id: 'filled-rectangle',
 
+				isShapeBuilder: true,
 				factory: makeFilledRectangleBuilder,
 			},
 			{
 				name: this.localizationTable.outlinedRectanglePen,
 				id: 'outlined-rectangle',
 
+				isShapeBuilder: true,
 				factory: makeOutlinedRectangleBuilder,
 			},
 			{
 				name: this.localizationTable.outlinedCirclePen,
 				id: 'outlined-circle',
 
+				isShapeBuilder: true,
 				factory: makeOutlinedCircleBuilder,
 			}
 		];
@@ -158,30 +171,43 @@ export default class PenToolWidget extends BaseToolWidget {
 				id: index,
 				makeIcon: () => this.createIconForRecord(penType),
 				title: penType.name,
+				isShapeBuilder: penType.isShapeBuilder ?? false,
 			};
 		});
 
-		const selector = makeGridSelector(
-			this.localizationTable.selectPenType,
+		const penSelector = makeGridSelector(
+			this.localizationTable.selectPenTip,
 			this.getCurrentPenTypeIdx(),
-			allChoices,
+			allChoices.filter(choice => !choice.isShapeBuilder),
 		);
 
-		selector.value.onUpdate(newValue => {
-			this.tool.setStrokeFactory(this.penTypes[newValue].factory);
-		});
+		const shapeSelector = makeGridSelector(
+			this.localizationTable.selectShape,
+			this.getCurrentPenTypeIdx(),
+			allChoices.filter(choice => choice.isShapeBuilder),
+		);
+
+		const onSelectorUpdate = (newPenTypeIndex: number) => {
+			this.tool.setStrokeFactory(this.penTypes[newPenTypeIndex].factory);
+		};
+
+		penSelector.value.onUpdate(onSelectorUpdate);
+		shapeSelector.value.onUpdate(onSelectorUpdate);
 
 		return {
 			setValue: (penTypeIndex: number) => {
-				selector.value.set(penTypeIndex);
+				penSelector.value.set(penTypeIndex);
+				shapeSelector.value.set(penTypeIndex);
 			},
 
 			updateIcons: () => {
-				selector.updateIcons();
+				penSelector.updateIcons();
+				shapeSelector.updateIcons();
 			},
 
 			addTo: (parent: HTMLElement) => {
-				selector.addTo(parent);
+				penSelector.addTo(parent);
+				shapeSelector.addTo(parent);
 			},
 		};
 	}

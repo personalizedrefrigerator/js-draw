@@ -31,7 +31,7 @@ const localization: EditorLocalization = {
 	linePen: 'Línea',
 	arrowPen: 'Flecha',
 	roundedTipPen: 'Lapiz Redondeado',
-	selectPenType: 'Forma de dibuja',
+	selectPenTip: 'Forma de dibuja',
 	handTool: 'Mover',
 	zoom: 'Zoom',
 	resetView: 'Reiniciar vista',
