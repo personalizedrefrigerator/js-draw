@@ -285,7 +285,6 @@ describe('Editor.toSVG', () => {
 			nudgePathNear(Vec2.of(100, 100));
 
 			const outputSVG = editor.toSVG();
-			console.log(outputSVG.outerHTML);
 			expect(outputSVG.querySelectorAll('svg > path')).toHaveLength(3);
 			expect(outputSVG.querySelectorAll('svg > g#group-1 > path')).toHaveLength(2);
 			expect(outputSVG.querySelectorAll('svg > g#group-1 > g')).toHaveLength(1);
