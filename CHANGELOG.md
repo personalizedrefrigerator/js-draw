@@ -4,6 +4,11 @@
    * The `Pen` constructor now accepts parameters in a different format — the `PenStyle` should contain the pen factory.
    * Timestamps in `Pointer`s and `StrokeDataPoint`s use `performance.now` instead of `Date.now`.
    * ==To-do==: Update this list
+  * Other changes
+   * New default toolbar
+   * New material icon pack
+   * Preserve `<g>` element parents when writing SVGs.
+   * Fix: Editor thinks control key is still pressed after shortcuts like `ctrl+Tab` that defocus the editor before a keyup event is sent for `ctrl`.
 
 # 0.25.1
  * Bug fixes

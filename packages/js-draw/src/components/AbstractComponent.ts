@@ -114,6 +114,16 @@ export default abstract class AbstractComponent {
 	public onAddToImage(_image: EditorImage): void { }
 	public onRemoveFromImage(): void { }
 
+	/**
+	 * Renders this component onto the given `canvas`.
+	 *
+	 * If `visibleRect` is given, it should be the region of `canvas` that is visible --
+	 * rendering anything outside of `visibleRect` should have no visible effect on the
+	 * resultant image.
+	 *
+	 * For optimal performance, implementers should call `canvas.startObject` and `canvas.endObject`
+	 * before and after rendering.
+	 */
 	public abstract render(canvas: AbstractRenderer, visibleRect?: Rect2): void;
 
 	/** @return true if `lineSegment` intersects this component. */
