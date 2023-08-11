@@ -1,7 +1,7 @@
 import EditorImage from './EditorImage';
 import ToolController from './tools/ToolController';
 import { EditorNotifier, EditorEventType, ImageLoader } from './types';
-import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent } from './inputEvents';
+import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent, KeyPressEvent } from './inputEvents';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
@@ -791,17 +791,43 @@ export class Editor {
 	}
 
 	/**
-	 * Adds event listners for keypresses to `elem` and forwards those events to the editor.
+	 * Adds event listners for keypresses (and drop events) on `elem` and forwards those
+	 * events to the editor.
 	 *
-	 * If the given `filter` returns `false` for an event, the event is ignored and not passed to the editor.
+	 * If the given `filter` returns `false` for an event, the event is ignored and not
+	 * passed to the editor.
 	 */
-	public handleKeyEventsFrom(elem: HTMLElement, filter: (event: KeyboardEvent)=>boolean = ()=>true) {
+	public handleKeyEventsFrom(
+		elem: HTMLElement,
+		filter: (event: KeyboardEvent)=>boolean = ()=>true
+	) {
+		// Track which keys are down so we can release them when the element
+		// loses focus. This is particularly important for keys like Control
+		// that can trigger shortcuts that cause the editor to lose focus before
+		// the keyup event is triggered.
+		let keysDown: KeyPressEvent[] = [];
+
+		type KeyEventLike = { key: string; code: string };
+
+		// Return whether two objects that are similar to keyboard events represent the
+		// same key.
+		const keyEventsMatch = (a: KeyEventLike, b: KeyEventLike) => {
+			return a.key === b.key && a.code === b.code;
+		};
+
 		elem.addEventListener('keydown', htmlEvent => {
 			if (!filter(htmlEvent)) {
 				return;
 			}
 
 			const event = keyPressEventFromHTMLEvent(htmlEvent);
+
+			// Add event to the list of keys that are down (so long as it
+			// isn't a duplicate).
+			if (!keysDown.some(other => keyEventsMatch(other, event))) {
+				keysDown.push(event);
+			}
+
 			if (event.key === 't' || event.key === 'T') {
 				htmlEvent.preventDefault();
 				this.display.rerenderAsText();
@@ -813,6 +839,12 @@ export class Editor {
 		});
 
 		elem.addEventListener('keyup', htmlEvent => {
+			// Remove the key from keysDown -- it's no longer down.
+			keysDown = keysDown.filter(event => {
+				const matches = keyEventsMatch(event, htmlEvent);
+				return !matches;
+			});
+
 			if (!filter(htmlEvent)) {
 				return;
 			}
@@ -820,6 +852,15 @@ export class Editor {
 			const event = keyUpEventFromHTMLEvent(htmlEvent);
 			if (this.toolController.dispatchInputEvent(event)) {
 				htmlEvent.preventDefault();
+			}
+		});
+
+		elem.addEventListener('blur', () => {
+			for (const event of keysDown) {
+				this.toolController.dispatchInputEvent({
+					...event,
+					kind: InputEvtType.KeyUpEvent,
+				});
 			}
 		});
 
