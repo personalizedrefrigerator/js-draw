@@ -29,6 +29,7 @@ export default class DropdownToolbar extends AbstractToolbar {
 		this.container = document.createElement('div');
 		this.container.classList.add(`${toolbarCSSPrefix}root`);
 		this.container.classList.add(`${toolbarCSSPrefix}element`);
+		this.container.classList.add(`${toolbarCSSPrefix}dropdown-toolbar`);
 		this.container.setAttribute('role', 'toolbar');
 		parent.appendChild(this.container);
 
