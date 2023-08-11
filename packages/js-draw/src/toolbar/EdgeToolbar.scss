@@ -9,12 +9,12 @@
 	to { translate: 0 100%; }
 }
 
-@keyframes toolbar--sidebar-container-transition-in {
+@keyframes toolbar--edgemenu-container-transition-in {
 	from { opacity: 0; }
 	to { opacity: 1; }
 }
 
-@keyframes toolbar--sidebar-container-transition-out {
+@keyframes toolbar--edgemenu-container-transition-out {
 	from { opacity: 1; }
 	to { opacity: 0; }
 }
@@ -109,7 +109,7 @@
 }
 
 // The toolbar portion (the bar along the top of the screen)
-.toolbar-sidebar-toolbar {
+.toolbar-edge-toolbar {
 	--toolbar-button-height: min(20vh, 48px);
 	--label-hover-offset-size: calc(14px + var(--toolbar-button-height));
 	box-sizing: border-box;
@@ -267,20 +267,20 @@
 
 // Restyle the sidebar so that colors can be selected when the pipette tool is enabled.
 .imageEditorContainer.pipette--color-selection-in-progress {
-	.toolbar-sidebar-container {
+	.toolbar-edgemenu-container {
 		height: 0;
 		background-color: transparent;
 
 		opacity: 0.9;
 
-		.toolbar-sidebar {
+		.toolbar-edgemenu {
 			position: absolute;
 		}
 	}
 }
 
 // The popup menu
-.toolbar-sidebar-container {
+.toolbar-edgemenu-container {
 	background-color: var(--primary-background-color-transparent);
 
 	transition: 0.15s ease-in-out height, 0.15s ease-in-out background-color;
@@ -319,7 +319,7 @@
 	}
 }
 
-.toolbar-sidebar-container .toolbar-sidebar {
+.toolbar-edgemenu-container .toolbar-edgemenu {
 	--toolbar-button-height: 48px;
 
 	touch-action: none;

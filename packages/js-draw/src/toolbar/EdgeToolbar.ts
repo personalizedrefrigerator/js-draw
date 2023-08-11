@@ -44,7 +44,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 		this.toolbarContainer = document.createElement('div');
 		this.toolbarContainer.classList.add(`${toolbarCSSPrefix}root`);
 		this.toolbarContainer.classList.add(`${toolbarCSSPrefix}element`);
-		this.toolbarContainer.classList.add(`${toolbarCSSPrefix}sidebar-toolbar`);
+		this.toolbarContainer.classList.add(`${toolbarCSSPrefix}edge-toolbar`);
 		this.toolbarContainer.setAttribute('role', 'toolbar');
 
 		this.toolbarActionRow = document.createElement('div');
@@ -71,11 +71,11 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		// Create the container elements
 		this.menuContainer = document.createElement('div');
-		this.menuContainer.classList.add(`${toolbarCSSPrefix}sidebar-container`);
+		this.menuContainer.classList.add(`${toolbarCSSPrefix}edgemenu-container`);
 
 		this.sidebarContainer = document.createElement('div');
 		this.sidebarContainer.classList.add(
-			`${toolbarCSSPrefix}sidebar`,
+			`${toolbarCSSPrefix}edgemenu`,
 			`${toolbarCSSPrefix}element`,
 		);
 		this.sidebarContainer.classList.add(`${toolbarCSSPrefix}tool-properties`);

@@ -120,7 +120,9 @@ const makeGridSelector = <ChoiceIdType> (
 			updateButtonCSS();
 
 			if (checked) {
-				button.scrollIntoView();
+				// Some environments (e.g. jsdom) don't support .scrollIntoView.
+				// Only call it if it exists.
+				button.scrollIntoView?.();
 			}
 		};
 		setChecked(false);
