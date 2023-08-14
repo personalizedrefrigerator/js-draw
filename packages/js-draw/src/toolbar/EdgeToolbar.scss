@@ -282,7 +282,7 @@
 .toolbar-edgemenu-container {
 	background-color: var(--primary-background-color-transparent);
 
-	transition: 0.15s ease-in-out height, 0.15s ease-in-out background-color;
+	transition: 0.15s ease-in-out height, 0.15s ease-in-out background-color, 0.2s ease-in-out opacity;
 	@media (prefers-reduced-motion: reduce) {
 		transition: none;
 	}

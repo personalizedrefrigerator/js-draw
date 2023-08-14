@@ -95,7 +95,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		this.closeButton = document.createElement('button');
 		this.closeButton.classList.add('drag-elem');
-		this.closeButton.setAttribute('alt', localizationTable.closeToolProperties);
+		this.closeButton.setAttribute('aria-label', localizationTable.closeToolProperties);
 
 		// The close button has default focus -- forward its events to the main editor so that keyboard
 		// shortcuts still work.
