@@ -227,7 +227,8 @@
 	background-color: var(--primary-background-color);
 	opacity: 0.3;
 
-	z-index: 4;
+	// Display above the main image, but below the toolbars
+	z-index: 2;
 }
 
 .toolbar-spacedList > * {
