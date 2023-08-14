@@ -104,6 +104,14 @@ export default class EdgeToolbar extends AbstractToolbar {
 			return event.code !== 'Space' && event.code !== 'Enter' && event.code !== 'Tab';
 		});
 
+		// Close the sidebar when pressing escape
+		this.sidebarContainer.addEventListener('keyup', event => {
+			if (!event.defaultPrevented && event.code === 'Escape') {
+				this.sidebarVisible.set(false);
+				event.preventDefault();
+			}
+		});
+
 		this.initDragListeners();
 
 		// Initialize the layout manager
