@@ -130,7 +130,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 	private listenForVisibilityChanges() {
 		let animationTimeout: ReturnType<typeof setTimeout>|null = null;
-		const animationDuration = 150;
+		const animationDuration = 170;
 
 		if (!this.sidebarVisible.get()) {
 			this.menuContainer.style.display = 'none';
@@ -148,16 +148,16 @@ export default class EdgeToolbar extends AbstractToolbar {
 				}
 
 				this.menuContainer.style.display = '';
-				this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-in`;
-				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-in`;
-				this.menuContainer.style.opacity = '';
+				this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-in`;
+				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-in`;
+				this.menuContainer.style.opacity = '1';
 
 
 				// Focus the close button when first shown.
 				this.closeButton.focus();
 			} else if (animationTimeout === null) {
-				this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-sidebar-transition-out`;
-				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-sidebar-container-transition-out`;
+				this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-out`;
+				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-out`;
 
 				// Manually set the container's opacity to prevent flickering when closing
 				// the toolbar.
