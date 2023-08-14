@@ -19,6 +19,7 @@ export interface ToolLocalization {
 	soundExplorer: string;
 	disableAccessibilityExploreTool: string;
 	enableAccessibilityExploreTool: string;
+	soundExplorerUsageAnnouncement: string;
 
 	findLabel: string;
 	toNextMatch: string;
@@ -56,6 +57,7 @@ export const defaultToolLocalization: ToolLocalization = {
 	soundExplorer: 'Sound-based image exploration',
 	disableAccessibilityExploreTool: 'Disable sound-based exploration',
 	enableAccessibilityExploreTool: 'Enable sound-based exploration',
+	soundExplorerUsageAnnouncement: 'Sound-based image exploration enabled: Click/drag the screen to play a sound representation of different parts of the image.',
 
 	findLabel: 'Find',
 	toNextMatch: 'Next',

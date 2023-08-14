@@ -1,6 +1,6 @@
 import Editor from '../Editor';
 import { LineSegment2, Color4, Point2 } from '@js-draw/math';
-import { PointerEvt } from '../inputEvents';
+import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 
 class SoundFeedback {
@@ -160,9 +160,20 @@ export default class SoundUITool extends BaseTool {
 		if (!enabled) {
 			this.soundFeedback?.close();
 			this.soundFeedback = null;
+		} else {
+			this.editor.announceForAccessibility(this.editor.localization.soundExplorerUsageAnnouncement);
 		}
 
 		this.updateToggleButtonText();
+	}
+
+	public override onKeyPress(event: KeyPressEvent): boolean {
+		if (event.code === 'Escape') {
+			this.setEnabled(false);
+			return true;
+		}
+
+		return false;
 	}
 
 	private lastPointerPos: Point2;
