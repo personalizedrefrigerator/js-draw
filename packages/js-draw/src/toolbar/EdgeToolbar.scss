@@ -111,6 +111,7 @@
 // The toolbar portion (the bar along the top of the screen)
 .toolbar-edge-toolbar {
 	--toolbar-button-height: min(20vh, 48px);
+	--toolbar-button-size: var(--toolbar-button-height);
 	--label-hover-offset-size: calc(14px + var(--toolbar-button-height));
 	box-sizing: border-box;
 
@@ -158,12 +159,7 @@
 			}
 		}
 
-		&.extra-padding {
-			& > :nth-child(n + 1) {
-				padding-right: 4px;
-				padding-left: 4px;
-			}
-		}
+		--extra-left-right-padding: 0px;
 	}
 
 	// row-reverse combined with setting one row's order to be less than the other allows
@@ -236,8 +232,11 @@
 	--button-label-hover-offset-x: 0;
 
 	.toolbar-toolContainer:not(.label-inline) .toolbar-button {
-		width: var(--toolbar-button-height);
-		height: var(--toolbar-button-height);
+		width: calc(var(--toolbar-button-size) + var(--extra-left-right-padding));
+
+		// Note: EdgeToolbar.ts currently assumes that the height of a button is
+		//       equivalent to --toolbar-button-size.
+		height: var(--toolbar-button-size);
 
 		@include label-visible-on-hover(label);
 	}

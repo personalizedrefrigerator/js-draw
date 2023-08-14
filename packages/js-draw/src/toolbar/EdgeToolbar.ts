@@ -175,35 +175,36 @@ export default class EdgeToolbar extends AbstractToolbar {
 		if (this.toolbarToolRow.clientWidth < this.toolbarToolRow.scrollWidth) {
 			this.toolbarToolRow.classList.add('has-scroll');
 
+			const visibleWidth = this.toolbarToolRow.clientWidth;
+
 			// Determine whether extra spacing needs to be added so that one button is cut
 			// in half. Ideally, when there is scroll, one button will be cut in half to show
 			// that scrolling is possible.
-			//let sppaceAdjustment = 0;
-			let totalButtonWidth = 0;
-			let needsExtraPaddingToDivideButton = true;
+			let currentWidth = 0;
+			let extraPadding = 0;
+			let numVisibleButtons = 0;
 			for (const child of this.toolbarToolRow.children) {
-				const buttonWidth = child.children[0].clientWidth;
-				totalButtonWidth += buttonWidth;
-				const widthDifference = totalButtonWidth - this.toolbarToolRow.clientWidth;
+				// Use the first child -- padding is applied around that child. Assumes
+				// that the button's width is its height plus some padding.
+				const buttonBaseSize = child.clientHeight;
+				currentWidth += buttonBaseSize;
+				numVisibleButtons ++;
 
-				if (Math.abs(widthDifference) < buttonWidth / 2) {
-					needsExtraPaddingToDivideButton = false;
-					break;
-				}
+				if (currentWidth > visibleWidth) {
+					// We want extraPadding + (currentWidth - buttonWidth / 2) = visibleWidth.
+					// Thus, extraPadding = visibleWidth - currentWidth + buttonWidth / 2;
+					extraPadding = visibleWidth - currentWidth + buttonBaseSize / 2;
 
-				if (totalButtonWidth >= this.toolbarToolRow.clientWidth) {
+					// Ensure that the padding is positive
+					if (extraPadding < 0) {
+						extraPadding += buttonBaseSize;
+					}
 					break;
 				}
 			}
 
-			//const extraPadding = this.toolbarToolRow.clientWidth / (visibleButtonCount + 1) - 1/2;
-			//this.toolbarToolRow.style.setProperty('--extra-padding', extraPadding);
-
-			if (needsExtraPaddingToDivideButton) {
-				this.toolbarToolRow.classList.add('extra-padding');
-			} else {
-				this.toolbarToolRow.classList.remove('extra-padding');
-			}
+			const perButtonPadding = Math.round(extraPadding/numVisibleButtons * 10) / 10;
+			this.toolbarToolRow.style.setProperty('--extra-left-right-padding', `${perButtonPadding}px`);
 		} else {
 			this.toolbarToolRow.classList.remove('has-scroll', 'extra-padding');
 		}
@@ -237,7 +238,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 		}
 
 		widget.setLayoutManager(this.layoutManager);
-		if (!widget.canBeInOverflowMenu()) {
+		if (widget.mustBeInToplevelMenu()) {
 			widget.addTo(this.toolbarActionRow);
 		} else {
 			widget.addTo(this.toolbarToolRow);
