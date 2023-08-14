@@ -30,8 +30,6 @@ export interface ToolbarLocalization {
 	deleteSelection: string;
 	duplicateSelection: string;
 
-	closeToolProperties: string;
-
 	pickColorFromScreen: string;
 	clickToPickColorAnnouncement: string;
 	colorSelectionCanceledAnnouncement: string;
@@ -56,8 +54,11 @@ export interface ToolbarLocalization {
 
 	errorImageHasZeroSize: string;
 
+	// closeSidebar is used for accessibility in a button label.
+	closeSidebar: (toolName: string)=>string;
 	dropdownShown: (toolName: string)=> string;
 	dropdownHidden: (toolName: string)=> string;
+
 	zoomLevel: (zoomPercentage: number)=> string;
 	colorChangedAnnouncement: (color: string)=> string;
 	imageSize: (size: number, units: string)=> string;
@@ -116,10 +117,10 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	paste: 'Paste',
 
-	closeToolProperties: 'Close: Tool Properties',
+	closeSidebar: (toolName: string) => `Close sidebar for ${toolName}`,
+	dropdownShown: (toolName) => `Menu for ${toolName} shown`,
+	dropdownHidden: (toolName) => `Menu for ${toolName} hidden`,
 
-	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
-	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
 	zoomLevel: (zoomPercent: number) => `Zoom: ${zoomPercent}%`,
 	colorChangedAnnouncement: (color: string) => `Color changed to ${color}`,
 	imageSize: (size: number, units: string) => `Image size: ${size} ${units}`,

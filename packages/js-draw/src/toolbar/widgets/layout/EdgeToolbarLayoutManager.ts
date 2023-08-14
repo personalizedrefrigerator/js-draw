@@ -5,9 +5,10 @@ import { ToolMenu, WidgetContentLayoutManager, ToolMenuParent } from './types';
 export default class EdgeToolbarLayoutManager implements WidgetContentLayoutManager {
 	private visibleWidgetContent: MutableReactiveValue<ToolMenu|null> = ReactiveValue.fromInitialValue(null);
 
-
+	// @internal
 	public constructor(
 		private setSidebarContent: (...content: HTMLElement[])=>void,
+		private sidebarTitle: MutableReactiveValue<string>,
 		private sidebarVisibility: MutableReactiveValue<boolean>,
 		private announceForAccessibility: (text: string)=>void,
 		private localization: ToolbarLocalization,
@@ -28,6 +29,7 @@ export default class EdgeToolbarLayoutManager implements WidgetContentLayoutMana
 			visible,
 			requestShow: () => {
 				this.setSidebarContent(contentElem);
+				this.sidebarTitle.set(parent.getTitle());
 
 				// Set visibleWidgetContent first -- this causes the previously visible (if any)
 				// item to not be sent a shown event.

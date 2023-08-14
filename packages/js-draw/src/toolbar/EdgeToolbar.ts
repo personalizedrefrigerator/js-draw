@@ -33,6 +33,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 	private sidebarVisible: MutableReactiveValue<boolean>;
 	private sidebarY: MutableReactiveValue<number>;
+	private sidebarTitle: MutableReactiveValue<string>;
 
 	/** @internal */
 	public constructor(
@@ -95,7 +96,6 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		this.closeButton = document.createElement('button');
 		this.closeButton.classList.add('drag-elem');
-		this.closeButton.setAttribute('aria-label', localizationTable.closeToolProperties);
 
 		// The close button has default focus -- forward its events to the main editor so that keyboard
 		// shortcuts still work.
@@ -120,13 +120,19 @@ export default class EdgeToolbar extends AbstractToolbar {
 			this.setupColorPickers();
 		};
 
+		this.sidebarTitle = MutableReactiveValue.fromInitialValue('');
+
 		this.layoutManager = new EdgeToolbarLayoutManager(
 			setSidebarContent,
+			this.sidebarTitle,
 			this.sidebarVisible,
 			editor.announceForAccessibility.bind(editor),
 			localizationTable,
 		);
 
+		this.sidebarTitle.onUpdateAndNow(title => {
+			this.closeButton.setAttribute('aria-label', localizationTable.closeSidebar(title));
+		});
 
 		// Make things visible/keep hidden.
 		this.listenForVisibilityChanges();
@@ -170,6 +176,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 				// Manually set the container's opacity to prevent flickering when closing
 				// the toolbar.
 				this.menuContainer.style.opacity = '0';
+
+				this.editor.announceForAccessibility(
+					this.localizationTable.dropdownHidden(this.sidebarTitle.get())
+				);
 
 				animationTimeout = setTimeout(() => {
 					this.menuContainer.style.display = 'none';
