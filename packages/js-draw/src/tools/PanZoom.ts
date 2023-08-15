@@ -90,12 +90,20 @@ class InertialScroller {
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;
 
+	// Distance between two touch points at the **start** of a gesture.
+	private startDist: number;
+
+	// Distance between two touch points the last time input data was received.
 	private lastDist: number;
 	private lastScreenCenter: Point2;
 	private lastTimestamp: number;
 	private lastPointerDownTimestamp: number = 0;
 	private initialTouchAngle: number = 0;
 	private initialViewportRotation: number = 0;
+
+	// Set to `true` only when scaling has started (if two fingers are down and have moved
+	// far enough).
+	private isScaling: boolean = false;
 
 	private inertialScroller: InertialScroller|null = null;
 	private velocity: Vec2|null = null;
@@ -141,9 +149,11 @@ export default class PanZoom extends BaseTool {
 		if (allAreTouch && pointers.length === 2 && this.mode & PanZoomMode.TwoFingerTouchGestures) {
 			const { screenCenter, angle, dist } = this.computePinchData(pointers[0], pointers[1]);
 			this.lastDist = dist;
+			this.startDist = dist;
 			this.lastScreenCenter = screenCenter;
 			this.initialTouchAngle = angle;
 			this.initialViewportRotation = this.editor.viewport.getRotationAngle();
+			this.isScaling = false;
 
 			handlingGesture = true;
 		} else if (pointers.length === 1 && (
@@ -152,6 +162,7 @@ export default class PanZoom extends BaseTool {
 			|| (this.mode & PanZoomMode.SinglePointerGestures)
 		)) {
 			this.lastScreenCenter = pointers[0].screenPos;
+			this.isScaling = false;
 			handlingGesture = true;
 		}
 
@@ -244,8 +255,21 @@ export default class PanZoom extends BaseTool {
 
 		this.updateVelocity(screenCenter);
 
+		let scaleFactor = 1;
+		if (this.isScaling) {
+			scaleFactor = dist / this.lastDist;
+		} else {
+			const initialScaleFactor = dist / this.startDist;
+
+			// Only start scaling if scaling done so far exceeds some threshold.
+			if (initialScaleFactor > 1.05 || initialScaleFactor < 0.95) {
+				scaleFactor = initialScaleFactor;
+				this.isScaling = true;
+			}
+		}
+
 		const transformUpdate = Mat33.translation(delta)
-			.rightMul(Mat33.scaling2D(dist / this.lastDist, canvasCenter))
+			.rightMul(Mat33.scaling2D(scaleFactor, canvasCenter))
 			.rightMul(Mat33.zRotation(deltaRotation, canvasCenter));
 
 		this.lastScreenCenter = screenCenter;
