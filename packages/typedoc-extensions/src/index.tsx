@@ -32,7 +32,7 @@ export const load = (app: Application) => {
 				</script>
 				<script src={event.relativeURL('assets/js-draw-typedoc-extension--browser.js')}></script>
 			</>
-		)
+		);
 	});
 
 	app.renderer.on(RendererEvent.END, (event: RendererEvent) => {

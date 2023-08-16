@@ -16,8 +16,6 @@ export interface MarkdownToken {
 const tokenizeMarkdown = (markdown: string) => {
 	const result: MarkdownToken[] = [];
 
-	let index = 0;
-
 	let escaped = false;
 	let tokenStartIndex = 0;
 	let buffer: string[] = [];
@@ -49,8 +47,6 @@ const tokenizeMarkdown = (markdown: string) => {
 	};
 
 	for (const char of markdown) {
-		index += char.length;
-
 		let handled = false;
 		if (!escaped) {
 			if (char === '`') {
