@@ -65,6 +65,10 @@ export default class BundledFile {
 						type: 'asset/inline',
 					},
 				],
+
+				// Prevent warnings if the TypeScript library is being included.
+				// See https://github.com/microsoft/TypeScript/issues/39436#issuecomment-817029140
+				noParse: [require.resolve('typescript/lib/typescript.js')],
 			},
 			optimization: {
 				minimizer: [
@@ -84,6 +88,11 @@ export default class BundledFile {
 			},
 			resolve: {
 				extensions: ['.tsx', '.ts', '.js'],
+
+				// Allow using the NodeJS path module in generated JS
+				fallback: {
+					'path': require.resolve('path-browserify'),
+				},
 			},
 		};
 

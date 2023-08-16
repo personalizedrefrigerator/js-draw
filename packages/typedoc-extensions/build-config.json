@@ -5,8 +5,14 @@
     "bundledFiles": [
         {
             "name": "browser",
-	        "inPath": "./src/browser.ts",
-            "outPath": "./dist/browser.js"
+	        "inPath": "./src/browser/browser.ts",
+            "outPath": "./dist/js-draw-typedoc-extension--browser.js"
+        },
+
+        {
+            "name": "preview",
+	        "inPath": "./src/browser/iframe-preview-setup.ts",
+            "outPath": "./dist/js-draw-typedoc-extension--iframe.js"
         }
     ]
 }
