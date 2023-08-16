@@ -1,9 +1,15 @@
 
-:root .insert-image-widget-dropdown-content {
+$image-widget-selector: '.insert-image-widget-dropdown-content';
+// Repeat the selector for additional specificity.
+:root #{$image-widget-selector}#{$image-widget-selector}#{$image-widget-selector} {
 	& > div > div {
 		padding: 5px;
 	}
-	
+
+	& > div {
+		min-height: 0;
+	}
+
 	img {
 		max-width: min(50vw, 75%);
 		max-height: 50vh;
@@ -13,7 +19,7 @@
 		margin-left: auto;
 		margin-right: auto;
 	}
-	
+
 	.action-button-row {
 		margin-top: 4px;
 		display: flex;
@@ -25,7 +31,7 @@
 		padding-bottom: 0;
 		margin-bottom: 0;
 	}
-	
+
 	.action-button-row > button {
 		flex-grow: 1;
 		text-align: end;
