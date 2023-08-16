@@ -19,7 +19,7 @@
 
 	"excludePrivate": true,
 	"excludeInternal": true,
-	"includeVersion": true,
+	"includeVersion": false,
 	"commentStyle": "all",
 
 	"readme": "README.md",

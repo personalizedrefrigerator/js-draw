@@ -1,7 +1,7 @@
 {
   "name": "@js-draw/monorepo",
   "private": true,
-  "version": "0.25.0",
+  "version": "0.0.0",
   "scripts": {
     "dist-test": "lerna run dist-test",
     "build": "lerna run build",
