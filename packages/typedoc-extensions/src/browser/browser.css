@@ -24,8 +24,8 @@ textarea.runnable-code {
 	--cm-secondary-background-color: #ddd;
 	--cm-secondary-text-color: #300;
 
-	--cm-caret-color: #000;
-	--cm-selection-background: #f77;
+	--cm-caret-color: var(--color-text);
+	--cm-selection-background: #0af;
 
 
 	--cm-shadow-color: rgba(0, 0, 0, 0.5);
@@ -36,8 +36,7 @@ textarea.runnable-code {
 		--cm-secondary-background-color: #222;
 		--cm-secondary-text-color: #eee;
 
-		--cm-caret-color: #400;
-		--cm-selection-background: #77448a;
+		--cm-selection-background: #003388;
 
 		--cm-shadow-color: rgba(200, 200, 100, 0.5);
 	}

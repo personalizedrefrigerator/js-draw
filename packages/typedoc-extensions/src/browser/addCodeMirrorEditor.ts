@@ -26,10 +26,17 @@ const codeMirrorTheme = EditorView.theme({
 		caretColor: 'var(--cm-caret-color)',
 	},
 	'&.cm-focused .cm-cursor': {
-		borderLeftColor: 'var(--cm-caret-color)'
+		borderLeftColor: 'var(--cm-caret-color)',
 	},
-	'&.cm-focused .cm-selectionBackground, ::selection': {
-		backgroundColor: 'var(--cm-selection-background)'
+	// Needs high specificity to override the default
+	'& .cm-selectionLayer .cm-selectionBackground, &.cm-focused .cm-selectionLayer .cm-selectionBackground, ::selection': {
+		background: 'var(--cm-selection-background)',
+		backgroundColor: 'var(--cm-selection-background) !important',
+	},
+	'.cm-activeLine': {
+		// Default color
+		color: 'var(--cm-primary-text-color)',
+		backgroundColor: 'transparent',
 	},
 
 	'.cm-gutters': {
