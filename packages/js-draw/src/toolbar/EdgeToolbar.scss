@@ -396,6 +396,7 @@
 		}
 	}
 
+	// Toolbar buttons within the menu
 	.toolbar-toolContainer {
 		display: block;
 
@@ -410,9 +411,9 @@
 			padding: 2px;
 
 			& > .toolbar-icon {
-				width: 36px;
-				height: 36px;
-				padding: 8px;
+				width: 30px;
+				height: 30px;
+				padding: 10px;
 
 				margin-right: 15px;
 			}
