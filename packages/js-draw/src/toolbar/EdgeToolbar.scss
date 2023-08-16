@@ -443,9 +443,10 @@
 
 			// Align inputs (assumes labels come first)
 			& > label {
-				padding-right: 10px;
-				min-width: 94px;
+				padding-right: 50px;
+				min-width: 100px;
 				flex-shrink: 1;
+				box-sizing: border-box;
 			}
 
 			// If checkboxes have flex-grow, the checkbox region can become centered.
