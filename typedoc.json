@@ -1,14 +1,26 @@
 {
 	"entryPoints": [
-		"./packages/js-draw",
-		"./packages/math",
-		"./packages/material-icons"
+		"./packages/js-draw/src/lib.ts",
+		"./packages/math/src/lib.ts",
+		"./packages/material-icons/src/lib.ts"
 	],
-	"entryPointStrategy": "packages",
+	"entryPointStrategy": "expand",
 	"name": "js-draw",
 	"out": "docs/typedoc/",
-	"includeVersion": false,
 	"plugin": [ "@js-draw/typedoc-extensions" ],
+
+	"exclude": [
+		"**/*.test.ts",
+		"node_modules/**",
+		"**/dist/**",
+		"**/dist-test/**",
+		"src/testing/"
+	],
+
+	"excludePrivate": true,
+	"excludeInternal": true,
+	"includeVersion": true,
+	"commentStyle": "all",
 
 	"readme": "README.md",
 	"tsconfig": "tsconfig-typedoc.json",
