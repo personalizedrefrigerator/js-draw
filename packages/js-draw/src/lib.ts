@@ -38,7 +38,7 @@
  * @see
  * {@link Editor}
  * {@link Editor.loadFromSVG}
- * {@link DropdownToolbar.addActionButton }
+ * {@link AbstractToolbar.addActionButton }
  *
  * @packageDocumentation
  */
