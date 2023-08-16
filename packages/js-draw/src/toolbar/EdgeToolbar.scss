@@ -434,9 +434,11 @@
 
 		& > div {
 			display: flex;
+			align-items: center;
 
 			// Space between items
-			margin-top: 15px;
+			margin-top: 5px;
+			min-height: 35px;
 
 			// Align inputs (assumes labels come first)
 			& > label {
