@@ -3,6 +3,7 @@
    * The `--seconary-foreground-color` and `--secondary-background-color` are no longer used for selected items. Use `--selection-foreground-color` and `--selection-background-color` instead.
    * The `Pen` constructor now accepts parameters in a different format — the `PenStyle` should contain the pen factory.
    * Timestamps in `Pointer`s and `StrokeDataPoint`s use `performance.now` instead of `Date.now`.
+   * A more specific selector than `.imageEditorContainer` is now required to override the `width` and `height` of an editor. Use `.js-draw.imageEditorContainer` or `body .imageEditorContainer` instead.
    * ==To-do==: Update this list
   * Other changes
    * New default toolbar
