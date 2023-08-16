@@ -424,26 +424,17 @@ export class Editor {
 			return false;
 		});
 
-		this.notifier.on(EditorEventType.DisplayResized, _event => {
+		const handleResize = () => {
 			this.viewport.updateScreenSize(
 				Vec2.of(this.display.width, this.display.height)
 			);
-			this.queueRerender();
+			this.rerender();
 			this.updateEditorSizeVariables();
-		});
-
-		const handleResize = () => {
-			this.notifier.dispatch(EditorEventType.DisplayResized, {
-				kind: EditorEventType.DisplayResized,
-				newSize: Vec2.of(
-					this.display.width,
-					this.display.height
-				),
-			});
 		};
 
 		if ('ResizeObserver' in (window as any)) {
 			const resizeObserver = new ResizeObserver(handleResize);
+			resizeObserver.observe(this.renderingRegion);
 			resizeObserver.observe(this.container);
 		} else {
 			addEventListener('resize', handleResize);
