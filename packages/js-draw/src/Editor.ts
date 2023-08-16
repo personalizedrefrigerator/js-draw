@@ -424,11 +424,21 @@ export class Editor {
 			return false;
 		});
 
+		let sizeUpdateTimeout: ReturnType<typeof setTimeout>|null = null;
 		this.notifier.on(EditorEventType.DisplayResized, _event => {
 			this.viewport.updateScreenSize(
 				Vec2.of(this.display.width, this.display.height)
 			);
 			this.queueRerender();
+
+			// Update CSS size variables
+			if (sizeUpdateTimeout) {
+				clearTimeout(sizeUpdateTimeout);
+			}
+			sizeUpdateTimeout = setTimeout(() => {
+				sizeUpdateTimeout = null;
+				this.updateEditorSizeVariables();
+			});
 		});
 
 		const handleResize = () => {
@@ -472,6 +482,17 @@ export class Editor {
 		document.addEventListener('paste', evt => {
 			this.handlePaste(evt);
 		});
+	}
+
+	private updateEditorSizeVariables() {
+		// Add CSS variables so that absolutely-positioned children of the editor can
+		// still fill the screen.
+		this.container.style.setProperty(
+			'--editor-current-width-px', `${this.container.clientWidth}px`
+		);
+		this.container.style.setProperty(
+			'--editor-current-height-px', `${this.container.clientHeight}px`
+		);
 	}
 
 	private pointers: Record<number, Pointer> = {};

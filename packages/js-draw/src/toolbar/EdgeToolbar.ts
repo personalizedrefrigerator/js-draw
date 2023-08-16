@@ -85,12 +85,15 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		// Setup resizing/dragging
 		this.sidebarY.onUpdateAndNow(y => {
-			if (y >= 0) {
+			const belowEdgeClassName = 'dropdown-below-edge';
+			if (y > 0) {
 				this.sidebarContainer.style.translate = `0 ${y}px`;
 				this.sidebarContainer.style.paddingBottom = '';
+				this.menuContainer.classList.add(belowEdgeClassName);
 			} else {
 				this.sidebarContainer.style.translate = '';
 				this.sidebarContainer.style.paddingBottom = `${-y}px`;
+				this.menuContainer.classList.remove(belowEdgeClassName);
 			}
 		});
 

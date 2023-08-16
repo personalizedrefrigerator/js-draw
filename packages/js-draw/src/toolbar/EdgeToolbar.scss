@@ -10,13 +10,15 @@
 }
 
 @keyframes toolbar--edgemenu-container-transition-in {
-	from { opacity: 0; }
-	to { opacity: 1; }
+	// Include overflow-y: hidden so that the bottom of the menu doesn't go below
+	// the editor.
+	from { opacity: 0; overflow-y: hidden; }
+	to { opacity: 1; overflow-y: hidden; }
 }
 
 @keyframes toolbar--edgemenu-container-transition-out {
-	from { opacity: 1; }
-	to { opacity: 0; }
+	from { opacity: 1; overflow-y: hidden; }
+	to { opacity: 0; overflow-y: hidden; }
 }
 
 // Shows a lable on hover
@@ -278,7 +280,7 @@
 	}
 }
 
-// The popup menu
+// The popup menu container
 .toolbar-edgemenu-container {
 	background-color: var(--primary-background-color-transparent);
 
@@ -288,8 +290,14 @@
 	}
 
 	position: absolute;
-	width: inherit;
-	height: inherit;
+	width: var(--editor-current-width-px);
+	height: var(--editor-current-height-px);
+	box-sizing: border-box;
+
+	// Hide the dropdown if it could reasonably go below the bottom of the editor
+	&.dropdown-below-edge {
+		overflow-y: hidden;
+	}
 
 	display: flex;
 	flex-direction: column-reverse;
@@ -327,7 +335,7 @@
 	background-color: var(--secondary-background-color);
 	--icon-color: var(--secondary-foreground-color);
 
-	box-shadow: 0px 0px 2px var(--primary-shadow-color);
+	box-shadow: 0px 0px 1px var(--primary-shadow-color);
 
 	padding-left: 10px;
 	padding-right: 10px;
