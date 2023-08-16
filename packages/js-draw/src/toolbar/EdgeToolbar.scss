@@ -452,6 +452,11 @@
 				box-sizing: border-box;
 			}
 
+			& > input[type="checkbox"] {
+				width: 20px;
+				height: 20px;
+			}
+
 			// If checkboxes have flex-grow, the checkbox region can become centered.
 			& > input:not([type="checkbox"]) {
 				flex-grow: 1;
