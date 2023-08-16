@@ -18,7 +18,7 @@
 	width: fit-content;
 }
 
-.imageEditorContainer {
+.js-draw.imageEditorContainer {
 	width: 100vw;
 	height: 100vh;
 	position: fixed;

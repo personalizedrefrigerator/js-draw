@@ -253,7 +253,7 @@ export class Editor {
 		this.container = document.createElement('div');
 		this.renderingRegion = document.createElement('div');
 		this.container.appendChild(this.renderingRegion);
-		this.container.className = 'imageEditorContainer';
+		this.container.classList.add('imageEditorContainer', 'js-draw');
 
 		this.loadingWarning = document.createElement('div');
 		this.loadingWarning.classList.add('loadingMessage');
@@ -424,21 +424,12 @@ export class Editor {
 			return false;
 		});
 
-		let sizeUpdateTimeout: ReturnType<typeof setTimeout>|null = null;
 		this.notifier.on(EditorEventType.DisplayResized, _event => {
 			this.viewport.updateScreenSize(
 				Vec2.of(this.display.width, this.display.height)
 			);
 			this.queueRerender();
-
-			// Update CSS size variables
-			if (sizeUpdateTimeout) {
-				clearTimeout(sizeUpdateTimeout);
-			}
-			sizeUpdateTimeout = setTimeout(() => {
-				sizeUpdateTimeout = null;
-				this.updateEditorSizeVariables();
-			});
+			this.updateEditorSizeVariables();
 		});
 
 		const handleResize = () => {

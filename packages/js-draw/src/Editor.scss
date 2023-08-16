@@ -60,6 +60,15 @@
 	color: var(--primary-foreground-color);
 	font-family: system-ui, -apple-system, sans-serif;
 	background-color: var(--primary-background-color);
+	
+	// Set the width/height to a value that's independent of its content -- avoids
+	// ResizeObserver errors: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
+	width: 100%;
+	height: 400px;
+	min-height: 250px;
+	min-width: 100px;
+
+	box-sizing: border-box;
 
 	display: flex;
 	flex-direction: column-reverse;
@@ -85,6 +94,8 @@
 	height: 100%;
 
 	/* Allow the canvas to shrink (needed in Chrome) */
+	min-width: 0;
+	max-width: inherit;
 	min-height: 0px;
 	max-height: inherit;
 }
