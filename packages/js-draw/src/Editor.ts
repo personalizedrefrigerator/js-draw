@@ -49,6 +49,8 @@ export interface EditorSettings {
 
 	/** Minimum zoom fraction (e.g. 0.5 → 50% zoom). */
 	minZoom: number,
+
+	/** Maximum zoom fraction (e.g. 2 → 200% zoom). */
 	maxZoom: number,
 
 	/**
@@ -63,8 +65,40 @@ export interface EditorSettings {
 	 */
 	keyboardShortcutOverrides: Record<string, Array<KeyBinding>>,
 
+	/**
+	 * Provides a set of icons for the editor.
+	 *
+	 * See, for example, the `@js-draw/material-icons` package.
+	 *
+	 * @example
+	 * ```ts
+	 * import * as jsdraw from 'js-draw';
+	 * import MaterialIconProvider from '@js-draw/material-icons';
+	 * import 'js-draw/styles';
+	 *
+	 * const settings: Partial<jsdraw.EditorSettings> = {
+	 *   // Default to material icons
+	 *   iconProvider: new MaterialIconProvider(),
+	 *
+	 *   // Only scroll the editor if it's focused.
+	 *   wheelEventsEnabled: 'only-if-focused',
+	 * };
+	 *
+	 * // Add an editor to the document, using the above settings
+	 * const editor = new jsdraw.Editor(document.body, settings);
+	 *
+	 * // Add a toolbar to the editor
+	 * const toolbar = jsdraw.makeEdgeToolbar(editor);
+	 *
+	 * // Add the default tool items
+	 * toolbar.addDefaults();
+	 * ```
+	 */
 	iconProvider: IconProvider,
 
+	/**
+	 * Additional messages to show in the "about" dialog.
+	 */
 	notices: AboutDialogEntry[],
 }
 
