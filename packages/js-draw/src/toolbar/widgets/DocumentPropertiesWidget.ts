@@ -125,7 +125,11 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add(`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`);
+		container.classList.add(
+			`${toolbarCSSPrefix}spacedList`,
+			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
+			`${toolbarCSSPrefix}document-properties-widget`
+		);
 
 		// Background color input
 		const backgroundColorRow = document.createElement('div');
@@ -214,10 +218,8 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 		// The "About..." button
 		const aboutButton = document.createElement('button');
+		aboutButton.classList.add('about-button');
 		aboutButton.innerText = this.localizationTable.about;
-		aboutButton.style.display = 'block';
-		aboutButton.style.width = '100%';
-		aboutButton.style.textAlign = 'end';
 
 		aboutButton.onclick = () => {
 			this.editor.showAboutDialog();
