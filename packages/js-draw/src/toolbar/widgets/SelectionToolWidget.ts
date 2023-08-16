@@ -19,7 +19,9 @@ const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizati
 
 	const colorRow = document.createElement('div');
 	const colorLabel = document.createElement('label');
-	const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(editor, color => {
+	const {
+		input: colorInput, container: colorInputContainer, setValue: setColorInputValue
+	} = makeColorInput(editor, color => {
 		const selection = selectionTool.getSelection();
 
 		if (selection) {

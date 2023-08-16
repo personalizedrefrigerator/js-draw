@@ -264,7 +264,9 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
+		const {
+			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
+		} = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 

@@ -172,22 +172,26 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 				// Focus the close button when first shown.
 				this.closeButton.focus();
-			} else if (animationTimeout === null) {
-				this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-out`;
-				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-out`;
+			} else {
+				this.closeColorPickers();
 
-				// Manually set the container's opacity to prevent flickering when closing
-				// the toolbar.
-				this.menuContainer.style.opacity = '0';
+				if (animationTimeout === null) {
+					this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-out`;
+					this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-out`;
 
-				this.editor.announceForAccessibility(
-					this.localizationTable.dropdownHidden(this.sidebarTitle.get())
-				);
+					// Manually set the container's opacity to prevent flickering when closing
+					// the toolbar.
+					this.menuContainer.style.opacity = '0';
 
-				animationTimeout = setTimeout(() => {
-					this.menuContainer.style.display = 'none';
-					animationTimeout = null;
-				}, animationDuration);
+					this.editor.announceForAccessibility(
+						this.localizationTable.dropdownHidden(this.sidebarTitle.get())
+					);
+
+					animationTimeout = setTimeout(() => {
+						this.menuContainer.style.display = 'none';
+						animationTimeout = null;
+					}, animationDuration);
+				}
 			}
 		});
 	}

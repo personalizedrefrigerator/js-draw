@@ -4,12 +4,11 @@ import PipetteTool from '../../../tools/PipetteTool';
 import { EditorEventType } from '../../../types';
 
 type OnColorChangeListener = (color: Color4)=>void;
-type SetColorCallback = (color: Color4|string) => void;
 
 // Returns [ color input, input container, callback to change the color value ].
 export const makeColorInput = (
 	editor: Editor, onColorChange: OnColorChangeListener
-): [ HTMLInputElement, HTMLElement, SetColorCallback ] => {
+) => {
 
 	const colorInputContainer = document.createElement('span');
 	const colorInput = document.createElement('input');
@@ -53,7 +52,9 @@ export const makeColorInput = (
 	};
 
 	colorInput.oninput = handleColorInput;
+	let isOpen = false;
 	colorInput.addEventListener('open', () => {
+		isOpen = true;
 		editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
 			kind: EditorEventType.ColorPickerToggled,
 			open: true,
@@ -66,7 +67,9 @@ export const makeColorInput = (
 		const colorPickerElem: HTMLElement|null = document.querySelector('#clr-picker #clr-hue-slider');
 		colorPickerElem?.focus();
 	});
-	colorInput.addEventListener('close', () => {
+
+	const onClose = () => {
+		isOpen = false;
 		editor.notifier.dispatch(EditorEventType.ColorPickerToggled, {
 			kind: EditorEventType.ColorPickerToggled,
 			open: false,
@@ -75,6 +78,9 @@ export const makeColorInput = (
 
 		// Restore focus to the input that opened the color picker
 		colorInput.focus();
+	};
+	colorInput.addEventListener('close', () => {
+		onClose();
 	});
 
 	const setColorInputValue = (color: Color4|string) => {
@@ -89,7 +95,16 @@ export const makeColorInput = (
 		colorInput.dispatchEvent(new Event('input', { bubbles: true }));
 	};
 
-	return [ colorInput, colorInputContainer, setColorInputValue ];
+	return {
+		input: colorInput,
+		container: colorInputContainer,
+		setValue: setColorInputValue,
+		closePicker: () => {
+			if (isOpen) {
+				onInputEnd();
+			}
+		},
+	};
 };
 
 const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: OnColorChangeListener) => {

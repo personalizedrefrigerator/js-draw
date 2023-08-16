@@ -46,7 +46,9 @@ export default class TextToolWidget extends BaseToolWidget {
 		const sizeInput = document.createElement('input');
 		const sizeLabel = document.createElement('label');
 
-		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
+		const {
+			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
+		} = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 		const colorLabel = document.createElement('label');

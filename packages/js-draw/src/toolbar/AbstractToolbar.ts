@@ -155,6 +155,10 @@ export default abstract class AbstractToolbar {
 		}));
 	}
 
+	protected closeColorPickers() {
+		closeColoris();
+	}
+
 	protected getWidgetUniqueId(widget: BaseWidget) {
 		return widget.getUniqueIdIn(this.#widgetsById);
 	}

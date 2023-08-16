@@ -137,7 +137,9 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 		backgroundColorLabel.innerText = this.localizationTable.backgroundColor;
 
-		const [ colorInput, backgroundColorInputContainer, setBgColorInputValue ] = makeColorInput(this.editor, color => {
+		const {
+			input: colorInput, container: backgroundColorInputContainer, setValue: setBgColorInputValue
+		} = makeColorInput(this.editor, color => {
 			if (!color.eq(this.getBackgroundColor())) {
 				this.setBackgroundColor(color);
 			}
