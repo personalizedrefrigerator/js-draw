@@ -216,11 +216,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		this.tool.setHasStabilization(enabled);
 	}
 
-	protected createAdvancedOptions() {
-		const container = document.createElement('details');
-		const label = document.createElement('summary');
-		label.innerText = this.localizationTable.advanced;
-
+	protected createStabilizationOption() {
 		const stabilizationOption = document.createElement('div');
 		const stabilizationCheckbox = document.createElement('input');
 		const stabilizationLabel = document.createElement('label');
@@ -230,9 +226,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		stabilizationCheckbox.id = `${toolbarCSSPrefix}-penInputStabilizationCheckbox-${PenToolWidget.idCounter++}`;
 		stabilizationLabel.htmlFor = stabilizationCheckbox.id;
 
-		stabilizationOption.replaceChildren(stabilizationCheckbox, stabilizationLabel);
-
-		container.replaceChildren(label, stabilizationOption);
+		stabilizationOption.replaceChildren(stabilizationLabel, stabilizationCheckbox);
 
 		stabilizationCheckbox.oninput = () => {
 			this.setInputStabilizationEnabled(stabilizationCheckbox.checked);
@@ -244,7 +238,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			},
 
 			addTo: (parent: HTMLElement) => {
-				parent.appendChild(container);
+				parent.appendChild(stabilizationOption);
 			}
 		};
 	}
@@ -277,7 +271,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
-		const advanced = this.createAdvancedOptions();
+		const stabilizationOption = this.createStabilizationOption();
 
 		this.updateInputs = () => {
 			setColorInputValue(this.tool.getColor());
@@ -287,13 +281,13 @@ export default class PenToolWidget extends BaseToolWidget {
 
 			// Update the selected stroke factory.
 			penTypeSelect.setValue(this.getCurrentPenTypeIdx());
-			advanced.update();
+			stabilizationOption.update();
 		};
 		this.updateInputs();
 
 		container.replaceChildren(colorRow, thicknessRow);
 		penTypeSelect.addTo(container);
-		advanced.addTo(container);
+		stabilizationOption.addTo(container);
 
 		dropdown.replaceChildren(container);
 		return true;
