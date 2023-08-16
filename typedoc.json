@@ -4,7 +4,7 @@
 		"./packages/math/src/lib.ts",
 		"./packages/material-icons/src/lib.ts"
 	],
-	"entryPointStrategy": "expand",
+	"entryPointStrategy": "resolve",
 	"name": "js-draw",
 	"out": "docs/typedoc/",
 	"plugin": [ "@js-draw/typedoc-extensions" ],
