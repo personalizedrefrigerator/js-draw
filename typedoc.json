@@ -2,6 +2,7 @@
 	"entryPoints": [
 		"./packages/js-draw",
 		"./packages/math",
+		"./packages/material-icons"
 	],
 	"entryPointStrategy": "packages",
 	"name": "js-draw",
