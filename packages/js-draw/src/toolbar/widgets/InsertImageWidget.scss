@@ -35,7 +35,6 @@ $image-widget-selector: '.insert-image-widget-dropdown-content';
 	.action-button-row > button {
 		flex-grow: 1;
 		text-align: end;
-		color: var(--primary-action-foreground-color);
 		max-width: 50%;
 		min-width: min(100%, 40px);
 	}
