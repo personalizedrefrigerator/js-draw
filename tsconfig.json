@@ -20,7 +20,7 @@
 		"moduleResolution": "Node",
 		"declaration": true,
 
-		"baseUrl": "./packages",
+		"baseUrl": "packages/",
 		"paths": {
 			"js-draw": ["js-draw/src"],
 			"@js-draw/*": ["*/src"]

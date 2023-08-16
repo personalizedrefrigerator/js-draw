@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"jsx": "react",
+
+		// See https://typedoc.org/api/modules/JSX.html
+		"jsxFactory": "JSX.createElement",
+		"jsxFragmentFactory": "JSX.Fragment"
+	},
+
+	"include": [
+		"**/*.ts",
+		"**/*.tsx"
+	]
+}

@@ -2,11 +2,13 @@
 	"entryPoints": [
 		"./packages/js-draw",
 		"./packages/math",
+		"./packages/material-icons"
 	],
 	"entryPointStrategy": "packages",
 	"name": "js-draw",
 	"out": "docs/typedoc/",
 	"includeVersion": false,
+	"plugin": [ "@js-draw/typedoc-extensions" ],
 
 	"readme": "README.md",
 	"tsconfig": "tsconfig-typedoc.json",

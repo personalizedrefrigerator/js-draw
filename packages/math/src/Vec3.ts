@@ -1,7 +1,8 @@
 
 
 /**
- * A vector with three components. Can also be used to represent a two-component vector.
+ * A vector with three components, $\begin{pmatrix} x \\ y \\ z \end{pmatrix}$.
+ * Can also be used to represent a two-component vector.
  *
  * A `Vec3` is immutable.
  */
@@ -22,6 +23,7 @@ export default class Vec3 {
 		};
 	}
 
+	/** Construct a vector from three components. */
 	public static of(x: number, y: number, z: number): Vec3 {
 		return new Vec3(x, y, z);
 	}

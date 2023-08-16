@@ -1,5 +1,6 @@
 import Vec3 from './Vec3';
 
+/** Utility functions that facilitate treating `Vec3`s as 2D vectors. */
 export namespace Vec2 {
 	/**
 	 * Creates a `Vec2` from an x and y coordinate.

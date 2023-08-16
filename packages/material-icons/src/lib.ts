@@ -1,4 +1,35 @@
 
+/**
+ * Provides a material icon theme for `js-draw`.
+ *
+ * @example
+ * ```ts,runnable
+ * import { Editor, makeEdgeToolbar } from 'js-draw';
+ * import { MaterialIconProvider } from '@js-draw/material-icons';
+ *
+ * // Apply js-draw CSS
+ * import 'js-draw/styles';
+ *
+ * const editor = new Editor(document.body, {
+ *   iconProvider: new MaterialIconProvider(),
+ * });
+ *
+ * // Ensure that there is enough room for the toolbar
+ * editor.getRootElement().style.minHeight = '500px';
+ *
+ * // Add a toolbar
+ * const toolbar = makeEdgeToolbar(editor);
+ *
+ * // ...width the default elements
+ * toolbar.addDefaults();
+ * ```
+ *
+ * @see
+ * {@link MaterialIconProvider}
+ *
+ * @packageDocumentation
+ */
+
 import { IconProvider, IconElemType, TextRenderingStyle, PenStyle } from 'js-draw';
 
 import README from './icons/README.md';
@@ -20,7 +51,6 @@ import Check from './icons/Check.svg';
 import InkHighlighter from './icons/InkHighlighter.svg';
 import Edit from './icons/Edit.svg';
 import CloudUpload from './icons/CloudUpload.svg';
-
 
 const icon = (data: string) => {
 	const icon = document.createElement('div');

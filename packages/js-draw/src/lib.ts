@@ -3,7 +3,7 @@
  * is available through the [`js-draw` package](https://www.npmjs.com/package/js-draw).
  *
  * @example
- * ```
+ * ```ts,runnable
  * import { Editor, Vec3, Mat33 } from 'js-draw';
  *
  * // Apply js-draw CSS
@@ -38,7 +38,7 @@
  * @see
  * {@link Editor}
  * {@link Editor.loadFromSVG}
- * {@link DropdownToolbar.addActionButton }
+ * {@link AbstractToolbar.addActionButton }
  *
  * @packageDocumentation
  */
