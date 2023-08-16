@@ -156,7 +156,7 @@ export default abstract class AbstractToolbar {
 	}
 
 	protected closeColorPickers() {
-		closeColoris();
+		closeColoris?.();
 	}
 
 	protected getWidgetUniqueId(widget: BaseWidget) {
