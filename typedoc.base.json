@@ -10,7 +10,6 @@
 	"excludeInternal": true,
 	"includeVersion": true,
 	"commentStyle": "all",
-	"readme": "README.md",
 	"entryPointStrategy": "expand",
 	"tsconfig": "tsconfig-typedoc.json",
 
