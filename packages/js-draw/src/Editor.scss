@@ -32,10 +32,12 @@
 	// Used for shadows
 	--primary-shadow-color: rgba(0, 0, 0, 0.5);
 
-	// Color used for some button foregrounds
-	--primary-action-foreground-color: color-mix(
-		in srgb, var(--primary-foreground-color), #0070ea
-	);
+	// Color used for some button/input foregrounds
+	--primary-action-foreground-color: #2070d0;
+
+	input {
+		accent-color: var(--primary-action-foreground-color);
+	}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -53,6 +55,8 @@
 		--selection-foreground-color: white;
 		--primary-shadow-color: rgba(250, 250, 250, 0.5);
 		--primary-background-color-transparent: rgba(50, 50, 50, 0.5);
+
+		--primary-action-foreground-color: #7ae;
 	}
 }
 
