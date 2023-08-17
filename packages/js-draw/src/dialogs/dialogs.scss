@@ -12,8 +12,8 @@
 	z-index: 3;
 
 	// Fill the editor
-	width: inherit;
-	height: inherit;
+	width: var(--editor-current-width-px);
+	height: var(--editor-current-height-px);
 
 	display: flex;
 	flex-direction: column-reverse;
