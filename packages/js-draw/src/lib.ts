@@ -25,12 +25,12 @@
  *   `);
  *
  *   toolbar.addActionButton({
- *      label: 'Save',
- *      icon: editor.icons.makeSaveIcon(),
+ *     label: 'Save',
+ *     icon: editor.icons.makeSaveIcon(),
  *   }, () => {
- *       const saveData = editor.toSVG().outerHTML;
+ *     const saveData = editor.toSVG().outerHTML;
  *
- *       // Do something with saveData
+ *     // Do something with saveData
  *   });
  * })();
  * ```

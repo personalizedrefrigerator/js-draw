@@ -1054,12 +1054,12 @@ export class Editor {
 			return;
 		}
 
-		// Draw a rectangle around the region that will be visible on save
 		const renderer = this.display.getDryInkRenderer();
 
 		this.image.renderWithCache(renderer, this.display.getCache(), this.viewport);
 
 		if (showImageBounds) {
+			// Draw a rectangle around the region that will be visible on save
 			const exportRectFill = { fill: Color4.fromHex('#44444455') };
 			const exportRectStrokeWidth = 5 * this.viewport.getSizeOfPixelOnCanvas();
 			renderer.drawRect(

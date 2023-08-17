@@ -73,6 +73,6 @@ The coding style is, for the most part, enforced by a pre-commit hook.
 
 Because `js-draw` was originally created as a part of a pull request for the Joplin note-taking app,
 [it mostly follows Joplin's style guide](https://github.com/laurent22/joplin/blob/dev/readme/coding_style.md),
-with the exception that TypeDoc-style comments (`/** */`) are permitted for documentation.
+with the exception that TypeDoc-style comments (`/** */`) are encouraged for documentation.
 
 Note that `//`-style comments can also be used for documentation.

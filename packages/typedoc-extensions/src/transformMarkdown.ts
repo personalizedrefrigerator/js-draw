@@ -8,7 +8,7 @@ const transformMarkdown = (markdown: string) => {
 	const nodes = parseMarkdown(markdown);
 	const transformedMarkdown = [];
 
-	const runnableExp = /^(ts|js),runnable/;
+	const runnableExp = /^(ts|js),runnable(,console)?/;
 
 	for (const node of nodes) {
 		if (node.type === RegionType.Math) {
@@ -22,10 +22,13 @@ const transformMarkdown = (markdown: string) => {
 			const runnableMatch = runnableExp.exec(node.content)!;
 			const content = node.content.substring(runnableMatch[0].length);
 
+			const mode = (runnableMatch[2] ?? ',html').substring(1);
+
 			transformedMarkdown.push(
 				`<textarea 
 					class="runnable-code"
-					data--mode="${runnableMatch[1]}"
+					data--lang="${htmlEscape(runnableMatch[1] ?? '')}"
+					data--mode="${htmlEscape(mode)}"
 					spellcheck="false"
 				>${
 	htmlEscape(content)

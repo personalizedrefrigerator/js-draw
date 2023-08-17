@@ -1,3 +1,17 @@
+/**
+ * # `@js-draw/math`
+ *
+ * @example
+ *
+ * ```ts,runnable,console
+ * import { Vec3 } from '@js-draw/math';
+ * console.log(Vec3.of(1, 2, 3).plus(Vec3.of(0, 1, 0)));
+ * console.log(Vec3.of(1, 2, 3).times(2));
+ * ```
+ *
+ * @packageDocumentation
+ */
+
 export { default as LineSegment2 } from './shapes/LineSegment2';
 export {
 	default as Path,

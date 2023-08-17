@@ -64,10 +64,29 @@ const initRunnableElements = async () => {
 				<!DOCTYPE html>
 				<html>
 					<head>
+						<style>
+							:root.console-view {
+								background-color: #222;
+								color: white;
+							}
+
+							:root.console-view body > div {
+								margin-bottom: 5px;
+
+								font-family: monospace;
+								white-space: pre-wrap;
+							}
+
+							:root.console-view body > div.error {
+								margin-bottom: 5px;
+								color: red;
+							}
+						</style>
 					</head>
 					<body>
 					</body>
 					<script>
+						window.mode = ${JSON.stringify(runnable.getAttribute('data--mode'))};
 						${iframePreviewSetup}
 					</script>
 					<script>
