@@ -40,15 +40,15 @@ const makeGridSelector = <ChoiceIdType> (
 
 	const selectedValue = MutableReactiveValue.fromInitialValue(defaultId);
 
-	const scrollingContainer = document.createElement('div');
-	scrollingContainer.setAttribute('role', 'menu');
-	scrollingContainer.id = `${toolbarCSSPrefix}-grid-select-id-${idCounter++}`;
+	const menuContainer = document.createElement('div');
+	menuContainer.setAttribute('role', 'menu');
+	menuContainer.id = `${toolbarCSSPrefix}-grid-select-id-${idCounter++}`;
 
-	stopPropagationOfScrollingWheelEvents(scrollingContainer);
+	stopPropagationOfScrollingWheelEvents(menuContainer);
 
 	const label = document.createElement('label');
 	label.innerText = labelText;
-	label.htmlFor = scrollingContainer.id;
+	label.htmlFor = menuContainer.id;
 	outerContainer.appendChild(label);
 
 	// All buttons in a radiogroup need the same name attribute.
@@ -112,18 +112,12 @@ const makeGridSelector = <ChoiceIdType> (
 		};
 
 		buttonContainer.replaceChildren(button, labelContainer);
-		scrollingContainer.appendChild(buttonContainer);
+		menuContainer.appendChild(buttonContainer);
 
 		// Set whether the current button is checked
 		const setChecked = (checked: boolean) => {
 			button.checked = checked;
 			updateButtonCSS();
-
-			if (checked) {
-				// Some environments (e.g. jsdom) don't support .scrollIntoView.
-				// Only call it if it exists.
-				button.scrollIntoView?.();
-			}
 		};
 		setChecked(false);
 
@@ -148,7 +142,7 @@ const makeGridSelector = <ChoiceIdType> (
 	// However, it is still possible that selectedValue does not correspond
 	// to a choice in `choices`. This is acceptable.
 
-	outerContainer.appendChild(scrollingContainer);
+	outerContainer.appendChild(menuContainer);
 
 	selectedValue.onUpdateAndNow(choiceId => {
 		for (let i = 0; i < buttons.length; i++) {
