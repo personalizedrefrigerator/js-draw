@@ -28,6 +28,12 @@
 .color-input-container {
 	display: inline-flex;
 	flex-direction: row;
+
+	&.picker-open .clr-field {
+		// Work around what seems to be a Coloris bug -- clicking on the input button
+		// keeps the color picker open (while clicking anywhere else closes the picker).
+		pointer-events: none;
+	}
 }
 
 $pipette-button-size: 30px;

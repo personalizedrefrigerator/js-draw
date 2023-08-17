@@ -60,6 +60,7 @@ export const makeColorInput = (
 			open: true,
 		});
 		pipetteController.cancel();
+		colorInputContainer.classList.add('picker-open');
 
 		// Focus the Coloris color picker, if it exists.
 		// Don't focus the text input within the color picker, however,
@@ -78,6 +79,8 @@ export const makeColorInput = (
 
 		// Restore focus to the input that opened the color picker
 		colorInput.focus();
+
+		colorInputContainer.classList.remove('picker-open');
 	};
 	colorInput.addEventListener('close', () => {
 		onClose();
