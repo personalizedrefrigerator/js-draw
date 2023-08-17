@@ -89,8 +89,8 @@ body:
     id: translation-inputAltText
     attributes:
       label: "inputAltText"
-      description: "Translate `Alt text: `."
-      placeholder: "Alt text: "
+      description: "Translate `Alt text`."
+      placeholder: "Alt text"
       value: "Alt-Text: "
     validations:
       required: false
@@ -98,9 +98,21 @@ body:
     id: translation-chooseFile
     attributes:
       label: "chooseFile"
-      description: "Translate `Choose file: `."
-      placeholder: "Choose file: "
+      description: "Translate `Choose file`."
+      placeholder: "Choose file"
       value: "Wähle Datei: "
+    validations:
+      required: false
+  - type: input
+    id: translation-dragAndDropHereOrBrowse
+    attributes:
+      label: "dragAndDropHereOrBrowse"
+      description: "Translate `Drag and drop here
+or
+{{browse}}`."
+      placeholder: "Drag and drop here
+or
+{{browse}}"
     validations:
       required: false
   - type: input
@@ -134,8 +146,8 @@ body:
     id: translation-thicknessLabel
     attributes:
       label: "thicknessLabel"
-      description: "Translate `Thickness: `."
-      placeholder: "Thickness: "
+      description: "Translate `Thickness`."
+      placeholder: "Thickness"
       value: "Dicke: "
     validations:
       required: false
@@ -143,8 +155,8 @@ body:
     id: translation-colorLabel
     attributes:
       label: "colorLabel"
-      description: "Translate `Color: `."
-      placeholder: "Color: "
+      description: "Translate `Color`."
+      placeholder: "Color"
       value: "Farbe: "
     validations:
       required: false
@@ -152,8 +164,8 @@ body:
     id: translation-fontLabel
     attributes:
       label: "fontLabel"
-      description: "Translate `Font: `."
-      placeholder: "Font: "
+      description: "Translate `Font`."
+      placeholder: "Font"
       value: "Schriftart: "
     validations:
       required: false
@@ -161,8 +173,8 @@ body:
     id: translation-textSize
     attributes:
       label: "textSize"
-      description: "Translate `Size: `."
-      placeholder: "Size: "
+      description: "Translate `Size`."
+      placeholder: "Size"
       value: "Größe: "
     validations:
       required: false
@@ -212,12 +224,20 @@ body:
     validations:
       required: false
   - type: input
-    id: translation-selectPenType
+    id: translation-selectPenTip
     attributes:
-      label: "selectPenType"
-      description: "Translate `Pen type: `."
-      placeholder: "Pen type: "
+      label: "selectPenTip"
+      description: "Translate `Pen tip`."
+      placeholder: "Pen tip"
       value: "Objekt-Typ: "
+    validations:
+      required: false
+  - type: input
+    id: translation-selectShape
+    attributes:
+      label: "selectShape"
+      description: "Translate `Shape`."
+      placeholder: "Shape"
     validations:
       required: false
   - type: input
@@ -268,8 +288,8 @@ body:
     id: translation-backgroundColor
     attributes:
       label: "backgroundColor"
-      description: "Translate `Background Color: `."
-      placeholder: "Background Color: "
+      description: "Translate `Background color`."
+      placeholder: "Background color"
       value: "Hintergrundfarbe: "
     validations:
       required: false
@@ -277,8 +297,8 @@ body:
     id: translation-imageWidthOption
     attributes:
       label: "imageWidthOption"
-      description: "Translate `Width: `."
-      placeholder: "Width: "
+      description: "Translate `Width`."
+      placeholder: "Width"
       value: "Breite: "
     validations:
       required: false
@@ -286,8 +306,8 @@ body:
     id: translation-imageHeightOption
     attributes:
       label: "imageHeightOption"
-      description: "Translate `Height: `."
-      placeholder: "Height: "
+      description: "Translate `Height`."
+      placeholder: "Height"
       value: "Höhe: "
     validations:
       required: false
@@ -295,8 +315,8 @@ body:
     id: translation-useGridOption
     attributes:
       label: "useGridOption"
-      description: "Translate `Grid: `."
-      placeholder: "Grid: "
+      description: "Translate `Grid`."
+      placeholder: "Grid"
       value: "Gitter: "
     validations:
       required: false
@@ -310,6 +330,22 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-about
+    attributes:
+      label: "about"
+      description: "Translate `About`."
+      placeholder: "About"
+    validations:
+      required: false
+  - type: input
+    id: translation-inputStabilization
+    attributes:
+      label: "inputStabilization"
+      description: "Translate `Input stabilization`."
+      placeholder: "Input stabilization"
+    validations:
+      required: false
+  - type: input
     id: translation-touchPanning
     attributes:
       label: "touchPanning"
@@ -319,20 +355,20 @@ body:
     validations:
       required: false
   - type: input
-    id: translation-freehandPen
+    id: translation-roundedTipPen
     attributes:
-      label: "freehandPen"
-      description: "Translate `Freehand`."
-      placeholder: "Freehand"
+      label: "roundedTipPen"
+      description: "Translate `Round`."
+      placeholder: "Round"
       value: "Freihand"
     validations:
       required: false
   - type: input
-    id: translation-pressureSensitiveFreehandPen
+    id: translation-flatTipPen
     attributes:
-      label: "pressureSensitiveFreehandPen"
-      description: "Translate `Freehand (pressure sensitive)`."
-      placeholder: "Freehand (pressure sensitive)"
+      label: "flatTipPen"
+      description: "Translate `Flat`."
+      placeholder: "Flat"
       value: "Stift (druckempfindlich)"
     validations:
       required: false
@@ -373,6 +409,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-outlinedCirclePen
+    attributes:
+      label: "outlinedCirclePen"
+      description: "Translate `Outlined circle`."
+      placeholder: "Outlined circle"
+    validations:
+      required: false
+  - type: input
     id: translation-lockRotation
     attributes:
       label: "lockRotation"
@@ -391,48 +435,57 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-closeSidebar
+    attributes:
+      label: "closeSidebar"
+      description: "Translate ``(toolName) => `Close sidebar for ${toolName}` ``."
+      placeholder: "(toolName) => `Close sidebar for ${toolName}`"
+      value: "(toolName) => `Close sidebar for ${toolName}`"
+    validations:
+      required: false
+  - type: input
     id: translation-dropdownShown
     attributes:
       label: "dropdownShown"
-      description: "Translate `function (toolName) { return \"Dropdown for \".concat(toolName, \" shown\"); }`."
-      placeholder: "function (toolName) { return \"Dropdown for \".concat(toolName, \" shown\"); }"
-      value: "function (toolName) { return \"Dropdown-Men\\u00FC f\\u00FCr \".concat(toolName, \" angezeigt\"); }"
+      description: "Translate ``(toolName) => `Menu for ${toolName} shown` ``."
+      placeholder: "(toolName) => `Menu for ${toolName} shown`"
+      value: "(toolName) => `Dropdown-Menü für ${toolName} angezeigt`"
     validations:
       required: false
   - type: input
     id: translation-dropdownHidden
     attributes:
       label: "dropdownHidden"
-      description: "Translate `function (toolName) { return \"Dropdown for \".concat(toolName, \" hidden\"); }`."
-      placeholder: "function (toolName) { return \"Dropdown for \".concat(toolName, \" hidden\"); }"
-      value: "function (toolName) { return \"Dropdown-Men\\u00FC f\\u00FCr \".concat(toolName, \" versteckt\"); }"
+      description: "Translate ``(toolName) => `Menu for ${toolName} hidden` ``."
+      placeholder: "(toolName) => `Menu for ${toolName} hidden`"
+      value: "(toolName) => `Dropdown-Menü für ${toolName} versteckt`"
     validations:
       required: false
   - type: input
     id: translation-zoomLevel
     attributes:
       label: "zoomLevel"
-      description: "Translate `function (zoomPercent) { return \"Zoom: \".concat(zoomPercent, \"%\"); }`."
-      placeholder: "function (zoomPercent) { return \"Zoom: \".concat(zoomPercent, \"%\"); }"
-      value: "function (zoomPercent) { return \"Verg\\u00F6\\u00DFerung: \".concat(zoomPercent, \"%\"); }"
+      description: "Translate ``(zoomPercent) => `Zoom: ${zoomPercent}%` ``."
+      placeholder: "(zoomPercent) => `Zoom: ${zoomPercent}%`"
+      value: "(zoomPercent) => `Vergößerung: ${zoomPercent}%`"
     validations:
       required: false
   - type: input
     id: translation-colorChangedAnnouncement
     attributes:
       label: "colorChangedAnnouncement"
-      description: "Translate `function (color) { return \"Color changed to \".concat(color); }`."
-      placeholder: "function (color) { return \"Color changed to \".concat(color); }"
-      value: "function (color) { return \"Farbe zu \".concat(color, \" ge\\u00E4ndert\"); }"
+      description: "Translate ``(color) => `Color changed to ${color}` ``."
+      placeholder: "(color) => `Color changed to ${color}`"
+      value: "(color) => `Farbe zu ${color} geändert`"
     validations:
       required: false
   - type: input
     id: translation-imageSize
     attributes:
       label: "imageSize"
-      description: "Translate `function (size, units) { return \"Image size: \".concat(size, \" \").concat(units); }`."
-      placeholder: "function (size, units) { return \"Image size: \".concat(size, \" \").concat(units); }"
-      value: "function (size, units) { return \"Bild-Gr\\u00F6\\u00DFe: \".concat(size, \" \").concat(units); }"
+      description: "Translate ``(size, units) => `Image size: ${size} ${units}` ``."
+      placeholder: "(size, units) => `Image size: ${size} ${units}`"
+      value: "(size, units) => `Bild-Größe: ${size} ${units}`"
     validations:
       required: false
   - type: input
@@ -448,18 +501,18 @@ body:
     id: translation-imageLoadError
     attributes:
       label: "imageLoadError"
-      description: "Translate `function (message) { return \"Error loading image: \".concat(message); }`."
-      placeholder: "function (message) { return \"Error loading image: \".concat(message); }"
-      value: "function (message) { return \"Fehler beim Laden des Bildes: \".concat(message); }"
+      description: "Translate ``(message) => `Error loading image: ${message}` ``."
+      placeholder: "(message) => `Error loading image: ${message}`"
+      value: "(message) => `Fehler beim Laden des Bildes: ${message}`"
     validations:
       required: false
   - type: input
     id: translation-penTool
     attributes:
       label: "penTool"
-      description: "Translate `function (penId) { return \"Pen \".concat(penId); }`."
-      placeholder: "function (penId) { return \"Pen \".concat(penId); }"
-      value: "function (penNumber) { return \"Stift \".concat(penNumber); }"
+      description: "Translate ``(penId) => `Pen ${penId}` ``."
+      placeholder: "(penId) => `Pen ${penId}`"
+      value: "(penNumber) => `Stift ${penNumber}`"
     validations:
       required: false
   - type: input
@@ -606,6 +659,14 @@ body:
     validations:
       required: false
   - type: input
+    id: translation-soundExplorerUsageAnnouncement
+    attributes:
+      label: "soundExplorerUsageAnnouncement"
+      description: "Translate `Sound-based image exploration enabled: Click/drag the screen to play a sound representation of different parts of the image.`."
+      placeholder: "Sound-based image exploration enabled: Click/drag the screen to play a sound representation of different parts of the image."
+    validations:
+      required: false
+  - type: input
     id: translation-findLabel
     attributes:
       label: "findLabel"
@@ -624,9 +685,9 @@ body:
     validations:
       required: false
   - type: input
-    id: translation-closeFindDialog
+    id: translation-closeDialog
     attributes:
-      label: "closeFindDialog"
+      label: "closeDialog"
       description: "Translate `Close`."
       placeholder: "Close"
       value: "Schließen"
@@ -654,9 +715,9 @@ body:
     id: translation-focusedFoundText
     attributes:
       label: "focusedFoundText"
-      description: "Translate `function (matchIdx, totalMatches) { return \"Viewing match \".concat(matchIdx, \" of \").concat(totalMatches); }`."
-      placeholder: "function (matchIdx, totalMatches) { return \"Viewing match \".concat(matchIdx, \" of \").concat(totalMatches); }"
-      value: "function (matchIdx, totalMatches) { return \"Sieh Treffer \".concat(matchIdx, \" von \").concat(totalMatches, \" an\"); }"
+      description: "Translate ``(matchIdx, totalMatches) => `Viewing match ${matchIdx} of ${totalMatches}` ``."
+      placeholder: "(matchIdx, totalMatches) => `Viewing match ${matchIdx} of ${totalMatches}`"
+      value: "(matchIdx, totalMatches) => `Sieh Treffer ${matchIdx} von ${totalMatches} an`"
     validations:
       required: false
   - type: input
@@ -672,36 +733,36 @@ body:
     id: translation-copied
     attributes:
       label: "copied"
-      description: "Translate `function (count, description) { return \"Copied \".concat(count, \" \").concat(description); }`."
-      placeholder: "function (count, description) { return \"Copied \".concat(count, \" \").concat(description); }"
-      value: "function (count, description) { return \"\".concat(count, \" \").concat(description, \" kopiert\"); }"
+      description: "Translate ``(count, description) => `Copied ${count} ${description}` ``."
+      placeholder: "(count, description) => `Copied ${count} ${description}`"
+      value: "(count, description) => `${count} ${description} kopiert`"
     validations:
       required: false
   - type: input
     id: translation-pasted
     attributes:
       label: "pasted"
-      description: "Translate `function (count, description) { return \"Pasted \".concat(count, \" \").concat(description); }`."
-      placeholder: "function (count, description) { return \"Pasted \".concat(count, \" \").concat(description); }"
-      value: "function (count, description) { return \"\".concat(count, \" \").concat(description, \" eingef\\u00FCgt\"); }"
+      description: "Translate ``(count, description) => `Pasted ${count} ${description}` ``."
+      placeholder: "(count, description) => `Pasted ${count} ${description}`"
+      value: "(count, description) => `${count} ${description} eingefügt`"
     validations:
       required: false
   - type: input
     id: translation-toolEnabledAnnouncement
     attributes:
       label: "toolEnabledAnnouncement"
-      description: "Translate `function (toolName) { return \"\".concat(toolName, \" enabled\"); }`."
-      placeholder: "function (toolName) { return \"\".concat(toolName, \" enabled\"); }"
-      value: "function (toolName) { return \"\".concat(toolName, \" aktiviert\"); }"
+      description: "Translate ``(toolName) => `${toolName} enabled` ``."
+      placeholder: "(toolName) => `${toolName} enabled`"
+      value: "(toolName) => `${toolName} aktiviert`"
     validations:
       required: false
   - type: input
     id: translation-toolDisabledAnnouncement
     attributes:
       label: "toolDisabledAnnouncement"
-      description: "Translate `function (toolName) { return \"\".concat(toolName, \" disabled\"); }`."
-      placeholder: "function (toolName) { return \"\".concat(toolName, \" disabled\"); }"
-      value: "function (toolName) { return \"\".concat(toolName, \" deaktiviert\"); }"
+      description: "Translate ``(toolName) => `${toolName} disabled` ``."
+      placeholder: "(toolName) => `${toolName} disabled`"
+      value: "(toolName) => `${toolName} deaktiviert`"
     validations:
       required: false
   - type: input
@@ -717,63 +778,63 @@ body:
     id: translation-transformedElements
     attributes:
       label: "transformedElements"
-      description: "Translate `function (elemCount) { return \"Transformed \".concat(elemCount, \" element\").concat(elemCount === 1 ? '' : 's'); }`."
-      placeholder: "function (elemCount) { return \"Transformed \".concat(elemCount, \" element\").concat(elemCount === 1 ? '' : 's'); }"
-      value: "function (elemCount) { return \"\".concat(elemCount, \" Element\").concat(1 === elemCount ? '' : 'e', \" transformiert\"); }"
+      description: "Translate ``(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}` ``."
+      placeholder: "(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`"
+      value: "(elemCount) => `${elemCount} Element${1 === elemCount ? '' : 'e'} transformiert`"
     validations:
       required: false
   - type: input
     id: translation-resizeOutputCommand
     attributes:
       label: "resizeOutputCommand"
-      description: "Translate `function (newSize) { return \"Resized image to \".concat(newSize.w, \"x\").concat(newSize.h); }`."
-      placeholder: "function (newSize) { return \"Resized image to \".concat(newSize.w, \"x\").concat(newSize.h); }"
-      value: "function (newSize) { return \"Bildgr\\u00F6\\u00DFe auf \".concat(newSize.w, \"x\").concat(newSize.h, \" ge\\u00E4ndert\"); }"
+      description: "Translate ``(newSize) => `Resized image to ${newSize.w}x${newSize.h}` ``."
+      placeholder: "(newSize) => `Resized image to ${newSize.w}x${newSize.h}`"
+      value: "(newSize) => `Bildgröße auf ${newSize.w}x${newSize.h} geändert`"
     validations:
       required: false
   - type: input
     id: translation-addElementAction
     attributes:
       label: "addElementAction"
-      description: "Translate `function (componentDescription) { return \"Added \".concat(componentDescription); }`."
-      placeholder: "function (componentDescription) { return \"Added \".concat(componentDescription); }"
-      value: "function (componentDescription) { return \"\".concat(componentDescription, \" hinzugef\\u00FCgt\"); }"
+      description: "Translate ``(componentDescription) => `Added ${componentDescription}` ``."
+      placeholder: "(componentDescription) => `Added ${componentDescription}`"
+      value: "(componentDescription) => `${componentDescription} hinzugefügt`"
     validations:
       required: false
   - type: input
     id: translation-eraseAction
     attributes:
       label: "eraseAction"
-      description: "Translate `function (componentDescription, numElems) { return \"Erased \".concat(numElems, \" \").concat(componentDescription); }`."
-      placeholder: "function (componentDescription, numElems) { return \"Erased \".concat(numElems, \" \").concat(componentDescription); }"
-      value: "function (elemDescription, countErased) { return \"\".concat(countErased, \" \").concat(elemDescription, \" gel\\u00F6scht\"); }"
+      description: "Translate ``(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}` ``."
+      placeholder: "(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`"
+      value: "(elemDescription, countErased) => `${countErased} ${elemDescription} gelöscht`"
     validations:
       required: false
   - type: input
     id: translation-duplicateAction
     attributes:
       label: "duplicateAction"
-      description: "Translate `function (componentDescription, numElems) { return \"Duplicated \".concat(numElems, \" \").concat(componentDescription); }`."
-      placeholder: "function (componentDescription, numElems) { return \"Duplicated \".concat(numElems, \" \").concat(componentDescription); }"
-      value: "function (elemDescription, countErased) { return \"\".concat(countErased, \" \").concat(elemDescription, \" dupliziert\"); }"
+      description: "Translate ``(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}` ``."
+      placeholder: "(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}`"
+      value: "(elemDescription, countErased) => `${countErased} ${elemDescription} dupliziert`"
     validations:
       required: false
   - type: input
     id: translation-unionOf
     attributes:
       label: "unionOf"
-      description: "Translate `function (actionDescription, actionCount) { return \"Union: \".concat(actionCount, \" \").concat(actionDescription); }`."
-      placeholder: "function (actionDescription, actionCount) { return \"Union: \".concat(actionCount, \" \").concat(actionDescription); }"
-      value: "function (actionDescription, actionCount) { return \"Vereinigung: \".concat(actionCount, \" \").concat(actionDescription); }"
+      description: "Translate ``(actionDescription, actionCount) => `Union: ${actionCount} ${actionDescription}` ``."
+      placeholder: "(actionDescription, actionCount) => `Union: ${actionCount} ${actionDescription}`"
+      value: "(actionDescription, actionCount) => `Vereinigung: ${actionCount} ${actionDescription}`"
     validations:
       required: false
   - type: input
     id: translation-inverseOf
     attributes:
       label: "inverseOf"
-      description: "Translate `function (actionDescription) { return \"Inverse of \".concat(actionDescription); }`."
-      placeholder: "function (actionDescription) { return \"Inverse of \".concat(actionDescription); }"
-      value: "function (actionDescription) { return \"\".concat(actionDescription, \" umgekehrt\"); }"
+      description: "Translate ``(actionDescription) => `Inverse of ${actionDescription}` ``."
+      placeholder: "(actionDescription) => `Inverse of ${actionDescription}`"
+      value: "(actionDescription) => `${actionDescription} umgekehrt`"
     validations:
       required: false
   - type: input
@@ -807,9 +868,9 @@ body:
     id: translation-rotatedBy
     attributes:
       label: "rotatedBy"
-      description: "Translate `function (degrees) { return \"Rotated by \".concat(Math.abs(degrees), \" degrees \").concat(degrees < 0 ? 'clockwise' : 'counter-clockwise'); }`."
-      placeholder: "function (degrees) { return \"Rotated by \".concat(Math.abs(degrees), \" degrees \").concat(degrees < 0 ? 'clockwise' : 'counter-clockwise'); }"
-      value: "function (degrees) { return \"\".concat(Math.abs(degrees), \" Grad \").concat(degrees < 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn', \" gedreht\"); }"
+      description: "Translate ``(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}` ``."
+      placeholder: "(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`"
+      value: "(degrees) => `${Math.abs(degrees)} Grad ${degrees < 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn'} gedreht`"
     validations:
       required: false
   - type: input
@@ -870,9 +931,9 @@ body:
     id: translation-selectedElements
     attributes:
       label: "selectedElements"
-      description: "Translate `function (count) { return \"Selected \".concat(count, \" element\").concat(count === 1 ? '' : 's'); }`."
-      placeholder: "function (count) { return \"Selected \".concat(count, \" element\").concat(count === 1 ? '' : 's'); }"
-      value: "function (count) { return \"\".concat(count, \" Element\").concat(1 === count ? '' : 'e', \" ausgew\\u00E4hlt\"); }"
+      description: "Translate ``(count) => `Selected ${count} element${count === 1 ? '' : 's'}` ``."
+      placeholder: "(count) => `Selected ${count} element${count === 1 ? '' : 's'}`"
+      value: "(count) => `${count} Element${1 === count ? '' : 'e'} ausgewählt`"
     validations:
       required: false
   - type: input
@@ -923,72 +984,72 @@ body:
     id: translation-filledBackgroundWithColor
     attributes:
       label: "filledBackgroundWithColor"
-      description: "Translate `function (color) { return \"Filled background (\".concat(color, \")\"); }`."
-      placeholder: "function (color) { return \"Filled background (\".concat(color, \")\"); }"
-      value: "function (color) { return \"Gef\\u00FCllter Hintergrund (\".concat(color, \")\"); }"
+      description: "Translate ``(color) => `Filled background (${color})` ``."
+      placeholder: "(color) => `Filled background (${color})`"
+      value: "(color) => `Gefüllter Hintergrund (${color})`"
     validations:
       required: false
   - type: input
     id: translation-text
     attributes:
       label: "text"
-      description: "Translate `function (text) { return \"Text object: \".concat(text); }`."
-      placeholder: "function (text) { return \"Text object: \".concat(text); }"
-      value: "function (text) { return \"Text-Objekt: \".concat(text); }"
+      description: "Translate ``(text) => `Text object: ${text}` ``."
+      placeholder: "(text) => `Text object: ${text}`"
+      value: "(text) => `Text-Objekt: ${text}`"
     validations:
       required: false
   - type: input
     id: translation-imageNode
     attributes:
       label: "imageNode"
-      description: "Translate `function (label) { return \"Image: \".concat(label); }`."
-      placeholder: "function (label) { return \"Image: \".concat(label); }"
-      value: "function (label) { return \"Bild: \".concat(label); }"
+      description: "Translate ``(label) => `Image: ${label}` ``."
+      placeholder: "(label) => `Image: ${label}`"
+      value: "label => `Bild: ${label}`"
     validations:
       required: false
   - type: input
     id: translation-restyledElement
     attributes:
       label: "restyledElement"
-      description: "Translate `function (elementDescription) { return \"Restyled \".concat(elementDescription); }`."
-      placeholder: "function (elementDescription) { return \"Restyled \".concat(elementDescription); }"
-      value: "function (elementDescription) { return \"\".concat(elementDescription, \" umgestaltet\"); }"
+      description: "Translate ``(elementDescription) => `Restyled ${elementDescription}` ``."
+      placeholder: "(elementDescription) => `Restyled ${elementDescription}`"
+      value: "(elementDescription) => `${elementDescription} umgestaltet`"
     validations:
       required: false
   - type: input
     id: translation-pathNodeCount
     attributes:
       label: "pathNodeCount"
-      description: "Translate `function (count) { return \"There are \".concat(count, \" visible path objects.\"); }`."
-      placeholder: "function (count) { return \"There are \".concat(count, \" visible path objects.\"); }"
-      value: "function (count) { return \"Es gibt \".concat(count, \" sichtbare Pfad-Objekte.\"); }"
+      description: "Translate ``(count) => `There are ${count} visible path objects.` ``."
+      placeholder: "(count) => `There are ${count} visible path objects.`"
+      value: "(count) => `Es gibt ${count} sichtbare Pfad-Objekte.`"
     validations:
       required: false
   - type: input
     id: translation-textNodeCount
     attributes:
       label: "textNodeCount"
-      description: "Translate `function (count) { return \"There are \".concat(count, \" visible text nodes.\"); }`."
-      placeholder: "function (count) { return \"There are \".concat(count, \" visible text nodes.\"); }"
-      value: "function (count) { return \"Es gibt \".concat(count, \" sichtbare Text-Knotenpunkte.\"); }"
+      description: "Translate ``(count) => `There are ${count} visible text nodes.` ``."
+      placeholder: "(count) => `There are ${count} visible text nodes.`"
+      value: "(count) => `Es gibt ${count} sichtbare Text-Knotenpunkte.`"
     validations:
       required: false
   - type: input
     id: translation-imageNodeCount
     attributes:
       label: "imageNodeCount"
-      description: "Translate `function (nodeCount) { return \"There are \".concat(nodeCount, \" visible image nodes.\"); }`."
-      placeholder: "function (nodeCount) { return \"There are \".concat(nodeCount, \" visible image nodes.\"); }"
-      value: "function (nodeCount) { return \"Es gibt \".concat(nodeCount, \" sichtbare Bild-Knoten.\"); }"
+      description: "Translate ``(nodeCount) => `There are ${nodeCount} visible image nodes.` ``."
+      placeholder: "(nodeCount) => `There are ${nodeCount} visible image nodes.`"
+      value: "(nodeCount) => `Es gibt ${nodeCount} sichtbare Bild-Knoten.`"
     validations:
       required: false
   - type: input
     id: translation-textNode
     attributes:
       label: "textNode"
-      description: "Translate `function (content) { return \"Text: \".concat(content); }`."
-      placeholder: "function (content) { return \"Text: \".concat(content); }"
-      value: "function (content) { return \"Text: \".concat(content); }"
+      description: "Translate ``(content) => `Text: ${content}` ``."
+      placeholder: "(content) => `Text: ${content}`"
+      value: "(content) => `Text: ${content}`"
     validations:
       required: false
   - type: input
@@ -1013,9 +1074,9 @@ body:
     id: translation-loading
     attributes:
       label: "loading"
-      description: "Translate `function (percentage) { return \"Loading \".concat(percentage, \"%...\"); }`."
-      placeholder: "function (percentage) { return \"Loading \".concat(percentage, \"%...\"); }"
-      value: "function (percentage) { return \"Laden \".concat(percentage, \"%...\"); }"
+      description: "Translate ``(percentage) => `Loading ${percentage}%...` ``."
+      placeholder: "(percentage) => `Loading ${percentage}%...`"
+      value: "percentage => `Laden ${percentage}%...`"
     validations:
       required: false
   - type: input
@@ -1040,18 +1101,18 @@ body:
     id: translation-undoAnnouncement
     attributes:
       label: "undoAnnouncement"
-      description: "Translate `function (commandDescription) { return \"Undid \".concat(commandDescription); }`."
-      placeholder: "function (commandDescription) { return \"Undid \".concat(commandDescription); }"
-      value: "function (commandDescription) { return \"\".concat(commandDescription, \" r\\u00FCckg\\u00E4ngig gemacht\"); }"
+      description: "Translate ``(commandDescription) => `Undid ${commandDescription}` ``."
+      placeholder: "(commandDescription) => `Undid ${commandDescription}`"
+      value: "(commandDescription) => `${commandDescription} rückgängig gemacht`"
     validations:
       required: false
   - type: input
     id: translation-redoAnnouncement
     attributes:
       label: "redoAnnouncement"
-      description: "Translate `function (commandDescription) { return \"Redid \".concat(commandDescription); }`."
-      placeholder: "function (commandDescription) { return \"Redid \".concat(commandDescription); }"
-      value: "function (commandDescription) { return \"\".concat(commandDescription, \" wiederholt\"); }"
+      description: "Translate ``(commandDescription) => `Redid ${commandDescription}` ``."
+      placeholder: "(commandDescription) => `Redid ${commandDescription}`"
+      value: "(commandDescription) => `${commandDescription} wiederholt`"
     validations:
       required: false
   - type: textarea
