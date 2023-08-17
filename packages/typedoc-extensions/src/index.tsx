@@ -22,7 +22,8 @@ export const load = (app: Application) => {
 	app.renderer.hooks.on('head.end', (event) => {
 		// Additional variable declarations for the browser script
 		const pageVariables = `
-			window.assetsURL = ${JSON.stringify(event.relativeURL('assets/'))}
+			window.assetsURL = ${JSON.stringify(event.relativeURL('assets/'))};
+			window.imagesURL = ${JSON.stringify(event.relativeURL('../img/'))};
 		`;
 
 		return (

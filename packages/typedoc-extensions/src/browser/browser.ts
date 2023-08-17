@@ -5,8 +5,11 @@ import { join } from 'path';
 import typeScriptToJS from '../typeScriptToJS';
 import addCodeMirrorEditor from './addCodeMirrorEditor';
 
+const assetsPath: string = (window as any).assetsURL;
+const imagesPath: string = (window as any).imagesURL;
+
 const loadIframePreviewScript = async () => {
-	const scriptPath = join((window as any).assetsURL, 'js-draw-typedoc-extension--iframe.js');
+	const scriptPath = join(assetsPath, 'js-draw-typedoc-extension--iframe.js');
 
 	const scriptRequest = await fetch(scriptPath);
 	const scriptContent = (await scriptRequest.text());
@@ -15,7 +18,7 @@ const loadIframePreviewScript = async () => {
 	return scriptContent.replace(/<[/]script>/g, '<\\/script>');
 };
 
-window.addEventListener('load', async () => {
+const initRunnableElements = async () => {
 	let iframePreviewSetup: string|null = null; // null if not loaded
 
 	const runnableElements = [...document.querySelectorAll('textarea.runnable-code')] as HTMLTextAreaElement[];
@@ -90,4 +93,21 @@ window.addEventListener('load', async () => {
 		editorContainer.appendChild(button);
 		runnable.replaceWith(editorContainer);
 	}
+};
+
+// Fix image URLs that are relative to the root of the repository
+const fixImageURLs = () => {
+	const images = document.querySelectorAll('img[src^="docs/img/"]') as NodeListOf<HTMLImageElement>;
+	for (const image of images) {
+		// Determine the path to the image relative to the docs/img/ directory
+		const imagePath = image.src.replace(/^.*(docs[/]img[/])/, '');
+		const newSrc = join(imagesPath, imagePath);
+		image.src = newSrc;
+	}
+};
+
+window.addEventListener('DOMContentLoaded', () => fixImageURLs());
+
+window.addEventListener('load', async () => {
+	await initRunnableElements();
 });
