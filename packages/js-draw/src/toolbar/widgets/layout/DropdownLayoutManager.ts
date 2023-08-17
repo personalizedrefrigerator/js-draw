@@ -58,8 +58,8 @@ class Dropdown implements ToolMenu {
 
 	protected repositionDropdown() {
 		const dropdownBBox = this.dropdownContainer.getBoundingClientRect();
-		const screenWidth = document.body.clientWidth;
-		const screenHeight = document.body.clientHeight;
+		const screenWidth = document.scrollingElement?.clientWidth ?? document.body.clientHeight;
+		const screenHeight = document.scrollingElement?.clientHeight ?? document.body.clientHeight;
 
 		let translateX = undefined;
 		let translateY = undefined;
@@ -69,7 +69,8 @@ class Dropdown implements ToolMenu {
 			translateX = `calc(${targetElem.clientWidth + 'px'} - 100%)`;
 		}
 
-		if (dropdownBBox.bottom > screenHeight) {
+		// Shift the dropdown if it's off the screen, but only if doing so moves it on to the screen
+		if (dropdownBBox.bottom > screenHeight && (dropdownBBox.top - dropdownBBox.height > 0)) {
 			const targetElem = this.parent.target;
 			translateY = `calc(-${targetElem.clientHeight}px - 100%)`;
 		}
