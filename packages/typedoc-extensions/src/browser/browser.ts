@@ -89,13 +89,23 @@ const initRunnableElements = async () => {
 			`);
 			doc.close();
 
+
+			const updateHeight = () => {
+				const elem = doc.scrollingElement ?? doc.body;
+				if (previewFrame && elem) {
+					previewFrame.style.height = `${Math.max(100, elem.scrollHeight)}px`;
+				}
+			};
+
+			// The load event doesn't seem to fire in some browsers (Safari/iOS).
+			// Also update the height immediately.
+			updateHeight();
+
 			// After loading, ensure that the preview window is large enough for its content.
 			previewFrame.contentWindow?.addEventListener('load', () => {
 				// Additional time for any async code to run
 				setTimeout(() => {
-					if (previewFrame && doc.scrollingElement) {
-						previewFrame.style.height = `${doc.scrollingElement.scrollHeight}px`;
-					}
+					updateHeight();
 				}, 0);
 			});
 		};
