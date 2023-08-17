@@ -175,6 +175,8 @@ export default abstract class AbstractToolbar {
 	/**
 	 * Adds a spacer.
 	 *
+	 * **Toolbars can choose to ignore calls to `addSpacer`**.
+	 *
 	 * @example
 	 * Adding a save button that moves to the very right edge of the toolbar
 	 * while keeping the other buttons centered:

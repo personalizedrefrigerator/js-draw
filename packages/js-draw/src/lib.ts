@@ -4,7 +4,7 @@
  *
  * @example
  * ```ts,runnable
- * import { Editor, Vec3, Mat33 } from 'js-draw';
+ * import { Editor, Vec3, Mat33, ToolbarWidgetTag } from 'js-draw';
  *
  * // Apply js-draw CSS
  * import 'js-draw/styles';
@@ -14,8 +14,11 @@
  * (async () => {
  *   const editor = new Editor(document.body);
  *   const toolbar = editor.addToolbar();
+ *
+ *   // Increases the minimum height of the editor
  *   editor.getRootElement().style.height = '600px';
  *
+ *   // Loads from SVG data
  *   await editor.loadFromSVG(`
  *       <svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
  *           <style id="js-draw-style-sheet">path{stroke-linecap:round;stroke-linejoin:round;}text{white-space:pre;}</style>
@@ -24,7 +27,11 @@
  *       </svg>
  *   `);
  *
- *   toolbar.addActionButton({
+ *   // Adding tags to a toolbar button allows different styles to be applied.
+ *   // Also see addActionButton.
+ *   const buttonLabels = [ ToolbarWidgetTag.Save ];
+ *
+ *   toolbar.addTaggedActionButton(buttonLabels, {
  *     label: 'Save',
  *     icon: editor.icons.makeSaveIcon(),
  *   }, () => {
