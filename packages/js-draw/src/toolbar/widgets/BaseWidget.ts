@@ -292,9 +292,6 @@ export default abstract class BaseWidget {
 				isToplevel: () => this.toplevel,
 			});
 
-			// Auto-focus this component's button when the dropdown hides --
-			// this ensures that keyboard focus goes to a reasonable location when
-			// the user closes a menu.
 			this.dropdown.visible.onUpdate(visible => {
 				if (visible) {
 					this.container.classList.add('dropdownVisible');
@@ -302,9 +299,11 @@ export default abstract class BaseWidget {
 					this.container.classList.remove('dropdownVisible');
 				}
 
-
+				// Auto-focus this component's button when the dropdown hides --
+				// this ensures that keyboard focus goes to a reasonable location when
+				// the user closes a menu.
 				if (!visible) {
-					this.button.focus();
+					this.focus();
 				}
 			});
 
@@ -319,6 +318,10 @@ export default abstract class BaseWidget {
 
 		parent.appendChild(this.container);
 		return this.container;
+	}
+
+	public focus() {
+		this.button.focus();
 	}
 
 	/**
@@ -391,7 +394,7 @@ export default abstract class BaseWidget {
 	 * In those layout managers, makes this dropdown visible.
 	 */
 	protected activateDropdown() {
-		this.dropdown?.onToolActivated();
+		this.dropdown?.onActivated();
 	}
 
 	/**

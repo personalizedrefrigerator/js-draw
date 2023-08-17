@@ -25,7 +25,7 @@ export interface ToolMenu {
 	readonly visible: ReactiveValue<boolean>;
 
 	/** Note that the tool associated with this dropdown has been activated. */
-	onToolActivated(): void;
+	onActivated(): void;
 
 	/** Adds the given `child` to the content of the dropdown. */
 	appendChild(child: HTMLElement): void;

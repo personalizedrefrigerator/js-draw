@@ -52,7 +52,7 @@ class Dropdown implements ToolMenu {
 		});
 	}
 
-	public onToolActivated(): void {
+	public onActivated(): void {
 		// Do nothing.
 	}
 

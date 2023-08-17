@@ -4,6 +4,12 @@ import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
+import { toolbarCSSPrefix } from '../constants';
+
+const isToolWidgetFocused = () => {
+	const currentFocus = [...document.querySelectorAll('*:focus')];
+	return currentFocus.length && currentFocus.some(elem => elem.classList.contains(`${toolbarCSSPrefix}button`));
+};
 
 export default abstract class BaseToolWidget extends BaseWidget {
 	public constructor(
@@ -21,6 +27,14 @@ export default abstract class BaseToolWidget extends BaseWidget {
 
 			if (toolEvt.tool === targetTool) {
 				this.setSelected(true);
+
+				// Transfer focus to the current button, only if another toolbar button is
+				// focused.
+				// This prevents pressing "space" from triggering a different action when
+				// the current is selected.
+				if (isToolWidgetFocused()) {
+					this.focus();
+				}
 			}
 		});
 

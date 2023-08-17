@@ -38,7 +38,7 @@ export default class EdgeToolbarLayoutManager implements WidgetContentLayoutMana
 
 				this.announceForAccessibility(this.localization.dropdownShown(parent.getTitle()));
 			},
-			onToolActivated: () => {
+			onActivated: () => {
 				// TODO: Only request show when in sidebar mode
 				//result?.requestShow();
 			},
