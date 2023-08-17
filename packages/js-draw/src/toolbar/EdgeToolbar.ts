@@ -151,6 +151,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		if (!this.sidebarVisible.get()) {
 			this.menuContainer.style.display = 'none';
+
+			// Set the initial opacity to 0 to allow the `transition` property
+			// to animate it to 1.
+			this.menuContainer.style.opacity = '0';
 		}
 
 		this.sidebarVisible.onUpdate(visible => {
