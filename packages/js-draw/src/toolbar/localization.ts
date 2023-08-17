@@ -94,7 +94,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	colorSelectionCanceledAnnouncement: 'Color selection canceled',
 	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 	documentProperties: 'Page',
-	backgroundColor: 'Background Color',
+	backgroundColor: 'Background color',
 	imageWidthOption: 'Width',
 	imageHeightOption: 'Height',
 	useGridOption: 'Grid',
