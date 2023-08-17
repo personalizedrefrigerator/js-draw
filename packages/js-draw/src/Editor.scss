@@ -19,7 +19,7 @@
 	// The tertiary foreground/background colors are also used for some
 	// menu/toolbar backgrounds.
 	--tertiary-background-color: #e5e5e5;
-	--tertiary-foreground-color: #2c303a;
+	--tertiary-foreground-color: #1c202a;
 
 	// The selection background/foreground colors are used for selected
 	// buttons.
@@ -33,7 +33,7 @@
 	--primary-shadow-color: rgba(0, 0, 0, 0.5);
 
 	// Color used for some button/input foregrounds
-	--primary-action-foreground-color: #26c;
+	--primary-action-foreground-color: #15b;
 
 	input {
 		accent-color: var(--primary-action-foreground-color);
