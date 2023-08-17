@@ -63,6 +63,9 @@ const codeMirrorHighlightStyle = HighlightStyle.define([
 	{ tag: tags.string, color: 'var(--cm-string-color)' },
 	{ tag: tags.paren, color: 'var(--cm-paren-color)' },
 	{ tag: tags.variableName, color: 'var(--cm-varname-color)' },
+	{ tag: tags.number, color: 'var(--cm-number-color)' },
+	{ tag: tags.integer, color: 'var(--cm-number-color)' },
+	{ tag: tags.float, color: 'var(--cm-number-color)' },
 ]);
 
 const addCodeMirrorEditor = (initialText: string, parent: HTMLElement) => {

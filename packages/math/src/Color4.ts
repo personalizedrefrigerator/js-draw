@@ -304,7 +304,7 @@ export default class Color4 {
 
 	public static transparent = Color4.ofRGBA(0, 0, 0, 0);
 	public static red = Color4.ofRGB(1.0, 0.0, 0.0);
-	public static orange = Color4.ofRGB(1.0, 1.0, 0.0);
+	public static orange = Color4.ofRGB(1.0, 0.65, 0.0);
 	public static green = Color4.ofRGB(0.0, 1.0, 0.0);
 	public static blue = Color4.ofRGB(0.0, 0.0, 1.0);
 	public static purple = Color4.ofRGB(0.5, 0.2, 0.5);
