@@ -1,5 +1,7 @@
 
 /**
+ * # `@js-draw/material-icons`
+ *
  * Provides a material icon theme for `js-draw`.
  *
  * @example

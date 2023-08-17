@@ -28,6 +28,13 @@ const initRunnableElements = async () => {
 		const editorContainer = document.createElement('div');
 		editorContainer.classList.add('runnable-code');
 
+		// Prevent TypeDoc from consuming the '/' key
+		editorContainer.onkeydown = event => {
+			if (event.key === '/') {
+				event.stopPropagation();
+			}
+		};
+
 		const editor = addCodeMirrorEditor(
 			// Multiline code blocks have an extra newline at the end. Remove it.
 			runnable.value.trimEnd(),

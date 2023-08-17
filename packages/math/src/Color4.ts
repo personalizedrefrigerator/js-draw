@@ -200,7 +200,7 @@ export default class Color4 {
 	 * Converts to (hue, saturation, value).
 	 * See also https://en.wikipedia.org/wiki/HSL_and_HSV#General_approach
 	 *
-	 * The resultant hue is represented in radians and is thus in [0, 2pi].
+	 * The resultant hue is represented in radians and is thus in $[0, 2\pi]$.
 	 */
 	public asHSV(): Vec3 {
 		// Ref: https://en.wikipedia.org/wiki/HSL_and_HSV#General_approach
