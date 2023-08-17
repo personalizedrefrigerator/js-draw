@@ -236,6 +236,10 @@
 	padding-top: 5px;
 }
 
+.toolbar-indentedList {
+	padding-left: 10px;
+}
+
 @media print {
 	/* Hide all toolbar elements on print. */
 	.toolbar-element {

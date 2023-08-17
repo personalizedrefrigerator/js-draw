@@ -15,7 +15,9 @@ import { toolbarCSSPrefix } from '../constants';
 
 const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizationTable: ToolbarLocalization) => {
 	const container = document.createElement('div');
-	container.classList.add('selection-format-menu', 'toolbar-spacedList');
+	container.classList.add(
+		'selection-format-menu', `${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}indentedList`
+	);
 
 	const colorRow = document.createElement('div');
 	const colorLabel = document.createElement('label');
