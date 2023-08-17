@@ -59,8 +59,6 @@ const initRunnableElements = async () => {
 
 			const doc = previewFrame.contentDocument!;
 
-			console.log(iframePreviewSetup);
-
 			doc.open();
 			doc.write(`
 				<!DOCTYPE html>
