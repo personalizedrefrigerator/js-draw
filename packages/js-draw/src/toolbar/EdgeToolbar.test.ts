@@ -34,13 +34,13 @@ describe('EdgeToolbar', () => {
 
 		// Before clicking a button, the edgemenu container should have display set to none
 		expect(getComputedStyle(edgemenuContainer).display).toBe('none');
-		expect(getComputedStyle(edgemenuContainer).opacity).not.toBe('0'); // Should be fading in
 
 		const firstButton = toolButtons[0] as HTMLElement;
 		firstButton.click();
 
 		// After clicking, should have non-none visibility
 		expect(getComputedStyle(edgemenuContainer).display).not.toBe('none');
+		expect(getComputedStyle(edgemenuContainer).opacity).not.toBe('0'); // Should be fading in
 
 		// The focused button should close the toolbar when clicked (and be within the menu container).
 		const closeButton = edgemenuContainer.querySelector(':focus')! as HTMLElement;
