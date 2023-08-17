@@ -70,6 +70,7 @@ class Dropdown implements ToolMenu {
 		}
 
 		// Shift the dropdown if it's off the screen, but only if doing so moves it on to the screen
+		// (prevents dropdowns from going almost completely offscreen on small screens).
 		if (dropdownBBox.bottom > screenHeight && (dropdownBBox.top - dropdownBBox.height > 0)) {
 			const targetElem = this.parent.target;
 			translateY = `calc(-${targetElem.clientHeight}px - 100%)`;

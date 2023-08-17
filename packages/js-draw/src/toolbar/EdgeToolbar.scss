@@ -12,13 +12,13 @@
 @keyframes toolbar--edgemenu-container-transition-in {
 	// Include overflow-y: hidden so that the bottom of the menu doesn't go below
 	// the editor.
-	from { opacity: 0; overflow-y: hidden; }
-	to { opacity: 1; overflow-y: hidden; }
+	from { overflow-y: hidden; }
+	to { overflow-y: hidden; }
 }
 
 @keyframes toolbar--edgemenu-container-transition-out {
-	from { opacity: 1; overflow-y: hidden; }
-	to { opacity: 0; overflow-y: hidden; }
+	from { overflow-y: hidden; }
+	to { overflow-y: hidden; }
 }
 
 // Shows a lable on hover

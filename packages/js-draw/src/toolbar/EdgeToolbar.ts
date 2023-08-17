@@ -183,12 +183,17 @@ export default class EdgeToolbar extends AbstractToolbar {
 					// the toolbar.
 					this.menuContainer.style.opacity = '0';
 
+					// Hide overflow -- don't show the part of the edge toolbar that's outside of
+					// the editor.
+					//this.menuContainer.style.overflowY = 'hidden';
+
 					this.editor.announceForAccessibility(
 						this.localizationTable.dropdownHidden(this.sidebarTitle.get())
 					);
 
 					animationTimeout = setTimeout(() => {
 						this.menuContainer.style.display = 'none';
+						this.menuContainer.style.overflowY = '';
 						animationTimeout = null;
 					}, animationDuration);
 				}
