@@ -66,7 +66,9 @@ const makeRedoIcon = (mirror: boolean) => {
  * Extend this class and override methods to customize icons.
  *
  * @example
- * ```ts
+ * ```ts,runnable
+ * import * as jsdraw from 'js-draw';
+ *
  * class CustomIconProvider extends jsdraw.IconProvider {
  *     // Use '☺' instead of the default dropdown symbol.
  *     public makeDropdownIcon() {
@@ -85,7 +87,7 @@ const makeRedoIcon = (mirror: boolean) => {
  * });
  *
  * // Add a toolbar that uses these icons
- * editor.addToolbar();
+ * jsdraw.makeDropdownToolbar(editor).addDefaults();
  * ```
  */
 export default class IconProvider {

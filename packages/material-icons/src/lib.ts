@@ -58,6 +58,9 @@ const icon = (data: string) => {
 	return icon.childNodes[0] as SVGElement;
 };
 
+/**
+ * An {@link IconProvider} that uses [material icons](https://github.com/google/material-design-icons).
+ */
 class MaterialIconProvider extends IconProvider {
 	public override makeUndoIcon(): IconElemType {
 		return icon(Undo);

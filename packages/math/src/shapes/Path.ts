@@ -54,6 +54,9 @@ interface IntersectionResult {
 type GeometryType = Abstract2DShape;
 type GeometryArrayType = Array<GeometryType>;
 
+/**
+ * Represents a union of lines and curves.
+ */
 export default class Path {
 	/**
 	 * A rough estimate of the bounding box of the path.
@@ -758,9 +761,14 @@ export default class Path {
 		return result.join('');
 	}
 
-	// Create a Path from a SVG path specification.
-	// TODO: Support a larger subset of SVG paths.
-	// TODO: Support `s`,`t` commands shorthands.
+	/**
+	 * Create a Path from a SVG path specification.
+	 *
+	 * ## To-do
+	 * - TODO: Support a larger subset of SVG paths
+	 *   - Elliptical arcs are currently unsupported.
+	 * - TODO: Support `s`,`t` commands shorthands.
+	 */
 	public static fromString(pathString: string): Path {
 		// See the MDN reference:
 		// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
@@ -949,5 +957,6 @@ export default class Path {
 		return result;
 	}
 
+	// @internal TODO: At present, this isn't really an empty path.
 	public static empty: Path = new Path(Vec2.zero, []);
 }
