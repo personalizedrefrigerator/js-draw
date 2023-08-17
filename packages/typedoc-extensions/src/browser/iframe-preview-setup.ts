@@ -3,6 +3,7 @@ import * as jsdraw from 'js-draw';
 import 'js-draw/styles';
 import * as jsdrawMath from '@js-draw/math';
 import * as jsdrawMaterialIcons from '@js-draw/material-icons';
+import './iframe.scss';
 
 (() => {
 	const logMessage = (message: any[]) => {
@@ -17,6 +18,14 @@ import * as jsdrawMaterialIcons from '@js-draw/material-icons';
 			else if (typeof part !== 'object') {
 				wrapper.innerText = JSON.stringify(part);
 				wrapper.classList.add(typeof part);
+			}
+			else if (part instanceof jsdrawMath.Color4) {
+				const colorSquare = document.createElement('span');
+				colorSquare.classList.add('color-square');
+				colorSquare.style.backgroundColor = part.toHexString();
+
+				wrapper.appendChild(colorSquare);
+				wrapper.appendChild(document.createTextNode(part.toString()));
 			}
 			else {
 				const details = document.createElement('details');

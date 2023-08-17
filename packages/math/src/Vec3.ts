@@ -5,6 +5,19 @@
  * Can also be used to represent a two-component vector.
  *
  * A `Vec3` is immutable.
+ *
+ * @example
+ *
+ * ```ts,runnable,console
+ * import { Vec3 } from '@js-draw/math';
+ *
+ * console.log('Vector addition:', Vec3.of(1, 2, 3).plus(Vec3.of(0, 1, 0)));
+ * console.log('Scalar multiplication:', Vec3.of(1, 2, 3).times(2));
+ * console.log('Cross products:', Vec3.unitX.cross(Vec3.unitY));
+ * console.log('Magnitude:', Vec3.of(1, 2, 3).length(), 'or', Vec3.of(1, 2, 3).magnitude());
+ * console.log('Square Magnitude:', Vec3.of(1, 2, 3).magnitudeSquared());
+ * console.log('As an array:', Vec3.unitZ.asArray());
+ * ```
  */
 export default class Vec3 {
 	private constructor(

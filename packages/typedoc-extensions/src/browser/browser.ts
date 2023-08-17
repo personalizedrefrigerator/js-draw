@@ -28,10 +28,14 @@ const initRunnableElements = async () => {
 		const editorContainer = document.createElement('div');
 		editorContainer.classList.add('runnable-code');
 
-		const editor = addCodeMirrorEditor(runnable.value, editorContainer);
+		const editor = addCodeMirrorEditor(
+			// Multiline code blocks have an extra newline at the end. Remove it.
+			runnable.value.trimEnd(),
+			editorContainer,
+		);
 
 		const button = document.createElement('button');
-		button.innerText = 'Run';
+		button.innerText = '▶ Run';
 
 
 		let previewFrame: HTMLIFrameElement|null = null;
@@ -64,24 +68,6 @@ const initRunnableElements = async () => {
 				<!DOCTYPE html>
 				<html>
 					<head>
-						<style>
-							:root.console-view {
-								background-color: #222;
-								color: white;
-							}
-
-							:root.console-view body > div {
-								margin-bottom: 5px;
-
-								font-family: monospace;
-								white-space: pre-wrap;
-							}
-
-							:root.console-view body > div.error {
-								margin-bottom: 5px;
-								color: red;
-							}
-						</style>
 					</head>
 					<body>
 					</body>

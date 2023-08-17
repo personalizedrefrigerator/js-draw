@@ -1,17 +1,30 @@
 import Vec3 from './Vec3';
 
+/**
+ * Represents a color.
+ *
+ * @example
+ * ```ts,runnable,console
+ * import { Color4 } from '@js-draw/math';
+ *
+ * console.log('Red:', Color4.fromString('#f00'));
+ * console.log('Also red:', Color4.ofRGB(1, 0, 0), Color4.red);
+ * console.log('Mixing red and blue:', Color4.red.mix(Color4.blue, 0.5));
+ * console.log('To string:', Color4.orange.toHexString());
+ * ```
+ */
 export default class Color4 {
 	private constructor(
 		/** Red component. Should be in the range [0, 1]. */
 		public readonly r: number,
 
-		/** Green component. `g` ∈ [0, 1] */
+		/** Green component. ${\tt g} \in [0, 1]$ */
 		public readonly g: number,
 
-		/** Blue component. `b` ∈ [0, 1] */
+		/** Blue component. ${\tt b} \in [0, 1]$ */
 		public readonly b: number,
 
-		/** Alpha/transparent component. `a` ∈ [0, 1]. 0 = transparent */
+		/** Alpha/transparent component. ${\tt a} \in [0, 1]$. 0 = transparent */
 		public readonly a: number
 	) {
 	}
@@ -136,7 +149,7 @@ export default class Color4 {
 	}
 
 	/**
-	 * If `fractionTo` is not in the range [0, 1], it will be clamped to the nearest number
+	 * If `fractionTo` is not in the range $[0, 1]$, it will be clamped to the nearest number
 	 * in that range. For example, `a.mix(b, -1)` is equivalent to `a.mix(b, 0)`.
 	 *
 	 * @returns a color `fractionTo` of the way from this color to `other`.
@@ -291,6 +304,7 @@ export default class Color4 {
 
 	public static transparent = Color4.ofRGBA(0, 0, 0, 0);
 	public static red = Color4.ofRGB(1.0, 0.0, 0.0);
+	public static orange = Color4.ofRGB(1.0, 1.0, 0.0);
 	public static green = Color4.ofRGB(0.0, 1.0, 0.0);
 	public static blue = Color4.ofRGB(0.0, 0.0, 1.0);
 	public static purple = Color4.ofRGB(0.5, 0.2, 0.5);

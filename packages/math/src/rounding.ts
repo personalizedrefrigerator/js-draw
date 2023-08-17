@@ -37,6 +37,17 @@ export const cleanUpNumber = (text: string) => {
 	return text;
 };
 
+/**
+ * Converts `num` to a string, removing trailing digits that were likely caused by
+ * precision errors.
+ *
+ * @example
+ * ```ts,runnable,console
+ * import { toRoundedString } from '@js-draw/math';
+ *
+ * console.log('Rounded: ', toRoundedString(1.000000011));
+ * ```
+ */
 export const toRoundedString = (num: number): string => {
 	// Try to remove rounding errors. If the number ends in at least three/four zeroes
 	// (or nines) just one or two digits, it's probably a rounding error.

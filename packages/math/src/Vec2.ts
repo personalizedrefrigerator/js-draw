@@ -1,6 +1,14 @@
 import Vec3 from './Vec3';
 
-/** Utility functions that facilitate treating `Vec3`s as 2D vectors. */
+/**
+ * Utility functions that facilitate treating `Vec3`s as 2D vectors.
+ *
+ * @example
+ * ```ts,runnable,console
+ * import { Vec2 } from '@js-draw/math';
+ * console.log(Vec2.of(1, 2));
+ * ```
+ */
 export namespace Vec2 {
 	/**
 	 * Creates a `Vec2` from an x and y coordinate.
