@@ -154,6 +154,47 @@ describe('Path.fromString', () => {
 		expect(path.startPoint).toMatchObject(Vec2.of(1, 1));
 	});
 
+	it('should handle elliptical arcs', () => {
+		const path = Path.fromString('m0 0 A9,8 90 1 0 10 10');
+		expect(path.startPoint).objEq(Vec2.zero);
+		expect(path.parts).toMatchObject([
+			{
+				kind: PathCommandType.EllipticalArcTo,
+				size: Vec2.of(9, 8),
+				majorAxisRotation: Math.PI / 2,
+				largeArcFlag: true,
+				sweepFlag: false,
+				endPoint: Vec2.of(10, 10),
+			},
+		]);
+	});
+
+	it('should correctly handle a moveTo command followed by multiple sets of arguments', () => {
+		const path = Path.fromString(`
+			m68,163 10,10 10,11
+			M68,163 10,10
+		`);
+		expect(path.startPoint).objEq(Vec2.of(68, 163));
+		expect(path.parts).toMatchObject([
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(68 + 10, 163 + 10),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(68 + 20, 163 + 21),
+			},
+			{
+				kind: PathCommandType.MoveTo,
+				point: Vec2.of(68, 163),
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: Vec2.of(10, 10),
+			},
+		]);
+	});
+
 	it('should correctly handle a command followed by multiple sets of arguments', () => {
 		// Commands followed by multiple sets of arguments, for example,
 		//  l 5,10 5,4 3,2,

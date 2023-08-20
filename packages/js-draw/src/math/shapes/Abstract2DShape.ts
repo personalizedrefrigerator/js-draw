@@ -3,7 +3,7 @@ import { Point2 } from '../Vec2';
 import Rect2 from './Rect2';
 
 abstract class Abstract2DShape {
-	protected static readonly smallValue = 1e-12;
+	protected static readonly smallValue = 1e-13;
 
 	/**
 	 * @returns the distance from `point` to this shape. If `point` is within this shape,

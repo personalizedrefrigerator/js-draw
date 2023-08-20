@@ -241,4 +241,41 @@ describe('Mat33 tests', () => {
 			0,  	0,     	1,
 		));
 	});
+
+	describe('should find correct eigenvalues and eigenvectors of 2x2 submatricies', () => {
+		it('should return eigenvalue 1 for identity matrix', () => {
+			const eigvals = Mat33.identity.mat22EigenValues();
+			expect(eigvals).toHaveLength(1);
+			expect(eigvals[0]).toBeCloseTo(1);
+
+			// Even though the identity matrix has one eigenvalue, it should be observed that
+			// any vector is an eigenvector. Thus, it should have (at least) the coordinate axes.
+			const eigvecs = Mat33.identity.mat22EigenVectors();
+			expect(eigvecs).toHaveLength(2);
+			expect(eigvecs[0]).objEq(Vec2.of(1, 0));
+			expect(eigvecs[1]).objEq(Vec2.of(0, 1));
+		});
+
+		it('should return no eigenvalues/eigenvectors for a small rotation', () => {
+			const mat = Mat33.zRotation(Math.PI / 4);
+			expect(mat.mat22EigenValues()).toHaveLength(0);
+			expect(mat.mat22EigenVectors()).toHaveLength(0);
+		});
+
+		it('a scaling and shearing matrix should have a single eigenvalue', () => {
+			const mat = new Mat33(
+				2, 1, 0,
+				0, 2, 0,
+				0, 0, 1
+			);
+
+			const eigvals = mat.mat22EigenValues();
+			expect(eigvals).toHaveLength(1);
+			expect(eigvals[0]).toBeCloseTo(2);
+
+			const eigvecs = mat.mat22EigenVectors();
+			expect(eigvecs).toHaveLength(1);
+			expect(eigvecs[0]).objEq(Vec2.of(0, -1));
+		});
+	});
 });
