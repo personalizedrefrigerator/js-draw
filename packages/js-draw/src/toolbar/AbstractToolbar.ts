@@ -102,17 +102,35 @@ export default abstract class AbstractToolbar {
 		];
 		const presetColorEnd = swatches.length;
 
+		// Keeps track of whether a Coloris initialization is scheduled.
+		let colorisInitScheduled = false;
+
 		// (Re)init Coloris -- update the swatches list.
 		const initColoris = () => {
-			coloris({
-				el: '.coloris_input',
-				format: 'hex',
-				selectInput: false,
-				focusInput: false,
-				themeMode: 'auto',
+			try {
+				coloris({
+					el: '.coloris_input',
+					format: 'hex',
+					selectInput: false,
+					focusInput: false,
+					themeMode: 'auto',
 
-				swatches,
-			});
+					swatches,
+				});
+			} catch(err) {
+				console.warn('Failed to initialize Coloris. Error: ', err);
+
+				// Try again --- a known issue is that Coloris fails to load if the document
+				// isn't ready.
+				if (!colorisInitScheduled) {
+					colorisInitScheduled = true;
+
+					// Wait to initialize after the document has loaded
+					document.addEventListener('load', () => {
+						initColoris();
+					}, { once: true });
+				}
+			}
 		};
 		initColoris();
 		this.#updateColoris = initColoris;
@@ -356,6 +374,61 @@ export default abstract class AbstractToolbar {
 		return widget;
 	}
 
+	/**
+	 * Adds a save button that, when clicked, calls `saveCallback`.
+	 *
+	 * **Note**: This is equivalent to
+	 * ```ts
+	 * const tags = [
+	 *   ToolbarWidgetTag.Save,
+	 * ];
+	 * toolbar.addTaggedActionButton(tags, {
+	 *   label: editor.localization.save,
+	 *   icon: editor.icons.makeSaveIcon(),
+	 * }, () => {
+	 *   saveCallback();
+	 * });
+	 * ```
+	 *
+	 * @final
+	 */
+	public addSaveButton(saveCallback: ()=>void): BaseWidget {
+		return this.addTaggedActionButton([ ToolbarWidgetTag.Save ], {
+			label: this.editor.localization.save,
+			icon: this.editor.icons.makeSaveIcon(),
+		}, () => {
+			saveCallback();
+		});
+	}
+
+	/**
+	 * Adds an "Exit" button that, when clicked, calls `exitCallback`.
+	 *
+	 * **Note**: This is equivalent to
+	 * ```ts
+	 * toolbar.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
+	 *   label: this.editor.localization.exit,
+	 *   icon: this.editor.icons.makeCloseIcon(),
+	 * }, () => {
+	 *   exitCallback();
+	 * });
+	 * ```
+	 *
+	 * @final
+	 */
+	public addExitButton(exitCallback: ()=>void): BaseWidget {
+		return this.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
+			label: this.editor.localization.exit,
+			icon: this.editor.icons.makeCloseIcon(),
+		}, () => {
+			exitCallback();
+		});
+	}
+
+	/**
+	 * Adds undo and redo buttons that trigger the editor's built-in undo and redo
+	 * functionality.
+	 */
 	public addUndoRedoButtons(undoFirst = true) {
 		const makeUndo = () => {
 			return this.addTaggedActionButton([
