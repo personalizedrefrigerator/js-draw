@@ -1,6 +1,10 @@
 
+# 1.0.3
+ * Bug fixes
+   * Edge toolbar: Fix edge menu text using incorrect CSS variable (it should use `--foreground-color-2` to match `--background-color-2`).
+
 # 1.0.2
- * Fix `.npmignore`
+ * Fix `.npmignore` allowing some unnecessary files.
 
 # 1.0.1
  * Removes default link from the about screen.
