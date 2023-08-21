@@ -15,7 +15,7 @@ export interface RectTemplate {
 }
 
 // invariant: w ≥ 0, h ≥ 0, immutable
-export default class Rect2 extends Abstract2DShape {
+export class Rect2 extends Abstract2DShape {
 	// Derived state:
 
 	// topLeft assumes up is -y
@@ -342,3 +342,5 @@ export default class Rect2 extends Abstract2DShape {
 	public static empty = new Rect2(0, 0, 0, 0);
 	public static unitSquare = new Rect2(0, 0, 1, 1);
 }
+
+export default Rect2;

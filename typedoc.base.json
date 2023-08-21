@@ -10,7 +10,7 @@
 	"excludeInternal": true,
 	"includeVersion": true,
 	"commentStyle": "all",
-	"entryPointStrategy": "expand",
+	"entryPointStrategy": "resolve",
 	"tsconfig": "tsconfig-typedoc.json",
 
 	"validation": {

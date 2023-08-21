@@ -12,7 +12,7 @@ export type Mat33Array = [
  * a two-dimensional affine transformation. (An affine transformation scales/rotates/shears
  * **and** translates while a linear transformation just scales/rotates/shears).
  */
-export default class Mat33 {
+export class Mat33 {
 	private readonly rows: Vec3[];
 
 	/**
@@ -444,3 +444,4 @@ export default class Mat33 {
 		return transform;
 	}
 }
+export default Mat33;

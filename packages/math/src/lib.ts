@@ -4,9 +4,9 @@
  * @packageDocumentation
  */
 
-export { default as LineSegment2 } from './shapes/LineSegment2';
+export { LineSegment2 } from './shapes/LineSegment2';
 export {
-	default as Path,
+	Path,
 
 	PathCommandType,
 	PathCommand,
@@ -15,11 +15,15 @@ export {
 	QuadraticBezierPathCommand,
 	CubicBezierPathCommand,
 } from './shapes/Path';
-export { default as Rect2 } from './shapes/Rect2';
-export { default as QuadraticBezier } from './shapes/QuadraticBezier';
+export { Rect2 } from './shapes/Rect2';
+export { QuadraticBezier } from './shapes/QuadraticBezier';
 
-export { default as Mat33, Mat33Array } from './Mat33';
+export { Mat33, Mat33Array } from './Mat33';
 export { Point2, Vec2 } from './Vec2';
-export { default as Vec3 } from './Vec3';
-export { default as Color4 } from './Color4';
+export { Vec3 } from './Vec3';
+export { Color4 } from './Color4';
 export { toRoundedString } from './rounding';
+
+
+// Note: All above exports cannot use `export { default as ... } from "..."` because this
+// breaks TypeDoc -- TypeDoc otherwise labels any imports of these classes as `default`.

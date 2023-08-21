@@ -9,7 +9,7 @@ import Rect2 from './Rect2';
  * This wrappper lazy-loads `bezier-js`'s Bézier and can perform some operations
  * without loading it at all (e.g. `normal`, `at`, and `approximateDistance`).
  */
-export default class QuadraticBezier extends BezierJSWrapper {
+export class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
 		public readonly p0: Point2,
 		public readonly p1: Point2,
@@ -139,3 +139,4 @@ export default class QuadraticBezier extends BezierJSWrapper {
 		return [ this.p0, this.p1, this.p2 ];
 	}
 }
+export default QuadraticBezier;

@@ -19,7 +19,7 @@
  * console.log('As an array:', Vec3.unitZ.asArray());
  * ```
  */
-export default class Vec3 {
+export class Vec3 {
 	private constructor(
 		public readonly x: number,
 		public readonly y: number,
@@ -242,3 +242,4 @@ export default class Vec3 {
 	public static unitZ = Vec3.of(0, 0, 1);
 	public static zero = Vec3.of(0, 0, 0);
 }
+export default Vec3;

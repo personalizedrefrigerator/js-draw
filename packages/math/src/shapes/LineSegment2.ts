@@ -9,7 +9,7 @@ interface IntersectionResult {
 }
 
 /** Represents a line segment. A `LineSegment2` is immutable. */
-export default class LineSegment2 extends Abstract2DShape {
+export class LineSegment2 extends Abstract2DShape {
 	// invariant: ||direction|| = 1
 
 	/**
@@ -229,3 +229,4 @@ export default class LineSegment2 extends Abstract2DShape {
 		return `LineSegment(${this.p1.toString()}, ${this.p2.toString()})`;
 	}
 }
+export default LineSegment2;

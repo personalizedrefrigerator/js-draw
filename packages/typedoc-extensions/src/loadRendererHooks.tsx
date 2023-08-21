@@ -23,6 +23,7 @@ const loadRendererHooks = (renderer: Renderer, options: Options) => {
 
 		// Additional variable declarations for the browser script
 		const pageVariables = `
+			window.basePath = ${JSON.stringify(event.relativeURL('.'))}
 			window.assetsURL = ${JSON.stringify(event.relativeURL('assets/'))};
 			window.imagesURL = ${JSON.stringify(event.relativeURL('../img/'))};
 			window.sidebarReplacements = ${JSON.stringify(sidebarReplacements)};

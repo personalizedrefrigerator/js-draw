@@ -57,7 +57,7 @@ type GeometryArrayType = Array<GeometryType>;
 /**
  * Represents a union of lines and curves.
  */
-export default class Path {
+export class Path {
 	/**
 	 * A rough estimate of the bounding box of the path.
 	 * A slight overestimate.
@@ -960,3 +960,4 @@ export default class Path {
 	// @internal TODO: At present, this isn't really an empty path.
 	public static empty: Path = new Path(Vec2.zero, []);
 }
+export default Path;
