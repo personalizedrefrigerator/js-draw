@@ -331,6 +331,10 @@ export default abstract class BaseWidget {
 		this.container.classList.add(className);
 	}
 
+	public removeCSSClassFromContainer(className: string) {
+		this.container.classList.remove(className);
+	}
+
 	public remove() {
 		this.container.remove();
 	}

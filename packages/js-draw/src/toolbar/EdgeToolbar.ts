@@ -206,9 +206,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 	}
 
 	private onToolbarRowResize() {
-		if (this.toolbarToolRow.clientWidth < this.toolbarToolRow.scrollWidth) {
-			this.toolbarToolRow.classList.add('has-scroll');
-
+		const setExtraPadding = () => {
 			const visibleWidth = this.toolbarToolRow.clientWidth;
 
 			// Determine whether extra spacing needs to be added so that one button is cut
@@ -239,6 +237,27 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 			const perButtonPadding = Math.round(extraPadding/numVisibleButtons * 10) / 10;
 			this.toolbarToolRow.style.setProperty('--extra-left-right-padding', `${perButtonPadding}px`);
+		};
+
+		const actionRowBBox = this.toolbarActionRow.getBoundingClientRect();
+		const toolbarRowBBox = this.toolbarToolRow.getBoundingClientRect();
+		const inSameRow = actionRowBBox.y === toolbarRowBBox.y;
+		const onDifferentRows = actionRowBBox.y + actionRowBBox.height <= toolbarRowBBox.y;
+
+		if (onDifferentRows) {
+			this.toolbarContainer.classList.remove('one-row');
+		} else {
+			this.toolbarContainer.classList.add('one-row');
+		}
+
+		if (this.toolbarToolRow.clientWidth < this.toolbarToolRow.scrollWidth) {
+			this.toolbarToolRow.classList.add('has-scroll');
+
+			// If both button areas are in the same row, don't change the padding --
+			// it could lead to an endless loop of reseize events.
+			if (!inSameRow) {
+				setExtraPadding();
+			}
 		} else {
 			this.toolbarToolRow.classList.remove('has-scroll', 'extra-padding');
 		}
@@ -258,8 +277,11 @@ export default class EdgeToolbar extends AbstractToolbar {
 		this.addDefaultToolWidgets();
 	}
 
-	protected override addWidgetInternal(widget: BaseWidget) {
+	private updateWidgetCSSClasses(widget: BaseWidget) {
 		const tags = widget.getTags();
+		widget.removeCSSClassFromContainer('label-inline');
+		widget.removeCSSClassFromContainer('label-left');
+		widget.removeCSSClassFromContainer('label-right');
 
 		if (tags.includes(ToolbarWidgetTag.Save)) {
 			widget.addCSSClassToContainer('label-inline');
@@ -270,6 +292,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 			widget.addCSSClassToContainer('label-inline');
 			widget.addCSSClassToContainer('label-left');
 		}
+	}
+
+	protected override addWidgetInternal(widget: BaseWidget) {
+		this.updateWidgetCSSClasses(widget);
 
 		widget.setLayoutManager(this.layoutManager);
 		if (widget.mustBeInToplevelMenu()) {

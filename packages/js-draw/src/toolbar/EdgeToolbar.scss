@@ -83,7 +83,7 @@
 	// support :has, which would make the entire statement block have no effect.
 	&:has(:focus-visible) > #{$label-selector} {
 		animation: $keyboard-hide-animation;
-		opacity: 0;;
+		opacity: 0;
 	}
 
 	& > #{$label-selector} {
@@ -117,6 +117,29 @@
 	--label-hover-offset-size: calc(14px + var(--toolbar-button-height));
 	box-sizing: border-box;
 
+	@media screen and (min-width: 610px) {
+		flex-wrap: nowrap;
+
+		> .toolbar-action-row {
+			max-width: 50vw;
+		}
+	}
+
+	@media screen and (max-width: 700px) {
+		&.one-row > * > .toolbar-toolContainer.label-inline {
+			font-size: 0.9em;
+
+			.toolbar-button {
+				label {
+					opacity: 0;
+					transition: none;
+				}
+
+				@include label-visible-on-hover(label);
+			}
+		}
+	}
+
 	> div.toolbar-element {
 		flex-direction: row;
 		display: flex;
@@ -127,6 +150,15 @@
 		color: var(--foreground-color-2);
 		--icon-color: var(--foreground-color-2);
 
+		// Display a smaller scrollbar on Chrome
+		&::-webkit-scrollbar {
+			width: 3px;
+			height: 3px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background-color: var(--shadow-color);
+		}
 		
 		&.toolbar-tool-row {
 			overflow-x: auto;
