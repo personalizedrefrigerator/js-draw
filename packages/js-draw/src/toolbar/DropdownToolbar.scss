@@ -1,9 +1,14 @@
 
 .toolbar-dropdown-toolbar {
-	button {
-		background-color: var(--background-color-1);
-		color: var(--foreground-color-1);
-		--icon-color: var(--foreground-color-1);
+	button, .toolbar-button {
+		background-color: var(--background-color-2);
+		color: var(--foreground-color-2);
+		--icon-color: var(--foreground-color-2);
+	}
+
+	&, .toolbar-dropdown {
+		background-color: var(--background-color-3);
+		color: var(--foreground-color-3);
 	}
 
 	.toolbar-spacedList > div {
@@ -27,6 +32,10 @@
 
 			border-radius: 5px;
 		}
+	}
+
+	.toolbar-grid-selector > div {
+		--button-size: 57px;
 	}
 
 	// Show toolbar buttons within dropdowns from left to right
