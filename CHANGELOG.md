@@ -1,4 +1,7 @@
 
+# 1.0.2
+ * Fix `.npmignore`
+
 # 1.0.1
  * Removes default link from the about screen.
    * `js-draw` can run in contexts where links are not expected.
