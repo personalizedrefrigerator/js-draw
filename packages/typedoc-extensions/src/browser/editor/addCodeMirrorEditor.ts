@@ -1,8 +1,9 @@
 
 import { EditorView, basicSetup } from 'codemirror';
-import { syntaxHighlighting } from '@codemirror/language';
+import { indentUnit, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
-import { javascript } from '@codemirror/lang-javascript';
+import { javascript as jsLanguageSupport } from '@codemirror/lang-javascript';
+import { css as cssLanguageSupport } from '@codemirror/lang-css';
 import { HighlightStyle } from '@codemirror/language';
 
 
@@ -68,13 +69,38 @@ const codeMirrorHighlightStyle = HighlightStyle.define([
 	{ tag: tags.float, color: 'var(--cm-number-color)' },
 ]);
 
-const addCodeMirrorEditor = (initialText: string, parent: HTMLElement) => {
+export enum EditorLanguage {
+	JavaScript,
+	TypeScript,
+	CSS,
+}
+
+const addCodeMirrorEditor = (initialText: string, parent: HTMLElement, language: EditorLanguage) => {
+	let languagePlugin;
+
+	if (language === EditorLanguage.CSS) {
+		languagePlugin = cssLanguageSupport();
+	} else {
+		languagePlugin = jsLanguageSupport({
+			typescript: language === EditorLanguage.TypeScript,
+		});
+	}
+
+	// Autodetect indentation
+	const indentationMatch = /[\n]([ \t]+)[^\n]/.exec(initialText);
+	let indentation = '  ';
+	if (indentationMatch) {
+		indentation = indentationMatch[1];
+		console.log('indent', indentation);
+	}
+
 	const editor = new EditorView({
 		extensions: [
 			basicSetup,
-			javascript(),
+			languagePlugin,
 			codeMirrorTheme,
 			syntaxHighlighting(codeMirrorHighlightStyle),
+			indentUnit.of(indentation),
 		],
 		parent,
 	});

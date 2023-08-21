@@ -398,7 +398,7 @@ export default class IconProvider {
 		textNode.setAttribute('x', '50');
 		textNode.setAttribute('y', '75');
 		textNode.style.fontSize = '65px';
-		textNode.style.filter = 'drop-shadow(0px 0px 10px var(--primary-shadow-color))';
+		textNode.style.filter = 'drop-shadow(0px 0px 10px var(--shadow-color))';
 
 		icon.appendChild(textNode);
 
@@ -731,7 +731,7 @@ export default class IconProvider {
 	}
 
 	#makeXIcon(): IconElemType {
-		const strokeWidth = '5px';
+		const strokeWidth = '6px';
 		const strokeColor = 'var(--icon-color)';
 		const fillColor = 'none';
 
@@ -755,7 +755,7 @@ export default class IconProvider {
 			<style>
 				.toolbar-save-icon {
 					stroke: var(--icon-color);
-					stroke-width: 10;
+					stroke-width: 6;
 					stroke-linejoin: round;
 					stroke-linecap: round;
 					fill: none;

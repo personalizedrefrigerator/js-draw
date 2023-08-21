@@ -2,116 +2,16 @@ import 'katex/dist/katex.css';
 import './browser.css';
 
 import { join } from 'path';
-import typeScriptToJS from '../typeScriptToJS';
-import addCodeMirrorEditor from './addCodeMirrorEditor';
+import { __js_draw__version } from 'js-draw';
+import replaceElementWithRunnableCode from './editor/replaceElementWithRunnableCode';
+import { imagesPath } from './constants';
 
-const assetsPath: string = (window as any).assetsURL;
-const imagesPath: string = (window as any).imagesURL;
-
-const loadIframePreviewScript = async () => {
-	const scriptPath = join(assetsPath, 'js-draw-typedoc-extension--iframe.js');
-
-	const scriptRequest = await fetch(scriptPath);
-	const scriptContent = (await scriptRequest.text());
-
-	// Allow including inline in the iframe.
-	return scriptContent.replace(/<[/]script>/g, '<\\/script>');
-};
 
 const initRunnableElements = async () => {
-	let iframePreviewSetup: string|null = null; // null if not loaded
-
-	const runnableElements = [...document.querySelectorAll('textarea.runnable-code')] as HTMLTextAreaElement[];
+	const runnableElements = [...document.querySelectorAll('pre.runnable-code')] as HTMLTextAreaElement[];
 
 	for (const runnable of runnableElements) {
-		// Replace the textarea with a CodeMirror editor
-		const editorContainer = document.createElement('div');
-		editorContainer.classList.add('runnable-code');
-
-		// Prevent TypeDoc from consuming the '/' key
-		editorContainer.onkeydown = event => {
-			if (event.key === '/') {
-				event.stopPropagation();
-			}
-		};
-
-		const editor = addCodeMirrorEditor(
-			// Multiline code blocks have an extra newline at the end. Remove it.
-			runnable.value.trimEnd(),
-			editorContainer,
-		);
-
-		const button = document.createElement('button');
-		button.innerText = '▶ Run';
-
-
-		let previewFrame: HTMLIFrameElement|null = null;
-		button.onclick = async () => {
-			if (previewFrame) {
-				previewFrame.remove();
-				previewFrame = null;
-				return;
-			}
-
-			iframePreviewSetup ??= await loadIframePreviewScript();
-
-			const js = typeScriptToJS(editor.getText());
-
-			previewFrame = document.createElement('iframe');
-			previewFrame.src = 'about:blank';
-			previewFrame.classList.add('code-run-frame');
-
-			// Sandboxing:
-			previewFrame.setAttribute('sandbox', 'allow-same-origin allow-scripts');
-			previewFrame.setAttribute('csp', 'default-src \'about:blank\'');
-
-			button.insertAdjacentElement('afterend', previewFrame);
-
-
-			const doc = previewFrame.contentDocument!;
-
-			doc.open();
-			doc.write(`
-				<!DOCTYPE html>
-				<html>
-					<head>
-					</head>
-					<body>
-					</body>
-					<script>
-						window.mode = ${JSON.stringify(runnable.getAttribute('data--mode'))};
-						${iframePreviewSetup}
-					</script>
-					<script>
-						${js}
-					</script>
-				</html>
-			`);
-			doc.close();
-
-
-			const updateHeight = () => {
-				const elem = doc.scrollingElement ?? doc.body;
-				if (previewFrame && elem) {
-					previewFrame.style.height = `${Math.max(100, elem.scrollHeight)}px`;
-				}
-			};
-
-			// The load event doesn't seem to fire in some browsers (Safari/iOS).
-			// Also update the height immediately.
-			updateHeight();
-
-			// After loading, ensure that the preview window is large enough for its content.
-			previewFrame.contentWindow?.addEventListener('load', () => {
-				// Additional time for any async code to run
-				setTimeout(() => {
-					updateHeight();
-				}, 0);
-			});
-		};
-
-		editorContainer.appendChild(button);
-		runnable.replaceWith(editorContainer);
+		replaceElementWithRunnableCode(runnable);
 	}
 };
 
@@ -126,7 +26,21 @@ const fixImageURLs = () => {
 	}
 };
 
-window.addEventListener('DOMContentLoaded', () => fixImageURLs());
+const replaceSidebarLinkLabels = () => {
+	const replacements: Record<string, string> = (window as any).sidebarReplacements ?? {};
+	const linkTexts = document.querySelectorAll('.site-menu > nav a > span') as NodeListOf<HTMLSpanElement>;
+
+	for (const linkText of linkTexts) {
+		if (linkText.innerText in replacements) {
+			linkText.innerText = replacements[linkText.innerText].replaceAll('{{version}}', __js_draw__version.number);
+		}
+	}
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+	replaceSidebarLinkLabels();
+	fixImageURLs();
+});
 
 window.addEventListener('load', async () => {
 	await initRunnableElements();

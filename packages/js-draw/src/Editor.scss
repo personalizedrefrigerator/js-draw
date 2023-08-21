@@ -8,18 +8,18 @@
 .imageEditorContainer {
 	// The primary background/foreground colors are used for
 	// unselected buttons and dialog text.
-	--primary-background-color: white;
-	--primary-foreground-color: black;
+	--background-color-1: white;
+	--foreground-color-1: black;
 
 	// The secondary foreground/background colors are used for some menu/toolbar
 	// backgrounds.
-	--secondary-background-color: #f5f5f5;
-	--secondary-foreground-color: #2c303a;
+	--background-color-2: #f5f5f5;
+	--foreground-color-2: #2c303a;
 
 	// The tertiary foreground/background colors are also used for some
 	// menu/toolbar backgrounds.
-	--tertiary-background-color: #e5e5e5;
-	--tertiary-foreground-color: #1c202a;
+	--background-color-3: #e5e5e5;
+	--foreground-color-3: #1c202a;
 
 	// The selection background/foreground colors are used for selected
 	// buttons.
@@ -27,43 +27,39 @@
 	--selection-foreground-color: #2c303a;
 
 	// Used for dialog backgrounds
-	--primary-background-color-transparent: rgba(105, 100, 100, 0.5);
+	--background-color-transparent: rgba(105, 100, 100, 0.5);
 
 	// Used for shadows
-	--primary-shadow-color: rgba(0, 0, 0, 0.5);
+	--shadow-color: rgba(0, 0, 0, 0.5);
 
 	// Color used for some button/input foregrounds
 	--primary-action-foreground-color: #15b;
-
-	input {
-		accent-color: var(--primary-action-foreground-color);
-	}
 }
 
 @media (prefers-color-scheme: dark) {
 	.imageEditorContainer {
-		--primary-background-color: #151515;
-		--primary-foreground-color: white;
+		--background-color-1: #151515;
+		--foreground-color-1: white;
 
-		--secondary-background-color: #222;
-		--secondary-foreground-color: #efefef;
+		--background-color-2: #222;
+		--foreground-color-2: #efefef;
 
-		--tertiary-background-color: #272627;
-		--tertiary-foreground-color: #eee;
+		--background-color-3: #272627;
+		--foreground-color-3: #eee;
 
 		--selection-background-color: #607;
 		--selection-foreground-color: white;
-		--primary-shadow-color: rgba(250, 250, 250, 0.5);
-		--primary-background-color-transparent: rgba(50, 50, 50, 0.5);
+		--shadow-color: rgba(250, 250, 250, 0.5);
+		--background-color-transparent: rgba(50, 50, 50, 0.5);
 
 		--primary-action-foreground-color: #7ae;
 	}
 }
 
 .imageEditorContainer {
-	color: var(--primary-foreground-color);
+	color: var(--foreground-color-1);
 	font-family: system-ui, -apple-system, sans-serif;
-	background-color: var(--primary-background-color);
+	background-color: var(--background-color-1);
 	
 	// Set the width/height to a value that's independent of its content -- avoids
 	// ResizeObserver errors: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
@@ -76,6 +72,10 @@
 
 	display: flex;
 	flex-direction: column-reverse;
+
+	input {
+		accent-color: var(--primary-action-foreground-color);
+	}
 }
 
 .imageEditorContainer .imageEditorRenderArea {

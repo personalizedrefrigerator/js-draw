@@ -6,6 +6,8 @@
 
 For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html).
 
+If you're coming from version 0.25, [read the migration guide!](https://personalizedrefrigerator.github.io/js-draw/typedoc/migrating-to-v1)
+
 # API
 
 To use `js-draw`,
@@ -182,36 +184,74 @@ The editor's color theme is specified using CSS. Its default theme looks like th
 .imageEditorContainer {
     /* Deafult colors for the editor -- light mode */
 
-    --primary-background-color: white;
-    --primary-background-color-transparent: rgba(255, 255, 255, 0.5);
-    --selection-background-color: #faf;
-    --primary-foreground-color: black;
-    --selection-foreground-color: black;
-    --primary-shadow-color: rgba(0, 0, 0, 0.5);
+    /* Used for unselected buttons and dialog text. */
+	--background-color-1: white;
+	--foreground-color-1: black;
+
+	/* Used for some menu/toolbar backgrounds. */
+	--background-color-2: #f5f5f5;
+	--foreground-color-2: #2c303a;
+
+	/* Used for other menu/toolbar backgrounds. */
+	--background-color-3: #e5e5e5;
+	--foreground-color-3: #1c202a;
+
+	/* Used for selected buttons. */
+	--selection-background-color: #cbdaf1;
+	--selection-foreground-color: #2c303a;
+
+	/* Used for dialog backgrounds */
+	--background-color-transparent: rgba(105, 100, 100, 0.5);
+
+	/* Used for shadows */
+	--shadow-color: rgba(0, 0, 0, 0.5);
+
+	/* Color used for some button/input foregrounds */
+	--primary-action-foreground-color: #15b;
 }
 
 @media (prefers-color-scheme: dark) {
     .imageEditorContainer {
-        /* Deafult colors for the editor -- dark mode */
+        /* Default colors for the editor -- dark mode */
+		--background-color-1: #151515;
+		--foreground-color-1: white;
 
-        --primary-background-color: #151515;
-        --primary-background-color-transparent: rgba(50, 50, 50, 0.5);
-        --selection-background-color: #607;
-        --primary-foreground-color: white;
-        --selection-foreground-color: white;
-        --primary-shadow-color: rgba(250, 250, 250, 0.5);
+		--background-color-2: #222;
+		--foreground-color-2: #efefef;
+
+		--background-color-3: #272627;
+		--foreground-color-3: #eee;
+
+		--selection-background-color: #607;
+		--selection-foreground-color: white;
+		--shadow-color: rgba(250, 250, 250, 0.5);
+		--background-color-transparent: rgba(50, 50, 50, 0.5);
+
+		--primary-action-foreground-color: #7ae;
     }
 }
 ```
 
 To override it, use a more specific CSS selector to set the theme variables. For example,
 ```css
+/* Notice the "body" below -- the selector needs to be more specific than what's in js-draw */
 body .imageEditorContainer {
-    --primary-background-color: green;
-    --primary-background-color-transparent: rgba(255, 240, 200, 0.5);
+    --background-color-1: green;
+    --foreground-color-1: black;
+
+    /* For this theme, use the same secondary and tertiary colors
+       (it's okay for them to be the same). */
+    --background-color-2: lime;
+    --foreground-color-2: black;
+    --background-color-3: lime;
+    --foreground-color-3: black;
+
+    --background-color-transparent: rgba(255, 240, 200, 0.5);
+	--shadow-color: rgba(0, 0, 0, 0.5);
+
     --selection-background-color: yellow;
-    --primary-foreground-color: black;
     --selection-foreground-color: black;
 }
 ```
 disables the dark theme and creates a theme that primarily uses yellow/green colors.
+

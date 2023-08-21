@@ -21,13 +21,16 @@
 		padding: 0 !important;
 		padding-bottom: 5px;
 
+		// Default border color if color-mix is not supported
+		--active-border-color: rgba(100, 100, 100, 0.5);
+
 		--active-border-color: color-mix(
-			in srgb, var(--primary-foreground-color), transparent
+			in srgb, var(--foreground-color-1), transparent
 		);
 
 		> .toolbar--file-input-description {
-			background-color: var(--tertiary-background-color);
-			color: var(--tertiary-foreground-color);
+			background-color: var(--background-color-3);
+			color: var(--foreground-color-3);
 
 			border: 1px dashed var(--active-border-color);
 			padding: 10px;
@@ -64,7 +67,7 @@
 
 
 		&:active, &:hover, &.drag-target {
-			--active-border-color: var(--primary-foreground-color);
+			--active-border-color: var(--foreground-color-1);
 		}
 
 		&.drag-target > .toolbar--file-input-description {

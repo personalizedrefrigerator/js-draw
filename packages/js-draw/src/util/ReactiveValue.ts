@@ -77,7 +77,7 @@ export abstract class ReactiveValue<T> {
 		callback: ()=>T, sourceValues: ReactiveValue<any>[]
 	): ReactiveValue<T>{
 		const result = new ReactiveValueImpl(callback());
-		const resultRef = new WeakRef(result);
+		const resultRef = window.WeakRef ? new WeakRef(result) : { deref: () => result };
 
 		for (const value of sourceValues) {
 			const listener = value.onUpdate(() => {

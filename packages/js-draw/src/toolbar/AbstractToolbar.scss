@@ -1,8 +1,8 @@
 
 /* The *main* root toolbar element */
 .toolbar-root {
-	background-color: var(--primary-background-color);
-	--icon-color: var(--primary-foreground-color);
+	background-color: var(--background-color-1);
+	--icon-color: var(--foreground-color-1);
 	--toolbar-button-height: min(20vh, 60px);
 
 	flex-wrap: wrap;
@@ -55,7 +55,7 @@
 	border-radius: 6px;
 
 	border: none;
-	box-shadow: 0px 0px 2px var(--primary-shadow-color);
+	box-shadow: 0px 0px 2px var(--shadow-color);
 
 	transition: background-color 0.15s ease, box-shadow 0.25s ease, opacity 0.2s ease;
 }
@@ -95,7 +95,7 @@
 }
 
 .toolbar-button:not(.disabled):hover, .toolbar-root button:not(:disabled):hover {
-	box-shadow: 0px 2px 4px var(--primary-shadow-color);
+	box-shadow: 0px 2px 4px var(--shadow-color);
 }
 
 .toolbar-root button:disabled {
@@ -151,8 +151,8 @@
 
 	/* Prevent overlap/being displayed under the undo/redo buttons */
 	z-index: 2;
-	background-color: var(--primary-background-color);
-	box-shadow: 0px 3px 3px var(--primary-shadow-color);
+	background-color: var(--background-color-1);
+	box-shadow: 0px 3px 3px var(--shadow-color);
 }
 
 /* Animate showing/hiding the dropdown. Animations triggered in JavaScript. */
@@ -224,7 +224,7 @@
 
 	touch-action: none;
 
-	background-color: var(--primary-background-color);
+	background-color: var(--background-color-1);
 	opacity: 0.3;
 
 	// Display above the main image, but below the toolbars

@@ -34,11 +34,14 @@ export interface ToolbarLocalization {
 	clickToPickColorAnnouncement: string;
 	colorSelectionCanceledAnnouncement: string;
 
-	reformatSelection: string;
 	undo: string;
 	redo: string;
+	exit: string;
+	save: string;
+
 	zoom: string;
 	resetView: string;
+	reformatSelection: string;
 	selectionToolKeyboardShortcuts: string;
 	paste: string;
 	documentProperties: string;
@@ -85,8 +88,12 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	resizeImageToSelection: 'Resize image to selection',
 	deleteSelection: 'Delete selection',
 	duplicateSelection: 'Duplicate selection',
+
+	exit: 'Exit',
+	save: 'Save',
 	undo: 'Undo',
 	redo: 'Redo',
+
 	selectPenTip: 'Pen tip',
 	selectShape: 'Shape',
 	pickColorFromScreen: 'Pick color from screen',
@@ -114,6 +121,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	lockRotation: 'Lock rotation',
 
 	paste: 'Paste',
+
 
 	closeSidebar: (toolName: string) => `Close sidebar for ${toolName}`,
 	dropdownShown: (toolName) => `Menu for ${toolName} shown`,

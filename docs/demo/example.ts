@@ -1,5 +1,5 @@
 // If from an NPM package,
-import { Editor, EditorEventType, EventDispatcher, makeEdgeToolbar, ToolbarWidgetTag } from 'js-draw';
+import { Editor, EditorEventType, EventDispatcher, makeEdgeToolbar } from 'js-draw';
 import 'js-draw/styles';
 
 import { Localization, getLocalizationTable } from './localization';
@@ -45,12 +45,7 @@ const createEditor = (
 	// default toolbar layout.
 	const toolbar = makeEdgeToolbar(editor);
 
-	toolbar.addTaggedActionButton([
-		ToolbarWidgetTag.Save,
-	], {
-		label: localization.save,
-		icon: editor.icons.makeSaveIcon(),
-	}, () => {
+	toolbar.addSaveButton(() => {
 		saveCallback();
 	});
 
@@ -67,12 +62,7 @@ const createEditor = (
 		void reShowLaunchOptions(localization, appNotifier);
 	};
 
-	toolbar.addTaggedActionButton([
-		ToolbarWidgetTag.Exit,
-	], {
-		label: localization.exit,
-		icon: editor.icons.makeCloseIcon(),
-	}, () => {
+	toolbar.addExitButton(() => {
 		if (hasChanges() && confirm(localization.saveUnsavedChanges)) {
 			saveCallback(closeEditor);
 		} else {

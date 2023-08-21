@@ -1,13 +1,12 @@
-import { Application, JSX, MarkdownEvent, RendererEvent } from 'typedoc';
+import { Renderer, JSX, MarkdownEvent, RendererEvent, Options } from 'typedoc';
 import { readdirSync, copyFileSync } from 'node:fs';
 import * as path from 'node:path';
 import transformMarkdown from './transformMarkdown';
 
-export const load = (app: Application) => {
+const loadRendererHooks = (renderer: Renderer, options: Options) => {
 	const distDir = path.dirname(__dirname);
 
-	//app.renderer.defineTheme('custom-theme', CustomTheme);
-	app.renderer.on(
+	renderer.on(
 		MarkdownEvent.PARSE,
 		(event: MarkdownEvent) => {
 			event.parsedText = transformMarkdown(event.parsedText);
@@ -16,14 +15,17 @@ export const load = (app: Application) => {
 
 		// A positive priority to run before parsing
 		// Not specifying this causes the event to run after.
-		1
+		1,
 	);
 
-	app.renderer.hooks.on('head.end', (event) => {
+	renderer.hooks.on('head.end', (event) => {
+		const sidebarReplacements = options.getValue('sidebarReplacements') as Record<string, string>;
+
 		// Additional variable declarations for the browser script
 		const pageVariables = `
 			window.assetsURL = ${JSON.stringify(event.relativeURL('assets/'))};
 			window.imagesURL = ${JSON.stringify(event.relativeURL('../img/'))};
+			window.sidebarReplacements = ${JSON.stringify(sidebarReplacements)};
 		`;
 
 		return (
@@ -36,7 +38,7 @@ export const load = (app: Application) => {
 		);
 	});
 
-	app.renderer.on(RendererEvent.END, (event: RendererEvent) => {
+	renderer.on(RendererEvent.END, (event: RendererEvent) => {
 		const filesToCopy = [
 			'js-draw-typedoc-extension--browser.js',
 			'js-draw-typedoc-extension--iframe.js',
@@ -55,3 +57,5 @@ export const load = (app: Application) => {
 		}
 	});
 };
+
+export default loadRendererHooks;

@@ -2,7 +2,9 @@
 	"entryPoints": [
 		"./packages/js-draw/src/lib.ts",
 		"./packages/math/src/lib.ts",
-		"./packages/material-icons/src/lib.ts"
+		"./packages/material-icons/src/lib.ts",
+
+		"./docs/doc-pages/typedoc.ts"
 	],
 	"entryPointStrategy": "resolve",
 	"name": "js-draw",
@@ -16,6 +18,16 @@
 		"**/dist-test/**",
 		"src/testing/"
 	],
+
+	"includes": "docs/",
+	"theme": "js-draw-theme",
+
+	"sidebarReplacements": {
+		"docs/doc-pages/typedoc": "More Documentation",
+		"packages/js-draw/src/lib": "js-draw - {{version}}",
+		"packages/math/src/lib": "@js-draw/math - {{version}}",
+		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}",
+	},
 
 	"excludePrivate": true,
 	"excludeInternal": true,

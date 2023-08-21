@@ -336,15 +336,18 @@ export default abstract class BaseWidget {
 	}
 
 	protected updateIcon() {
-		const newIcon = this.createIcon();
+		let newIcon = this.createIcon();
 
-		if (newIcon) {
-			this.icon?.replaceWith(newIcon);
-			this.icon = newIcon;
-			this.icon.classList.add(`${toolbarCSSPrefix}icon`);
+		if (!newIcon) {
+			newIcon = document.createElement('div');
+			this.container.classList.add('no-icon');
 		} else {
-			this.icon?.remove();
+			this.container.classList.remove('no-icon');
 		}
+
+		this.icon?.replaceWith(newIcon);
+		this.icon = newIcon;
+		this.icon.classList.add(`${toolbarCSSPrefix}icon`);
 	}
 
 	public setDisabled(disabled: boolean) {

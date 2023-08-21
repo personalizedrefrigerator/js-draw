@@ -284,6 +284,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 	}
 
 	protected override onRemove() {
+		this.toolbarContainer.remove();
 		this.menuContainer.remove();
 		this.toolRowResizeObserver.disconnect();
 	}

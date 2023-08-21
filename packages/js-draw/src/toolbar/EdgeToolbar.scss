@@ -97,8 +97,8 @@
 		// clicking on items in the second row:
 		pointer-events: none;
 
-		background-color: var(--primary-background-color);
-		color: var(--primary-foreground-color);
+		background-color: var(--background-color-1);
+		color: var(--foreground-color-1);
 		border-radius: 25px;
 		padding: 10px;
 
@@ -123,9 +123,9 @@
 		flex-grow: 1;
 
 		justify-content: center;
-		background-color: var(--secondary-background-color);
-		color: var(--secondary-foreground-color);
-		--icon-color: var(--secondary-foreground-color);
+		background-color: var(--background-color-2);
+		color: var(--foreground-color-2);
+		--icon-color: var(--foreground-color-2);
 
 		
 		&.toolbar-tool-row {
@@ -139,9 +139,9 @@
 			// hovering over the items should make labels appear
 			// on top of the buttons in the next item (not below).
 			z-index: 2;
-			background-color: var(--tertiary-background-color);
-			color: var(--tertiary-foreground-color);
-			--icon-color: var(--tertiary-foreground-color);
+			background-color: var(--background-color-3);
+			color: var(--foreground-color-3);
+			--icon-color: var(--foreground-color-3);
 		}
 
 		&.has-scroll {
@@ -233,7 +233,7 @@
 	--button-label-hover-offset-y: var(--label-hover-offset-size);
 	--button-label-hover-offset-x: 0;
 
-	.toolbar-toolContainer:not(.label-inline) .toolbar-button {
+	.toolbar-toolContainer:not(.no-icon):not(.label-inline) .toolbar-button {
 		width: calc(var(--toolbar-button-size) + var(--extra-left-right-padding));
 
 		// Note: EdgeToolbar.ts currently assumes that the height of a button is
@@ -282,7 +282,7 @@
 
 // The popup menu container
 .toolbar-edgemenu-container {
-	background-color: var(--primary-background-color-transparent);
+	background-color: var(--background-color-transparent);
 
 	transition: 0.15s ease-in-out height, 0.15s ease-in-out background-color, 0.2s ease-in-out opacity;
 	@media (prefers-reduced-motion: reduce) {
@@ -310,12 +310,12 @@
 		border: none;
 		padding: 10px;
 
-		color: var(--primary-foreground-color);
+		color: var(--foreground-color-1);
 
 		transition: 0.2s ease box-shadow;
 
 		&:hover {
-			box-shadow: 0 1px 2px var(--primary-shadow-color);
+			box-shadow: 0 1px 2px var(--shadow-color);
 		}
 
 		font-weight: bold;
@@ -335,10 +335,10 @@
 	touch-action: none;
 	user-select: none;
 
-	background-color: var(--secondary-background-color);
-	--icon-color: var(--secondary-foreground-color);
+	background-color: var(--background-color-2);
+	--icon-color: var(--foreground-color-2);
 
-	box-shadow: 0px 0px 1px var(--primary-shadow-color);
+	box-shadow: 0px 0px 1px var(--shadow-color);
 
 	padding-left: 10px;
 	padding-right: 10px;

@@ -3,5 +3,10 @@
 
 	"include": [
 		"packages/**/*.ts",
+		"docs/doc-pages/*.ts"
 	],
+
+	"exclude": [
+		"packages/typedoc-extensions/"
+	]
 }

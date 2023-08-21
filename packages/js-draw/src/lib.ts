@@ -31,13 +31,15 @@
  *   // Also see addActionButton.
  *   const buttonLabels = [ ToolbarWidgetTag.Save ];
  *
- *   toolbar.addTaggedActionButton(buttonLabels, {
- *     label: 'Save',
- *     icon: editor.icons.makeSaveIcon(),
- *   }, () => {
+ *   toolbar.addSaveButton(() => {
  *     const saveData = editor.toSVG().outerHTML;
  *
  *     // Do something with saveData
+ *   });
+ *
+ *   toolbar.addExitButton(() => {
+ *     // Save/confirm exiting here?
+ *     editor.remove();
  *   });
  * })();
  * ```
@@ -70,6 +72,9 @@ export * from './shortcuts/lib';
 export { default as EventDispatcher } from './EventDispatcher';
 export { default as Pointer, PointerDevice } from './Pointer';
 export { default as UndoRedoHistory } from './UndoRedoHistory';
+
+// @internal
+export { default as __js_draw__version } from './version';
 
 import AbstractToolbar from './toolbar/AbstractToolbar';
 

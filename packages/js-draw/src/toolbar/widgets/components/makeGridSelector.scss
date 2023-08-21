@@ -21,7 +21,7 @@
 		margin: 2px;
 
 		&:focus-within {
-			outline: 2px solid var(--primary-foreground-color);
+			outline: 2px solid var(--foreground-color-1);
 		}
 
 		// The choice buttons use input[type=radio] internally.

@@ -19,7 +19,6 @@ export interface Localization {
 
 	saveUnsavedChanges: string;
 
-	exit: string;
 	save: string;
 	delete: string;
 	reallyDelete: (imageName: string) => string;
@@ -61,7 +60,6 @@ localizationTables.en = {
 
 	saveUnsavedChanges: 'There may be unsaved changes. Save them?',
 
-	exit: 'Exit',
 	save: 'Save',
 	delete: 'Delete',
 	reallyDelete: (imageName) => `Are you sure you want to delete ${imageName}?`,
@@ -86,7 +84,6 @@ localizationTables.es = {
 	...localizationTables.en,
 
 	new: 'Nuevo',
-	save: 'Guarde',
 	delete: 'Borre',
 	reallyDelete: (imageName) => `¿Está seguro que quiere borrar "${imageName}"?`,
 

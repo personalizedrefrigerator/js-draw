@@ -6,7 +6,8 @@ import * as jsdrawMaterialIcons from '@js-draw/material-icons';
 import './iframe.scss';
 
 (() => {
-	const logMessage = (message: any[]) => {
+	/** Creates an HTML element that contains the content of `message`. */
+	const createLogElementFor = (message: any[]) => {
 		const container = document.createElement('div');
 		for (const part of message) {
 			const wrapper = document.createElement('span');
@@ -51,11 +52,12 @@ import './iframe.scss';
 
 	const isConsoleMode = (window as any).mode === 'console';
 
+	/** Adds a log element to the body. */
 	const addLogElement = (elem: HTMLElement) => {
 		if (isConsoleMode) {
-			document.body.appendChild(elem);
+			(document.body ?? document.documentElement).appendChild(elem);
 		} else {
-			document.body.insertAdjacentElement('afterbegin', elem);
+			(document.body ?? document.documentElement).insertAdjacentElement('afterbegin', elem);
 		}
 	};
 
@@ -66,13 +68,13 @@ import './iframe.scss';
 		const origLog = console.log;
 		console.log = (...args) => {
 			origLog.call(this, args);
-			addLogElement(logMessage(args));
+			addLogElement(createLogElementFor(args));
 		};
 
 		const origWarn = console.warn;
 		console.warn = (...args) => {
 			origWarn.call(this, args);
-			const container = logMessage(args);
+			const container = createLogElementFor(args);
 			container.classList.add('warning');
 			addLogElement(container);
 		};
@@ -80,12 +82,13 @@ import './iframe.scss';
 		const origError = console.warn;
 		console.error = (...args) => {
 			origError.call(this, args);
-			const container = logMessage(args);
+			const container = createLogElementFor(args);
 			container.classList.add('error');
 			addLogElement(container);
 		};
 	}
 
+	// Allows libraries included after this to require/include content.
 	(window as any).require = (path: string) => {
 		if (path === 'js-draw') {
 			return jsdraw;
@@ -104,7 +107,7 @@ import './iframe.scss';
 	(window as any).exports = { };
 
 	window.onerror = (event) => {
-		const errorElement = logMessage(['Error: ', event]);
+		const errorElement = createLogElementFor(['Error: ', event]);
 		errorElement.classList.add('error');
 		addLogElement(errorElement);
 	};

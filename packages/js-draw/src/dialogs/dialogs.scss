@@ -2,7 +2,7 @@
 @use './makeAboutDialog.scss';
 
 .dialog-container {
-	background-color: var( --primary-background-color-transparent);
+	background-color: var( --background-color-transparent);
 
 	backdrop-filter: blur(5px);
 	-webkit-backdrop-filter: blur(5px);
@@ -21,12 +21,12 @@
 	justify-content: center;
 
 	dialog {
-		background-color: var(--primary-background-color);
-		color: var(--primary-foreground-color);
+		background-color: var(--background-color-1);
+		color: var(--foreground-color-1);
 		border: none;
 		outline: none;
 	
-		box-shadow: 0 0 2px var(--primary-shadow-color);
+		box-shadow: 0 0 2px var(--shadow-color);
 		border-radius: 8px;
 
 		max-height: 90vh;
