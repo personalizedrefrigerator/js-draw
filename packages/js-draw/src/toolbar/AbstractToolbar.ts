@@ -21,6 +21,7 @@ import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
 import { DispatcherEventListener } from '../EventDispatcher';
 import { Color4 } from '@js-draw/math';
 import { toolbarCSSPrefix } from './constants';
+import SaveActionWidget from './widgets/SaveActionWidget';
 
 type UpdateColorisCallback = ()=>void;
 type WidgetByIdMap = Record<string, BaseWidget>;
@@ -377,28 +378,23 @@ export default abstract class AbstractToolbar {
 	/**
 	 * Adds a save button that, when clicked, calls `saveCallback`.
 	 *
-	 * **Note**: This is equivalent to
-	 * ```ts
-	 * const tags = [
-	 *   ToolbarWidgetTag.Save,
-	 * ];
-	 * toolbar.addTaggedActionButton(tags, {
-	 *   label: editor.localization.save,
-	 *   icon: editor.icons.makeSaveIcon(),
-	 * }, () => {
-	 *   saveCallback();
-	 * });
-	 * ```
+	 * @example
+	 * ```ts,runnable
+	 * import { Editor, makeDropdownToolbar } from 'js-draw';
 	 *
-	 * @final
+	 * const editor = new Editor(document.body);
+	 * const toolbar = makeDropdownToolbar(editor);
+	 *
+	 * toolbar.addDefaults();
+	 * toolbar.addSaveButton(() => alert('save clicked!'));
+	 * ```
 	 */
 	public addSaveButton(saveCallback: ()=>void): BaseWidget {
-		return this.addTaggedActionButton([ ToolbarWidgetTag.Save ], {
-			label: this.editor.localization.save,
-			icon: this.editor.icons.makeSaveIcon(),
-		}, () => {
-			saveCallback();
-		});
+		const widget = new SaveActionWidget(this.editor, this.localizationTable, saveCallback);
+		widget.setTags([ ToolbarWidgetTag.Save ]);
+		this.addWidget(widget);
+
+		return widget;
 	}
 
 	/**

@@ -1,5 +1,7 @@
 
-# 1.0.3
+# 1.1.0
+ * Features
+   * Bind `ctrl+s` (or `meta+s`) to the save action, if added with [`AbstractToolbar.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addSaveButton).
  * Bug fixes
    * Edge toolbar: Fix edge menu text using incorrect CSS variable (it should use `--foreground-color-2` to match `--background-color-2`).
 
