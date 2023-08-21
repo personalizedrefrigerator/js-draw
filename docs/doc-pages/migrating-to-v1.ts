@@ -6,4 +6,4 @@
  *
  * [[include:doc-pages/migrating-to-v1.md]]
  */
-export namespace MigratingToVersion1 {}
+export namespace MigratingToVersion1__ {}

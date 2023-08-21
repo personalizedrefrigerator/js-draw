@@ -1,5 +1,5 @@
 # 1.0.0 (work in progress)
- * Breaking changes (see [the migration guide](https://js-draw.web.app/typedoc/modules/docs_doc_pages_typedoc.MigratingToVersion1.html))
+ * Breaking changes (see [the migration guide](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html))
    * The `--secondary-foreground-color` and `--secondary-background-color` are no longer used for selected items. Use `--selection-foreground-color` and `--selection-background-color` instead.
    * The `Pen` constructor now accepts parameters in a different format — the `PenStyle` should contain the pen factory.
    * Timestamps in `Pointer`s and `StrokeDataPoint`s use `performance.now` instead of `Date.now`.
