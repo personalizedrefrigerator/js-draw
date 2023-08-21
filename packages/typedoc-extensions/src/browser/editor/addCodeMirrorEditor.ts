@@ -91,7 +91,6 @@ const addCodeMirrorEditor = (initialText: string, parent: HTMLElement, language:
 	let indentation = '  ';
 	if (indentationMatch) {
 		indentation = indentationMatch[1];
-		console.log('indent', indentation);
 	}
 
 	const editor = new EditorView({

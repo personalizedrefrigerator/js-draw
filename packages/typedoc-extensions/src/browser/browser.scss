@@ -42,3 +42,10 @@ textarea.runnable-code {
 		--cm-shadow-color: rgba(200, 200, 100, 0.5);
 	}
 }
+
+// Correct code block size within headers
+h1, h2, h3, h4, h5 {
+	code {
+		font-size: inherit;
+	}
+}

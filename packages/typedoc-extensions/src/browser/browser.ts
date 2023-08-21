@@ -1,5 +1,5 @@
 import 'katex/dist/katex.css';
-import './browser.css';
+import './browser.scss';
 
 import { join } from 'path';
 import { __js_draw__version } from 'js-draw';

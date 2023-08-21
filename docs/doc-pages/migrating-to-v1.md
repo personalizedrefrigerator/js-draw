@@ -4,7 +4,7 @@ Version 1 of the `js-draw` library introduces many new features and [several bre
  
 ## Breaking API change: CSS variables
 
-If you're customizing `js-draw`'s theme, this API change applies to you.
+The CSS variables used to customize `js-draw`'s theme have changed.
 
 <details><summary>Comparison between old and new CSS variables</summary>
 
@@ -87,6 +87,7 @@ const makeToolbar = (newToolbar: boolean, editor: Editor) => {
 const makeEditor = async () => {
 	const editor = new Editor(document.body, {
 		iconProvider: new MaterialIconProvider(),
+    	wheelEventsEnabled: 'only-if-focused',
 	});
 
 	// Loads from SVG data
@@ -172,6 +173,7 @@ const makeToolbar = (editor: Editor) => {
 const makeEditor = () => {
 	const editor = new Editor(document.body, {
 		iconProvider: new MaterialIconProvider(),
+    	wheelEventsEnabled: 'only-if-focused',
 	});
 
 	makeToolbar(editor);
@@ -186,7 +188,7 @@ to create different types of toolbars.
 Even in the dropdown toolbar, the behavior/appearance of many toolbar widgets are different.
 
 
-## Breaking API change: Different PenTool API
+## Breaking API change: Different `PenTool` API
 
 The constructor for the `PenTool` has changed — rather than accepting the pen's default stroke factory
 as a separate argument, the factory is a part of the `style` parameter.
@@ -199,7 +201,9 @@ import {
 } from 'js-draw';
 import 'js-draw/styles';
 
-const editor = new Editor(document.body);
+const editor = new Editor(document.body, {
+    wheelEventsEnabled: 'only-if-focused',
+});
 
 const penStyle: PenStyle = {
 	color: Color4.red,
@@ -216,4 +220,13 @@ editor.toolController.addPrimaryTool(
 // Add the toolbar **after** adding the new tool.
 editor.addToolbar();
 ```
+
+## Breaking API change: Timestamps now use `performance.now()`
+
+Timestamps attached to events internal to the editor now use
+[`performance.now()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now) rather than
+`Date.now()`. As such, these timestamps
+- are relative to [`performance.timeOrigin`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/timeOrigin), not the UNIX epoch
+- are not integers (but are still in milliseconds).
+
 

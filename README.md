@@ -6,7 +6,7 @@
 
 For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html).
 
-If you're coming from version 0.25, [read the migration guide!](https://personalizedrefrigerator.github.io/js-draw/typedoc/migrating-to-v1)
+If you're coming from version 0.25, [read the migration guide!](https://js-draw.web.app/typedoc/modules/docs_doc_pages_typedoc.MigratingToVersion1.html)
 
 # API
 

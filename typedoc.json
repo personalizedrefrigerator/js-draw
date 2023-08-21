@@ -27,6 +27,7 @@
 		"packages/js-draw/src/lib": "js-draw - {{version}}",
 		"packages/math/src/lib": "@js-draw/math - {{version}}",
 		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}",
+		"MigratingToVersion1": "Migrating to version 1"
 	},
 
 	"excludePrivate": true,
