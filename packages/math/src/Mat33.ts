@@ -335,7 +335,10 @@ export class Mat33 {
 		return Math.hypot(this.a1, this.a2);
 	}
 
-	/** Constructs a 3x3 translation matrix (for translating `Vec2`s) */
+	/**
+	 * Constructs a 3x3 translation matrix (for translating `Vec2`s) using
+	 * **transformVec2**.
+	 */
 	public static translation(amount: Vec2): Mat33 {
 		// When transforming Vec2s by a 3x3 matrix, we give the input
 		// Vec2s z = 1. As such,

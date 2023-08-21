@@ -1,5 +1,18 @@
 /**
- * # `@js-draw/math`
+ * ```ts,runnable,console
+ * import { Vec2, Mat33, Rect2 } from '@js-draw/math';
+ *
+ * // Example: Rotate a vector 90 degrees about the z-axis
+ * const rotate90Degrees = Mat33.zRotation(Math.PI/2); // π/2 radians = 90 deg
+ * const moveUp = Mat33.translation(Vec2.of(1, 0));
+ * const moveUpThenRotate = rotate90Degrees.rightMul(moveUp);
+ * console.log(moveUpThenRotate.transformVec2(Vec2.of(1, 2)));
+ *
+ * // Example: Bounding box of some points
+ * console.log(Rect2.bboxOf([
+ *   Vec2.of(1, 2), Vec2.of(3, 4), Vec2.of(-100, 1000),
+ * ]));
+ * ```
  *
  * @packageDocumentation
  */
