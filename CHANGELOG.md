@@ -2,6 +2,7 @@
 # 1.0.1
  * Removes default link from the about screen.
    * `js-draw` can run in contexts where links are not expected.
+ * Fixes peer dependency version for `@js-draw/material-icons`
 
 # 1.0.0
  * Breaking changes (see [the migration guide](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html))
