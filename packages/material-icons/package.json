@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/material-icons",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Material icon pack for js-draw. ",
 	"types": "./dist/mjs/lib.d.ts",
 	"main": "./dist/cjs/lib.js",
@@ -17,8 +17,8 @@
 		"watch": "rm -rf ./dist/* && mkdir -p dist && build-tool watch"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.0.1",
-		"js-draw": "^1.0.1"
+		"@js-draw/build-tool": "^1.0.2",
+		"js-draw": "^1.0.2"
 	},
 	"peerDependencies": {
 		"js-draw": "^1.0.1"
