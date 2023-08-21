@@ -338,6 +338,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 				return true;
 			}
 
+			if (!this.sidebarVisible.get()) {
+				return true;
+			}
+
 			// Don't send pointer events that don't directly target mainContainer
 			// to the editor
 			return false;
