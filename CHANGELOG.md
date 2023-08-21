@@ -1,4 +1,9 @@
-# 1.0.0 (work in progress)
+
+# 1.0.1
+ * Removes default link from the about screen.
+   * `js-draw` can run in contexts where links are not expected.
+
+# 1.0.0
  * Breaking changes (see [the migration guide](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html))
    * The `--secondary-foreground-color` and `--secondary-background-color` are no longer used for selected items. Use `--selection-foreground-color` and `--selection-background-color` instead.
    * The `Pen` constructor now accepts parameters in a different format — the `PenStyle` should contain the pen factory.
