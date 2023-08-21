@@ -42,7 +42,7 @@ const editor = new Editor(document.body);
 If you're not using a bundler, consider using the pre-bundled editor:
 ```html
 <!-- Replace 0.20.0 with the latest version of js-draw -->
-<script src="https://cdn.jsdelivr.net/npm/js-draw@0.20.0/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-draw@1.0.0/dist/bundle.js"></script>
 <script>
     const editor = new jsdraw.Editor(document.body);
     editor.addToolbar();
@@ -60,20 +60,34 @@ To create a toolbar with the default tools:
 const toolbar = editor.addToolbar();
 ```
 
-Custom actions can be added to the toolbar. For example, to add a `save` button:
+Save and exit buttons can be added with the `.addSaveButton` and `.addExitButton` methods: 
 ```ts
-toolbar.addActionButton('Save', () => {
+toolbar.addSaveButton(() => {
     const svgElem = editor.toSVG();
     console.log('The saved SVG:', svgElem.outerHTML);
+});
+
+toolbar.addExitButton(() => {
+    // Save here?
+
+    // Removes the editor from the document.
+    editor.remove();
+});
+```
+
+Custom actions can also be added to the toolbar. For example,
+```ts
+toolbar.addActionButton('Custom', () => {
+    // When the action button is pressed
 });
 ```
 or alternatively, with an icon,
 ```ts
 toolbar.addActionButton({
-  label: 'Save'
+  label: 'Custom',
   icon: editor.icons.makeSaveIcon(),
 }, () => {
-    // Save content here.
+    // Do something here
 });
 ```
 
