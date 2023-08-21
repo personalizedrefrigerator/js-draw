@@ -1396,7 +1396,7 @@ export class Editor {
 
 		const notices: AboutDialogEntry[] = [];
 		notices.push({
-			heading: { kind: 'link', text: 'js-draw', href: 'https://github.com/personalizedrefrigerator/js-draw' },
+			heading: 'js-draw',
 			text: [
 				`v${version.number}`,
 				'',
