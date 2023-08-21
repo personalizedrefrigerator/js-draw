@@ -1,0 +1,5 @@
+{
+	"extends": ["../../typedoc.base.json"],
+	"entryPoints": ["./migrating-to-v1.ts"],
+	"includeVersion": false
+}

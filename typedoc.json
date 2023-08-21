@@ -1,12 +1,12 @@
 {
 	"entryPoints": [
-		"./packages/js-draw/src/lib.ts",
-		"./packages/math/src/lib.ts",
-		"./packages/material-icons/src/lib.ts",
+		"./packages/js-draw",
+		"./packages/math",
+		"./packages/material-icons",
 
-		"./docs/doc-pages/typedoc.ts"
+		"./docs/doc-pages/"
 	],
-	"entryPointStrategy": "resolve",
+	"entryPointStrategy": "packages",
 	"name": "js-draw",
 	"out": "docs/typedoc/",
 	"plugin": [ "@js-draw/typedoc-extensions" ],
