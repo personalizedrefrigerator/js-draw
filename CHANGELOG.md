@@ -1,4 +1,11 @@
 
+# 1.2.0
+ * Features
+   * Added additional `Color4` utility functions ([`fromHSV`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromHSV), [`fromRGBVector`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromRGBVector), [`contrastRatio`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#contrastRatio), and [`.rgb`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#rgb)).
+   * Added [`adjustEditorThemeForContrast`](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.adjustEditorThemeForContrast.html) function.
+ * Other changes
+   * Prefers `transform` to `translation` when setting the position of the edge toolbar for compatibility with older browsers.
+
 # 1.1.0
  * Features
    * Bind `ctrl+s` (or `meta+s`) to the save action, if added with [`AbstractToolbar.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addSaveButton).
