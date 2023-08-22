@@ -331,6 +331,10 @@ export default class Color4 {
 		}
 		hue %= Math.PI * 2;
 
+		// Clamp value and saturation to [0, 1]
+		value = Math.max(0, Math.min(1, value));
+		saturation = Math.max(0, Math.min(1, saturation));
+
 		// Formula from https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB
 
 		// Saturation can be thought of as scaled chroma. Unapply the scaling.

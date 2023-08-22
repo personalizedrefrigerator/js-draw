@@ -79,6 +79,8 @@ export { default as EventDispatcher } from './EventDispatcher';
 export { default as Pointer, PointerDevice } from './Pointer';
 export { default as UndoRedoHistory } from './UndoRedoHistory';
 
+export * from './util/lib';
+
 // @internal
 export { default as __js_draw__version } from './version';
 
@@ -86,12 +88,13 @@ import AbstractToolbar from './toolbar/AbstractToolbar';
 
 export {
 	Editor, EditorSettings, AbstractToolbar,
-
-	/**
-	 * Using the HTMLToolbar alias is deprecated. Use
-	 * `AbstractToolbar` instead.
-	 * @deprecated
-	 */
-	AbstractToolbar as HTMLToolbar,
 };
+
+
+/**
+ * Using the HTMLToolbar alias is deprecated. Use
+ * `AbstractToolbar` instead.
+ * @deprecated
+ */
+export { AbstractToolbar as HTMLToolbar };
 export default Editor;
