@@ -33,6 +33,7 @@ import RenderablePathSpec from './rendering/RenderablePathSpec';
 import makeAboutDialog, { AboutDialogEntry } from './dialogs/makeAboutDialog';
 import version from './version';
 
+/** Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}. */
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
 	renderingMode: RenderingMode,
@@ -47,10 +48,10 @@ export interface EditorSettings {
 	 */
 	wheelEventsEnabled: boolean|'only-if-focused';
 
-	/** Minimum zoom fraction (e.g. 0.5 → 50% zoom). */
+	/** Minimum zoom fraction (e.g. 0.5 → 50% zoom). Defaults to $2 \cdot 10^{-10}$. */
 	minZoom: number,
 
-	/** Maximum zoom fraction (e.g. 2 → 200% zoom). */
+	/** Maximum zoom fraction (e.g. 2 → 200% zoom). Defaults to $1 \cdot 10^{12}$. */
 	maxZoom: number,
 
 	/**
@@ -71,7 +72,7 @@ export interface EditorSettings {
 	 * See, for example, the `@js-draw/material-icons` package.
 	 *
 	 * @example
-	 * ```ts
+	 * ```ts,runnable
 	 * import * as jsdraw from 'js-draw';
 	 * import MaterialIconProvider from '@js-draw/material-icons';
 	 * import 'js-draw/styles';
