@@ -1,12 +1,12 @@
 @keyframes toolbar--edgemenu-transition-in {
-	from { translate: 0 100%; }
-	to { translate: 0; }
+	from { transform: translate(0, 100%); }
+	to { transform: translate(0, 0); }
 }
 
 @keyframes toolbar--edgemenu-transition-out {
 	// Don't include `from { translate: 0 }` because initially,
 	// the translation might not be zero (e.g. during a drag).
-	to { translate: 0 100%; }
+	to { transform: translate(0, 100%); }
 }
 
 @keyframes toolbar--edgemenu-container-transition-in {
@@ -392,7 +392,7 @@
 	border-top-left-radius: $border-radius;
 	border-top-right-radius: $border-radius;
 
-	transition: translate 0.1s ease, padding-bottom 0.1s ease;
+	transition: transform 0.1s ease, padding-bottom 0.1s ease;
 
 	input, textarea {
 		user-select: auto;
