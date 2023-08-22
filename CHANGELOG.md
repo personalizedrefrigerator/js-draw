@@ -20,7 +20,7 @@
    * Timestamps in `Pointer`s and `StrokeDataPoint`s use `performance.now` instead of `Date.now`.
    * A more specific selector than `.imageEditorContainer` is now required to override the `width` and `height` of an editor. Use `.js-draw.imageEditorContainer` or `body .imageEditorContainer`.
   * Other changes
-   * New default toolbar
+   * New default toolbar &mdash; [design credit](https://www.figma.com/file/NA5F2AMWO3wUuaoDfUaAb8/Material-3-wireframes?type=design&node-id=54490%3A1103&mode=design&t=Ee0UwnPnQ2bNC2uM-1)
    * New material icon pack
    * Preserve `<g>` element parents when writing SVGs.
    * Fix: Editor thinks control key is still pressed after shortcuts like `ctrl+Tab` that defocus the editor before a keyup event is sent for `ctrl`.
