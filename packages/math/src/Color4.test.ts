@@ -50,6 +50,26 @@ describe('Color4', () => {
 		expect(Color4.ofRGB(0.5, 0.25, 0.5).asHSV()).objEq(Vec3.of(Math.PI * 5 / 3, 0.5, 0.5), 0.1);
 	});
 
+	it('fromHSV(color.asHSV) should return the original color', () => {
+		const testColors = [
+			Color4.red, Color4.green, Color4.blue,
+			Color4.white, Color4.black,
+		];
+
+		const testWithColor = (color: Color4) => {
+			expect(Color4.fromHSV(...color.asHSV().asArray())).objEq(color);
+		};
+
+		for (const color of testColors) {
+			testWithColor(color);
+		}
+
+		for (let i = 0; i <= 6; i++) {
+			testWithColor(Color4.fromHSV(i * Math.PI / 7, 0.5, 0.5));
+			testWithColor(Color4.fromHSV(i * Math.PI / 6, 0.5, 0.5));
+		}
+	});
+
 	it('.rgb should return a 3-component vector', () => {
 		expect(Color4.red.rgb).objEq(Vec3.of(1, 0, 0));
 		expect(Color4.green.rgb).objEq(Vec3.of(0, 1, 0));

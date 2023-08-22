@@ -311,6 +311,66 @@ export default class Color4 {
 		return Vec3.of(hue, saturation, value);
 	}
 
+	/**
+	 * Creates a new `Color4` from a representation [in $HSV$](https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB).
+	 *
+	 * [Algorithm](https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB).
+	 *
+	 * Note that hue must be given **in radians**. While non-standard, this is consistent with
+	 * {@link asHSV}.
+	 *
+	 * `hue` and `value` should range from 0 to 1.
+	 *
+	 * @param hue $H \in [0, 2\pi]$
+	 * @param saturation $S_V \in [0, 1]$
+	 * @param value $V \in [0, 1]$
+	 */
+	public static fromHSV(hue: number, saturation: number, value: number) {
+		if (hue < 0) {
+			hue += Math.PI * 2;
+		}
+		hue %= Math.PI * 2;
+
+		// Formula from https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB
+
+		// Saturation can be thought of as scaled chroma. Unapply the scaling.
+		// See https://en.wikipedia.org/wiki/HSL_and_HSV#Saturation
+		const chroma = value * saturation;
+
+		// Determines which edge of the projected color cube
+		const huePrime = hue / (Math.PI / 3);
+
+		const secondLargestComponent = chroma * (1 - Math.abs((huePrime % 2) - 1));
+
+		let rgb;
+		if (huePrime < 1) {
+			rgb = [ chroma, secondLargestComponent, 0 ];
+		} else if (huePrime < 2) {
+			rgb = [ secondLargestComponent, chroma, 0 ];
+		} else if (huePrime < 3) {
+			rgb = [ 0, chroma, secondLargestComponent ];
+		} else if (huePrime < 4) {
+			rgb = [ 0, secondLargestComponent, chroma ];
+		} else if (huePrime < 5) {
+			rgb = [ secondLargestComponent, 0, chroma ];
+		} else {
+			rgb = [ chroma, 0, secondLargestComponent ];
+		}
+
+		const adjustment = value - chroma;
+		return Color4.ofRGB(rgb[0] + adjustment, rgb[1] + adjustment, rgb[2] + adjustment);
+	}
+
+
+	/**
+	 * Equivalent to `ofRGB(rgb.x, rgb.y, rgb.z)`.
+	 *
+	 * All components should be in the range `[0, 1]` (0 to 1 inclusive).
+	 */
+	public static fromRGBVector(rgb: Vec3, alpha?: number) {
+		return Color4.ofRGBA(rgb.x, rgb.y, rgb.z, alpha ?? 1);
+	}
+
 	private hexString: string|null = null;
 
 	/**
