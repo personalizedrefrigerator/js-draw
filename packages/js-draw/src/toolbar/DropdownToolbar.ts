@@ -5,6 +5,30 @@ import OverflowWidget from './widgets/OverflowWidget';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
 import { toolbarCSSPrefix } from './constants';
 
+/**
+ * @example
+ *
+ * ```ts,runnable
+ * import { makeDropdownToolbar, Editor } from 'js-draw';
+ *
+ * const editor = new Editor(document.body);
+ * const toolbar = makeDropdownToolbar(editor);
+ * toolbar.addDefaults();
+ *
+ * toolbar.addExitButton(editor => {
+ *   // TODO
+ * });
+ *
+ * toolbar.addSaveButton(editor => {
+ *   // TODO
+ * });
+ * ```
+ *
+ * @see
+ * - {@link makeEdgeToolbar}
+ * - {@link AbstractToolbar.addSaveButton}
+ * - {@link AbstractToolbar.addExitButton}
+ */
 export const makeDropdownToolbar = (editor: Editor): AbstractToolbar => {
 	return new DropdownToolbar(editor, editor.getRootElement());
 };

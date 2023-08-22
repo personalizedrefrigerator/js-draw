@@ -119,7 +119,7 @@ const makeEditor = async () => {
 makeEditor();
 ```
 
-## Breaking UI change: Different default toolbar
+## Breaking UI change: [New default toolbar](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.makeEdgeToolbar.html)
 
 The toolbar added by `.addToolbar()` has changed. A version of the original toolbar is still available.
 

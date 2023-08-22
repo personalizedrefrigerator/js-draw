@@ -7,7 +7,34 @@ import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
 import stopPropagationOfScrollingWheelEvents from '../util/stopPropagationOfScrollingWheelEvents';
 
-
+/**
+ * Creates an `EdgeToolbar`.
+ *
+ * [Credit for the original design of this UI](https://www.figma.com/file/NA5F2AMWO3wUuaoDfUaAb8/Material-3-wireframes?type=design&node-id=54490%3A1103&mode=design&t=Ee0UwnPnQ2bNC2uM-1).
+ *
+ * @example
+ *
+ * ```ts,runnable
+ * import { makeEdgeToolbar, Editor } from 'js-draw';
+ *
+ * const editor = new Editor(document.body);
+ * const toolbar = makeEdgeToolbar(editor);
+ * toolbar.addDefaults();
+ *
+ * toolbar.addSaveButton(editor => {
+ *   // TODO
+ * });
+ *
+ * toolbar.addExitButton(editor => {
+ *   // TODO
+ * });
+ * ```
+ *
+ * @see
+ * - {@link makeDropdownToolbar}
+ * - {@link AbstractToolbar.addSaveButton}
+ * - {@link AbstractToolbar.addExitButton}
+ */
 export const makeEdgeToolbar = (editor: Editor): AbstractToolbar => {
 	return new EdgeToolbar(editor, editor.getRootElement(), editor.localization);
 };
