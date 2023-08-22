@@ -171,6 +171,54 @@ export default class Color4 {
 	}
 
 	/**
+	 * Ignoring this color's alpha component, returns a vector with components,
+	 * $$
+	 * \begin{pmatrix} \colorbox{#F44}{\tt r} \\ \colorbox{#4F4}{\tt g} \\ \colorbox{#44F}{\tt b} \end{pmatrix}
+	 * $$
+	 */
+	public get rgb() {
+		return Vec3.of(this.r, this.g, this.b);
+	}
+
+	/**
+	 * Returns the [relative luminance](https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef)
+	 * of this color in the sRGB color space.
+	 *
+	 * Ignores the alpha component.
+	 */
+	public relativeLuminance(): number {
+		// References:
+		// - https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+		// - https://stackoverflow.com/a/9733420
+
+		// Normalize the components, as per above
+		const components = [ this.r, this.g, this.b ].map(component => {
+			if (component < 0.03928) {
+				return component / 12.92;
+			} else {
+				return Math.pow((component + 0.055) / 1.055, 2.4);
+			}
+		});
+
+		// From w3.org,
+		// > For the sRGB colorspace, the relative luminance of a color is
+		// > defined as L = 0.2126 * R + 0.7152 * G + 0.0722 * B
+		// where R, G, B are defined in components above.
+		return 0.2126 * components[0] + 0.7152 * components[1] + 0.0722 * components[2];
+	}
+
+	/**
+	 * Returns the [contrast ratio](https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef)
+	 * between `colorA` and `colorB`.
+	 */
+	public static contrastRatio(colorA: Color4, colorB: Color4): number {
+		const L1 = colorA.relativeLuminance();
+		const L2 = colorB.relativeLuminance();
+
+		return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+	}
+
+	/**
 	 * @returns the component-wise average of `colors`, or `Color4.transparent` if `colors` is empty.
 	 */
 	public static average(colors: Color4[]) {

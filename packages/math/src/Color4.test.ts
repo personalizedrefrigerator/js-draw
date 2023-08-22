@@ -49,4 +49,26 @@ describe('Color4', () => {
 		expect(Color4.ofRGB(0.5, 0.5, 0.5).asHSV()).objEq(Vec3.of(0, 0, 0.5));
 		expect(Color4.ofRGB(0.5, 0.25, 0.5).asHSV()).objEq(Vec3.of(Math.PI * 5 / 3, 0.5, 0.5), 0.1);
 	});
+
+	it('.rgb should return a 3-component vector', () => {
+		expect(Color4.red.rgb).objEq(Vec3.of(1, 0, 0));
+		expect(Color4.green.rgb).objEq(Vec3.of(0, 1, 0));
+		expect(Color4.blue.rgb).objEq(Vec3.of(0, 0, 1));
+	});
+
+	it('should return correct contrast ratios', () => {
+		// Expected values from https://webaim.org/resources/contrastchecker/
+		const testCases: [ Color4, Color4, number ][] = [
+			[ Color4.white, Color4.black, 21 ],
+			[ Color4.fromHex('#FF0000'), Color4.black, 5.25 ],
+			[ Color4.fromHex('#FF0000'), Color4.fromHex('#0000FF'), 2.14 ],
+			[ Color4.fromHex('#300000'), Color4.fromHex('#003000'), 1.26 ],
+			[ Color4.fromHex('#300000'), Color4.fromHex('#003000'), 1.26 ],
+			[ Color4.fromHex('#D60000'), Color4.fromHex('#003000'), 2.71 ],
+		];
+
+		for (const [ colorA, colorB, expectedContrast ] of testCases) {
+			expect(Color4.contrastRatio(colorA, colorB)).toBeCloseTo(expectedContrast, 1);
+		}
+	});
 });
