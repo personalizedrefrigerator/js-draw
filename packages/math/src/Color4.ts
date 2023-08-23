@@ -93,6 +93,10 @@ export default class Color4 {
 			return Color4.transparent;
 		}
 
+		if (text === '') {
+			return Color4.black;
+		}
+
 		// rgba?: Match both rgb and rgba strings.
 		// ([,0-9.]+): Match any string of only numeric, '.' and ',' characters.
 		const rgbRegex = /^rgba?\(([,0-9.]+)\)$/i;
