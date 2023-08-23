@@ -56,11 +56,11 @@ const adjustEditorThemeForContrast = (editor: Editor) => {
 
 	// Each set of entries in colorPairs should resolve to colors with sufficient
 	// contrast.
-	const colorPairs: [string, string][] = [
-		[ '--background-color-1', '--foreground-color-1'],
-		[ '--background-color-2', '--foreground-color-2'],
-		[ '--background-color-3', '--foreground-color-3'],
-		[ '--selection-background-color', '--selection-foreground-color'],
+	const colorPairs: [string, string, boolean, boolean][] = [
+		[ '--background-color-1', '--foreground-color-1', true, true],
+		[ '--background-color-2', '--foreground-color-2', true, true],
+		[ '--background-color-3', '--foreground-color-3', true, true],
+		[ '--selection-background-color', '--selection-foreground-color', false, true],
 	];
 
 	// Clear any overrides
@@ -71,41 +71,73 @@ const adjustEditorThemeForContrast = (editor: Editor) => {
 
 
 	const styles = getComputedStyle(editorElem);
-	const minContrast = 3;
 
-	for (const [ backgroundVar, foregroundVar ] of colorPairs) {
-		let color1 = Color4.fromString(styles.getPropertyValue(backgroundVar));
-		let color2 = Color4.fromString(styles.getPropertyValue(foregroundVar));
-		let swappedColors = false;
+	const adjustVariablesForContrast = (
+		var1: string,
+		var2: string,
+		minContrast: number,
+
+		// true if the variable can be updated
+		updateVar1: boolean,
+		updateVar2: boolean,
+	) => {
+		let color1 = Color4.fromString(styles.getPropertyValue(var1));
+		let color2 = Color4.fromString(styles.getPropertyValue(var2));
 
 		// Ensure that color1 has the lesser luminance
 		if (color1.relativeLuminance() < color2.relativeLuminance()) {
 			const tmp = color1;
 			color1 = color2;
 			color2 = tmp;
-			swappedColors = true;
+
+			const oldVar2 = var2;
+			var2 = var1;
+			var1 = oldVar2;
+
+			const oldUpdateVar1 = updateVar1;
+			updateVar1 = updateVar2;
+			updateVar2 = oldUpdateVar1;
 		}
 
 		let colorsUpdated = false;
 		let currentContrast = Color4.contrastRatio(color1, color2);
-		const iterations = 0;
+		let iterations = 0;
 
-		while (currentContrast < minContrast && iterations < 5) {
-			const step = Vec3.of(0.1, 0.1, 0.1);
-			color1 = Color4.fromRGBVector(color1.rgb.plus(step));
-			color2 = Color4.fromRGBVector(color2.rgb.minus(step));
+		// Step the brightness of color1 and color2 in different directions while necessary
+		while (currentContrast < minContrast && iterations < 8) {
+			const step = Vec3.of(0.15, 0.12, 0.12);
+			if (updateVar1) {
+				if (color2.eq(Color4.white) && !updateVar2) {
+					color2 = Color4.black;
+				}
+				color1 = Color4.fromRGBVector(color1.rgb.plus(step));
+			}
+
+			if (updateVar2) {
+				if (color2.eq(Color4.black) && !updateVar1) {
+					color2 = Color4.white;
+				}
+				color2 = Color4.fromRGBVector(color2.rgb.minus(step));
+			}
 
 			currentContrast = Color4.contrastRatio(color1, color2);
 			colorsUpdated = true;
+			iterations ++;
 		}
 
+		// Update the CSS variables if necessary
 		if (colorsUpdated) {
-			const newBackground = swappedColors ? color2 : color1;
-			const newForeground = swappedColors ? color1 : color2;
-
-			editorElem.style.setProperty(foregroundVar, newForeground.toHexString());
-			editorElem.style.setProperty(backgroundVar, newBackground.toHexString());
+			editorElem.style.setProperty(var1, color1.toHexString());
+			editorElem.style.setProperty(var2, color2.toHexString());
 		}
+	};
+
+	// Also adjust the selection background
+	adjustVariablesForContrast('--selection-background-color', '--background-color-2', 1, true, false);
+
+	for (const [ backgroundVar, foregroundVar, updateBackground, updateForeground ] of colorPairs) {
+		const minContrast = 4.5;
+		adjustVariablesForContrast(backgroundVar, foregroundVar, minContrast, updateBackground, updateForeground);
 	}
 };
 
