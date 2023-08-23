@@ -108,7 +108,7 @@ const adjustEditorThemeForContrast = (editor: Editor, options?: { dontClearOverr
 
 		// Step the brightness of color1 and color2 in different directions while necessary
 		while (currentContrast < minContrast && iterations < 8) {
-			const step = Vec3.of(0.12, 0.12, 0.12);
+			const step = Vec3.of(0.1, 0.1, 0.1);
 			if (updateVar1) {
 				if (color2.eq(Color4.white) && !updateVar2) {
 					color2 = Color4.black;
@@ -138,7 +138,7 @@ const adjustEditorThemeForContrast = (editor: Editor, options?: { dontClearOverr
 	};
 
 	// Also adjust the selection background
-	adjustVariablesForContrast('--selection-background-color', '--background-color-2', 1.6, true, false);
+	adjustVariablesForContrast('--selection-background-color', '--background-color-2', 1.29, true, false);
 
 	for (const [ backgroundVar, foregroundVar, updateBackground, updateForeground ] of colorPairs) {
 		const minContrast = 4.5;

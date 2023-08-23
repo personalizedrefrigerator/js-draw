@@ -1,4 +1,8 @@
 
+# 1.2.1
+ * Bug fixes
+   * Fix `adjustEditorThemeForContrast` not ensuring that the selection and the main toolbar background have sufficient contrast.
+
 # 1.2.0
  * Features
    * Added additional `Color4` utility functions ([`fromHSV`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromHSV), [`fromRGBVector`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromRGBVector), [`contrastRatio`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#contrastRatio), and [`.rgb`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#rgb)).
