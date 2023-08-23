@@ -159,7 +159,7 @@ export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 		const child = ReactiveValue.fromInitialValue(
 			sourceValue.get()[propertyName]
 		);
-		const childRef = new WeakRef(child);
+		const childRef = window.WeakRef ? new WeakRef(child) : { deref: () => child };
 
 		// When the source is updated...
 		const sourceListener = sourceValue.onUpdate(newValue => {
