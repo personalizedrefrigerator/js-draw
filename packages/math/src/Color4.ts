@@ -125,7 +125,13 @@ export default class Color4 {
 		canvas.width = 1;
 		canvas.height = 1;
 
-		const ctx = canvas.getContext('2d')!;
+		const ctx = canvas.getContext('2d');
+
+		// Default to black if no canvas is available.
+		if (!ctx) {
+			return Color4.black;
+		}
+
 		ctx.fillStyle = text;
 		ctx.fillRect(0, 0, 1, 1);
 
