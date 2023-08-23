@@ -60,6 +60,7 @@ const adjustEditorThemeForContrast = (editor: Editor, options?: { dontClearOverr
 		[ '--background-color-1', '--foreground-color-1', true, true],
 		[ '--background-color-2', '--foreground-color-2', true, true],
 		[ '--background-color-3', '--foreground-color-3', true, true],
+		[ '--background-color-2', '--primary-action-foreground-color', false, true ],
 		[ '--selection-background-color', '--selection-foreground-color', false, true],
 	];
 
