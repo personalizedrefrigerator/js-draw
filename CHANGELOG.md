@@ -1,4 +1,10 @@
 
+# 1.2.2
+ * API fixes
+   * Exports `pathToRenderable`, `pathFromRenderable`, and `pathVisualEquivalent`. These functions were renamed in version 1.0.0 and the new versions were not exported.
+ * Bug fixes
+   * Updates the grid selector widget to use the correct icon foreground for selected items.
+
 # 1.2.1
  * Bug fixes
    * Fix `adjustEditorThemeForContrast` not ensuring that the selection and the main toolbar background have sufficient contrast.
