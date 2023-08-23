@@ -9,8 +9,7 @@ interface RenderablePathSpec {
 	path?: Path;
 }
 
-
-
+/** Converts a renderable path (a path with a `startPoint`, `commands`, and `style`). */
 export const pathFromRenderable = (renderable: RenderablePathSpec): Path => {
 	if (renderable.path) {
 		return renderable.path;
