@@ -57,6 +57,9 @@
 	border: none;
 	box-shadow: 0px 0px 2px var(--shadow-color);
 
+	user-select: none;
+	-webkit-user-select: none;
+
 	transition: background-color 0.15s ease, box-shadow 0.25s ease, opacity 0.2s ease;
 }
 
