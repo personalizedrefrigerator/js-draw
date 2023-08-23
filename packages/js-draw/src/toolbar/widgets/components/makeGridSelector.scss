@@ -53,6 +53,7 @@
 		&.checked {
 			background-color: var(--selection-background-color);
 			color: var(--selection-foreground-color);
+			--icon-color: var(--selection-foreground-color);
 		}
 	}
 	
