@@ -42,6 +42,10 @@
 			align-items: center;
 			justify-content: center;
 			padding: 4px;
+
+			// Prevent long pressing from selecting the label
+			user-select: none;
+			-webkit-user-select: none;
 		}
 
 		.icon {
