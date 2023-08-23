@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/math",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"description": "A math library for js-draw. ",
 	"types": "./dist/mjs/lib.d.ts",
 	"main": "./dist/cjs/lib.js",

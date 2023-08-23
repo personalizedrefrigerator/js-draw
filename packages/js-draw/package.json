@@ -64,7 +64,7 @@
     "postpack": "ts-node tools/copyREADME.ts revert"
   },
   "dependencies": {
-    "@js-draw/math": "^1.2.1",
+    "@js-draw/math": "^1.2.2",
     "@melloware/coloris": "0.21.0"
   },
   "devDependencies": {
@@ -86,6 +86,5 @@
     "pen",
     "freehand",
     "svg"
-  ],
-  "gitHead": "76143804907e30f389caede3d21f1aa403755252"
+  ]
 }
