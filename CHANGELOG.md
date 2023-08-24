@@ -32,7 +32,9 @@
 
 # 1.0.0
 
-Special thanks to [Joplin SAS](https://joplinapp.org/) for supporting the development of this release!
+Special thanks to:
+- [Joplin SAS](https://joplinapp.org/) for supporting the development of this release
+- Marta Le Colloec (@MartaLC) for [designing the new toolbar!](https://www.figma.com/file/NA5F2AMWO3wUuaoDfUaAb8/Material-3-wireframes?type=design&node-id=54490%3A1103&mode=design&t=Ee0UwnPnQ2bNC2uM-1)
 
  * Breaking changes (see [the migration guide](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html))
    * The `--secondary-foreground-color` and `--secondary-background-color` are no longer used for selected items. Use `--selection-foreground-color` and `--selection-background-color` instead.
@@ -40,7 +42,7 @@ Special thanks to [Joplin SAS](https://joplinapp.org/) for supporting the develo
    * Timestamps in `Pointer`s and `StrokeDataPoint`s use `performance.now` instead of `Date.now`.
    * A more specific selector than `.imageEditorContainer` is now required to override the `width` and `height` of an editor. Use `.js-draw.imageEditorContainer` or `body .imageEditorContainer`.
   * Other changes
-   * New default toolbar &mdash; [design credit](https://www.figma.com/file/NA5F2AMWO3wUuaoDfUaAb8/Material-3-wireframes?type=design&node-id=54490%3A1103&mode=design&t=Ee0UwnPnQ2bNC2uM-1)
+   * New default toolbar (see [makeEdgeToolbar](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.makeEdgeToolbar.html)).
    * New material icon pack
    * Preserve `<g>` element parents when writing SVGs.
    * Fix: Editor thinks control key is still pressed after shortcuts like `ctrl+Tab` that defocus the editor before a keyup event is sent for `ctrl`.
