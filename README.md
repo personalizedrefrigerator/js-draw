@@ -199,49 +199,49 @@ The editor's color theme is specified using CSS. Its default theme looks like th
     /* Deafult colors for the editor -- light mode */
 
     /* Used for unselected buttons and dialog text. */
-	--background-color-1: white;
-	--foreground-color-1: black;
+    --background-color-1: white;
+    --foreground-color-1: black;
 
-	/* Used for some menu/toolbar backgrounds. */
-	--background-color-2: #f5f5f5;
-	--foreground-color-2: #2c303a;
+    /* Used for some menu/toolbar backgrounds. */
+    --background-color-2: #f5f5f5;
+    --foreground-color-2: #2c303a;
 
-	/* Used for other menu/toolbar backgrounds. */
-	--background-color-3: #e5e5e5;
-	--foreground-color-3: #1c202a;
+    /* Used for other menu/toolbar backgrounds. */
+    --background-color-3: #e5e5e5;
+    --foreground-color-3: #1c202a;
 
-	/* Used for selected buttons. */
-	--selection-background-color: #cbdaf1;
-	--selection-foreground-color: #2c303a;
+    /* Used for selected buttons. */
+    --selection-background-color: #cbdaf1;
+    --selection-foreground-color: #2c303a;
 
-	/* Used for dialog backgrounds */
-	--background-color-transparent: rgba(105, 100, 100, 0.5);
+    /* Used for dialog backgrounds */
+    --background-color-transparent: rgba(105, 100, 100, 0.5);
 
-	/* Used for shadows */
-	--shadow-color: rgba(0, 0, 0, 0.5);
+    /* Used for shadows */
+    --shadow-color: rgba(0, 0, 0, 0.5);
 
-	/* Color used for some button/input foregrounds */
-	--primary-action-foreground-color: #15b;
+    /* Color used for some button/input foregrounds */
+    --primary-action-foreground-color: #15b;
 }
 
 @media (prefers-color-scheme: dark) {
     .imageEditorContainer {
         /* Default colors for the editor -- dark mode */
-		--background-color-1: #151515;
-		--foreground-color-1: white;
+        --background-color-1: #151515;
+        --foreground-color-1: white;
 
-		--background-color-2: #222;
-		--foreground-color-2: #efefef;
+        --background-color-2: #222;
+        --foreground-color-2: #efefef;
 
-		--background-color-3: #272627;
-		--foreground-color-3: #eee;
+        --background-color-3: #272627;
+        --foreground-color-3: #eee;
 
-		--selection-background-color: #607;
-		--selection-foreground-color: white;
-		--shadow-color: rgba(250, 250, 250, 0.5);
-		--background-color-transparent: rgba(50, 50, 50, 0.5);
+        --selection-background-color: #607;
+        --selection-foreground-color: white;
+        --shadow-color: rgba(250, 250, 250, 0.5);
+        --background-color-transparent: rgba(50, 50, 50, 0.5);
 
-		--primary-action-foreground-color: #7ae;
+        --primary-action-foreground-color: #7ae;
     }
 }
 ```
@@ -261,7 +261,7 @@ body .imageEditorContainer {
     --foreground-color-3: black;
 
     --background-color-transparent: rgba(255, 240, 200, 0.5);
-	--shadow-color: rgba(0, 0, 0, 0.5);
+    --shadow-color: rgba(0, 0, 0, 0.5);
 
     --selection-background-color: yellow;
     --selection-foreground-color: black;
