@@ -64,11 +64,15 @@ export interface EditorSettings {
 	 * Overrides for keyboard shortcuts. For example,
 	 * ```ts
 	 * {
-	 * 	'some.shortcut.id': [ ShortcutManager.keyboardShortcutFromString('ctrl+a') ],
+	 * 	'some.shortcut.id': [ KeyBinding.keyboardShortcutFromString('ctrl+a') ],
 	 * 	'another.shortcut.id': [ ]
 	 * }
 	 * ```
 	 * where shortcut IDs map to lists of associated keybindings.
+	 *
+	 * @see
+	 * - {@link KeyBinding}
+	 * - {@link KeyboardShortcutManager}
 	 */
 	keyboardShortcutOverrides: Record<string, Array<KeyBinding>>,
 
@@ -76,30 +80,6 @@ export interface EditorSettings {
 	 * Provides a set of icons for the editor.
 	 *
 	 * See, for example, the `@js-draw/material-icons` package.
-	 *
-	 * @example
-	 * ```ts,runnable
-	 * import * as jsdraw from 'js-draw';
-	 * import MaterialIconProvider from '@js-draw/material-icons';
-	 * import 'js-draw/styles';
-	 *
-	 * const settings: Partial<jsdraw.EditorSettings> = {
-	 *   // Default to material icons
-	 *   iconProvider: new MaterialIconProvider(),
-	 *
-	 *   // Only scroll the editor if it's focused.
-	 *   wheelEventsEnabled: 'only-if-focused',
-	 * };
-	 *
-	 * // Add an editor to the document, using the above settings
-	 * const editor = new jsdraw.Editor(document.body, settings);
-	 *
-	 * // Add a toolbar to the editor
-	 * const toolbar = jsdraw.makeEdgeToolbar(editor);
-	 *
-	 * // Add the default tool items
-	 * toolbar.addDefaults();
-	 * ```
 	 */
 	iconProvider: IconProvider,
 
@@ -253,6 +233,12 @@ export class Editor {
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 			notices: [],
 		};
+
+		// Validate settings
+		if (this.settings.minZoom > this.settings.maxZoom) {
+			throw new Error('Minimum zoom must be lesser than maximum zoom!');
+		}
+
 		this.icons = this.settings.iconProvider;
 
 		this.shortcuts = new KeyboardShortcutManager(this.settings.keyboardShortcutOverrides);
@@ -322,6 +308,11 @@ export class Editor {
 
 					if (oldZoom <= this.settings.maxZoom && oldZoom >= this.settings.minZoom) {
 						resetTransform = evt.oldTransform;
+					} else {
+						// If 1x zoom isn't acceptable, try a zoom between the minimum and maximum.
+						resetTransform = Mat33.scaling2D(
+							(this.settings.minZoom + this.settings.maxZoom) / 2
+						);
 					}
 
 					this.viewport.resetTransform(resetTransform);

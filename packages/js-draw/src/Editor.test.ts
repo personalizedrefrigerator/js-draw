@@ -1,4 +1,5 @@
-import { BaseTool, InputEvtType } from './lib';
+import { BaseTool, InputEvtType, RenderingMode } from './lib';
+import Editor from './Editor';
 import createEditor from './testing/createEditor';
 
 describe('Editor', () => {
@@ -104,4 +105,19 @@ describe('Editor', () => {
 			code: 'KeyF',
 		}]);
 	});
+
+	it('should throw if given minimum zoom greater than maximum zoom', () => {
+		const makeEditorWithInvalidSettings = () => {
+			return new Editor(document.body, {
+				renderingMode: RenderingMode.DummyRenderer,
+
+				minZoom: 10,
+				maxZoom: 1,
+			});
+		};
+
+		expect(makeEditorWithInvalidSettings).toThrow('Minimum zoom must be lesser');
+	});
+
+
 });
