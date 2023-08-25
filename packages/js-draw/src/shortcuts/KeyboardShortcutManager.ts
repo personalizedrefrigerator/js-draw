@@ -72,8 +72,8 @@ export default class KeyboardShortcutManager {
 	 * const shortcutId = 'io.github.personalizedrefrigerator.js-draw.select-all';
 	 *
 	 * // Associate two shortcuts with the same ID
-	 * const shortcut1 = KeyboardShortcutManager.keyboardShortcutFromString('ctrlOrMeta+a');
-	 * const shortcut2 = KeyboardShortcutManager.keyboardShortcutFromString('ctrlOrMeta+shift+a');
+	 * const shortcut1 = KeyBinding.fromString('ctrlOrMeta+a');
+	 * const shortcut2 = KeyBinding.fromString('ctrlOrMeta+shift+a');
 	 * KeyboardShortcutManager.registerDefaultKeyboardShortcut(
 	 * 	shortcutId,
 	 * 	[ shortcut1, shortcut2 ],

@@ -33,7 +33,13 @@ import RenderablePathSpec from './rendering/RenderablePathSpec';
 import makeAboutDialog, { AboutDialogEntry } from './dialogs/makeAboutDialog';
 import version from './version';
 
-/** Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}. */
+/**
+ * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
+ *
+ * ## Example
+ *
+ * [[include:doc-pages/inline-examples/settings-example-1.md]]
+ */
 export interface EditorSettings {
 	/** Defaults to `RenderingMode.CanvasRenderer` */
 	renderingMode: RenderingMode,
