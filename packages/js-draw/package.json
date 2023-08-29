@@ -69,7 +69,6 @@
   },
   "devDependencies": {
     "@js-draw/build-tool": "^1.0.2",
-    "@types/bezier-js": "4.1.0",
     "@types/jest": "29.5.3",
     "@types/jsdom": "21.1.1"
   },

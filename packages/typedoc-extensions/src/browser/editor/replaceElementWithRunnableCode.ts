@@ -54,6 +54,14 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		}
 	}
 
+	// Allow only part of the runnable content to be shown in the editor --
+	// the part after a ---visible--- line.
+	// The /s modifier allows . to match newlines. See https://stackoverflow.com/a/8303552
+	const hiddenContentMatch = /^(.*)[\n]---visible---[\n](.*)$/sg.exec(initialEditorValue);
+
+	// invisibleContent won't be shown in the editor
+	const invisibleContent = hiddenContentMatch	? hiddenContentMatch[1] : '';
+	initialEditorValue = hiddenContentMatch ? hiddenContentMatch[2] : initialEditorValue;
 
 	const editor = addCodeMirrorEditor(
 		initialEditorValue,
@@ -69,7 +77,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	controlsArea.replaceChildren(runButton, hideButton);
 
 	const getContentToRun = () => {
-		const editorText = editor.getText();
+		const editorText = invisibleContent + '\n' + editor.getText();
 		let js = '';
 		let css = '';
 
@@ -142,7 +150,10 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					${bodyHTML}
 				</body>
 				<script>
-					${js}
+					"use strict";
+					(async () => {
+						${js}
+					})();
 				</script>
 			</html>
 		`);

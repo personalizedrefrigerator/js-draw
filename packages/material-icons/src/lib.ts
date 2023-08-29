@@ -22,7 +22,7 @@
  * // Add a toolbar
  * const toolbar = makeEdgeToolbar(editor);
  *
- * // ...width the default elements
+ * // ...with the default elements
  * toolbar.addDefaults();
  * ```
  *

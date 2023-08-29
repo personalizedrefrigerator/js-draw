@@ -51,7 +51,6 @@ const replaceInternalPackageToPackageLinks = () => {
 			link.setAttribute('target', '');
 			link.setAttribute('href', href);
 			link.classList.remove('external');
-			console.log(moduleTarget);
 		}
 	}
 };

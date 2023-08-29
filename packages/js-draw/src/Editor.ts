@@ -92,20 +92,22 @@ export interface EditorSettings {
 /**
  * The main entrypoint for the full editor.
  *
- * @example
+ * ## Example
  * To create an editor with a toolbar,
- * ```
+ * ```ts,runnable
+ * import { Editor } from 'js-draw';
+ *
  * const editor = new Editor(document.body);
  *
  * const toolbar = editor.addToolbar();
- * toolbar.addActionButton('Save', () => {
+ * toolbar.addSaveButton(() => {
  *   const saveData = editor.toSVG().outerHTML;
  *   // Do something with saveData...
  * });
  * ```
  *
  * See also
- * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts#L15).
+ * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts).
  */
 export class Editor {
 	// Wrapper around the viewport and toolbar
@@ -190,7 +192,9 @@ export class Editor {
 
 	/**
 	 * @example
-	 * ```
+	 * ```ts,runnable
+	 * import { Editor } from 'js-draw';
+	 *
 	 * const container = document.body;
 	 *
 	 * // Create an editor
@@ -203,13 +207,16 @@ export class Editor {
 	 * // Add the default toolbar
 	 * const toolbar = editor.addToolbar();
 	 *
-	 * // Add a save button
+	 * const createCustomIcon = () => {
+	 *   // Create/return an icon here.
+	 * };
+	 *
+	 * // Add a custom button
 	 * toolbar.addActionButton({
-	 *   label: 'Save'
-	 *   icon: createSaveIcon(),
+	 *   label: 'Custom Button'
+	 *   icon: createCustomIcon(),
 	 * }, () => {
-	 *   const saveData = editor.toSVG().outerHTML;
-	 *   // Do something with saveData
+	 *   // Do something here
 	 * });
 	 * ```
 	 */
@@ -1087,6 +1094,9 @@ export class Editor {
 	/**
 	 * Clears the wet ink display.
 	 *
+	 * The wet ink display can be used by the currently active tool to display a preview
+	 * of an in-progress action.
+	 *
 	 * @see {@link Display.getWetInkRenderer}
 	 */
 	public clearWetInk() {
@@ -1116,6 +1126,10 @@ export class Editor {
 		};
 	}
 
+	/**
+	 * Creates a CSS stylesheet with `content` and applies it to the document
+	 * (and thus, to this editor).
+	 */
 	public addStyleSheet(content: string): HTMLStyleElement {
 		const styleSheet = document.createElement('style');
 		styleSheet.innerText = content;
@@ -1252,6 +1266,12 @@ export class Editor {
 		return dataURL;
 	}
 
+	/**
+	 * Converts the editor's content into an SVG image.
+	 *
+	 * @see
+	 * {@link SVGRenderer}
+	 */
 	public toSVG(): SVGElement {
 		const importExportViewport = this.image.getImportExportViewport().getTemporaryClone();
 
@@ -1376,8 +1396,23 @@ export class Editor {
 	/**
 	 * Alias for `loadFrom(SVGLoader.fromString)`.
 	 *
-	 * This is particularly useful when accessing a bundled version of the editor,
-	 * where `SVGLoader.fromString` is unavailable.
+	 * @example
+	 * ```ts,runnable
+	 * import {Editor} from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 *
+	 * ---visible---
+	 * await editor.loadFromSVG(`
+	 *   <svg viewBox="5 23 52 30" width="52" height="16" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+	 *     <text style="
+	 *       transform: matrix(0.181846, 0.1, 0, 0.181846, 11.4, 33.2);
+	 *       font-family: serif;
+	 *       font-size: 32px;
+	 *       fill: rgb(100, 140, 61);
+	 *     ">An SVG image!</text>
+	 *   </svg>
+	 * `);
+	 * ```
 	 */
 	public async loadFromSVG(svgData: string, sanitize: boolean = false) {
 		const loader = SVGLoader.fromString(svgData, sanitize);
