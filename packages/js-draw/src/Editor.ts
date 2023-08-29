@@ -982,13 +982,13 @@ export class Editor {
 		this.hideLoadingWarning();
 	}
 
-	// @see {@link #asyncApplyOrUnapplyCommands }
+	// @see {@link asyncApplyOrUnapplyCommands }
 	public asyncApplyCommands(commands: Command[], chunkSize: number) {
 		return this.asyncApplyOrUnapplyCommands(commands, true, chunkSize);
 	}
 
 	// If `unapplyInReverseOrder`, commands are reversed before unapplying.
-	// @see {@link #asyncApplyOrUnapplyCommands }
+	// @see {@link asyncApplyOrUnapplyCommands }
 	public asyncUnapplyCommands(commands: Command[], chunkSize: number, unapplyInReverseOrder: boolean = false) {
 		if (unapplyInReverseOrder) {
 			commands = [ ...commands ]; // copy

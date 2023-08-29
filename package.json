@@ -31,6 +31,6 @@
     "lerna": "7.1.4",
     "lint-staged": "13.2.3",
     "ts-jest": "29.1.1",
-    "typedoc": "0.24.8"
+    "typedoc": "0.25.0"
   }
 }
