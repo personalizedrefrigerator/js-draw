@@ -13,7 +13,7 @@ import Vec3 from './Vec3';
  * console.log('To string:', Color4.orange.toHexString());
  * ```
  */
-export default class Color4 {
+export class Color4 {
 	private constructor(
 		/** Red component. Should be in the range [0, 1]. */
 		public readonly r: number,
@@ -437,4 +437,4 @@ export default class Color4 {
 	public static white = Color4.ofRGB(1, 1, 1);
 }
 
-export { Color4 };
+export default Color4;
