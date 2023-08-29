@@ -14,7 +14,7 @@ export default class BundledFile {
 	private readonly outputFilename: string;
 
 	public constructor(
-		public readonly bundleName: string,
+		public readonly bundleName: string|undefined,
 		private readonly sourceFilePath: string,
 		outputFilepath?: string,
 	) {
@@ -31,17 +31,23 @@ export default class BundledFile {
 	}
 
 	private getWebpackOptions(mode: 'production' | 'development'): webpack.Configuration {
+		let libraryOption = {};
+		if (this.bundleName) {
+			libraryOption = {
+				library: {
+					type: 'window',
+					name: this.bundleName,
+				},
+			};
+		}
+
 		const config: webpack.Configuration = {
 			mode,
 			entry: this.sourceFilePath,
 			output: {
 				path: this.outputDirectory,
 				filename: this.outputFilename,
-
-				library: {
-					type: 'window',
-					name: this.bundleName,
-				},
+				...libraryOption,
 			},
 			// See https://webpack.js.org/guides/typescript/
 			module: {
@@ -168,9 +174,7 @@ export default class BundledFile {
 		const compiler = webpack(this.getWebpackOptions('development'));
 		const watchOptions = {
 			followSymlinks: true,
-			ignored: [
-				'node_modules/',
-			]
+			ignored: /^.*node_modules.*[/](?![@]?js[-]draw)/g
 		};
 
 		console.info('Watching bundle: ', this.bundleName);

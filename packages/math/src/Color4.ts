@@ -47,6 +47,20 @@ export default class Color4 {
 		return new Color4(red, green, blue, alpha);
 	}
 
+	/** Creates a color from an RGBA (or RGB) array where each value ranges from 0-255. */
+	public static fromArray(array: Uint8Array|Uint8ClampedArray) {
+		const red = array[0];
+		const green = array[1];
+		const blue = array[2];
+
+		let alpha = 255;
+		if (3 < array.length) {
+			alpha = array[3];
+		}
+
+		return Color4.ofRGBA(red / 255, green / 255, blue / 255, alpha / 255);
+	}
+
 	public static fromHex(hexString: string): Color4 {
 		// Remove starting '#' (if present)
 		hexString = (hexString.match(/^[#]?(.*)$/) ?? [])[1];

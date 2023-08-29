@@ -15,6 +15,6 @@
 		"js-draw": "^1.2.2"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.0.2"
+		"@js-draw/build-tool": "^1.2.2"
 	}
 }

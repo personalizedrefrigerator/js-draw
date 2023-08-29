@@ -1,17 +1,19 @@
 {
-	"name": "@js-draw/debug-stroke-logging",
+	"name": "@js-draw/example-pdf",
 	"version": "1.2.2",
-	"description": "Allows sending logs",
+	"description": "Shows loading a PDF",
 	"license": "MIT",
 	"private": true,
 	"scripts": {
 		"bundle": "ts-node scripts/bundle.ts",
 		"watchBundle": "ts-node scripts/watchBundle.ts",
-		"build": "build-tool build",
+		"build": "cp ../../../node_modules/pdfjs-dist/build/pdf.worker.js ./ && build-tool build",
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"js-draw": "^1.2.2"
+		"js-draw": "^1.2.2",
+		"pdfjs-dist": "3.10.111",
+		"@js-draw/pdf-support": "^1.2.2"
 	},
 	"devDependencies": {
 		"@js-draw/build-tool": "^1.2.2"
