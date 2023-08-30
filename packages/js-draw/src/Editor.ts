@@ -137,12 +137,13 @@ export class Editor {
 	 * Data structure for adding/removing/querying objects in the image.
 	 *
 	 * @example
-	 * ```
+	 * ```ts,runnable
+	 * import { Editor, Stroke, Path, Color4, pathToRenderable } from 'js-draw';
 	 * const editor = new Editor(document.body);
 	 *
 	 * // Create a path.
 	 * const stroke = new Stroke([
-	 *   Path.fromString('M0,0 L30,30 z').toRenderable({ fill: Color4.black }),
+	 *   pathToRenderable(Path.fromString('M0,0 L100,100 L300,30 z'), { fill: Color4.red }),
 	 * ]);
 	 * const addElementCommand = editor.image.addElement(stroke);
 	 *

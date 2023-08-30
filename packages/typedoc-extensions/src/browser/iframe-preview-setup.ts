@@ -106,10 +106,18 @@ import './iframe.scss';
 	(window as any).module = { exports: {} };
 	(window as any).exports = { };
 
-	window.onerror = (event) => {
+	const onError = (event: Event|string) => {
 		const errorElement = createLogElementFor(['Error: ', event]);
 		errorElement.classList.add('error');
 		addLogElement(errorElement);
+	};
+
+	window.onerror = (event) => {
+		onError(event);
+	};
+
+	window.onunhandledrejection = (event) => {
+		onError(event.reason ?? event);
 	};
 
 })();
