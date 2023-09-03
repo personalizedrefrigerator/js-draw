@@ -48,6 +48,7 @@ export default class ScrollbarTool extends BaseTool {
 		});
 	}
 
+	private fadeOutTimeout: ReturnType<typeof setTimeout>|null = null;
 	private updateScrollbars() {
 		const viewport = this.editor.viewport;
 		const visibleRect = viewport.visibleRect;
@@ -65,5 +66,17 @@ export default class ScrollbarTool extends BaseTool {
 
 		this.horizontalScrollbar.style.marginLeft = `${scrollbarX}px`;
 		this.verticalScrollbar.style.marginTop = `${scrollbarY}px`;
+
+		// Fade out after a delay.
+		if (this.fadeOutTimeout !== null) {
+			clearTimeout(this.fadeOutTimeout);
+		}
+
+		const fadeOutDelay = 3000;
+		this.fadeOutTimeout = setTimeout(() => {
+			this.scrollbarOverlay.classList.remove('just-updated');
+		}, fadeOutDelay);
+
+		this.scrollbarOverlay.classList.add('just-updated');
 	}
 }

@@ -3,14 +3,34 @@
 	width: 0;
 	height: 0;
 	overflow: visible;
-	opacity: 0.3;
-	pointer-events: none;;
+
+	$visible-opacity: 0.3;
+	opacity: $visible-opacity;
+	pointer-events: none;
+
+
+	@media (prefers-reduced-motion: reduce) {
+		animation: none !important;
+	}
+
+	@keyframes fade-out {
+		from { opacity: $visible-opacity; }
+		to { opacity: 0; }
+	}
+
+	&:not(.just-updated) {
+		animation: 1s ease 0s fade-out;
+		opacity: 0;
+	}
 
 	--scrollbar-size: 3px;
 
 	& > div {
 		width: var(--scrollbar-size);
 		height: var(--scrollbar-size);
+
+		min-width: var(--scrollbar-size);
+		min-height: var(--scrollbar-size);
 
 		background-color: var(--foreground-color-1);
 		border-radius: var(--scrollbar-size);
