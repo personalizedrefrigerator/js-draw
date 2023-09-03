@@ -1,5 +1,6 @@
 import Editor from '../Editor';
 import { DispatcherEventListener } from '../EventDispatcher';
+import { Rect2 } from '@js-draw/math';
 import { EditorEventType } from '../types';
 import BaseTool from './BaseTool';
 
@@ -51,15 +52,21 @@ export default class ScrollbarTool extends BaseTool {
 	private fadeOutTimeout: ReturnType<typeof setTimeout>|null = null;
 	private updateScrollbars() {
 		const viewport = this.editor.viewport;
-		const visibleRect = viewport.visibleRect;
-		const exportRect = this.editor.getImportExportRect().union(visibleRect);
 		const screenSize = viewport.getScreenRectSize();
+		const screenRect = new Rect2(0, 0, screenSize.x, screenSize.y);
+		const imageRect = this.editor.getImportExportRect()
+		// The scrollbars are positioned in screen coordinates, so the exportRect also needs
+		// to be in screen coordinates
+			.transformedBoundingBox(viewport.canvasToScreenTransform)
 
-		const scrollbarWidth = visibleRect.width / exportRect.width * screenSize.x;
-		const scrollbarHeight = visibleRect.height / exportRect.height * screenSize.y;
+		// If the screenRect is outside of the exportRect, expand the image rectangle
+			.union(screenRect);
 
-		const scrollbarX = Math.max(0, Math.min(1, visibleRect.x / exportRect.width)) * (screenSize.x - scrollbarWidth);
-		const scrollbarY = Math.max(0, Math.min(1, visibleRect.y / exportRect.height)) * (screenSize.y - scrollbarHeight);
+		const scrollbarWidth = screenRect.width / imageRect.width * screenSize.x;
+		const scrollbarHeight = screenRect.height / imageRect.height * screenSize.y;
+
+		const scrollbarX = (screenRect.x - imageRect.x) / imageRect.width * (screenSize.x);
+		const scrollbarY = (screenRect.y - imageRect.y) / imageRect.height * (screenSize.y);
 
 		this.horizontalScrollbar.style.width = `${scrollbarWidth}px`;
 		this.verticalScrollbar.style.height = `${scrollbarHeight}px`;
