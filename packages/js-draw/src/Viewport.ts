@@ -142,7 +142,7 @@ export class Viewport {
 		return this.transform;
 	}
 
-	/** @returns the size of the visible region in pixels. */
+	/** @returns the size of the visible region in pixels (screen units). */
 	public getScreenRectSize(): Vec2 {
 		return this.screenRect.size;
 	}

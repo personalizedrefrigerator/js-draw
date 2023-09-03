@@ -1,0 +1,31 @@
+
+.ScrollbarTool-overlay {
+	width: 0;
+	height: 0;
+	overflow: visible;
+	opacity: 0.3;
+	pointer-events: none;;
+
+	--scrollbar-size: 3px;
+
+	& > div {
+		width: var(--scrollbar-size);
+		height: var(--scrollbar-size);
+
+		background-color: var(--foreground-color-1);
+		border-radius: var(--scrollbar-size);
+		position: absolute;
+	}
+
+	&:not(.scrollbar-left) {
+		.vertical-scrollbar {
+			margin-left: calc(var(--editor-current-display-width-px) - var(--scrollbar-size));
+		}
+	}
+	
+	&:not(.scrollbar-top) {
+		.horizontal-scrollbar {
+			margin-top: calc(var(--editor-current-display-height-px) - var(--scrollbar-size));
+		}
+	}
+}

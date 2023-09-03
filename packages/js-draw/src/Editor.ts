@@ -481,6 +481,12 @@ export class Editor {
 		this.container.style.setProperty(
 			'--editor-current-height-px', `${this.container.clientHeight}px`
 		);
+		this.container.style.setProperty(
+			'--editor-current-display-width-px', `${this.renderingRegion.clientWidth}px`
+		);
+		this.container.style.setProperty(
+			'--editor-current-display-height-px', `${this.renderingRegion.clientHeight}px`
+		);
 	}
 
 	private pointers: Record<number, Pointer> = {};

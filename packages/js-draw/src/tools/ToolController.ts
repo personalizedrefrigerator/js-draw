@@ -22,6 +22,7 @@ import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
 import { InputEvt, InputEvtType } from '../inputEvents';
 import InputPipeline from './InputFilter/InputPipeline';
 import InputStabilizer from './InputFilter/InputStabilizer';
+import ScrollbarTool from './ScrollbarTool';
 
 export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
@@ -74,6 +75,7 @@ export default class ToolController implements InputEventListener {
 		soundExplorer.setEnabled(false);
 
 		this.tools = [
+			new ScrollbarTool(editor),
 			new PipetteTool(editor, localization.pipetteTool),
 			soundExplorer,
 			panZoomTool,
