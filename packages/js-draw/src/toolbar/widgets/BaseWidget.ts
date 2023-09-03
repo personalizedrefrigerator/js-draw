@@ -67,6 +67,12 @@ export default abstract class BaseWidget {
 		this.button.setAttribute('role', 'button');
 		this.button.tabIndex = 0;
 
+		// Disable the context menu. This allows long-press gestures to trigger the button's
+		// tooltip instead.
+		this.button.oncontextmenu = event => {
+			event.preventDefault();
+		};
+
 		const toolbarShortcutHandlers = this.editor.toolController.getMatchingTools(ToolbarShortcutHandler);
 
 		// If the onKeyPress function has been extended and the editor is configured to send keypress events to
