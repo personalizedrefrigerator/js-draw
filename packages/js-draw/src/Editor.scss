@@ -136,6 +136,13 @@
 	z-index: 5;
 }
 
+// So as not to change the position of other overlays, all overlays should have
+// 0 width/height.
+.imageEditorContainer > .overlay {
+	width: 0;
+	height: 0;
+}
+
 @media print {
 	.imageEditorContainer .loadingMessage {
 		display: none;
