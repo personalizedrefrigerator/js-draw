@@ -20,7 +20,7 @@
 		flex-shrink: 1;
 		margin: 2px;
 
-		&:focus-within {
+		&.focus-visible {
 			outline: 2px solid var(--foreground-color-1);
 		}
 

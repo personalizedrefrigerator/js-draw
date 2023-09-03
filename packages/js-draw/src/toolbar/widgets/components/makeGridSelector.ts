@@ -111,6 +111,16 @@ const makeGridSelector = <ChoiceIdType> (
 			updateButtonCSS();
 		};
 
+		button.onfocus = () => {
+			if (buttonContainer.querySelector(':focus-visible')) {
+				buttonContainer.classList.add('focus-visible');
+			}
+		};
+
+		button.onblur = () => {
+			buttonContainer.classList.remove('focus-visible');
+		};
+
 		buttonContainer.replaceChildren(button, labelContainer);
 		menuContainer.appendChild(buttonContainer);
 
