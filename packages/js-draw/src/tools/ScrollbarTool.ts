@@ -67,6 +67,18 @@ export default class ScrollbarTool extends BaseTool {
 		this.horizontalScrollbar.style.marginLeft = `${scrollbarX}px`;
 		this.verticalScrollbar.style.marginTop = `${scrollbarY}px`;
 
+		// Style the scrollbars differently when there's no scroll.
+		const handleNoScrollStyling = (scrollbar: HTMLElement, size: number, fillSize: number) => {
+			const fillsWindowClass = 'represents-no-scroll';
+			if (Math.abs(size - fillSize) < 1e-8) {
+				scrollbar.classList.add(fillsWindowClass);
+			} else {
+				scrollbar.classList.remove(fillsWindowClass);
+			}
+		};
+		handleNoScrollStyling(this.horizontalScrollbar, scrollbarWidth, screenSize.x);
+		handleNoScrollStyling(this.verticalScrollbar, scrollbarHeight, screenSize.y);
+
 		// Fade out after a delay.
 		if (this.fadeOutTimeout !== null) {
 			clearTimeout(this.fadeOutTimeout);

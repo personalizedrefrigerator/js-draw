@@ -8,9 +8,10 @@
 	opacity: $visible-opacity;
 	pointer-events: none;
 
+	--fade-out-animation: 1s ease 0s fade-out;
 
 	@media (prefers-reduced-motion: reduce) {
-		animation: none !important;
+		--fade-out-animation: none !important;
 	}
 
 	@keyframes fade-out {
@@ -19,13 +20,13 @@
 	}
 
 	&:not(.just-updated) {
-		animation: 1s ease 0s fade-out;
+		animation: var(--fade-out-animation);
 		opacity: 0;
 	}
 
 	--scrollbar-size: 3px;
 
-	& > div {
+	.vertical-scrollbar, .horizontal-scrollbar {
 		width: var(--scrollbar-size);
 		height: var(--scrollbar-size);
 
@@ -35,6 +36,11 @@
 		background-color: var(--foreground-color-1);
 		border-radius: var(--scrollbar-size);
 		position: absolute;
+
+		&.represents-no-scroll {
+			animation: var(--fade-out-animation);
+			opacity: 0;
+		}
 	}
 
 	&:not(.scrollbar-left) {
