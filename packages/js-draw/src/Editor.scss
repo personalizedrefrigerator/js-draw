@@ -136,12 +136,13 @@
 	z-index: 5;
 }
 
+// TODO: Apply this change during a future major release.
 // So as not to change the position of other overlays, all overlays should have
-// 0 width/height.
-.imageEditorContainer > .overlay {
-	width: 0;
-	height: 0;
-}
+// 0 height.
+// Uses the alternate overlay class name to decrease specificity.
+// .js-draw-editor-overlay {
+// 	//height: 0;
+// }
 
 @media print {
 	.imageEditorContainer .loadingMessage {

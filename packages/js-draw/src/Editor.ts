@@ -1121,11 +1121,14 @@ export class Editor {
 	 * Creates an element that will be positioned on top of the dry/wet ink
 	 * renderers.
 	 *
+	 * So as not to change the position of other overlays, `overlay` should either
+	 * be styled to have 0 height or have `position: absolute`.
+	 *
 	 * This is useful for displaying content on top of the rendered content
 	 * (e.g. a selection box).
 	 */
 	public createHTMLOverlay(overlay: HTMLElement) {
-		overlay.classList.add('overlay');
+		overlay.classList.add('overlay', 'js-draw-editor-overlay');
 		this.container.appendChild(overlay);
 
 		return {
