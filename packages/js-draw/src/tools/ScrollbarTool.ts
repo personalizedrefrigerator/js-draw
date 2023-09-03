@@ -58,8 +58,8 @@ export default class ScrollbarTool extends BaseTool {
 		const scrollbarWidth = visibleRect.width / exportRect.width * screenSize.x;
 		const scrollbarHeight = visibleRect.height / exportRect.height * screenSize.y;
 
-		const scrollbarX = Math.max(0, Math.min(1, visibleRect.x / exportRect.width)) * screenSize.x;
-		const scrollbarY = Math.max(0, Math.min(1, visibleRect.y / exportRect.height)) * screenSize.y;
+		const scrollbarX = Math.max(0, Math.min(1, visibleRect.x / exportRect.width)) * (screenSize.x - scrollbarWidth);
+		const scrollbarY = Math.max(0, Math.min(1, visibleRect.y / exportRect.height)) * (screenSize.y - scrollbarHeight);
 
 		this.horizontalScrollbar.style.width = `${scrollbarWidth}px`;
 		this.verticalScrollbar.style.height = `${scrollbarHeight}px`;
@@ -67,7 +67,7 @@ export default class ScrollbarTool extends BaseTool {
 		this.horizontalScrollbar.style.marginLeft = `${scrollbarX}px`;
 		this.verticalScrollbar.style.marginTop = `${scrollbarY}px`;
 
-		// Style the scrollbars differently when there's no scroll.
+		// Style the scrollbars differently when there's no scroll (all content visible)
 		const handleNoScrollStyling = (scrollbar: HTMLElement, size: number, fillSize: number) => {
 			const fillsWindowClass = 'represents-no-scroll';
 			if (Math.abs(size - fillSize) < 1e-8) {
