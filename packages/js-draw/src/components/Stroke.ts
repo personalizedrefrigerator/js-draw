@@ -161,14 +161,42 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		// stroke radius (has many false negatives). As such, additional checks are
 		// done here, before passing to the superclass.
 
-
 		if (!rect.intersects(this.getBBox())) {
 			return false;
 		}
 
+		// The following check only checks for the positive case:
+		// Sample a set of points that are known to be within each part of this
+		// stroke. For example, the points marked with an "x" below:
+		//   ___________________
+		//  /                   \
+		//  | x              x  |
+		//  \_____________      |
+		//                |  x  |
+		//                \_____/
+		//
+		// Because we don't want the following case to result in selection,
+		//   __________________
+		//  /.___.             \
+		//  || x |          x  |    <-  /* The
+		//  |·---·             |            .___.
+		//  \____________      |            |   |
+		//               |  x  |            ·---·
+		//               \_____/           denotes the input rectangle */
+		//
+		// we need to ensure that the rectangle intersects each point **and** the
+		// edge of the rectangle.
 		for (const part of this.parts) {
+			// As such, we need to shrink the input rectangle to verify that the original,
+			// unshrunken rectangle would have intersected the edge of the stroke if it
+			// intersects a point within the stroke.
+			const interiorRect = rect.grownBy(-(part.style.stroke?.width ?? 0));
+			if (interiorRect.area === 0) {
+				continue;
+			}
+
 			for (const point of part.path.startEndPoints()) {
-				if (rect.containsPoint(point)) {
+				if (interiorRect.containsPoint(point)) {
 					return true;
 				}
 			}

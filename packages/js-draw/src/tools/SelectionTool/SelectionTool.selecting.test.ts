@@ -1,13 +1,16 @@
+import { Color4, Path, Vec2 } from '@js-draw/math';
+
 import { InputEvtType } from '../../inputEvents';
 import Pointer, { PointerDevice } from '../../Pointer';
-import { Vec2 } from '@js-draw/math';
 import SerializableCommand from '../../commands/SerializableCommand';
 import createEditor from '../../testing/createEditor';
 import SelectionTool from './SelectionTool';
+import { pathToRenderable, Stroke } from '../../lib';
+import sendPenEvent from '../../testing/sendPenEvent';
 
 
-describe('SelectionTool.touchSelect', () => {
-	it('should rectangle select', async () => {
+describe('SelectionTool.selecting', () => {
+	it('should select strokes that intersect the selection box', async () => {
 		// This data replicates a bug experienced occasionally while rectangle-selecting objects.
 		// This was originally caused by the maximum number of raymarching steps being too small.
 		const strokeCommandsJSON = [
@@ -128,5 +131,39 @@ describe('SelectionTool.touchSelect', () => {
 		}
 
 		expect(selectionTool.getSelectedObjects()).toHaveLength(5);
+	});
+
+	it('should not select a stroke if not intersecting the stroke\'s edge', async () => {
+		const editor = createEditor();
+
+		const testStroke = new Stroke([
+			pathToRenderable(Path.fromString('m0,0 l10,0'), {
+				fill: Color4.transparent,
+				stroke: {
+					width: 10,
+					color: Color4.red,
+				}
+			})
+		]);
+
+		await editor.dispatch(editor.image.addElement(testStroke));
+
+		const selectionTool = editor.toolController.getMatchingTools(SelectionTool)[0];
+		selectionTool.setEnabled(true);
+
+		// Select the start point of the stroke, but within the stroke width
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-1, -1));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(1, 1));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(1, 1));
+
+		// Because the selection is within the stroke width, nothing should be selected
+		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
+
+		// A larger selection, however, should select the stroke
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-12, -12));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(1, 1));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(1, 1));
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
 	});
 });

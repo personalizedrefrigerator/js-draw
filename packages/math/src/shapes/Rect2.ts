@@ -159,6 +159,17 @@ export class Rect2 extends Abstract2DShape {
 			return this;
 		}
 
+		// Prevent width/height from being negative
+		if (margin < 0) {
+			const xMargin = -Math.min(-margin, this.w / 2);
+			const yMargin = -Math.min(-margin, this.h / 2);
+
+			return new Rect2(
+				this.x - xMargin, this.y - yMargin,
+				this.w + xMargin * 2, this.h + yMargin * 2,
+			);
+		}
+
 		return new Rect2(
 			this.x - margin, this.y - margin, this.w + margin * 2, this.h + margin * 2
 		);

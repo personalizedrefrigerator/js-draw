@@ -151,6 +151,19 @@ describe('Rect2', () => {
 		expect(transformedBBox.containsRect(rect)).toBe(true);
 	});
 
+	it('.grownBy should expand a rectangle by the given margin', () => {
+		expect(Rect2.empty.grownBy(0)).toBe(Rect2.empty);
+
+		// Should add padding to all sides.
+		expect(new Rect2(1, 2, 3, 4).grownBy(1)).objEq(new Rect2(0, 1, 5, 6));
+
+		// Shrinking should not result in negative widths/heights and
+		// should adjust x/y appropriately
+		expect(new Rect2(1, 2, 1, 2).grownBy(-1)).objEq(new Rect2(1.5, 3, 0, 0));
+		expect(new Rect2(1, 2, 4, 4).grownBy(-1)).objEq(new Rect2(2, 3, 2, 2));
+		expect(new Rect2(1, 2, 2, 8).grownBy(-2)).objEq(new Rect2(2, 4, 0, 4));
+	});
+
 	describe('should correctly expand to include a given point', () => {
 		it('Growing an empty rectange to include (1, 0)', () => {
 			const originalRect = Rect2.empty;
