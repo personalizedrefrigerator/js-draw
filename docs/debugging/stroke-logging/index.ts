@@ -55,3 +55,6 @@ editor.notifier.on(jsdraw.EditorEventType.ToolDisabled, event => {
 
 log.value = 'Started successfully!';
 
+// To facilitate debugging
+(window as any).editor = editor;
+

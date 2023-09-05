@@ -97,6 +97,8 @@ export class Path {
 		const geometry: GeometryArrayType = [];
 
 		for (const part of this.parts) {
+			let exhaustivenessCheck: never;
+
 			switch (part.kind) {
 			case PathCommandType.CubicBezierTo:
 				geometry.push(
@@ -124,11 +126,46 @@ export class Path {
 				geometry.push(new PointShape2D(part.point));
 				startPoint = part.point;
 				break;
+			default:
+				exhaustivenessCheck = part;
+				return exhaustivenessCheck;
 			}
 		}
 
 		this.cachedGeometry = geometry;
 		return this.cachedGeometry;
+	}
+
+	/**
+	 * Iterates through the start/end points of each component in this path.
+	 *
+	 * If a start point is equivalent to the end point of the previous segment,
+	 * the point is **not** emitted twice.
+	 */
+	public *startEndPoints() {
+		yield this.startPoint;
+
+		for (const part of this.parts) {
+			let exhaustivenessCheck: never;
+
+			switch (part.kind) {
+			case PathCommandType.CubicBezierTo:
+				yield part.endPoint;
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				yield part.endPoint;
+				break;
+			case PathCommandType.LineTo:
+				yield part.point;
+				break;
+			case PathCommandType.MoveTo:
+				yield part.point;
+				break;
+			default:
+				exhaustivenessCheck = part;
+				return exhaustivenessCheck;
+			}
+		}
 	}
 
 	private cachedPolylineApproximation: LineSegment2[]|null = null;

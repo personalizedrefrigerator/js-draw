@@ -156,6 +156,27 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return false;
 	}
 
+	public override intersectsRect(rect: Rect2): boolean {
+		// AbstractComponent::intersectsRect can be inexact for strokes with non-zero
+		// stroke radius (has many false negatives). As such, additional checks are
+		// done here, before passing to the superclass.
+
+
+		if (!rect.intersects(this.getBBox())) {
+			return false;
+		}
+
+		for (const part of this.parts) {
+			for (const point of part.path.startEndPoints()) {
+				if (rect.containsPoint(point)) {
+					return true;
+				}
+			}
+		}
+
+		return super.intersectsRect(rect);
+	}
+
 	public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.getBBox());
 		for (const part of this.parts) {
