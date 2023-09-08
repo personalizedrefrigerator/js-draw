@@ -11,7 +11,7 @@ import './settingsDialog.css';
  * Returns a promise that resolves when the dialog closes.
  */
 const makeSettingsDialog = (localization: Localization): Promise<void> => {
-	const container = document.createElement('div');
+	const container = document.createElement('dialog');
 	container.classList.add('dialog-background');
 
 	const dialog = document.createElement('div');
@@ -116,6 +116,7 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 	dialog.replaceChildren(keybindingsHeader, keybindingsContainer, saveButton);
 	container.appendChild(dialog);
 	document.body.appendChild(container);
+	container.show();
 
 	const saveResults = () => {
 		saveKeybindingOverrides(changedShortcuts);

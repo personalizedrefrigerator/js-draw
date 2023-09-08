@@ -38,7 +38,7 @@ const makeNewImageDialog = (
 		closeDialogWithResult(item);
 	};
 
-	const background = document.createElement('div');
+	const background = document.createElement('dialog');
 	background.classList.add('dialog-background');
 	background.classList.add('new-image-dialog-background');
 
@@ -111,6 +111,7 @@ const makeNewImageDialog = (
 	container.replaceChildren(titleElem, fromTemplateArea, fromFileArea, advancedArea);
 	background.appendChild(container);
 	document.body.appendChild(background);
+	background.show();
 
 	// Handle file uploads.
 	fileInput.onchange = () => {
