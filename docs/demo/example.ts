@@ -227,19 +227,38 @@ const fillLaunchList = async (
 		editor.loadFromSVG(await storeEntry.read());
 	};
 
+	const errorList = document.createElement('ul');
+	errorList.classList.add('error-container');
+	launchButtonContainer.appendChild(errorList);
+
+	const showError = (errorMessage: string) => {
+		const messageContainer = document.createElement('li');
+		messageContainer.innerText = errorMessage;
+		errorList.appendChild(messageContainer);
+		errorList.classList.add('has-errors');
+	};
+
 	// Wrap window.localStorage in a class that facilitates reading/writing to it.
 	const localStorageDataStore = new LocalStorageStore(localization);
 
 	// Wrap window.indexeddb in a similar class. Both extend AbstractStore, which
 	// allows our image saving/loading code to work with either/both.
-	const dbStore = await IndexedDBStore.create(localization);
+	let dbStore: IndexedDBStore|null;
+	try {
+		dbStore = await IndexedDBStore.create(localization);
+	} catch (error) {
+		showError(`${localization.databaseLoadError} Error: ${error}`);
+		dbStore = null;
+	}
 
 	// Create a list of buttons for loading recent saves.
-	const dbLoadSaveList = await makeLoadFromSaveList(dbStore, loadFromStoreEntry, localization);
-	launchButtonContainer?.appendChild(dbLoadSaveList);
+	if (dbStore) {
+		const dbLoadSaveList = await makeLoadFromSaveList(dbStore, loadFromStoreEntry, localization);
+		launchButtonContainer.appendChild(dbLoadSaveList);
+	}
 
 	const lsLoadSaveList = await makeLoadFromSaveList(localStorageDataStore, loadFromStoreEntry, localization);
-	launchButtonContainer?.appendChild(lsLoadSaveList);
+	launchButtonContainer.appendChild(lsLoadSaveList);
 
 	// Add a "new image" floating action button.
 	const newImageFAB = new FloatingActionButton({
@@ -252,7 +271,7 @@ const fillLaunchList = async (
 		// the user to be able to make multiple "new image" dialogs be present
 		// on the screen at the same time.
 		newImageFAB.setDisabled(true);
-		const entry = await makeNewImageDialog(localization, dbStore);
+		const entry = await makeNewImageDialog(localization, dbStore ?? localStorageDataStore);
 		newImageFAB.setDisabled(false);
 
 		if (entry === null) {
@@ -271,7 +290,7 @@ const fillLaunchList = async (
 		settingsButton.style.display = 'block';
 	};
 	settingsButton.classList.add('settingsButton');
-	launchButtonContainer?.appendChild(settingsButton);
+	launchButtonContainer.appendChild(settingsButton);
 };
 
 (async () => {

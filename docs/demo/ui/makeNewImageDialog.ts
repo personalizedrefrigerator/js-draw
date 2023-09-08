@@ -27,6 +27,8 @@ const makeNewImageDialog = (
 
 		let item: StoreEntry|null = await store.createNewEntry();
 		if (item === null) {
+			alert(localization.warningSaveTargetOnlySupportsOneImage);
+
 			item = makeReadOnlyStoreEntry(result, onInvalidOperation);
 		} else {
 			// Set the initial content of the item.

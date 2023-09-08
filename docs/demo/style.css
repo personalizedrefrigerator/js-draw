@@ -84,6 +84,24 @@
 	-webkit-backdrop-filter: var(--backdrop-filter);
 }
 
+.error-container {
+	display: none;
+	background-color: #ffbbbb;
+	color: black;
+	padding: 4px;
+	border-radius: 4px;
+
+	font-family: sans-serif;
+}
+
+.error-container li::before {
+	content: "❗";
+}
+
+.error-container.has-errors {
+	display: block;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		background-color: black;
@@ -104,5 +122,10 @@
 
 	.dialog-background .dialog {
 		background-color: #111;
+	}
+
+	.error-container {
+		color: white;
+		background-color: #500;
 	}
 }
