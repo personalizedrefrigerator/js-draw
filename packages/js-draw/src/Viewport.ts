@@ -98,7 +98,7 @@ export class Viewport {
 		return result;
 	}
 
-	// @internal
+	/** Resizes the screen rect to the given size. @internal */
 	public updateScreenSize(screenSize: Vec2) {
 		this.screenRect = this.screenRect.resizedTo(screenSize);
 	}

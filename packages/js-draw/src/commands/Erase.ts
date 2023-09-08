@@ -42,8 +42,8 @@ export default class Erase extends SerializableCommand {
 			const parent = editor.image.findParent(part);
 
 			if (parent) {
-				editor.image.onDestroyElement(part);
 				parent.remove();
+				editor.image.onDestroyElement(part);
 			}
 		}
 

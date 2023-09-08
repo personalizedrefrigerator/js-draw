@@ -7,7 +7,8 @@ import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';
 import EventDispatcher from './EventDispatcher';
-import { assertIsNumber, assertIsNumberArray } from './util/assertions';
+import { assertIsBoolean, assertIsNumber, assertIsNumberArray } from './util/assertions';
+import Command from './commands/Command';
 
 // @internal Sort by z-index, low to high
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
@@ -30,6 +31,9 @@ export default class EditorImage {
 	/** Viewport for the exported/imported image. */
 	private importExportViewport: Viewport;
 
+	// Whether the viewport should be autoresized on item add/remove.
+	private shouldAutoresizeExportViewport: boolean;
+
 	// @internal
 	public readonly notifier: EditorImageNotifier;
 
@@ -48,6 +52,7 @@ export default class EditorImage {
 
 		// Default to a 500x500 image
 		this.importExportViewport.updateScreenSize(Vec2.of(500, 500));
+		this.shouldAutoresizeExportViewport = false;
 	}
 
 	// Returns all components that make up the background of this image. These
@@ -108,7 +113,11 @@ export default class EditorImage {
 		this.render(renderer, null);
 	}
 
-	/** @returns all elements in the image, sorted by z-index. This can be slow for large images. */
+	/**
+	 * @returns all elements in the image, sorted by z-index. This can be slow for large images.
+	 *
+	 * Does not include background elements.
+	 */
 	public getAllElements() {
 		const leaves = this.root.getLeaves();
 		sortLeavesByZIndex(leaves);
@@ -129,10 +138,20 @@ export default class EditorImage {
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
-	/** Called whenever an element is completely removed. @internal */
+	/** Called whenever (just after) an element is completely removed. @internal */
 	public onDestroyElement(elem: AbstractComponent) {
 		this.componentCount --;
 		delete this.componentsById[elem.getId()];
+
+		this.autoresizeExportViewport();
+	}
+
+	/** Called just after an element is added. @internal */
+	private onElementAdded(elem: AbstractComponent) {
+		this.componentCount ++;
+		this.componentsById[elem.getId()] = elem;
+
+		this.autoresizeExportViewport();
 	}
 
 	/**
@@ -145,15 +164,16 @@ export default class EditorImage {
 	}
 
 	private addElementDirectly(elem: AbstractComponent): ImageNode {
+		// Because onAddToImage can affect the element's bounding box,
+		// this needs to be called before parentTree.addLeaf.
 		elem.onAddToImage(this);
-
-		this.componentCount ++;
-		this.componentsById[elem.getId()] = elem;
 
 		// If a background component, add to the background. Else,
 		// add to the normal component tree.
 		const parentTree = elem.isBackground() ? this.background : this.root;
-		return parentTree.addLeaf(elem);
+		const result = parentTree.addLeaf(elem);
+		this.onElementAdded(elem);
+		return result;
 	}
 
 	private removeElementDirectly(element: AbstractComponent) {
@@ -247,8 +267,6 @@ export default class EditorImage {
 		}
 	};
 
-
-
 	/**
 	 * @returns a `Viewport` for rendering the image when importing/exporting.
 	 */
@@ -256,30 +274,92 @@ export default class EditorImage {
 		return this.importExportViewport;
 	}
 
-	public setImportExportRect(imageRect: Rect2): SerializableCommand {
-		const importExportViewport = this.getImportExportViewport();
-		const origSize = importExportViewport.visibleRect.size;
-		const origTransform = importExportViewport.canvasToScreenTransform;
+	/**
+	 * @see {@link setImportExportRect}
+	 */
+	public getImportExportRect() {
+		return this.getImportExportViewport().visibleRect;
+	}
 
-		return new EditorImage.SetImportExportRectCommand(origSize, origTransform, imageRect);
+	/**
+	 * Sets the import/export rectangle to the given `imageRect`. Disables
+	 * autoresize (if it was previously enabled).
+	 */
+	public setImportExportRect(imageRect: Rect2): SerializableCommand {
+		return EditorImage.SetImportExportRectCommand.of(
+			this, imageRect, false,
+		);
+	}
+
+	public getAutoresizeEnabled() {
+		return this.shouldAutoresizeExportViewport;
+	}
+
+	public setAutoresizeEnabled(autoresize: boolean): Command {
+		if (autoresize === this.shouldAutoresizeExportViewport) {
+			return Command.empty;
+		}
+
+		const newBBox = this.root.getBBox();
+		return EditorImage.SetImportExportRectCommand.of(
+			this, newBBox, autoresize,
+		);
+	}
+
+	private autoresizeExportViewport() {
+		// Only autoresize if in autoresize mode -- otherwise resizing the image
+		// should be done with undoable commands.
+		if (this.shouldAutoresizeExportViewport) {
+			this.setExportRectDirectly(this.root.getBBox());
+		}
+	}
+
+	/**
+	 * Sets the import/export viewport directly, without returning a `Command`.
+	 * As such, this is not undoable.
+	 *
+	 * See setImportExportRect
+	 */
+	private setExportRectDirectly(newRect: Rect2) {
+		const viewport = this.getImportExportViewport();
+		viewport.updateScreenSize(newRect.size);
+		viewport.resetTransform(Mat33.translation(newRect.topLeft.times(-1)));
 	}
 
 	// Handles resizing the background import/export region of the image.
 	private static SetImportExportRectCommand = class extends SerializableCommand {
 		private static commandId = 'set-import-export-rect';
 
-		public constructor(
+		private constructor(
 			private originalSize: Vec2,
 			private originalTransform: Mat33,
-			private finalRect: Rect2,
+			private originalAutoresize: boolean,
+			private newExportRect: Rect2,
+			private newAutoresize: boolean,
 		) {
 			super(EditorImage.SetImportExportRectCommand.commandId);
 		}
 
+		// Uses `image` to store the original size/transform
+		public static of(
+			image: EditorImage,
+			newExportRect: Rect2,
+			newAutoresize: boolean,
+		) {
+			const importExportViewport = image.getImportExportViewport();
+			const originalSize = importExportViewport.visibleRect.size;
+			const originalTransform = importExportViewport.canvasToScreenTransform;
+			const originalAutoresize = image.getAutoresizeEnabled();
+
+			return new EditorImage.SetImportExportRectCommand(
+				originalSize, originalTransform, originalAutoresize,
+				newExportRect, newAutoresize,
+			);
+		}
+
 		public apply(editor: Editor) {
-			const viewport = editor.image.getImportExportViewport();
-			viewport.updateScreenSize(this.finalRect.size);
-			viewport.resetTransform(Mat33.translation(this.finalRect.topLeft.times(-1)));
+			editor.image.setExportRectDirectly(this.newExportRect);
+			editor.image.shouldAutoresizeExportViewport = this.newAutoresize;
 			editor.queueRerender();
 		}
 
@@ -287,11 +367,19 @@ export default class EditorImage {
 			const viewport = editor.image.getImportExportViewport();
 			viewport.updateScreenSize(this.originalSize);
 			viewport.resetTransform(this.originalTransform);
+			editor.image.shouldAutoresizeExportViewport = this.originalAutoresize;
 			editor.queueRerender();
 		}
 
 		public description(_editor: Editor, localization: EditorLocalization) {
-			return localization.resizeOutputCommand(this.finalRect);
+			if (this.newAutoresize !== this.originalAutoresize) {
+				if (this.newAutoresize) {
+					return localization.enabledAutoresizeOutputCommand;
+				} else {
+					return localization.disabledAutoresizeOutputCommand;
+				}
+			}
+			return localization.resizeOutputCommand(this.newExportRect);
 		}
 
 		protected serializeToJSON() {
@@ -299,11 +387,13 @@ export default class EditorImage {
 				originalSize: this.originalSize.xy,
 				originalTransform: this.originalTransform.toArray(),
 				newRegion: {
-					x: this.finalRect.x,
-					y: this.finalRect.y,
-					w: this.finalRect.w,
-					h: this.finalRect.h,
+					x: this.newExportRect.x,
+					y: this.newExportRect.y,
+					w: this.newExportRect.w,
+					h: this.newExportRect.h,
 				},
+				autoresize: this.newAutoresize,
+				originalAutoresize: this.originalAutoresize,
 			};
 		}
 
@@ -319,14 +409,19 @@ export default class EditorImage {
 					json.newRegion.w,
 					json.newRegion.h,
 				]);
+				assertIsBoolean(json.autoresize ?? false);
+				assertIsBoolean(json.originalAutoresize ?? false);
 
 				const originalSize = Vec2.ofXY(json.originalSize);
 				const originalTransform = new Mat33(...(json.originalTransform as Mat33Array));
 				const finalRect = new Rect2(
 					json.newRegion.x, json.newRegion.y, json.newRegion.w, json.newRegion.h
 				);
+				const autoresize = json.autoresize ?? false;
+				const originalAutoresize = json.originalAutoresize ?? false;
+
 				return new EditorImage.SetImportExportRectCommand(
-					originalSize, originalTransform, finalRect
+					originalSize, originalTransform, originalAutoresize, finalRect, autoresize
 				);
 			});
 		}

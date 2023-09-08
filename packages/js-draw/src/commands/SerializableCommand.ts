@@ -4,7 +4,9 @@ import Command from './Command';
 export type DeserializationCallback = (data: Record<string, any>|any[], editor: Editor) => SerializableCommand;
 
 export default abstract class SerializableCommand extends Command {
-	public constructor(private commandTypeId: string) {
+	readonly #commandTypeId: string;
+
+	public constructor(commandTypeId: string) {
 		super();
 
 		if (!(commandTypeId in SerializableCommand.deserializationCallbacks)) {
@@ -12,6 +14,8 @@ export default abstract class SerializableCommand extends Command {
 				`Command ${commandTypeId} must have a registered deserialization callback. To do this, call SerializableCommand.register.`
 			);
 		}
+
+		this.#commandTypeId = commandTypeId;
 	}
 
 	protected abstract serializeToJSON(): string|Record<string, any>|any[];
@@ -24,7 +28,7 @@ export default abstract class SerializableCommand extends Command {
 	public serialize(): Record<string|symbol, any> {
 		return {
 			data: this.serializeToJSON(),
-			commandType: this.commandTypeId,
+			commandType: this.#commandTypeId,
 		};
 	}
 
