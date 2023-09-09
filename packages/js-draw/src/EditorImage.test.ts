@@ -19,7 +19,7 @@ abstract class BaseTestComponent extends AbstractComponent {
 		super(componentKind);
 		this.contentBBox = bbox;
 	}
-	public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined) {
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2 | undefined) {
 		canvas.startObject(this.contentBBox);
 		canvas.fillRect(this.contentBBox, Color4.red);
 		canvas.endObject();
