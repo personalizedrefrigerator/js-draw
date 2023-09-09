@@ -26,6 +26,10 @@ export const svgStyleAttributesDataKey = 'svgStyleAttrs';
 // was first loaded.
 export const svgLoaderAttributeContainerID = 'svgContainerID';
 
+// If present in the exported SVG's class list, the image will be
+// autoresized when components are added/removed.
+export const svgLoaderAutoresizeClassName = 'autoresize';
+
 // [key, value]
 export type SVGLoaderUnknownAttribute = [ string, string ];
 
@@ -505,8 +509,10 @@ export default class SVGLoader implements ImageLoader {
 			return;
 		}
 
+		const autoresize = node.classList.contains(svgLoaderAutoresizeClassName);
+
 		this.rootViewBox = new Rect2(x, y, width, height);
-		this.onDetermineExportRect?.(this.rootViewBox);
+		this.onDetermineExportRect?.(this.rootViewBox, { autoresize });
 	}
 
 	private async updateSVGAttrs(node: SVGSVGElement) {

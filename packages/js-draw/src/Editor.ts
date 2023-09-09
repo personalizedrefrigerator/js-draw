@@ -9,7 +9,7 @@ import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2, Vec3, Color4, Mat33, Rect2, toRoundedString } from '@js-draw/math';
 import Display, { RenderingMode } from './rendering/Display';
 import SVGRenderer from './rendering/renderers/SVGRenderer';
-import SVGLoader from './SVGLoader';
+import SVGLoader, { svgLoaderAutoresizeClassName } from './SVGLoader';
 import Pointer from './Pointer';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
@@ -1304,6 +1304,12 @@ export class Editor {
 		result.setAttribute('width', toRoundedString(rect.w));
 		result.setAttribute('height', toRoundedString(rect.h));
 
+		if (this.image.getAutoresizeEnabled()) {
+			result.classList.add(svgLoaderAutoresizeClassName);
+		} else {
+			result.classList.remove(svgLoaderAutoresizeClassName);
+		}
+
 		return result;
 	}
 
@@ -1319,6 +1325,8 @@ export class Editor {
 		const originalBackgrounds = this.image.getBackgroundComponents();
 		const eraseBackgroundCommand = new Erase(originalBackgrounds);
 
+		let autoresizeEnabled = false;
+
 		await loader.start(async (component) => {
 			await this.dispatchNoAnnounce(EditorImage.addElement(component));
 		}, (countProcessed: number, totalToProcess: number) => {
@@ -1329,10 +1337,22 @@ export class Editor {
 			}
 
 			return null;
-		}, (importExportRect: Rect2) => {
+		}, (importExportRect, options) => {
 			this.dispatchNoAnnounce(this.setImportExportRect(importExportRect), false);
 			this.dispatchNoAnnounce(this.viewport.zoomTo(importExportRect), false);
+
+			if (options) {
+				autoresizeEnabled = options.autoresize;
+			}
 		});
+
+		// TODO: Move this call into the callback above. Currently, this would cause
+		//       decrease in performance as the main background would be repeatedly added
+		//       and removed from the editor every time another component is added.
+		this.dispatchNoAnnounce(
+			this.image.setAutoresizeEnabled(autoresizeEnabled),
+			false,
+		);
 
 		// Ensure that we don't have multiple overlapping BackgroundComponents. Remove
 		// old BackgroundComponents.

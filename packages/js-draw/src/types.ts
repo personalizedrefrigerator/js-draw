@@ -128,10 +128,16 @@ export type OnProgressListener =
 
 export type ComponentAddedListener = (component: AbstractComponent)=> Promise<void>|void;
 
+
 // Called when a new estimate for the import/export rect has been generated. This can be called multiple times.
 // Only the last call to this listener must be accurate.
 // The import/export rect is also returned by [start].
-export type OnDetermineExportRectListener = (exportRect: Rect2)=> void;
+//
+// **Note**: In a future release, the `options` parameter may be required.
+export type OnDetermineExportRectListener = (
+	exportRect: Rect2,
+	options?: { autoresize: boolean },
+)=> void;
 
 export interface ImageLoader {
 	start(
