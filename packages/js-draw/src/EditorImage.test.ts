@@ -156,8 +156,6 @@ describe('EditorImage', () => {
 			testStroke2.transformBy(Mat33.translation(Vec2.of(100, -10))),
 		]));
 
-		console.log((image as any).root.getBBox());
-
 		// After adding, the viewport should update
 		expect(getScreenRect()).objEq(
 			testStroke.getBBox().union(testStroke2.getBBox())
