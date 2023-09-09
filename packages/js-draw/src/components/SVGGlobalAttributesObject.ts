@@ -8,7 +8,7 @@
 import { LineSegment2, Mat33, Rect2 } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
 type GlobalAttrsList = Array<[string, string|null]>;
@@ -43,6 +43,10 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 
 	public override isSelectable() {
 		return false;
+	}
+
+	public override getSizingMode() {
+		return ComponentSizingMode.Anywhere;
 	}
 
 	protected createClone() {

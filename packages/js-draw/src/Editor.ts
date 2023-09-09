@@ -1070,8 +1070,8 @@ export class Editor {
 
 		this.image.renderWithCache(renderer, this.display.getCache(), this.viewport);
 
-		if (showImageBounds) {
-			// Draw a rectangle around the region that will be visible on save
+		// Draw a rectangle around the region that will be visible on save
+		if (showImageBounds && !this.image.getAutoresizeEnabled()) {
 			const exportRectFill = { fill: Color4.fromHex('#44444455') };
 			const exportRectStrokeWidth = 5 * this.viewport.getSizeOfPixelOnCanvas();
 			renderer.drawRect(

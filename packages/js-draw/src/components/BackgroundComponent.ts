@@ -4,7 +4,7 @@ import { DispatcherEventListener } from '../EventDispatcher';
 import SerializableCommand from '../commands/SerializableCommand';
 import { LineSegment2, Mat33, Rect2, Color4, toRoundedString, Path, PathCommandType, Vec2, PathCommand } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 import Viewport from '../Viewport';
@@ -35,6 +35,11 @@ export const backgroundTypeToClassNameMap = {
 export default class BackgroundComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 	private viewportSizeChangeListener: DispatcherEventListener|null = null;
+	private autoresizeChangedListener: DispatcherEventListener|null = null;
+
+	// Whether the background should grow/shrink to match the screen size,
+	// rather than being clipped to the image boundaries.
+	private fillsScreen: boolean = false;
 
 	private gridSize: number = Viewport.getGridSize(2);
 	private gridStrokeWidth: number = 0.7;
@@ -138,26 +143,49 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 			EditorImageEventType.ExportViewportChanged, () => {
 				this.recomputeBBox(image);
 			});
+
+		this.autoresizeChangedListener = image.notifier.on(
+			EditorImageEventType.AutoresizeModeChanged,
+			() => {
+				this.recomputeBBox(image);
+			},
+		);
 		this.recomputeBBox(image);
 	}
 
 	public override onRemoveFromImage(): void {
 		this.viewportSizeChangeListener?.remove();
+		this.autoresizeChangedListener?.remove();
+
 		this.viewportSizeChangeListener = null;
+		this.autoresizeChangedListener = null;
 	}
 
 	private recomputeBBox(image: EditorImage) {
 		const importExportRect = image.getImportExportViewport().visibleRect;
+		let needsRerender = false;
 		if (!this.contentBBox.eq(importExportRect)) {
 			this.contentBBox = importExportRect;
 
-			// Re-render this if already added to the EditorImage.
+			needsRerender = true;
+		}
+
+		const imageAutoresizes = image.getAutoresizeEnabled();
+		if (imageAutoresizes !== this.fillsScreen) {
+			this.fillsScreen = imageAutoresizes;
+
+			needsRerender = true;
+		}
+
+		if (needsRerender) {
+			// Re-renders this if already added to the EditorImage.
 			image.queueRerenderOf(this);
 		}
 	}
 
 	private generateGridPath(visibleRect?: Rect2) {
-		const targetRect = visibleRect?.grownBy(this.gridStrokeWidth)?.intersection(this.contentBBox) ?? this.contentBBox;
+		const contentBBox = this.getFullBoundingBox(visibleRect);
+		const targetRect = visibleRect?.grownBy(this.gridStrokeWidth)?.intersection(contentBBox) ?? contentBBox;
 
 		const roundDownToGrid = (coord: number) => Math.floor(coord / this.gridSize) * this.gridSize;
 		const roundUpToGrid = (coord: number) => Math.ceil(coord / this.gridSize) * this.gridSize;
@@ -206,24 +234,34 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		return new Path(startPoint, result);
 	}
 
+	/**
+	 * @returns this background's bounding box if the screen size is taken into
+	 * account (which may be necessary if this component is configured to fill the
+	 * entire screen).
+	 */
+	private getFullBoundingBox(visibleRect?: Rect2) {
+		return (this.fillsScreen ? visibleRect : this.contentBBox) ?? this.contentBBox;
+	}
+
 	public render(canvas: AbstractRenderer, visibleRect?: Rect2) {
 		if (this.backgroundType === BackgroundType.None) {
 			return;
 		}
 		const clip = this.backgroundType === BackgroundType.Grid;
-		canvas.startObject(this.contentBBox, clip);
+		const contentBBox = this.getFullBoundingBox(visibleRect);
+		canvas.startObject(contentBBox, clip);
 
 		if (this.backgroundType === BackgroundType.SolidColor || this.backgroundType === BackgroundType.Grid) {
 			// If the rectangle for this region contains the visible rect,
 			// we can fill the entire visible rectangle (which may be more efficient than
 			// filling the entire region for this.)
 			if (visibleRect) {
-				const intersection = visibleRect.intersection(this.contentBBox);
+				const intersection = visibleRect.intersection(contentBBox);
 				if (intersection) {
 					canvas.fillRect(intersection, this.mainColor);
 				}
 			} else {
-				canvas.fillRect(this.contentBBox, this.mainColor);
+				canvas.fillRect(contentBBox, this.mainColor);
 			}
 		}
 
@@ -271,6 +309,10 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 
 	public override isBackground(): boolean {
 		return true;
+	}
+
+	public override getSizingMode(): ComponentSizingMode {
+		return this.fillsScreen ? ComponentSizingMode.FillScreen : ComponentSizingMode.BoundingBox;
 	}
 
 	protected serializeToJSON() {

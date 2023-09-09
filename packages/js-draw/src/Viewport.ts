@@ -256,8 +256,21 @@ export class Viewport {
 	public computeZoomToTransform(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Mat33 {
 		let transform = Mat33.identity;
 
+		// Invalid size? (Would divide by zero)
 		if (toMakeVisible.w === 0 || toMakeVisible.h === 0) {
-			throw new Error(`${toMakeVisible.toString()} rectangle is empty! Cannot zoom to!`);
+			// Create a new rectangle with a valid size
+			let newSize = Math.max(toMakeVisible.w, toMakeVisible.h);
+
+			// Choose a reasonable default size, but don't zoom.
+			if (newSize === 0) {
+				newSize = 50;
+				allowZoomIn = false;
+				allowZoomOut = false;
+			}
+
+			toMakeVisible = new Rect2(
+				toMakeVisible.x, toMakeVisible.y, newSize, newSize,
+			);
 		}
 
 		if (isNaN(toMakeVisible.size.magnitude())) {

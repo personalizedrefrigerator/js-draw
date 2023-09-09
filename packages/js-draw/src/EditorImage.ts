@@ -1,7 +1,7 @@
 import Editor from './Editor';
 import AbstractRenderer from './rendering/renderers/AbstractRenderer';
 import Viewport from './Viewport';
-import AbstractComponent from './components/AbstractComponent';
+import AbstractComponent, { ComponentSizingMode } from './components/AbstractComponent';
 import { Rect2, Vec2, Mat33, Mat33Array } from '@js-draw/math';
 import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
@@ -16,7 +16,8 @@ export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 };
 
 export enum EditorImageEventType {
-	ExportViewportChanged
+	ExportViewportChanged,
+	AutoresizeModeChanged,
 }
 
 export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image: EditorImage }>;
@@ -39,15 +40,13 @@ export default class EditorImage {
 
 	// @internal
 	public constructor() {
-		this.root = new ImageNode();
-		this.background = new ImageNode();
+		this.root = new RootImageNode();
+		this.background = new RootImageNode();
 		this.componentsById = {};
 
 		this.notifier = new EventDispatcher();
 		this.importExportViewport = new Viewport(() => {
-			this.notifier.dispatch(EditorImageEventType.ExportViewportChanged, {
-				image: this,
-			});
+			this.onExportViewportChanged();
 		});
 
 		// Default to a 500x500 image
@@ -295,6 +294,7 @@ export default class EditorImage {
 		return this.shouldAutoresizeExportViewport;
 	}
 
+	/** Returns a `Command` that sets whether the image should autoresize. */
 	public setAutoresizeEnabled(autoresize: boolean): Command {
 		if (autoresize === this.shouldAutoresizeExportViewport) {
 			return Command.empty;
@@ -306,6 +306,17 @@ export default class EditorImage {
 		);
 	}
 
+	private setAutoresizeEnabledDirectly(shouldAutoresize: boolean) {
+		if (shouldAutoresize !== this.shouldAutoresizeExportViewport) {
+			this.shouldAutoresizeExportViewport = shouldAutoresize;
+
+			this.notifier.dispatch(EditorImageEventType.AutoresizeModeChanged, {
+				image: this,
+			});
+		}
+	}
+
+	/** Updates the size/position of the viewport */
 	private autoresizeExportViewport() {
 		// Only autoresize if in autoresize mode -- otherwise resizing the image
 		// should be done with undoable commands.
@@ -314,16 +325,49 @@ export default class EditorImage {
 		}
 	}
 
+
+	private settingExportRect: boolean = false;
+
 	/**
 	 * Sets the import/export viewport directly, without returning a `Command`.
 	 * As such, this is not undoable.
 	 *
 	 * See setImportExportRect
+	 *
+	 * Returns true if changes to the viewport were made (and thus
+	 * ExportViewportChanged was fired.)
 	 */
 	private setExportRectDirectly(newRect: Rect2) {
 		const viewport = this.getImportExportViewport();
-		viewport.updateScreenSize(newRect.size);
-		viewport.resetTransform(Mat33.translation(newRect.topLeft.times(-1)));
+		const lastSize = viewport.getScreenRectSize();
+		const lastTransform = viewport.canvasToScreenTransform;
+
+		const newTransform = Mat33.translation(newRect.topLeft.times(-1));
+
+		if (!lastSize.eq(newRect.size) || !lastTransform.eq(newTransform)) {
+			// Prevent the ExportViewportChanged event from being fired
+			// multiple times for the same viewport change: Set settingExportRect
+			// to true.
+			this.settingExportRect = true;
+			viewport.updateScreenSize(newRect.size);
+			viewport.resetTransform(newTransform);
+			this.settingExportRect = false;
+
+			this.onExportViewportChanged();
+			return true;
+		}
+		return false;
+	}
+
+	private onExportViewportChanged() {
+		// Prevent firing duplicate events -- changes
+		// made by exportViewport.resetTransform may cause this method to be
+		// called.
+		if (!this.settingExportRect) {
+			this.notifier.dispatch(EditorImageEventType.ExportViewportChanged, {
+				image: this,
+			});
+		}
 	}
 
 	// Handles resizing the background import/export region of the image.
@@ -358,16 +402,16 @@ export default class EditorImage {
 		}
 
 		public apply(editor: Editor) {
+			editor.image.setAutoresizeEnabledDirectly(this.newAutoresize);
 			editor.image.setExportRectDirectly(this.newExportRect);
-			editor.image.shouldAutoresizeExportViewport = this.newAutoresize;
 			editor.queueRerender();
 		}
 
 		public unapply(editor: Editor) {
 			const viewport = editor.image.getImportExportViewport();
+			editor.image.setAutoresizeEnabledDirectly(this.originalAutoresize);
 			viewport.updateScreenSize(this.originalSize);
 			viewport.resetTransform(this.originalTransform);
-			editor.image.shouldAutoresizeExportViewport = this.originalAutoresize;
 			editor.queueRerender();
 		}
 
@@ -430,7 +474,10 @@ export default class EditorImage {
 
 type TooSmallToRenderCheck = (rect: Rect2)=> boolean;
 
-/** Part of the Editor's image. @internal */
+/**
+ * Part of the Editor's image. Does not handle fullscreen/invisible components.
+ * @internal
+ */
 export class ImageNode {
 	private content: AbstractComponent|null;
 	private bbox: Rect2;
@@ -466,9 +513,11 @@ export class ImageNode {
 		return this.parent;
 	}
 
-	private getChildrenIntersectingRegion(region: Rect2): ImageNode[] {
+	// Override this to change how children are considered within a given region.
+	protected getChildrenIntersectingRegion(region: Rect2, isTooSmallFilter?: TooSmallToRenderCheck): ImageNode[] {
 		return this.children.filter(child => {
-			return child.getBBox().intersects(region);
+			const bbox = child.getBBox();
+			return !isTooSmallFilter?.(bbox) && bbox.intersects(region);
 		});
 	}
 
@@ -480,31 +529,23 @@ export class ImageNode {
 	}
 
 	// Returns a list of `ImageNode`s with content (and thus no children).
+	// Override getChildrenIntersectingRegion to customize how this method
+	// determines whether/which children are in `region`.
 	public getLeavesIntersectingRegion(region: Rect2, isTooSmall?: TooSmallToRenderCheck): ImageNode[] {
 		const result: ImageNode[] = [];
-		let current: ImageNode|undefined;
 		const workList: ImageNode[] = [];
 
 		workList.push(this);
-		const toNext = () => {
-			current = undefined;
-
-			const next = workList.pop();
-			if (next && !isTooSmall?.(next.bbox)) {
-				current = next;
-
-				if (current.content !== null && current.getBBox().intersection(region)) {
-					result.push(current);
-				}
-
-				workList.push(
-					...current.getChildrenIntersectingRegion(region)
-				);
-			}
-		};
 
 		while (workList.length > 0) {
-			toNext();
+			const current = workList.pop()!;
+			if (current.content !== null) {
+				result.push(current);
+			}
+
+			workList.push(
+				...current.getChildrenIntersectingRegion(region, isTooSmall)
+			);
 		}
 
 		return result;
@@ -592,12 +633,18 @@ export class ImageNode {
 			return result;
 		}
 
-
-		const newNode = new ImageNode(this);
+		const newNode = ImageNode.createLeafNode(this, leaf);
 		this.children.push(newNode);
-		newNode.content = leaf;
 		newNode.recomputeBBox(true);
+		return newNode;
+	}
 
+	// Creates a new leaf node with the given content.
+	// This only establishes the parent-child linking in one direction. Callers
+	// must add the resultant node to the list of children manually.
+	protected static createLeafNode(parent: ImageNode, content: AbstractComponent) {
+		const newNode = new ImageNode(parent);
+		newNode.content = content;
 		return newNode;
 	}
 
@@ -654,6 +701,26 @@ export class ImageNode {
 		}
 	}
 
+	// Removes the parent-to-child link.
+	// Called internally by `.remove`
+	protected removeChild(child: ImageNode) {
+		const oldChildCount = this.children.length;
+		this.children = this.children.filter(node => {
+			return node !== child;
+		});
+
+		console.assert(
+			this.children.length === oldChildCount - 1,
+			`${oldChildCount - 1} ≠ ${this.children.length} after removing all nodes equal to ${child}. Nodes should only be removed once.`
+		);
+
+		this.children.forEach(child => {
+			child.rebalance();
+		});
+
+		this.recomputeBBox(true);
+	}
+
 	// Remove this node and all of its children
 	public remove() {
 		this.content?.onRemoveFromImage();
@@ -665,25 +732,11 @@ export class ImageNode {
 			return;
 		}
 
-		const oldChildCount = this.parent.children.length;
-		this.parent.children = this.parent.children.filter(node => {
-			return node !== this;
-		});
+		this.parent.removeChild(this);
 
-		console.assert(
-			this.parent.children.length === oldChildCount - 1,
-			`${oldChildCount - 1} ≠ ${this.parent.children.length} after removing all nodes equal to ${this}. Nodes should only be removed once.`
-		);
-
-		this.parent.children.forEach(child => {
-			child.rebalance();
-		});
-
-		this.parent.recomputeBBox(true);
-
-		// Invalidate/disconnect this.
-		this.content = null;
+		// Remove the child-to-parent link and invalid this
 		this.parent = null;
+		this.content = null;
 		this.children = [];
 	}
 
@@ -699,6 +752,79 @@ export class ImageNode {
 		for (const leaf of leaves) {
 			// Leaves by definition have content
 			leaf.getContent()!.render(renderer, visibleRect);
+		}
+	}
+}
+
+/** An `ImageNode` that can properly handle fullscreen/data components. @internal */
+export class RootImageNode extends ImageNode {
+	// Nodes that will always take up the entire screen
+	private fullscreenChildren: ImageNode[] = [];
+
+	// Nodes that will never be visible unless a full render is done.
+	private dataComponents: ImageNode[] = [];
+
+	protected override getChildrenIntersectingRegion(region: Rect2, _isTooSmall?: TooSmallToRenderCheck) {
+		const result = super.getChildrenIntersectingRegion(region);
+
+		for (const node of this.fullscreenChildren) {
+			result.push(node);
+		}
+
+		return result;
+	}
+
+
+	public override getLeaves(): ImageNode[] {
+		const leaves = super.getLeaves();
+
+		// Add fullscreen/data components — this method should
+		// return *all* leaves.
+		return this.dataComponents.concat(this.fullscreenChildren, leaves);
+	}
+
+	public override removeChild(child: ImageNode) {
+		let removed = false;
+
+		const checkTargetChild = (component: ImageNode) => {
+			const isTarget = component === child;
+			removed ||= isTarget;
+			return !isTarget;
+		};
+
+		// Check whether the child is stored in the data/fullscreen
+		// component arrays first.
+		this.dataComponents = this.dataComponents
+			.filter(checkTargetChild);
+		this.fullscreenChildren = this.fullscreenChildren
+			.filter(checkTargetChild);
+
+		if (!removed) {
+			super.removeChild(child);
+		}
+	}
+
+	public override addLeaf(leafContent: AbstractComponent): ImageNode {
+		const sizingMode = leafContent.getSizingMode();
+
+		if (sizingMode === ComponentSizingMode.BoundingBox) {
+			return super.addLeaf(leafContent);
+		} else if (sizingMode === ComponentSizingMode.FillScreen) {
+			this.onContentChange();
+
+			const newNode = ImageNode.createLeafNode(this, leafContent);
+			this.fullscreenChildren.push(newNode);
+			return newNode;
+		} else if (sizingMode === ComponentSizingMode.Anywhere) {
+			this.onContentChange();
+
+			const newNode = ImageNode.createLeafNode(this, leafContent);
+			this.dataComponents.push(newNode);
+			return newNode;
+		} else {
+			const exhaustivenessCheck: never = sizingMode;
+			throw new Error(`Invalid sizing mode, ${sizingMode}`);
+			return exhaustivenessCheck;
 		}
 	}
 }
