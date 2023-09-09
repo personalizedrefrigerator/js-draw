@@ -1,11 +1,41 @@
 import EditorImage from './EditorImage';
 import Stroke from './components/Stroke';
-import { Vec2, Color4, Path, PathCommandType, Rect2, Mat33 } from '@js-draw/math';
+import { Vec2, Color4, Path, PathCommandType, Rect2, Mat33, LineSegment2, Vec3 } from '@js-draw/math';
 import DummyRenderer from './rendering/renderers/DummyRenderer';
 import createEditor from './testing/createEditor';
 import RenderingStyle from './rendering/RenderingStyle';
 import { Command, Erase, SerializableCommand, uniteCommands } from './commands/lib';
 import { pathToRenderable } from './rendering/RenderablePathSpec';
+import AbstractComponent, { ComponentSizingMode } from './components/AbstractComponent';
+import { ImageComponentLocalization } from './components/localization';
+import { AbstractRenderer } from './rendering/lib';
+
+// A base component with some methods implemented to facilitate creating
+// custom AbstractComponent subclasses for the tests below.
+abstract class BaseTestComponent extends AbstractComponent {
+	protected override contentBBox: Rect2;
+
+	public constructor(bbox: Rect2, componentKind: string) {
+		super(componentKind);
+		this.contentBBox = bbox;
+	}
+	public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined) {
+		canvas.startObject(this.contentBBox);
+		canvas.fillRect(this.contentBBox, Color4.red);
+		canvas.endObject();
+	}
+	public override intersects(lineSegment: LineSegment2): boolean {
+		return this.contentBBox.intersectsLineSegment(lineSegment).length > 0;
+	}
+	protected override serializeToJSON(): string | number | any[] | Record<string, any> | null {
+		return {
+			bbox: this.getBBox().corners.map(corner => corner.asArray()),
+		};
+	}
+	public override description(_localizationTable: ImageComponentLocalization): string {
+		return 'A test component';
+	}
+}
 
 describe('EditorImage', () => {
 	const testStroke = new Stroke([
@@ -204,5 +234,157 @@ describe('EditorImage', () => {
 		await editor.history.undo();
 
 		expect(editor.image.getImportExportRect()).objEq(originalScreenRect);
+	});
+
+	describe('should correctly adding/remove a single component', () => {
+		const runTest = async (positioning: ComponentSizingMode, isBackground: boolean) => {
+			const renderMock = jest.fn();
+			const addToImageMock = jest.fn();
+
+			// Create a subclass of AbstractComponent with the given positioning mode.
+			const TestComponent = class extends BaseTestComponent {
+				public constructor(bbox: Rect2) {
+					super(bbox, 'test-component');
+				}
+				public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined): void {
+					renderMock(canvas, visibleRect);
+					super.render(canvas, visibleRect);
+				}
+				protected override applyTransformation(_affineTransfm: Mat33): void {
+					throw new Error('Method not implemented.');
+				}
+				protected override createClone(): AbstractComponent {
+					return new TestComponent(this.getBBox());
+				}
+				public override onAddToImage(image: EditorImage): void {
+					addToImageMock(image);
+				}
+				public override getSizingMode(): ComponentSizingMode {
+					return positioning;
+				}
+				public override isBackground(): boolean {
+					return isBackground;
+				}
+			};
+
+			AbstractComponent.registerComponent('test-component', (data) => {
+				return new TestComponent(
+					Rect2.bboxOf(
+						JSON.parse(data).bbox.map(
+							(corner: [number, number, number]) =>
+								Vec3.of(...corner)
+						)
+					)
+				);
+			});
+
+			const testBBoxes = [
+				Rect2.empty,
+				Rect2.unitSquare,
+			];
+
+			for (const bbox of testBBoxes) {
+				renderMock.mockClear();
+				addToImageMock.mockClear();
+
+				const testComponent = new TestComponent(bbox);
+
+				const editor = createEditor();
+				const image = editor.image;
+				const addElementCommand = image.addElement(testComponent);
+
+				expect(renderMock).not.toHaveBeenCalled();
+				expect(addToImageMock).not.toHaveBeenCalled();
+
+				await editor.dispatch(addElementCommand);
+
+				// addToImage should have been called
+				expect(addToImageMock).toHaveBeenCalledWith(image);
+
+				// Should have a parent
+				expect(image.findParent(testComponent)).not.toBeNull();
+
+				const elements = image.getElementsIntersectingRegion(
+					// Grow the check region if an empty bbox
+					bbox.maxDimension === 0 ? bbox.grownBy(1) : bbox,
+
+					// Include background components
+					true,
+				);
+
+				// If one of the intersectable positioning types,
+				if (positioning !== ComponentSizingMode.Anywhere) {
+					expect(elements).toMatchObject([
+						testComponent,
+					]);
+				} else {
+					expect(elements).toHaveLength(0);
+				}
+
+				expect(image.estimateNumElements()).toBe(1);
+
+				// getAllElements does not include backgrounds
+				if (!isBackground) {
+					// Regardless of type, should be present in allElements
+					expect(image.getAllElements()).toHaveLength(1);
+					expect(image.getAllElements()[0]).toBe(testComponent);
+				} else {
+					expect(image.getBackgroundComponents()).toHaveLength(1);
+					expect(image.getBackgroundComponents()[0]).toBe(testComponent);
+				}
+
+				renderMock.mockClear();
+
+				// Calling renderAll should render the component.
+				const renderer = editor.display.getDryInkRenderer();
+				image.renderAll(renderer);
+
+				expect(renderMock).toHaveBeenCalledTimes(1);
+				expect(renderMock).toHaveBeenCalledWith(renderer, undefined);
+
+				// Calling render should render the component depending on the
+				// viewport and whether the component has type Anywhere.
+				await editor.viewport.zoomTo(bbox).apply(editor);
+
+				image.render(renderer, editor.viewport);
+
+				// Should not have rendered the Anywhere positioned element (should consider
+				// the element off-screen for performance reasons).
+				if (positioning === ComponentSizingMode.BoundingBox || positioning === ComponentSizingMode.FillScreen) {
+					expect(renderMock).toHaveBeenCalledTimes(2);
+					expect(renderMock).toHaveBeenLastCalledWith(renderer, editor.viewport.visibleRect);
+				} else {
+					expect(renderMock).toHaveBeenCalledTimes(1);
+				}
+
+				// Remove the element
+				await editor.history.undo();
+
+				expect(image.estimateNumElements()).toBe(0);
+
+				// Calling renderAll should now NOT render the component.
+				renderMock.mockClear();
+				image.renderAll(renderer);
+				expect(renderMock).toHaveBeenCalledTimes(0);
+
+				expect(image.getAllElements()).toHaveLength(0);
+				expect(image.getBackgroundComponents()).toHaveLength(0);
+			}
+		};
+
+		it('should correctly add/remove Anywhere-positioned components', async () => {
+			await runTest(ComponentSizingMode.Anywhere, false);
+			await runTest(ComponentSizingMode.Anywhere, true);
+		});
+
+		it('should correctly add/remove FillScreen-positioned components', async () => {
+			await runTest(ComponentSizingMode.FillScreen, false);
+			await runTest(ComponentSizingMode.FillScreen, true);
+		});
+
+		it('should correctly add/remove BoundingBox-positioned components', async () => {
+			await runTest(ComponentSizingMode.BoundingBox, true);
+			await runTest(ComponentSizingMode.BoundingBox, false);
+		});
 	});
 });

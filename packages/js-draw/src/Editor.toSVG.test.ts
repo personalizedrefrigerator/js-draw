@@ -291,4 +291,27 @@ describe('Editor.toSVG', () => {
 			expect(outputSVG.querySelectorAll('svg > g#group-1 > g > *')).toHaveLength(0);
 		});
 	});
+
+	it('should preserve unknown SVG objects', async () => {
+		const editor = createEditor();
+		await editor.loadFrom(SVGLoader.fromString(`
+			<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+				<path d='M10,10 L20,10 L10,40'/>
+				<some-elem some-attr='foo'/>
+				<path d='M40,40 l10,10 0,10'/>
+			</svg>
+		`, {
+			// Keep unknown elements
+			sanitize: false,
+
+			// Don't warn on unknown elements
+			disableUnknownObjectWarnings: true,
+		}));
+
+		const asSVG = editor.toSVG();
+
+		expect(asSVG.querySelectorAll('svg > some-elem')).toHaveLength(1);
+		expect(asSVG.querySelectorAll('svg > path')).toHaveLength(2);
+		expect(asSVG.querySelector('svg > some-elem')?.getAttribute('some-attr')).toBe('foo');
+	});
 });

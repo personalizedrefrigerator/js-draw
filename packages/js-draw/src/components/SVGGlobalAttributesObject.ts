@@ -46,6 +46,9 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 	}
 
 	public override getSizingMode() {
+		// This component can be shown anywhere (it won't be
+		// visible to the user, it just needs to be saved with
+		// the image).
 		return ComponentSizingMode.Anywhere;
 	}
 

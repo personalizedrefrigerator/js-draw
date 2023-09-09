@@ -115,7 +115,7 @@ export default class EditorImage {
 	/**
 	 * @returns all elements in the image, sorted by z-index. This can be slow for large images.
 	 *
-	 * Does not include background elements.
+	 * Does not include background elements. See {@link getBackgroundComponents}.
 	 */
 	public getAllElements() {
 		const leaves = this.root.getLeaves();
@@ -130,10 +130,14 @@ export default class EditorImage {
 	}
 
 	/** @returns a list of `AbstractComponent`s intersecting `region`, sorted by z-index. */
-	public getElementsIntersectingRegion(region: Rect2): AbstractComponent[] {
-		const leaves = this.root.getLeavesIntersectingRegion(region);
-		sortLeavesByZIndex(leaves);
+	public getElementsIntersectingRegion(region: Rect2, includeBackground: boolean = false): AbstractComponent[] {
+		let leaves = this.root.getLeavesIntersectingRegion(region);
 
+		if (includeBackground) {
+			leaves = leaves.concat(this.background.getLeavesIntersectingRegion(region));
+		}
+
+		sortLeavesByZIndex(leaves);
 		return leaves.map(leaf => leaf.getContent()!);
 	}
 
@@ -553,6 +557,8 @@ export class ImageNode {
 
 	// Returns the child of this with the target content or `null` if no
 	// such child exists.
+	//
+	// Note: Relies on all children to have valid bounding boxes.
 	public getChildWithContent(target: AbstractComponent): ImageNode|null {
 		const candidates = this.getLeavesIntersectingRegion(target.getBBox());
 		for (const candidate of candidates) {
@@ -774,7 +780,6 @@ export class RootImageNode extends ImageNode {
 		return result;
 	}
 
-
 	public override getLeaves(): ImageNode[] {
 		const leaves = super.getLeaves();
 
@@ -802,6 +807,36 @@ export class RootImageNode extends ImageNode {
 		if (!removed) {
 			super.removeChild(child);
 		}
+	}
+
+	public override getChildWithContent(target: AbstractComponent): ImageNode|null {
+		const sizingMode = target.getSizingMode();
+
+		// getChildWithContent only searches through the default child list
+		// and/or relies on children to have valid bounding boxes.
+		if (sizingMode === ComponentSizingMode.BoundingBox) {
+			return super.getChildWithContent(target);
+		}
+
+		// Determine the correct list to search through.
+		let candidates;
+		if (sizingMode === ComponentSizingMode.Anywhere) {
+			candidates = this.dataComponents;
+		} else if (sizingMode === ComponentSizingMode.FillScreen) {
+			candidates = this.fullscreenChildren;
+		} else {
+			const exhaustivenessCheck: never = sizingMode;
+			throw new Error('sizingMode must be one of Anywhere, FillScreen, or BoundingBox');
+			return exhaustivenessCheck;
+		}
+
+		for (const candidate of candidates) {
+			if (candidate.getContent() === target) {
+				return candidate;
+			}
+		}
+
+		return null;
 	}
 
 	public override addLeaf(leafContent: AbstractComponent): ImageNode {

@@ -36,6 +36,10 @@ export type SVGLoaderUnknownAttribute = [ string, string ];
 // [key, value, priority]
 export type SVGLoaderUnknownStyleAttribute = { key: string, value: string, priority?: string };
 
+export interface SVGLoaderOptions {
+	sanitize?: boolean;
+	disableUnknownObjectWarnings?: boolean;
+}
 
 const supportedStrokeFillStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
 
@@ -49,8 +53,17 @@ export default class SVGLoader implements ImageLoader {
 	private totalToProcess: number = 0;
 	private rootViewBox: Rect2|null;
 
+	// Options
+	private readonly storeUnknown: boolean;
+	private readonly disableUnknownObjectWarnings: boolean;
+
 	private constructor(
-		private source: SVGSVGElement, private onFinish?: OnFinishListener, private readonly storeUnknown: boolean = true) {
+		private source: SVGSVGElement,
+		private onFinish: OnFinishListener,
+		options: SVGLoaderOptions,
+	) {
+		this.storeUnknown = !(options.sanitize ?? false);
+		this.disableUnknownObjectWarnings = !!options.disableUnknownObjectWarnings;
 	}
 
 	// If [computedStyles] is given, it is preferred to directly accessing node's style object.
@@ -560,11 +573,13 @@ export default class SVGLoader implements ImageLoader {
 			await this.addUnknownNode(node as SVGStyleElement);
 			break;
 		default:
-			console.warn('Unknown SVG element,', node, node.tagName);
-			if (!(node instanceof SVGElement)) {
-				console.warn(
-					'Element', node, 'is not an SVGElement!', this.storeUnknown ? 'Continuing anyway.' : 'Skipping.'
-				);
+			if (!this.disableUnknownObjectWarnings) {
+				console.warn('Unknown SVG element,', node, node.tagName);
+				if (!(node instanceof SVGElement)) {
+					console.warn(
+						'Element', node, 'is not an SVGElement!', this.storeUnknown ? 'Continuing anyway.' : 'Skipping.'
+					);
+				}
 			}
 
 			await this.addUnknownNode(node as SVGElement);
@@ -623,9 +638,12 @@ export default class SVGLoader implements ImageLoader {
 	 *
 	 * @see {@link Editor.loadFrom}
 	 * @param text - Textual representation of the SVG (e.g. `<svg viewbox='...'>...</svg>`).
-	 * @param sanitize - if `true`, don't store unknown attributes.
+	 * @param options - if `true` or `false`, treated as the `sanitize` option -- don't store unknown attributes.
 	 */
-	public static fromString(text: string, sanitize: boolean = false): SVGLoader {
+	public static fromString(
+		text: string,
+		options: Partial<SVGLoaderOptions>|boolean = false
+	): SVGLoader {
 		const sandbox = document.createElement('iframe');
 		sandbox.src = 'about:blank';
 		sandbox.setAttribute('sandbox', 'allow-same-origin');
@@ -670,9 +688,24 @@ export default class SVGLoader implements ImageLoader {
 		svgElem.innerHTML = text;
 		sandboxDoc.body.appendChild(svgElem);
 
+		// Handle options
+		let sanitize;
+		let disableUnknownObjectWarnings;
+
+		if (typeof options === 'boolean') {
+			sanitize = options;
+			disableUnknownObjectWarnings = false;
+		} else {
+			sanitize = options.sanitize ?? false;
+			disableUnknownObjectWarnings = options.disableUnknownObjectWarnings ?? false;
+		}
+
+
 		return new SVGLoader(svgElem, () => {
 			svgElem.remove();
 			sandbox.remove();
-		}, !sanitize);
+		}, {
+			sanitize, disableUnknownObjectWarnings,
+		});
 	}
 }
