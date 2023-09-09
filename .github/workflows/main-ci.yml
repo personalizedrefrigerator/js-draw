@@ -1,7 +1,8 @@
 # Created on GitHub
 
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Simple workflow for deploying static content to GitHub Pages/Firebase
+# hosting
+name: Deploy static content to Pages and Firebase
 
 on:
   # Runs on pushes targeting the default branch
@@ -52,3 +53,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
+      - name: Deploy to Firebase hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JS_DRAW }}'
+          channelId: live
+          projectId: js-draw
