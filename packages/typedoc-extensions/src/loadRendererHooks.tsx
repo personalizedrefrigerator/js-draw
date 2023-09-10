@@ -1,9 +1,9 @@
-import { Renderer, JSX, MarkdownEvent, RendererEvent, Options } from 'typedoc';
+import { Renderer, JSX, MarkdownEvent, RendererEvent } from 'typedoc';
 import { readdirSync, copyFileSync } from 'node:fs';
 import * as path from 'node:path';
 import transformMarkdown from './transformMarkdown';
 
-const loadRendererHooks = (renderer: Renderer, options: Options) => {
+const loadRendererHooks = (renderer: Renderer) => {
 	const distDir = path.dirname(__dirname);
 
 	renderer.on(

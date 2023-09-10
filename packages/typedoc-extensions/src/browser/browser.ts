@@ -2,7 +2,6 @@ import 'katex/dist/katex.css';
 import './browser.scss';
 
 import { join } from 'path';
-import { __js_draw__version } from 'js-draw';
 import replaceElementWithRunnableCode from './editor/replaceElementWithRunnableCode';
 import { imagesPath, basePath } from './constants';
 
