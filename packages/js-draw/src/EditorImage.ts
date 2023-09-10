@@ -810,33 +810,30 @@ export class RootImageNode extends ImageNode {
 	}
 
 	public override getChildWithContent(target: AbstractComponent): ImageNode|null {
-		const sizingMode = target.getSizingMode();
+		const searchExtendedChildren = () => {
+			// Search through all extended children
+			const candidates = this.fullscreenChildren.concat(this.dataComponents);
 
-		// getChildWithContent only searches through the default child list
-		// and/or relies on children to have valid bounding boxes.
-		if (sizingMode === ComponentSizingMode.BoundingBox) {
-			return super.getChildWithContent(target);
-		}
-
-		// Determine the correct list to search through.
-		let candidates;
-		if (sizingMode === ComponentSizingMode.Anywhere) {
-			candidates = this.dataComponents;
-		} else if (sizingMode === ComponentSizingMode.FillScreen) {
-			candidates = this.fullscreenChildren;
-		} else {
-			const exhaustivenessCheck: never = sizingMode;
-			throw new Error('sizingMode must be one of Anywhere, FillScreen, or BoundingBox');
-			return exhaustivenessCheck;
-		}
-
-		for (const candidate of candidates) {
-			if (candidate.getContent() === target) {
-				return candidate;
+			for (const candidate of candidates) {
+				if (candidate.getContent() === target) {
+					return candidate;
+				}
 			}
+
+			return null;
+		};
+
+		// If positioned as if a standard child, search using the superclass first.
+		// Because it could be mislabeled, also search the extended children if the superclass
+		// search fails.
+		if (target.getSizingMode() === ComponentSizingMode.BoundingBox) {
+			return super.getChildWithContent(target) ?? searchExtendedChildren();
 		}
 
-		return null;
+
+		// Fall back to the superclass -- it's possible that the component has
+		// changed labels.
+		return super.getChildWithContent(target) ?? searchExtendedChildren();
 	}
 
 	public override addLeaf(leafContent: AbstractComponent): ImageNode {

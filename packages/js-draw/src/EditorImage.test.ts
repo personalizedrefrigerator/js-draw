@@ -243,8 +243,11 @@ describe('EditorImage', () => {
 
 			// Create a subclass of AbstractComponent with the given positioning mode.
 			const TestComponent = class extends BaseTestComponent {
+				public positioning: ComponentSizingMode;
+
 				public constructor(bbox: Rect2) {
 					super(bbox, 'test-component');
+					this.positioning = positioning;
 				}
 				public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined): void {
 					renderMock(canvas, visibleRect);
@@ -260,7 +263,7 @@ describe('EditorImage', () => {
 					addToImageMock(image);
 				}
 				public override getSizingMode(): ComponentSizingMode {
-					return positioning;
+					return this.positioning;
 				}
 				public override isBackground(): boolean {
 					return isBackground;
@@ -279,8 +282,8 @@ describe('EditorImage', () => {
 			});
 
 			const testBBoxes = [
-				Rect2.empty,
 				Rect2.unitSquare,
+				Rect2.empty,
 			];
 
 			for (const bbox of testBBoxes) {
@@ -324,14 +327,17 @@ describe('EditorImage', () => {
 				expect(image.estimateNumElements()).toBe(1);
 
 				// getAllElements does not include backgrounds
-				if (!isBackground) {
-					// Regardless of type, should be present in allElements
-					expect(image.getAllElements()).toHaveLength(1);
-					expect(image.getAllElements()[0]).toBe(testComponent);
-				} else {
-					expect(image.getBackgroundComponents()).toHaveLength(1);
-					expect(image.getBackgroundComponents()[0]).toBe(testComponent);
-				}
+				const expectToBeOnlyElement = () => {
+					if (!isBackground) {
+						// Regardless of type, should be present in allElements
+						expect(image.getAllElements()).toHaveLength(1);
+						expect(image.getAllElements()[0]).toBe(testComponent);
+					} else {
+						expect(image.getBackgroundComponents()).toHaveLength(1);
+						expect(image.getBackgroundComponents()[0]).toBe(testComponent);
+					}
+				};
+				expectToBeOnlyElement();
 
 				renderMock.mockClear();
 
@@ -369,6 +375,26 @@ describe('EditorImage', () => {
 
 				expect(image.getAllElements()).toHaveLength(0);
 				expect(image.getBackgroundComponents()).toHaveLength(0);
+
+				// Add the element back
+				await editor.history.redo();
+				expectToBeOnlyElement();
+
+				// Change the positioning of the element
+				if (positioning === ComponentSizingMode.BoundingBox) {
+					testComponent.positioning = ComponentSizingMode.FillScreen;
+				} else {
+					testComponent.positioning = ComponentSizingMode.BoundingBox;
+				}
+
+				// Should still find the parent.
+				console.log(bbox);
+				expect(image.findParent(testComponent)).not.toBeNull();
+
+				// Remove the element -- should remove, even though positioning has changed.
+				await editor.dispatch(new Erase([ testComponent ]));
+				expect(image.estimateNumElements()).toBe(0);
+				expect(image.getAllElements()).toHaveLength(0);
 			}
 		};
 
