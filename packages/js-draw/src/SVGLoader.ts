@@ -28,7 +28,7 @@ export const svgLoaderAttributeContainerID = 'svgContainerID';
 
 // If present in the exported SVG's class list, the image will be
 // autoresized when components are added/removed.
-export const svgLoaderAutoresizeClassName = 'autoresize';
+export const svgLoaderAutoresizeClassName = 'js-draw--autoresize';
 
 // [key, value]
 export type SVGLoaderUnknownAttribute = [ string, string ];
