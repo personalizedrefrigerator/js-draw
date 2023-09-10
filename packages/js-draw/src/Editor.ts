@@ -387,6 +387,7 @@ export class Editor {
 	private registerListeners() {
 		this.handlePointerEventsFrom(this.renderingRegion);
 		this.handleKeyEventsFrom(this.renderingRegion);
+		this.handlePointerEventsFrom(this.accessibilityAnnounceArea);
 
 		this.container.addEventListener('wheel', evt => {
 			let delta = Vec3.of(evt.deltaX, evt.deltaY, evt.deltaZ);

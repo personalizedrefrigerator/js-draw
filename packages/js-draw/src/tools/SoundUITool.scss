@@ -5,6 +5,10 @@
 	overflow: hidden;    
 }
 
+.js-draw-sound-ui-toggle button {
+	margin-top: 1px;
+}
+
 .js-draw-sound-ui-toggle:focus-within, .js-draw-sound-ui-toggle.sound-ui-tool-enabled {
 	overflow: visible;
 	z-index: 5;
