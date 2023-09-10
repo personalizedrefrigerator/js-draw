@@ -388,7 +388,6 @@ describe('EditorImage', () => {
 				}
 
 				// Should still find the parent.
-				console.log(bbox);
 				expect(image.findParent(testComponent)).not.toBeNull();
 
 				// Remove the element -- should remove, even though positioning has changed.
