@@ -1247,11 +1247,14 @@ export class Editor {
 		}
 	}
 
-	// Get a data URL (e.g. as produced by `HTMLCanvasElement::toDataURL`).
-	// If `format` is not `image/png`, a PNG image URL may still be returned (as in the
-	// case of `HTMLCanvasElement::toDataURL`).
-	//
-	// The export resolution is the same as the size of the drawing canvas.
+	/**
+	 * Get a data URL (e.g. as produced by `HTMLCanvasElement::toDataURL`).
+	 * If `format` is not `image/png`, a PNG image URL may still be returned (as in the
+	 * case of `HTMLCanvasElement::toDataURL`).
+	 *
+	 * The export resolution is the same as the size of the drawing canvas, unless `outputSize`
+	 * is given.
+	 */
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png', outputSize?: Vec2): string {
 		const canvas = document.createElement('canvas');
 

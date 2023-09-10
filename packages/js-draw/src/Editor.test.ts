@@ -119,5 +119,21 @@ describe('Editor', () => {
 		expect(makeEditorWithInvalidSettings).toThrow('Minimum zoom must be lesser');
 	});
 
+	it('should not allow zooming out further than the minimum zoom', () => {
+		const editor = new Editor(document.body, {
+			renderingMode: RenderingMode.DummyRenderer,
 
+			minZoom: 0.25,
+			maxZoom: 2,
+		});
+
+		for (let i = 0; i < 10; i++) {
+			editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 's');
+			editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 's');
+		}
+
+		// Should be close-ish to the minimum, but not less than.
+		expect(editor.viewport.getScaleFactor()).toBeGreaterThanOrEqual(0.25);
+		expect(editor.viewport.getScaleFactor()).toBeLessThan(0.5);
+	});
 });

@@ -277,30 +277,33 @@ export default class PanZoom extends BaseTool {
 		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(transformUpdate)
 		);
+		return transformUpdate;
 	}
 
 	private handleOneFingerMove(pointer: Pointer) {
 		const delta = this.getCenterDelta(pointer.screenPos);
+		const transformUpdate = Mat33.translation(delta);
 		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(
-				Mat33.translation(delta)
-			)
+				transformUpdate,
+			),
 		);
 		this.updateVelocity(pointer.screenPos);
 		this.lastScreenCenter = pointer.screenPos;
+
+		return transformUpdate;
 	}
 
 	public override onPointerMove({ allPointers }: PointerEvt): void {
 		this.transform ??= Viewport.transformBy(Mat33.identity);
 
-		const lastTransform = this.transform;
+		let transformUpdate = Mat33.identity;
 		if (allPointers.length === 2) {
-			this.handleTwoFingerMove(allPointers);
+			transformUpdate = this.handleTwoFingerMove(allPointers);
 		} else if (allPointers.length === 1) {
-			this.handleOneFingerMove(allPointers[0]);
+			transformUpdate = this.handleOneFingerMove(allPointers[0]);
 		}
-		lastTransform.unapply(this.editor);
-		this.transform.apply(this.editor);
+		Viewport.transformBy(transformUpdate).apply(this.editor);
 
 		this.lastTimestamp = performance.now();
 	}
