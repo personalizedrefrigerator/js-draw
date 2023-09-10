@@ -26,17 +26,6 @@ const fixImageURLs = () => {
 	}
 };
 
-const replaceSidebarLinkLabels = () => {
-	const replacements: Record<string, string> = (window as any).sidebarReplacements ?? {};
-	const linkTexts = document.querySelectorAll('.site-menu > nav a > span') as NodeListOf<HTMLSpanElement>;
-
-	for (const linkText of linkTexts) {
-		if (linkText.innerText in replacements) {
-			linkText.innerText = replacements[linkText.innerText].replaceAll('{{version}}', __js_draw__version.number);
-		}
-	}
-};
-
 // Works around a TypeDoc bug where cross-module links don't work.
 const replaceInternalPackageToPackageLinks = () => {
 	const linksToReplace = document.querySelectorAll('a[data--module]');
@@ -73,7 +62,6 @@ const navigateBasedOnURL = () => {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
-	replaceSidebarLinkLabels();
 	fixImageURLs();
 	replaceInternalPackageToPackageLinks();
 	navigateBasedOnURL();
@@ -84,5 +72,5 @@ window.addEventListener('load', async () => {
 });
 
 (window as any).navigateTo = (packageName: string, _exportName: string) => {
-	location.href = join(basePath, packageName.replace(/[^a-zA-Z_0-9]/g, '_') + '.html');
+	location.replace(join(basePath, packageName.replace(/[^a-zA-Z_0-9]/g, '_') + '.html'));
 };

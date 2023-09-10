@@ -5,7 +5,7 @@ export const load = (app: Application) => {
 	app.options.addDeclaration({
 		name: 'sidebarReplacements',
 		type: ParameterType.Object,
-		help: 'maps sidebar link text to replacement text',
+		help: 'maps navigation text to replacement text',
 		defaultValue: {},
 	});
 
