@@ -480,6 +480,8 @@
 	.toolbar-spacedList {
 		box-sizing: border-box;
 
+		--align-items-to-x: 105px;
+
 		& > div {
 			display: flex;
 			align-items: center;
@@ -491,7 +493,7 @@
 			// Align inputs (assumes labels come first)
 			& > label {
 				padding-right: 35px;
-				min-width: 105px;
+				min-width: var(--align-items-to-x);
 				flex-shrink: 1;
 				box-sizing: border-box;
 			}
@@ -499,6 +501,7 @@
 			& > input[type="checkbox"] {
 				width: 20px;
 				height: 20px;
+				margin-left: 0;
 			}
 
 			// If checkboxes have flex-grow, the checkbox region can become centered.

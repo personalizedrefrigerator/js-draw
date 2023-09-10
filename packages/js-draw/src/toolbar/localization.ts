@@ -49,6 +49,7 @@ export interface ToolbarLocalization {
 	imageWidthOption: string;
 	imageHeightOption: string;
 	useGridOption: string;
+	enableAutoresizeOption: string;
 	toggleOverflow: string,
 
 	about: string;
@@ -105,6 +106,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	imageWidthOption: 'Width',
 	imageHeightOption: 'Height',
 	useGridOption: 'Grid',
+	enableAutoresizeOption: 'Auto-resize',
 	toggleOverflow: 'More',
 	about: 'About',
 	inputStabilization: 'Input stabilization',

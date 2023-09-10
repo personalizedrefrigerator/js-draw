@@ -132,53 +132,69 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		);
 
 		// Background color input
-		const backgroundColorRow = document.createElement('div');
-		const backgroundColorLabel = document.createElement('label');
+		const makeBackgroundColorInput = () => {
+			const backgroundColorRow = document.createElement('div');
+			const backgroundColorLabel = document.createElement('label');
 
-		backgroundColorLabel.innerText = this.localizationTable.backgroundColor;
+			backgroundColorLabel.innerText = this.localizationTable.backgroundColor;
 
-		const {
-			input: colorInput, container: backgroundColorInputContainer, setValue: setBgColorInputValue
-		} = makeColorInput(this.editor, color => {
-			if (!color.eq(this.getBackgroundColor())) {
-				this.setBackgroundColor(color);
-			}
-		});
+			const {
+				input: colorInput, container: backgroundColorInputContainer, setValue: setBgColorInputValue
+			} = makeColorInput(this.editor, color => {
+				if (!color.eq(this.getBackgroundColor())) {
+					this.setBackgroundColor(color);
+				}
+			});
 
-		colorInput.id = `${toolbarCSSPrefix}docPropertiesColorInput-${DocumentPropertiesWidget.idCounter++}`;
-		backgroundColorLabel.htmlFor = colorInput.id;
+			colorInput.id = `${toolbarCSSPrefix}docPropertiesColorInput-${DocumentPropertiesWidget.idCounter++}`;
+			backgroundColorLabel.htmlFor = colorInput.id;
 
-		backgroundColorRow.replaceChildren(backgroundColorLabel, backgroundColorInputContainer);
+			backgroundColorRow.replaceChildren(backgroundColorLabel, backgroundColorInputContainer);
+			return { setBgColorInputValue, backgroundColorRow };
+		};
+		const { backgroundColorRow, setBgColorInputValue } = makeBackgroundColorInput();
 
-		// Background style selector
-		const useGridRow = document.createElement('div');
-		const useGridLabel = document.createElement('label');
-		const useGridCheckbox = document.createElement('input');
+		const makeCheckboxRow = (labelText: string, onChange: (newValue: boolean)=>void) => {
+			const rowContainer = document.createElement('div');
+			const labelElement = document.createElement('label');
+			const checkboxElement = document.createElement('input');
 
-		useGridCheckbox.id = `${toolbarCSSPrefix}docPropertiesUseGridCheckbox-${DocumentPropertiesWidget.idCounter++}`;
-		useGridLabel.htmlFor = useGridCheckbox.id;
+			checkboxElement.id = `${toolbarCSSPrefix}docPropertiesCheckbox-${DocumentPropertiesWidget.idCounter++}`;
+			labelElement.htmlFor = checkboxElement.id;
 
-		useGridCheckbox.type = 'checkbox';
-		useGridLabel.innerText = this.localizationTable.useGridOption;
+			checkboxElement.type = 'checkbox';
+			labelElement.innerText = labelText;
 
-		useGridCheckbox.oninput = () => {
-			const prevBackgroundType = this.getBackgroundType();
-			const wasGrid = prevBackgroundType === BackgroundType.Grid;
+			checkboxElement.oninput = () => {
+				onChange(checkboxElement.checked);
+			};
 
-			if (wasGrid === useGridCheckbox.checked) {
-				// Already the requested background type.
-				return;
-			}
+			rowContainer.replaceChildren(labelElement, checkboxElement);
 
-			let newBackgroundType = BackgroundType.SolidColor;
-			if (useGridCheckbox.checked) {
-				newBackgroundType = BackgroundType.Grid;
-			}
-
-			this.editor.dispatch(this.setBackgroundType(newBackgroundType));
+			return { container: rowContainer, checkbox: checkboxElement };
 		};
 
-		useGridRow.replaceChildren(useGridLabel, useGridCheckbox);
+		// Background style selector
+		const { container: useGridRow, checkbox: useGridCheckbox } = makeCheckboxRow(
+			this.localizationTable.useGridOption,
+			(checked) => {
+				const prevBackgroundType = this.getBackgroundType();
+				const wasGrid = prevBackgroundType === BackgroundType.Grid;
+
+				if (wasGrid === checked) {
+					// Already the requested background type.
+					return;
+				}
+
+				let newBackgroundType = BackgroundType.SolidColor;
+				if (checked) {
+					newBackgroundType = BackgroundType.Grid;
+				}
+
+				this.editor.dispatch(this.setBackgroundType(newBackgroundType));
+			}
+		);
+
 
 		// Adds a width/height input
 		const addDimensionRow = (labelContent: string, onChange: (value: number)=>void) => {
@@ -195,17 +211,26 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			input.style.flexGrow = '2';
 			input.style.width = '25px';
 
-			row.style.display = 'flex';
-
 			input.oninput = () => {
 				onChange(parseFloat(input.value));
 			};
 
+			row.classList.add('js-draw-size-input-row');
 			row.replaceChildren(label, input);
 
 			return {
 				setValue: (value: number) => {
 					input.value = value.toString();
+				},
+				setIsAutomaticSize: (automatic: boolean) => {
+					input.disabled = automatic;
+
+					const automaticSizeClass = 'size-input-row--automatic-size';
+					if (automatic) {
+						row.classList.add(automaticSizeClass);
+					} else {
+						row.classList.remove(automaticSizeClass);
+					}
 				},
 				element: row,
 			};
@@ -217,6 +242,15 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		const imageHeightRow = addDimensionRow(this.localizationTable.imageHeightOption, (value: number) => {
 			this.updateImportExportRectSize({ height: value });
 		});
+
+		// The autoresize checkbox
+		const { container: auroresizeRow, checkbox: autoresizeCheckbox } = makeCheckboxRow(
+			this.localizationTable.enableAutoresizeOption,
+			(checked) => {
+				const image = this.editor.image;
+				this.editor.dispatch(image.setAutoresizeEnabled(checked));
+			},
+		);
 
 		// The "About..." button
 		const aboutButton = document.createElement('button');
@@ -231,9 +265,15 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		this.updateDropdownContent = () => {
 			setBgColorInputValue(this.getBackgroundColor());
 
+			const autoresize = this.editor.image.getAutoresizeEnabled();
 			const importExportRect = this.editor.getImportExportRect();
+
 			imageWidthRow.setValue(importExportRect.width);
 			imageHeightRow.setValue(importExportRect.height);
+			autoresizeCheckbox.checked = autoresize;
+
+			imageWidthRow.setIsAutomaticSize(autoresize);
+			imageHeightRow.setIsAutomaticSize(autoresize);
 
 			useGridCheckbox.checked = this.getBackgroundType() === BackgroundType.Grid;
 		};
@@ -241,7 +281,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 
 		container.replaceChildren(
-			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element, aboutButton
+			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element, auroresizeRow, aboutButton,
 		);
 		dropdown.replaceChildren(container);
 
