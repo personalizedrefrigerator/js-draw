@@ -113,14 +113,14 @@ export default abstract class AbstractRenderer {
 	public drawPath(path: RenderablePathSpec) {
 		// If we're being called outside of an object,
 		// we can't delay rendering
-		if (this.objectLevel === 0) {
+		if (this.objectLevel === 0 || this.currentPaths === null) {
 			this.currentPaths = [path];
 			this.flushPath();
 			this.currentPaths = null;
 		} else {
 			// Otherwise, don't render paths all at once. This prevents faint lines between
 			// segments of the same stroke from being visible.
-			this.currentPaths!.push(path);
+			this.currentPaths.push(path);
 		}
 	}
 

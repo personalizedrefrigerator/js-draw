@@ -95,7 +95,13 @@ export default class EditorImage {
 	/** @internal */
 	public renderWithCache(screenRenderer: AbstractRenderer, cache: RenderingCache, viewport: Viewport) {
 		this.background.render(screenRenderer, viewport.visibleRect);
-		cache.render(screenRenderer, this.root, viewport);
+
+		// If in debug mode, avoid rendering with cache to show additional debug information
+		if (!debugMode) {
+			cache.render(screenRenderer, this.root, viewport);
+		} else {
+			this.root.render(screenRenderer, viewport.visibleRect);
+		}
 	}
 
 	/**
@@ -760,10 +766,6 @@ export class ImageNode {
 	}
 
 	public render(renderer: AbstractRenderer, visibleRect?: Rect2) {
-		if (debugMode && visibleRect) {
-			this.renderDebugBoundingBoxes(renderer, visibleRect);
-		}
-
 		let leaves;
 		if (visibleRect) {
 			leaves = this.getLeavesIntersectingRegion(visibleRect, rect => renderer.isTooSmallToRender(rect));
@@ -776,28 +778,37 @@ export class ImageNode {
 			// Leaves by definition have content
 			leaf.getContent()!.render(renderer, visibleRect);
 		}
+
+		// Show debug information
+		if (debugMode && visibleRect) {
+			this.renderDebugBoundingBoxes(renderer, visibleRect);
+		}
 	}
 
 	// Debug only: Shows bounding boxes of this and all children.
-	public renderDebugBoundingBoxes(renderer: AbstractRenderer, visibleRect: Rect2) {
+	public renderDebugBoundingBoxes(renderer: AbstractRenderer, visibleRect: Rect2, depth: number = 0) {
 		const bbox = this.getBBox();
 		const pixelSize = 1 / (renderer.getSizeOfCanvasPixelOnScreen() || 1);
 
-		if (bbox.maxDimension < 3 * pixelSize || !bbox.intersects(visibleRect) || this.content) {
+		if (bbox.maxDimension < 3 * pixelSize || !bbox.intersects(visibleRect)) {
 			return;
 		}
 
-		for (const child of this.children) {
-			child.renderDebugBoundingBoxes(renderer, visibleRect);
-		}
-
+		// Render debug information for this
 		renderer.startObject(bbox);
-		// Different style if a leaf
-		const fill = this.content ? Color4.ofRGBA(1, 0, 1, 0.4) : Color4.ofRGBA(0, 1, 0, 0.6);
-		const lineWidth = 8 * pixelSize;
+
+		// Different styling for leaf nodes
+		const isLeaf = !!this.content;
+		const fill = isLeaf ? Color4.ofRGBA(1, 0, 1, 0.4) : Color4.ofRGBA(0, 1, Math.sin(depth), 0.6);
+		const lineWidth = isLeaf ? 1 * pixelSize : 2 * pixelSize;
 
 		renderer.drawRect(bbox.intersection(visibleRect)!, lineWidth, { fill });
 		renderer.endObject();
+
+		// Render debug information for children
+		for (const child of this.children) {
+			child.renderDebugBoundingBoxes(renderer, visibleRect, depth + 1);
+		}
 	}
 }
 
