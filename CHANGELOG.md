@@ -1,4 +1,16 @@
 
+# 1.3.0
+ * Features
+   * Adds support for images with full-screen backgrounds and no border (see `EditorImage.setAutoresizeEnabled`). These drawings automatically resize to fit what has been drawn when saved.
+   * Scrollbars within the editor. These scrollbars are currently read-only.
+ * Bug fixes
+   * Fix ctrl+scroll zoom rate is significantly faster than pinch zooming.
+   * Fix zoom level jumping when attempting to zoom outside of zoom limits with a touchscreen.
+   * Fix elements intersecting the selection rectangle not recognized as selected in some cases.
+   * Fix context menu sometimes shown when long-pressing toplevel buttons in the sidebar toolbar (rather than showing the button's tooltip).
+ * Other changes
+   * Slightly faster loading of large SVGs.
+
 # 1.2.2
  * API fixes
    * Exports `pathToRenderable`, `pathFromRenderable`, and `pathVisualEquivalent`. These functions were renamed in version 1.0.0 and the new versions were not exported.
