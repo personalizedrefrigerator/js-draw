@@ -21,7 +21,6 @@ export class Rect2 extends Abstract2DShape {
 	// topLeft assumes up is -y
 	public readonly topLeft: Point2;
 	public readonly size: Vec2;
-	public readonly bottomRight: Point2;
 	public readonly area: number;
 
 	public constructor(
@@ -45,7 +44,6 @@ export class Rect2 extends Abstract2DShape {
 		// Precompute/store vector forms.
 		this.topLeft = Vec2.of(this.x, this.y);
 		this.size = Vec2.of(this.w, this.h);
-		this.bottomRight = this.topLeft.plus(this.size);
 		this.area = this.w * this.h;
 	}
 
@@ -65,8 +63,8 @@ export class Rect2 extends Abstract2DShape {
 
 	public containsRect(other: Rect2): boolean {
 		return this.x <= other.x && this.y <= other.y
-				&& this.bottomRight.x >= other.bottomRight.x
-				&& this.bottomRight.y >= other.bottomRight.y;
+				&& this.x + this.w >= other.x + other.w
+				&& this.y + this.h >= other.y + other.h;
 	}
 
 	public intersects(other: Rect2): boolean {
@@ -205,6 +203,10 @@ export class Rect2 extends Abstract2DShape {
 		return Math.max(this.w, this.h);
 	}
 
+	public get bottomRight() {
+		return this.topLeft.plus(this.size);
+	}
+
 	public get topRight() {
 		return this.bottomRight.plus(Vec2.of(0, -this.h));
 	}
@@ -326,17 +328,17 @@ export class Rect2 extends Abstract2DShape {
 		}
 
 		const firstRect = rects[0];
-		let minX: number = firstRect.topLeft.x;
-		let minY: number = firstRect.topLeft.y;
-		let maxX: number = firstRect.bottomRight.x;
-		let maxY: number = firstRect.bottomRight.y;
+		let minX: number = firstRect.x;
+		let minY: number = firstRect.y;
+		let maxX: number = firstRect.x + firstRect.w;
+		let maxY: number = firstRect.y + firstRect.h;
 
 		for (let i = 1; i < rects.length; i++) {
 			const rect = rects[i];
-			minX = Math.min(minX, rect.topLeft.x);
-			minY = Math.min(minY, rect.topLeft.y);
-			maxX = Math.max(maxX, rect.bottomRight.x);
-			maxY = Math.max(maxY, rect.bottomRight.y);
+			minX = Math.min(minX, rect.x);
+			minY = Math.min(minY, rect.y);
+			maxX = Math.max(maxX, rect.x + rect.w);
+			maxY = Math.max(maxY, rect.y + rect.h);
 		}
 
 		return new Rect2(

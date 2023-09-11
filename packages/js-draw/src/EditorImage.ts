@@ -2,7 +2,7 @@ import Editor from './Editor';
 import AbstractRenderer from './rendering/renderers/AbstractRenderer';
 import Viewport from './Viewport';
 import AbstractComponent, { ComponentSizingMode } from './components/AbstractComponent';
-import { Rect2, Vec2, Mat33, Mat33Array } from '@js-draw/math';
+import { Rect2, Vec2, Mat33, Mat33Array, Color4 } from '@js-draw/math';
 import { EditorLocalization } from './localization';
 import RenderingCache from './rendering/caching/RenderingCache';
 import SerializableCommand from './commands/SerializableCommand';
@@ -21,6 +21,8 @@ export enum EditorImageEventType {
 }
 
 export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image: EditorImage }>;
+
+const debugMode = false;
 
 // Handles lookup/storage of elements in the image
 export default class EditorImage {
@@ -670,8 +672,19 @@ export class ImageNode {
 		}
 
 		if (bubbleUp && !oldBBox.eq(this.bbox)) {
-			this.parent?.recomputeBBox(true);
+			if (!this.bbox.containsRect(oldBBox)) {
+				this.parent?.unionBBoxWith(this.bbox);
+			} else {
+				this.parent?.recomputeBBox(true);
+			}
 		}
+	}
+
+	// Grows this' bounding box to also include `other`.
+	// Always bubbles up.
+	private unionBBoxWith(other: Rect2) {
+		this.bbox = this.bbox.union(other);
+		this.parent?.unionBBoxWith(other);
 	}
 
 	private updateParents(recursive: boolean = false) {
@@ -747,6 +760,10 @@ export class ImageNode {
 	}
 
 	public render(renderer: AbstractRenderer, visibleRect?: Rect2) {
+		if (debugMode && visibleRect) {
+			this.renderDebugBoundingBoxes(renderer, visibleRect);
+		}
+
 		let leaves;
 		if (visibleRect) {
 			leaves = this.getLeavesIntersectingRegion(visibleRect, rect => renderer.isTooSmallToRender(rect));
@@ -759,6 +776,28 @@ export class ImageNode {
 			// Leaves by definition have content
 			leaf.getContent()!.render(renderer, visibleRect);
 		}
+	}
+
+	// Debug only: Shows bounding boxes of this and all children.
+	public renderDebugBoundingBoxes(renderer: AbstractRenderer, visibleRect: Rect2) {
+		const bbox = this.getBBox();
+		const pixelSize = 1 / (renderer.getSizeOfCanvasPixelOnScreen() || 1);
+
+		if (bbox.maxDimension < 3 * pixelSize || !bbox.intersects(visibleRect) || this.content) {
+			return;
+		}
+
+		for (const child of this.children) {
+			child.renderDebugBoundingBoxes(renderer, visibleRect);
+		}
+
+		renderer.startObject(bbox);
+		// Different style if a leaf
+		const fill = this.content ? Color4.ofRGBA(1, 0, 1, 0.4) : Color4.ofRGBA(0, 1, 0, 0.6);
+		const lineWidth = 8 * pixelSize;
+
+		renderer.drawRect(bbox.intersection(visibleRect)!, lineWidth, { fill });
+		renderer.endObject();
 	}
 }
 
