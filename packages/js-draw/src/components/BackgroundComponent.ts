@@ -185,7 +185,9 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 
 	private generateGridPath(visibleRect?: Rect2) {
 		const contentBBox = this.getFullBoundingBox(visibleRect);
-		const targetRect = visibleRect?.grownBy(this.gridStrokeWidth)?.intersection(contentBBox) ?? contentBBox;
+
+		// .grownBy acts on all sides, so we need only grow by strokeWidth / 2 (1 * the stroke radius)
+		const targetRect = (visibleRect?.intersection(contentBBox) ?? contentBBox).grownBy(this.gridStrokeWidth / 2);
 
 		const roundDownToGrid = (coord: number) => Math.floor(coord / this.gridSize) * this.gridSize;
 		const roundUpToGrid = (coord: number) => Math.ceil(coord / this.gridSize) * this.gridSize;
