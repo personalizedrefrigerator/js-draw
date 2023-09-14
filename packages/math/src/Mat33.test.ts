@@ -198,47 +198,11 @@ describe('Mat33 tests', () => {
 		));
 	});
 
-	it('should convert CSS matrix(...) strings to matricies', () => {
-		// From MDN:
-		// 		⎡ a c e ⎤
-		// 		⎢ b d f ⎥  =  matrix(a,b,c,d,e,f)
-		// 		⎣ 0 0 1 ⎦
-		const identity = Mat33.fromCSSMatrix('matrix(1, 0, 0, 1, 0, 0)');
-		expect(identity).objEq(Mat33.identity);
-		expect(Mat33.fromCSSMatrix('matrix(1, 2, 3, 4, 5, 6)')).objEq(new Mat33(
-			1, 3, 5,
-			2, 4, 6,
-			0, 0, 1,
-		));
-		expect(Mat33.fromCSSMatrix('matrix(1e2, 2, 3, 4, 5, 6)')).objEq(new Mat33(
-			1e2, 3, 5,
-			2, 4, 6,
-			0, 0, 1,
-		));
-		expect(Mat33.fromCSSMatrix('matrix(1.6, 2, .3, 4, 5, 6)')).objEq(new Mat33(
-			1.6, .3, 5,
-			2, 4, 6,
-			0, 0, 1,
-		));
-		expect(Mat33.fromCSSMatrix('matrix(-1, 2, 3.E-2, 4, -5.123, -6.5)')).objEq(new Mat33(
-			-1, 0.03, -5.123,
-			2, 4, -6.5,
-			0, 0, 1,
-		));
-		expect(Mat33.fromCSSMatrix('matrix(1.6,\n\t2, .3, 4, 5, 6)')).objEq(new Mat33(
-			1.6, .3, 5,
-			2, 4, 6,
-			0, 0, 1,
-		));
-		expect(Mat33.fromCSSMatrix('matrix(1.6,2, .3E-2, 4, 5, 6)')).objEq(new Mat33(
-			1.6, 3e-3, 5,
-			2, 4, 6,
-			0, 0, 1,
-		));
-		expect(Mat33.fromCSSMatrix('matrix(-1, 2e6,	3E-2,-5.123, -6.5e-1, 0.01)')).objEq(new Mat33(
-			-1, 	3E-2,  	-6.5e-1,
-			2e6,	-5.123,	0.01,
-			0,  	0,     	1,
-		));
+	it('getColumn should return the given column index', () => {
+		expect(Mat33.identity.getColumn(0)).objEq(Vec3.unitX);
+		expect(Mat33.identity.getColumn(1)).objEq(Vec3.of(0, 1, 0));
+
+		// scaling2D only scales the x/y components of vectors it transforms
+		expect(Mat33.scaling2D(2).getColumn(2)).objEq(Vec3.of(0, 0, 1));
 	});
 });

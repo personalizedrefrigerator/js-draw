@@ -1,5 +1,6 @@
 import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
+import { toRoundedString } from './rounding';
 
 export type Mat33Array = [
 	number, number, number,
@@ -335,9 +336,27 @@ export class Mat33 {
 		return Math.hypot(this.a1, this.a2);
 	}
 
+	/** Returns the `idx`-th column (`idx` is 0-indexed). */
+	public getColumn(idx: number) {
+		return Vec3.of(
+			this.rows[0].at(idx),
+			this.rows[1].at(idx),
+			this.rows[2].at(idx),
+		);
+	}
+
 	/**
 	 * Constructs a 3x3 translation matrix (for translating `Vec2`s) using
 	 * **transformVec2**.
+	 *
+	 * Creates a matrix in the form
+	 * $$
+	 * 	\begin{pmatrix}
+	 * 		1 & 0 & {\tt amount.x}\\
+	 * 		0 & 1 & {\tt amount.y}\\
+	 * 		0 & 0 & 1
+	 * 	\end{pmatrix}
+	 * $$
 	 */
 	public static translation(amount: Vec2): Mat33 {
 		// When transforming Vec2s by a 3x3 matrix, we give the input
@@ -392,9 +411,138 @@ export class Mat33 {
 		return result.rightMul(Mat33.translation(center.times(-1)));
 	}
 
-	/** @see {@link fromCSSMatrix} */
+	/**
+	 * **Note**: Assumes `this.c1 = this.c2 = 0` and `this.c3 = 1`.
+	 *
+	 * @see {@link fromCSSMatrix} and {@link toSafeCSSTransformList}
+	 */
 	public toCSSMatrix(): string {
 		return `matrix(${this.a1},${this.b1},${this.a2},${this.b2},${this.a3},${this.b3})`;
+	}
+
+	/**
+	 * Converts this matrix into a list of CSS transforms that attempt to preserve
+	 * this matrix's translation.
+	 *
+	 * In Chrome/Firefox, translation attributes only support 6 digits. This works around
+	 * that by expanding this matrix into the product of several CSS transforms.
+	 *
+	 * **Note**: Assumes `this.c1 = this.c2 = 0` and `this.c3 = 1`.
+	 *
+	 * @beta May change between minor releases.
+	 */
+	public toSafeCSSTransformList(): string {
+		// Check whether it's safe to return just the CSS matrix
+		const translation = Vec2.of(this.a3, this.b3);
+		const translationRoundedX = toRoundedString(translation.x);
+		const translationRoundedY = toRoundedString(translation.y);
+
+		const nonDigitsRegex = /[^0-9]+/g;
+		const translationXDigits = translationRoundedX.replace(nonDigitsRegex, '').length;
+		const translationYDigits = translationRoundedY.replace(nonDigitsRegex, '').length;
+
+		// Is it safe to just return the default CSS matrix?
+		if (translationXDigits <= 5 && translationYDigits <= 5) {
+			return this.toCSSMatrix();
+		}
+
+		// Remove the last column (the translation column)
+		const transform = new Mat33(
+			this.a1, this.a2, 0,
+			this.b1, this.b2, 0,
+			0, 0, 1,
+		);
+
+		const transforms: string[] = [];
+		let lastScale: Vec2|null = null;
+
+		const addTranslate = (translation: Vec2) => {
+			lastScale = null;
+			if (!translation.eq(Vec2.zero)) {
+				transforms.push(`translate(${toRoundedString(translation.x)}px, ${toRoundedString(translation.y)}px)`);
+			}
+		};
+
+		const addScale = (scale: Vec2) => {
+			// Merge with the last scale
+			if (lastScale) {
+				const previousCommand = transforms.pop();
+				console.assert(previousCommand!.startsWith('scale'), 'Invalid state: Merging scale commands');
+
+				scale = lastScale.scale(scale);
+			}
+
+			if (scale.x === scale.y) {
+				transforms.push(`scale(${scale.x})`);
+			} else {
+				transforms.push(`scale(${scale.x}, ${scale.y})`);
+			}
+			lastScale = scale;
+		};
+
+		const digitsPreDecimalCount = (numberString: string) => {
+			let decimalIndex = numberString.indexOf('.');
+			if (decimalIndex === -1) {
+				decimalIndex = numberString.length;
+			}
+
+			return numberString.substring(0, decimalIndex).replace(nonDigitsRegex, '').length;
+		};
+
+		const getShift = (numberString: string) => {
+			const preDecimal = digitsPreDecimalCount(translationRoundedX);
+			const postDecimal = (numberString.match(/[.](\d*)/) ?? [''])[0].length;
+			return Math.floor((preDecimal - postDecimal) / 2);
+		};
+
+		const addShiftedTranslate = (translate: Vec2) => {
+			const xString = toRoundedString(translate.x);
+			const yString = toRoundedString(translate.y);
+
+			let xShift = -getShift(xString);
+			let yShift = -getShift(yString);
+
+			const maxShiftMagnitude = 4;
+			xShift = Math.min(Math.abs(xShift), maxShiftMagnitude) * Math.sign(xShift);
+			yShift = Math.min(Math.abs(yShift), maxShiftMagnitude) * Math.sign(yShift);
+
+			const shift = Vec2.of(Math.pow(10, xShift), Math.pow(10, yShift));
+			const invShift = Vec2.of(Math.pow(10, -xShift), Math.pow(10, -yShift));
+			addScale(invShift);
+			addTranslate(translate.scale(shift));
+			addScale(shift);
+		};
+
+		// Arguments can be negative to left shift, else right shifts.
+		const shiftBy = (xDigits: number, yDigits: number) => {
+			const xScale = Math.pow(10, xDigits);
+			const yScale = Math.pow(10, yDigits);
+
+			// Separate translation into two translate() calls that act at
+			// different scale levels. Together, these two translations form the
+			// original
+			const largerTranslate = Vec2.of(
+				// Round to xDigits
+				Math.floor(translation.x / xScale) * xScale,
+
+				// Round to yDigits
+				Math.floor(translation.y / yScale) * yScale,
+			);
+
+			// The fractional part
+			const smallerTranslate = translation.minus(largerTranslate);
+
+			addShiftedTranslate(largerTranslate);
+			addShiftedTranslate(smallerTranslate);
+		};
+
+		shiftBy(getShift(translationRoundedX), getShift(translationRoundedY));
+
+		if (!transform.eq(Mat33.identity)) {
+			transforms.push(transform.toCSSMatrix());
+		}
+
+		return transforms.join(' ');
 	}
 
 	/**
@@ -412,39 +560,118 @@ export class Mat33 {
 			return Mat33.identity;
 		}
 
-		const numberExp = '([-]?\\d*(?:\\.\\d*)?(?:[eE][-]?\\d+)?)';
-		const numberSepExp = '[, \\t\\n]';
-		const regExpSource = `^\\s*matrix\\s*\\(${
-			[
-				// According to MDN, matrix(a,b,c,d,e,f) has form:
-				// 		⎡ a c e ⎤
-				// 		⎢ b d f ⎥
-				// 		⎣ 0 0 1 ⎦
-				numberExp, numberExp, numberExp, // a, c, e
-				numberExp, numberExp, numberExp, // b, d, f
-			].join(`${numberSepExp}+`)
-		}${numberSepExp}*\\)\\s*$`;
-		const matrixExp = new RegExp(regExpSource, 'i');
-		const match = matrixExp.exec(cssString);
+		const parseArguments = (argumentString: string) => {
+			return argumentString.split(/[, \t\n]+/g).map(argString => {
+				let isPercentage = false;
+				if (argString.endsWith('%')) {
+					isPercentage = true;
+					argString = argString.substring(0, argString.length - 1);
+				}
 
-		if (!match) {
-			throw new Error(`Unsupported transformation: ${cssString}`);
+				// Remove trailing px units.
+				argString = argString.replace(/px$/ig, '');
+
+				const numberExp = /^[-]?\d*(?:\.\d*)?(?:[eE][-]?\d+)?$/i;
+
+				if (!numberExp.exec(argString)) {
+					throw new Error(
+						`All arguments to transform functions must be numeric (state: ${
+							JSON.stringify({
+								currentArgument: argString,
+								allArguments: argumentString,
+							})
+						})`
+					);
+				}
+
+				let argNumber = parseFloat(argString);
+
+				if (isPercentage) {
+					argNumber /= 100;
+				}
+
+				return argNumber;
+			});
+		};
+
+
+		const keywordToAction = {
+			matrix: (matrixData: number[]) => {
+				if (matrixData.length !== 6) {
+					throw new Error(`Invalid matrix argument: ${matrixData}. Must have length 6`);
+				}
+
+				const a = matrixData[0];
+				const b = matrixData[1];
+				const c = matrixData[2];
+				const d = matrixData[3];
+				const e = matrixData[4];
+				const f = matrixData[5];
+
+				const transform = new Mat33(
+					a, c, e,
+					b, d, f,
+					0, 0, 1
+				);
+				return transform;
+			},
+
+			scale: (scaleArgs: number[]) => {
+				let scaleX, scaleY;
+				if (scaleArgs.length === 1) {
+					scaleX = scaleArgs[0];
+					scaleY = scaleArgs[0];
+				} else if (scaleArgs.length === 2) {
+					scaleX = scaleArgs[0];
+					scaleY = scaleArgs[1];
+				} else {
+					throw new Error(`The scale() function only supports two arguments. Given: ${scaleArgs}`);
+				}
+
+				return Mat33.scaling2D(Vec2.of(scaleX, scaleY));
+			},
+
+			translate: (translateArgs: number[]) => {
+				let translateX = 0;
+				let translateY = 0;
+
+				if (translateArgs.length === 1) {
+					// If no y translation is given, assume 0.
+					translateX = translateArgs[0];
+				} else if (translateArgs.length === 2) {
+					translateX = translateArgs[0];
+					translateY = translateArgs[1];
+				} else {
+					throw new Error(`The translate() function requires either 1 or 2 arguments. Given ${translateArgs}`);
+				}
+
+				return Mat33.translation(Vec2.of(translateX, translateY));
+			},
+		};
+
+		// A command (\w+)
+		// followed by a set of arguments ([ \t\n0-9eE.,\-%]+)
+		const partRegex = /\s*(\w+)\s*\(([^)]*)\)/ig;
+		let match;
+		let matrix: Mat33|null = null;
+
+		while ((match = partRegex.exec(cssString)) !== null) {
+			const action = match[1].toLowerCase();
+			if (!(action in keywordToAction)) {
+				throw new Error(`Unsupported CSS transform action: ${action}`);
+			}
+
+			const args = parseArguments(match[2]);
+			const currentMatrix = keywordToAction[action as keyof typeof keywordToAction](args);
+
+			if (!matrix) {
+				matrix = currentMatrix;
+			} else {
+				matrix = matrix.rightMul(currentMatrix);
+			}
 		}
 
-		const matrixData = match.slice(1).map(entry => parseFloat(entry));
-		const a = matrixData[0];
-		const b = matrixData[1];
-		const c = matrixData[2];
-		const d = matrixData[3];
-		const e = matrixData[4];
-		const f = matrixData[5];
-
-		const transform = new Mat33(
-			a, c, e,
-			b, d, f,
-			0, 0, 1
-		);
-		return transform;
+		return matrix ?? Mat33.identity;
 	}
 }
 export default Mat33;

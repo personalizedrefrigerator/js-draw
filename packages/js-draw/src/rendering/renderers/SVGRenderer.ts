@@ -160,11 +160,8 @@ export default class SVGRenderer extends AbstractRenderer {
 		}
 
 		if (!transform.eq(Mat33.identity)) {
-			elem.style.transform = `matrix(
-				${transform.a1}, ${transform.b1},
-				${transform.a2}, ${transform.b2},
-				${transform.a3}, ${transform.b3}
-			)`;
+			elem.style.transform = transform.toSafeCSSTransformList();
+			console.log('transform', elem.style.transform, '\n from', transform.toSafeCSSTransformList());
 		} else {
 			elem.style.transform = '';
 		}

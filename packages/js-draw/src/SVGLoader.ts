@@ -304,7 +304,9 @@ export default class SVGLoader implements ImageLoader {
 		let transform;
 		try {
 			transform = Mat33.fromCSSMatrix(elem.style.transform);
+			console.log(elem.tagName, 'from', elem.style.transform);
 		} catch(_e) {
+			console.warn(_e);
 			transform = Mat33.fromCSSMatrix(transformProperty);
 		}
 
