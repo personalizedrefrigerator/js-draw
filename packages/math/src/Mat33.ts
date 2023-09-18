@@ -1,6 +1,5 @@
 import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
-import { toRoundedString } from './rounding';
 
 export type Mat33Array = [
 	number, number, number,
