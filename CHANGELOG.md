@@ -1,4 +1,9 @@
 
+# 1.3.1
+ * Bug fixes
+    * Fix grid lines disappearing when zooming (was only an issue whith autoresize enabled)
+    * Fix very small image/text elements moving on save/reload
+
 # 1.3.0
  * Features
    * Adds support for images with full-screen backgrounds and no border (see `EditorImage.setAutoresizeEnabled`). These drawings automatically resize to fit what has been drawn when saved.
