@@ -291,32 +291,46 @@ export default class SVGLoader implements ImageLoader {
 	// If given, 'supportedAttrs' will have x, y, etc. attributes that were used in computing the transform added to it,
 	// to prevent storing duplicate transform information when saving the component.
 	private getTransform(elem: SVGElement, supportedAttrs?: string[], computedStyles?: CSSStyleDeclaration): Mat33 {
-		computedStyles ??= window.getComputedStyle(elem);
-
-		let transformProperty = computedStyles.transform;
-		if (transformProperty === '' || transformProperty === 'none') {
-			transformProperty = elem.style.transform || 'none';
-		}
-
-		// Prefer the actual .style.transform
-		// to the computed stylesheet -- in some browsers, the computedStyles version
-		// can have lower precision.
+		// If possible, load the js-draw specific transform attribute
+		const highpTransformAttribute = 'data-highp-transform';
+		const rawTransformData = elem.getAttribute(highpTransformAttribute);
 		let transform;
-		try {
-			transform = Mat33.fromCSSMatrix(elem.style.transform);
-		} catch(_e) {
-			console.warn('matrix parse error', _e);
-			transform = Mat33.fromCSSMatrix(transformProperty);
+		if (rawTransformData) {
+			try {
+				transform = Mat33.fromCSSMatrix(rawTransformData);
+				supportedAttrs?.push(highpTransformAttribute);
+			} catch(e) {
+				console.warn(`Unable to parse raw transform data, ${rawTransformData}. Falling back to CSS data.`);
+			}
 		}
 
-		const elemX = elem.getAttribute('x');
-		const elemY = elem.getAttribute('y');
-		if (elemX || elemY) {
-			const x = parseFloat(elemX ?? '0');
-			const y = parseFloat(elemY ?? '0');
-			if (!isNaN(x) && !isNaN(y)) {
-				supportedAttrs?.push('x', 'y');
-				transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
+		if (!transform) {
+			computedStyles ??= window.getComputedStyle(elem);
+
+			let transformProperty = computedStyles.transform;
+			if (transformProperty === '' || transformProperty === 'none') {
+				transformProperty = elem.style.transform || 'none';
+			}
+
+			// Prefer the actual .style.transform
+			// to the computed stylesheet -- in some browsers, the computedStyles version
+			// can have lower precision.
+			try {
+				transform = Mat33.fromCSSMatrix(elem.style.transform);
+			} catch(_e) {
+				console.warn('matrix parse error', _e);
+				transform = Mat33.fromCSSMatrix(transformProperty);
+			}
+
+			const elemX = elem.getAttribute('x');
+			const elemY = elem.getAttribute('y');
+			if (elemX || elemY) {
+				const x = parseFloat(elemX ?? '0');
+				const y = parseFloat(elemY ?? '0');
+				if (!isNaN(x) && !isNaN(y)) {
+					supportedAttrs?.push('x', 'y');
+					transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
+				}
 			}
 		}
 

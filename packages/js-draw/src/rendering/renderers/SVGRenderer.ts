@@ -151,23 +151,18 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	// Apply [elemTransform] to [elem]. Uses both a `matrix` and `.x`, `.y` properties if `setXY` is true.
 	// Otherwise, just uses a `matrix`.
-	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false, setXY: boolean = true) {
-		let transform = !inCanvasSpace ? this.getCanvasToScreenTransform().rightMul(elemTransform) : elemTransform;
-		const translation = transform.transformVec2(Vec2.zero);
-
-		if (setXY) {
-			transform = transform.rightMul(Mat33.translation(translation.times(-1)));
-		}
+	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false) {
+		const transform = !inCanvasSpace ? this.getCanvasToScreenTransform().rightMul(elemTransform) : elemTransform;
 
 		if (!transform.eq(Mat33.identity)) {
-			elem.style.transform = transform.toSafeCSSTransformList();
+			const matrixString = transform.toCSSMatrix();
+			elem.style.transform = matrixString;
+
+			// Most browsers round the components of CSS transforms.
+			// Include a higher precision copy of the element's transform.
+			elem.setAttribute('data-highp-transform', matrixString);
 		} else {
 			elem.style.transform = '';
-		}
-
-		if (setXY) {
-			elem.setAttribute('x', `${toRoundedString(translation.x)}`);
-			elem.setAttribute('y', `${toRoundedString(translation.y)}`);
 		}
 	}
 
@@ -212,10 +207,7 @@ export default class SVGRenderer extends AbstractRenderer {
 			const container = document.createElementNS(svgNameSpace, 'text');
 			container.appendChild(document.createTextNode(text));
 
-			// Don't set .x/.y properties (just use .style.transform).
-			// Child nodes aren't translated by .x/.y properties, but are by .style.transform.
-			const setXY = false;
-			this.transformFrom(transform, container, true, setXY);
+			this.transformFrom(transform, container, true);
 			applyTextStyles(container, style);
 
 			this.elem.appendChild(container);
