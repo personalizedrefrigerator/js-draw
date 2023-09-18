@@ -1,6 +1,7 @@
 import Mat33 from './Mat33';
 import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
+import { toRoundedString } from './rounding';
 
 
 describe('Mat33 tests', () => {
@@ -204,5 +205,57 @@ describe('Mat33 tests', () => {
 
 		// scaling2D only scales the x/y components of vectors it transforms
 		expect(Mat33.scaling2D(2).getColumn(2)).objEq(Vec3.of(0, 0, 1));
+	});
+
+	describe('toSafeCSSTransformList', () => {
+		it('should not add extra transforms when unnecessary', () => {
+			expect(Mat33.identity.toSafeCSSTransformList()).toBe(Mat33.identity.toCSSMatrix());
+
+			// Should only convert to a single matrix()
+			expect(
+				Mat33.translation(Vec2.of(0.1, 0.1)).toSafeCSSTransformList()
+			).toBe('matrix(1,0,0,1,0.1,0.1)');
+			expect(
+				Mat33.translation(Vec2.of(0.01, 0.001)).toSafeCSSTransformList()
+			).toBe('matrix(1,0,0,1,0.01,0.001)');
+		});
+
+		it('should convert small translations into combinations of translations and scales', () => {
+			expect(
+				Mat33.translation(Vec2.of(0.23456789, 0.111111112)).toSafeCSSTransformList()
+			).toBe('scale(.0001) translate(2345px, 1111px) scale(.0001) translate(6788px, 1111px) scale(.0001) translate(9999px, 2000px) scale(.0001) translate(9999px, 0px) scale(10000) scale(10000) scale(10000) matrix(10000,0,0,10000,0,0)');
+		});
+
+		it('should produce the same matrix when parsed with fromCSSMatrix', () => {
+			const testMatrices = [
+				new Mat33(
+					1, 2, -123.45678901,
+					3, 4, 456.78901,
+					0, 0, 1,
+				),
+				new Mat33(
+					1e6, -1e7, 0.000001,
+					2,   3, 12345.6,
+					0, 0, 1,
+				),
+				new Mat33(
+					1e6, 0.001, 0.002001,
+					2,   1.2345, -12345.6,
+					0, 0, 1,
+				),
+			];
+
+			for (const mat of testMatrices) {
+				const filteredMatrix = Mat33.fromCSSMatrix(mat.toSafeCSSTransformList());
+
+				expect(filteredMatrix).objEq(mat, 1e-3);
+
+				expect(
+					filteredMatrix.toArray().map(toRoundedString)
+				).toMatchObject(
+					mat.toArray().map(toRoundedString)
+				);
+			}
+		});
 	});
 });

@@ -165,3 +165,4 @@ export const toStringOfSamePrecision = (num: number, ...references: string[]): s
 	const negativeSign = textMatch[1];
 	return cleanUpNumber(`${negativeSign}${preDecimal}.${postDecimal}`);
 };
+

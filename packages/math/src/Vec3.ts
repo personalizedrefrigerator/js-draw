@@ -64,6 +64,16 @@ export class Vec3 {
 	}
 
 	/**
+	 * Returns the entry of this with the greatest magnitude.
+	 *
+	 * In other words, returns $\max \{ |x| : x \in {\bf v} \}$, where ${\bf v}$ is the set of
+	 * all entries of this vector.
+	 */
+	public maximumEntryMagnitude(): number {
+		return Math.max(Math.abs(this.x), Math.max(Math.abs(this.y), Math.abs(this.z)));
+	}
+
+	/**
 	 * Return this' angle in the XY plane (treats this as a Vec2).
 	 *
 	 * This is equivalent to `Math.atan2(vec.y, vec.x)`.

@@ -345,6 +345,16 @@ export class Mat33 {
 		);
 	}
 
+	/** Returns the magnitude of the entry with the largest entry */
+	public maximumEntryMagnitude() {
+		let greatestSoFar = Math.abs(this.a1);
+		for (const entry of this.toArray()) {
+			greatestSoFar = Math.max(greatestSoFar, Math.abs(entry));
+		}
+
+		return greatestSoFar;
+	}
+
 	/**
 	 * Constructs a 3x3 translation matrix (for translating `Vec2`s) using
 	 * **transformVec2**.
@@ -421,15 +431,16 @@ export class Mat33 {
 	}
 
 	/**
+	 * @beta May change or even be removed between minor releases.
+	 *
 	 * Converts this matrix into a list of CSS transforms that attempt to preserve
 	 * this matrix's translation.
 	 *
-	 * In Chrome/Firefox, translation attributes only support 6 digits. This works around
+	 * In Chrome/Firefox, translation attributes only support 6 digits (likely an artifact
+	 * of using lower-precision floating point numbers). This works around
 	 * that by expanding this matrix into the product of several CSS transforms.
 	 *
 	 * **Note**: Assumes `this.c1 = this.c2 = 0` and `this.c3 = 1`.
-	 *
-	 * @beta May change between minor releases.
 	 */
 	public toSafeCSSTransformList(): string {
 		// Check whether it's safe to return just the CSS matrix
@@ -447,7 +458,7 @@ export class Mat33 {
 		}
 
 		// Remove the last column (the translation column)
-		const transform = new Mat33(
+		let transform = new Mat33(
 			this.a1, this.a2, 0,
 			this.b1, this.b2, 0,
 			0, 0, 1,
@@ -456,6 +467,7 @@ export class Mat33 {
 		const transforms: string[] = [];
 		let lastScale: Vec2|null = null;
 
+		// Appends a translate() command to the list of `transforms`.
 		const addTranslate = (translation: Vec2) => {
 			lastScale = null;
 			if (!translation.eq(Vec2.zero)) {
@@ -463,23 +475,34 @@ export class Mat33 {
 			}
 		};
 
+		// Appends a scale() command to the list of transforms, possibly merging with
+		// the last command, if a scale().
 		const addScale = (scale: Vec2) => {
 			// Merge with the last scale
 			if (lastScale) {
-				const previousCommand = transforms.pop();
-				console.assert(previousCommand!.startsWith('scale'), 'Invalid state: Merging scale commands');
+				const newScale = lastScale.scale(scale);
 
-				scale = lastScale.scale(scale);
+				// Don't merge if the new scale has very large values
+				if (newScale.maximumEntryMagnitude() < 1e7) {
+					const previousCommand = transforms.pop();
+					console.assert(
+						previousCommand!.startsWith('scale'),
+						'Invalid state: Merging scale commands'
+					);
+
+					scale = newScale;
+				}
 			}
 
 			if (scale.x === scale.y) {
-				transforms.push(`scale(${scale.x})`);
+				transforms.push(`scale(${toRoundedString(scale.x)})`);
 			} else {
-				transforms.push(`scale(${scale.x}, ${scale.y})`);
+				transforms.push(`scale(${toRoundedString(scale.x)}, ${toRoundedString(scale.y)})`);
 			}
 			lastScale = scale;
 		};
 
+		// Returns the number of digits before the `.` in the given number string.
 		const digitsPreDecimalCount = (numberString: string) => {
 			let decimalIndex = numberString.indexOf('.');
 			if (decimalIndex === -1) {
@@ -489,54 +512,75 @@ export class Mat33 {
 			return numberString.substring(0, decimalIndex).replace(nonDigitsRegex, '').length;
 		};
 
+		// Returns the number of digits (positive for left shift, negative for right shift)
+		// required to shift the decimal to the middle of the number.
 		const getShift = (numberString: string) => {
-			const preDecimal = digitsPreDecimalCount(translationRoundedX);
-			const postDecimal = (numberString.match(/[.](\d*)/) ?? [''])[0].length;
-			return Math.floor((preDecimal - postDecimal) / 2);
+			const preDecimal = digitsPreDecimalCount(numberString);
+			const postDecimal = (numberString.match(/[.](\d*)/) ?? ['', ''])[1].length;
+
+			// The shift required to center the decimal point.
+			const toCenter = postDecimal - preDecimal;
+
+			// toCenter is positive for a left shift (adding more pre-decimals),
+			// so, after applying it,
+			const postShiftPreDecimal = preDecimal + toCenter;
+
+			// We want the digits before the decimal to have a length at most 4, however.
+			// Thus, right shift until this is the case.
+			const shiftForAtMost5DigitsPreDecimal = 4 - Math.max(postShiftPreDecimal, 4);
+
+			return toCenter + shiftForAtMost5DigitsPreDecimal;
 		};
 
-		const addShiftedTranslate = (translate: Vec2) => {
+		const addShiftedTranslate = (translate: Vec2, depth: number = 0) => {
 			const xString = toRoundedString(translate.x);
 			const yString = toRoundedString(translate.y);
 
-			let xShift = -getShift(xString);
-			let yShift = -getShift(yString);
+			const xShiftDigits = getShift(xString);
+			const yShiftDigits = getShift(yString);
+			const shift = Vec2.of(Math.pow(10, xShiftDigits), Math.pow(10, yShiftDigits));
+			const invShift = Vec2.of(Math.pow(10, -xShiftDigits), Math.pow(10, -yShiftDigits));
 
-			const maxShiftMagnitude = 4;
-			xShift = Math.min(Math.abs(xShift), maxShiftMagnitude) * Math.sign(xShift);
-			yShift = Math.min(Math.abs(yShift), maxShiftMagnitude) * Math.sign(yShift);
-
-			const shift = Vec2.of(Math.pow(10, xShift), Math.pow(10, yShift));
-			const invShift = Vec2.of(Math.pow(10, -xShift), Math.pow(10, -yShift));
 			addScale(invShift);
-			addTranslate(translate.scale(shift));
-			addScale(shift);
-		};
 
-		// Arguments can be negative to left shift, else right shifts.
-		const shiftBy = (xDigits: number, yDigits: number) => {
-			const xScale = Math.pow(10, xDigits);
-			const yScale = Math.pow(10, yDigits);
-
-			// Separate translation into two translate() calls that act at
-			// different scale levels. Together, these two translations form the
-			// original
-			const largerTranslate = Vec2.of(
-				// Round to xDigits
-				Math.floor(translation.x / xScale) * xScale,
-
-				// Round to yDigits
-				Math.floor(translation.y / yScale) * yScale,
+			const shiftedTranslate = translate.scale(shift);
+			const roundedShiftedTranslate = Vec2.of(
+				Math.floor(shiftedTranslate.x),
+				Math.floor(shiftedTranslate.y),
 			);
 
-			// The fractional part
-			const smallerTranslate = translation.minus(largerTranslate);
+			addTranslate(roundedShiftedTranslate);
 
-			addShiftedTranslate(largerTranslate);
-			addShiftedTranslate(smallerTranslate);
+			// Don't recurse more than 3 times -- the more times we recurse, the more
+			// the scaling is influenced by error.
+			if (!roundedShiftedTranslate.eq(shiftedTranslate) && depth < 3) {
+				addShiftedTranslate(
+					shiftedTranslate.minus(roundedShiftedTranslate),
+					depth + 1
+				);
+			}
+
+			addScale(shift);
+
+			return translate;
 		};
 
-		shiftBy(getShift(translationRoundedX), getShift(translationRoundedY));
+		const adjustTransformFromScale = () => {
+			if (lastScale) {
+				const scaledTransform = transform.rightMul(Mat33.scaling2D(lastScale));
+
+				// If adding the scale to the transform leads to large values, avoid
+				// doing this.
+				if (scaledTransform.maximumEntryMagnitude() < 1e12) {
+					transforms.pop();
+					transform = transform.rightMul(Mat33.scaling2D(lastScale));
+					lastScale = null;
+				}
+			}
+		};
+
+		addShiftedTranslate(translation);
+		adjustTransformFromScale();
 
 		if (!transform.eq(Mat33.identity)) {
 			transforms.push(transform.toCSSMatrix());
@@ -571,7 +615,7 @@ export class Mat33 {
 				// Remove trailing px units.
 				argString = argString.replace(/px$/ig, '');
 
-				const numberExp = /^[-]?\d*(?:\.\d*)?(?:[eE][-]?\d+)?$/i;
+				const numberExp = /^[-]?\d*(?:\.\d*)?(?:[eE][-+]?\d+)?$/i;
 
 				if (!numberExp.exec(argString)) {
 					throw new Error(
