@@ -56,6 +56,12 @@
 	}
 }
 
+// Derived colors
+.imageEditorContainer {
+	// Default icon color
+	--icon-color: var(--foreground-color-1);
+}
+
 .imageEditorContainer {
 	color: var(--foreground-color-1);
 	font-family: system-ui, -apple-system, sans-serif;

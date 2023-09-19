@@ -53,6 +53,7 @@ import Check from './icons/Check.svg';
 import InkHighlighter from './icons/InkHighlighter.svg';
 import Edit from './icons/Edit.svg';
 import CloudUpload from './icons/CloudUpload.svg';
+import RotateLeft from './icons/RotateLeft.svg';
 
 const icon = (data: string) => {
 	const icon = document.createElement('div');
@@ -78,6 +79,9 @@ class MaterialIconProvider extends IconProvider {
 	}
 	public override makeSelectionIcon(): IconElemType {
 		return icon(ArrowSelectorTool);
+	}
+	public override makeRotateIcon(): IconElemType {
+		return icon(RotateLeft);
 	}
 	public override makeHandToolIcon(): IconElemType {
 		return icon(PanTool);

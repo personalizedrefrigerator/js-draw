@@ -7,7 +7,7 @@ import SerializableCommand from '../../commands/SerializableCommand';
 import Editor from '../../Editor';
 import { Mat33, Rect2, Point2, Vec2, Mat33Array } from '@js-draw/math';
 import Pointer from '../../Pointer';
-import SelectionHandle, { HandleShape, handleSize } from './SelectionHandle';
+import SelectionHandle, { HandleAction, handleSize } from './SelectionHandle';
 import { cssPrefix } from './SelectionTool';
 import AbstractComponent from '../../components/AbstractComponent';
 import { EditorLocalization } from '../../localization';
@@ -51,8 +51,10 @@ export default class Selection {
 		this.container.appendChild(this.backgroundElem);
 
 		const resizeHorizontalHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(1, 0.5),
+			{
+				action: HandleAction.ResizeX,
+				side: Vec2.of(1, 0.5),
+			},
 			this,
 			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.HorizontalOnly),
@@ -61,8 +63,10 @@ export default class Selection {
 		);
 
 		const resizeVerticalHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(0.5, 1),
+			{
+				action: HandleAction.ResizeY,
+				side: Vec2.of(0.5, 1),
+			},
 			this,
 			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.VerticalOnly),
@@ -71,8 +75,10 @@ export default class Selection {
 		);
 
 		const resizeBothHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(1, 1),
+			{
+				action: HandleAction.ResizeXY,
+				side: Vec2.of(1, 1),
+			},
 			this,
 			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.Both),
@@ -81,8 +87,11 @@ export default class Selection {
 		);
 
 		const rotationHandle = new SelectionHandle(
-			HandleShape.Circle,
-			Vec2.of(0.5, 0),
+			{
+				action: HandleAction.Rotate,
+				side: Vec2.of(0.5, 0),
+				icon: this.editor.icons.makeRotateIcon(),
+			},
 			this,
 			this.editor.viewport,
 			(startPoint) => this.transformers.rotate.onDragStart(startPoint),

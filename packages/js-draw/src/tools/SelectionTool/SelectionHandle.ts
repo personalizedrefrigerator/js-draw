@@ -5,9 +5,28 @@ import Selection from './Selection';
 import Pointer from '../../Pointer';
 import Viewport from '../../Viewport';
 
-export enum HandleShape {
+enum HandleShape {
 	Circle,
 	Square,
+}
+
+export enum HandleAction {
+	ResizeXY = 'resize-xy',
+	Rotate = 'rotate',
+	ResizeX = 'resize-x',
+	ResizeY = 'resize-y',
+}
+
+export interface HandlePresentation {
+	// (1,1) corresponds to the bottom right of the parent,
+	// (1, 0) corresponds to the top left.
+	side: Vec2;
+
+	// An icon to optionally display within the handle
+	icon?: Element;
+
+	// Determines the handle's shape/style
+	action: HandleAction;
 }
 
 export const handleSize = 30;
@@ -20,10 +39,11 @@ export type DragEndCallback = ()=> void;
 export default class SelectionHandle {
 	private element: HTMLElement;
 	private snapToGrid: boolean;
+	private shape: HandleShape;
+	private parentSide: Vec2;
 
 	public constructor(
-		readonly shape: HandleShape,
-		private readonly parentSide: Vec2,
+		readonly presentation: HandlePresentation,
 		private readonly parent: Selection,
 		private readonly viewport: Viewport,
 
@@ -32,9 +52,26 @@ export default class SelectionHandle {
 		private readonly onDragEnd: DragEndCallback,
 	) {
 		this.element = document.createElement('div');
-		this.element.classList.add(`${cssPrefix}handle`);
+		this.element.classList.add(
+			`${cssPrefix}handle`,
+			`${cssPrefix}${presentation.action}`,
+		);
 
-		switch (shape) {
+		this.parentSide = presentation.side;
+
+		const icon = presentation.icon;
+		if (icon) {
+			this.element.appendChild(icon);
+			icon.classList.add('icon');
+		}
+
+		if (presentation.action === HandleAction.Rotate) {
+			this.shape = HandleShape.Circle;
+		} else {
+			this.shape = HandleShape.Square;
+		}
+
+		switch (this.shape) {
 		case HandleShape.Circle:
 			this.element.classList.add(`${cssPrefix}circle`);
 			break;
@@ -42,7 +79,7 @@ export default class SelectionHandle {
 			this.element.classList.add(`${cssPrefix}square`);
 			break;
 		default:
-			assertUnreachable(shape);
+			assertUnreachable(this.shape);
 		}
 
 		this.updatePosition();

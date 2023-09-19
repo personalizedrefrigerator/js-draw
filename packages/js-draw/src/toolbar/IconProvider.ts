@@ -175,6 +175,53 @@ export default class IconProvider {
 		return icon;
 	}
 
+	public makeRotateIcon(): IconElemType {
+		const icon = document.createElementNS(svgNamespace, 'svg');
+
+		icon.innerHTML = `
+			<defs>
+				<marker
+					id="arrow-marker"
+					viewBox="0 0 10 10"
+					refX="3" refY="5"
+					markerWidth="3" markerHeight="3"
+					orient="auto-start-reverse"
+				>
+					<path
+						d="M0,0 L8,5 L0,10z"
+						fill="var(--icon-color)"
+					/>
+				</marker>
+			</defs>
+
+			<path
+				marker-start="url(#arrow-marker)"
+				d="
+					M20,20
+					A30,30 0 1 1 80 80
+				"
+				fill="none"
+				stroke="var(--icon-color)"
+				stroke-width="12"
+			/>
+			<path
+				d="
+					M80,80
+					A30,30 0 1 1 20 20
+				"
+				fill="none"
+				stroke="var(--icon-color)"
+				stroke-width="12"
+				stroke-dasharray="30 10 20 10 20 10 10"
+				style="stroke-linecap: butt;"
+			/>
+		`;
+
+		icon.setAttribute('viewBox', '-5 -5 110 110');
+
+		return icon;
+	}
+
 	public makeHandToolIcon(): IconElemType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
