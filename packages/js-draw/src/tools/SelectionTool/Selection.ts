@@ -27,6 +27,10 @@ export default class Selection {
 	private handles: SelectionHandle[];
 	private originalRegion: Rect2;
 
+	// The last-computed bounding box of selected content
+	// @see getTightBoundingBox
+	private selectionTightBoundingBox: Rect2|null = null;
+
 	private transformers;
 	private transform: Mat33 = Mat33.identity;
 
@@ -359,6 +363,7 @@ export default class Selection {
 	// Returns false if the selection is empty.
 	public recomputeRegion(): boolean {
 		const newRegion = this.computeTightBoundingBox();
+		this.selectionTightBoundingBox = newRegion;
 
 		if (!newRegion) {
 			this.cancelSelection();
@@ -366,17 +371,26 @@ export default class Selection {
 		}
 
 		this.originalRegion = newRegion;
+		this.padRegion();
+
+		return true;
+	}
+
+	// Applies padding to the current region if it is too small.
+	// @internal
+	public padRegion() {
+		const sourceRegion = this.selectionTightBoundingBox ?? this.originalRegion;
 
 		const minSize = this.getMinCanvasSize();
-		if (this.originalRegion.w < minSize || this.originalRegion.h < minSize) {
+		if (sourceRegion.w < minSize || sourceRegion.h < minSize) {
 			// Add padding
 			const padding = minSize / 2;
 			this.originalRegion = Rect2.bboxOf(
-				this.originalRegion.corners, padding
+				sourceRegion.corners, padding
 			);
-		}
 
-		return true;
+			this.updateUI();
+		}
 	}
 
 	public getMinCanvasSize(): number {
@@ -631,6 +645,8 @@ export default class Selection {
 
 	public setToPoint(point: Point2) {
 		this.originalRegion = this.originalRegion.grownToPoint(point);
+		this.selectionTightBoundingBox = null;
+
 		this.updateUI();
 	}
 
@@ -639,13 +655,16 @@ export default class Selection {
 			this.container.remove();
 		}
 		this.originalRegion = Rect2.empty;
+		this.selectionTightBoundingBox = null;
 		this.hasParent = false;
 	}
 
 	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
 		this.addRemoveSelectionFromImage(true);
 		this.originalRegion = bbox;
+		this.selectionTightBoundingBox = bbox;
 		this.selectedElems = objects.filter(object => object.isSelectable());
+		this.padRegion();
 		this.updateUI();
 	}
 

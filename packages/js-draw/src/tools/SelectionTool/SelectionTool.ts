@@ -38,6 +38,11 @@ export default class SelectionTool extends BaseTool {
 			// hasn't been finalized yet. Clear before updating the UI.
 			this.editor.clearWetInk();
 
+			// If not currently selecting, ensure that the selection box
+			// is large enough.
+			if (!this.expandingSelectionBox) {
+				this.selectionBox?.padRegion();
+			}
 			this.selectionBox?.updateUI();
 		});
 
