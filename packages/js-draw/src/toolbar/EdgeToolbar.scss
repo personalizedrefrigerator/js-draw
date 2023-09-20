@@ -118,7 +118,7 @@
 	box-sizing: border-box;
 
 	// Don't allow multiple lines when over a certain width (prefer scrolling)
-	@media screen and (min-width: 610px) {
+	@media screen and (min-width: 540px) {
 		flex-wrap: nowrap;
 
 		> .toolbar-action-row {
@@ -131,7 +131,7 @@
 		&.one-row > * > .toolbar-toolContainer.label-inline {
 			font-size: 0.9em;
 
-			.toolbar-button {
+			& > .toolbar-button {
 				label {
 					opacity: 0;
 
@@ -145,6 +145,13 @@
 				}
 
 				@include label-visible-on-hover(label);
+
+				// Clear additional margins added because of the left/right side labels.
+				// (Repeat selector to increase specificity).
+				& > .toolbar-icon.toolbar-icon {
+					margin-left: 0;
+					margin-right: 0;
+				}
 			}
 		}
 	}
