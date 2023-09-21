@@ -1,14 +1,14 @@
-import Editor from './Editor';
-import AbstractRenderer from './rendering/renderers/AbstractRenderer';
-import Viewport from './Viewport';
-import AbstractComponent, { ComponentSizingMode } from './components/AbstractComponent';
+import Editor from '../Editor';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
+import Viewport from '../Viewport';
+import AbstractComponent, { ComponentSizingMode } from '../components/AbstractComponent';
 import { Rect2, Vec2, Mat33, Mat33Array, Color4 } from '@js-draw/math';
-import { EditorLocalization } from './localization';
-import RenderingCache from './rendering/caching/RenderingCache';
-import SerializableCommand from './commands/SerializableCommand';
-import EventDispatcher from './EventDispatcher';
-import { assertIsBoolean, assertIsNumber, assertIsNumberArray } from './util/assertions';
-import Command from './commands/Command';
+import { EditorLocalization } from '../localization';
+import RenderingCache from '../rendering/caching/RenderingCache';
+import SerializableCommand from '../commands/SerializableCommand';
+import EventDispatcher from '../EventDispatcher';
+import { assertIsBoolean, assertIsNumber, assertIsNumberArray } from '../util/assertions';
+import Command from '../commands/Command';
 
 // @internal Sort by z-index, low to high
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
@@ -21,6 +21,14 @@ export enum EditorImageEventType {
 }
 
 export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image: EditorImage }>;
+
+/**
+ * A callback used to
+ * 1. pause the render process
+ * 2. observe progress through `componentsProcessed` and `totalComponents`
+ * 3. stop the render process early by returning `false`.
+ */
+export type PreRenderComponentCallback = (component: AbstractComponent, componentsProcessed: number, totalComponents: number)=>Promise<boolean>;
 
 const debugMode = false;
 
@@ -115,10 +123,35 @@ export default class EditorImage {
 		this.root.render(renderer, viewport?.visibleRect);
 	}
 
-	/** Renders all nodes, even ones not within the viewport. @internal */
+	/**
+	 * Like {@link renderAll}, but can be stopped early and
+	 * paused.
+	 *
+	 * @internal
+	 */
+	public async renderAllAsync(
+		renderer: AbstractRenderer,
+		preRenderComponent: PreRenderComponentCallback,
+	) {
+		const stoppedEarly = !(await this.background.renderAllAsync(renderer, preRenderComponent));
+
+		if (!stoppedEarly) {
+			return await this.root.renderAllAsync(renderer, preRenderComponent);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Renders all nodes, even ones not within the viewport.
+	 *
+	 * This can be slow for large images
+	 * @internal
+	 */
 	public renderAll(renderer: AbstractRenderer) {
 		this.render(renderer, null);
 	}
+
 
 	/**
 	 * @returns all elements in the image, sorted by z-index. This can be slow for large images.
@@ -763,6 +796,34 @@ export class ImageNode {
 		this.parent = null;
 		this.content = null;
 		this.children = [];
+	}
+
+	// Returns false if stopped early
+	public async renderAllAsync(
+		renderer: AbstractRenderer,
+
+		// Used to pause/stop the renderer process
+		preRenderComponent: PreRenderComponentCallback,
+	) {
+		const leaves = this.getLeaves();
+		sortLeavesByZIndex(leaves);
+
+		const totalLeaves = leaves.length;
+
+		for (let leafIndex = 0; leafIndex < totalLeaves; leafIndex++) {
+			const leaf = leaves[leafIndex];
+			const component = leaf.getContent()!;
+
+			const shouldContinue = await preRenderComponent(component, leafIndex, totalLeaves);
+
+			if (!shouldContinue) {
+				return false;
+			}
+
+			component.render(renderer, undefined);
+		}
+
+		return true;
 	}
 
 	public render(renderer: AbstractRenderer, visibleRect?: Rect2) {

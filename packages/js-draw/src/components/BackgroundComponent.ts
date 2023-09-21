@@ -1,5 +1,5 @@
 import Editor from '../Editor';
-import EditorImage, { EditorImageEventType } from '../EditorImage';
+import EditorImage, { EditorImageEventType } from '../image/EditorImage';
 import { DispatcherEventListener } from '../EventDispatcher';
 import SerializableCommand from '../commands/SerializableCommand';
 import { LineSegment2, Mat33, Rect2, Color4, toRoundedString, Path, PathCommandType, Vec2, PathCommand } from '@js-draw/math';

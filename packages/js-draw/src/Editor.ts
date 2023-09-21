@@ -1,4 +1,4 @@
-import EditorImage from './EditorImage';
+import EditorImage from './image/EditorImage';
 import ToolController from './tools/ToolController';
 import { EditorNotifier, EditorEventType, ImageLoader } from './types';
 import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent, KeyPressEvent } from './inputEvents';
@@ -6,10 +6,10 @@ import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
-import { Point2, Vec2, Vec3, Color4, Mat33, Rect2, toRoundedString } from '@js-draw/math';
+import { Point2, Vec2, Vec3, Color4, Mat33, Rect2 } from '@js-draw/math';
 import Display, { RenderingMode } from './rendering/Display';
 import SVGRenderer from './rendering/renderers/SVGRenderer';
-import SVGLoader, { svgLoaderAutoresizeClassName } from './SVGLoader';
+import SVGLoader from './SVGLoader';
 import Pointer from './Pointer';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
@@ -32,6 +32,7 @@ import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
 import RenderablePathSpec from './rendering/RenderablePathSpec';
 import makeAboutDialog, { AboutDialogEntry } from './dialogs/makeAboutDialog';
 import version from './version';
+import { editorImageToSVGSync, editorImageToSVGAsync } from './image/export/editorImageToSVG';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -1290,51 +1291,47 @@ export class Editor {
 	 * {@link SVGRenderer}
 	 */
 	public toSVG(options?: { minDimension?: number }): SVGElement {
-		const importExportViewport = this.image.getImportExportViewport().getTemporaryClone();
+		return editorImageToSVGSync(this.image, options ?? {});
+	}
 
-		const sanitize = false;
-		const { element: result, renderer } = SVGRenderer.fromViewport(importExportViewport, sanitize);
+	/**
+	 * Converts the editor's content into an SVG image.
+	 *
+	 * Like {@link toSVG}, but can be configured to briefly pause after processing every
+	 * `pauseAfterCount` items. This can prevent the editor from becoming unresponsive
+	 * when saving very large images.
+	 */
+	public async toSVGAsync(
+		options: {
+			minDimension?: number,
 
-		const origTransform = importExportViewport.canvasToScreenTransform;
-		// Render with (0,0) at (0,0) — we'll handle translation with
-		// the viewBox property.
-		importExportViewport.resetTransform(Mat33.identity);
+			// Number of components to process before pausing
+			pauseAfterCount?: number,
 
-		this.image.renderAll(renderer);
+			// Returns false to cancel the render.
+			// Note that totalToProcess is the total for the currently-being-processed layer.
+			onProgress?: (processedCountInLayer: number, totalToProcessInLayer: number)=>Promise<void|boolean>,
+		} = {},
+	): Promise<SVGElement> {
+		const pauseAfterCount = options.pauseAfterCount ?? 100;
 
-		importExportViewport.resetTransform(origTransform);
+		return await editorImageToSVGAsync(this.image, async (_component, processedCount, totalComponents) => {
+			if (options.onProgress) {
+				const shouldContinue = await options.onProgress(processedCount, totalComponents);
 
+				if (shouldContinue === false) {
+					return false;
+				}
+			}
 
-		// Just show the main region
-		const rect = importExportViewport.visibleRect;
-		result.setAttribute('viewBox', [rect.x, rect.y, rect.w, rect.h].map(part => toRoundedString(part)).join(' '));
+			if (processedCount % pauseAfterCount === 0) {
+				await untilNextAnimationFrame();
+			}
 
-		// Adjust the width/height as necessary
-		let width = rect.w;
-		let height = rect.h;
-
-		if (options?.minDimension && width < options.minDimension) {
-			const newWidth = options.minDimension;
-			height *= newWidth / (width || 1);
-			width = newWidth;
-		}
-
-		if (options?.minDimension && height < options.minDimension) {
-			const newHeight = options.minDimension;
-			width *= newHeight / (height || 1);
-			height = newHeight;
-		}
-
-		result.setAttribute('width', toRoundedString(width));
-		result.setAttribute('height', toRoundedString(height));
-
-		if (this.image.getAutoresizeEnabled()) {
-			result.classList.add(svgLoaderAutoresizeClassName);
-		} else {
-			result.classList.remove(svgLoaderAutoresizeClassName);
-		}
-
-		return result;
+			return true;
+		}, {
+			minDimension: options.minDimension,
+		});
 	}
 
 	/**

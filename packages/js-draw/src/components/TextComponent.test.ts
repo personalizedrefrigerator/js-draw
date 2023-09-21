@@ -1,4 +1,4 @@
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { Vec2, Mat33, Color4 } from '@js-draw/math';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import createEditor from '../testing/createEditor';

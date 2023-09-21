@@ -17,7 +17,7 @@ import Duplicate from '../../commands/Duplicate';
 import Command from '../../commands/Command';
 import { DragTransformer, ResizeTransformer, RotateTransformer } from './TransformMode';
 import { ResizeMode } from './types';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;

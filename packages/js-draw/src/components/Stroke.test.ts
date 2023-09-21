@@ -1,7 +1,7 @@
 import { Path, Vec2, Mat33, Color4 } from '@js-draw/math';
 import Stroke from './Stroke';
 import createEditor from '../testing/createEditor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import AbstractComponent from './AbstractComponent';
 import { DummyRenderer, SerializableCommand } from '../lib';
 import { pathToRenderable } from '../rendering/RenderablePathSpec';

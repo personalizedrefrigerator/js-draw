@@ -1,6 +1,6 @@
 import Stroke from '../../components/Stroke';
 import Editor from '../../Editor';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
 import { InputEvtType } from '../../inputEvents';
 import Selection from './Selection';
 import SelectionTool from './SelectionTool';

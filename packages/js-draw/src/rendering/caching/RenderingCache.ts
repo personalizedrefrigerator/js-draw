@@ -1,4 +1,4 @@
-import { ImageNode } from '../../EditorImage';
+import { ImageNode } from '../../image/EditorImage';
 import { Rect2 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';

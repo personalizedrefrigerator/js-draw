@@ -1,7 +1,7 @@
 
 // A cache record with sub-nodes.
 
-import { ImageNode, sortLeavesByZIndex } from '../../EditorImage';
+import { ImageNode, sortLeavesByZIndex } from '../../image/EditorImage';
 import { Rect2, Color4 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';

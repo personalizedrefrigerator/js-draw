@@ -1,14 +1,14 @@
 import EditorImage from './EditorImage';
-import Stroke from './components/Stroke';
+import Stroke from '../components/Stroke';
 import { Vec2, Color4, Path, PathCommandType, Rect2, Mat33, LineSegment2, Vec3 } from '@js-draw/math';
-import DummyRenderer from './rendering/renderers/DummyRenderer';
-import createEditor from './testing/createEditor';
-import RenderingStyle from './rendering/RenderingStyle';
-import { Command, Erase, SerializableCommand, uniteCommands } from './commands/lib';
-import { pathToRenderable } from './rendering/RenderablePathSpec';
-import AbstractComponent, { ComponentSizingMode } from './components/AbstractComponent';
-import { ImageComponentLocalization } from './components/localization';
-import { AbstractRenderer } from './rendering/lib';
+import DummyRenderer from '../rendering/renderers/DummyRenderer';
+import createEditor from '../testing/createEditor';
+import RenderingStyle from '../rendering/RenderingStyle';
+import { Command, Erase, SerializableCommand, uniteCommands } from '../commands/lib';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
+import AbstractComponent, { ComponentSizingMode } from '../components/AbstractComponent';
+import { ImageComponentLocalization } from '../components/localization';
+import { AbstractRenderer } from '../rendering/lib';
 
 // A base component with some methods implemented to facilitate creating
 // custom AbstractComponent subclasses for the tests below.

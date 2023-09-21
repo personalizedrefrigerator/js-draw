@@ -1,7 +1,7 @@
 import ImageComponent from '../../components/ImageComponent';
 import Editor from '../../Editor';
 import Erase from '../../commands/Erase';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
 import SelectionTool from '../../tools/SelectionTool/SelectionTool';
 import { Mat33 } from '@js-draw/math';

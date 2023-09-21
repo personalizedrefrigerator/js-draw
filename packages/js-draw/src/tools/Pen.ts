@@ -1,6 +1,6 @@
 import { Color4 } from '@js-draw/math';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import Pointer, { PointerDevice } from '../Pointer';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import { EditorEventType, StrokeDataPoint } from '../types';

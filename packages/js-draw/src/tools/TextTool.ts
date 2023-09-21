@@ -1,6 +1,6 @@
 import TextComponent from '../components/TextComponent';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { Rect2, Mat33, Vec2, Color4 } from '@js-draw/math';
 import { PointerDevice } from '../Pointer';
 import { EditorEventType } from '../types';

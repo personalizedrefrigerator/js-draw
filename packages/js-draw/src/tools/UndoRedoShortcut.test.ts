@@ -1,7 +1,7 @@
 /* @jest-environment jsdom */
 
 import Stroke from '../components/Stroke';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { Path, Color4 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import { InputEvtType } from '../inputEvents';

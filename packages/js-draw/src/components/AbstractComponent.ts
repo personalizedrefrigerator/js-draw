@@ -1,6 +1,6 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { LineSegment2, Mat33, Mat33Array, Rect2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
