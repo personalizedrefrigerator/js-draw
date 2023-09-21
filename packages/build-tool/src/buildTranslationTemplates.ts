@@ -77,6 +77,7 @@ const generateTranslationTemplate = (
 
 		lines.push('    validations:');
 		lines.push(`      required: ${required}`);
+		lines.push('    render: shell');
 
 		bodyContentLines.push(...lines);
 	};

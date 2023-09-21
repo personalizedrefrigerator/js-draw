@@ -22,6 +22,7 @@ body:
       value: "de"
     validations:
       required: true
+    render: shell
   - type: input
     id: translation-pen
     attributes:
@@ -31,6 +32,7 @@ body:
       value: "Stift"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-eraser
     attributes:
@@ -40,6 +42,7 @@ body:
       value: "Radierer"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-select
     attributes:
@@ -49,6 +52,7 @@ body:
       value: "Auswahl"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-handTool
     attributes:
@@ -58,6 +62,7 @@ body:
       value: "Verschieben"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-zoom
     attributes:
@@ -67,6 +72,7 @@ body:
       value: "Vergrößerung"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-image
     attributes:
@@ -76,6 +82,7 @@ body:
       value: "Bild"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-reformatSelection
     attributes:
@@ -85,6 +92,7 @@ body:
       value: "Formatiere Auswahl"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-inputAltText
     attributes:
@@ -94,6 +102,7 @@ body:
       value: "Alt-Text: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-chooseFile
     attributes:
@@ -103,6 +112,7 @@ body:
       value: "Wähle Datei: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-dragAndDropHereOrBrowse
     attributes:
@@ -118,6 +128,7 @@ or
 {{browse}}"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-submit
     attributes:
@@ -127,6 +138,7 @@ or
       value: "Absenden"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-cancel
     attributes:
@@ -136,6 +148,7 @@ or
       value: "Abbrechen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-resetView
     attributes:
@@ -145,6 +158,7 @@ or
       value: "Ansicht zurücksetzen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-thicknessLabel
     attributes:
@@ -154,6 +168,7 @@ or
       value: "Dicke: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-colorLabel
     attributes:
@@ -163,6 +178,7 @@ or
       value: "Farbe: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-fontLabel
     attributes:
@@ -172,6 +188,7 @@ or
       value: "Schriftart: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-textSize
     attributes:
@@ -181,6 +198,7 @@ or
       value: "Größe: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-resizeImageToSelection
     attributes:
@@ -190,6 +208,7 @@ or
       value: "Bildgröße an Auswahl anpassen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-deleteSelection
     attributes:
@@ -199,6 +218,7 @@ or
       value: "Auswahl löschen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-duplicateSelection
     attributes:
@@ -208,6 +228,7 @@ or
       value: "Auswahl duplizieren"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-exit
     attributes:
@@ -216,6 +237,7 @@ or
       placeholder: "Exit"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-save
     attributes:
@@ -224,6 +246,7 @@ or
       placeholder: "Save"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-undo
     attributes:
@@ -233,6 +256,7 @@ or
       value: "Rückgängig"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-redo
     attributes:
@@ -242,6 +266,7 @@ or
       value: "Wiederholen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-selectPenTip
     attributes:
@@ -251,6 +276,7 @@ or
       value: "Objekt-Typ: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-selectShape
     attributes:
@@ -259,6 +285,7 @@ or
       placeholder: "Shape"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-pickColorFromScreen
     attributes:
@@ -268,6 +295,7 @@ or
       value: "Farbe von Bildschirm auswählen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-clickToPickColorAnnouncement
     attributes:
@@ -277,6 +305,7 @@ or
       value: "Klicke auf den Bildschirm, um eine Farbe auszuwählen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-colorSelectionCanceledAnnouncement
     attributes:
@@ -285,6 +314,7 @@ or
       placeholder: "Color selection canceled"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-selectionToolKeyboardShortcuts
     attributes:
@@ -294,6 +324,7 @@ or
       value: "Auswahl-Werkzeug: Verwende die Pfeiltasten, um ausgewählte Elemente zu verschieben und ‚i‘ und ‚o‘, um ihre Größe zu ändern."
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-documentProperties
     attributes:
@@ -303,6 +334,7 @@ or
       value: "Seite"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-backgroundColor
     attributes:
@@ -312,6 +344,7 @@ or
       value: "Hintergrundfarbe: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-imageWidthOption
     attributes:
@@ -321,6 +354,7 @@ or
       value: "Breite: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-imageHeightOption
     attributes:
@@ -330,6 +364,7 @@ or
       value: "Höhe: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-useGridOption
     attributes:
@@ -339,6 +374,7 @@ or
       value: "Gitter: "
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-enableAutoresizeOption
     attributes:
@@ -347,6 +383,7 @@ or
       placeholder: "Auto-resize"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-toggleOverflow
     attributes:
@@ -356,6 +393,7 @@ or
       value: "Mehr"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-about
     attributes:
@@ -364,6 +402,7 @@ or
       placeholder: "About"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-inputStabilization
     attributes:
@@ -372,6 +411,7 @@ or
       placeholder: "Input stabilization"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-touchPanning
     attributes:
@@ -381,6 +421,7 @@ or
       value: "Ansicht mit Touchscreen verschieben"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-roundedTipPen
     attributes:
@@ -390,6 +431,7 @@ or
       value: "Freihand"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-flatTipPen
     attributes:
@@ -399,6 +441,7 @@ or
       value: "Stift (druckempfindlich)"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-arrowPen
     attributes:
@@ -408,6 +451,7 @@ or
       value: "Pfeil"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-linePen
     attributes:
@@ -417,6 +461,7 @@ or
       value: "Linie"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-outlinedRectanglePen
     attributes:
@@ -426,6 +471,7 @@ or
       value: "Umrissenes Rechteck"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-filledRectanglePen
     attributes:
@@ -435,6 +481,7 @@ or
       value: "Ausgefülltes Rechteck"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-outlinedCirclePen
     attributes:
@@ -443,6 +490,7 @@ or
       placeholder: "Outlined circle"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-lockRotation
     attributes:
@@ -452,6 +500,7 @@ or
       value: "Sperre Rotation"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-paste
     attributes:
@@ -461,6 +510,7 @@ or
       value: "Einfügen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-closeSidebar
     attributes:
@@ -473,6 +523,7 @@ or
       value: "(toolName) => `Close sidebar for ${toolName}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-dropdownShown
     attributes:
@@ -482,6 +533,7 @@ or
       value: "(toolName) => `Dropdown-Menü für ${toolName} angezeigt`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-dropdownHidden
     attributes:
@@ -491,6 +543,7 @@ or
       value: "(toolName) => `Dropdown-Menü für ${toolName} versteckt`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-zoomLevel
     attributes:
@@ -500,6 +553,7 @@ or
       value: "(zoomPercent) => `Vergößerung: ${zoomPercent}%`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-colorChangedAnnouncement
     attributes:
@@ -509,6 +563,7 @@ or
       value: "(color) => `Farbe zu ${color} geändert`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-imageSize
     attributes:
@@ -518,6 +573,7 @@ or
       value: "(size, units) => `Bild-Größe: ${size} ${units}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-errorImageHasZeroSize
     attributes:
@@ -527,6 +583,7 @@ or
       value: "Fehler: Bild hat Größe Null"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-imageLoadError
     attributes:
@@ -536,6 +593,7 @@ or
       value: "(message) => `Fehler beim Laden des Bildes: ${message}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-penTool
     attributes:
@@ -545,6 +603,7 @@ or
       value: "(penNumber) => `Stift ${penNumber}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-selectionTool
     attributes:
@@ -554,6 +613,7 @@ or
       value: "Auswahl"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-selectAllTool
     attributes:
@@ -563,6 +623,7 @@ or
       value: "Alle auswählen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-eraserTool
     attributes:
@@ -572,6 +633,7 @@ or
       value: "Radiergummi"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-touchPanTool
     attributes:
@@ -581,6 +643,7 @@ or
       value: "Ansicht mit Touchscreen verschieben"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-twoFingerPanZoomTool
     attributes:
@@ -590,6 +653,7 @@ or
       value: "Ansicht verschieben und vergrößern"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-undoRedoTool
     attributes:
@@ -599,6 +663,7 @@ or
       value: "Rückgängig/Wiederholen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-rightClickDragPanTool
     attributes:
@@ -608,6 +673,7 @@ or
       value: "Rechtsklick-Ziehen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-pipetteTool
     attributes:
@@ -617,6 +683,7 @@ or
       value: "Farbe von Bildschirm auswählen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-keyboardPanZoom
     attributes:
@@ -626,6 +693,7 @@ or
       value: "Tastaturkürzel zum Verschieben/Vergrößern der Ansicht"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-textTool
     attributes:
@@ -634,6 +702,7 @@ or
       placeholder: "Text"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-enterTextToInsert
     attributes:
@@ -643,6 +712,7 @@ or
       value: "Einzufügender Text"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-changeTool
     attributes:
@@ -652,6 +722,7 @@ or
       value: "Wechsle Werkzeug"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-pasteHandler
     attributes:
@@ -661,6 +732,7 @@ or
       value: "Copy-Paste-Handler"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-soundExplorer
     attributes:
@@ -670,6 +742,7 @@ or
       value: "Klangbasierte Bilderkundung"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-disableAccessibilityExploreTool
     attributes:
@@ -679,6 +752,7 @@ or
       value: "Deaktiviere klangbasierte Erkundung"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-enableAccessibilityExploreTool
     attributes:
@@ -688,6 +762,7 @@ or
       value: "Aktiviere klangbasierte Erkundung"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-soundExplorerUsageAnnouncement
     attributes:
@@ -696,6 +771,7 @@ or
       placeholder: "Sound-based image exploration enabled: Click/drag the screen to play a sound representation of different parts of the image."
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-findLabel
     attributes:
@@ -705,6 +781,7 @@ or
       value: "Finde"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-toNextMatch
     attributes:
@@ -714,6 +791,7 @@ or
       value: "Nächstes"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-closeDialog
     attributes:
@@ -723,6 +801,7 @@ or
       value: "Schließen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-findDialogShown
     attributes:
@@ -732,6 +811,7 @@ or
       value: "Finde-Dialog angezeigt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-findDialogHidden
     attributes:
@@ -741,6 +821,7 @@ or
       value: "Finde-Dialog versteckt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-focusedFoundText
     attributes:
@@ -750,6 +831,7 @@ or
       value: "(matchIdx, totalMatches) => `Sieh Treffer ${matchIdx} von ${totalMatches} an`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-anyDevicePanning
     attributes:
@@ -759,6 +841,7 @@ or
       value: "Ansicht mit jedem Eingabegerät verschieben"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-copied
     attributes:
@@ -768,6 +851,7 @@ or
       value: "(count, description) => `${count} ${description} kopiert`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-pasted
     attributes:
@@ -777,6 +861,7 @@ or
       value: "(count, description) => `${count} ${description} eingefügt`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-toolEnabledAnnouncement
     attributes:
@@ -786,6 +871,7 @@ or
       value: "(toolName) => `${toolName} aktiviert`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-toolDisabledAnnouncement
     attributes:
@@ -795,6 +881,7 @@ or
       value: "(toolName) => `${toolName} deaktiviert`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-updatedViewport
     attributes:
@@ -804,6 +891,7 @@ or
       value: "Transformierte Ansicht"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-transformedElements
     attributes:
@@ -813,6 +901,7 @@ or
       value: "(elemCount) => `${elemCount} Element${1 === elemCount ? '' : 'e'} transformiert`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-resizeOutputCommand
     attributes:
@@ -822,6 +911,7 @@ or
       value: "(newSize) => `Bildgröße auf ${newSize.w}x${newSize.h} geändert`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-enabledAutoresizeOutputCommand
     attributes:
@@ -830,6 +920,7 @@ or
       placeholder: "Enabled output autoresize"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-disabledAutoresizeOutputCommand
     attributes:
@@ -838,6 +929,7 @@ or
       placeholder: "Disabled output autoresize"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-addElementAction
     attributes:
@@ -847,6 +939,7 @@ or
       value: "(componentDescription) => `${componentDescription} hinzugefügt`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-eraseAction
     attributes:
@@ -856,6 +949,7 @@ or
       value: "(elemDescription, countErased) => `${countErased} ${elemDescription} gelöscht`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-duplicateAction
     attributes:
@@ -865,6 +959,7 @@ or
       value: "(elemDescription, countErased) => `${countErased} ${elemDescription} dupliziert`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-unionOf
     attributes:
@@ -874,6 +969,7 @@ or
       value: "(actionDescription, actionCount) => `Vereinigung: ${actionCount} ${actionDescription}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-inverseOf
     attributes:
@@ -883,6 +979,7 @@ or
       value: "(actionDescription) => `${actionDescription} umgekehrt`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-elements
     attributes:
@@ -892,6 +989,7 @@ or
       value: "Elemente"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-erasedNoElements
     attributes:
@@ -901,6 +999,7 @@ or
       value: "Nichts entfernt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-duplicatedNoElements
     attributes:
@@ -910,6 +1009,7 @@ or
       value: "Nichts dupliziert"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-rotatedBy
     attributes:
@@ -919,6 +1019,7 @@ or
       value: "(degrees) => `${Math.abs(degrees)} Grad ${degrees < 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn'} gedreht`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-movedLeft
     attributes:
@@ -928,6 +1029,7 @@ or
       value: "Nacht links bewegt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-movedUp
     attributes:
@@ -937,6 +1039,7 @@ or
       value: "Nacht oben bewegt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-movedDown
     attributes:
@@ -946,6 +1049,7 @@ or
       value: "Nacht unten bewegt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-movedRight
     attributes:
@@ -955,6 +1059,7 @@ or
       value: "Nacht rechts bewegt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-zoomedOut
     attributes:
@@ -964,6 +1069,7 @@ or
       value: "Ansicht verkleinert"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-zoomedIn
     attributes:
@@ -973,6 +1079,7 @@ or
       value: "Ansicht vergrößert"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-selectedElements
     attributes:
@@ -982,6 +1089,7 @@ or
       value: "(count) => `${count} Element${1 === count ? '' : 'e'} ausgewählt`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-unlabeledImageNode
     attributes:
@@ -991,6 +1099,7 @@ or
       value: "Bild ohne Label"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-stroke
     attributes:
@@ -1000,6 +1109,7 @@ or
       value: "Strich"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-svgObject
     attributes:
@@ -1009,6 +1119,7 @@ or
       value: "SVG-Objekt"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-emptyBackground
     attributes:
@@ -1018,6 +1129,7 @@ or
       value: "Leerer Hintergrund"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-gridBackground
     attributes:
@@ -1026,6 +1138,7 @@ or
       placeholder: "Grid background"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-filledBackgroundWithColor
     attributes:
@@ -1035,6 +1148,7 @@ or
       value: "(color) => `Gefüllter Hintergrund (${color})`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-text
     attributes:
@@ -1044,6 +1158,7 @@ or
       value: "(text) => `Text-Objekt: ${text}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-imageNode
     attributes:
@@ -1053,6 +1168,7 @@ or
       value: "label => `Bild: ${label}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-restyledElement
     attributes:
@@ -1062,6 +1178,7 @@ or
       value: "(elementDescription) => `${elementDescription} umgestaltet`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-pathNodeCount
     attributes:
@@ -1071,6 +1188,7 @@ or
       value: "(count) => `Es gibt ${count} sichtbare Pfad-Objekte.`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-textNodeCount
     attributes:
@@ -1080,6 +1198,7 @@ or
       value: "(count) => `Es gibt ${count} sichtbare Text-Knotenpunkte.`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-imageNodeCount
     attributes:
@@ -1089,6 +1208,7 @@ or
       value: "(nodeCount) => `Es gibt ${nodeCount} sichtbare Bild-Knoten.`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-textNode
     attributes:
@@ -1098,6 +1218,7 @@ or
       value: "(content) => `Text: ${content}`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-rerenderAsText
     attributes:
@@ -1107,6 +1228,7 @@ or
       value: "Als Text darstellen"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-accessibilityInputInstructions
     attributes:
@@ -1116,6 +1238,7 @@ or
       value: "Drücke ‚t‘, um den Inhalt des Ansichtsfensters als Text zu lesen. Verwende die Pfeiltasten, um die Ansicht zu verschieben, und klicke und ziehe, um Striche zu zeichnen. Drücke ‚w‘ zum Vergrößern und ‚s‘ zum Verkleinern der Ansicht."
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-loading
     attributes:
@@ -1125,6 +1248,7 @@ or
       value: "percentage => `Laden ${percentage}%...`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-imageEditor
     attributes:
@@ -1134,6 +1258,7 @@ or
       value: "Bild-Editor"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-doneLoading
     attributes:
@@ -1143,6 +1268,7 @@ or
       value: "Laden fertig"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-undoAnnouncement
     attributes:
@@ -1152,6 +1278,7 @@ or
       value: "(commandDescription) => `${commandDescription} rückgängig gemacht`"
     validations:
       required: false
+    render: shell
   - type: input
     id: translation-redoAnnouncement
     attributes:
@@ -1161,6 +1288,7 @@ or
       value: "(commandDescription) => `${commandDescription} wiederholt`"
     validations:
       required: false
+    render: shell
   - type: textarea
     id: additional-comments
     attributes:
@@ -1168,3 +1296,4 @@ or
       placeholder: "Any additional information/comments on the translation can go here."
     validations:
       required: false
+    render: shell
