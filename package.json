@@ -13,6 +13,7 @@
     "lint-staged": "lint-staged",
     "lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
     "build-translation-templates": "lerna run build-translation-templates",
+    "translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
     "preinstall": "git config core.hookspath .githooks",
     "postinstall": "npm run build"
   },

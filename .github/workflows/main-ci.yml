@@ -42,7 +42,7 @@ jobs:
       - name: Lint
         run: npm run lint-ci
       - name: Build pages
-        run: bash build_tools/build-website.sh
+        run: bash scripts/build-website.sh
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
