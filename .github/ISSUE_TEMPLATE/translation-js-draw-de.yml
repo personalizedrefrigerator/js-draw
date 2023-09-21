@@ -109,7 +109,10 @@ body:
       label: "dragAndDropHereOrBrowse"
       description: "Translate `Drag and drop here
 or
-{{browse}}`."
+{{browse}}`.
+
+> **Note**:
+> Uses {{curly braces}} to denote bold text"
       placeholder: "Drag and drop here
 or
 {{browse}}"
@@ -203,6 +206,22 @@ or
       description: "Translate `Duplicate selection`."
       placeholder: "Duplicate selection"
       value: "Auswahl duplizieren"
+    validations:
+      required: false
+  - type: input
+    id: translation-exit
+    attributes:
+      label: "exit"
+      description: "Translate `Exit`."
+      placeholder: "Exit"
+    validations:
+      required: false
+  - type: input
+    id: translation-save
+    attributes:
+      label: "save"
+      description: "Translate `Save`."
+      placeholder: "Save"
     validations:
       required: false
   - type: input
@@ -318,6 +337,14 @@ or
       description: "Translate `Grid`."
       placeholder: "Grid"
       value: "Gitter: "
+    validations:
+      required: false
+  - type: input
+    id: translation-enableAutoresizeOption
+    attributes:
+      label: "enableAutoresizeOption"
+      description: "Translate `Auto-resize`."
+      placeholder: "Auto-resize"
     validations:
       required: false
   - type: input
@@ -438,7 +465,10 @@ or
     id: translation-closeSidebar
     attributes:
       label: "closeSidebar"
-      description: "Translate ``(toolName) => `Close sidebar for ${toolName}` ``."
+      description: "Translate ``(toolName) => `Close sidebar for ${toolName}` ``.
+
+> **Note**:
+> Currently used as an accessibilty label"
       placeholder: "(toolName) => `Close sidebar for ${toolName}`"
       value: "(toolName) => `Close sidebar for ${toolName}`"
     validations:
@@ -790,6 +820,22 @@ or
       description: "Translate ``(newSize) => `Resized image to ${newSize.w}x${newSize.h}` ``."
       placeholder: "(newSize) => `Resized image to ${newSize.w}x${newSize.h}`"
       value: "(newSize) => `Bildgröße auf ${newSize.w}x${newSize.h} geändert`"
+    validations:
+      required: false
+  - type: input
+    id: translation-enabledAutoresizeOutputCommand
+    attributes:
+      label: "enabledAutoresizeOutputCommand"
+      description: "Translate `Enabled output autoresize`."
+      placeholder: "Enabled output autoresize"
+    validations:
+      required: false
+  - type: input
+    id: translation-disabledAutoresizeOutputCommand
+    attributes:
+      label: "disabledAutoresizeOutputCommand"
+      description: "Translate `Disabled output autoresize`."
+      placeholder: "Disabled output autoresize"
     validations:
       required: false
   - type: input
