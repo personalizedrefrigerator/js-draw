@@ -314,4 +314,51 @@ describe('Editor.toSVG', () => {
 		expect(asSVG.querySelectorAll('svg > path')).toHaveLength(2);
 		expect(asSVG.querySelector('svg > some-elem')?.getAttribute('some-attr')).toBe('foo');
 	});
+
+	describe('should increase SVG size if minDimension is greater than the image size', () => {
+		it('...with the same width/height', () => {
+			const editor = createEditor();
+			editor.dispatch(editor.setImportExportRect(new Rect2(10, 10, 20, 20)));
+
+			// No option: Don't change the width/height
+			let asSVG = editor.toSVG();
+			expect(asSVG.getAttribute('width')).toBe('20');
+			expect(asSVG.getAttribute('height')).toBe('20');
+
+			asSVG = editor.toSVG({ minDimension: 100 });
+			expect(asSVG.getAttribute('width')).toBe('100');
+			expect(asSVG.getAttribute('height')).toBe('100');
+
+			asSVG = editor.toSVG({ minDimension: 30 });
+			expect(asSVG.getAttribute('width')).toBe('30');
+			expect(asSVG.getAttribute('height')).toBe('30');
+		});
+
+		it('...with a smaller width', () => {
+			const editor = createEditor();
+			editor.dispatch(editor.setImportExportRect(new Rect2(0, 0, 10, 20)));
+
+			// Should preserve aspect ratio
+			let asSVG = editor.toSVG({ minDimension: 100 });
+			expect(asSVG.getAttribute('width')).toBe('100');
+			expect(asSVG.getAttribute('height')).toBe('200');
+
+			asSVG = editor.toSVG({ minDimension: 30 });
+			expect(asSVG.getAttribute('width')).toBe('30');
+			expect(asSVG.getAttribute('height')).toBe('60');
+		});
+
+		it('...with a smaller height', () => {
+			const editor = createEditor();
+			editor.dispatch(editor.setImportExportRect(new Rect2(0, 0, 20, 10)));
+
+			let asSVG = editor.toSVG({ minDimension: 100 });
+			expect(asSVG.getAttribute('width')).toBe('200');
+			expect(asSVG.getAttribute('height')).toBe('100');
+
+			asSVG = editor.toSVG({ minDimension: 30 });
+			expect(asSVG.getAttribute('width')).toBe('60');
+			expect(asSVG.getAttribute('height')).toBe('30');
+		});
+	});
 });

@@ -1283,10 +1283,13 @@ export class Editor {
 	/**
 	 * Converts the editor's content into an SVG image.
 	 *
+	 * If the output SVG has width or height less than `options.minDimension`, its size
+	 * will be increased.
+	 *
 	 * @see
 	 * {@link SVGRenderer}
 	 */
-	public toSVG(): SVGElement {
+	public toSVG(options?: { minDimension?: number }): SVGElement {
 		const importExportViewport = this.image.getImportExportViewport().getTemporaryClone();
 
 		const sanitize = false;
@@ -1305,8 +1308,25 @@ export class Editor {
 		// Just show the main region
 		const rect = importExportViewport.visibleRect;
 		result.setAttribute('viewBox', [rect.x, rect.y, rect.w, rect.h].map(part => toRoundedString(part)).join(' '));
-		result.setAttribute('width', toRoundedString(rect.w));
-		result.setAttribute('height', toRoundedString(rect.h));
+
+		// Adjust the width/height as necessary
+		let width = rect.w;
+		let height = rect.h;
+
+		if (options?.minDimension && width < options.minDimension) {
+			const newWidth = options.minDimension;
+			height *= newWidth / (width || 1);
+			width = newWidth;
+		}
+
+		if (options?.minDimension && height < options.minDimension) {
+			const newHeight = options.minDimension;
+			width *= newHeight / (height || 1);
+			height = newHeight;
+		}
+
+		result.setAttribute('width', toRoundedString(width));
+		result.setAttribute('height', toRoundedString(height));
 
 		if (this.image.getAutoresizeEnabled()) {
 			result.classList.add(svgLoaderAutoresizeClassName);
