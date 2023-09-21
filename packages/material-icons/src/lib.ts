@@ -39,7 +39,6 @@ import ExpandMore from './icons/ExpandMore.svg';
 import Undo from './icons/Undo.svg';
 import Redo from './icons/Redo.svg';
 import InkEraser from './icons/InkEraser.svg';
-import ArrowSelectorTool from './icons/ArrowSelectorTool.svg';
 import PanTool from './icons/PanTool.svg';
 import TouchApp from './icons/TouchApp.svg';
 import ScreenLockRotation from './icons/ScreenLockRotation.svg';
@@ -54,6 +53,7 @@ import InkHighlighter from './icons/InkHighlighter.svg';
 import Edit from './icons/Edit.svg';
 import CloudUpload from './icons/CloudUpload.svg';
 import RotateLeft from './icons/RotateLeft.svg';
+import Select from './icons/Select.svg';
 
 const icon = (data: string) => {
 	const icon = document.createElement('div');
@@ -78,7 +78,7 @@ class MaterialIconProvider extends IconProvider {
 		return icon(InkEraser);
 	}
 	public override makeSelectionIcon(): IconElemType {
-		return icon(ArrowSelectorTool);
+		return icon(Select);
 	}
 	public override makeRotateIcon(): IconElemType {
 		return icon(RotateLeft);
