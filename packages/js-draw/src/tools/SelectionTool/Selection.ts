@@ -421,6 +421,14 @@ export default class Selection {
 		this.backgroundElem.style.transform = `rotate(${rotationDeg}deg)`;
 		this.backgroundElem.style.transformOrigin = 'center';
 
+		// If closer to perpendicular, apply different CSS
+		const perpendicularClassName = `${cssPrefix}rotated-near-perpendicular`;
+		if (Math.abs(Math.sin(this.screenRegionRotation)) > 0.5) {
+			this.container.classList.add(perpendicularClassName);
+		} else {
+			this.container.classList.remove(perpendicularClassName);
+		}
+
 		for (const handle of this.handles) {
 			handle.updatePosition();
 		}

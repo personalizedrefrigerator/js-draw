@@ -23,6 +23,12 @@
 		border-radius: 100%;
 	}
 
+	&.selection-tool-rotate {
+		cursor: grab;
+	}
+}
+
+.selection-tool-handle {
 	&.selection-tool-resize-x {
 		cursor: ew-resize;
 	}
@@ -31,12 +37,22 @@
 		cursor: ns-resize;
 	}
 
-	&.selection-tool-rotate {
-		cursor: grab;
+	&.selection-tool-resize-xy {
+		cursor: nw-resize;
+	}
+}
+
+.selection-tool-rotated-near-perpendicular .selection-tool-handle {
+	&.selection-tool-resize-x {
+		cursor: ns-resize;
+	}
+
+	&.selection-tool-resize-y {
+		cursor: ew-resize;
 	}
 
 	&.selection-tool-resize-xy {
-		cursor: nw-resize;
+		cursor: sw-resize;
 	}
 }
 
