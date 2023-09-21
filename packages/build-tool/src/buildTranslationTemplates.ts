@@ -77,7 +77,6 @@ const generateTranslationTemplate = (
 
 		lines.push('    validations:');
 		lines.push(`      required: ${required}`);
-		lines.push('    render: shell');
 
 		bodyContentLines.push(...lines);
 	};
@@ -127,11 +126,12 @@ const generateTranslationTemplate = (
 			...comments,
 		].join('\n\n');
 
-		addInput('input', `translation-${key}`, {
+		addInput('textarea', `translation-${key}`, {
 			label: `${key}`,
 			description,
 			placeholder: englishTranslation,
 			value: currentTranslation,
+			render: 'shell',
 		});
 	}
 
