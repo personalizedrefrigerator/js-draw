@@ -62,9 +62,9 @@
 }
 
 @keyframes selection-duplicated-animation {
-	0% { transform: scale(1, 1); }
-	50% { transform: scale(1.02, 1.02); }
-	100% { transform: scale(1, 1); }
+	0% { scale: 1 1; }
+	50% { scale: 1.02 1.02; }
+	100% { scale: 1 1; }
 }
 
 /* Do not run the animation when the user has disabled motion animations. */
