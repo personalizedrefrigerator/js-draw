@@ -157,7 +157,7 @@ export default class SoundUITool extends BaseTool {
 	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
 
-		if (!enabled) {
+		if (!this.isEnabled()) {
 			this.soundFeedback?.close();
 			this.soundFeedback = null;
 		} else {

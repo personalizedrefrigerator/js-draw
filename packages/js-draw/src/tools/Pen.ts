@@ -46,6 +46,10 @@ export default class Pen extends BaseTool {
 		});
 	}
 
+	public override mustBeDisabledInReadOnlyEditor() {
+		return true;
+	}
+
 	private getPressureMultiplier() {
 		const thickness = this.style.thickness;
 		return 1 / this.editor.viewport.getScaleFactor() * thickness;
@@ -248,10 +252,6 @@ export default class Pen extends BaseTool {
 	public getColor() { return this.style.color; }
 	public getStrokeFactory() { return this.style.factory; }
 	public getStyleValue() { return this.styleValue; }
-
-	public override setEnabled(enabled: boolean): void {
-		super.setEnabled(enabled);
-	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		const shortcuts = this.editor.shortcuts;

@@ -9,6 +9,10 @@ export default class UndoRedoShortcut extends BaseTool {
 		super(editor.notifier, editor.localization.undoRedoTool);
 	}
 
+	public override mustBeDisabledInReadOnlyEditor() {
+		return true;
+	}
+
 	// @internal
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		if (this.editor.shortcuts.matchesShortcut(undoKeyboardShortcutId, event)) {

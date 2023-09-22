@@ -1,4 +1,5 @@
-import { BaseTool, InputEvtType, RenderingMode } from './lib';
+import { BaseTool, InputEvtType, RenderingMode, SelectionTool, sendPenEvent } from './lib';
+import { Vec2 } from '@js-draw/math';
 import Editor from './Editor';
 import createEditor from './testing/createEditor';
 
@@ -135,5 +136,86 @@ describe('Editor', () => {
 		// Should be close-ish to the minimum, but not less than.
 		expect(editor.viewport.getScaleFactor()).toBeGreaterThanOrEqual(0.25);
 		expect(editor.viewport.getScaleFactor()).toBeLessThan(0.5);
+	});
+
+	it('should be read-only when in read-only mode', () => {
+		const editor = createEditor();
+
+		expect(editor.image.getAllElements()).toHaveLength(0);
+
+		const drawStroke = () => {
+			// Before setting read only, should be possible to draw.
+			sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(20, 20));
+			sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(30, 30));
+		};
+
+		drawStroke();
+		expect(editor.image.getAllElements()).toHaveLength(1);
+
+		editor.setReadOnly(true);
+
+		const undoWithKeyboard = () => {
+			// Try to undo with keyboard shortcuts
+			editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'z', true);
+			editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'z', true);
+		};
+
+		undoWithKeyboard();
+
+		// Should have no effect
+		expect(editor.image.getAllElements()).toHaveLength(1);
+
+		// Try to draw
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-100, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(20, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(30, 300));
+
+		// Should have no effect
+		expect(editor.image.getAllElements()).toHaveLength(1);
+
+		// Try to select and delete everything
+		const selectAndDeleteAll = () => {
+			editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'a', true);
+			editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'a', true);
+
+			// Should select regardless of whether enabled.
+			const selectedObjects = [];
+			for (const selectionTool of editor.toolController.getMatchingTools(SelectionTool)) {
+				selectedObjects.push(...selectionTool.getSelectedObjects());
+			}
+			expect(selectedObjects).toHaveLength(1);
+
+			editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, 'Delete', false);
+			editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'Delete', false);
+		};
+		selectAndDeleteAll();
+
+		// Should have no effect
+		expect(editor.image.getAllElements()).toHaveLength(1);
+
+		editor.setReadOnly(false);
+
+		// Try to re-enable the pen tool
+		const selectFirstTool = () => {
+			editor.sendKeyboardEvent(InputEvtType.KeyPressEvent, '1', false);
+			editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, '1', false);
+		};
+		selectFirstTool();
+
+		// Now try to delete everything
+		selectAndDeleteAll();
+
+		// Should work
+		expect(editor.image.getAllElements()).toHaveLength(0);
+
+		// Undoing with keyboard shortcuts should also work
+		undoWithKeyboard();
+		expect(editor.image.getAllElements()).toHaveLength(1);
+
+		// And so should drawing
+		selectFirstTool();
+		drawStroke();
+		expect(editor.image.getAllElements()).toHaveLength(2);
 	});
 });

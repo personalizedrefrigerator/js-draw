@@ -50,6 +50,10 @@ export default class SelectionTool extends BaseTool {
 		this.editor.handlePointerEventsFrom(this.handleOverlay);
 	}
 
+	public override mustBeDisabledInReadOnlyEditor() {
+		return true;
+	}
+
 	private makeSelectionBox(selectionStartPos: Point2) {
 		this.prevSelectionBox = this.selectionBox;
 		this.selectionBox = new Selection(

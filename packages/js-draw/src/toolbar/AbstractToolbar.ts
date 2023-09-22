@@ -38,6 +38,16 @@ export interface SpacerOptions {
 	maxSize: string;
 }
 
+export type ToolbarActionButtonOptions = {
+	// Effect of mustBeToplevel depends on the toolbar. In the dropdown toolbar,
+	// this determines whether the button can be placed in the toolbar's overflow menu
+	// or not.
+	mustBeToplevel?: boolean;
+
+	// Whether to auto-disable the button in read-only editors. True by default.
+	autoDisableInReadOnlyEditors?: boolean;
+};
+
 export default abstract class AbstractToolbar {
 	#listeners: DispatcherEventListener[] = [];
 
@@ -317,8 +327,17 @@ export default abstract class AbstractToolbar {
 	protected makeActionButton(
 		title: string|ActionButtonIcon,
 		command: ()=>void,
-		mustBeToplevel: boolean = true,
+		options: ToolbarActionButtonOptions|boolean = true,
 	): BaseWidget {
+		// Parse options
+		if (typeof options === 'boolean') {
+			options = {
+				mustBeToplevel: options,
+			};
+		}
+		const mustBeToplevel = options.mustBeToplevel ?? true;
+		const autoDisableInReadOnlyEditors = options.autoDisableInReadOnlyEditors ?? true;
+
 		const titleString = typeof title === 'string' ? title : title.label;
 		const widgetId = 'action-button';
 
@@ -338,6 +357,7 @@ export default abstract class AbstractToolbar {
 			command,
 			this.editor.localization,
 			mustBeToplevel,
+			autoDisableInReadOnlyEditors,
 		);
 
 		return widget;
@@ -346,14 +366,18 @@ export default abstract class AbstractToolbar {
 	/**
 	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).
 	 *
+	 * `options` can either be an object with properties `mustBeToplevel` and/or
+	 * `autoDisableInReadOnlyEditors` or a boolean value. If a boolean, it is interpreted
+	 * as being the value of `mustBeToplevel`.
+	 *
 	 * @return The added button.
 	 */
 	public addActionButton(
 		title: string|ActionButtonIcon,
 		command: ()=> void,
-		mustBeToplevel: boolean = true
+		options: ToolbarActionButtonOptions|boolean = true,
 	): BaseWidget {
-		const widget = this.makeActionButton(title, command, mustBeToplevel);
+		const widget = this.makeActionButton(title, command, options);
 		this.addWidget(widget);
 		return widget;
 	}
@@ -366,9 +390,9 @@ export default abstract class AbstractToolbar {
 		tags: (ToolbarWidgetTag|string)[],
 		title: string|ActionButtonIcon,
 		command: ()=>void,
-		mustBeToplevel = true
+		options: ToolbarActionButtonOptions|boolean = true,
 	): BaseWidget {
-		const widget = this.makeActionButton(title, command, mustBeToplevel);
+		const widget = this.makeActionButton(title, command, options);
 		widget.setTags(tags);
 		this.addWidget(widget);
 
@@ -418,6 +442,8 @@ export default abstract class AbstractToolbar {
 			icon: this.editor.icons.makeCloseIcon(),
 		}, () => {
 			exitCallback();
+		}, {
+			autoDisableInReadOnlyEditors: false,
 		});
 	}
 

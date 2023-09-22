@@ -146,7 +146,7 @@ export default class FindTool extends BaseTool {
 	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
-		if (enabled) {
+		if (this.isEnabled()) {
 			this.setVisible(false);
 		}
 	}

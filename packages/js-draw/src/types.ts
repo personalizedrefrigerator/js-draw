@@ -24,6 +24,8 @@ export enum EditorEventType {
 
 	SelectionUpdated,
 
+	ReadOnlyModeToggled,
+
 	/** @internal */
 	ColorPickerToggled,
 
@@ -94,6 +96,11 @@ export interface SelectionUpdated {
 	readonly tool: BaseTool;
 }
 
+export interface ReadOnlyToggled {
+	readonly kind: EditorEventType.ReadOnlyModeToggled;
+	readonly editorIsReadOnly: boolean;
+}
+
 export interface ColorPickerToggled {
 	readonly kind: EditorEventType.ColorPickerToggled;
 	readonly open: boolean;
@@ -115,7 +122,7 @@ export interface ToolbarDropdownShownEvent {
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
 	| EditorViewportChangedEvent | DisplayResizedEvent
 	| EditorUndoStackUpdated | CommandDoneEvent | CommandUndoneEvent
-	| SelectionUpdated
+	| SelectionUpdated | ReadOnlyToggled
 	| ColorPickerToggled | ColorPickerColorSelected
 	| ToolbarDropdownShownEvent;
 

@@ -28,7 +28,12 @@ export default abstract class BaseWidget {
 	private dropdownIcon: Element;
 	private label: HTMLLabelElement;
 	#hasDropdown: boolean;
+
+	// True iff this widget is disabled.
 	private disabled: boolean = false;
+
+	// True iff this widget is currently disabled because the editor is read only
+	#disabledDueToReadOnlyEditor: boolean = false;
 
 	#tags: (ToolbarWidgetTag|string)[] = [];
 
@@ -37,6 +42,9 @@ export default abstract class BaseWidget {
 
 	private toplevel: boolean = true;
 	protected readonly localizationTable: ToolbarLocalization;
+
+	// Listens for changes in whether the editor is read-only
+	#readOnlyListener: { remove: ()=>void }|null = null;
 
 	public constructor(
 		protected editor: Editor,
@@ -80,6 +88,14 @@ export default abstract class BaseWidget {
 		if (toolbarShortcutHandlers.length > 0 && this.onKeyPress !== BaseWidget.prototype.onKeyPress) {
 			toolbarShortcutHandlers[0].registerListener(event => this.onKeyPress(event));
 		}
+	}
+
+	/**
+	 * Should return a constant true or false value. If true (the default),
+	 * this widget must be automatically disabled when its editor is read-only.
+	 */
+	protected shouldAutoDisableInReadOnlyEditor() {
+		return true;
 	}
 
 	public getId(): string {
@@ -322,6 +338,21 @@ export default abstract class BaseWidget {
 			this.container.remove();
 		}
 
+		this.#readOnlyListener = this.editor.isReadOnlyReactiveValue().onUpdateAndNow(readOnly => {
+			if (readOnly && this.shouldAutoDisableInReadOnlyEditor() && !this.disabled) {
+				this.setDisabled(true);
+				this.#disabledDueToReadOnlyEditor = true;
+
+				if (this.#hasDropdown) {
+					this.dropdown?.requestHide();
+				}
+			}
+			else if (!readOnly && this.#disabledDueToReadOnlyEditor) {
+				this.#disabledDueToReadOnlyEditor = false;
+				this.setDisabled(false);
+			}
+		});
+
 		parent.appendChild(this.container);
 		return this.container;
 	}
@@ -343,6 +374,9 @@ export default abstract class BaseWidget {
 
 	public remove() {
 		this.container.remove();
+
+		this.#readOnlyListener?.remove();
+		this.#readOnlyListener = null;
 	}
 
 	protected updateIcon() {
@@ -362,6 +396,7 @@ export default abstract class BaseWidget {
 
 	public setDisabled(disabled: boolean) {
 		this.disabled = disabled;
+		this.#disabledDueToReadOnlyEditor = false;
 
 		if (this.disabled) {
 			this.button.classList.add('disabled');

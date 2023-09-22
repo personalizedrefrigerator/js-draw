@@ -18,6 +18,10 @@ export default class OverflowWidget extends BaseWidget {
 		this.overflowContainer ??= document.createElement('div');
 	}
 
+	protected override shouldAutoDisableInReadOnlyEditor() {
+		return false;
+	}
+
 	protected getTitle(): string {
 		return this.localizationTable.toggleOverflow;
 	}

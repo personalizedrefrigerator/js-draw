@@ -50,6 +50,10 @@ export default abstract class BaseToolWidget extends BaseWidget {
 		});
 	}
 
+	protected override shouldAutoDisableInReadOnlyEditor() {
+		return this.targetTool.mustBeDisabledInReadOnlyEditor();
+	}
+
 	protected handleClick() {
 		if (this.hasDropdown) {
 			if (!this.targetTool.isEnabled()) {

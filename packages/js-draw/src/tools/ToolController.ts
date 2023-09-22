@@ -222,5 +222,12 @@ export default class ToolController implements InputEventListener {
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
 		return this.tools.filter(tool => tool instanceof type) as Type[];
 	}
+
+	// @internal
+	public onEditorDestroyed() {
+		for (const tool of this.tools) {
+			tool.onDestroy();
+		}
+	}
 }
 

@@ -11,6 +11,10 @@ class SaveActionWidget extends ActionButtonWidget {
 		this.setTags([ ToolbarWidgetTag.Save ]);
 	}
 
+	protected override shouldAutoDisableInReadOnlyEditor() {
+		return false;
+	}
+
 	protected override onKeyPress(event: KeyPressEvent): boolean {
 		if (this.editor.shortcuts.matchesShortcut(saveKeyboardShortcut, event)) {
 			this.clickAction();

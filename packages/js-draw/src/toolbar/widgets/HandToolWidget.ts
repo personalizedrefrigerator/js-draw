@@ -99,6 +99,10 @@ class HandModeWidget extends BaseWidget {
 		this.setSelected(false);
 	}
 
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
+	}
+
 	private setModeFlag(enabled: boolean) {
 		this.tool.setModeEnabled(this.flag, enabled);
 	}
@@ -169,6 +173,10 @@ export default class HandToolWidget extends BaseToolWidget {
 
 		this.addSubWidget(touchPanningWidget);
 		this.addSubWidget(rotationLockWidget);
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
 	}
 
 	private static getPrimaryHandTool(toolController: ToolController): PanZoom|null {

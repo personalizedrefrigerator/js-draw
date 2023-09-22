@@ -74,6 +74,10 @@ export default class TextTool extends BaseTool {
 		this.editor.notifier.on(EditorEventType.ViewportChanged, () => this.updateTextInput());
 	}
 
+	public override mustBeDisabledInReadOnlyEditor() {
+		return true;
+	}
+
 	private initTextMeasuringCanvas() {
 		this.textMeasuringCtx ??= document.createElement('canvas').getContext('2d');
 	}
@@ -236,7 +240,7 @@ export default class TextTool extends BaseTool {
 	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
-		if (!enabled) {
+		if (!this.isEnabled()) {
 			this.flushInput();
 		}
 

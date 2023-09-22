@@ -32,6 +32,7 @@ import RenderablePathSpec from './rendering/RenderablePathSpec';
 import makeAboutDialog, { AboutDialogEntry } from './dialogs/makeAboutDialog';
 import version from './version';
 import { editorImageToSVGSync, editorImageToSVGAsync } from './image/export/editorImageToSVG';
+import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -188,6 +189,7 @@ export class Editor {
 	private accessibilityAnnounceArea: HTMLElement;
 	private accessibilityControlArea: HTMLTextAreaElement;
 	private eventListenerTargets: HTMLElement[] = [];
+	private readOnly: MutableReactiveValue<boolean>;
 
 	private settings: EditorSettings;
 
@@ -246,6 +248,8 @@ export class Editor {
 		if (this.settings.minZoom > this.settings.maxZoom) {
 			throw new Error('Minimum zoom must be lesser than maximum zoom!');
 		}
+
+		this.readOnly = MutableReactiveValue.fromInitialValue(false);
 
 		this.icons = this.settings.iconProvider;
 
@@ -927,6 +931,30 @@ export class Editor {
 		this.eventListenerTargets.push(elem);
 	}
 
+	/**
+	 * Attempts to prevent **user-triggered** events from modifying
+	 * the content of the image.
+	 */
+	public setReadOnly(readOnly: boolean) {
+		if (readOnly !== this.readOnly.get()) {
+			this.readOnly.set(readOnly);
+
+			this.notifier.dispatch(EditorEventType.ReadOnlyModeToggled, {
+				kind: EditorEventType.ReadOnlyModeToggled,
+				editorIsReadOnly: readOnly,
+			});
+		}
+	}
+
+	// @internal
+	public isReadOnlyReactiveValue(): ReactiveValue<boolean> {
+		return this.readOnly;
+	}
+
+	public isReadOnly() {
+		return this.readOnly;
+	}
+
 	/** `apply` a command. `command` will be announced for accessibility. */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		const dispatchResult = this.dispatchNoAnnounce(command, addToHistory);
@@ -1519,11 +1547,15 @@ export class Editor {
 		this.closeAboutDialog = makeAboutDialog(this, notices).close;
 	}
 
-	/** Removes and destroys the editor */
+	/**
+	 * Removes and **destroys** the editor. The editor cannot be added to a parent
+	 * again after calling this method.
+	 */
 	public remove() {
 		this.container.remove();
 
 		// TODO: Is additional cleanup necessary here?
+		this.toolController.onEditorDestroyed();
 	}
 }
 

@@ -146,7 +146,7 @@ export abstract class ReactiveValue<T> {
 
 export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 	/**
-	 * Changes the value of this and fires all update listeners.
+	 * Changes the value of this and, if different, fires all update listeners.
 	 *
 	 * @see {@link onUpdate}
 	 */

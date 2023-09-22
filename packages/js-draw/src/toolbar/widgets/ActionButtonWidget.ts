@@ -3,6 +3,8 @@ import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 
 export default class ActionButtonWidget extends BaseWidget {
+	#autoDisableInReadOnlyEditors: boolean;
+
 	public constructor(
 		editor: Editor,
 		id: string,
@@ -13,8 +15,14 @@ export default class ActionButtonWidget extends BaseWidget {
 
 		localizationTable?: ToolbarLocalization,
 		protected mustBeToplevel: boolean = false,
+		autoDisableInReadOnlyEditors: boolean = true,
 	) {
 		super(editor, id, localizationTable);
+		this.#autoDisableInReadOnlyEditors = autoDisableInReadOnlyEditors;
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return this.#autoDisableInReadOnlyEditors;
 	}
 
 	protected handleClick() {
