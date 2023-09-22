@@ -1,4 +1,5 @@
 import Editor from './Editor';
+import { Color4 } from './lib';
 import createEditor from './testing/createEditor';
 
 const loadTestImage = async (editor: Editor, numPaths: number) => {
@@ -42,11 +43,15 @@ describe('Editor.toSVGAsync', () => {
 	it('should have same output as toSVG', async () => {
 		const editor = createEditor();
 
+
 		// Needed to evaluate requestAnimationFrame/setTimeout delays in toSVGAsync
 		jest.useRealTimers();
 
 		const numTotalPaths = 520;
 		await loadTestImage(editor, numTotalPaths);
+
+		// Add a background
+		await editor.dispatch(editor.setBackgroundColor(Color4.red));
 
 		const asyncSVG = await editor.toSVGAsync();
 		const syncSVG = editor.toSVG();

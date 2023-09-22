@@ -1294,7 +1294,11 @@ export class Editor {
 	}
 
 	/**
-	 * Converts the editor's content into an SVG image.
+	 * Converts the editor's content into an SVG image in an asynchronous,
+	 * but **potentially lossy** way.
+	 *
+	 * **Warning**: If the image is being edited during an async rendering, edited components
+	 * may not be rendered.
 	 *
 	 * Like {@link toSVG}, but can be configured to briefly pause after processing every
 	 * `pauseAfterCount` items. This can prevent the editor from becoming unresponsive

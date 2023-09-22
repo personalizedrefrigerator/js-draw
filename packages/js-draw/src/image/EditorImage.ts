@@ -124,8 +124,10 @@ export default class EditorImage {
 	}
 
 	/**
-	 * Like {@link renderAll}, but can be stopped early and
-	 * paused.
+	 * Like {@link renderAll}, but can be stopped early and paused.
+	 *
+	 * **Note**: If the image is being edited during an async rendering, there is no
+	 * guarantee that all nodes will be rendered correctly (some may be missing).
 	 *
 	 * @internal
 	 */
@@ -798,6 +800,7 @@ export class ImageNode {
 		this.children = [];
 	}
 
+	// Creates a (potentially incomplete) async rendering of this image.
 	// Returns false if stopped early
 	public async renderAllAsync(
 		renderer: AbstractRenderer,
@@ -812,7 +815,13 @@ export class ImageNode {
 
 		for (let leafIndex = 0; leafIndex < totalLeaves; leafIndex++) {
 			const leaf = leaves[leafIndex];
-			const component = leaf.getContent()!;
+			const component = leaf.getContent();
+
+			// Even though leaf was originally a leaf, it might not be any longer --
+			// rendering is async and the tree can change during that time.
+			if (!component) {
+				continue;
+			}
 
 			const shouldContinue = await preRenderComponent(component, leafIndex, totalLeaves);
 
