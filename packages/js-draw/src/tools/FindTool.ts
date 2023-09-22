@@ -27,6 +27,10 @@ export default class FindTool extends BaseTool {
 		this.overlay.classList.add(`${cssPrefix}-overlay`);
 	}
 
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
+	}
+
 	private getMatches(searchFor: string): Rect2[] {
 		searchFor = searchFor.toLocaleLowerCase();
 		const allTextComponents = this.editor.image.getAllElements()

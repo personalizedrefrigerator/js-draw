@@ -23,6 +23,7 @@ import { InputEvt, InputEvtType } from '../inputEvents';
 import InputPipeline from './InputFilter/InputPipeline';
 import InputStabilizer from './InputFilter/InputStabilizer';
 import ScrollbarTool from './ScrollbarTool';
+import ReactiveValue from '../util/ReactiveValue';
 
 export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
@@ -31,9 +32,12 @@ export default class ToolController implements InputEventListener {
 
 	// Form a pipeline that allows filtering/mapping input events.
 	private inputPipeline: InputPipeline;
+	private isEditorReadOnly: ReactiveValue<boolean>;
 
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
+		this.isEditorReadOnly = editor.isReadOnlyReactiveValue();
+
 		this.inputPipeline = new InputPipeline();
 		this.inputPipeline.setEmitListener(event => this.onEventInternal(event));
 
@@ -138,6 +142,11 @@ export default class ToolController implements InputEventListener {
 
 	// @internal use `dispatchEvent` rather than calling `onEvent` directly.
 	private onEventInternal(event: InputEvt): boolean {
+		const isEditorReadOnly = this.isEditorReadOnly.get();
+		const canToolReceiveInput = (tool: BaseTool) => {
+			return tool.isEnabled() && (!isEditorReadOnly || tool.canReceiveInputInReadOnlyEditor());
+		};
+
 		let handled = false;
 		if (event.kind === InputEvtType.PointerDownEvt) {
 			let canOnlySendToActiveTool = false;
@@ -150,7 +159,7 @@ export default class ToolController implements InputEventListener {
 					continue;
 				}
 
-				if (tool.isEnabled() && tool.onEvent(event)) {
+				if (canToolReceiveInput(tool) && tool.onEvent(event)) {
 					if (this.activeTool !== tool) {
 						this.activeTool?.onEvent({ kind: InputEvtType.GestureCancelEvt });
 					}
@@ -182,7 +191,7 @@ export default class ToolController implements InputEventListener {
 			}
 		} else {
 			for (const tool of this.tools) {
-				if (!tool.isEnabled()) {
+				if (!canToolReceiveInput(tool)) {
 					continue;
 				}
 

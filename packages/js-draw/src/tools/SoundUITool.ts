@@ -143,6 +143,10 @@ export default class SoundUITool extends BaseTool {
 		editor.createHTMLOverlay(this.toggleButtonContainer);
 	}
 
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
+	}
+
 	private updateToggleButtonText() {
 		const containerEnabledClass = 'sound-ui-tool-enabled';
 		if (this.isEnabled()) {

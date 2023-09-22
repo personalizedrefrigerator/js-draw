@@ -112,6 +112,11 @@ export default class PanZoom extends BaseTool {
 		super(editor.notifier, description);
 	}
 
+	// The pan/zoom tool can be used in a read-only editor.
+	public override canReceiveInputInReadOnlyEditor(): boolean {
+		return true;
+	}
+
 	// Returns information about the pointers in a gesture
 	public computePinchData(p1: Pointer, p2: Pointer): PinchData {
 		// Swap the pointers to ensure consistent ordering.

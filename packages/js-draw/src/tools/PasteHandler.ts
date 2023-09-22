@@ -25,10 +25,6 @@ export default class PasteHandler extends BaseTool {
 		super(editor.notifier, editor.localization.pasteHandler);
 	}
 
-	public override mustBeDisabledInReadOnlyEditor(): boolean {
-		return true;
-	}
-
 	// @internal
 	public override onPaste(event: PasteEvent): boolean {
 		const mime = event.mime.toLowerCase();

@@ -11,8 +11,6 @@ export default abstract class BaseTool implements InputEventListener {
 
 	#inputMapper: InputMapper|null = null;
 
-	#isInReadOnlyEditor: boolean = false;
-	#wouldBeEnabledIfNotReadonly: boolean = true;
 	#readOnlyEditorChangeListener: DispatcherEventListener|null = null;
 
 	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
@@ -32,26 +30,11 @@ export default abstract class BaseTool implements InputEventListener {
 				});
 			}
 		});
-
-		this.#readOnlyEditorChangeListener = notifier.on(EditorEventType.ReadOnlyModeToggled, (event) => {
-			if (event.kind !== EditorEventType.ReadOnlyModeToggled) {
-				return;
-			}
-
-			this.#isInReadOnlyEditor = event.editorIsReadOnly;
-			if (event.editorIsReadOnly && this.mustBeDisabledInReadOnlyEditor()) {
-				const wasEnabled = this.isEnabled();
-				this.setEnabled(false);
-				this.#wouldBeEnabledIfNotReadonly = wasEnabled;
-			} else {
-				this.setEnabled(this.#wouldBeEnabledIfNotReadonly);
-			}
-		});
 	}
 
 
-	/** Override this to force-disable this tool in a read-only editor */
-	public mustBeDisabledInReadOnlyEditor() {
+	/** Override this to allow this tool to be enabled in a read-only editor */
+	public canReceiveInputInReadOnlyEditor() {
 		return false;
 	}
 
@@ -151,11 +134,6 @@ export default abstract class BaseTool implements InputEventListener {
 	}
 
 	public setEnabled(enabled: boolean) {
-		this.#wouldBeEnabledIfNotReadonly = enabled;
-		if (enabled && this.#isInReadOnlyEditor && this.mustBeDisabledInReadOnlyEditor()) {
-			return;
-		}
-
 		this.#enabled.set(enabled);
 	}
 

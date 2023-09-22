@@ -10,6 +10,10 @@ export default class SelectAllShortcutHandler extends BaseTool {
 		super(editor.notifier, editor.localization.selectAllTool);
 	}
 
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
+	}
+
 	// @internal
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		if (this.editor.shortcuts.matchesShortcut(selectAllKeyboardShortcut, event)) {

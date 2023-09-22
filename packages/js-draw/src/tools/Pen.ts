@@ -46,10 +46,6 @@ export default class Pen extends BaseTool {
 		});
 	}
 
-	public override mustBeDisabledInReadOnlyEditor() {
-		return true;
-	}
-
 	private getPressureMultiplier() {
 		const thickness = this.style.thickness;
 		return 1 / this.editor.viewport.getScaleFactor() * thickness;

@@ -34,10 +34,6 @@ export default class Eraser extends BaseTool {
 		});
 	}
 
-	public override mustBeDisabledInReadOnlyEditor() {
-		return true;
-	}
-
 	private clearPreview() {
 		this.editor.clearWetInk();
 	}
