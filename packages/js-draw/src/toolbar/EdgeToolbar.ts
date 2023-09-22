@@ -268,7 +268,6 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		const actionRowBBox = this.toolbarActionRow.getBoundingClientRect();
 		const toolbarRowBBox = this.toolbarToolRow.getBoundingClientRect();
-		const inSameRow = actionRowBBox.y === toolbarRowBBox.y;
 		const onDifferentRows = actionRowBBox.y + actionRowBBox.height <= toolbarRowBBox.y;
 
 		if (onDifferentRows) {
@@ -280,11 +279,11 @@ export default class EdgeToolbar extends AbstractToolbar {
 		if (this.toolbarToolRow.clientWidth < this.toolbarToolRow.scrollWidth) {
 			this.toolbarToolRow.classList.add('has-scroll');
 
-			// If both button areas are in the same row, don't change the padding --
-			// it could lead to an endless loop of reseize events.
-			if (!inSameRow) {
-				setExtraPadding();
-			}
+			// Note: This can potentially change the size of the tool row.
+			// Because this is run inside of a ResizeObserver callback, special
+			// care must be taken to ensure that this change doesn't re-trigger
+			// the resize observer.
+			setExtraPadding();
 		} else {
 			this.toolbarToolRow.classList.remove('has-scroll', 'extra-padding');
 		}

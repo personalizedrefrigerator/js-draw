@@ -123,6 +123,14 @@
 
 		> .toolbar-action-row {
 			max-width: 50vw;
+
+			// Because the items are in the same row and a ResizeObserver
+			// can change the size of the other row, we need to ensure that
+			// this component doesn't re-trigger the ResizeObserver callback.
+			//
+			// As such, disable flex grow/shrink:
+			flex-grow: 0;
+			flex-shrink: 0;
 		}
 	}
 
