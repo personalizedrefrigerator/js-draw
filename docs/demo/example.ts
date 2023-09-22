@@ -20,7 +20,7 @@ import makeSettingsDialog from './ui/makeSettingsDialog';
 import MaterialIconProvider from '@js-draw/material-icons';
 
 // Creates and sets up a new Editor
-const createEditor = (
+const createEditor = async (
 	// Mapping from keys to localized strings based on the user's locale.
 	// For example, if the locale is es (for español), strings are in Spanish.
 	localization: Localization,
@@ -31,7 +31,10 @@ const createEditor = (
 
 	// Function that can be called to save the content of the editor.
 	saveCallback: (onComplete?: ()=>void)=>void,
-): Editor => {
+
+	// Function that returns the initial editor data
+	getInitialSVGData: ()=>Promise<string>,
+): Promise<Editor> => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement, {
 		keyboardShortcutOverrides: loadKeybindingOverrides(),
@@ -45,7 +48,7 @@ const createEditor = (
 	// default toolbar layout.
 	const toolbar = makeEdgeToolbar(editor);
 
-	toolbar.addSaveButton(() => {
+	const saveButton = toolbar.addSaveButton(() => {
 		saveCallback();
 	});
 
@@ -87,6 +90,20 @@ const createEditor = (
 	// Set focus to the main region of the editor.
 	// This allows keyboard shortcuts to work.
 	editor.focus();
+
+	// Loading the SVG:
+	// First, ensure that users can't save an incomplete image by disabling save
+	// and editing (disabling editing allows the exit button to still be clickable, so
+	// long as there is nothing to save).
+	editor.setReadOnly(true);
+	saveButton.setDisabled(true);
+
+	await editor.loadFromSVG(await getInitialSVGData());
+
+	// After loading, re-enable editing.
+	editor.setReadOnly(false);
+	saveButton.setDisabled(false);
+	console.assert(!hasChanges(), 'should not have changes just after loading the image');
 
 	return editor;
 };
@@ -193,16 +210,13 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 			hideLaunchOptions();
 
 			const fileSaver = makeFileSaver(blob.name, file);
-			const editor = createEditor(
+			const editor = await createEditor(
 				localization,
 				appNotifier,
 
-				onClose => saveImage(localization, editor, fileSaver, appNotifier, onClose));
+				onClose => saveImage(localization, editor, fileSaver, appNotifier, onClose),
 
-			const data = await blob.text();
-
-			// Load the SVG data
-			editor.loadFromSVG(data);
+				() => blob.text());
 		});
 	}
 };
@@ -216,15 +230,17 @@ const fillLaunchList = async (
 	const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
 		hideLaunchOptions();
 
-		const editor = createEditor(
+		const editor = await createEditor(
 			localization,
 			appNotifier,
 
-			onClose => saveImage(localization, editor, storeEntry, appNotifier, onClose)
-		);
+			// A function called when the save button is pressed
+			// onClose should be fired when the save dialog closes.
+			onClose => saveImage(localization, editor, storeEntry, appNotifier, onClose),
 
-		// Load the SVG data
-		editor.loadFromSVG(await storeEntry.read());
+			// A function that returns the initial SVG data to load
+			() => storeEntry.read(),
+		);
 	};
 
 	const errorList = document.createElement('ul');
