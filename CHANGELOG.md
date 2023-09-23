@@ -1,3 +1,6 @@
+# 1.4.1
+ * Bug fixes
+    * Fix `minDimension` argument not resizing the background when `toSVG` was called on an empty, auto-resizing image.
 
 # 1.4.0
  * Featrues
