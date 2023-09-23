@@ -249,6 +249,17 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		if (this.backgroundType === BackgroundType.None) {
 			return;
 		}
+
+		// If visibleRect is null, components should render everything.
+		// In that case, a full render is being done.
+		const mustRender = !visibleRect;
+
+		// If this.fillsScreen, the visibleRect needs to be known.
+		// Use the screen rect.
+		if (this.fillsScreen) {
+			visibleRect ??= canvas.getVisibleRect();
+		}
+
 		const clip = this.backgroundType === BackgroundType.Grid;
 		const contentBBox = this.getFullBoundingBox(visibleRect);
 		canvas.startObject(contentBBox, clip);
@@ -257,12 +268,11 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 			// If the rectangle for this region contains the visible rect,
 			// we can fill the entire visible rectangle (which may be more efficient than
 			// filling the entire region for this.)
-			if (visibleRect) {
-				const intersection = visibleRect.intersection(contentBBox);
-				if (intersection) {
-					canvas.fillRect(intersection, this.mainColor);
-				}
-			} else {
+			const intersection = visibleRect?.intersection(contentBBox);
+			if (intersection) {
+				canvas.fillRect(intersection, this.mainColor);
+			}
+			else if (mustRender) {
 				canvas.fillRect(contentBBox, this.mainColor);
 			}
 		}

@@ -1,5 +1,5 @@
 import EditorImage, { PreRenderComponentCallback } from '../EditorImage';
-import { Mat33 } from '@js-draw/math';
+import { Mat33, Rect2 } from '@js-draw/math';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import { svgLoaderAutoresizeClassName } from '../../SVGLoader';
 import setExportedSVGSize, { SVGSizingOptions } from './setExportedSVGSize';
@@ -19,6 +19,25 @@ const toSVGInternal = (
 	image: EditorImage, renderFunction: RenderCallback, options: SVGExportOptions
 ) => {
 	const importExportViewport = image.getImportExportViewport().getTemporaryClone();
+
+	// If the rectangle has zero width or height, its size can't be increased
+	// -- set its size to the minimum.
+	if (options?.minDimension) {
+		const originalRect = importExportViewport.visibleRect;
+		let rect = originalRect;
+
+		if (rect.w <= 1e-32) {
+			rect = new Rect2(rect.x, rect.y, options.minDimension, rect.h);
+		}
+
+		if (rect.h <= 1e-32) {
+			rect = new Rect2(rect.x, rect.y, rect.w, options.minDimension);
+		}
+
+		if (!rect.eq(originalRect)) {
+			importExportViewport.updateScreenSize(rect.size);
+		}
+	}
 
 	const { element: result, renderer } = SVGRenderer.fromViewport(
 		importExportViewport, options.sanitize ?? false,

@@ -229,4 +229,13 @@ export default abstract class AbstractRenderer {
 	public getSizeOfCanvasPixelOnScreen(): number {
 		return this.getCanvasToScreenTransform().transformVec3(Vec2.unitX).length();
 	}
+
+	// Returns the region in canvas space that is visible within the viewport this
+	// canvas is rendering to.
+	//
+	// Note that in some cases this might not be the same as the `visibleRect` given
+	// to components in their `render` method.
+	public getVisibleRect() {
+		return this.viewport.visibleRect;
+	}
 }

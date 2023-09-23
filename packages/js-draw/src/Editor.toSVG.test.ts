@@ -360,5 +360,22 @@ describe('Editor.toSVG', () => {
 			expect(asSVG.getAttribute('width')).toBe('60');
 			expect(asSVG.getAttribute('height')).toBe('30');
 		});
+
+		it('...with zero width and height', () => {
+			const editor = createEditor();
+			editor.dispatch(editor.setImportExportRect(new Rect2(0, 0, 0, 0)));
+
+			let asSVG = editor.toSVG({ minDimension: 100 });
+			expect(asSVG.getAttribute('width')).toBe('100');
+			expect(asSVG.getAttribute('height')).toBe('100');
+
+			// This should also be the case when the editor has zero size due
+			// to autoresize.
+			editor.dispatch(editor.image.setAutoresizeEnabled(true));
+
+			asSVG = editor.toSVG({ minDimension: 200 });
+			expect(asSVG.getAttribute('width')).toBe('200');
+			expect(asSVG.getAttribute('height')).toBe('200');
+		});
 	});
 });

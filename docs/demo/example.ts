@@ -167,7 +167,12 @@ const saveImage = (
 		appNotifier.dispatch('image-saved', null);
 	};
 
-	showSavePopup(localization, editor.toSVG(), editor, saveMethod, onSaveSuccess, onDialogClose);
+	// Increase the size of very small images.
+	const toSVGOptions = {
+		minDimension: 30,
+	};
+
+	showSavePopup(localization, editor.toSVG(toSVGOptions), editor, saveMethod, onSaveSuccess, onDialogClose);
 };
 
 // Destroys the welcome screen.
