@@ -1,8 +1,8 @@
 import EditorImage, { PreRenderComponentCallback } from '../EditorImage';
-import { Mat33, Rect2 } from '@js-draw/math';
+import { Rect2 } from '@js-draw/math';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import { svgLoaderAutoresizeClassName } from '../../SVGLoader';
-import setExportedSVGSize, { SVGSizingOptions } from './setExportedSVGSize';
+import adjustExportedSVGSize, { SVGSizingOptions } from './adjustExportedSVGSize';
 
 export interface SVGExportOptions extends SVGSizingOptions {
 	// Defaults to false
@@ -26,11 +26,11 @@ const toSVGInternal = (
 		const originalRect = importExportViewport.visibleRect;
 		let rect = originalRect;
 
-		if (rect.w <= 1e-32) {
+		if (rect.w <= 0) {
 			rect = new Rect2(rect.x, rect.y, options.minDimension, rect.h);
 		}
 
-		if (rect.h <= 1e-32) {
+		if (rect.h <= 0) {
 			rect = new Rect2(rect.x, rect.y, rect.w, options.minDimension);
 		}
 
@@ -40,26 +40,26 @@ const toSVGInternal = (
 	}
 
 	const { element: result, renderer } = SVGRenderer.fromViewport(
-		importExportViewport, options.sanitize ?? false,
+		importExportViewport,
+		{
+			sanitize: options.sanitize ?? false,
+			useViewBoxForPositioning: true,
+		},
 	);
-
-	const origTransform = importExportViewport.canvasToScreenTransform;
-	// Render with (0,0) at (0,0) — we'll handle translation with
-	// the viewBox property.
-	importExportViewport.resetTransform(Mat33.identity);
 
 	// Use a callback rather than async/await to allow this function to create
 	// both sync and async render functions
 	renderFunction(renderer, () => {
-		importExportViewport.resetTransform(origTransform);
-
 		if (image.getAutoresizeEnabled()) {
 			result.classList.add(svgLoaderAutoresizeClassName);
 		} else {
 			result.classList.remove(svgLoaderAutoresizeClassName);
 		}
 
-		setExportedSVGSize(result, importExportViewport, options);
+
+		const exportRect = importExportViewport.visibleRect;
+		adjustExportedSVGSize(result, exportRect, options);
+
 		return result;
 	});
 

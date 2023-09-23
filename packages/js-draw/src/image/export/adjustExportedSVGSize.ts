@@ -1,20 +1,15 @@
-import { toRoundedString } from '@js-draw/math';
-import Viewport from '../../Viewport';
+import { Rect2, toRoundedString } from '@js-draw/math';
 
 // @internal
 export type SVGSizingOptions = { minDimension?: number };
 
 // @internal
-const setExportedSVGSize = (
-	svg: SVGElement, viewport: Viewport, options: SVGSizingOptions
+const adjustExportedSVGSize = (
+	svg: SVGElement, exportRect: Rect2, options: SVGSizingOptions
 ) => {
-	// Just show the main region
-	const rect = viewport.visibleRect;
-	svg.setAttribute('viewBox', [rect.x, rect.y, rect.w, rect.h].map(part => toRoundedString(part)).join(' '));
-
 	// Adjust the width/height as necessary
-	let width = rect.w;
-	let height = rect.h;
+	let width = exportRect.w;
+	let height = exportRect.h;
 
 	if (options?.minDimension && width < options.minDimension) {
 		const newWidth = options.minDimension;
@@ -32,5 +27,5 @@ const setExportedSVGSize = (
 	svg.setAttribute('height', toRoundedString(height));
 };
 
-export default setExportedSVGSize;
+export default adjustExportedSVGSize;
 

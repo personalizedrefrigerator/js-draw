@@ -315,6 +315,45 @@ describe('Editor.toSVG', () => {
 		expect(asSVG.querySelector('svg > some-elem')?.getAttribute('some-attr')).toBe('foo');
 	});
 
+	it('should have size matching content if autoresize is enabled', async () => {
+		const editor = createEditor();
+
+		// Load from an image with auto-resize enabled
+		await editor.loadFrom(SVGLoader.fromString(`
+			<svg
+				viewBox="0 0 500 500"
+				width="500" height="500"
+				class="js-draw--autoresize"
+				version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"
+			>
+				<path d="M325,127l0-146l-186,0l0,146l186,0" fill="#ffffff" class="js-draw-image-background"/>
+				<path d="M1,-1 l10,10 l-5,-6" fill="#ff0"/>
+			</svg>
+		`, {
+			// Preserve unknown elements and attributes (may include
+			// storing SVG metadata). This ensures that storing metadata doesn't
+			// conflict with changing the size of the image.
+			sanitize: false,
+		}));
+
+		expect(editor.image.getAutoresizeEnabled()).toBe(true);
+		expect(editor.image.getImportExportRect()).objEq(new Rect2(1, -1, 10, 10));
+
+		// Saving should produce an autoresized image
+		let savedSVG = editor.toSVG();
+		expect(savedSVG.getAttribute('viewBox')).toBe('1 -1 10 10');
+		expect(savedSVG.classList.contains('js-draw--autoresize')).toBe(true);
+
+		// Disabling autoresize and saving the image should produce an image without
+		// autoresize
+		editor.dispatch(editor.image.setAutoresizeEnabled(false));
+		expect(editor.image.getAutoresizeEnabled()).toBe(false);
+
+		// Saved image should now no longer have the autoresize class
+		savedSVG = editor.toSVG();
+		expect(savedSVG.classList.contains('js-draw--autoresize')).toBe(false);
+	});
+
 	describe('should increase SVG size if minDimension is greater than the image size', () => {
 		it('...with the same width/height', () => {
 			const editor = createEditor();

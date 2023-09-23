@@ -111,4 +111,29 @@ describe('SVGLoader', () => {
 			}
 		});
 	});
+
+	it('should load autoresize attribute from a saved SVG', async () => {
+		const editor = createEditor();
+
+		// Load from an image with auto-resize enabled and a size that
+		// doesn't match its content.
+		await editor.loadFrom(SVGLoader.fromString(`
+			<svg
+				viewBox="0 0 500 500"
+				width="500" height="500"
+				class="js-draw--autoresize"
+				version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"
+			>
+				<path d="M325,127 l0-146 l-186,0 l0,146 l186,0" fill="#ffffff" class="js-draw-image-background"/>
+				<path d="M1,-1 l10,10" fill="none" stroke="#803380" stroke-width="4"/>
+			</svg>
+		`));
+
+		// Should have autoresize enabled
+		expect(editor.image.getAutoresizeEnabled()).toBe(true);
+
+		// Should have the correct bounding box (note: padded by half stroke-width
+		// on all sides).
+		expect(editor.image.getImportExportRect()).objEq(new Rect2(-1, -3, 14, 14));
+	});
 });
