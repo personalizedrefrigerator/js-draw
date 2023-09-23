@@ -1,4 +1,18 @@
 
+# 1.4.0
+ * Featrues
+    * `Editor::toSVG` now allows specifying a minimum output dimension.
+    * Added `Editor::toSVGAsync`.
+    * Added support for read-only editors (see `Editor::setReadOnly`). Note that this feature only attempts to prevent a user from editing the image (and doesn't protect from edits via the API).
+    * Change the cursor to a resize icon when hovering over selection resize boxes.
+ * Localization
+    * Improved Spanish localization.
+ * Bug fixes
+    * Navigation: Prevent app from entering an invalid state (and thus breaking navigation) when scrolling very far away from (0,0) then zooming in.
+    * Edge toolbar
+        * Fix: Save/close buttons were extra wide on some screen sizes in Safari.
+        * Fix: Padding not adjusted for scroll when icons are all on one line. When working properly, the rightmost icon should be roughly half visible to indicate scroll.
+
 # 1.3.1
  * Bug fixes
     * Fix grid lines disappearing when zooming and autoresize enabled
