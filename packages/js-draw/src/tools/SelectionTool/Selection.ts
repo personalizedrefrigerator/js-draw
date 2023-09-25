@@ -201,10 +201,12 @@ export default class Selection {
 		this.originalRegion = this.originalRegion.transformedBoundingBox(this.transform);
 		this.transform = Mat33.identity;
 
-		// Make the commands undo-able
-		await this.editor.dispatch(new Selection.ApplyTransformationCommand(
-			this, selectedElems, fullTransform
-		));
+		// Make the commands undo-able, but only if the transform is non-empty.
+		if (!fullTransform.eq(Mat33.identity)) {
+			await this.editor.dispatch(new Selection.ApplyTransformationCommand(
+				this, selectedElems, fullTransform
+			));
+		}
 
 		// Clear renderings of any in-progress transformations
 		const wetInkRenderer = this.editor.display.getWetInkRenderer();
