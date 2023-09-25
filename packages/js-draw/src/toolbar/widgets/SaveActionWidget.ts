@@ -4,10 +4,25 @@ import { ToolbarLocalization } from '../localization';
 import ActionButtonWidget from './ActionButtonWidget';
 import { ToolbarWidgetTag } from './BaseWidget';
 import { saveKeyboardShortcut } from './keybindings';
+import { ActionButtonIcon } from '../types';
 
 class SaveActionWidget extends ActionButtonWidget {
-	public constructor(editor: Editor, localization: ToolbarLocalization, saveCallback: ()=>void) {
-		super(editor, 'save-button', editor.icons.makeSaveIcon, localization.save, saveCallback);
+	public constructor(
+		editor: Editor,
+		localization: ToolbarLocalization,
+		saveCallback: ()=>void,
+		labelOverride: Partial<ActionButtonIcon> = {},
+	) {
+		super(
+			editor,
+			'save-button',
+			// Creates an icon
+			() => {
+				return labelOverride.icon ?? editor.icons.makeSaveIcon();
+			},
+			labelOverride.label ?? localization.save,
+			saveCallback
+		);
 		this.setTags([ ToolbarWidgetTag.Save ]);
 	}
 

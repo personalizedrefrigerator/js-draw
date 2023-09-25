@@ -412,9 +412,13 @@ export default abstract class AbstractToolbar {
 	 * toolbar.addDefaults();
 	 * toolbar.addSaveButton(() => alert('save clicked!'));
 	 * ```
+	 *
+	 * `labelOverride` can optionally be used to change the `label` or `icon` of the button.
 	 */
-	public addSaveButton(saveCallback: ()=>void): BaseWidget {
-		const widget = new SaveActionWidget(this.editor, this.localizationTable, saveCallback);
+	public addSaveButton(saveCallback: ()=>void, labelOverride: Partial<ActionButtonIcon> = {}): BaseWidget {
+		const widget = new SaveActionWidget(
+			this.editor, this.localizationTable, saveCallback, labelOverride,
+		);
 		widget.setTags([ ToolbarWidgetTag.Save ]);
 		this.addWidget(widget);
 
@@ -429,6 +433,9 @@ export default abstract class AbstractToolbar {
 	 * toolbar.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
 	 *   label: this.editor.localization.exit,
 	 *   icon: this.editor.icons.makeCloseIcon(),
+	 *
+	 *   // labelOverride can be used to override label or icon.
+	 *   ...labelOverride,
 	 * }, () => {
 	 *   exitCallback();
 	 * });
@@ -437,10 +444,11 @@ export default abstract class AbstractToolbar {
 	 *
 	 * @final
 	 */
-	public addExitButton(exitCallback: ()=>void): BaseWidget {
+	public addExitButton(exitCallback: ()=>void, labelOverride: Partial<ActionButtonIcon> = {}): BaseWidget {
 		return this.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
 			label: this.editor.localization.exit,
 			icon: this.editor.icons.makeCloseIcon(),
+			...labelOverride,
 		}, () => {
 			exitCallback();
 		}, {
