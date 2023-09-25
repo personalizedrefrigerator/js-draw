@@ -60,7 +60,7 @@
 	@media (hover: hover) {
 		// Only show an animation when opening the label due to a hover --
 		// show the label immediately otherwise.
-		&:hover > #{$label-selector} {
+		&:hover:not(:focus-visible) > #{$label-selector} {
 			opacity: $label-visible-opacity;
 			animation: 1s $hover-active-animation;
 		}
@@ -69,7 +69,7 @@
 	// When the user is pressing/long-pressing the button
 	&:active > #{$label-selector} {
 		opacity: $label-visible-opacity;
-		animation: 0.8s $hover-active-animation;
+		animation: 1s $hover-active-animation;
 	}
 
 	$keyboard-hide-animation: 1.5s ease rehide-label;
