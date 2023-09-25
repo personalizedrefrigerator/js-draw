@@ -54,6 +54,7 @@ import Edit from './icons/Edit.svg';
 import CloudUpload from './icons/CloudUpload.svg';
 import RotateLeft from './icons/RotateLeft.svg';
 import Select from './icons/Select.svg';
+import Close from './icons/Close.svg';
 
 const icon = (data: string) => {
 	const icon = document.createElement('div');
@@ -147,6 +148,9 @@ class MaterialIconProvider extends IconProvider {
 	}
 	public override makeDeleteSelectionIcon(): IconElemType {
 		return icon(Delete);
+	}
+	public override makeCloseIcon(): IconElemType {
+		return icon(Close);
 	}
 	public override makeSaveIcon(): IconElemType {
 		return icon(Check);
