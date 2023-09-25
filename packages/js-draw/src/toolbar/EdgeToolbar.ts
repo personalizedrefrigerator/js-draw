@@ -311,12 +311,12 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		if (tags.includes(ToolbarWidgetTag.Save)) {
 			widget.addCSSClassToContainer('label-inline');
-			widget.addCSSClassToContainer('label-right');
+			widget.addCSSClassToContainer('label-left');
 		}
 
 		if (tags.includes(ToolbarWidgetTag.Exit)) {
 			widget.addCSSClassToContainer('label-inline');
-			widget.addCSSClassToContainer('label-left');
+			widget.addCSSClassToContainer('label-right');
 		}
 	}
 
