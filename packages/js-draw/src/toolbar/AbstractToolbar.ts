@@ -424,7 +424,7 @@ export default abstract class AbstractToolbar {
 	/**
 	 * Adds an "Exit" button that, when clicked, calls `exitCallback`.
 	 *
-	 * **Note**: This is equivalent to
+	 * **Note**: This is roughly equivalent to
 	 * ```ts
 	 * toolbar.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
 	 *   label: this.editor.localization.exit,
@@ -433,6 +433,7 @@ export default abstract class AbstractToolbar {
 	 *   exitCallback();
 	 * });
 	 * ```
+	 * with some additional configuration.
 	 *
 	 * @final
 	 */

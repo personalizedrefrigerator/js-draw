@@ -105,6 +105,7 @@ body:
       label: "chooseFile"
       description: "Translate `Choose file`."
       placeholder: "Choose file"
+      value: "Seleccionar archivo"
       render: "shell"
     validations:
       required: false
@@ -139,6 +140,7 @@ or
       label: "cancel"
       description: "Translate `Cancel`."
       placeholder: "Cancel"
+      value: "Cancelar"
       render: "shell"
     validations:
       required: false
@@ -177,7 +179,7 @@ or
       label: "fontLabel"
       description: "Translate `Font`."
       placeholder: "Font"
-      value: "Fuente: "
+      value: "Fuente:"
       render: "shell"
     validations:
       required: false
@@ -227,6 +229,7 @@ or
       label: "exit"
       description: "Translate `Exit`."
       placeholder: "Exit"
+      value: "Salir"
       render: "shell"
     validations:
       required: false
@@ -236,6 +239,7 @@ or
       label: "save"
       description: "Translate `Save`."
       placeholder: "Save"
+      value: "Guardar"
       render: "shell"
     validations:
       required: false
@@ -265,7 +269,7 @@ or
       label: "selectPenTip"
       description: "Translate `Pen tip`."
       placeholder: "Pen tip"
-      value: "Forma de dibuja"
+      value: "Punta"
       render: "shell"
     validations:
       required: false
@@ -275,6 +279,7 @@ or
       label: "selectShape"
       description: "Translate `Shape`."
       placeholder: "Shape"
+      value: "Forma"
       render: "shell"
     validations:
       required: false
@@ -332,7 +337,7 @@ or
       label: "backgroundColor"
       description: "Translate `Background color`."
       placeholder: "Background color"
-      value: "Color de fondo: "
+      value: "Color de fondo"
       render: "shell"
     validations:
       required: false
@@ -457,7 +462,7 @@ or
       label: "outlinedRectanglePen"
       description: "Translate `Outlined rectangle`."
       placeholder: "Outlined rectangle"
-      value: "Rectángulo con nada más que un borde"
+      value: "Rectángulo delineado"
       render: "shell"
     validations:
       required: false
@@ -496,6 +501,7 @@ or
       label: "paste"
       description: "Translate `Paste`."
       placeholder: "Paste"
+      value: "Pegar"
       render: "shell"
     validations:
       required: false
@@ -518,9 +524,7 @@ or
       label: "dropdownShown"
       description: "Translate ``(toolName) => `Menu for ${toolName} shown` ``."
       placeholder: "(toolName) => `Menu for ${toolName} shown`"
-      value: "dropdownShown(toolName) {
-        return `Menú por ${toolName} es visible`;
-    }"
+      value: "(toolName) => `Menú por ${toolName} es visible`"
       render: "shell"
     validations:
       required: false
@@ -530,9 +534,7 @@ or
       label: "dropdownHidden"
       description: "Translate ``(toolName) => `Menu for ${toolName} hidden` ``."
       placeholder: "(toolName) => `Menu for ${toolName} hidden`"
-      value: "function (toolName) {
-        return `Menú por ${toolName} fue ocultado`;
-    }"
+      value: "(toolName) => { return `Menú por ${toolName} fue ocultado`; }"
       render: "shell"
     validations:
       required: false
@@ -552,9 +554,7 @@ or
       label: "colorChangedAnnouncement"
       description: "Translate ``(color) => `Color changed to ${color}` ``."
       placeholder: "(color) => `Color changed to ${color}`"
-      value: "function (color) {
-        return `Color fue cambiado a ${color}`;
-    }"
+      value: "(color) => { return `Color fue cambiado a ${color}`; }"
       render: "shell"
     validations:
       required: false
@@ -593,9 +593,7 @@ or
       label: "penTool"
       description: "Translate ``(penId) => `Pen ${penId}` ``."
       placeholder: "(penId) => `Pen ${penId}`"
-      value: "function (penId) {
-        return `Lapiz ${penId}`;
-    }"
+      value: "(penId) => { return `Lapiz ${penId}`; }"
       render: "shell"
     validations:
       required: false
@@ -671,6 +669,7 @@ or
       label: "pipetteTool"
       description: "Translate `Pick color from screen`."
       placeholder: "Pick color from screen"
+      value: "Seleccione un color de la pantalla"
       render: "shell"
     validations:
       required: false
@@ -764,6 +763,7 @@ or
       label: "findLabel"
       description: "Translate `Find`."
       placeholder: "Find"
+      value: "Buscar"
       render: "shell"
     validations:
       required: false
@@ -773,6 +773,7 @@ or
       label: "toNextMatch"
       description: "Translate `Next`."
       placeholder: "Next"
+      value: "Próxima"
       render: "shell"
     validations:
       required: false
@@ -782,6 +783,7 @@ or
       label: "closeDialog"
       description: "Translate `Close`."
       placeholder: "Close"
+      value: "Cerrar"
       render: "shell"
     validations:
       required: false
