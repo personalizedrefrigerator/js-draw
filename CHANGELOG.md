@@ -1,3 +1,13 @@
+# 1.5.0
+ * Bug fixes
+    * Make tooltips less likely to appear when scrolling the toolbar with touch.
+    * Fix empty selection transformations added to the undo stack.
+    * Fix diagonal resize cursors appearing as "shrink diagonally" on MacOS and possibly other systems.
+ * Other improvements
+    * Allow changing the icon/label of "Save" and "Exit" buttons
+    * Move "Exit" to the left of "Save" by default
+    * Make the "Save"/"Exit" icons closer to the text size
+
 # 1.4.1
  * Bug fixes
     * Fix `minDimension` argument not resizing the background when `toSVG` was called on an empty, auto-resizing image.
