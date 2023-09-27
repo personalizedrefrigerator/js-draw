@@ -232,6 +232,7 @@ export default class DropdownToolbar extends AbstractToolbar {
 	 * ```
 	 */
 	public addDefaults() {
+		this.addDefaultOverlays();
 		this.addDefaultToolWidgets();
 		this.addOverflowWidget();
 		this.addDefaultActionButtons();

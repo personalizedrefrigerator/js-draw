@@ -5,6 +5,7 @@
 @use "./widgets/SelectionToolWidget.scss";
 @use "./widgets/DocumentPropertiesWidget.scss";
 @use "./widgets/components/components.scss";
+@use "./overlays/ZoomControlOverlay.scss";
 
 @use "./AbstractToolbar.scss";
 @use "./EdgeToolbar.scss";

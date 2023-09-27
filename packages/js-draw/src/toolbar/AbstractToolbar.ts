@@ -22,6 +22,8 @@ import { DispatcherEventListener } from '../EventDispatcher';
 import { Color4 } from '@js-draw/math';
 import { toolbarCSSPrefix } from './constants';
 import SaveActionWidget from './widgets/SaveActionWidget';
+import { ToolbarEditorOverlay } from './overlays/types';
+import ZoomControlOverlay from './overlays/ZoomControlOverlay';
 
 type UpdateColorisCallback = ()=>void;
 type WidgetByIdMap = Record<string, BaseWidget>;
@@ -53,6 +55,8 @@ export default abstract class AbstractToolbar {
 
 	#widgetsById: WidgetByIdMap = {};
 	#widgetList: Array<BaseWidget> = [];
+
+	#overlays: Array<ToolbarEditorOverlay> = [];
 
 	private static colorisStarted: boolean = false;
 	#updateColoris: UpdateColorisCallback|null = null;
@@ -537,8 +541,16 @@ export default abstract class AbstractToolbar {
 		this.addWidget(new InsertImageWidget(this.editor, this.localizationTable));
 	}
 
+	/**
+	 * Adds the toolbar's default action buttons (e.g. undo and
+	 * redo buttons.
+	 */
 	public addDefaultActionButtons() {
 		this.addUndoRedoButtons();
+	}
+
+	public addDefaultOverlays() {
+		this.#overlays.push(new ZoomControlOverlay(this.localizationTable, this.editor));
 	}
 
 	/**
@@ -554,6 +566,13 @@ export default abstract class AbstractToolbar {
 			listener.remove();
 		}
 		this.#listeners = [];
+
+		for (const widget of this.#widgetList) {
+			widget.remove();
+		}
+		for (const overlay of this.#overlays) {
+			overlay.remove();
+		}
 
 		this.onRemove();
 	}

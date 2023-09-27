@@ -1,79 +1,13 @@
 import Editor from '../../Editor';
-import { Mat33 } from '@js-draw/math';
 import PanZoom, { PanZoomMode } from '../../tools/PanZoom';
 import ToolController from '../../tools/ToolController';
 import { EditorEventType } from '../../types';
-import Viewport from '../../Viewport';
 import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 import makeSeparator from './components/makeSeparator';
-
-const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
-	const zoomLevelRow = document.createElement('div');
-
-	const increaseButton = document.createElement('button');
-	const decreaseButton = document.createElement('button');
-	const resetViewButton = document.createElement('button');
-	const zoomLevelDisplay = document.createElement('span');
-	increaseButton.innerText = '+';
-	decreaseButton.innerText = '-';
-	resetViewButton.innerText = localizationTable.resetView;
-	zoomLevelRow.replaceChildren(zoomLevelDisplay, increaseButton, decreaseButton, resetViewButton);
-
-	zoomLevelRow.classList.add(`${toolbarCSSPrefix}zoomLevelEditor`);
-	zoomLevelDisplay.classList.add('zoomDisplay');
-
-	let lastZoom: number|undefined;
-	const updateZoomDisplay = () => {
-		let zoomLevel = editor.viewport.getScaleFactor() * 100;
-
-		if (zoomLevel > 0.1) {
-			zoomLevel = Math.round(zoomLevel * 10) / 10;
-		} else {
-			zoomLevel = Math.round(zoomLevel * 1000) / 1000;
-		}
-
-		if (zoomLevel !== lastZoom) {
-			zoomLevelDisplay.innerText = localizationTable.zoomLevel(zoomLevel);
-			lastZoom = zoomLevel;
-		}
-	};
-	updateZoomDisplay();
-
-	editor.notifier.on(EditorEventType.ViewportChanged, (event) => {
-		if (event.kind === EditorEventType.ViewportChanged) {
-			updateZoomDisplay();
-
-			// Can't reset if already reset.
-			resetViewButton.disabled = event.newTransform.eq(Mat33.identity);
-		}
-	});
-
-	const zoomBy = (factor: number) => {
-		const screenCenter = editor.viewport.visibleRect.center;
-		const transformUpdate = Mat33.scaling2D(factor, screenCenter);
-		editor.dispatch(Viewport.transformBy(transformUpdate), false);
-	};
-
-	increaseButton.onclick = () => {
-		zoomBy(5.0/4);
-	};
-
-	decreaseButton.onclick = () => {
-		zoomBy(4.0/5);
-	};
-
-	resetViewButton.onclick = () => {
-		const addToHistory = false;
-		editor.dispatch(Viewport.transformBy(
-			editor.viewport.canvasToScreenTransform.inverse()
-		), addToHistory);
-	};
-
-	return zoomLevelRow;
-};
+import makeZoomControl from '../util/makeZoomControl';
 
 class HandModeWidget extends BaseWidget {
 	public constructor(
@@ -209,9 +143,8 @@ export default class HandToolWidget extends BaseToolWidget {
 		nonbuttonActionContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
 
 		makeSeparator().addTo(nonbuttonActionContainer);
-		nonbuttonActionContainer.appendChild(
-			makeZoomControl(this.localizationTable, this.editor)
-		);
+		const zoomControl = makeZoomControl(this.localizationTable, this.editor);
+		zoomControl.addTo(nonbuttonActionContainer);
 		dropdown.appendChild(nonbuttonActionContainer);
 
 		return true;
