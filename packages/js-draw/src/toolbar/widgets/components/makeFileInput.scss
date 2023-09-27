@@ -1,0 +1,77 @@
+
+.toolbar-element .toolbar--file-input-container {
+	display: flex;
+
+	> input[type="file"] {
+		// Hide in a way such that screen readers can still access the
+		// input.
+		opacity: 0;
+		width: 0;
+		// Override the existing min-width set for other inputs
+		min-width: 0 !important;
+		max-width: 0;
+		height: 0;
+	}
+
+	> label {
+		display: block;
+		flex-grow: 1;
+
+		// Override existing padding rules.
+		padding: 0 !important;
+		padding-bottom: 5px;
+
+		// Default border color if color-mix is not supported
+		--active-border-color: rgba(100, 100, 100, 0.5);
+
+		--active-border-color: color-mix(
+			in srgb, var(--foreground-color-1), transparent
+		);
+
+		> .toolbar--file-input-description {
+			background-color: var(--background-color-3);
+			color: var(--foreground-color-3);
+
+			border: 1px dashed var(--active-border-color);
+			padding: 10px;
+			margin-top: 10px;
+
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+
+			--action-color: var(--primary-action-foreground-color);
+			--icon-color: var(--action-color);
+
+			> span {
+				// Allow `\n`s to create new lines
+				white-space: pre-wrap;
+
+				> b {
+					color: var(--action-color);
+					cursor: pointer;
+				}
+			}
+
+			> .icon {
+				$size: min(50vw, 42px);
+				width: $size;
+				height: $size;
+
+				margin-bottom: 8px;
+
+				display: block;
+			}
+		}
+
+
+		&:active, &:hover, &.drag-target {
+			--active-border-color: var(--foreground-color-1);
+		}
+
+		&.drag-target > .toolbar--file-input-description {
+			border-width: 2px;
+		}
+	}
+}

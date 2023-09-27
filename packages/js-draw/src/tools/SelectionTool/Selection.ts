@@ -5,14 +5,11 @@
 
 import SerializableCommand from '../../commands/SerializableCommand';
 import Editor from '../../Editor';
-import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/shapes/Rect2';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Mat33, Rect2, Point2, Vec2, Mat33Array } from '@js-draw/math';
 import Pointer from '../../Pointer';
-import SelectionHandle, { HandleShape, handleSize } from './SelectionHandle';
+import SelectionHandle, { HandleAction, handleSize } from './SelectionHandle';
 import { cssPrefix } from './SelectionTool';
 import AbstractComponent from '../../components/AbstractComponent';
-import { Mat33Array } from '../../math/Mat33';
 import { EditorLocalization } from '../../localization';
 import Viewport from '../../Viewport';
 import Erase from '../../commands/Erase';
@@ -20,7 +17,7 @@ import Duplicate from '../../commands/Duplicate';
 import Command from '../../commands/Command';
 import { DragTransformer, ResizeTransformer, RotateTransformer } from './TransformMode';
 import { ResizeMode } from './types';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -29,6 +26,10 @@ const maxPreviewElemCount = 500;
 export default class Selection {
 	private handles: SelectionHandle[];
 	private originalRegion: Rect2;
+
+	// The last-computed bounding box of selected content
+	// @see getTightBoundingBox
+	private selectionTightBoundingBox: Rect2|null = null;
 
 	private transformers;
 	private transform: Mat33 = Mat33.identity;
@@ -54,36 +55,49 @@ export default class Selection {
 		this.container.appendChild(this.backgroundElem);
 
 		const resizeHorizontalHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(1, 0.5),
+			{
+				action: HandleAction.ResizeX,
+				side: Vec2.of(1, 0.5),
+			},
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.HorizontalOnly),
 			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
 			() => this.transformers.resize.onDragEnd(),
 		);
 
 		const resizeVerticalHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(0.5, 1),
+			{
+				action: HandleAction.ResizeY,
+				side: Vec2.of(0.5, 1),
+			},
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.VerticalOnly),
 			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
 			() => this.transformers.resize.onDragEnd(),
 		);
 
 		const resizeBothHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(1, 1),
+			{
+				action: HandleAction.ResizeXY,
+				side: Vec2.of(1, 1),
+			},
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.Both),
 			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
 			() => this.transformers.resize.onDragEnd(),
 		);
 
 		const rotationHandle = new SelectionHandle(
-			HandleShape.Circle,
-			Vec2.of(0.5, 0),
+			{
+				action: HandleAction.Rotate,
+				side: Vec2.of(0.5, 0),
+				icon: this.editor.icons.makeRotateIcon(),
+			},
 			this,
+			this.editor.viewport,
 			(startPoint) => this.transformers.rotate.onDragStart(startPoint),
 			(currentPoint) => this.transformers.rotate.onDragUpdate(currentPoint),
 			() => this.transformers.rotate.onDragEnd(),
@@ -179,7 +193,7 @@ export default class Selection {
 	}
 
 	// Applies the current transformation to the selection
-	public finalizeTransform() {
+	public async finalizeTransform() {
 		const fullTransform = this.transform;
 		const selectedElems = this.selectedElems;
 
@@ -187,10 +201,12 @@ export default class Selection {
 		this.originalRegion = this.originalRegion.transformedBoundingBox(this.transform);
 		this.transform = Mat33.identity;
 
-		// Make the commands undo-able
-		this.editor.dispatch(new Selection.ApplyTransformationCommand(
-			this, selectedElems, fullTransform
-		));
+		// Make the commands undo-able, but only if the transform is non-empty.
+		if (!fullTransform.eq(Mat33.identity)) {
+			await this.editor.dispatch(new Selection.ApplyTransformationCommand(
+				this, selectedElems, fullTransform
+			));
+		}
 
 		// Clear renderings of any in-progress transformations
 		const wetInkRenderer = this.editor.display.getWetInkRenderer();
@@ -349,6 +365,7 @@ export default class Selection {
 	// Returns false if the selection is empty.
 	public recomputeRegion(): boolean {
 		const newRegion = this.computeTightBoundingBox();
+		this.selectionTightBoundingBox = newRegion;
 
 		if (!newRegion) {
 			this.cancelSelection();
@@ -356,17 +373,26 @@ export default class Selection {
 		}
 
 		this.originalRegion = newRegion;
+		this.padRegion();
+
+		return true;
+	}
+
+	// Applies padding to the current region if it is too small.
+	// @internal
+	public padRegion() {
+		const sourceRegion = this.selectionTightBoundingBox ?? this.originalRegion;
 
 		const minSize = this.getMinCanvasSize();
-		if (this.originalRegion.w < minSize || this.originalRegion.h < minSize) {
+		if (sourceRegion.w < minSize || sourceRegion.h < minSize) {
 			// Add padding
 			const padding = minSize / 2;
 			this.originalRegion = Rect2.bboxOf(
-				this.originalRegion.corners, padding
+				sourceRegion.corners, padding
 			);
-		}
 
-		return true;
+			this.updateUI();
+		}
 	}
 
 	public getMinCanvasSize(): number {
@@ -396,6 +422,14 @@ export default class Selection {
 		const rotationDeg = this.screenRegionRotation * 180 / Math.PI;
 		this.backgroundElem.style.transform = `rotate(${rotationDeg}deg)`;
 		this.backgroundElem.style.transformOrigin = 'center';
+
+		// If closer to perpendicular, apply different CSS
+		const perpendicularClassName = `${cssPrefix}rotated-near-perpendicular`;
+		if (Math.abs(Math.sin(this.screenRegionRotation)) > 0.5) {
+			this.container.classList.add(perpendicularClassName);
+		} else {
+			this.container.classList.remove(perpendicularClassName);
+		}
 
 		for (const handle of this.handles) {
 			handle.updatePosition();
@@ -459,28 +493,41 @@ export default class Selection {
 
 	private targetHandle: SelectionHandle|null = null;
 	private backgroundDragging: boolean = false;
-	public onDragStart(pointer: Pointer, target: EventTarget): boolean {
+	public onDragStart(pointer: Pointer): boolean {
 		// Clear the HTML selection (prevent HTML drag and drop being triggered by this drag)
 		document.getSelection()?.removeAllRanges();
 
-		this.removeDeletedElemsFromSelection();
-		this.addRemoveSelectionFromImage(false);
+		this.targetHandle = null;
+
+		let result = false;
 
 		for (const handle of this.handles) {
-			if (handle.isTarget(target)) {
-				handle.handleDragStart(pointer);
+			if (handle.containsPoint(pointer.canvasPos)) {
 				this.targetHandle = handle;
-				return true;
+				result = true;
 			}
 		}
 
-		if (this.backgroundElem === target) {
+		this.backgroundDragging = false;
+		if (this.region.containsPoint(pointer.canvasPos)) {
 			this.backgroundDragging = true;
-			this.transformers.drag.onDragStart(pointer.canvasPos);
-			return true;
+			result = true;
 		}
 
-		return false;
+		if (result) {
+			this.removeDeletedElemsFromSelection();
+			this.addRemoveSelectionFromImage(false);
+		}
+
+		if (this.targetHandle) {
+			this.targetHandle.handleDragStart(pointer);
+		}
+
+		if (this.backgroundDragging) {
+			this.transformers.drag.onDragStart(pointer.canvasPos);
+		}
+
+		return result;
 	}
 
 	public onDragUpdate(pointer: Pointer) {
@@ -546,9 +593,28 @@ export default class Selection {
 		return new Erase(this.selectedElems);
 	}
 
+	private selectionDuplicatedAnimationTimeout: ReturnType<typeof setTimeout>|null = null;
+	private runSelectionDuplicatedAnimation() {
+		if (this.selectionDuplicatedAnimationTimeout) {
+			clearTimeout(this.selectionDuplicatedAnimationTimeout);
+		}
+
+		const animationDuration = 400; // ms
+		this.backgroundElem.style.animation = `${animationDuration}ms ease selection-duplicated-animation`;
+
+		this.selectionDuplicatedAnimationTimeout = setTimeout(() => {
+			this.backgroundElem.style.animation = '';
+			this.selectionDuplicatedAnimationTimeout = null;
+		}, animationDuration);
+	}
+
 	public async duplicateSelectedObjects(): Promise<Command> {
 		const wasTransforming = this.backgroundDragging || this.targetHandle;
 		let tmpApplyCommand: Command|null = null;
+
+		if (!wasTransforming) {
+			this.runSelectionDuplicatedAnimation();
+		}
 
 		if (wasTransforming) {
 			// Don't update the selection's focus when redoing/undoing
@@ -589,6 +655,8 @@ export default class Selection {
 
 	public setToPoint(point: Point2) {
 		this.originalRegion = this.originalRegion.grownToPoint(point);
+		this.selectionTightBoundingBox = null;
+
 		this.updateUI();
 	}
 
@@ -597,18 +665,21 @@ export default class Selection {
 			this.container.remove();
 		}
 		this.originalRegion = Rect2.empty;
+		this.selectionTightBoundingBox = null;
 		this.hasParent = false;
 	}
 
 	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
 		this.addRemoveSelectionFromImage(true);
 		this.originalRegion = bbox;
+		this.selectionTightBoundingBox = bbox;
 		this.selectedElems = objects.filter(object => object.isSelectable());
+		this.padRegion();
 		this.updateUI();
 	}
 
 	public getSelectedObjects(): AbstractComponent[] {
-		return this.selectedElems;
+		return [...this.selectedElems];
 	}
 }
 

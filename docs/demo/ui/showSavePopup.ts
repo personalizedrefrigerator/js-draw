@@ -22,10 +22,13 @@ const showSavePopup = (
 
 	// Called when data has been saved successfully.
 	onSaveSuccess: ()=>void,
+
+	// Called when the dialog is closed
+	onDialogClose?: ()=>void,
 ) => {
 	let imgHTML = img.outerHTML;
 
-	const popupContainer = document.createElement('div');
+	const popupContainer = document.createElement('dialog');
 	popupContainer.classList.add('popupContainer');
 	popupContainer.appendChild(document.createTextNode('Saving...'));
 	document.body.appendChild(popupContainer);
@@ -160,6 +163,8 @@ const showSavePopup = (
 	);
 	popupDoc.close();
 
+	popupContainer.show();
+
 	// Loading the preview can be much slower than saving the image.
 	// Only do so if requested.
 	const previewRegion = popupDoc.querySelector('#previewRegion')!;
@@ -280,6 +285,7 @@ const showSavePopup = (
 	const closePopup = () => {
 		updateTitle();
 		popupContainer.remove();
+		onDialogClose?.();
 	};
 
 	closeButton.onclick = () => {

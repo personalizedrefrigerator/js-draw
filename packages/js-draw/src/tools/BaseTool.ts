@@ -2,12 +2,41 @@ import { EditorNotifier, EditorEventType } from '../types';
 import { WheelEvt, PointerEvt, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent, InputEvt, InputEvtType, GestureCancelEvt, PointerDownEvt, PointerMoveEvt, PointerUpEvt } from '../inputEvents';
 import ToolEnabledGroup from './ToolEnabledGroup';
 import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
+import { DispatcherEventListener } from '../EventDispatcher';
 
 export default abstract class BaseTool implements InputEventListener {
-	private enabled: boolean = true;
-	private group: ToolEnabledGroup|null = null;
+	#enabled: MutableReactiveValue<boolean>;
+	#group: ToolEnabledGroup|null = null;
 
 	#inputMapper: InputMapper|null = null;
+
+	#readOnlyEditorChangeListener: DispatcherEventListener|null = null;
+
+	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
+		this.#enabled = ReactiveValue.fromInitialValue(true);
+		this.#enabled.onUpdate(enabled => {
+			// Ensure that at most one tool in the group is enabled.
+			if (enabled) {
+				this.#group?.notifyEnabled(this);
+				this.notifier.dispatch(EditorEventType.ToolEnabled, {
+					kind: EditorEventType.ToolEnabled,
+					tool: this,
+				});
+			} else {
+				this.notifier.dispatch(EditorEventType.ToolDisabled, {
+					kind: EditorEventType.ToolDisabled,
+					tool: this,
+				});
+			}
+		});
+	}
+
+
+	/** Override this to allow this tool to be enabled in a read-only editor */
+	public canReceiveInputInReadOnlyEditor() {
+		return false;
+	}
 
 	public setInputMapper(mapper: InputMapper|null) {
 		this.#inputMapper = mapper;
@@ -75,9 +104,6 @@ export default abstract class BaseTool implements InputEventListener {
 
 	public onGestureCancel(_event: GestureCancelEvt) { }
 
-	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
-	}
-
 	public onWheel(_event: WheelEvt): boolean {
 		return false;
 	}
@@ -108,25 +134,27 @@ export default abstract class BaseTool implements InputEventListener {
 	}
 
 	public setEnabled(enabled: boolean) {
-		this.enabled = enabled;
-
-		// Ensure that at most one tool in the group is enabled.
-		if (enabled) {
-			this.group?.notifyEnabled(this);
-			this.notifier.dispatch(EditorEventType.ToolEnabled, {
-				kind: EditorEventType.ToolEnabled,
-				tool: this,
-			});
-		} else {
-			this.notifier.dispatch(EditorEventType.ToolDisabled, {
-				kind: EditorEventType.ToolDisabled,
-				tool: this,
-			});
-		}
+		this.#enabled.set(enabled);
 	}
 
 	public isEnabled(): boolean {
-		return this.enabled;
+		return this.#enabled.get();
+	}
+
+	/**
+	 * Returns a {@link ReactiveValue} that updates based on whether this tool is
+	 * enabled.
+	 *
+	 * @example
+	 * ```ts
+	 * const tool = new SomeTool();
+	 *
+	 * // Watch for changes in enabled status
+	 * tool.enabledValue().onUpdate(enabled => doSomething(enabled));
+	 * ```
+	 */
+	public enabledValue(): ReactiveValue<boolean> {
+		return this.#enabled;
 	}
 
 	// Connect this tool to a set of other tools, ensuring that at most one
@@ -136,15 +164,22 @@ export default abstract class BaseTool implements InputEventListener {
 			group.notifyEnabled(this);
 		}
 
-		this.group = group;
+		this.#group = group;
 	}
 
 	public getToolGroup(): ToolEnabledGroup|null {
-		if (this.group) {
-			return this.group;
+		if (this.#group) {
+			return this.#group;
 		}
 
 		return null;
+	}
+
+	// Called when the tool is removed/when the editor is destroyed.
+	// Subclasses that override this method **must call super.onDestroy()**.
+	public onDestroy() {
+		this.#readOnlyEditorChangeListener?.remove();
+		this.#readOnlyEditorChangeListener = null;
 	}
 }
 

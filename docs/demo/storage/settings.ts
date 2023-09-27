@@ -1,11 +1,11 @@
-import { HTMLToolbar, KeyBinding } from 'js-draw';
+import { AbstractToolbar, KeyBinding } from 'js-draw';
 
 // Key in window.localStorage to store the last state of the toolbar.
 const editorStateLocalStorageKey = 'editorState';
 
 
 /** Saves the current state of an `Editor`'s toolbar to `localStorage`. */
-export const saveToolbarState = (toolbar: HTMLToolbar) => {
+export const saveToolbarState = (toolbar: AbstractToolbar) => {
 	try {
 		localStorage.setItem(editorStateLocalStorageKey, toolbar.serializeState());
 	} catch (e) {
@@ -17,7 +17,7 @@ export const saveToolbarState = (toolbar: HTMLToolbar) => {
  * Loads the state of a toolbar from `localStorage` (if present) and applies it to the given
  * `toolbar`.
  */
-export const restoreToolbarState = (toolbar: HTMLToolbar) => {
+export const restoreToolbarState = (toolbar: AbstractToolbar) => {
 	const toolbarState = localStorage.getItem(editorStateLocalStorageKey);
 	if (toolbarState) {
 		// If the toolbar state is invalid, deserialize may throw errors. To prevent a change in

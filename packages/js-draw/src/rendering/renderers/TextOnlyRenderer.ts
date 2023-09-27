@@ -1,7 +1,4 @@
-import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/shapes/Rect2';
-import { Vec2 } from '../../math/Vec2';
-import Vec3 from '../../math/Vec3';
+import { Vec2, Vec3, Rect2, Mat33 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import { TextRendererLocalization } from '../localization';
 import RenderingStyle from '../RenderingStyle';

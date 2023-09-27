@@ -1,10 +1,12 @@
 # js-draw
 
-[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
+[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/js_draw.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
 
 ![](docs/img/readme-images/js-draw.jpg)
 
-For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html).
+For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/).
+
+If you're coming from version 0.25, [read the migration guide!](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html)
 
 # API
 
@@ -39,8 +41,8 @@ const editor = new Editor(document.body);
 
 If you're not using a bundler, consider using the pre-bundled editor:
 ```html
-<!-- Replace 0.20.0 with the latest version of js-draw -->
-<script src="https://cdn.jsdelivr.net/npm/js-draw@0.20.0/dist/bundle.js"></script>
+<!-- Replace 1.0.0 with the latest version of js-draw -->
+<script src="https://cdn.jsdelivr.net/npm/js-draw@1.0.0/dist/bundle.js"></script>
 <script>
     const editor = new jsdraw.Editor(document.body);
     editor.addToolbar();
@@ -58,20 +60,34 @@ To create a toolbar with the default tools:
 const toolbar = editor.addToolbar();
 ```
 
-Custom actions can be added to the toolbar. For example, to add a `save` button:
+Save and exit buttons can be added with the `.addSaveButton` and `.addExitButton` methods: 
 ```ts
-toolbar.addActionButton('Save', () => {
+toolbar.addSaveButton(() => {
     const svgElem = editor.toSVG();
     console.log('The saved SVG:', svgElem.outerHTML);
+});
+
+toolbar.addExitButton(() => {
+    // Save here?
+
+    // Removes the editor from the document.
+    editor.remove();
+});
+```
+
+Custom actions can also be added to the toolbar. For example,
+```ts
+toolbar.addActionButton('Custom', () => {
+    // When the action button is pressed
 });
 ```
 or alternatively, with an icon,
 ```ts
 toolbar.addActionButton({
-  label: 'Save'
+  label: 'Custom',
   icon: editor.icons.makeSaveIcon(),
 }, () => {
-    // Save content here.
+    // Do something here
 });
 ```
 
@@ -166,7 +182,7 @@ const editor = new Editor(document.body, {
         eraser: 'Borrador',
         select: 'Selecciona',
         thicknessLabel: 'Tamaño: ',
-        colorLabel: 'Color: ',
+        colorLabel: 'Color',
 
         ...
     },
@@ -182,36 +198,74 @@ The editor's color theme is specified using CSS. Its default theme looks like th
 .imageEditorContainer {
     /* Deafult colors for the editor -- light mode */
 
-    --primary-background-color: white;
-    --primary-background-color-transparent: rgba(255, 255, 255, 0.5);
-    --secondary-background-color: #faf;
-    --primary-foreground-color: black;
-    --secondary-foreground-color: black;
-    --primary-shadow-color: rgba(0, 0, 0, 0.5);
+    /* Used for unselected buttons and dialog text. */
+    --background-color-1: white;
+    --foreground-color-1: black;
+
+    /* Used for some menu/toolbar backgrounds. */
+    --background-color-2: #f5f5f5;
+    --foreground-color-2: #2c303a;
+
+    /* Used for other menu/toolbar backgrounds. */
+    --background-color-3: #e5e5e5;
+    --foreground-color-3: #1c202a;
+
+    /* Used for selected buttons. */
+    --selection-background-color: #cbdaf1;
+    --selection-foreground-color: #2c303a;
+
+    /* Used for dialog backgrounds */
+    --background-color-transparent: rgba(105, 100, 100, 0.5);
+
+    /* Used for shadows */
+    --shadow-color: rgba(0, 0, 0, 0.5);
+
+    /* Color used for some button/input foregrounds */
+    --primary-action-foreground-color: #15b;
 }
 
 @media (prefers-color-scheme: dark) {
     .imageEditorContainer {
-        /* Deafult colors for the editor -- dark mode */
+        /* Default colors for the editor -- dark mode */
+        --background-color-1: #151515;
+        --foreground-color-1: white;
 
-        --primary-background-color: #151515;
-        --primary-background-color-transparent: rgba(50, 50, 50, 0.5);
-        --secondary-background-color: #607;
-        --primary-foreground-color: white;
-        --secondary-foreground-color: white;
-        --primary-shadow-color: rgba(250, 250, 250, 0.5);
+        --background-color-2: #222;
+        --foreground-color-2: #efefef;
+
+        --background-color-3: #272627;
+        --foreground-color-3: #eee;
+
+        --selection-background-color: #607;
+        --selection-foreground-color: white;
+        --shadow-color: rgba(250, 250, 250, 0.5);
+        --background-color-transparent: rgba(50, 50, 50, 0.5);
+
+        --primary-action-foreground-color: #7ae;
     }
 }
 ```
 
 To override it, use a more specific CSS selector to set the theme variables. For example,
 ```css
+/* Notice the "body" below -- the selector needs to be more specific than what's in js-draw */
 body .imageEditorContainer {
-    --primary-background-color: green;
-    --primary-background-color-transparent: rgba(255, 240, 200, 0.5);
-    --secondary-background-color: yellow;
-    --primary-foreground-color: black;
-    --secondary-foreground-color: black;
+    --background-color-1: green;
+    --foreground-color-1: black;
+
+    /* For this theme, use the same secondary and tertiary colors
+       (it's okay for them to be the same). */
+    --background-color-2: lime;
+    --foreground-color-2: black;
+    --background-color-3: lime;
+    --foreground-color-3: black;
+
+    --background-color-transparent: rgba(255, 240, 200, 0.5);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+
+    --selection-background-color: yellow;
+    --selection-foreground-color: black;
 }
 ```
 disables the dark theme and creates a theme that primarily uses yellow/green colors.
+

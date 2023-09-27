@@ -1,0 +1,48 @@
+{
+	"name": "@js-draw/math",
+	"version": "1.4.0",
+	"description": "A math library for js-draw. ",
+	"types": "./dist/mjs/lib.d.ts",
+	"main": "./dist/cjs/lib.js",
+	"exports": {
+		".": {
+			"types": "./dist/mjs/lib.d.ts",
+			"import": "./dist/mjs/lib.mjs",
+			"require": "./dist/cjs/lib.js"
+		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/personalizedrefrigerator/js-draw.git"
+	},
+	"author": "Henry Heino",
+	"license": "MIT",
+	"private": false,
+	"scripts": {
+		"dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
+		"dist": "npm run build && npm run dist-test",
+		"build": "rm -rf ./dist && mkdir dist && build-tool build",
+		"watch": "rm -rf ./dist/* && mkdir -p dist && build-tool watch"
+	},
+	"dependencies": {
+		"bezier-js": "6.1.3"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^1.4.0",
+		"@types/bezier-js": "4.1.0",
+		"@types/jest": "29.5.3",
+		"@types/jsdom": "21.1.1"
+	},
+	"bugs": {
+		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"
+	},
+	"homepage": "https://github.com/personalizedrefrigerator/js-draw#readme",
+	"keywords": [
+		"ink",
+		"drawing",
+		"pen",
+		"freehand",
+		"svg",
+		"math"
+	]
+}

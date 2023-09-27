@@ -1,8 +1,16 @@
 {
 	"entryPoints": [
-		"./packages/js-draw/src/lib.ts",
-		"./packages/js-draw/src/bundle/bundled.ts"
+		"./packages/js-draw",
+		"./packages/math",
+		"./packages/material-icons",
+
+		"./docs/doc-pages/"
 	],
+	"entryPointStrategy": "packages",
+	"name": "js-draw",
+	"out": "docs/typedoc/",
+	"plugin": [ "@js-draw/typedoc-extensions" ],
+
 	"exclude": [
 		"**/*.test.ts",
 		"node_modules/**",
@@ -10,12 +18,25 @@
 		"**/dist-test/**",
 		"src/testing/"
 	],
+
+	"includes": "docs/",
+	"theme": "js-draw-theme",
+
+	"sidebarReplacements": {
+		"docs/doc-pages/typedoc": "More Documentation",
+		"packages/js-draw/src/lib": "js-draw - {{version}}",
+		"packages/math/src/lib": "@js-draw/math - {{version}}",
+		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}",
+		"MigratingToVersion1__": "Migrating to version 1",
+		"WritingATheme__": "Writing a theme"
+	},
+
 	"excludePrivate": true,
 	"excludeInternal": true,
+	"includeVersion": false,
 	"commentStyle": "all",
+
 	"readme": "README.md",
-	"entryPointStrategy": "expand",
-	"out": "docs/typedoc/",
 	"tsconfig": "tsconfig-typedoc.json",
 
 	"validation": {

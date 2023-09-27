@@ -15,6 +15,10 @@ export default class ToolSwitcherShortcut extends BaseTool {
 		super(editor.notifier, editor.localization.changeTool);
 	}
 
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
+	}
+
 	// @internal
 	public override onKeyPress({ key }: KeyPressEvent): boolean {
 		const toolController = this.editor.toolController;

@@ -5,14 +5,14 @@
 		<meta charset="utf-8"/>
 		<title>Editor from a bundle</title>
 		<style>
-			body .imageEditorContainer {
+			body .js-draw.imageEditorContainer {
 				height: 800px;
 
-				--primary-background-color: green;
-				--primary-background-color-transparent: rgba(255, 240, 200, 0.5);
-				--secondary-background-color: yellow;
-				--primary-foreground-color: black;
-				--secondary-foreground-color: black;
+				--background-color-1: green;
+				--background-color-transparent: rgba(255, 240, 200, 0.5);
+				--selection-background-color: yellow;
+				--foreground-color-1: black;
+				--selection-foreground-color: black;
 			}
 		</style>
 	</head>
@@ -21,7 +21,7 @@
 			This file tests the bundled version of <code>js-draw</code>.
 			Be sure to run <code>npm run build</code> before opening this!
 		</p>
-		<script src="../dist/bundle.js"></script>
+		<script src="../packages/js-draw/dist/bundle.js"></script>
 		<script>
 			const editor1 = new jsdraw.Editor(document.body, {
 				wheelEventsEnabled: false,

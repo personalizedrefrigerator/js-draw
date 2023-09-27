@@ -1,0 +1,74 @@
+
+.selection-tool-selection-background {
+	background-color: var(--selection-background-color);
+	opacity: 0.5;
+	overflow: visible;
+	position: absolute;
+}
+
+.selection-tool-handle {
+	border: 1px solid var(--foreground-color-1);
+	background: var(--background-color-1);
+	position: absolute;
+
+	box-sizing: border-box;
+	padding: 3px;
+
+	& .icon {
+		width: 100%;
+		height: 100%;
+	}
+
+	&.selection-tool-circle {
+		border-radius: 100%;
+	}
+
+	&.selection-tool-rotate {
+		cursor: grab;
+	}
+}
+
+.selection-tool-handle {
+	&.selection-tool-resize-x {
+		cursor: ew-resize;
+	}
+
+	&.selection-tool-resize-y {
+		cursor: ns-resize;
+	}
+
+	&.selection-tool-resize-xy {
+		cursor: nwse-resize;
+	}
+}
+
+.selection-tool-rotated-near-perpendicular .selection-tool-handle {
+	&.selection-tool-resize-x {
+		cursor: ns-resize;
+	}
+
+	&.selection-tool-resize-y {
+		cursor: ew-resize;
+	}
+
+	&.selection-tool-resize-xy {
+		cursor: nesw-resize;
+	}
+}
+
+.overlay.handleOverlay {
+	height: 0;
+	overflow: visible;
+}
+
+@keyframes selection-duplicated-animation {
+	0% { scale: 1 1; }
+	50% { scale: 1.02 1.02; }
+	100% { scale: 1 1; }
+}
+
+/* Do not run the animation when the user has disabled motion animations. */
+@media (prefers-reduced-motion: reduce) {
+	@keyframes selection-duplicated-animation {
+	}
+}

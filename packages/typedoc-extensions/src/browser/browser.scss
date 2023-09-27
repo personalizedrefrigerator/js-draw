@@ -1,0 +1,51 @@
+
+textarea.runnable-code {
+	width: 100%;
+	min-height: 400px;
+}
+
+.code-run-frame {
+	width: 100%;
+	display: block;
+}
+
+:root {
+	/* Inherit some styles from TypeDoc */
+	--cm-primary-text-color: var(--color-text);
+	--cm-primary-background-color: var(--code-background);
+
+	--cm-keyword-color: var(--hl-4);
+	--cm-comment-color: var(--hl-7);
+	--cm-string-color: var(--hl-3);
+	--cm-paren-color: var(--hl-1);
+	--cm-varname-color: var(--hl-2);
+	--cm-number-color: var(--hl-16);
+
+
+	--cm-secondary-background-color: #ddd;
+	--cm-secondary-text-color: #300;
+
+	--cm-caret-color: var(--color-text);
+	--cm-selection-background: #0af;
+
+
+	--cm-shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+@media screen and (prefers-color-scheme: dark) {	
+	:root {
+		--cm-secondary-background-color: #222;
+		--cm-secondary-text-color: #eee;
+
+		--cm-selection-background: #003388;
+
+		--cm-shadow-color: rgba(200, 200, 100, 0.5);
+	}
+}
+
+// Correct code block size within headers
+h1, h2, h3, h4, h5 {
+	code {
+		font-size: inherit;
+	}
+}

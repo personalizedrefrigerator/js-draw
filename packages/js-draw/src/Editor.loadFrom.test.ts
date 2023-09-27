@@ -1,4 +1,4 @@
-import Color4 from './Color4';
+import { Color4 } from '@js-draw/math';
 import { imageBackgroundCSSClassName } from './components/BackgroundComponent';
 import { RestyleableComponent } from './lib';
 import SVGLoader from './SVGLoader';

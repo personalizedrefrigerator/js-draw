@@ -1,8 +1,6 @@
 
 import { Editor } from '../Editor';
-import Mat33 from '../math/Mat33';
-import { Point2, Vec2 } from '../math/Vec2';
-import Vec3 from '../math/Vec3';
+import { Mat33, Vec3, Point2, Vec2 } from '@js-draw/math';
 import Pointer, { PointerDevice } from '../Pointer';
 import { EditorEventType } from '../types';
 import { KeyPressEvent, PointerEvt, WheelEvt } from '../inputEvents';
@@ -48,7 +46,7 @@ class InertialScroller {
 		}
 
 		this.currentVelocity = this.initialVelocity;
-		let lastTime = Date.now();
+		let lastTime = performance.now();
 		this.running = true;
 
 		const maxSpeed = 5000; // units/s
@@ -58,7 +56,7 @@ class InertialScroller {
 		}
 
 		while (this.running && this.currentVelocity.magnitude() > minSpeed) {
-			const nowTime = Date.now();
+			const nowTime = performance.now();
 			const dt = (nowTime - lastTime) / 1000;
 
 			this.currentVelocity = this.currentVelocity.times(Math.pow(1/8, dt));
@@ -92,6 +90,10 @@ class InertialScroller {
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;
 
+	// Distance between two touch points at the **start** of a gesture.
+	private startDist: number;
+
+	// Distance between two touch points the last time input data was received.
 	private lastDist: number;
 	private lastScreenCenter: Point2;
 	private lastTimestamp: number;
@@ -99,11 +101,20 @@ export default class PanZoom extends BaseTool {
 	private initialTouchAngle: number = 0;
 	private initialViewportRotation: number = 0;
 
+	// Set to `true` only when scaling has started (if two fingers are down and have moved
+	// far enough).
+	private isScaling: boolean = false;
+
 	private inertialScroller: InertialScroller|null = null;
 	private velocity: Vec2|null = null;
 
 	public constructor(private editor: Editor, private mode: PanZoomMode, description: string) {
 		super(editor.notifier, description);
+	}
+
+	// The pan/zoom tool can be used in a read-only editor.
+	public override canReceiveInputInReadOnlyEditor(): boolean {
+		return true;
 	}
 
 	// Returns information about the pointers in a gesture
@@ -143,9 +154,11 @@ export default class PanZoom extends BaseTool {
 		if (allAreTouch && pointers.length === 2 && this.mode & PanZoomMode.TwoFingerTouchGestures) {
 			const { screenCenter, angle, dist } = this.computePinchData(pointers[0], pointers[1]);
 			this.lastDist = dist;
+			this.startDist = dist;
 			this.lastScreenCenter = screenCenter;
 			this.initialTouchAngle = angle;
 			this.initialViewportRotation = this.editor.viewport.getRotationAngle();
+			this.isScaling = false;
 
 			handlingGesture = true;
 		} else if (pointers.length === 1 && (
@@ -154,11 +167,12 @@ export default class PanZoom extends BaseTool {
 			|| (this.mode & PanZoomMode.SinglePointerGestures)
 		)) {
 			this.lastScreenCenter = pointers[0].screenPos;
+			this.isScaling = false;
 			handlingGesture = true;
 		}
 
 		if (handlingGesture) {
-			this.lastTimestamp = (new Date()).getTime();
+			this.lastTimestamp = performance.now();
 			this.transform ??= Viewport.transformBy(Mat33.identity);
 			this.editor.display.setDraftMode(true);
 		}
@@ -168,7 +182,7 @@ export default class PanZoom extends BaseTool {
 
 	private updateVelocity(currentCenter: Point2) {
 		const deltaPos = currentCenter.minus(this.lastScreenCenter);
-		let deltaTime = (Date.now() - this.lastTimestamp) / 1000;
+		let deltaTime = (performance.now() - this.lastTimestamp) / 1000;
 
 		// Ignore duplicate events, unless there has been enough time between them.
 		if (deltaPos.magnitude() === 0 && deltaTime < 0.1) {
@@ -246,8 +260,21 @@ export default class PanZoom extends BaseTool {
 
 		this.updateVelocity(screenCenter);
 
+		let scaleFactor = 1;
+		if (this.isScaling) {
+			scaleFactor = dist / this.lastDist;
+		} else {
+			const initialScaleFactor = dist / this.startDist;
+
+			// Only start scaling if scaling done so far exceeds some threshold.
+			if (initialScaleFactor > 1.05 || initialScaleFactor < 0.95) {
+				scaleFactor = initialScaleFactor;
+				this.isScaling = true;
+			}
+		}
+
 		const transformUpdate = Mat33.translation(delta)
-			.rightMul(Mat33.scaling2D(dist / this.lastDist, canvasCenter))
+			.rightMul(Mat33.scaling2D(scaleFactor, canvasCenter))
 			.rightMul(Mat33.zRotation(deltaRotation, canvasCenter));
 
 		this.lastScreenCenter = screenCenter;
@@ -255,32 +282,35 @@ export default class PanZoom extends BaseTool {
 		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(transformUpdate)
 		);
+		return transformUpdate;
 	}
 
 	private handleOneFingerMove(pointer: Pointer) {
 		const delta = this.getCenterDelta(pointer.screenPos);
+		const transformUpdate = Mat33.translation(delta);
 		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(
-				Mat33.translation(delta)
-			)
+				transformUpdate,
+			),
 		);
 		this.updateVelocity(pointer.screenPos);
 		this.lastScreenCenter = pointer.screenPos;
+
+		return transformUpdate;
 	}
 
 	public override onPointerMove({ allPointers }: PointerEvt): void {
 		this.transform ??= Viewport.transformBy(Mat33.identity);
 
-		const lastTransform = this.transform;
+		let transformUpdate = Mat33.identity;
 		if (allPointers.length === 2) {
-			this.handleTwoFingerMove(allPointers);
+			transformUpdate = this.handleTwoFingerMove(allPointers);
 		} else if (allPointers.length === 1) {
-			this.handleOneFingerMove(allPointers[0]);
+			transformUpdate = this.handleOneFingerMove(allPointers[0]);
 		}
-		lastTransform.unapply(this.editor);
-		this.transform.apply(this.editor);
+		Viewport.transformBy(transformUpdate).apply(this.editor);
 
-		this.lastTimestamp = (new Date()).getTime();
+		this.lastTimestamp = performance.now();
 	}
 
 	public override onPointerUp(event: PointerEvt): void {
@@ -384,9 +414,15 @@ export default class PanZoom extends BaseTool {
 			toCanvas.transformVec3(
 				Vec3.of(-delta.x, -delta.y, 0)
 			);
-		const pinchZoomScaleFactor = 1.03;
+
+		let pinchAmount = delta.z;
+
+		// Clamp the magnitude of pinchAmount
+		pinchAmount = Math.atan(pinchAmount / 2) * 2;
+
+		const pinchZoomScaleFactor = 1.04;
 		const transformUpdate = Mat33.scaling2D(
-			Math.max(0.25, Math.min(Math.pow(pinchZoomScaleFactor, -delta.z), 4)), canvasPos
+			Math.max(0.4, Math.min(Math.pow(pinchZoomScaleFactor, -pinchAmount), 4)), canvasPos
 		).rightMul(
 			Mat33.translation(translation)
 		);

@@ -1,5 +1,5 @@
 // If from an NPM package,
-import { Editor, EditorEventType, EventDispatcher } from 'js-draw';
+import { Editor, EditorEventType, EventDispatcher, makeEdgeToolbar } from 'js-draw';
 import 'js-draw/styles';
 
 import { Localization, getLocalizationTable } from './localization';
@@ -17,9 +17,10 @@ import makeNewImageDialog from './ui/makeNewImageDialog';
 import { AppNotifier } from './types';
 import { loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
 import makeSettingsDialog from './ui/makeSettingsDialog';
+import MaterialIconProvider from '@js-draw/material-icons';
 
 // Creates and sets up a new Editor
-const createEditor = (
+const createEditor = async (
 	// Mapping from keys to localized strings based on the user's locale.
 	// For example, if the locale is es (for español), strings are in Spanish.
 	localization: Localization,
@@ -29,31 +30,49 @@ const createEditor = (
 	appNotifier: AppNotifier,
 
 	// Function that can be called to save the content of the editor.
-	saveCallback: ()=>void,
-): Editor => {
+	saveCallback: (onComplete?: ()=>void)=>void,
+
+	// Function that returns the initial editor data
+	getInitialSVGData: ()=>Promise<string>,
+): Promise<Editor> => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement, {
-		keyboardShortcutOverrides: loadKeybindingOverrides()
+		keyboardShortcutOverrides: loadKeybindingOverrides(),
+		iconProvider: new MaterialIconProvider(),
 	});
+
+	const { hasChanges } = watchForChanges(editor, appNotifier);
 
 	// Although new Editor(parentElement) created an Editor, it doesn't have a toolbar
 	// yet. `.addToolbar()` creates a toolbar and adds it to the document, using the
 	// default toolbar layout.
-	const toolbar = editor.addToolbar();
+	const toolbar = makeEdgeToolbar(editor);
+
+	const saveButton = toolbar.addSaveButton(() => {
+		saveCallback();
+	});
+
+	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
+
+	toolbar.addDefaults();
 
 	// Add space between the save button and the other buttons.
 	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
 
-	// Show a "are you sure you want to leave this page" dialog
-	// if there could be unsaved changes.
-	setUpUnsavedChangesWarning(localization, editor, appNotifier);
+	// Also add a close button
+	const closeEditor = () => {
+		editor.remove();
+		void reShowLaunchOptions(localization, appNotifier);
+	};
 
-	toolbar.addActionButton({
-		label: localization.save,
-		icon: editor.icons.makeSaveIcon(),
-	}, () => {
-		saveCallback();
+	toolbar.addExitButton(() => {
+		if (hasChanges() && confirm(localization.saveUnsavedChanges)) {
+			saveCallback(closeEditor);
+		} else {
+			closeEditor();
+		}
 	});
+
 
 	// Save toolbar state whenever tool state changes (which could be caused by a
 	// change in the one of the toolbar widgets).
@@ -64,28 +83,34 @@ const createEditor = (
 	// Load toolbar widget state from localStorage.
 	restoreToolbarState(toolbar);
 
+	// Show a "are you sure you want to leave this page" dialog
+	// if there could be unsaved changes.
+	setUpUnsavedChangesWarning(localization, hasChanges);
+
 	// Set focus to the main region of the editor.
 	// This allows keyboard shortcuts to work.
 	editor.focus();
 
+	// Loading the SVG:
+	// First, ensure that users can't save an incomplete image by disabling save
+	// and editing (disabling editing allows the exit button to still be clickable, so
+	// long as there is nothing to save).
+	editor.setReadOnly(true);
+	saveButton.setDisabled(true);
+
+	await editor.loadFromSVG(await getInitialSVGData());
+
+	// After loading, re-enable editing.
+	editor.setReadOnly(false);
+	saveButton.setDisabled(false);
+	console.assert(!hasChanges(), 'should not have changes just after loading the image');
+
 	return editor;
 };
 
-// Show a confirmation dialog if the user attemtps to close the page while there
-// are unsaved changes.
-const setUpUnsavedChangesWarning = (
-	localization: Localization, editor: Editor, appNotifier: AppNotifier
-) => {
+// Watches `editor` for changes.
+const watchForChanges = (editor: Editor, appNotifier: AppNotifier) => {
 	let hasChanges = false;
-
-	// Show a confirmation dialog when the user tries to close the page.
-	window.onbeforeunload = () => {
-		if (hasChanges) {
-			return localization.confirmUnsavedChanges;
-		}
-
-		return undefined;
-	};
 
 	// Watch for commands to be done or undone: If this happens, there are likely
 	// unsaved changes.
@@ -101,6 +126,26 @@ const setUpUnsavedChangesWarning = (
 	appNotifier.on('image-saved', () => {
 		hasChanges = false;
 	});
+
+	return {
+		hasChanges: () => hasChanges,
+	};
+};
+
+// Show a confirmation dialog if the user attemtps to close the page while there
+// are unsaved changes.
+const setUpUnsavedChangesWarning = (
+	localization: Localization, hasChanges: ()=>boolean,
+) => {
+	// Show a confirmation dialog when the user tries to close the page.
+	window.onbeforeunload = () => {
+		if (hasChanges()) {
+			return localization.confirmUnsavedChanges;
+		}
+
+		return undefined;
+	};
+
 };
 
 // Saves the contents of `editor` using the given `saveMethod` (an ImageSaver is an
@@ -114,20 +159,36 @@ const saveImage = (
 	editor: Editor,
 	saveMethod: ImageSaver,
 	appNotifier: AppNotifier,
+
+	onDialogClose?: ()=>void
 ) => {
 	const onSaveSuccess = () => {
 		// Notify other parts of the app that the image was saved successfully.
 		appNotifier.dispatch('image-saved', null);
 	};
 
-	showSavePopup(localization, editor.toSVG(), editor, saveMethod, onSaveSuccess);
+	// Increase the size of very small images.
+	const toSVGOptions = {
+		minDimension: 30,
+	};
+
+	showSavePopup(localization, editor.toSVG(toSVGOptions), editor, saveMethod, onSaveSuccess, onDialogClose);
 };
 
 // Destroys the welcome screen.
+let launchScreen: HTMLElement|null = null;
 const hideLaunchOptions = () => {
-	document.querySelector('#launchOptions')?.remove();
+	launchScreen = document.querySelector('#launchOptions');
+	launchScreen?.remove();
 };
 
+const reShowLaunchOptions = async (localization: Localization, appNotifier: AppNotifier) => {
+	if (launchScreen) {
+		launchScreen.replaceChildren();
+		await fillLaunchList(launchScreen, localization, appNotifier);
+		document.body.appendChild(launchScreen);
+	}
+};
 
 // PWA file access. At the time of this writing, TypeScript does not recognise window.launchQueue.
 declare let launchQueue: any;
@@ -154,74 +215,84 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 			hideLaunchOptions();
 
 			const fileSaver = makeFileSaver(blob.name, file);
-			const editor = createEditor(
+			const editor = await createEditor(
 				localization,
 				appNotifier,
 
-				() => saveImage(localization, editor, fileSaver, appNotifier));
+				onClose => saveImage(localization, editor, fileSaver, appNotifier, onClose),
 
-			const data = await blob.text();
-
-			// Load the SVG data
-			editor.loadFromSVG(data);
+				() => blob.text());
 		});
 	}
 };
 
-(async () => {
-	// Get a set of localized strings so that this app can be displayed in
-	// a language the user is familiar with.
-	const localization = getLocalizationTable();
-	const appNotifier: AppNotifier = new EventDispatcher();
-
-	// If launched with a file to open, open the file.
-	handlePWALaunching(localization, appNotifier);
-
+// Fills `launchButtonContainer` with a list of recent saves
+const fillLaunchList = async (
+	launchButtonContainer: HTMLElement, localization: Localization, appNotifier: AppNotifier
+) => {
 	// Load from a data store entry. `storeEntry` might be, for example,
 	// an image and its metadata as stored in this app's database.
 	const loadFromStoreEntry = async (storeEntry: StoreEntry) => {
 		hideLaunchOptions();
 
-		const editor = createEditor(
+		const editor = await createEditor(
 			localization,
 			appNotifier,
 
-			() => saveImage(localization, editor, storeEntry, appNotifier)
-		);
+			// A function called when the save button is pressed
+			// onClose should be fired when the save dialog closes.
+			onClose => saveImage(localization, editor, storeEntry, appNotifier, onClose),
 
-		// Load the SVG data
-		editor.loadFromSVG(await storeEntry.read());
+			// A function that returns the initial SVG data to load
+			() => storeEntry.read(),
+		);
 	};
 
-	// launchButtonContainer will contain a list of recent drawings
-	const launchButtonContainer = document.querySelector('#launchOptions');
+	const errorList = document.createElement('ul');
+	errorList.classList.add('error-container');
+	launchButtonContainer.appendChild(errorList);
+
+	const showError = (errorMessage: string) => {
+		const messageContainer = document.createElement('li');
+		messageContainer.innerText = errorMessage;
+		errorList.appendChild(messageContainer);
+		errorList.classList.add('has-errors');
+	};
 
 	// Wrap window.localStorage in a class that facilitates reading/writing to it.
 	const localStorageDataStore = new LocalStorageStore(localization);
 
 	// Wrap window.indexeddb in a similar class. Both extend AbstractStore, which
 	// allows our image saving/loading code to work with either/both.
-	const dbStore = await IndexedDBStore.create(localization);
+	let dbStore: IndexedDBStore|null;
+	try {
+		dbStore = await IndexedDBStore.create(localization);
+	} catch (error) {
+		showError(`${localization.databaseLoadError} Error: ${error}`);
+		dbStore = null;
+	}
 
 	// Create a list of buttons for loading recent saves.
-	const dbLoadSaveList = await makeLoadFromSaveList(dbStore, loadFromStoreEntry, localization);
-	launchButtonContainer?.appendChild(dbLoadSaveList);
+	if (dbStore) {
+		const dbLoadSaveList = await makeLoadFromSaveList(dbStore, loadFromStoreEntry, localization);
+		launchButtonContainer.appendChild(dbLoadSaveList);
+	}
 
 	const lsLoadSaveList = await makeLoadFromSaveList(localStorageDataStore, loadFromStoreEntry, localization);
-	launchButtonContainer?.appendChild(lsLoadSaveList);
+	launchButtonContainer.appendChild(lsLoadSaveList);
 
 	// Add a "new image" floating action button.
 	const newImageFAB = new FloatingActionButton({
 		title: localization.new,
 		icon: makeIconFromText('+')
-	}, document.body);
+	}, launchButtonContainer);
 
 	newImageFAB.addClickListener(async () => {
 		// Disable the FAB while the "new image" dialog is open: We don't want
 		// the user to be able to make multiple "new image" dialogs be present
 		// on the screen at the same time.
 		newImageFAB.setDisabled(true);
-		const entry = await makeNewImageDialog(localization, dbStore);
+		const entry = await makeNewImageDialog(localization, dbStore ?? localStorageDataStore);
 		newImageFAB.setDisabled(false);
 
 		if (entry === null) {
@@ -240,5 +311,19 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 		settingsButton.style.display = 'block';
 	};
 	settingsButton.classList.add('settingsButton');
-	launchButtonContainer?.appendChild(settingsButton);
+	launchButtonContainer.appendChild(settingsButton);
+};
+
+(async () => {
+	// Get a set of localized strings so that this app can be displayed in
+	// a language the user is familiar with.
+	const localization = getLocalizationTable();
+	const appNotifier: AppNotifier = new EventDispatcher();
+
+	// If launched with a file to open, open the file.
+	handlePWALaunching(localization, appNotifier);
+
+	// launchButtonContainer will contain a list of recent drawings
+	const launchButtonContainer = document.querySelector('#launchOptions') as HTMLElement;
+	await fillLaunchList(launchButtonContainer, localization, appNotifier);
 })();

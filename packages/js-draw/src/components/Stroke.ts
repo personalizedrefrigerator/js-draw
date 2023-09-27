@@ -1,14 +1,12 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33 from '../math/Mat33';
-import Path from '../math/shapes/Path';
-import Rect2 from '../math/shapes/Rect2';
+import { Mat33, Path, Rect2, LineSegment2 } from '@js-draw/math';
 import Editor from '../Editor';
-import AbstractRenderer, { RenderablePathSpec } from '../rendering/renderers/AbstractRenderer';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
+import RenderablePathSpec, { pathFromRenderable, pathToRenderable } from '../rendering/RenderablePathSpec';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -64,7 +62,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		this.parts = [];
 
 		for (const section of parts) {
-			const path = Path.fromRenderable(section);
+			const path = pathFromRenderable(section);
 			const pathBBox = this.bboxForPart(path.bbox, section.style);
 
 			if (!this.contentBBox) {
@@ -156,6 +154,55 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			}
 		}
 		return false;
+	}
+
+	public override intersectsRect(rect: Rect2): boolean {
+		// AbstractComponent::intersectsRect can be inexact for strokes with non-zero
+		// stroke radius (has many false negatives). As such, additional checks are
+		// done here, before passing to the superclass.
+
+		if (!rect.intersects(this.getBBox())) {
+			return false;
+		}
+
+		// The following check only checks for the positive case:
+		// Sample a set of points that are known to be within each part of this
+		// stroke. For example, the points marked with an "x" below:
+		//   ___________________
+		//  /                   \
+		//  | x              x  |
+		//  \_____________      |
+		//                |  x  |
+		//                \_____/
+		//
+		// Because we don't want the following case to result in selection,
+		//   __________________
+		//  /.___.             \
+		//  || x |          x  |    <-  /* The
+		//  |·---·             |            .___.
+		//  \____________      |            |   |
+		//               |  x  |            ·---·
+		//               \_____/           denotes the input rectangle */
+		//
+		// we need to ensure that the rectangle intersects each point **and** the
+		// edge of the rectangle.
+		for (const part of this.parts) {
+			// As such, we need to shrink the input rectangle to verify that the original,
+			// unshrunken rectangle would have intersected the edge of the stroke if it
+			// intersects a point within the stroke.
+			const interiorRect = rect.grownBy(-(part.style.stroke?.width ?? 0));
+			if (interiorRect.area === 0) {
+				continue;
+			}
+
+			for (const point of part.path.startEndPoints()) {
+				if (interiorRect.containsPoint(point)) {
+					return true;
+				}
+			}
+		}
+
+		return super.intersectsRect(rect);
 	}
 
 	public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
@@ -287,7 +334,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 		const pathSpec: RenderablePathSpec[] = json.map((part: any) => {
 			const style = styleFromJSON(part.style);
-			return Path.fromString(part.path).toRenderable(style);
+			return pathToRenderable(Path.fromString(part.path), style);
 		});
 		return new Stroke(pathSpec);
 	}

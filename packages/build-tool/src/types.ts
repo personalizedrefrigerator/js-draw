@@ -1,4 +1,6 @@
 
+export type BuildMode = 'build'|'watch';
+
 
 export interface BundledFileRecord {
 	name: string;
@@ -26,8 +28,17 @@ export interface TranslationSourcePair {
 export interface BuildConfig {
 	bundledFiles: BundledFileRecord[];
 
+	prebuild: {
+		// A path to a script to be run just before building
+		scriptPath: string;
+	}|null;
+
 	translationSourceFiles: TranslationSourcePair[];
 	translationDestPath: string;
+
+	// Paths to SCSS files to be compiled. If given, both inDirectory and
+	// outDirectory must be specified.
+	scssFiles: string[];
 
 	inDirectory: string|undefined;
 	outDirectory: string|undefined;

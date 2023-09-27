@@ -1,0 +1,6 @@
+{
+	"name": "Additional Documentation",
+	"description": "Not a real package -- used to include markdown files in generated typedoc output",
+	"private": true,
+	"version": "0.0.0"
+}

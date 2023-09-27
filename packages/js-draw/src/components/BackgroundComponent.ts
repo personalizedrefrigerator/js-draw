@@ -1,19 +1,14 @@
-import Color4 from '../Color4';
 import Editor from '../Editor';
-import EditorImage, { EditorImageEventType } from '../EditorImage';
+import EditorImage, { EditorImageEventType } from '../image/EditorImage';
 import { DispatcherEventListener } from '../EventDispatcher';
 import SerializableCommand from '../commands/SerializableCommand';
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33 from '../math/Mat33';
-import Rect2 from '../math/shapes/Rect2';
+import { LineSegment2, Mat33, Rect2, Color4, toRoundedString, Path, PathCommandType, Vec2, PathCommand } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
-import Path, { PathCommand, PathCommandType } from '../math/shapes/Path';
-import { Vec2 } from '../math/Vec2';
 import Viewport from '../Viewport';
-import { toRoundedString } from '../math/rounding';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 export enum BackgroundType {
 	SolidColor,
@@ -40,6 +35,11 @@ export const backgroundTypeToClassNameMap = {
 export default class BackgroundComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
 	private viewportSizeChangeListener: DispatcherEventListener|null = null;
+	private autoresizeChangedListener: DispatcherEventListener|null = null;
+
+	// Whether the background should grow/shrink to match the screen size,
+	// rather than being clipped to the image boundaries.
+	private fillsScreen: boolean = false;
 
 	private gridSize: number = Viewport.getGridSize(2);
 	private gridStrokeWidth: number = 0.7;
@@ -143,26 +143,51 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 			EditorImageEventType.ExportViewportChanged, () => {
 				this.recomputeBBox(image);
 			});
+
+		this.autoresizeChangedListener = image.notifier.on(
+			EditorImageEventType.AutoresizeModeChanged,
+			() => {
+				this.recomputeBBox(image);
+			},
+		);
 		this.recomputeBBox(image);
 	}
 
 	public override onRemoveFromImage(): void {
 		this.viewportSizeChangeListener?.remove();
+		this.autoresizeChangedListener?.remove();
+
 		this.viewportSizeChangeListener = null;
+		this.autoresizeChangedListener = null;
 	}
 
 	private recomputeBBox(image: EditorImage) {
 		const importExportRect = image.getImportExportViewport().visibleRect;
+		let needsRerender = false;
 		if (!this.contentBBox.eq(importExportRect)) {
 			this.contentBBox = importExportRect;
 
-			// Re-render this if already added to the EditorImage.
+			needsRerender = true;
+		}
+
+		const imageAutoresizes = image.getAutoresizeEnabled();
+		if (imageAutoresizes !== this.fillsScreen) {
+			this.fillsScreen = imageAutoresizes;
+
+			needsRerender = true;
+		}
+
+		if (needsRerender) {
+			// Re-renders this if already added to the EditorImage.
 			image.queueRerenderOf(this);
 		}
 	}
 
 	private generateGridPath(visibleRect?: Rect2) {
-		const targetRect = visibleRect?.grownBy(this.gridStrokeWidth)?.intersection(this.contentBBox) ?? this.contentBBox;
+		const contentBBox = this.getFullBoundingBox(visibleRect);
+
+		// .grownBy acts on all sides, so we need only grow by strokeWidth / 2 (1 * the stroke radius)
+		const targetRect = (visibleRect?.intersection(contentBBox) ?? contentBBox).grownBy(this.gridStrokeWidth / 2);
 
 		const roundDownToGrid = (coord: number) => Math.floor(coord / this.gridSize) * this.gridSize;
 		const roundUpToGrid = (coord: number) => Math.ceil(coord / this.gridSize) * this.gridSize;
@@ -211,24 +236,44 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		return new Path(startPoint, result);
 	}
 
+	/**
+	 * @returns this background's bounding box if the screen size is taken into
+	 * account (which may be necessary if this component is configured to fill the
+	 * entire screen).
+	 */
+	private getFullBoundingBox(visibleRect?: Rect2) {
+		return (this.fillsScreen ? visibleRect : this.contentBBox) ?? this.contentBBox;
+	}
+
 	public render(canvas: AbstractRenderer, visibleRect?: Rect2) {
 		if (this.backgroundType === BackgroundType.None) {
 			return;
 		}
+
+		// If visibleRect is null, components should render everything.
+		// In that case, a full render is being done.
+		const mustRender = !visibleRect;
+
+		// If this.fillsScreen, the visibleRect needs to be known.
+		// Use the screen rect.
+		if (this.fillsScreen) {
+			visibleRect ??= canvas.getVisibleRect();
+		}
+
 		const clip = this.backgroundType === BackgroundType.Grid;
-		canvas.startObject(this.contentBBox, clip);
+		const contentBBox = this.getFullBoundingBox(visibleRect);
+		canvas.startObject(contentBBox, clip);
 
 		if (this.backgroundType === BackgroundType.SolidColor || this.backgroundType === BackgroundType.Grid) {
 			// If the rectangle for this region contains the visible rect,
 			// we can fill the entire visible rectangle (which may be more efficient than
 			// filling the entire region for this.)
-			if (visibleRect) {
-				const intersection = visibleRect.intersection(this.contentBBox);
-				if (intersection) {
-					canvas.fillRect(intersection, this.mainColor);
-				}
-			} else {
-				canvas.fillRect(this.contentBBox, this.mainColor);
+			const intersection = visibleRect?.intersection(contentBBox);
+			if (intersection) {
+				canvas.fillRect(intersection, this.mainColor);
+			}
+			else if (mustRender) {
+				canvas.fillRect(contentBBox, this.mainColor);
 			}
 		}
 
@@ -246,7 +291,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 				fill: Color4.transparent,
 				stroke: { width: this.gridStrokeWidth, color: gridColor }
 			};
-			canvas.drawPath(this.generateGridPath(visibleRect).toRenderable(style));
+			canvas.drawPath(pathToRenderable(this.generateGridPath(visibleRect), style));
 		}
 
 		const backgroundTypeCSSClass = backgroundTypeToClassNameMap[this.backgroundType];
@@ -276,6 +321,10 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 
 	public override isBackground(): boolean {
 		return true;
+	}
+
+	public override getSizingMode(): ComponentSizingMode {
+		return this.fillsScreen ? ComponentSizingMode.FillScreen : ComponentSizingMode.BoundingBox;
 	}
 
 	protected serializeToJSON() {

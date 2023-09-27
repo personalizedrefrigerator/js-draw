@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>Debugging | js-draw examples</title>
+	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+		}
+
+		#history-container {
+			display: flex;
+			flex-direction: row;
+
+			height: 25vh;
+		}
+
+		#history-container>div {
+			width: 50vw;
+
+			display: flex;
+			flex-direction: column;
+
+			overflow-y: auto;
+
+			border: 1px solid gray;
+		}
+
+		#history-container pre {
+			white-space: pre-wrap;
+			word-wrap: break-word;
+		}
+
+		.js-draw.imageEditorContainer {
+			flex-grow: 2;
+			flex-shrink: 1;
+			max-height: 75vh;
+			min-height: 500px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="history-container"></div>
+	<div id="editor-container"></div>
+</body>
+<script src="./index.bundle.js"></script>
+
+</html>

@@ -1,14 +1,10 @@
-import Color4 from '../../Color4';
 import TextComponent from '../../components/TextComponent';
-import Mat33 from '../../math/Mat33';
-import Path from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
-import { Point2, Vec2 } from '../../math/Vec2';
-import Vec3 from '../../math/Vec3';
+import { Mat33, Rect2, Point2, Vec2, Vec3, Color4 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
-import AbstractRenderer, { RenderableImage, RenderablePathSpec } from './AbstractRenderer';
+import AbstractRenderer, { RenderableImage } from './AbstractRenderer';
+import RenderablePathSpec, { visualEquivalent } from '../RenderablePathSpec';
 
 /**
  * Renders onto a `CanvasRenderingContext2D`.
@@ -116,9 +112,15 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	protected endPath(style: RenderingStyle) {
-		this.ctx.save();
-		this.ctx.fillStyle = style.fill.toHexString();
-		this.ctx.fill();
+		// Saving and restoring can be slow in some browsers
+		// (e.g. 0.50ms). Avoid.
+		//this.ctx.save();
+
+		// If not a transparent fill
+		if (style.fill.a > 0) {
+			this.ctx.fillStyle = style.fill.toHexString();
+			this.ctx.fill();
+		}
 
 		if (style.stroke) {
 			this.ctx.strokeStyle = style.stroke.color.toHexString();
@@ -126,10 +128,12 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.ctx.lineCap = 'round';
 			this.ctx.lineJoin = 'round';
 			this.ctx.stroke();
+
+			this.ctx.lineWidth = 1;
 		}
 
 		this.ctx.closePath();
-		this.ctx.restore();
+		//this.ctx.restore();
 	}
 
 	protected lineTo(point: Point2) {
@@ -181,7 +185,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		// If part of a huge object, it might be worth trimming the path
 		if (this.currentObjectBBox?.containsRect(this.getViewport().visibleRect)) {
 			// Try to trim/remove parts of the path outside of the bounding box.
-			path = Path.visualEquivalent(
+			path = visualEquivalent(
 				path,
 				this.getViewport().visibleRect
 			);
@@ -281,6 +285,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 				1.0,
 				0.5 + Math.cos(i * 0.2) / 4, 0.5
 			).toHexString();
+			this.ctx.lineWidth = 2;
 			this.ctx.fill();
 			this.ctx.stroke();
 			this.ctx.closePath();

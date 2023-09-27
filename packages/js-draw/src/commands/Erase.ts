@@ -1,7 +1,7 @@
 import AbstractComponent from '../components/AbstractComponent';
 import describeComponentList from '../components/util/describeComponentList';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { EditorLocalization } from '../localization';
 import SerializableCommand from './SerializableCommand';
 
@@ -43,6 +43,7 @@ export default class Erase extends SerializableCommand {
 
 			if (parent) {
 				parent.remove();
+				editor.image.onDestroyElement(part);
 			}
 		}
 

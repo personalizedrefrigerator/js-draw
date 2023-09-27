@@ -1,9 +1,7 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33, { Mat33Array } from '../math/Mat33';
-import Rect2 from '../math/shapes/Rect2';
+import EditorImage from '../image/EditorImage';
+import { LineSegment2, Mat33, Mat33Array, Rect2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
@@ -14,6 +12,27 @@ export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
 export type DeserializeCallback = (data: string)=>AbstractComponent;
 type ComponentId = string;
 
+export enum ComponentSizingMode {
+	/** The default. The compnent gets its size from its bounding box. */
+	BoundingBox,
+
+	/** Causes the component to fill the entire visible region of the screen */
+	FillScreen,
+
+	/**
+	 * Displays the component anywhere (arbitrary location) on the
+	 * canvas. (Ignoring the bounding box).
+	 *
+	 * These components may be ignored unless a full render is done.
+	 *
+	 * Intended for compnents that need to be rendered on a full export,
+	 * but won't be visible to the user.
+	 *
+	 * For example, a metadata component.
+	 */
+	Anywhere,
+}
+
 /**
  * A base class for everything that can be added to an {@link EditorImage}.
  */
@@ -23,9 +42,17 @@ export default abstract class AbstractComponent {
 	// @deprecated
 	protected lastChangedTime: number;
 
-	// The bounding box of this component.
-	// {@link getBBox}, by default, returns `contentBBox`.
-	// This must be set by components.
+	/**
+	 * The bounding box of this component.
+	 * {@link getBBox}, by default, returns `contentBBox`.
+	 * This must be set by components.
+	 *
+	 * If this changes, {@link EditorImage.queueRerenderOf} should be called for
+	 * this object (provided that this object has been added to the editor.)
+	 *
+	 * **Note**: This value is ignored if {@link getSizingMode} returns `FillScreen`
+	 * or `FillImage`.
+	 */
 	protected abstract contentBBox: Rect2;
 
 	private zIndex: number;
@@ -112,10 +139,32 @@ export default abstract class AbstractComponent {
 		return this.getBBox();
 	}
 
+	/**
+	 * Returns information about how this component should be displayed
+	 * (e.g. fill the screen or get its size from {@link getBBox}).
+	 *
+	 * {@link EditorImage.queueRerenderOf} must be called to apply changes to
+	 * the output of this method if this component has already been added to an
+	 * {@link EditorImage}.
+	 */
+	public getSizingMode(): ComponentSizingMode {
+		return ComponentSizingMode.BoundingBox;
+	}
+
 	/** Called when this component is added to the given image. */
 	public onAddToImage(_image: EditorImage): void { }
 	public onRemoveFromImage(): void { }
 
+	/**
+	 * Renders this component onto the given `canvas`.
+	 *
+	 * If `visibleRect` is given, it should be the region of `canvas` that is visible --
+	 * rendering anything outside of `visibleRect` should have no visible effect on the
+	 * resultant image.
+	 *
+	 * For optimal performance, implementers should call `canvas.startObject` and `canvas.endObject`
+	 * before and after rendering.
+	 */
 	public abstract render(canvas: AbstractRenderer, visibleRect?: Rect2): void;
 
 	/** @return true if `lineSegment` intersects this component. */
@@ -152,6 +201,7 @@ export default abstract class AbstractComponent {
 
 	// Returns a command that, when applied, transforms this by [affineTransfm] and
 	// updates the editor.
+	// This also increases the element's z-index so that it is on top.
 	public transformBy(affineTransfm: Mat33): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);
 	}

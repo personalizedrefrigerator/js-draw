@@ -1,0 +1,14 @@
+.tool-dropdown-separator {
+	// Default border color if color-mix is not supported.
+	--border-color: rgba(100, 100, 100, 0.2);
+
+	// A mostly-transparent version of the foreground color.
+	--border-color: color-mix(in srgb, var(--foreground-color-1), rgba(0, 0, 0, 0) 80%);
+
+	border-top: 1px solid var(--border-color);
+
+	padding-left: 2px;
+
+	margin-top: 10px;
+	margin-bottom: 10px;
+}

@@ -1,0 +1,19 @@
+{
+	"name": "@js-draw/debug-history-visualizer",
+	"version": "1.5.0",
+	"description": "Allows viewing undo history",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"bundle": "ts-node scripts/bundle.ts",
+		"watchBundle": "ts-node scripts/watchBundle.ts",
+		"build": "build-tool build",
+		"watch": "build-tool watch"
+	},
+	"dependencies": {
+		"js-draw": "^1.5.0"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^1.4.0"
+	}
+}

@@ -1,13 +1,14 @@
 import Editor from '../../Editor';
-import Mat33 from '../../math/Mat33';
+import { Mat33 } from '@js-draw/math';
 import PanZoom, { PanZoomMode } from '../../tools/PanZoom';
 import ToolController from '../../tools/ToolController';
 import { EditorEventType } from '../../types';
 import Viewport from '../../Viewport';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
+import makeSeparator from './components/makeSeparator';
 
 const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
 	const zoomLevelRow = document.createElement('div');
@@ -65,39 +66,14 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 	};
 
 	resetViewButton.onclick = () => {
+		const addToHistory = false;
 		editor.dispatch(Viewport.transformBy(
 			editor.viewport.canvasToScreenTransform.inverse()
-		), true);
+		), addToHistory);
 	};
 
 	return zoomLevelRow;
 };
-
-class ZoomWidget extends BaseWidget {
-	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
-		super(editor, 'zoom-widget', localizationTable);
-
-		// Make it possible to open the dropdown, even if this widget isn't selected.
-		this.container.classList.add('dropdownShowable');
-	}
-
-	protected getTitle(): string {
-		return this.localizationTable.zoom;
-	}
-
-	protected createIcon(): Element {
-		return this.editor.icons.makeZoomIcon();
-	}
-
-	protected handleClick(): void {
-		this.setDropdownVisible(!this.isDropdownVisible());
-	}
-
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
-		dropdown.replaceChildren(makeZoomControl(this.localizationTable, this.editor));
-		return true;
-	}
-}
 
 class HandModeWidget extends BaseWidget {
 	public constructor(
@@ -121,6 +97,10 @@ class HandModeWidget extends BaseWidget {
 			}
 		});
 		this.setSelected(false);
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
 	}
 
 	private setModeFlag(enabled: boolean) {
@@ -193,9 +173,10 @@ export default class HandToolWidget extends BaseToolWidget {
 
 		this.addSubWidget(touchPanningWidget);
 		this.addSubWidget(rotationLockWidget);
-		this.addSubWidget(
-			new ZoomWidget(editor, localizationTable)
-		);
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
 	}
 
 	private static getPrimaryHandTool(toolController: ToolController): PanZoom|null {
@@ -218,6 +199,22 @@ export default class HandToolWidget extends BaseToolWidget {
 		} else {
 			this.setDropdownVisible(!this.isDropdownVisible());
 		}
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
+		super.fillDropdown(dropdown);
+
+		// The container for all actions that come after the toolbar buttons.
+		const nonbuttonActionContainer = document.createElement('div');
+		nonbuttonActionContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
+
+		makeSeparator().addTo(nonbuttonActionContainer);
+		nonbuttonActionContainer.appendChild(
+			makeZoomControl(this.localizationTable, this.editor)
+		);
+		dropdown.appendChild(nonbuttonActionContainer);
+
+		return true;
 	}
 
 	public override setSelected(selected: boolean): void {

@@ -1,0 +1,162 @@
+
+@use './toolbar/toolbar.scss';
+@use './tools/tools.scss';
+@use './dialogs/dialogs.scss';
+@use './Coloris.css';
+
+/* Deafult colors for the editor */
+.imageEditorContainer {
+	// The primary background/foreground colors are used for
+	// unselected buttons and dialog text.
+	--background-color-1: white;
+	--foreground-color-1: black;
+
+	// The secondary foreground/background colors are used for some menu/toolbar
+	// backgrounds.
+	--background-color-2: #f5f5f5;
+	--foreground-color-2: #2c303a;
+
+	// The tertiary foreground/background colors are also used for some
+	// menu/toolbar backgrounds.
+	--background-color-3: #e5e5e5;
+	--foreground-color-3: #1c202a;
+
+	// The selection background/foreground colors are used for selected
+	// buttons.
+	--selection-background-color: #cbdaf1;
+	--selection-foreground-color: #2c303a;
+
+	// Used for dialog backgrounds
+	--background-color-transparent: rgba(105, 100, 100, 0.5);
+
+	// Used for shadows
+	--shadow-color: rgba(0, 0, 0, 0.5);
+
+	// Color used for some button/input foregrounds
+	--primary-action-foreground-color: #15b;
+}
+
+@media (prefers-color-scheme: dark) {
+	.imageEditorContainer {
+		--background-color-1: #151515;
+		--foreground-color-1: white;
+
+		--background-color-2: #222;
+		--foreground-color-2: #efefef;
+
+		--background-color-3: #272627;
+		--foreground-color-3: #eee;
+
+		--selection-background-color: #607;
+		--selection-foreground-color: white;
+		--shadow-color: rgba(250, 250, 250, 0.5);
+		--background-color-transparent: rgba(50, 50, 50, 0.5);
+
+		--primary-action-foreground-color: #7ae;
+	}
+}
+
+// Derived colors
+.imageEditorContainer {
+	// Default icon color
+	--icon-color: var(--foreground-color-1);
+}
+
+.imageEditorContainer {
+	color: var(--foreground-color-1);
+	font-family: system-ui, -apple-system, sans-serif;
+	background-color: var(--background-color-1);
+	
+	// Set the width/height to a value that's independent of its content -- avoids
+	// ResizeObserver errors: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
+	width: 100%;
+	height: 400px;
+	min-height: 220px;
+	min-width: 100px;
+
+	box-sizing: border-box;
+
+	display: flex;
+	flex-direction: column-reverse;
+
+	input {
+		accent-color: var(--primary-action-foreground-color);
+	}
+}
+
+.imageEditorContainer .imageEditorRenderArea {
+	display: grid;
+	grid-template-columns: 1fr;
+	flex-grow: 2;
+	flex-shrink: 1;
+	min-height: 100px;
+	min-width: 0;
+	width: 100%;
+	height:	100%;
+}
+
+.imageEditorContainer .imageEditorRenderArea canvas {
+	/* Stack all canvases on top of each other */
+	grid-row: 1 / 1;
+	grid-column: 1 / 1;
+	touch-action: none;
+
+	/* Fill the container */
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+
+	/* Allow the canvas to shrink (needed in Chrome) */
+	min-width: 0;
+	max-width: inherit;
+	min-height: 0px;
+	max-height: inherit;
+}
+
+.imageEditorContainer .loadingMessage {
+	position: fixed;
+	text-align: center;
+	font-size: 2em;
+
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.imageEditorContainer .accessibilityAnnouncement {
+	opacity: 0;
+	width: 0;
+	height: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.imageEditorContainer .textRendererOutputContainer {
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.imageEditorContainer .textRendererOutputContainer:focus-within {
+	overflow: visible;
+	z-index: 5;
+}
+
+// TODO: Apply this change during a future major release.
+// So as not to change the position of other overlays, all overlays should have
+// 0 height.
+// Uses the alternate overlay class name to decrease specificity.
+// .js-draw-editor-overlay {
+// 	//height: 0;
+// }
+
+@media print {
+	.imageEditorContainer .loadingMessage {
+		display: none;
+	}
+
+	.imageEditorContainer .imageEditorRenderArea canvas {
+		width: 100%;
+		height: initial;
+	}
+}

@@ -2,7 +2,7 @@ import { GestureCancelEvt, InputEvt, InputEvtType, PointerEvt, PointerMoveEvt, i
 import InputMapper from './InputMapper';
 import Viewport from '../../Viewport';
 import Editor from '../../Editor';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Point2, Vec2 } from '@js-draw/math';
 import untilNextAnimationFrame from '../../util/untilNextAnimationFrame';
 
 enum StabilizerType {
@@ -72,7 +72,7 @@ class StylusInputStabilizer {
 	}
 
 	private async loop() {
-		this.lastUpdateTime = Date.now();
+		this.lastUpdateTime = performance.now();
 		while (this.runLoop) {
 			this.update(false);
 			await untilNextAnimationFrame();
@@ -105,7 +105,7 @@ class StylusInputStabilizer {
 	}
 
 	public update(force: boolean): boolean {
-		const nowTime = Date.now();
+		const nowTime = performance.now();
 		const deltaTime = nowTime - this.lastUpdateTime;
 
 		const reachedTarget = this.strokePoint.eq(this.targetPoint);
@@ -154,7 +154,7 @@ class StylusInputStabilizer {
 		const toTarget = this.targetPoint.minus(this.strokePoint);
 		if (this.velocity.dot(toTarget) > this.options.minSimilarityToFinalize) {
 			// Connect the stroke to its end point
-			this.updatePointer(this.targetPoint, Date.now());
+			this.updatePointer(this.targetPoint, performance.now());
 		}
 	}
 
@@ -175,7 +175,9 @@ export default class InputStabilizer extends InputMapper {
 	}
 
 	private mapPointerEvent(event: PointerEvt|GestureCancelEvt) {
-		if (isPointerEvt(event)) {
+		// Don't store the last pointer event for use with pressure/button data --
+		// this information can be very different for a pointerup event.
+		if (isPointerEvt(event) && event.kind !== InputEvtType.PointerUpEvt) {
 			this.lastPointerEvent = event;
 		}
 

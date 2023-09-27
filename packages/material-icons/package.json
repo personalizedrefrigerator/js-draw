@@ -1,0 +1,30 @@
+{
+	"name": "@js-draw/material-icons",
+	"version": "1.5.0",
+	"description": "Material icon pack for js-draw. ",
+	"types": "./dist/mjs/lib.d.ts",
+	"main": "./dist/cjs/lib.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/personalizedrefrigerator/js-draw.git"
+	},
+	"author": "Henry Heino",
+	"license": "MIT",
+	"private": false,
+	"scripts": {
+		"dist": "npm run build",
+		"build": "rm -rf ./dist/* && mkdir -p dist && build-tool build",
+		"watch": "rm -rf ./dist/* && mkdir -p dist && build-tool watch"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^1.4.0",
+		"js-draw": "^1.5.0"
+	},
+	"peerDependencies": {
+		"js-draw": "^1.0.1"
+	},
+	"bugs": {
+		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"
+	},
+	"homepage": "https://github.com/personalizedrefrigerator/js-draw#readme"
+}

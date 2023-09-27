@@ -1,6 +1,5 @@
 
-import Mat33 from '../../math/Mat33';
-import { Vec2 } from '../../math/Vec2';
+import { Mat33, Vec2 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import DummyRenderer from './DummyRenderer';
 

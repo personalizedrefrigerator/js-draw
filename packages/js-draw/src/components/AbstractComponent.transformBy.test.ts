@@ -1,11 +1,12 @@
 import { Color4, EditorImage, Mat33, Path, Rect2, Vec2 } from '../lib';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
 import createEditor from '../testing/createEditor';
 import Stroke from './Stroke';
 
 describe('AbstractComponent.transformBy', () => {
 	it('should restore the component\'s z-index on undo', () => {
 		const editor = createEditor();
-		const component = new Stroke([ Path.fromRect(Rect2.unitSquare).toRenderable({ fill: Color4.red }) ]);
+		const component = new Stroke([ pathToRenderable(Path.fromRect(Rect2.unitSquare), { fill: Color4.red }) ]);
 		EditorImage.addElement(component).apply(editor);
 
 		const origZIndex = component.getZIndex();

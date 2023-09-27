@@ -1,19 +1,9 @@
-import Color4 from '../../Color4';
+import { Color4, Mat33, Point2, Vec2, Rect2, Path, PathCommandType } from '@js-draw/math';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
-import Mat33 from '../../math/Mat33';
-import Path, { PathCommand, PathCommandType } from '../../math/shapes/Path';
-import Rect2 from '../../math/shapes/Rect2';
-import { Point2, Vec2 } from '../../math/Vec2';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
-
-export interface RenderablePathSpec {
-	startPoint: Point2;
-	commands: PathCommand[];
-	style: RenderingStyle;
-	path?: Path;
-}
+import RenderablePathSpec, { pathToRenderable } from '../RenderablePathSpec';
 
 export interface RenderableImage {
 	transform: Mat33;
@@ -123,14 +113,14 @@ export default abstract class AbstractRenderer {
 	public drawPath(path: RenderablePathSpec) {
 		// If we're being called outside of an object,
 		// we can't delay rendering
-		if (this.objectLevel === 0) {
+		if (this.objectLevel === 0 || this.currentPaths === null) {
 			this.currentPaths = [path];
 			this.flushPath();
 			this.currentPaths = null;
 		} else {
 			// Otherwise, don't render paths all at once. This prevents faint lines between
 			// segments of the same stroke from being visible.
-			this.currentPaths!.push(path);
+			this.currentPaths.push(path);
 		}
 	}
 
@@ -138,13 +128,13 @@ export default abstract class AbstractRenderer {
 	// This is equivalent to `drawPath(Path.fromRect(...).toRenderable(...))`.
 	public drawRect(rect: Rect2, lineWidth: number, lineFill: RenderingStyle) {
 		const path = Path.fromRect(rect, lineWidth);
-		this.drawPath(path.toRenderable(lineFill));
+		this.drawPath(pathToRenderable(path, lineFill));
 	}
 
 	/** Draws a filled rectangle. */
 	public fillRect(rect: Rect2, fill: Color4) {
 		const path = Path.fromRect(rect);
-		this.drawPath(path.toRenderable({ fill }));
+		this.drawPath(pathToRenderable(path, { fill }));
 	}
 
 	/**
@@ -238,5 +228,14 @@ export default abstract class AbstractRenderer {
 
 	public getSizeOfCanvasPixelOnScreen(): number {
 		return this.getCanvasToScreenTransform().transformVec3(Vec2.unitX).length();
+	}
+
+	// Returns the region in canvas space that is visible within the viewport this
+	// canvas is rendering to.
+	//
+	// Note that in some cases this might not be the same as the `visibleRect` given
+	// to components in their `render` method.
+	public getVisibleRect() {
+		return this.viewport.visibleRect;
 	}
 }

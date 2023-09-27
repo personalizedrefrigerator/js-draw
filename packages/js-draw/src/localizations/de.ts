@@ -37,7 +37,7 @@ const localization: EditorLocalization = {
 	touchPanning: 'Ansicht mit Touchscreen verschieben',
 	anyDevicePanning: 'Ansicht mit jedem Eingabegerät verschieben',
 
-	selectPenType: 'Objekt-Typ: ',
+	selectPenTip: 'Objekt-Typ: ',
 	roundedTipPen: 'Freihand',
 	flatTipPen: 'Stift (druckempfindlich)',
 	arrowPen: 'Pfeil',
@@ -73,7 +73,7 @@ const localization: EditorLocalization = {
 	pasteHandler: 'Copy-Paste-Handler',
 	findLabel: 'Finde',
 	toNextMatch: 'Nächstes',
-	closeFindDialog: 'Schließen',
+	closeDialog: 'Schließen',
 	findDialogShown: 'Finde-Dialog angezeigt',
 	findDialogHidden: 'Finde-Dialog versteckt',
 	focusedFoundText: (matchIdx, totalMatches) => `Sieh Treffer ${matchIdx} von ${totalMatches} an`,

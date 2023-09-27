@@ -1,0 +1,19 @@
+
+.toolbar-document-properties-widget {
+	button.about-button {
+		width: 100%;
+		text-align: end;
+	}
+
+	& > * {
+		--align-items-to-x: 120px;
+	}
+
+	.js-draw-size-input-row.js-draw-size-input-row {
+		display: flex;
+
+		&.size-input-row--automatic-size {
+			display: none;
+		}
+	}
+}

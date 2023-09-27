@@ -3,5 +3,5 @@
  * @packageDocumentation
  */
 
-import './Editor.css';
+import './Editor.scss';
 import '@melloware/coloris/dist/coloris.css';

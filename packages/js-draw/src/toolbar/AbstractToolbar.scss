@@ -1,0 +1,251 @@
+
+/* The *main* root toolbar element */
+.toolbar-root {
+	background-color: var(--background-color-1);
+	--icon-color: var(--foreground-color-1);
+	--toolbar-button-height: min(20vh, 60px);
+
+	flex-wrap: wrap;
+
+	box-sizing: border-box;
+	width: 100%;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+/* Any root toolbar element */
+.toolbar-element {
+	// Display above selection dialogs, etc.
+	// Note that this needs to be less than the
+	// z-index of dropdown menus (particularly when
+	// multiple editors can be displayed).
+	z-index: 1;
+
+	font-family: system-ui, -apple-system, sans-serif;
+
+
+	details > summary {
+		cursor: pointer;
+	}
+}
+
+.toolbar-element > .toolbar-toolContainer > .toolbar-button,
+.toolbar-element > .toolbar-toolContainer > * > button,
+.toolbar-element > .toolbar-buttonGroup > button,
+.toolbar-element > .toolbar-button {
+	white-space: pre;
+	height: var(--toolbar-button-height);
+}
+
+.toolbar-dropdown .toolbar-button > .toolbar-icon {
+	max-width: 50px;
+	width: 100%;
+}
+
+.toolbar-button.disabled {
+	filter: opacity(0.5) sepia(0.2);
+	cursor: unset;
+}
+
+.toolbar-button, .toolbar-element button {
+	cursor: pointer;
+	text-align: center;
+	border-radius: 6px;
+
+	border: none;
+	box-shadow: 0px 0px 2px var(--shadow-color);
+
+	user-select: none;
+	-webkit-user-select: none;
+
+	transition: background-color 0.15s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+}
+
+.toolbar-button,
+.toolbar-buttonGroup > button,
+.toolbar-toolContainer > * > button,
+.toolbar-root > button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	padding-left: 3px;
+	padding-right: 3px;
+
+	min-width: 40px;
+	max-width: 105px;
+	width: min-content;
+	font-size: 1em;
+}
+
+.toolbar-button > label {
+	cursor: inherit;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* Decrease the font size of labels in the main toolbar if they're long. */
+.toolbar-root > .toolbar-toolContainer > .toolbar-button > label.long-label {
+	font-size: 0.75em;
+}
+
+.toolbar-dropdown > .toolbar-toolContainer > button,
+.toolbar-dropdown > .toolbar-toolContainer > .toolbar-button {
+	width: 6em;
+}
+
+.toolbar-button:not(.disabled):hover, .toolbar-root button:not(:disabled):hover {
+	box-shadow: 0px 2px 4px var(--shadow-color);
+}
+
+.toolbar-root button:disabled {
+	cursor: inherit;
+	filter: opacity(0.5);
+}
+
+.toolbar-root .toolbar-icon {
+	flex-shrink: 1;
+	user-select: none;
+
+	width: 100%;
+	min-width: 20px;
+	min-height: 20px;
+}
+
+.toolbar-toolContainer.selected > .toolbar-button {
+	background-color: var(--selection-background-color);
+	color: var(--selection-foreground-color);
+	--icon-color: var(--selection-foreground-color);
+}
+
+.toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
+	display: none;
+}
+
+.toolbar-toolContainer > .toolbar-button > .toolbar-showHideDropdownIcon {
+	height: 15px;
+	transition: transform 0.25s ease;
+}
+
+.toolbar-toolContainer.dropdownVisible > .toolbar-button > .toolbar-showHideDropdownIcon {
+	transform: rotate(180deg);
+}
+
+.toolbar-dropdown.hidden,
+.toolbar-toolContainer:not(.selected):not(.dropdownShowable)
+		> .toolbar-dropdown:not(.hiding) {
+	display: none;
+}
+
+.toolbar-dropdown {
+	position: absolute;
+	padding: 15px;
+	padding-top: 5px;
+
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	max-height: 80vh;
+
+	max-width: fit-content;
+
+	/* Prevent overlap/being displayed under the undo/redo buttons */
+	z-index: 2;
+	background-color: var(--background-color-1);
+	box-shadow: 0px 3px 3px var(--shadow-color);
+}
+
+/* Animate showing/hiding the dropdown. Animations triggered in JavaScript. */
+@keyframes dropdown-transition-in {
+	0% {
+		opacity: 0;
+		transform: scale(1, 0);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1, 1);
+	}
+}
+
+@keyframes dropdown-transition-out {
+	0% {
+		opacity: 1;
+		transform: scale(1, 1);	
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1, 0);
+	}
+}
+
+.toolbar-dropdown {
+	/* Ensure the animation begins from the correct location. */
+	transform-origin: top left;
+
+	--dropdown-show-animation: dropdown-transition-in;
+	--dropdown-hide-animation: dropdown-transition-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	/* Disable toolbar animations if reducing motion */
+	.toolbar-dropdown {
+		--dropdown-show-animation: none;
+		--dropdown-hide-animation: none;
+	}
+
+	.toolbar-dropdown.hiding {
+		display: none;
+	}
+
+	/* Also disable arrow rotation */
+	.toolbar-toolContainer > .toolbar-button > .toolbar-showHideDropdownIcon {
+		transition: none;
+	}
+
+	/* ...and background color animation. */
+	:root .toolbar-button, .toolbar-root button {
+		transition: none;
+	}
+}
+
+.toolbar-buttonGroup {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+.toolbar-closeColorPickerOverlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+
+	touch-action: none;
+
+	background-color: var(--background-color-1);
+	opacity: 0.3;
+
+	// Display above the main image, but below the toolbars
+	z-index: 2;
+}
+
+.toolbar-spacedList > * {
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+
+.toolbar-indentedList {
+	padding-left: 10px;
+}
+
+@media print {
+	/* Hide all toolbar elements on print. */
+	.toolbar-element {
+		display: none;
+	}
+}

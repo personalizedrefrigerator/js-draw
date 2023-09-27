@@ -2,27 +2,36 @@ import { EditorEventType } from '../types';
 import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
-import { Point2, Vec2 } from '../math/Vec2';
-import LineSegment2 from '../math/shapes/LineSegment2';
+import { Point2, Vec2, LineSegment2, Color4, Rect2 } from '@js-draw/math';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import { PointerDevice } from '../Pointer';
-import Color4 from '../Color4';
-import Rect2 from '../math/shapes/Rect2';
 import RenderingStyle from '../rendering/RenderingStyle';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2|null = null;
 	private isFirstEraseEvt: boolean = true;
 	private toRemove: AbstractComponent[];
 	private thickness: number = 10;
+	private thicknessValue: MutableReactiveValue<number>;
 
 	// Commands that each remove one element
 	private partialCommands: Erase[] = [];
 
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
+
+		this.thicknessValue = ReactiveValue.fromInitialValue(this.thickness);
+		this.thicknessValue.onUpdate(value => {
+			this.thickness = value;
+
+			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+				kind: EditorEventType.ToolUpdated,
+				tool: this,
+			});
+		});
 	}
 
 	private clearPreview() {
@@ -150,12 +159,15 @@ export default class Eraser extends BaseTool {
 		return this.thickness;
 	}
 
-	public setThickness(thickness: number) {
-		this.thickness = thickness;
+	/**
+	 * Returns a {@link MutableReactiveValue} that can be used to watch
+	 * this tool's thickness.
+	 */
+	public getThicknessValue() {
+		return this.thicknessValue;
+	}
 
-		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
-			kind: EditorEventType.ToolUpdated,
-			tool: this,
-		});
+	public setThickness(thickness: number) {
+		this.thicknessValue.set(thickness);
 	}
 }

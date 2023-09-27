@@ -1,6 +1,5 @@
-import Color4 from '../../Color4';
 import Viewport from '../../Viewport';
-import { Vec2 } from '../../math/Vec2';
+import { Vec2, Color4 } from '@js-draw/math';
 import { StrokeDataPoint } from '../../types';
 import { makeFreehandLineBuilder } from './FreehandLineBuilder';
 
@@ -10,7 +9,7 @@ describe('FreehandLineBuilder', () => {
 		const startPoint: StrokeDataPoint = {
 			pos: Vec2.zero,
 			width: 1,
-			time: (new Date()).getTime(),
+			time: performance.now(),
 			color: Color4.red,
 		};
 		const lineBuilder = makeFreehandLineBuilder(startPoint, viewport);

@@ -11,11 +11,15 @@ export interface Localization {
 	templateLightGrid: string;
 	templateDarkGrid: string;
 
+	warningSaveTargetOnlySupportsOneImage: string;
+
 	confirmUnsavedChanges: string;
 
 	advancedOptions: string;
 	pasteSVGTextDataHint: string;
 	submit: string;
+
+	saveUnsavedChanges: string;
 
 	save: string;
 	delete: string;
@@ -47,6 +51,8 @@ localizationTables.en = {
 	templateLightGrid: 'Light Grid',
 	templateDarkGrid: 'Dark Grid',
 
+	warningSaveTargetOnlySupportsOneImage: 'Warning: On this system, js-draw only supports saving one image. While this image will still be downloadable, you won\'t be able to save it to this website.',
+
 	confirmUnsavedChanges: 'There may be unsaved changes. Really quit?',
 
 	advancedOptions: 'Advanced...',
@@ -55,6 +61,8 @@ localizationTables.en = {
 
 	newImageHeading: 'New Image',
 	new: 'New',
+
+	saveUnsavedChanges: 'There may be unsaved changes. Save them?',
 
 	save: 'Save',
 	delete: 'Delete',
@@ -80,7 +88,6 @@ localizationTables.es = {
 	...localizationTables.en,
 
 	new: 'Nuevo',
-	save: 'Guarde',
 	delete: 'Borre',
 	reallyDelete: (imageName) => `¿Está seguro que quiere borrar "${imageName}"?`,
 

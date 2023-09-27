@@ -1,10 +1,8 @@
 import AbstractComponent from '../../components/AbstractComponent';
 import Editor from '../../Editor';
-import Mat33 from '../../math/Mat33';
-import Rect2 from '../../math/shapes/Rect2';
-import { Point2, Vec2 } from '../../math/Vec2';
+import { Mat33, Rect2, Point2, Vec2 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
-import { CopyEvent,  KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
+import { CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
 import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
@@ -18,11 +16,10 @@ export const cssPrefix = 'selection-tool-';
 // With respect to `extend`ing, `SelectionTool` is not stable.
 export default class SelectionTool extends BaseTool {
 	private handleOverlay: HTMLElement;
-	private prevSelectionBox: Selection|null;
-	private selectionBox: Selection|null;
-	private lastEvtTarget: EventTarget|null = null;
+	private prevSelectionBox: Selection | null;
+	private selectionBox: Selection | null;
 
-	private startPoint: Vec2|null = null; // canvas position
+	private startPoint: Vec2 | null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
 	private snapToGrid: boolean = false;
@@ -41,16 +38,16 @@ export default class SelectionTool extends BaseTool {
 			// hasn't been finalized yet. Clear before updating the UI.
 			this.editor.clearWetInk();
 
+			// If not currently selecting, ensure that the selection box
+			// is large enough.
+			if (!this.expandingSelectionBox) {
+				this.selectionBox?.padRegion();
+			}
 			this.selectionBox?.updateUI();
 		});
 
 		this.editor.handleKeyEventsFrom(this.handleOverlay);
-		this.editor.handlePointerEventsFrom(this.handleOverlay, (eventName, htmlEvent: PointerEvent) => {
-			if (eventName === 'pointerdown') {
-				this.lastEvtTarget = htmlEvent.target;
-			}
-			return true;
-		});
+		this.editor.handlePointerEventsFrom(this.handleOverlay);
 	}
 
 	private makeSelectionBox(selectionStartPos: Point2) {
@@ -91,12 +88,12 @@ export default class SelectionTool extends BaseTool {
 
 			let transforming = false;
 
-			if (this.lastEvtTarget && this.selectionBox) {
+			if (this.selectionBox) {
 				if (snapToGrid) {
 					this.snapSelectionToGrid();
 				}
 
-				const dragStartResult = this.selectionBox.onDragStart(current, this.lastEvtTarget);
+				const dragStartResult = this.selectionBox.onDragStart(current);
 
 				if (dragStartResult) {
 					transforming = true;
@@ -137,30 +134,8 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	private onSelectionUpdated() {
-		// Note that the selection has changed
-		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
-			kind: EditorEventType.ToolUpdated,
-			tool: this,
-		});
-
-		const selectedItemCount = this.selectionBox?.getSelectedItemCount() ?? 0;
-		if (selectedItemCount > 0) {
-			this.editor.announceForAccessibility(
-				this.editor.localization.selectedElements(selectedItemCount)
-			);
-			this.zoomToSelection();
-		} else if (this.selectionBox) {
-			this.selectionBox.cancelSelection();
-			this.prevSelectionBox = this.selectionBox;
-			this.selectionBox = null;
-		}
-	}
-
 	// Called after a gestureCancel and a pointerUp
 	private onGestureEnd() {
-		this.lastEvtTarget = null;
-
 		if (!this.selectionBox) return;
 
 		if (!this.selectionBoxHandlingEvt) {
@@ -173,13 +148,6 @@ export default class SelectionTool extends BaseTool {
 
 
 		this.selectionBoxHandlingEvt = false;
-	}
-
-	private zoomToSelection() {
-		if (this.selectionBox) {
-			const selectionRect = this.selectionBox.region;
-			this.editor.dispatchNoAnnounce(this.editor.viewport.zoomTo(selectionRect, false), false);
-		}
 	}
 
 	public override onPointerUp(event: PointerEvt): void {
@@ -219,6 +187,53 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		this.expandingSelectionBox = false;
+	}
+
+	private lastSelectedObjects: AbstractComponent[] = [];
+
+	private onSelectionUpdated() {
+		const selectedItemCount = this.selectionBox?.getSelectedItemCount() ?? 0;
+		const selectedObjects = this.selectionBox?.getSelectedObjects() ?? [];
+		const hasDifferentSelection =
+			this.lastSelectedObjects.length !== selectedItemCount
+			|| selectedObjects.some((obj, i) => this.lastSelectedObjects[i] !== obj);
+
+		if (hasDifferentSelection) {
+			this.lastSelectedObjects = selectedObjects;
+
+			// Note that the selection has changed
+			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+				kind: EditorEventType.ToolUpdated,
+				tool: this,
+			});
+
+			// Only fire the SelectionUpdated event if the selection really updated.
+			this.editor.notifier.dispatch(EditorEventType.SelectionUpdated, {
+				kind: EditorEventType.SelectionUpdated,
+				selectedComponents: selectedObjects,
+				tool: this,
+			});
+
+			if (selectedItemCount > 0) {
+				this.editor.announceForAccessibility(
+					this.editor.localization.selectedElements(selectedItemCount)
+				);
+				this.zoomToSelection();
+			}
+		}
+
+		if (selectedItemCount === 0 && this.selectionBox) {
+			this.selectionBox.cancelSelection();
+			this.prevSelectionBox = this.selectionBox;
+			this.selectionBox = null;
+		}
+	}
+
+	private zoomToSelection() {
+		if (this.selectionBox) {
+			const selectionRect = this.selectionBox.region;
+			this.editor.dispatchNoAnnounce(this.editor.viewport.zoomTo(selectionRect, false), false);
+		}
 	}
 
 	private static handleableKeys = [
@@ -394,7 +409,7 @@ export default class SelectionTool extends BaseTool {
 			return false;
 		}
 
-		const exportViewport = new Viewport(() => {});
+		const exportViewport = new Viewport(() => { });
 		exportViewport.updateScreenSize(Vec2.of(bbox.w, bbox.h));
 		exportViewport.resetTransform(Mat33.translation(bbox.topLeft.times(-1)));
 
@@ -422,6 +437,9 @@ export default class SelectionTool extends BaseTool {
 		super.setEnabled(enabled);
 
 		// Clear the selection
+		this.selectionBox?.cancelSelection();
+		this.onSelectionUpdated();
+
 		this.handleOverlay.replaceChildren();
 		this.selectionBox = null;
 
@@ -440,7 +458,7 @@ export default class SelectionTool extends BaseTool {
 
 	// Get the object responsible for displaying this' selection.
 	// @internal
-	public getSelection(): Selection|null {
+	public getSelection(): Selection | null {
 		return this.selectionBox;
 	}
 
@@ -465,7 +483,7 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		});
 
-		let bbox: Rect2|null = null;
+		let bbox: Rect2 | null = null;
 		for (const object of objects) {
 			if (bbox) {
 				bbox = bbox.union(object.getBBox());

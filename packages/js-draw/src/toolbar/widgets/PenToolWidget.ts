@@ -9,13 +9,15 @@ import Editor from '../../Editor';
 import Pen from '../../tools/Pen';
 import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
 import { ToolbarLocalization } from '../localization';
-import makeColorInput from '../makeColorInput';
+import makeColorInput from './components/makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
-import Color4 from '../../Color4';
+import { Color4 } from '@js-draw/math';
 import { SavedToolbuttonState } from './BaseWidget';
 import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
+import { toolbarCSSPrefix } from '../constants';
+import makeThicknessSlider from './components/makeThicknessSlider';
+import makeGridSelector from './components/makeGridSelector';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -24,6 +26,10 @@ export interface PenTypeRecord {
 	// A unique ID for the facotory (e.g. 'chisel-tip-pen')
 	id: string;
 
+	// True if the pen type generates shapes (and should thus be shown in the GUI
+	// as a shape generator). Defaults to false.
+	isShapeBuilder?: boolean;
+
 	// Creates an `AbstractComponent` from pen input.
 	factory: ComponentBuilderFactory;
 }
@@ -31,6 +37,7 @@ export interface PenTypeRecord {
 export default class PenToolWidget extends BaseToolWidget {
 	private updateInputs: ()=> void = () => {};
 	protected penTypes: PenTypeRecord[];
+	protected shapelikeIDs: string[];
 
 	// A counter variable that ensures different HTML elements are given unique names/ids.
 	private static idCounter: number = 0;
@@ -39,6 +46,9 @@ export default class PenToolWidget extends BaseToolWidget {
 		editor: Editor, private tool: Pen, localization?: ToolbarLocalization
 	) {
 		super(editor, tool, 'pen', localization);
+
+		// Pen types that correspond to
+		this.shapelikeIDs = [ 'pressure-sensitive-pen', 'freehand-pen' ];
 
 		// Default pen types
 		this.penTypes = [
@@ -58,30 +68,35 @@ export default class PenToolWidget extends BaseToolWidget {
 				name: this.localizationTable.arrowPen,
 				id: 'arrow',
 
+				isShapeBuilder: true,
 				factory: makeArrowBuilder,
 			},
 			{
 				name: this.localizationTable.linePen,
 				id: 'line',
 
+				isShapeBuilder: true,
 				factory: makeLineBuilder,
 			},
 			{
 				name: this.localizationTable.filledRectanglePen,
 				id: 'filled-rectangle',
 
+				isShapeBuilder: true,
 				factory: makeFilledRectangleBuilder,
 			},
 			{
 				name: this.localizationTable.outlinedRectanglePen,
 				id: 'outlined-rectangle',
 
+				isShapeBuilder: true,
 				factory: makeOutlinedRectangleBuilder,
 			},
 			{
 				name: this.localizationTable.outlinedCirclePen,
 				id: 'outlined-circle',
 
+				isShapeBuilder: true,
 				factory: makeOutlinedCircleBuilder,
 			}
 		];
@@ -128,18 +143,19 @@ export default class PenToolWidget extends BaseToolWidget {
 	}
 
 	private createIconForRecord(record: PenTypeRecord|null) {
-		const color = this.tool.getColor();
+		const style = {
+			...this.tool.getStyleValue().get(),
+		};
+
+		if (record?.factory) {
+			style.factory = record.factory;
+		}
 
 		const strokeFactory = record?.factory;
 		if (!strokeFactory || strokeFactory === makeFreehandLineBuilder || strokeFactory === makePressureSensitiveFreehandLineBuilder) {
-			// Use a square-root scale to prevent the pen's tip from overflowing.
-			const scale = Math.round(Math.sqrt(this.tool.getThickness()) * 4);
-			const roundedTip = strokeFactory === makeFreehandLineBuilder;
-
-			return this.editor.icons.makePenIcon(scale, color.toHexString(), roundedTip);
+			return this.editor.icons.makePenIcon(style);
 		} else {
-			const hasTransparency = color.a < 1;
-			return this.editor.icons.makeIconFromFactory(this.tool, strokeFactory, hasTransparency);
+			return this.editor.icons.makeIconFromFactory(style);
 		}
 	}
 
@@ -150,130 +166,48 @@ export default class PenToolWidget extends BaseToolWidget {
 
 	// Creates a widget that allows selecting different pen types
 	private createPenTypeSelector() {
-		const outerContainer = document.createElement('div');
-		outerContainer.classList.add(`${toolbarCSSPrefix}pen-type-selector`);
+		const allChoices = this.penTypes.map((penType, index) => {
+			return {
+				id: index,
+				makeIcon: () => this.createIconForRecord(penType),
+				title: penType.name,
+				isShapeBuilder: penType.isShapeBuilder ?? false,
+			};
+		});
 
-		const scrollingContainer = document.createElement('div');
-		scrollingContainer.setAttribute('role', 'menu');
-		scrollingContainer.id = `${toolbarCSSPrefix}-pen-type-selector-id-${PenToolWidget.idCounter++}`;
+		const penSelector = makeGridSelector(
+			this.localizationTable.selectPenTip,
+			this.getCurrentPenTypeIdx(),
+			allChoices.filter(choice => !choice.isShapeBuilder),
+		);
 
-		scrollingContainer.onwheel = (event) => {
-			const hasScroll = scrollingContainer.clientWidth !== scrollingContainer.scrollWidth
-							&& event.deltaX !== 0;
-			const eventScrollsPastLeft =
-				scrollingContainer.scrollLeft + event.deltaX <= 0;
-			const scrollRight = scrollingContainer.scrollLeft + scrollingContainer.clientWidth;
-			const eventScrollsPastRight =
-				scrollRight + event.deltaX > scrollingContainer.scrollWidth;
+		const shapeSelector = makeGridSelector(
+			this.localizationTable.selectShape,
+			this.getCurrentPenTypeIdx(),
+			allChoices.filter(choice => choice.isShapeBuilder),
+		);
 
-			// Stop the editor from receiving the event if it will scroll the pen type selector
-			// instead.
-			if (hasScroll && !eventScrollsPastLeft && !eventScrollsPastRight) {
-				event.stopPropagation();
-			}
+		const onSelectorUpdate = (newPenTypeIndex: number) => {
+			this.tool.setStrokeFactory(this.penTypes[newPenTypeIndex].factory);
 		};
 
-		const label = document.createElement('label');
-		label.innerText = this.localizationTable.selectPenType;
-		label.htmlFor = scrollingContainer.id;
-		outerContainer.appendChild(label);
-
-		// All buttons in a radiogroup need the same name attribute.
-		const radiogroupName = `${toolbarCSSPrefix}-pen-type-selector-${PenToolWidget.idCounter++}`;
-
-		const createTypeSelectorButton = (record: PenTypeRecord) => {
-			const buttonContainer = document.createElement('div');
-			buttonContainer.classList.add('pen-type-button');
-
-			const button = document.createElement('input');
-			button.type = 'radio';
-			button.name = radiogroupName;
-			button.id = `${toolbarCSSPrefix}-pen-type-button-${PenToolWidget.idCounter++}`;
-
-			const labelContainer = document.createElement('label');
-
-			const rebuildLabel = () => {
-				const labelText = document.createElement('span');
-
-				const icon = this.createIconForRecord(record);
-				icon.classList.add('icon');
-
-				// The title of the record
-				labelText.innerText = record.name;
-				labelContainer.htmlFor = button.id;
-
-				labelContainer.replaceChildren(icon, labelText);
-			};
-			rebuildLabel();
-
-			const updateButtonCSS = () => {
-				if (button.checked) {
-					buttonContainer.classList.add('checked');
-				} else {
-					buttonContainer.classList.remove('checked');
-				}
-			};
-
-			button.oninput = () => {
-				// Setting the stroke factory fires an event that causes the value
-				// of this button to be set.
-				if (button.checked) {
-					this.tool.setStrokeFactory(record.factory);
-				}
-
-				updateButtonCSS();
-			};
-
-			buttonContainer.replaceChildren(button, labelContainer);
-			scrollingContainer.appendChild(buttonContainer);
-
-			// Set whether the button is checked, assuming the stroke factory associated
-			// with the button was set elsewhere.
-			const setChecked = (checked: boolean) => {
-				button.checked = checked;
-				updateButtonCSS();
-
-				if (checked) {
-					button.scrollIntoView();
-				}
-			};
-			setChecked(false);
-
-			// Updates the factory's icon based on the current style of the tool.
-			const updateIcon = () => {
-				rebuildLabel();
-			};
-
-			return { setChecked, updateIcon };
-		};
-
-		const buttons: Array<ReturnType<typeof createTypeSelectorButton>> = [];
-		for (const penType of this.penTypes) {
-			buttons.push(createTypeSelectorButton(penType));
-		}
-		// invariant: buttons.length = this.penTypes.length
-
-		outerContainer.appendChild(scrollingContainer);
+		penSelector.value.onUpdate(onSelectorUpdate);
+		shapeSelector.value.onUpdate(onSelectorUpdate);
 
 		return {
 			setValue: (penTypeIndex: number) => {
-				// Select the value specified
-				if (penTypeIndex < 0 || penTypeIndex >= this.penTypes.length) {
-					console.error('Invalid pen type index', penTypeIndex);
-					return;
-				}
-
-				for (let i = 0; i < buttons.length; i++) {
-					buttons[i].setChecked(i === penTypeIndex);
-				}
+				penSelector.value.set(penTypeIndex);
+				shapeSelector.value.set(penTypeIndex);
 			},
 
 			updateIcons: () => {
-				buttons.forEach(button => button.updateIcon());
+				penSelector.updateIcons();
+				shapeSelector.updateIcons();
 			},
 
 			addTo: (parent: HTMLElement) => {
-				parent.appendChild(outerContainer);
+				penSelector.addTo(parent);
+				shapeSelector.addTo(parent);
 			},
 		};
 	}
@@ -282,11 +216,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		this.tool.setHasStabilization(enabled);
 	}
 
-	protected createAdvancedOptions() {
-		const container = document.createElement('details');
-		const label = document.createElement('summary');
-		label.innerText = this.localizationTable.advanced;
-
+	protected createStabilizationOption() {
 		const stabilizationOption = document.createElement('div');
 		const stabilizationCheckbox = document.createElement('input');
 		const stabilizationLabel = document.createElement('label');
@@ -296,9 +226,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		stabilizationCheckbox.id = `${toolbarCSSPrefix}-penInputStabilizationCheckbox-${PenToolWidget.idCounter++}`;
 		stabilizationLabel.htmlFor = stabilizationCheckbox.id;
 
-		stabilizationOption.replaceChildren(stabilizationCheckbox, stabilizationLabel);
-
-		container.replaceChildren(label, stabilizationOption);
+		stabilizationOption.replaceChildren(stabilizationLabel, stabilizationCheckbox);
 
 		stabilizationCheckbox.oninput = () => {
 			this.setInputStabilizationEnabled(stabilizationCheckbox.checked);
@@ -310,45 +238,29 @@ export default class PenToolWidget extends BaseToolWidget {
 			},
 
 			addTo: (parent: HTMLElement) => {
-				parent.appendChild(container);
+				parent.appendChild(stabilizationOption);
 			}
 		};
 	}
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add(`${toolbarCSSPrefix}spacedList`);
-
-		const thicknessRow = document.createElement('div');
+		container.classList.add(
+			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
+		);
 
 		// Thickness: Value of the input is squared to allow for finer control/larger values.
-		const thicknessLabel = document.createElement('label');
-		const thicknessInput = document.createElement('input');
+		const { container: thicknessRow, setValue: setThickness } = makeThicknessSlider(this.editor, thickness => {
+			this.tool.setThickness(thickness);
+		});
+
 		const penTypeSelect = this.createPenTypeSelector();
-
-		// Give inputs IDs so we can label them with a <label for=...>Label text</label>
-		thicknessInput.id = `${toolbarCSSPrefix}penThicknessInput${PenToolWidget.idCounter++}`;
-
-		thicknessLabel.innerText = this.localizationTable.thicknessLabel;
-		thicknessLabel.setAttribute('for', thicknessInput.id);
-
-		// Use a logarithmic scale for thicknessInput (finer control over thinner strokewidths.)
-		const inverseThicknessInputFn = (t: number) => Math.log10(t);
-		const thicknessInputFn = (t: number) => 10**t;
-
-		thicknessInput.type = 'range';
-		thicknessInput.min = `${inverseThicknessInputFn(2)}`;
-		thicknessInput.max = `${inverseThicknessInputFn(400)}`;
-		thicknessInput.step = '0.1';
-		thicknessInput.oninput = () => {
-			this.tool.setThickness(thicknessInputFn(parseFloat(thicknessInput.value)));
-		};
-		thicknessRow.appendChild(thicknessLabel);
-		thicknessRow.appendChild(thicknessInput);
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
+		const {
+			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
+		} = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 
@@ -359,23 +271,23 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
-		const advanced = this.createAdvancedOptions();
+		const stabilizationOption = this.createStabilizationOption();
 
 		this.updateInputs = () => {
 			setColorInputValue(this.tool.getColor());
-			thicknessInput.value = inverseThicknessInputFn(this.tool.getThickness()).toString();
+			setThickness(this.tool.getThickness());
 
 			penTypeSelect.updateIcons();
 
 			// Update the selected stroke factory.
 			penTypeSelect.setValue(this.getCurrentPenTypeIdx());
-			advanced.update();
+			stabilizationOption.update();
 		};
 		this.updateInputs();
 
 		container.replaceChildren(colorRow, thicknessRow);
 		penTypeSelect.addTo(container);
-		advanced.addTo(container);
+		stabilizationOption.addTo(container);
 
 		dropdown.replaceChildren(container);
 		return true;

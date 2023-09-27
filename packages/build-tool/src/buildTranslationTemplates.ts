@@ -43,12 +43,17 @@ const generateTranslationTemplate = (
 	// Strings in the default locale (which has all strings translated)
 	defaultLocaleStrings: any,
 
+	// A map from translation keys to comments
+	translationComments?: Record<string, string|string[]>,
+
 	// The locale the user will be translating into
 	destLocale?: string,
 
 	// Strings in destLocale
 	destLocaleStrings?: any,
 ) => {
+	translationComments ??= {};
+
 	const bodyContentLines: string[] = [];
 
 	const addInput = (
@@ -110,11 +115,23 @@ const generateTranslationTemplate = (
 			currentTranslation = undefined;
 		}
 
-		addInput('input', `translation-${key}`, {
+		let comments: string|string[] = translationComments[key] ?? [];
+		if (typeof comments === 'string') {
+			comments = [ comments ];
+		}
+		comments = comments.map(comment => `> **Note**:\n> ${comment.replace(/\n/g, '\n> ')}`);
+
+		const description = [
+			`Translate ${codeFormat(englishTranslation)}.`,
+			...comments,
+		].join('\n\n');
+
+		addInput('textarea', `translation-${key}`, {
 			label: `${key}`,
-			description: `Translate ${codeFormat(englishTranslation)}.`,
+			description,
 			placeholder: englishTranslation,
 			value: currentTranslation,
+			render: 'shell',
 		});
 	}
 
@@ -142,7 +159,11 @@ ${bodyContentLines.join('\n')}`;
 const buildTranslationTemplate = async (source: TranslationSource, destFolder: string) => {
 	const projName = source.name;
 
-	const locales = (await import(source.path)).default;
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	const translationData = require(source.path);
+
+	const locales = translationData.default ?? translationData.locales;
+	const comments = translationData.comments;
 
 	// Write the translation template for the current source.
 	// locale should be the destination locale or undefined if there is no specific
@@ -151,6 +172,9 @@ const buildTranslationTemplate = async (source: TranslationSource, destFolder: s
 		const template = generateTranslationTemplate(
 			projName,
 			locales[source.defaultLocale],
+
+			// Comments on the translation keys
+			comments,
 
 			// Destination locale
 			locale,

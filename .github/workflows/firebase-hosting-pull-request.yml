@@ -19,14 +19,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install dependencies
         run: npm install
-      - name: Test imports
-        run: npm run dist-test
-      - name: Run tests
-        run: npm run test
-      - name: Lint
-        run: npm run lint-ci
       - name: Build
-        run: bash ./build_tools/build-website.sh
+        run: bash ./scripts/build-website.sh
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

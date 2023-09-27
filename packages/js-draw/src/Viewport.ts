@@ -1,10 +1,7 @@
 import Command from './commands/Command';
 import { CommandLocalization } from './commands/localization';
 import Editor from './Editor';
-import Mat33 from './math/Mat33';
-import Rect2 from './math/shapes/Rect2';
-import { Point2, Vec2 } from './math/Vec2';
-import Vec3 from './math/Vec3';
+import { Mat33, Rect2, Point2, Vec2, Vec3 } from '@js-draw/math';
 import { StrokeDataPoint } from './types';
 
 // Returns the base type of some type of point/number
@@ -101,7 +98,7 @@ export class Viewport {
 		return result;
 	}
 
-	// @internal
+	/** Resizes the screen rect to the given size. @internal */
 	public updateScreenSize(screenSize: Vec2) {
 		this.screenRect = this.screenRect.resizedTo(screenSize);
 	}
@@ -145,7 +142,7 @@ export class Viewport {
 		return this.transform;
 	}
 
-	/** @returns the size of the visible region in pixels. */
+	/** @returns the size of the visible region in pixels (screen units). */
 	public getScreenRectSize(): Vec2 {
 		return this.screenRect.size;
 	}
@@ -259,8 +256,21 @@ export class Viewport {
 	public computeZoomToTransform(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Mat33 {
 		let transform = Mat33.identity;
 
+		// Invalid size? (Would divide by zero)
 		if (toMakeVisible.w === 0 || toMakeVisible.h === 0) {
-			throw new Error(`${toMakeVisible.toString()} rectangle is empty! Cannot zoom to!`);
+			// Create a new rectangle with a valid size
+			let newSize = Math.max(toMakeVisible.w, toMakeVisible.h);
+
+			// Choose a reasonable default size, but don't zoom.
+			if (newSize === 0) {
+				newSize = 50;
+				allowZoomIn = false;
+				allowZoomOut = false;
+			}
+
+			toMakeVisible = new Rect2(
+				toMakeVisible.x, toMakeVisible.y, newSize, newSize,
+			);
 		}
 
 		if (isNaN(toMakeVisible.size.magnitude())) {

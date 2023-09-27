@@ -1,0 +1,537 @@
+@keyframes toolbar--edgemenu-transition-in {
+	from { transform: translate(0, 100%); }
+	to { transform: translate(0, 0); }
+}
+
+@keyframes toolbar--edgemenu-transition-out {
+	// Don't include `from { translate: 0 }` because initially,
+	// the translation might not be zero (e.g. during a drag).
+	to { transform: translate(0, 100%); }
+}
+
+@keyframes toolbar--edgemenu-container-transition-in {
+	// Include overflow-y: hidden so that the bottom of the menu doesn't go below
+	// the editor.
+	from { overflow-y: hidden; }
+	to { overflow-y: hidden; }
+}
+
+@keyframes toolbar--edgemenu-container-transition-out {
+	from { overflow-y: hidden; }
+	to { overflow-y: hidden; }
+}
+
+// Shows a lable on hover
+// Uses the --button-label-hover-offset-y and --button-label-hover-offset-x
+// variables to determine the label's position.
+//
+// If the label is in a scrolling container, that container should have position: relative;
+// as this allows absolutely positioned children to scroll with the container (rather than
+// remaining stationary).
+@mixin label-visible-on-hover($label-selector) {
+	$label-visible-opacity: 0.8;
+
+	// Make the label hide only when hovering.
+
+	@keyframes rehide-label {
+		0% { opacity: $label-visible-opacity; }
+		80% { opacity: $label-visible-opacity; }
+		100% { opacity: 0.1; }
+	}
+
+	@keyframes show-label {
+		0% { opacity: 0; }
+		// Keep the label hidden before showing
+		80% { opacity: 0; }
+		100% { opacity: $label-visible-opacity; }
+	}
+
+	@keyframes keep-label-hidden {
+		0% { opacity: 0; }
+		100% { opacity: 0; }
+	}
+
+
+	$hover-active-animation: ease show-label;
+
+	// Avoids sticky hover on touch devices. See
+	// https://css-tricks.com/solving-sticky-hover-states-with-media-hover-hover/
+	// When the primary device supports hover:
+	@media (hover: hover) {
+		// Only show an animation when opening the label due to a hover --
+		// show the label immediately otherwise.
+		&:hover:not(:focus-visible) > #{$label-selector} {
+			opacity: $label-visible-opacity;
+			animation: 1s $hover-active-animation;
+		}
+	}
+
+	// When the user is pressing/long-pressing the button
+	&:active > #{$label-selector} {
+		opacity: $label-visible-opacity;
+		animation: 1s $hover-active-animation;
+	}
+
+	$keyboard-hide-animation: 1.5s ease rehide-label;
+
+	&:focus-visible > #{$label-selector} {
+		animation: $keyboard-hide-animation;
+		opacity: 0;
+	}
+
+	// Make the :has selector separate its own statement -- some browsers don't
+	// support :has, which would make the entire statement block have no effect.
+	&:has(:focus-visible) > #{$label-selector} {
+		animation: $keyboard-hide-animation;
+		opacity: 0;
+	}
+
+	& > #{$label-selector} {
+		opacity: 0;
+		position: absolute;
+		margin-top: var(--button-label-hover-offset-y);
+		margin-left: var(--button-label-hover-offset-x);
+
+		// The label is often mostly invisible/just below a toolbar item.
+		// If there are multiple toolbar rows, ensure that a label doesn't prevent
+		// clicking on items in the second row:
+		pointer-events: none;
+
+		background-color: var(--background-color-1);
+		color: var(--foreground-color-1);
+		border-radius: 25px;
+		padding: 10px;
+
+		transition: 0.2s ease opacity, 0.2s ease margin-top;
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+}
+
+// The toolbar portion (the bar along the top of the screen)
+.toolbar-edge-toolbar {
+	--toolbar-button-height: min(20vh, 48px);
+	--toolbar-button-size: var(--toolbar-button-height);
+	--label-hover-offset-size: calc(14px + var(--toolbar-button-height));
+	box-sizing: border-box;
+
+	// Don't allow multiple lines when over a certain width (prefer scrolling)
+	@media screen and (min-width: 540px) {
+		flex-wrap: nowrap;
+
+		> .toolbar-action-row {
+			max-width: 50vw;
+
+			// Because the items are in the same row and a ResizeObserver
+			// can change the size of the other row, we need to ensure that
+			// this component doesn't re-trigger the ResizeObserver callback.
+			//
+			// As such, disable flex grow/shrink:
+			flex-grow: 0;
+			flex-shrink: 0;
+		}
+	}
+
+	// Hide labels when above a certain width
+	@media screen and (max-width: 700px) {
+		&.one-row > * > .toolbar-toolContainer.label-inline {
+			font-size: 0.9em;
+
+			& > .toolbar-button {
+				label {
+					opacity: 0;
+
+					@keyframes hide-initially {
+						from { opacity: 0; }
+						to { opacity: 0; }
+					}
+
+					// Prevent labels from having an initial transition
+					animation: 0.2s linear hide-initially;
+				}
+
+				@include label-visible-on-hover(label);
+
+				// Clear additional margins added because of the left/right side labels.
+				// (Repeat selector to increase specificity).
+				& > .toolbar-icon.toolbar-icon {
+					margin-left: 0;
+					margin-right: 0;
+				}
+
+				width: var(--toolbar-button-size);
+			}
+		}
+	}
+
+	> div.toolbar-element {
+		flex-direction: row;
+		display: flex;
+		flex-grow: 1;
+
+		justify-content: center;
+		background-color: var(--background-color-2);
+		color: var(--foreground-color-2);
+		--icon-color: var(--foreground-color-2);
+
+		// Display a smaller scrollbar on Chrome
+		&::-webkit-scrollbar {
+			width: 3px;
+			height: 3px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background-color: var(--shadow-color);
+		}
+		
+		&.toolbar-tool-row {
+			overflow-x: auto;
+			overflow-y: hidden;
+			flex-grow: 100;
+		}
+
+		&.toolbar-action-row {
+			// Increase the z-index of the first item --
+			// hovering over the items should make labels appear
+			// on top of the buttons in the next item (not below).
+			z-index: 2;
+			background-color: var(--background-color-3);
+			color: var(--foreground-color-3);
+			--icon-color: var(--foreground-color-3);
+		}
+
+		&.has-scroll {
+			justify-content: start;
+
+			// Allows absolutely positioned children to scroll with the content.
+			position: relative;
+
+			// Show labels to the *right*, rather than below buttons when scrolling.
+			// Otherwise, the labels are clipped.
+			--button-label-hover-offset-y: 0;
+			--button-label-hover-offset-x: calc(0px - var(--label-hover-offset-size));
+
+			& > :nth-child(1) {
+				// Ensure that the first label doesn't go off the edge of the screen
+				--button-label-hover-offset-x: var(--label-hover-offset-size);
+			}
+		}
+
+		--extra-left-right-padding: 0px;
+	}
+
+	// row-reverse combined with setting one row's order to be less than the other allows
+	// the upper toolbar to be shown above the lower toolbar on small screens and to the
+	// right on large screens.
+	flex-direction: row;
+	justify-content: space-around;
+
+	.toolbar-toolContainer.selected > .toolbar-button {
+		background-color: var(--selection-background-color);
+		color: var(--selection-foreground-color);
+		--icon-color: var(--selection-foreground-color);
+	}
+
+	.toolbar-button {
+		box-sizing: border-box;
+		background-color: transparent;
+
+		.toolbar-showHideDropdownIcon {
+			// Shrink, but not as fast as everything else.
+			flex-shrink: 0.01;
+
+			height: 12px;
+		}
+	}
+
+	.toolbar-toolContainer {
+		// No inline label -- default to an order between the first
+		// and last button.
+		order: 1;
+	}
+
+	// Display some buttons' labels inline, rather than only on hover.
+	.toolbar-toolContainer.label-inline {
+		flex-grow: 1;
+		display: flex;
+
+		--button-flex-direction: row;
+
+
+		&.label-left { // Icon on the right
+			justify-content: end;
+			--button-flex-direction: row-reverse;
+
+			> .toolbar-button > .toolbar-icon {
+				margin-left: 7px;
+				margin-right: 0;
+			}
+
+			// Show last
+			order: 100;
+		}
+
+		&.label-right { // Icon on the left
+			// Show first
+			order: -1;
+		}
+
+		> .toolbar-button {
+			width: auto;
+			flex-direction: var(--button-flex-direction);
+
+			> .toolbar-icon {
+				height: 100%;
+				margin-right: 7px;
+				margin-left: 0;
+
+				// Make smaller than the other icons
+				width: 22px;
+			}
+		}
+	}
+
+	--button-label-hover-offset-y: var(--label-hover-offset-size);
+	--button-label-hover-offset-x: 0;
+
+	.toolbar-toolContainer:not(.no-icon):not(.label-inline) .toolbar-button {
+		width: calc(var(--toolbar-button-size) + var(--extra-left-right-padding));
+
+		// Note: EdgeToolbar.ts currently assumes that the height of a button is
+		//       equivalent to --toolbar-button-size.
+		height: var(--toolbar-button-size);
+
+		@include label-visible-on-hover(label);
+	}
+
+	& > div > .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
+		display: block;
+		visibility: hidden;
+	}
+
+	.toolbar-toolContainer > .toolbar-button {
+		margin: 0;
+		border-radius: 0;
+
+		padding: 8px;
+
+		&.has-dropdown {
+			padding-left: 8px;
+			padding-right: 8px;
+			padding-top: 8px;
+			padding-bottom: 0px;
+		}
+
+
+		box-shadow: none;
+	}
+}
+
+// Restyle the sidebar so that colors can be selected when the pipette tool is enabled.
+.imageEditorContainer.pipette--color-selection-in-progress {
+	.toolbar-edgemenu-container {
+		height: 0;
+		background-color: transparent;
+
+		opacity: 0.9;
+
+		.toolbar-edgemenu {
+			position: absolute;
+		}
+	}
+}
+
+// The popup menu container
+.toolbar-edgemenu-container {
+	background-color: var(--background-color-transparent);
+
+	transition: 0.15s ease-in-out height, 0.15s ease-in-out background-color, 0.2s ease-in-out opacity;
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
+
+	position: absolute;
+	width: var(--editor-current-width-px);
+	height: var(--editor-current-height-px);
+	box-sizing: border-box;
+
+	// Hide the dropdown if it could reasonably go below the bottom of the editor
+	&.dropdown-below-edge {
+		overflow-y: hidden;
+	}
+
+	display: flex;
+	flex-direction: column-reverse;
+	align-items: center;
+	z-index: 2;
+
+	button {
+		font-size: 1.2em;
+		box-shadow: none;
+		border: none;
+		padding: 10px;
+
+		color: var(--foreground-color-1);
+
+		transition: 0.2s ease box-shadow;
+
+		&:hover {
+			box-shadow: 0 1px 2px var(--shadow-color);
+		}
+
+		font-weight: bold;
+		color: var(--primary-action-foreground-color);
+	}
+
+	// Special styles for the enum selector 
+	.toolbar-grid-selector .choice-button {
+		--button-label-hover-offset-y: var(--button-size);
+		@include label-visible-on-hover('label > .button-label-text');
+	}
+}
+
+.toolbar-edgemenu-container .toolbar-edgemenu {
+	--toolbar-button-height: 48px;
+
+	touch-action: none;
+	user-select: none;
+
+	background-color: var(--background-color-2);
+	color: var(--foreground-color-2);
+	--icon-color: var(--foreground-color-2);
+
+	box-shadow: 0px 0px 1px var(--shadow-color);
+
+	padding-left: 10px;
+	padding-right: 10px;
+
+	width: min(400px, 100vw);
+	box-sizing: border-box;
+
+	$border-radius: 30px;
+	border-top-left-radius: $border-radius;
+	border-top-right-radius: $border-radius;
+
+	transition: transform 0.1s ease, padding-bottom 0.1s ease;
+
+	input, textarea {
+		user-select: auto;
+	}
+
+	.toolbar-toolContainer {
+		display: inline-block;
+	}
+
+	button {
+		background-color: transparent;
+	}
+
+	& > button.drag-elem {
+		height: 40px;
+		display: block;
+
+		cursor: ns-resize;
+
+		position: relative;
+		margin-top: -15px;
+		margin-bottom: 10px;
+
+		width: 100%;
+		border: none;
+		box-shadow: none;
+
+		background: transparent;
+		
+		&::before {
+			content: "";
+
+			background-color: var(--icon-color);
+			opacity: 0.2;
+			display: block;
+
+			position: relative;
+			top: 10px;
+
+			height: 5px;
+			border-radius: 5px;
+
+			width: min(80%, 40px);
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+
+	// Toolbar buttons within the menu
+	.toolbar-toolContainer {
+		display: block;
+
+		.toolbar-button {
+			flex-direction: row;
+			max-width: unset;
+			width: 100%;
+			box-sizing: border-box;
+			justify-content: flex-start;
+			box-shadow: none;
+
+			padding: 2px;
+
+			& > .toolbar-icon {
+				width: 25px;
+				height: 25px;
+				padding: 13px;
+
+				margin-right: 15px;
+			}
+
+			// No special sizing for long labels
+			label, & > label.long-label {
+				font-size: 1em;
+			}
+		}
+	}
+
+	.toolbar-nonbutton-controls-main-list {
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+
+	.toolbar-spacedList {
+		box-sizing: border-box;
+
+		--align-items-to-x: 105px;
+
+		& > div {
+			display: flex;
+			align-items: center;
+
+			// Space between items
+			margin-top: 5px;
+			min-height: 35px;
+
+			// Align inputs (assumes labels come first)
+			& > label {
+				padding-right: 35px;
+				min-width: var(--align-items-to-x);
+				flex-shrink: 1;
+				box-sizing: border-box;
+			}
+
+			& > input[type="checkbox"] {
+				width: 20px;
+				height: 20px;
+				margin-left: 0;
+			}
+
+			// If checkboxes have flex-grow, the checkbox region can become centered.
+			& > input:not([type="checkbox"]) {
+				flex-grow: 1;
+
+				// Specify a minimum width to allow the input to shrink.
+				min-width: 48px;
+				flex-shrink: 1;
+			}
+		}
+	}
+}

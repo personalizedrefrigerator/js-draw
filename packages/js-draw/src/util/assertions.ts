@@ -53,3 +53,15 @@ export const assertIsNumberArray = (
 
 	return true;
 };
+
+/**
+ * Throws an exception if `typeof value` is not a boolean.
+ */
+export const assertIsBoolean = (value: any): value is boolean => {
+	if (typeof value !== 'boolean') {
+		throw new Error('Given value is not a boolean');
+		// return false;
+	}
+
+	return true;
+};

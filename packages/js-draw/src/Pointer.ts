@@ -1,4 +1,4 @@
-import { Point2, Vec2 } from './math/Vec2';
+import { Point2, Vec2 } from '@js-draw/math';
 import Viewport from './Viewport';
 
 export enum PointerDevice {
@@ -31,7 +31,7 @@ export default class Pointer {
 		// Unique ID for the pointer
 		public readonly id: number,
 
-		// Numeric timestamp (milliseconds, as from `(new Date).getTime()`)
+		// Numeric timestamp (milliseconds, as from `performance.now()`).
 		public readonly timeStamp: number,
 	) {
 	}
@@ -144,7 +144,7 @@ export default class Pointer {
 			device = PointerDevice.Eraser;
 		}
 
-		const timeStamp = (new Date()).getTime();
+		const timeStamp = evt.timeStamp;
 		const canvasPos = viewport.roundPoint(viewport.screenToCanvas(screenPos));
 
 		if (device === PointerDevice.PrimaryButtonMouse) {

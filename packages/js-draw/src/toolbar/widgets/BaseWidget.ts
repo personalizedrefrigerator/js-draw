@@ -1,22 +1,41 @@
 import Editor from '../../Editor';
-import { DispatcherEventListener } from '../../EventDispatcher';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
-import { EditorEventType } from '../../types';
 import { KeyPressEvent, keyPressEventFromHTMLEvent, keyUpEventFromHTMLEvent } from '../../inputEvents';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
+import DropdownLayoutManager from './layout/DropdownLayoutManager';
+import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
 
 export type SavedToolbuttonState = Record<string, any>;
+
+/**
+ * A set of labels that allow toolbar themes to treat buttons differently.
+ */
+export enum ToolbarWidgetTag {
+	Save = 'save',
+	Exit = 'exit',
+	Undo = 'undo',
+	Redo = 'redo',
+}
 
 export default abstract class BaseWidget {
 	protected readonly container: HTMLElement;
 	private button: HTMLElement;
 	private icon: Element|null;
-	private dropdownContainer: HTMLElement;
+	private layoutManager: WidgetContentLayoutManager;
+	private dropdown: ToolMenu|null = null;
+	private dropdownContent: HTMLElement;
 	private dropdownIcon: Element;
 	private label: HTMLLabelElement;
 	#hasDropdown: boolean;
+
+	// True iff this widget is disabled.
 	private disabled: boolean = false;
+
+	// True iff this widget is currently disabled because the editor is read only
+	#disabledDueToReadOnlyEditor: boolean = false;
+
+	#tags: (ToolbarWidgetTag|string)[] = [];
 
 	// Maps subWidget IDs to subWidgets.
 	private subWidgets: Record<string, BaseWidget> = {};
@@ -24,19 +43,30 @@ export default abstract class BaseWidget {
 	private toplevel: boolean = true;
 	protected readonly localizationTable: ToolbarLocalization;
 
+	// Listens for changes in whether the editor is read-only
+	#readOnlyListener: { remove: ()=>void }|null = null;
+
 	public constructor(
 		protected editor: Editor,
 		protected id: string,
-		localizationTable?: ToolbarLocalization,
+		localizationTable?: ToolbarLocalization
 	) {
 		this.localizationTable = localizationTable ?? editor.localization;
 
+		// Default layout manager
+		const defaultLayoutManager = new DropdownLayoutManager(
+			(text) => this.editor.announceForAccessibility(text),
+			this.localizationTable
+		);
+		defaultLayoutManager.connectToEditorNotifier(editor.notifier);
+		this.layoutManager = defaultLayoutManager;
+
 		this.icon = null;
 		this.container = document.createElement('div');
-		this.container.classList.add(`${toolbarCSSPrefix}toolContainer`);
-		this.dropdownContainer = document.createElement('div');
-		this.dropdownContainer.classList.add(`${toolbarCSSPrefix}dropdown`);
-		this.dropdownContainer.classList.add('hidden');
+		this.container.classList.add(
+			`${toolbarCSSPrefix}toolContainer`, `${toolbarCSSPrefix}toolButtonContainer`
+		);
+		this.dropdownContent = document.createElement('div');
 		this.#hasDropdown = false;
 
 		this.button = document.createElement('div');
@@ -44,6 +74,12 @@ export default abstract class BaseWidget {
 		this.label = document.createElement('label');
 		this.button.setAttribute('role', 'button');
 		this.button.tabIndex = 0;
+
+		// Disable the context menu. This allows long-press gestures to trigger the button's
+		// tooltip instead.
+		this.button.oncontextmenu = event => {
+			event.preventDefault();
+		};
 
 		const toolbarShortcutHandlers = this.editor.toolController.getMatchingTools(ToolbarShortcutHandler);
 
@@ -54,8 +90,53 @@ export default abstract class BaseWidget {
 		}
 	}
 
+	/**
+	 * Should return a constant true or false value. If true (the default),
+	 * this widget must be automatically disabled when its editor is read-only.
+	 */
+	protected shouldAutoDisableInReadOnlyEditor() {
+		return true;
+	}
+
 	public getId(): string {
 		return this.id;
+	}
+
+	/**
+	 * Note: Tags should be set *before* a tool widget is added to a toolbar.
+	 *
+	 *
+	 * Associates tags with this widget that can be used by toolbar themes
+	 * to customize the layout/appearance of this button. Prefer tags in
+	 * the `ToolbarWidgetTag` enum, where possible.
+	 *
+	 * In addition to being readable from the {@link getTags} method, tags are
+	 * added to a button's main container as CSS classes with the `toolwidget-tag--` prefix.
+	 *
+	 * For example, the `undo` tag would result in `toolwidget-tag--undo`
+	 * being added to the button's container's class list.
+	 *
+	 */
+	public setTags(tags: (string|ToolbarWidgetTag)[]) {
+		const toClassName = (tag: string) => {
+			return `toolwidget-tag--${tag}`;
+		};
+
+		// Remove CSS classes associated with old tags
+		for (const tag of this.#tags) {
+			this.container.classList.remove(toClassName(tag));
+		}
+
+		this.#tags = [...tags];
+
+		// Add new CSS classes
+		for (const tag of this.#tags) {
+			this.container.classList.add(toClassName(tag));
+		}
+	}
+
+	public getTags() {
+		return [ ...this.#tags ];
 	}
 
 	/**
@@ -66,6 +147,8 @@ export default abstract class BaseWidget {
 	 * `container = { 'foo': somethingNotThis, 'foo-1': somethingElseNotThis }`, this method
 	 * returns `foo-2` because elements with IDs `foo` and `foo-1` are already present in
 	 * `container`.
+	 *
+	 * If `this` is already in `container`, returns the id given to `this` in the container.
 	 */
 	public getUniqueIdIn(container: Record<string, BaseWidget>): string {
 		let id = this.getId();
@@ -98,7 +181,12 @@ export default abstract class BaseWidget {
 		return true;
 	}
 
+	/** @deprecated Renamed to `setUpButtonEventListeners`. */
 	protected setupActionBtnClickListener(button: HTMLElement) {
+		return this.setUpButtonEventListeners(button);
+	}
+
+	protected setUpButtonEventListeners(button: HTMLElement) {
 		const clickTriggers = { Enter: true, ' ': true, };
 		button.onkeydown = (evt) => {
 			let handled = false;
@@ -139,6 +227,11 @@ export default abstract class BaseWidget {
 				this.handleClick();
 			}
 		};
+
+		// Prevent double-click zoom on some devices.
+		button.ondblclick = event => {
+			event.preventDefault();
+		};
 	}
 
 	// Add a listener that is triggered when a key is pressed.
@@ -162,7 +255,18 @@ export default abstract class BaseWidget {
 		this.subWidgets[id] = widget;
 	}
 
-	private toolbarWidgetToggleListener: DispatcherEventListener|null = null;
+	public setLayoutManager(manager: WidgetContentLayoutManager) {
+		if (manager === this.layoutManager) {
+			return;
+		}
+
+		this.layoutManager = manager;
+		if (this.container.parentElement) {
+			// Trigger a re-creation of this' content
+			this.addTo(this.container.parentElement);
+		}
+	}
+
 
 	/**
 	 * Adds this to `parent`.
@@ -183,7 +287,7 @@ export default abstract class BaseWidget {
 		}
 
 		// Click functionality
-		this.setupActionBtnClickListener(this.button);
+		this.setUpButtonEventListeners(this.button);
 
 		// Clear anything already in this.container.
 		this.container.replaceChildren();
@@ -193,29 +297,39 @@ export default abstract class BaseWidget {
 
 		// Clear the dropdownContainer in case this element is being moved to another
 		// parent.
-		this.dropdownContainer.replaceChildren();
-		this.#hasDropdown = this.fillDropdown(this.dropdownContainer);
+		this.dropdownContent.replaceChildren();
+		this.#hasDropdown = this.fillDropdown(this.dropdownContent);
 		if (this.#hasDropdown) {
+			this.button.classList.add('has-dropdown');
+
+			// We're re-creating the dropdown.
+			this.dropdown?.destroy();
+
 			this.dropdownIcon = this.createDropdownIcon();
 			this.button.appendChild(this.dropdownIcon);
-			this.container.appendChild(this.dropdownContainer);
 
-			if (this.toolbarWidgetToggleListener) {
-				this.toolbarWidgetToggleListener.remove();
-			}
+			this.dropdown = this.layoutManager.createToolMenu({
+				target: this.button,
+				getTitle: () => this.getTitle(),
+				isToplevel: () => this.toplevel,
+			});
 
-			this.toolbarWidgetToggleListener = this.editor.notifier.on(EditorEventType.ToolbarDropdownShown, (evt) => {
-				if (
-					evt.kind === EditorEventType.ToolbarDropdownShown
-					&& evt.parentWidget !== this
+			this.dropdown.visible.onUpdate(visible => {
+				if (visible) {
+					this.container.classList.add('dropdownVisible');
+				} else {
+					this.container.classList.remove('dropdownVisible');
+				}
 
-					// Don't hide if a submenu wash shown (it might be a submenu of
-					// the current menu).
-					&& evt.parentWidget.toplevel
-				) {
-					this.setDropdownVisible(false);
+				// Auto-focus this component's button when the dropdown hides --
+				// this ensures that keyboard focus goes to a reasonable location when
+				// the user closes a menu.
+				if (!visible) {
+					this.focus();
 				}
 			});
+
+			this.dropdown.appendChild(this.dropdownContent);
 		}
 
 		this.setDropdownVisible(false);
@@ -224,25 +338,65 @@ export default abstract class BaseWidget {
 			this.container.remove();
 		}
 
+		this.#readOnlyListener = this.editor.isReadOnlyReactiveValue().onUpdateAndNow(readOnly => {
+			if (readOnly && this.shouldAutoDisableInReadOnlyEditor() && !this.disabled) {
+				this.setDisabled(true);
+				this.#disabledDueToReadOnlyEditor = true;
+
+				if (this.#hasDropdown) {
+					this.dropdown?.requestHide();
+				}
+			}
+			else if (!readOnly && this.#disabledDueToReadOnlyEditor) {
+				this.#disabledDueToReadOnlyEditor = false;
+				this.setDisabled(false);
+			}
+		});
+
 		parent.appendChild(this.container);
 		return this.container;
 	}
 
+	public focus() {
+		this.button.focus();
+	}
+
+	/**
+	 * @internal
+	 */
+	public addCSSClassToContainer(className: string) {
+		this.container.classList.add(className);
+	}
+
+	public removeCSSClassFromContainer(className: string) {
+		this.container.classList.remove(className);
+	}
+
+	public remove() {
+		this.container.remove();
+
+		this.#readOnlyListener?.remove();
+		this.#readOnlyListener = null;
+	}
 
 	protected updateIcon() {
-		const newIcon = this.createIcon();
+		let newIcon = this.createIcon();
 
-		if (newIcon) {
-			this.icon?.replaceWith(newIcon);
-			this.icon = newIcon;
-			this.icon.classList.add(`${toolbarCSSPrefix}icon`);
+		if (!newIcon) {
+			newIcon = document.createElement('div');
+			this.container.classList.add('no-icon');
 		} else {
-			this.icon?.remove();
+			this.container.classList.remove('no-icon');
 		}
+
+		this.icon?.replaceWith(newIcon);
+		this.icon = newIcon;
+		this.icon.classList.add(`${toolbarCSSPrefix}icon`);
 	}
 
 	public setDisabled(disabled: boolean) {
 		this.disabled = disabled;
+		this.#disabledDueToReadOnlyEditor = false;
 
 		if (this.disabled) {
 			this.button.classList.add('disabled');
@@ -274,66 +428,40 @@ export default abstract class BaseWidget {
 		}
 	}
 
-	private hideDropdownTimeout: any|null = null;
 
 	protected setDropdownVisible(visible: boolean) {
-		const currentlyVisible = this.container.classList.contains('dropdownVisible');
-		if (currentlyVisible === visible) {
-			return;
-		}
-
-		// If waiting to hide the dropdown, cancel it.
-		if (this.hideDropdownTimeout) {
-			clearTimeout(this.hideDropdownTimeout);
-			this.hideDropdownTimeout = null;
-			this.dropdownContainer.classList.remove('hiding');
-			this.repositionDropdown();
-		}
-
-
-		const animationDuration = 150; // ms
-
 		if (visible) {
-			this.dropdownContainer.classList.remove('hidden');
-			this.container.classList.add('dropdownVisible');
-			this.editor.announceForAccessibility(
-				this.localizationTable.dropdownShown(this.getTitle())
-			);
-
-			this.editor.notifier.dispatch(EditorEventType.ToolbarDropdownShown, {
-				kind: EditorEventType.ToolbarDropdownShown,
-				parentWidget: this,
-			});
-
-			this.repositionDropdown();
+			this.dropdown?.requestShow();
 		} else {
-			this.container.classList.remove('dropdownVisible');
-			this.editor.announceForAccessibility(
-				this.localizationTable.dropdownHidden(this.getTitle())
-			);
-
-			this.dropdownContainer.classList.add('hiding');
-
-			// Hide the dropdown *slightly* before the animation finishes. This
-			// prevents flickering in some browsers.
-			const hideDelay = animationDuration * 0.95;
-
-			this.hideDropdownTimeout = setTimeout(() => {
-				this.dropdownContainer.classList.add('hidden');
-				this.dropdownContainer.classList.remove('hiding');
-				this.repositionDropdown();
-			}, hideDelay);
+			this.dropdown?.requestHide();
 		}
-
-		// Animate
-		const animationName = `var(--dropdown-${
-			visible ? 'show' : 'hide'
-		}-animation)`;
-		this.dropdownContainer.style.animation = `${animationDuration}ms ease ${animationName}`;
 	}
 
+	/**
+	 * Only used by some layout managers.
+	 * In those layout managers, makes this dropdown visible.
+	 */
+	protected activateDropdown() {
+		this.dropdown?.onActivated();
+	}
+
+	/**
+	 * Returns `true` if this widget must always be in a toplevel menu and not
+	 * in a scrolling/overflow menu.
+	 *
+	 * This method can be overidden to override the default of `true`.
+	 */
+	public mustBeInToplevelMenu(): boolean {
+		return false;
+	}
+
+	/**
+	 * Returns true iff this widget can be in a nontoplevel menu.
+	 *
+	 * @deprecated Use `!mustBeInToplevelMenu()` instead.
+	 */
 	public canBeInOverflowMenu(): boolean {
-		return true;
+		return !this.mustBeInToplevelMenu();
 	}
 
 	public getButtonWidth(): number {
@@ -348,26 +476,13 @@ export default abstract class BaseWidget {
 		this.container.style.display = hidden ? 'none' : '';
 	}
 
-	protected repositionDropdown() {
-		const dropdownBBox = this.dropdownContainer.getBoundingClientRect();
-		const screenWidth = document.body.clientWidth;
-
-		if (dropdownBBox.left > screenWidth / 2) {
-			// Use .translate so as not to conflict with CSS animating the
-			// transform property.
-			this.dropdownContainer.style.translate = `calc(${this.button.clientWidth + 'px'} - 100%) 0`;
-		} else {
-			this.dropdownContainer.style.translate = '';
-		}
-	}
-
 	/** Set whether the widget is contained within another. @internal */
 	public setIsToplevel(toplevel: boolean) {
 		this.toplevel = toplevel;
 	}
 
 	protected isDropdownVisible(): boolean {
-		return !this.dropdownContainer.classList.contains('hidden');
+		return this.dropdown?.visible?.get() ?? false;
 	}
 
 	protected isSelected(): boolean {

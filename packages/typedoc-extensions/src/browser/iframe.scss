@@ -1,0 +1,38 @@
+
+:root.console-view {
+	background-color: #222;
+	color: white;
+
+	body > div {
+		margin-bottom: 10px;
+	
+		font-family: monospace;
+		white-space: pre-wrap;
+
+		& > details {
+			display: inline-block;
+		}
+
+		& > * {
+			margin-right: 5px;
+		}
+
+		&.error {
+			color: red;
+		}
+
+		&.warning {
+			color: yellow;
+		}
+
+		.color-square {
+			width: 1em;
+			height: 1em;
+			margin-right: 3px;
+			display: inline-block;
+
+			border: 1px solid white;
+		}
+	}
+}
+

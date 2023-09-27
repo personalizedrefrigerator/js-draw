@@ -1,7 +1,7 @@
 import UnknownSVGObject from '../components/UnknownSVGObject';
 import Editor from '../Editor';
 import { EditorImage, Rect2, StrokeComponent } from '../lib';
-import { Vec2 } from '../math/Vec2';
+import { Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import sendPenEvent from '../testing/sendPenEvent';
 import { InputEvtType } from '../inputEvents';

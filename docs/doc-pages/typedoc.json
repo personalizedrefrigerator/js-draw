@@ -1,0 +1,6 @@
+{
+	"extends": ["../../typedoc.base.json"],
+	"entryPoints": ["./typedoc.ts"],
+	"includeVersion": false,
+	"readme": "./doc-pages.md"
+}

@@ -23,6 +23,12 @@ const config = {
 	},
 
 	testEnvironment: 'jsdom',
+	testEnvironmentOptions: {
+		// Prevents scripts from running within iframes (including sandboxed iframes)
+		// which prevents "Error: The SVG sandbox is broken! Please double-check the sandboxing setting."
+		// from being repeatedly logged to the console during testing.
+		runScripts: 'outside-only',
+	},
 	setupFilesAfterEnv: [ '<rootDir>/testing/beforeEachFile.ts' ],
 };
 

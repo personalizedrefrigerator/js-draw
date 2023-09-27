@@ -1,5 +1,4 @@
-import Color4 from '../Color4';
-import { Path, Rect2 } from '../math/lib';
+import { Path, Rect2, Color4, Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import AbstractComponent from './AbstractComponent';
 import BackgroundComponent, { BackgroundType, imageBackgroundCSSClassName } from './BackgroundComponent';
@@ -41,5 +40,29 @@ describe('ImageBackground', () => {
 		expect(deserializedBackground.getMainColor()).objEq(Color4.red);
 		expect(deserializedBackground.getGridSize()).toBe(background.getGridSize());
 		expect(deserializedBackground.getSecondaryColor()).objEq(Color4.purple);
+	});
+
+	it('should match image size on save if autoresize is enabled', () => {
+		const editor = createEditor();
+		editor.dispatch(editor.image.setAutoresizeEnabled(true));
+
+		// The editor is initially empty, so should have an empty import/export rect
+		expect(editor.image.getImportExportRect().size).objEq(Vec2.zero);
+
+		// Add a background
+		const background = new BackgroundComponent(BackgroundType.SolidColor, Color4.green);
+		editor.dispatch(editor.image.addElement(background));
+
+		// Render to SVG and increase the output size
+		const asSVG = editor.toSVG({ minDimension: 50 });
+		expect(asSVG.getAttribute('width')).toBe('50');
+		expect(asSVG.getAttribute('height')).toBe('50');
+
+		// The background should have the expected path/size
+		// TODO: This test currently relies too heavily on non-background-specific implementation
+		//       details. Ideally, this should be renderer-independent.
+		expect(asSVG.querySelectorAll(
+			`path.${imageBackgroundCSSClassName}[d="M50,50L50,0L0,0L0,50L50,50"]`
+		)).toHaveLength(1);
 	});
 });

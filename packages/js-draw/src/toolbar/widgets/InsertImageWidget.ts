@@ -1,18 +1,21 @@
 import ImageComponent from '../../components/ImageComponent';
 import Editor from '../../Editor';
 import Erase from '../../commands/Erase';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
 import SelectionTool from '../../tools/SelectionTool/SelectionTool';
-import Mat33 from '../../math/Mat33';
+import { Mat33 } from '@js-draw/math';
 import fileToBase64 from '../../util/fileToBase64';
 import { ToolbarLocalization } from '../localization';
-import ActionButtonWidget from './ActionButtonWidget';
+import BaseWidget from './BaseWidget';
+import { EditorEventType } from '../../types';
+import { toolbarCSSPrefix } from '../constants';
+import makeFileInput from './components/makeFileInput';
+import { MutableReactiveValue } from '../../util/ReactiveValue';
 
-export default class InsertImageWidget extends ActionButtonWidget {
-	private imageSelectionOverlay: HTMLElement;
+export default class InsertImageWidget extends BaseWidget {
 	private imagePreview: HTMLImageElement;
-	private imageFileInput: HTMLInputElement;
+	private selectedFiles: MutableReactiveValue<File[]>|null;
 	private imageAltTextInput: HTMLInputElement;
 	private statusView: HTMLElement;
 	private imageBase64URL: string|null;
@@ -21,27 +24,57 @@ export default class InsertImageWidget extends ActionButtonWidget {
 	public constructor(editor: Editor, localization?: ToolbarLocalization) {
 		localization ??= editor.localization;
 
-		super(editor,
-			'insert-image-widget',
-			() => editor.icons.makeInsertImageIcon(),
-			localization.image,
-			() => this.onClicked()
-		);
+		super(editor, 'insert-image-widget', localization);
 
-		this.imageSelectionOverlay = document.createElement('div');
-		this.imageSelectionOverlay.classList.add('toolbar-image-selection-overlay');
-		this.fillOverlay();
+		// Make the dropdown showable
+		this.container.classList.add('dropdownShowable');
 
-		this.editor.createHTMLOverlay(this.imageSelectionOverlay);
-		this.imageSelectionOverlay.style.display = 'none';
+		editor.notifier.on(EditorEventType.SelectionUpdated, event => {
+			if (event.kind === EditorEventType.SelectionUpdated && this.isDropdownVisible()) {
+				this.updateInputs();
+			}
+		});
+	}
+
+	protected override getTitle(): string {
+		return this.localizationTable.image;
+	}
+
+	protected override createIcon(): Element | null {
+		return this.editor.icons.makeInsertImageIcon();
+	}
+
+	protected override setDropdownVisible(visible: boolean): void {
+		super.setDropdownVisible(visible);
+
+		// Update the dropdown just before showing.
+		if (this.isDropdownVisible()) {
+			this.updateInputs();
+		}
+	}
+
+	protected override handleClick() {
+		this.setDropdownVisible(!this.isDropdownVisible());
 	}
 
 	private static nextInputId = 0;
 
-	private fillOverlay() {
+	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
+		container.classList.add(
+			'insert-image-widget-dropdown-content',
+			`${toolbarCSSPrefix}spacedList`,
+			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
+		);
 
-		const chooseImageRow = document.createElement('div');
+		const {
+			container: chooseImageRow,
+			selectedFiles,
+		} = makeFileInput(
+			this.localizationTable.chooseFile,
+			this.editor,
+			'image/*',
+		);
 		const altTextRow = document.createElement('div');
 		this.imagePreview = document.createElement('img');
 		this.statusView = document.createElement('div');
@@ -50,44 +83,34 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		actionButtonRow.classList.add('action-button-row');
 
 		this.submitButton = document.createElement('button');
-		const cancelButton = document.createElement('button');
-
-		this.imageFileInput = document.createElement('input');
+		this.selectedFiles = selectedFiles;
 		this.imageAltTextInput = document.createElement('input');
-		const imageFileInputLabel = document.createElement('label');
+
+		// Label the alt text input
 		const imageAltTextLabel = document.createElement('label');
 
-		const fileInputId = `insert-image-file-input-${InsertImageWidget.nextInputId ++}`;
 		const altTextInputId = `insert-image-alt-text-input-${InsertImageWidget.nextInputId++}`;
-
-		this.imageFileInput.setAttribute('id', fileInputId);
 		this.imageAltTextInput.setAttribute('id', altTextInputId);
 		imageAltTextLabel.htmlFor = altTextInputId;
-		imageFileInputLabel.htmlFor = fileInputId;
-
-		this.imageFileInput.accept = 'image/*';
 
 		imageAltTextLabel.innerText = this.localizationTable.inputAltText;
-		imageFileInputLabel.innerText = this.localizationTable.chooseFile;
-
-		this.imageFileInput.type = 'file';
 		this.imageAltTextInput.type = 'text';
 
 		this.statusView.setAttribute('aria-live', 'polite');
 
-		cancelButton.innerText = this.localizationTable.cancel;
 		this.submitButton.innerText = this.localizationTable.submit;
 
-		this.imageFileInput.onchange = async () => {
-			if (this.imageFileInput.value === '' || !this.imageFileInput.files || !this.imageFileInput.files[0]) {
+		this.selectedFiles.onUpdateAndNow(async files => {
+			if (files.length === 0) {
 				this.imagePreview.style.display = 'none';
 				this.submitButton.disabled = true;
+				this.submitButton.style.display = 'none';
 				return;
 			}
 
 			this.imagePreview.style.display = 'block';
 
-			const image = this.imageFileInput.files[0];
+			const image = files[0];
 
 			let data: string|null = null;
 
@@ -102,37 +125,28 @@ export default class InsertImageWidget extends ActionButtonWidget {
 			if (data) {
 				this.imagePreview.src = data;
 				this.submitButton.disabled = false;
+				this.submitButton.style.display = '';
 				this.updateImageSizeDisplay();
 			} else {
 				this.submitButton.disabled = true;
+				this.submitButton.style.display = 'none';
 				this.statusView.innerText = '';
 			}
-		};
+		});
 
-		cancelButton.onclick = () => {
-			this.hideDialog();
-		};
-
-		this.imageSelectionOverlay.onclick = (evt: MouseEvent) => {
-			// If clicking on the backdrop
-			if (evt.target === this.imageSelectionOverlay) {
-				this.hideDialog();
-			}
-		};
-
-		chooseImageRow.replaceChildren(imageFileInputLabel, this.imageFileInput);
 		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
-		actionButtonRow.replaceChildren(cancelButton, this.submitButton);
+		actionButtonRow.replaceChildren(this.submitButton);
 
 		container.replaceChildren(
 			chooseImageRow, altTextRow, this.imagePreview, this.statusView, actionButtonRow
 		);
 
-		this.imageSelectionOverlay.replaceChildren(container);
+		dropdown.replaceChildren(container);
+		return true;
 	}
 
 	private hideDialog() {
-		this.imageSelectionOverlay.style.display = 'none';
+		this.setDropdownVisible(false);
 	}
 
 	private updateImageSizeDisplay() {
@@ -154,22 +168,24 @@ export default class InsertImageWidget extends ActionButtonWidget {
 		);
 	}
 
-	private clearInputs() {
-		this.imageFileInput.value = '';
-		this.imageAltTextInput.value = '';
-		this.imagePreview.style.display = 'none';
-		this.submitButton.disabled = true;
-		this.statusView.innerText = '';
-	}
+	private updateInputs() {
+		const resetInputs = () => {
+			this.selectedFiles?.set([]);
+			this.imageAltTextInput.value = '';
+			this.imagePreview.style.display = 'none';
+			this.submitButton.disabled = true;
+			this.statusView.innerText = '';
 
-	private onClicked() {
-		this.imageSelectionOverlay.style.display = '';
-		this.clearInputs();
-		this.imageFileInput.focus();
+			this.submitButton.style.display = '';
+
+			this.imageAltTextInput.oninput = null;
+		};
+		resetInputs();
 
 		const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
 		const selectedObjects = selectionTools.map(tool => tool.getSelectedObjects()).flat();
 
+		// Check: Is there a selected image that can be edited?
 		let editingImage: ImageComponent|null = null;
 		if (selectedObjects.length === 1 && selectedObjects[0] instanceof ImageComponent) {
 			editingImage = selectedObjects[0];
@@ -182,9 +198,18 @@ export default class InsertImageWidget extends ActionButtonWidget {
 			this.imagePreview.src = this.imageBase64URL;
 
 			this.updateImageSizeDisplay();
-		} else {
+		} else if (selectedObjects.length > 0) {
+			// If not, clear the selection.
 			selectionTools.forEach(tool => tool.clearSelection());
 		}
+
+		// Show the submit button only when there is data to submit.
+		this.submitButton.style.display = 'none';
+		this.imageAltTextInput.oninput = () => {
+			if (this.imagePreview.src?.length > 0) {
+				this.submitButton.style.display = '';
+			}
+		};
 
 		this.submitButton.onclick = async () => {
 			if (!this.imageBase64URL) {
@@ -202,7 +227,7 @@ export default class InsertImageWidget extends ActionButtonWidget {
 				return;
 			}
 
-			this.imageSelectionOverlay.style.display = 'none';
+			this.hideDialog();
 
 			if (editingImage) {
 				const eraseCommand = new Erase([ editingImage ]);

@@ -1,5 +1,3 @@
-
-
 import KeyboardShortcutManager from '../../shortcuts/KeyboardShortcutManager';
 
 // Selection
@@ -19,3 +17,10 @@ for (let i = 0; i < selectStrokeTypeKeyboardShortcutIds.length; i++) {
 		id, [ `CtrlOrMeta+Digit${(i + 1)}` ], 'Select pen style ' + (i + 1),
 	);
 }
+
+// Save
+export const saveKeyboardShortcut = 'jsdraw.toolbar.SaveActionWidget.save';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	saveKeyboardShortcut, [ 'ctrlOrMeta+KeyS' ], 'Save'
+);
+

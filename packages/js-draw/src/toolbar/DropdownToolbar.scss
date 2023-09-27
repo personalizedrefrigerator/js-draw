@@ -1,0 +1,46 @@
+
+.toolbar-dropdown-toolbar {
+	button, .toolbar-button {
+		background-color: var(--background-color-2);
+		color: var(--foreground-color-2);
+		--icon-color: var(--foreground-color-2);
+	}
+
+	&, .toolbar-dropdown {
+		background-color: var(--background-color-3);
+		color: var(--foreground-color-3);
+	}
+
+	.toolbar-spacedList > div {
+		// Add spacing between labels and inputs (assumes labels come first)
+		& > label {
+			padding-right: 10px;
+			min-width: 50px;
+		}
+	}
+
+	// Override the styling of color fields
+	.clr-field {
+		// Make the preview a rounded box.
+		button {
+			width: 100%;
+			height: 100%;
+
+			// Ensure that the preview is centered vertically
+			top: 50%;
+			left: 0;
+
+			border-radius: 5px;
+		}
+	}
+
+	.toolbar-grid-selector > div {
+		--button-size: 57px;
+	}
+
+	// Show toolbar buttons within dropdowns from left to right
+	// rather than from top to bottom.
+	.toolbar-dropdown > div > .toolbar-toolContainer {
+		display: inline-block;
+	}
+}

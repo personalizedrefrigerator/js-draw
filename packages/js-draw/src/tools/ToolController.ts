@@ -1,4 +1,5 @@
 import { EditorEventType } from '../types';
+import { Color4 } from '@js-draw/math';
 import Editor from '../Editor';
 import BaseTool from './BaseTool';
 import PanZoom, { PanZoomMode } from './PanZoom';
@@ -6,7 +7,6 @@ import Pen from './Pen';
 import ToolEnabledGroup from './ToolEnabledGroup';
 import Eraser from './Eraser';
 import SelectionTool from './SelectionTool/SelectionTool';
-import Color4 from '../Color4';
 import { ToolLocalization } from './localization';
 import UndoRedoShortcut from './UndoRedoShortcut';
 import TextTool from './TextTool';
@@ -22,6 +22,8 @@ import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
 import { InputEvt, InputEvtType } from '../inputEvents';
 import InputPipeline from './InputFilter/InputPipeline';
 import InputStabilizer from './InputFilter/InputStabilizer';
+import ScrollbarTool from './ScrollbarTool';
+import ReactiveValue from '../util/ReactiveValue';
 
 export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
@@ -30,9 +32,12 @@ export default class ToolController implements InputEventListener {
 
 	// Form a pipeline that allows filtering/mapping input events.
 	private inputPipeline: InputPipeline;
+	private isEditorReadOnly: ReactiveValue<boolean>;
 
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
+		this.isEditorReadOnly = editor.isReadOnlyReactiveValue();
+
 		this.inputPipeline = new InputPipeline();
 		this.inputPipeline.setEmitListener(event => this.onEventInternal(event));
 
@@ -53,7 +58,15 @@ export default class ToolController implements InputEventListener {
 			secondaryPenTool,
 
 			// Highlighter-like pen with width=40
-			new Pen(editor, localization.penTool(3), { color: Color4.ofRGBA(1, 1, 0, 0.5), thickness: 40 }, makePressureSensitiveFreehandLineBuilder),
+			new Pen(
+				editor,
+				localization.penTool(3),
+				{
+					color: Color4.ofRGBA(1, 1, 0, 0.5),
+					thickness: 40,
+					factory: makePressureSensitiveFreehandLineBuilder
+				}
+			),
 
 			new Eraser(editor, localization.eraserTool),
 			new SelectionTool(editor, localization.selectionTool),
@@ -66,6 +79,7 @@ export default class ToolController implements InputEventListener {
 		soundExplorer.setEnabled(false);
 
 		this.tools = [
+			new ScrollbarTool(editor),
 			new PipetteTool(editor, localization.pipetteTool),
 			soundExplorer,
 			panZoomTool,
@@ -97,7 +111,7 @@ export default class ToolController implements InputEventListener {
 	}
 
 	// Replaces the current set of tools with `tools`. This should only be done before
-	// the creation of the app's toolbar (if using `HTMLToolbar`).
+	// the creation of the app's toolbar (if using `AbstractToolbar`).
 	public setTools(tools: BaseTool[], primaryToolGroup?: ToolEnabledGroup) {
 		this.tools = tools;
 		this.primaryToolGroup = primaryToolGroup ?? new ToolEnabledGroup();
@@ -128,6 +142,11 @@ export default class ToolController implements InputEventListener {
 
 	// @internal use `dispatchEvent` rather than calling `onEvent` directly.
 	private onEventInternal(event: InputEvt): boolean {
+		const isEditorReadOnly = this.isEditorReadOnly.get();
+		const canToolReceiveInput = (tool: BaseTool) => {
+			return tool.isEnabled() && (!isEditorReadOnly || tool.canReceiveInputInReadOnlyEditor());
+		};
+
 		let handled = false;
 		if (event.kind === InputEvtType.PointerDownEvt) {
 			let canOnlySendToActiveTool = false;
@@ -140,7 +159,7 @@ export default class ToolController implements InputEventListener {
 					continue;
 				}
 
-				if (tool.isEnabled() && tool.onEvent(event)) {
+				if (canToolReceiveInput(tool) && tool.onEvent(event)) {
 					if (this.activeTool !== tool) {
 						this.activeTool?.onEvent({ kind: InputEvtType.GestureCancelEvt });
 					}
@@ -172,7 +191,7 @@ export default class ToolController implements InputEventListener {
 			}
 		} else {
 			for (const tool of this.tools) {
-				if (!tool.isEnabled()) {
+				if (!canToolReceiveInput(tool)) {
 					continue;
 				}
 
@@ -211,6 +230,13 @@ export default class ToolController implements InputEventListener {
 
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
 		return this.tools.filter(tool => tool instanceof type) as Type[];
+	}
+
+	// @internal
+	public onEditorDestroyed() {
+		for (const tool of this.tools) {
+			tool.onDestroy();
+		}
 	}
 }
 

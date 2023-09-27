@@ -4,7 +4,7 @@
 
 import Editor from '../Editor';
 import TextComponent from '../components/TextComponent';
-import Rect2 from '../math/shapes/Rect2';
+import { Rect2 } from '@js-draw/math';
 import { KeyPressEvent } from '../inputEvents';
 import BaseTool from './BaseTool';
 import { toggleFindVisibleShortcutId } from './keybindings';
@@ -25,6 +25,10 @@ export default class FindTool extends BaseTool {
 
 		this.overlay.style.display = 'none';
 		this.overlay.classList.add(`${cssPrefix}-overlay`);
+	}
+
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
 	}
 
 	private getMatches(searchFor: string): Rect2[] {
@@ -81,7 +85,7 @@ export default class FindTool extends BaseTool {
 
 		label.innerText = this.editor.localization.findLabel;
 		nextBtn.innerText = this.editor.localization.toNextMatch;
-		closeBtn.innerText = this.editor.localization.closeFindDialog;
+		closeBtn.innerText = this.editor.localization.closeDialog;
 
 		this.searchInput.onkeydown = (ev: KeyboardEvent) => {
 			if (ev.key === 'Enter') {
@@ -146,7 +150,7 @@ export default class FindTool extends BaseTool {
 	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
-		if (enabled) {
+		if (this.isEnabled()) {
 			this.setVisible(false);
 		}
 	}

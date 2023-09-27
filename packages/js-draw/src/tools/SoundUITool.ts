@@ -1,8 +1,6 @@
-import Color4 from '../Color4';
 import Editor from '../Editor';
-import LineSegment2 from '../math/shapes/LineSegment2';
-import { Point2 } from '../math/Vec2';
-import { PointerEvt } from '../inputEvents';
+import { LineSegment2, Color4, Point2 } from '@js-draw/math';
+import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 
 class SoundFeedback {
@@ -145,6 +143,10 @@ export default class SoundUITool extends BaseTool {
 		editor.createHTMLOverlay(this.toggleButtonContainer);
 	}
 
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
+	}
+
 	private updateToggleButtonText() {
 		const containerEnabledClass = 'sound-ui-tool-enabled';
 		if (this.isEnabled()) {
@@ -159,12 +161,23 @@ export default class SoundUITool extends BaseTool {
 	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
 
-		if (!enabled) {
+		if (!this.isEnabled()) {
 			this.soundFeedback?.close();
 			this.soundFeedback = null;
+		} else {
+			this.editor.announceForAccessibility(this.editor.localization.soundExplorerUsageAnnouncement);
 		}
 
 		this.updateToggleButtonText();
+	}
+
+	public override onKeyPress(event: KeyPressEvent): boolean {
+		if (event.code === 'Escape') {
+			this.setEnabled(false);
+			return true;
+		}
+
+		return false;
 	}
 
 	private lastPointerPos: Point2;

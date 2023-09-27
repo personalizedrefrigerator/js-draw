@@ -1,3 +1,97 @@
+# 1.5.0
+ * Bug fixes
+    * Make tooltips less likely to appear when scrolling the toolbar with touch.
+    * Fix empty selection transformations added to the undo stack.
+    * Fix diagonal resize cursors appearing as "shrink diagonally" on MacOS and possibly other systems.
+ * Other improvements
+    * Allow changing the icon/label of "Save" and "Exit" buttons
+    * Move "Exit" to the left of "Save" by default
+    * Make the "Save"/"Exit" icons closer to the text size
+
+# 1.4.1
+ * Bug fixes
+    * Fix `minDimension` argument not resizing the background when `toSVG` was called on an empty, auto-resizing image.
+
+# 1.4.0
+ * Featrues
+    * `Editor::toSVG` now allows specifying a minimum output dimension.
+    * Added `Editor::toSVGAsync`.
+    * Added support for read-only editors (see `Editor::setReadOnly`). Note that this feature only attempts to prevent a user from editing the image (and doesn't protect from edits via the API).
+    * Change the cursor to a resize icon when hovering over selection resize boxes.
+ * Localization
+    * Improved Spanish localization.
+ * Bug fixes
+    * Navigation: Prevent app from entering an invalid state (and thus breaking navigation) when scrolling very far away from (0,0) then zooming in.
+    * Edge toolbar
+        * Fix: Save/close buttons were extra wide on some screen sizes in Safari.
+        * Fix: Padding not adjusted for scroll when icons are all on one line. When working properly, the rightmost icon should be roughly half visible to indicate scroll.
+
+# 1.3.1
+ * Bug fixes
+    * Fix grid lines disappearing when zooming and autoresize enabled
+    * Fix very small image/text elements moving on save/reload
+
+# 1.3.0
+ * Features
+   * Adds support for images with full-screen backgrounds and no border (see `EditorImage.setAutoresizeEnabled`). These drawings automatically resize to fit what has been drawn when saved.
+   * Scrollbars within the editor. These scrollbars are currently read-only.
+ * Bug fixes
+   * Fix ctrl+scroll zoom rate is significantly faster than pinch zooming.
+   * Fix zoom level jumping when attempting to zoom outside of zoom limits with a touchscreen.
+   * Fix elements intersecting the selection rectangle not recognized as selected in some cases.
+   * Fix context menu sometimes shown when long-pressing toplevel buttons in the sidebar toolbar (rather than showing the button's tooltip).
+ * Other changes
+   * Slightly faster loading of large SVGs.
+
+# 1.2.2
+ * API fixes
+   * Exports `pathToRenderable`, `pathFromRenderable`, and `pathVisualEquivalent`. These functions were renamed in version 1.0.0 and the new versions were not exported.
+ * Bug fixes
+   * Updates the grid selector widget to use the correct icon foreground for selected items.
+
+# 1.2.1
+ * Bug fixes
+   * Fix `adjustEditorThemeForContrast` not ensuring that the selection and the main toolbar background have sufficient contrast.
+
+# 1.2.0
+ * Features
+   * Added additional `Color4` utility functions ([`fromHSV`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromHSV), [`fromRGBVector`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromRGBVector), [`contrastRatio`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#contrastRatio), and [`.rgb`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#rgb)).
+   * Added [`adjustEditorThemeForContrast`](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.adjustEditorThemeForContrast.html) function.
+ * Other changes
+   * Prefers `transform` to `translation` when setting the position of the edge toolbar for compatibility with older browsers.
+
+# 1.1.0
+ * Features
+   * Bind `ctrl+s` (or `meta+s`) to the save action, if added with [`AbstractToolbar.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addSaveButton).
+ * Bug fixes
+   * Edge toolbar: Fix edge menu text using incorrect CSS variable (it should use `--foreground-color-2` to match `--background-color-2`).
+
+# 1.0.2
+ * Fix `.npmignore` allowing some unnecessary files.
+
+# 1.0.1
+ * Removes default link from the about screen.
+   * `js-draw` can run in contexts where links are not expected.
+ * Fixes peer dependency version for `@js-draw/material-icons`
+
+# 1.0.0
+
+Special thanks to:
+- [Joplin SAS](https://joplinapp.org/) for supporting the development of this release
+- Marta Le Colloec (@MartaLC) for [designing the new toolbar!](https://www.figma.com/file/NA5F2AMWO3wUuaoDfUaAb8/Material-3-wireframes?type=design&node-id=54490%3A1103&mode=design&t=Ee0UwnPnQ2bNC2uM-1)
+
+Breaking changes (see [the migration guide](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html))
+ * The `--secondary-foreground-color` and `--secondary-background-color` are no longer used for selected items. Use `--selection-foreground-color` and `--selection-background-color` instead.
+ * The `Pen` constructor now accepts parameters in a different format — the `PenStyle` should contain the pen factory.
+ * Timestamps in `Pointer`s and `StrokeDataPoint`s use `performance.now` instead of `Date.now`.
+ * A more specific selector than `.imageEditorContainer` is now required to override the `width` and `height` of an editor. Use `.js-draw.imageEditorContainer` or `body .imageEditorContainer`.
+
+Other changes
+ * New default toolbar (see [makeEdgeToolbar](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.makeEdgeToolbar.html)).
+ * New material icon pack
+ * Preserve `<g>` element parents when writing SVGs.
+ * Fix: Editor thinks control key is still pressed after shortcuts like `ctrl+Tab` that defocus the editor before a keyup event is sent for `ctrl`.
+
 # 0.25.1
  * Bug fixes
    * Fixes a bug in old versions of Chromium-based browsers: Strokes disappear on left mouse button up.

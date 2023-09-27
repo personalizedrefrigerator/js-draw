@@ -5,12 +5,10 @@
 // @packageDocumentation
 //
 
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33 from '../math/Mat33';
-import Rect2 from '../math/shapes/Rect2';
+import { LineSegment2, Mat33, Rect2 } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
 type GlobalAttrsList = Array<[string, string|null]>;
@@ -20,9 +18,20 @@ const componentKind = 'svg-global-attributes';
 // Stores global SVG attributes (e.g. namespace identifiers.)
 export default class SVGGlobalAttributesObject extends AbstractComponent {
 	protected contentBBox: Rect2;
-	public constructor(private readonly attrs: GlobalAttrsList) {
+	private readonly attrs: GlobalAttrsList;
+
+	// Does not modify `attrs`
+	public constructor(attrs: GlobalAttrsList) {
 		super(componentKind);
 		this.contentBBox = Rect2.empty;
+
+		// Already stored/managed in `editor.image`.
+		const attrsManagedByRenderer = [ 'viewBox', 'width', 'height' ];
+
+		// Only store attributes that aren't managed by other parts of the app.
+		this.attrs = attrs.filter(([attr, _value]) => {
+			return !attrsManagedByRenderer.includes(attr);
+		});
 	}
 
 	public render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
@@ -30,6 +39,7 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 			// Don't draw unrenderable objects if we can't
 			return;
 		}
+
 
 		for (const [ attr, value ] of this.attrs) {
 			canvas.setRootSVGAttribute(attr, value);
@@ -47,6 +57,13 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 		return false;
 	}
 
+	public override getSizingMode() {
+		// This component can be shown anywhere (it won't be
+		// visible to the user, it just needs to be saved with
+		// the image).
+		return ComponentSizingMode.Anywhere;
+	}
+
 	protected createClone() {
 		return new SVGGlobalAttributesObject(this.attrs);
 	}
@@ -59,22 +76,9 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 		return JSON.stringify(this.attrs);
 	}
 
-	public static deserializeFromString(data: string): AbstractComponent {
-		const json = JSON.parse(data) as GlobalAttrsList;
-		const attrs: GlobalAttrsList = [];
-
-		const numericAndSpaceContentExp = /^[ \t\n0-9.-eE]+$/;
-
-		// Don't deserialize all attributes, just those that should be safe.
-		for (const [ key, val ] of json) {
-			if (key === 'viewBox' || key === 'width' || key === 'height') {
-				if (val && numericAndSpaceContentExp.exec(val)) {
-					attrs.push([key, val]);
-				}
-			}
-		}
-
-		return new SVGGlobalAttributesObject(attrs);
+	public static deserializeFromString(_data: string): AbstractComponent {
+		// To be safe, don't deserialize any attributes
+		return new SVGGlobalAttributesObject([]);
 	}
 }
 

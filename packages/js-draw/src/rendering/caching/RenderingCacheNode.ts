@@ -1,9 +1,8 @@
 
 // A cache record with sub-nodes.
 
-import Color4 from '../../Color4';
-import { ImageNode, sortLeavesByZIndex } from '../../EditorImage';
-import Rect2 from '../../math/shapes/Rect2';
+import { ImageNode, sortLeavesByZIndex } from '../../image/EditorImage';
+import { Rect2, Color4 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';
 import CacheRecord from './CacheRecord';
@@ -63,12 +62,16 @@ export default class RenderingCacheNode {
 	// Generates children, if missing.
 	private generateChildren() {
 		if (this.instantiatedChildren.length === 0) {
-			const childRects = this.region.divideIntoGrid(cacheDivisionSize, cacheDivisionSize);
-
-			if (this.region.size.x === 0 || this.region.size.y === 0) {
+			if (this.region.size.x / cacheDivisionSize === 0 || this.region.size.y / cacheDivisionSize === 0) {
 				console.warn('Cache element has zero size! Not generating children.');
 				return;
 			}
+
+			const childRects = this.region.divideIntoGrid(cacheDivisionSize, cacheDivisionSize);
+			console.assert(
+				childRects.length === cacheDivisionSize * cacheDivisionSize,
+				'Warning: divideIntoGrid created the wrong number of subrectangles!',
+			);
 
 			for (const rect of childRects) {
 				const child = new RenderingCacheNode(rect, this.cacheState);

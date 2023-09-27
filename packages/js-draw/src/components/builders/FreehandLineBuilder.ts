@@ -1,14 +1,12 @@
-import AbstractRenderer, { RenderablePathSpec } from '../../rendering/renderers/AbstractRenderer';
-import { Point2, Vec2 } from '../../math/Vec2';
-import Rect2 from '../../math/shapes/Rect2';
-import { PathCommand, PathCommandType } from '../../math/shapes/Path';
+import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
+import RenderablePathSpec from '../../rendering/RenderablePathSpec';
+import { Point2, Vec2, Rect2, Color4, PathCommand, PathCommandType } from '@js-draw/math';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import RenderingStyle from '../../rendering/RenderingStyle';
 import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
-import Color4 from '../../Color4';
 
 export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
 	// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if

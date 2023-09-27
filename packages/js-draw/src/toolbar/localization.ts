@@ -13,11 +13,13 @@ export interface ToolbarLocalization {
 	image: string;
 	inputAltText: string;
 	chooseFile: string;
+	dragAndDropHereOrBrowse: string; // Uses {{curly braces}} to bold text
 	cancel: string;
 	submit: string;
 	roundedTipPen: string;
 	flatTipPen: string;
-	selectPenType: string;
+	selectPenTip: string;
+	selectShape: string;
 	colorLabel: string;
 	pen: string;
 	eraser: string;
@@ -32,11 +34,14 @@ export interface ToolbarLocalization {
 	clickToPickColorAnnouncement: string;
 	colorSelectionCanceledAnnouncement: string;
 
-	reformatSelection: string;
 	undo: string;
 	redo: string;
+	exit: string;
+	save: string;
+
 	zoom: string;
 	resetView: string;
+	reformatSelection: string;
 	selectionToolKeyboardShortcuts: string;
 	paste: string;
 	documentProperties: string;
@@ -44,15 +49,19 @@ export interface ToolbarLocalization {
 	imageWidthOption: string;
 	imageHeightOption: string;
 	useGridOption: string;
+	enableAutoresizeOption: string;
 	toggleOverflow: string,
 
-	advanced: string;
+	about: string;
 	inputStabilization: string;
 
 	errorImageHasZeroSize: string;
 
+	// closeSidebar is used for accessibility in a button label.
+	closeSidebar: (toolName: string)=>string;
 	dropdownShown: (toolName: string)=> string;
 	dropdownHidden: (toolName: string)=> string;
+
 	zoomLevel: (zoomPercentage: number)=> string;
 	colorChangedAnnouncement: (color: string)=> string;
 	imageSize: (size: number, units: string)=> string;
@@ -67,38 +76,45 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	zoom: 'Zoom',
 	image: 'Image',
 	reformatSelection: 'Format selection',
-	inputAltText: 'Alt text: ',
-	chooseFile: 'Choose file: ',
+	inputAltText: 'Alt text',
+	chooseFile: 'Choose file',
+	dragAndDropHereOrBrowse: 'Drag and drop here\nor\n{{browse}}',
 	submit: 'Submit',
 	cancel: 'Cancel',
 	resetView: 'Reset view',
-	thicknessLabel: 'Thickness: ',
-	colorLabel: 'Color: ',
-	fontLabel: 'Font: ',
-	textSize: 'Size: ',
+	thicknessLabel: 'Thickness',
+	colorLabel: 'Color',
+	fontLabel: 'Font',
+	textSize: 'Size',
 	resizeImageToSelection: 'Resize image to selection',
 	deleteSelection: 'Delete selection',
 	duplicateSelection: 'Duplicate selection',
+
+	exit: 'Exit',
+	save: 'Save',
 	undo: 'Undo',
 	redo: 'Redo',
-	selectPenType: 'Pen type: ',
+
+	selectPenTip: 'Pen tip',
+	selectShape: 'Shape',
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
 	colorSelectionCanceledAnnouncement: 'Color selection canceled',
 	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 	documentProperties: 'Page',
-	backgroundColor: 'Background Color: ',
-	imageWidthOption: 'Width: ',
-	imageHeightOption: 'Height: ',
-	useGridOption: 'Grid: ',
+	backgroundColor: 'Background color',
+	imageWidthOption: 'Width',
+	imageHeightOption: 'Height',
+	useGridOption: 'Grid',
+	enableAutoresizeOption: 'Auto-resize',
 	toggleOverflow: 'More',
-	advanced: 'Advanced',
+	about: 'About',
 	inputStabilization: 'Input stabilization',
 
 	touchPanning: 'Touchscreen panning',
 
-	roundedTipPen: 'Rounded Tip',
-	flatTipPen: 'Flat Tip',
+	roundedTipPen: 'Round',
+	flatTipPen: 'Flat',
 	arrowPen: 'Arrow',
 	linePen: 'Line',
 	outlinedRectanglePen: 'Outlined rectangle',
@@ -108,8 +124,11 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	paste: 'Paste',
 
-	dropdownShown: (toolName) => `Dropdown for ${toolName} shown`,
-	dropdownHidden: (toolName) => `Dropdown for ${toolName} hidden`,
+
+	closeSidebar: (toolName: string) => `Close sidebar for ${toolName}`,
+	dropdownShown: (toolName) => `Menu for ${toolName} shown`,
+	dropdownHidden: (toolName) => `Menu for ${toolName} hidden`,
+
 	zoomLevel: (zoomPercent: number) => `Zoom: ${zoomPercent}%`,
 	colorChangedAnnouncement: (color: string) => `Color changed to ${color}`,
 	imageSize: (size: number, units: string) => `Image size: ${size} ${units}`,

@@ -19,10 +19,11 @@ export interface ToolLocalization {
 	soundExplorer: string;
 	disableAccessibilityExploreTool: string;
 	enableAccessibilityExploreTool: string;
+	soundExplorerUsageAnnouncement: string;
 
 	findLabel: string;
 	toNextMatch: string;
-	closeFindDialog: string;
+	closeDialog: string;
 	findDialogShown: string;
 	findDialogHidden: string;
 	focusedFoundText: (currentMatchNumber: number, totalMatches: number)=> string;
@@ -56,10 +57,11 @@ export const defaultToolLocalization: ToolLocalization = {
 	soundExplorer: 'Sound-based image exploration',
 	disableAccessibilityExploreTool: 'Disable sound-based exploration',
 	enableAccessibilityExploreTool: 'Enable sound-based exploration',
+	soundExplorerUsageAnnouncement: 'Sound-based image exploration enabled: Click/drag the screen to play a sound representation of different parts of the image.',
 
 	findLabel: 'Find',
 	toNextMatch: 'Next',
-	closeFindDialog: 'Close',
+	closeDialog: 'Close',
 	findDialogShown: 'Find dialog shown',
 	findDialogHidden: 'Find dialog hidden',
 	focusedFoundText: (matchIdx: number, totalMatches: number) => `Viewing match ${matchIdx} of ${totalMatches}`,

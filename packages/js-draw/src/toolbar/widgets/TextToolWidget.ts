@@ -1,10 +1,10 @@
-import Color4 from '../../Color4';
+import { Color4 } from '@js-draw/math';
 import Editor from '../../Editor';
 import TextTool from '../../tools/TextTool';
 import { EditorEventType } from '../../types';
-import { toolbarCSSPrefix } from '../HTMLToolbar';
+import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
-import makeColorInput from '../makeColorInput';
+import makeColorInput from './components/makeColorInput';
 import BaseToolWidget from './BaseToolWidget';
 import { SavedToolbuttonState } from './BaseWidget';
 
@@ -33,7 +33,9 @@ export default class TextToolWidget extends BaseToolWidget {
 	private static idCounter: number = 0;
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
-		container.classList.add(`${toolbarCSSPrefix}spacedList`);
+		container.classList.add(
+			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
+		);
 		const fontRow = document.createElement('div');
 		const colorRow = document.createElement('div');
 		const sizeRow = document.createElement('div');
@@ -44,7 +46,9 @@ export default class TextToolWidget extends BaseToolWidget {
 		const sizeInput = document.createElement('input');
 		const sizeLabel = document.createElement('label');
 
-		const [ colorInput, colorInputContainer, setColorInputValue ] = makeColorInput(this.editor, color => {
+		const {
+			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
+		} = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
 		const colorLabel = document.createElement('label');

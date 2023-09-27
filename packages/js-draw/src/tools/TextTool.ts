@@ -1,10 +1,7 @@
-import Color4 from '../Color4';
 import TextComponent from '../components/TextComponent';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
-import Rect2 from '../math/shapes/Rect2';
-import Mat33 from '../math/Mat33';
-import { Vec2 } from '../math/Vec2';
+import EditorImage from '../image/EditorImage';
+import { Rect2, Mat33, Vec2, Color4 } from '@js-draw/math';
 import { PointerDevice } from '../Pointer';
 import { EditorEventType } from '../types';
 import { PointerEvt } from '../inputEvents';
@@ -13,9 +10,13 @@ import { ToolLocalization } from './localization';
 import Erase from '../commands/Erase';
 import uniteCommands from '../commands/uniteCommands';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
+import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 const overlayCSSClass = 'textEditorOverlay';
 export default class TextTool extends BaseTool {
+	private textStyleValue: MutableReactiveValue<TextRenderingStyle>;
+
+	// A reference to the current value of `textStyleValue`.
 	private textStyle: TextRenderingStyle;
 
 	private textEditOverlay: HTMLElement;
@@ -29,13 +30,22 @@ export default class TextTool extends BaseTool {
 
 	public constructor(private editor: Editor, description: string, private localizationTable: ToolLocalization) {
 		super(editor.notifier, description);
-		this.textStyle = {
+		this.textStyleValue = ReactiveValue.fromInitialValue({
 			size: 32,
 			fontFamily: 'sans-serif',
 			renderingStyle: {
 				fill: Color4.purple,
 			},
-		};
+		});
+		this.textStyleValue.onUpdateAndNow(() => {
+			this.textStyle = this.textStyleValue.get();
+
+			this.updateTextInput();
+			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+				kind: EditorEventType.ToolUpdated,
+				tool: this,
+			});
+		});
 
 		this.textEditOverlay = document.createElement('div');
 		this.textEditOverlay.classList.add(overlayCSSClass);
@@ -226,7 +236,7 @@ export default class TextTool extends BaseTool {
 	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
-		if (!enabled) {
+		if (!this.isEnabled()) {
 			this.flushInput();
 		}
 
@@ -285,47 +295,33 @@ export default class TextTool extends BaseTool {
 		this.editor.focus();
 	}
 
-	private dispatchUpdateEvent() {
-		this.updateTextInput();
-		this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
-			kind: EditorEventType.ToolUpdated,
-			tool: this,
-		});
-	}
-
 	public setFontFamily(fontFamily: string) {
 		if (fontFamily !== this.textStyle.fontFamily) {
-			this.textStyle = {
+			this.textStyleValue.set({
 				...this.textStyle,
 				fontFamily: fontFamily,
-			};
-
-			this.dispatchUpdateEvent();
+			});
 		}
 	}
 
 	public setColor(color: Color4) {
 		if (!color.eq(this.textStyle.renderingStyle.fill)) {
-			this.textStyle = {
+			this.textStyleValue.set({
 				...this.textStyle,
 				renderingStyle: {
 					...this.textStyle.renderingStyle,
 					fill: color,
 				},
-			};
-
-			this.dispatchUpdateEvent();
+			});
 		}
 	}
 
 	public setFontSize(size: number) {
 		if (size !== this.textStyle.size) {
-			this.textStyle = {
+			this.textStyleValue.set({
 				...this.textStyle,
 				size,
-			};
-
-			this.dispatchUpdateEvent();
+			});
 		}
 	}
 
@@ -333,9 +329,11 @@ export default class TextTool extends BaseTool {
 		return this.textStyle;
 	}
 
+	public getStyleValue(): MutableReactiveValue<TextRenderingStyle> {
+		return this.textStyleValue;
+	}
+
 	private setTextStyle(style: TextRenderingStyle) {
-		// Copy the style — we may change parts of it.
-		this.textStyle = { ...style, renderingStyle: { ...style.renderingStyle } };
-		this.dispatchUpdateEvent();
+		this.textStyleValue.set(style);
 	}
 }

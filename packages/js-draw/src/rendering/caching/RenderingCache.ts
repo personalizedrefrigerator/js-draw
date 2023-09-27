@@ -1,5 +1,5 @@
-import { ImageNode } from '../../EditorImage';
-import Rect2 from '../../math/shapes/Rect2';
+import { ImageNode } from '../../image/EditorImage';
+import { Rect2 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';
 import RenderingCacheNode from './RenderingCacheNode';

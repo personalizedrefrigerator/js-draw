@@ -1,4 +1,4 @@
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import AbstractComponent from '../components/AbstractComponent';
 import SerializableCommand from './SerializableCommand';
 

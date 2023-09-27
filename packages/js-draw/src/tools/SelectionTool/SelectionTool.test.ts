@@ -1,16 +1,15 @@
-import Color4 from '../../Color4';
 import Stroke from '../../components/Stroke';
 import Editor from '../../Editor';
-import EditorImage from '../../EditorImage';
-import Path from '../../math/shapes/Path';
-import { Vec2 } from '../../math/Vec2';
+import EditorImage from '../../image/EditorImage';
 import { InputEvtType } from '../../inputEvents';
 import Selection from './Selection';
 import SelectionTool from './SelectionTool';
 import createEditor from '../../testing/createEditor';
 import Pointer from '../../Pointer';
-import { Rect2 } from '../../lib';
+import { Rect2, Vec2, Path, Color4 } from '@js-draw/math';
 import sendPenEvent from '../../testing/sendPenEvent';
+import { pathToRenderable } from '../../rendering/RenderablePathSpec';
+import { EditorEventType } from '../../types';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(SelectionTool)[0];
@@ -19,7 +18,7 @@ const getSelectionTool = (editor: Editor): SelectionTool => {
 const createSquareStroke = (size: number = 1) => {
 	const testStroke = new Stroke([
 		// A filled square
-		Path.fromString(`M0,0 L${size},0 L${size},${size} L0,${size} Z`).toRenderable({ fill: Color4.blue }),
+		pathToRenderable(Path.fromString(`M0,0 L${size},0 L${size},${size} L0,${size} Z`), { fill: Color4.blue }),
 	]);
 	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
@@ -42,9 +41,7 @@ const createEditorWithSingleObjectSelection = (objectSize: number = 50) => {
 };
 
 const dragSelection = (editor: Editor, selection: Selection, startPt: Vec2, endPt: Vec2) => {
-	const backgroundElem = selection.getBackgroundElem();
-
-	selection.onDragStart(Pointer.ofCanvasPoint(startPt, true, editor.viewport), backgroundElem);
+	selection.onDragStart(Pointer.ofCanvasPoint(startPt, true, editor.viewport));
 	jest.advanceTimersByTime(100);
 
 	selection.onDragUpdate(Pointer.ofCanvasPoint(endPt, true, editor.viewport));
@@ -143,13 +140,13 @@ describe('SelectionTool', () => {
 		editor.sendKeyboardEvent(InputEvtType.KeyUpEvent, 'Shift');
 
 		// Select the larger stroke without shift pressed
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 200));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(600, 600));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(600, 600));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(200, 200));
 		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
 
 		// Select nothing
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(200, 200));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(201, 201));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(2000, 200));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(2001, 201));
 		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
 	});
 
@@ -157,8 +154,7 @@ describe('SelectionTool', () => {
 		const { editor, selectionTool } = createEditorWithSingleObjectSelection(50);
 
 		const selection = selectionTool.getSelection()!;
-		const backgroundElem = selection.getBackgroundElem();
-		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport), backgroundElem);
+		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
 		selection.onDragUpdate(Pointer.ofCanvasPoint(Vec2.of(20, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
@@ -197,15 +193,64 @@ describe('SelectionTool', () => {
 		expect(testStroke.getBBox().topLeft).objEq(Vec2.of(10, 0));
 	});
 
+	it('rotation handle should rotate the selection', () => {
+		const { addTestStrokeCommand: strokeCommand } = createSquareStroke(50);
+
+		const editor = createEditor();
+		editor.dispatch(strokeCommand);
+
+		// Select the first stroke
+		const selectionTool = getSelectionTool(editor);
+		selectionTool.setEnabled(true);
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(40, 40));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 100));
+
+		// Drag the rotate handle, which should be located halfway across
+		// the top of the selection box
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(25, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(30, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(0, 25));
+
+		// Rotate 45 degrees:
+		//  Drag start (resize circle)
+		//     ↓
+		// .---o---x ← y=0, drag end
+		// |       |
+		// |       |
+		// |       |
+		// .-------.
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(50, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(50, 0));
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
+
+		// Deselect & add the item back to the editor
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(1250, 0));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(1250, 0));
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
+
+		const imageStrokes = editor.image.getAllElements();
+		expect(imageStrokes).toHaveLength(1);
+
+		const transformedStroke = imageStrokes[0] as Stroke;
+		const strokePoints = transformedStroke.getPath().polylineApproximation().map(line => line.p1);
+
+		// One point should now be just above the center of the square:
+		//      .  ←
+		//   .     .
+		//      .
+		//
+		expect(strokePoints.filter(point => point.eq(Vec2.of(Math.hypot(25, 0), 0)))).toHaveLength(1);
+	});
+
 	it('dragCancel should return a selection to its original position', () => {
 		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(150);
 
 		const selection = selectionTool.getSelection()!;
-		const dragBackground = selection.getBackgroundElem();
-
 		expect(testStroke.getBBox().topLeft).objEq(Vec2.zero);
 
-		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(10, 0), true, editor.viewport), dragBackground);
+		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(10, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
 		selection.onDragUpdate(Pointer.ofCanvasPoint(Vec2.of(200, 10), true, editor.viewport));
 		jest.advanceTimersByTime(100);
@@ -219,9 +264,7 @@ describe('SelectionTool', () => {
 		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(150);
 
 		const selection = selectionTool.getSelection()!;
-		const dragBackground = selection.getBackgroundElem();
-
-		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport), dragBackground);
+		selection.onDragStart(Pointer.ofCanvasPoint(Vec2.of(0, 0), true, editor.viewport));
 		jest.advanceTimersByTime(100);
 		selection.onDragUpdate(Pointer.ofCanvasPoint(Vec2.of(20, 0), true, editor.viewport));
 
@@ -257,5 +300,71 @@ describe('SelectionTool', () => {
 
 		expect(editor.image.findParent(testStroke)).not.toBeNull();
 		expect(testStroke.getBBox()).objEq(new Rect2(30, 10, 150, 150));
+	});
+
+	it('should only fire the SelectionChanged event if the selection changed', () => {
+		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(150);
+
+		selectionTool.clearSelection();
+
+		const updatedListener = jest.fn();
+		editor.notifier.on(EditorEventType.SelectionUpdated, updatedListener);
+
+		expect(updatedListener).toHaveBeenCalledTimes(0);
+
+		selectionTool.setEnabled(true);
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+
+		// Should not be notified until the selection ends
+		expect(updatedListener).toHaveBeenCalledTimes(0);
+
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(5, 5));
+
+		expect(updatedListener).toHaveBeenCalledTimes(1);
+		expect(updatedListener).toHaveBeenLastCalledWith({
+			kind: EditorEventType.SelectionUpdated,
+			tool: selectionTool,
+			selectedComponents: [ testStroke ]
+		});
+
+		// Selecting the same content should not re-fire the listener
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10, 10));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(5, 5));
+
+		expect(updatedListener).toHaveBeenCalledTimes(1);
+
+		// ...but selecting a different item should.
+		const secondStroke = createSquareStroke(3000); // Large to ensure that we don't drag the selection instead.
+		editor.dispatch(secondStroke.addTestStrokeCommand);
+
+		expect(updatedListener).toHaveBeenCalledTimes(1);
+
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(2999, 2999));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3001, 3001));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3002, 3002));
+
+		expect(updatedListener).toHaveBeenCalledTimes(2);
+		expect(updatedListener).toHaveBeenLastCalledWith({
+			kind: EditorEventType.SelectionUpdated,
+			tool: selectionTool,
+			selectedComponents: [ secondStroke.testStroke ],
+		});
+	});
+
+	it('should remove the selection box after ending an empty selection', () => {
+		const { editor, selectionTool } = createEditorWithSingleObjectSelection(150);
+
+		// Should have a selection when objects are selected
+		expect(selectionTool.getSelection()).not.toBe(null);
+
+		// Select nothing
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(2999, 2999));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3001, 3001));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3002, 3002));
+
+		// Should not have a selection after setting the selection to contain no objects
+		expect(selectionTool.getSelection()).toBe(null);
 	});
 });

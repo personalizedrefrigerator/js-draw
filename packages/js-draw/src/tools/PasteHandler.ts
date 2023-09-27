@@ -3,10 +3,9 @@ import AbstractComponent from '../components/AbstractComponent';
 import TextComponent from '../components/TextComponent';
 import SVGLoader from '../SVGLoader';
 import { PasteEvent } from '../inputEvents';
-import Mat33 from '../math/Mat33';
+import { Mat33, Color4 } from '@js-draw/math';
 import BaseTool from './BaseTool';
 import TextTool from './TextTool';
-import Color4 from '../Color4';
 import ImageComponent from '../components/ImageComponent';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 

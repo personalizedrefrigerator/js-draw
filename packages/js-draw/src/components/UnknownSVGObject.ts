@@ -4,12 +4,10 @@
 // @packageDocumentation
 //
 
-import LineSegment2 from '../math/shapes/LineSegment2';
-import Mat33 from '../math/Mat33';
-import Rect2 from '../math/shapes/Rect2';
+import { LineSegment2, Mat33, Rect2 } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
 const componentId = 'unknown-svg-object';
@@ -27,7 +25,9 @@ export default class UnknownSVGObject extends AbstractComponent {
 			return;
 		}
 
+		canvas.startObject(this.contentBBox);
 		canvas.drawSVGElem(this.svgObject);
+		canvas.endObject(this.getLoadSaveData());
 	}
 
 	public override intersects(lineSegment: LineSegment2): boolean {
@@ -39,6 +39,13 @@ export default class UnknownSVGObject extends AbstractComponent {
 
 	public override isSelectable() {
 		return false;
+	}
+
+	public override getSizingMode() {
+		// This component can be shown anywhere (it won't be
+		// visible to the user, it just needs to be saved with
+		// the image).
+		return ComponentSizingMode.Anywhere;
 	}
 
 	protected createClone(): AbstractComponent {

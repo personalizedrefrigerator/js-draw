@@ -1,14 +1,11 @@
 // Types related to the image editor
 
-import EventDispatcher from './EventDispatcher';
-import Mat33 from './math/Mat33';
-import { Point2, Vec2 } from './math/Vec2';
-import BaseTool from './tools/BaseTool';
-import AbstractComponent from './components/AbstractComponent';
-import Rect2 from './math/shapes/Rect2';
-import Color4 from './Color4';
-import Command from './commands/Command';
-import BaseWidget from './toolbar/widgets/BaseWidget';
+import type EventDispatcher from './EventDispatcher';
+import type { Mat33, Point2, Vec2, Rect2, Color4 } from '@js-draw/math';
+import type BaseTool from './tools/BaseTool';
+import type AbstractComponent from './components/AbstractComponent';
+import type Command from './commands/Command';
+import type { WidgetContentLayoutManager } from './toolbar/widgets/layout/types';
 
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
@@ -25,8 +22,17 @@ export enum EditorEventType {
 	ViewportChanged,
 	DisplayResized,
 
+	SelectionUpdated,
+
+	ReadOnlyModeToggled,
+
+	/** @internal */
 	ColorPickerToggled,
+
+	/** @internal */
 	ColorPickerColorSelected,
+
+	/** @deprecated @internal */
 	ToolbarDropdownShown,
 }
 
@@ -84,6 +90,17 @@ export interface CommandUndoneEvent {
 	readonly command: Command;
 }
 
+export interface SelectionUpdated {
+	readonly kind: EditorEventType.SelectionUpdated;
+	readonly selectedComponents: AbstractComponent[];
+	readonly tool: BaseTool;
+}
+
+export interface ReadOnlyToggled {
+	readonly kind: EditorEventType.ReadOnlyModeToggled;
+	readonly editorIsReadOnly: boolean;
+}
+
 export interface ColorPickerToggled {
 	readonly kind: EditorEventType.ColorPickerToggled;
 	readonly open: boolean;
@@ -96,12 +113,16 @@ export interface ColorPickerColorSelected {
 
 export interface ToolbarDropdownShownEvent {
 	readonly kind: EditorEventType.ToolbarDropdownShown;
-	readonly parentWidget: BaseWidget;
+
+	// True iff the source dropdown is toplevel.
+	readonly fromToplevelDropdown: boolean;
+	readonly layoutManager: WidgetContentLayoutManager;
 }
 
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
 	| EditorViewportChangedEvent | DisplayResizedEvent
 	| EditorUndoStackUpdated | CommandDoneEvent | CommandUndoneEvent
+	| SelectionUpdated | ReadOnlyToggled
 	| ColorPickerToggled | ColorPickerColorSelected
 	| ToolbarDropdownShownEvent;
 
@@ -114,10 +135,16 @@ export type OnProgressListener =
 
 export type ComponentAddedListener = (component: AbstractComponent)=> Promise<void>|void;
 
+
 // Called when a new estimate for the import/export rect has been generated. This can be called multiple times.
 // Only the last call to this listener must be accurate.
 // The import/export rect is also returned by [start].
-export type OnDetermineExportRectListener = (exportRect: Rect2)=> void;
+//
+// **Note**: In a future release, the `options` parameter may be required.
+export type OnDetermineExportRectListener = (
+	exportRect: Rect2,
+	options?: { autoresize: boolean },
+)=> void;
 
 export interface ImageLoader {
 	start(
@@ -131,7 +158,7 @@ export interface StrokeDataPoint {
 	pos: Point2;
 	width: number;
 
-	/** Time in milliseconds (e.g. as returned by `new Date().getTime()`). */
+	/** Time in milliseconds (e.g. as returned by `performance.now()`). */
 	time: number;
 	color: Color4;
 }
