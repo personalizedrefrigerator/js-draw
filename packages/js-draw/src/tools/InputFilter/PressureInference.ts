@@ -1,7 +1,7 @@
 import InputMapper from './InputMapper';
 import { InputEvt, InputEvtType, isPointerEvt } from '../../inputEvents';
 import Pointer from '../../Pointer';
-import { Vec2 } from '../../math/Vec2';
+import { Vec2 } from '@js-draw/math';
 
 export default class PressureInference extends InputMapper {
 	private lastPointerData: Record<number, Pointer> = {};
@@ -14,7 +14,7 @@ export default class PressureInference extends InputMapper {
 		if (isPointerEvt(event)) {
 			let pressure = event.current.pressure ?? 0.5;
 
-			if (event.kind !== InputEvtType.PointerDownEvt) {
+			if (event.kind === InputEvtType.PointerMoveEvt) {
 				const lastData = this.lastPointerData[event.current.id];
 
 				if (lastData) {
@@ -27,16 +27,28 @@ export default class PressureInference extends InputMapper {
 						pressure = -Math.atan(velocity.dot(Vec2.of(1, 1)) * 4) / Math.PI + 0.5;
 					}
 				}
+			} else if (event.kind === InputEvtType.PointerUpEvt) {
+				pressure = 0.01;
 			}
 
 			this.lastPointerData[event.current.id] = event.current;
 			const mappedCurrent = event.current.withPressure(pressure);
 
-			return this.emit({
+			const eventData = {
 				...event,
 				current: mappedCurrent,
 				allPointers: event.allPointers.map(ptr => ptr === event.current ? mappedCurrent : ptr),
-			});
+			};
+
+			if (event.kind === InputEvtType.PointerUpEvt) {
+				this.emit({
+					...eventData,
+					kind: InputEvtType.PointerMoveEvt,
+					allPointers: [...event.allPointers, mappedCurrent]
+				});
+			}
+
+			return this.emit(eventData);
 		}
 
 		return this.emit(event);
