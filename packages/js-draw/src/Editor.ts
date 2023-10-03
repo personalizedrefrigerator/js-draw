@@ -909,12 +909,16 @@ export class Editor {
 			}
 		});
 
-		elem.addEventListener('blur', () => {
-			for (const event of keysDown) {
-				this.toolController.dispatchInputEvent({
-					...event,
-					kind: InputEvtType.KeyUpEvent,
-				});
+		elem.addEventListener('focusout', (event: FocusEvent) => {
+			const stillHasFocus = event.relatedTarget && elem.contains(event.relatedTarget as Node);
+			if (!stillHasFocus) {
+				for (const event of keysDown) {
+					this.toolController.dispatchInputEvent({
+						...event,
+						kind: InputEvtType.KeyUpEvent,
+					});
+				}
+				keysDown = [];
 			}
 		});
 
