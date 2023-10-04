@@ -51,7 +51,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	 *
 	 * const stroke = new Stroke([
 	 *     // Fill with red
-	 *     path.toRenderable({ fill: Color4.red })
+	 *     pathToRenderable({ fill: Color4.red })
 	 * ]);
 	 * ```
 	 */
