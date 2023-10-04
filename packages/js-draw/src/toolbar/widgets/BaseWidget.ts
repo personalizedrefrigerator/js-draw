@@ -43,8 +43,7 @@ export default abstract class BaseWidget {
 	private toplevel: boolean = true;
 	protected readonly localizationTable: ToolbarLocalization;
 
-	// Listens for changes in whether the editor is read-only
-	#readOnlyListener: { remove: ()=>void }|null = null;
+	#removeEditorListeners: (()=>void)|null = null;
 
 	public constructor(
 		protected editor: Editor,
@@ -80,14 +79,46 @@ export default abstract class BaseWidget {
 		this.button.oncontextmenu = event => {
 			event.preventDefault();
 		};
+	}
+
+	#addEditorListeners() {
+		this.#removeEditorListeners?.();
 
 		const toolbarShortcutHandlers = this.editor.toolController.getMatchingTools(ToolbarShortcutHandler);
+		let removeKeyPressListener: (()=>void)|null = null;
 
 		// If the onKeyPress function has been extended and the editor is configured to send keypress events to
 		// toolbar widgets,
 		if (toolbarShortcutHandlers.length > 0 && this.onKeyPress !== BaseWidget.prototype.onKeyPress) {
-			toolbarShortcutHandlers[0].registerListener(event => this.onKeyPress(event));
+			const keyPressListener = (event: KeyPressEvent) => this.onKeyPress(event);
+			const handler = toolbarShortcutHandlers[0];
+			handler.registerListener(keyPressListener);
+			removeKeyPressListener = () => {
+				handler.removeListener(keyPressListener);
+			};
 		}
+
+		const readOnlyListener = this.editor.isReadOnlyReactiveValue().onUpdateAndNow(readOnly => {
+			if (readOnly && this.shouldAutoDisableInReadOnlyEditor() && !this.disabled) {
+				this.setDisabled(true);
+				this.#disabledDueToReadOnlyEditor = true;
+
+				if (this.#hasDropdown) {
+					this.dropdown?.requestHide();
+				}
+			}
+			else if (!readOnly && this.#disabledDueToReadOnlyEditor) {
+				this.#disabledDueToReadOnlyEditor = false;
+				this.setDisabled(false);
+			}
+		});
+
+		this.#removeEditorListeners = () => {
+			readOnlyListener.remove();
+			removeKeyPressListener?.();
+
+			this.#removeEditorListeners = null;
+		};
 	}
 
 	/**
@@ -338,23 +369,20 @@ export default abstract class BaseWidget {
 			this.container.remove();
 		}
 
-		this.#readOnlyListener = this.editor.isReadOnlyReactiveValue().onUpdateAndNow(readOnly => {
-			if (readOnly && this.shouldAutoDisableInReadOnlyEditor() && !this.disabled) {
-				this.setDisabled(true);
-				this.#disabledDueToReadOnlyEditor = true;
-
-				if (this.#hasDropdown) {
-					this.dropdown?.requestHide();
-				}
-			}
-			else if (!readOnly && this.#disabledDueToReadOnlyEditor) {
-				this.#disabledDueToReadOnlyEditor = false;
-				this.setDisabled(false);
-			}
-		});
+		this.#addEditorListeners();
 
 		parent.appendChild(this.container);
 		return this.container;
+	}
+
+	/**
+	 * Remove this. This allows the widget to be added to a toolbar again
+	 * in the future using {@link addTo}.
+	 */
+	public remove() {
+		this.container.remove();
+
+		this.#removeEditorListeners?.();
 	}
 
 	public focus() {
@@ -372,12 +400,6 @@ export default abstract class BaseWidget {
 		this.container.classList.remove(className);
 	}
 
-	public remove() {
-		this.container.remove();
-
-		this.#readOnlyListener?.remove();
-		this.#readOnlyListener = null;
-	}
 
 	protected updateIcon() {
 		let newIcon = this.createIcon();

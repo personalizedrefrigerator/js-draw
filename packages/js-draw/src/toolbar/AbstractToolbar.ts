@@ -546,7 +546,10 @@ export default abstract class AbstractToolbar {
 	 */
 	public abstract addDefaults(): void;
 
-	/** Remove this toolbar from its container and clean up listeners. */
+	/**
+	 * Remove this toolbar from its container and clean up listeners.
+	 * This should only be called **once** for a given toolbar.
+	 */
 	public remove() {
 		this.closeColorPickerOverlay?.remove();
 
@@ -556,6 +559,10 @@ export default abstract class AbstractToolbar {
 		this.#listeners = [];
 
 		this.onRemove();
+
+		for (const widget of this.#widgetList) {
+			widget.remove();
+		}
 	}
 
 	/**
