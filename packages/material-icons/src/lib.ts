@@ -118,6 +118,8 @@ class MaterialIconProvider extends IconProvider {
 
 		if (!this.isRoundedTipPen(style)) {
 			line.style.strokeLinecap = 'square';
+		} else {
+			line.style.strokeLinecap = 'round';
 		}
 
 		svg.insertAdjacentElement('afterbegin', line);
