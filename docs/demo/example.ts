@@ -48,29 +48,27 @@ const createEditor = async (
 	// default toolbar layout.
 	const toolbar = makeEdgeToolbar(editor);
 
-	const saveButton = toolbar.addSaveButton(() => {
-		saveCallback();
-	});
+	toolbar.addDefaultToolWidgets();
 
-	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
-
-	toolbar.addDefaults();
-
-	// Add space between the save button and the other buttons.
-	toolbar.addSpacer({ grow: 1, maxSize: '30px' });
-
-	// Also add a close button
 	const closeEditor = () => {
 		editor.remove();
 		void reShowLaunchOptions(localization, appNotifier);
 	};
 
+	// Add buttons in this order (exit, undo/redo, save) so that the
+	// tab order matches the display order (which is set with CSS).
 	toolbar.addExitButton(() => {
 		if (hasChanges() && confirm(localization.saveUnsavedChanges)) {
 			saveCallback(closeEditor);
 		} else {
 			closeEditor();
 		}
+	});
+
+	toolbar.addUndoRedoButtons();
+
+	const saveButton = toolbar.addSaveButton(() => {
+		saveCallback();
 	});
 
 
