@@ -132,8 +132,10 @@
 }
 
 .imageEditorContainer .textRendererOutputContainer {
-	width: 1px;
-	height: 1px;
+	// Needs to have non-zero size so that it can be accessibility-focused
+	// on iOS
+	width: 0.001px;
+	height: 0.001px;
 	overflow: hidden;
 }
 
