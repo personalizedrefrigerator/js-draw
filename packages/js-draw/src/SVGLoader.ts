@@ -661,6 +661,9 @@ export default class SVGLoader implements ImageLoader {
 	): SVGLoader {
 		const sandbox = document.createElement('iframe');
 		sandbox.src = 'about:blank';
+
+		// allow-same-origin is necessary for how we interact with the sandbox. As such,
+		// DO NOT ENABLE ALLOW-SCRIPTS.
 		sandbox.setAttribute('sandbox', 'allow-same-origin');
 		sandbox.setAttribute('csp', 'default-src \'about:blank\'');
 		sandbox.style.display = 'none';

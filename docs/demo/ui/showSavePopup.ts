@@ -39,6 +39,8 @@ const showSavePopup = (
 	// Turn on sandboxing -- the user may attempt to display the SVG directly in the sandbox.
 	// Allow-scripts is required by Safari on iOS to have click listeners on buttons.
 	// TODO: Check whether this is still the case and remove allow-scripts if no longer necessary.
+	//       Until then, the iframe provides no additional security protections (which is fine
+	//       for how we're currently using it).
 	popupIframe.setAttribute('sandbox', 'allow-same-origin allow-downloads allow-scripts');
 	popupIframe.setAttribute('csp', 'default-src \'about:blank\'');
 	popupContainer.replaceChildren(popupIframe);
