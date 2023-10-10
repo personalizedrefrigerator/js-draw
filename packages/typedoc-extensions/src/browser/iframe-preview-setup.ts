@@ -5,6 +5,17 @@ import * as jsdrawMath from '@js-draw/math';
 import * as jsdrawMaterialIcons from '@js-draw/material-icons';
 import './iframe.scss';
 
+window.addEventListener('load', () => {
+	// Update height immediately after loading
+	setTimeout(() => {
+		const height = (document.scrollingElement ?? document.body).scrollHeight;
+		parent.postMessage({
+			message: 'updateHeight',
+			height,
+		}, '*');
+	}, 0);
+});
+
 (() => {
 	/** Creates an HTML element that contains the content of `message`. */
 	const createLogElementFor = (message: any[]) => {
@@ -119,5 +130,4 @@ import './iframe.scss';
 	window.onunhandledrejection = (event) => {
 		onError(event.reason ?? event);
 	};
-
 })();

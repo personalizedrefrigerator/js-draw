@@ -100,8 +100,11 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	};
 
 
+	let removeMessageListener: (()=>void)|null = null;
 	let previewFrame: HTMLIFrameElement|null = null;
+
 	const closeFrame = () => {
+		removeMessageListener?.();
 		previewFrame?.remove();
 		previewFrame = null;
 	};
@@ -125,16 +128,9 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		previewFrame.classList.add('code-run-frame');
 
 		// Sandboxing:
-		previewFrame.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-modals');
-		previewFrame.setAttribute('csp', 'default-src \'about:blank\'');
+		previewFrame.setAttribute('sandbox', 'allow-scripts allow-modals');
 
-		controlsArea.insertAdjacentElement('afterend', previewFrame);
-
-
-		const doc = previewFrame.contentDocument!;
-
-		doc.open();
-		doc.write(`
+		previewFrame.srcdoc = `
 			<!DOCTYPE html>
 			<html>
 				<head>
@@ -156,28 +152,30 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					})();
 				</script>
 			</html>
-		`);
-		doc.close();
+		`;
 
+		const messageListener = (event: MessageEvent) => {
+			// Iframes with content set by srcdoc= have origin set to null.
+			if (event.origin !== 'null') {
+				console.log('ignoring event with origin', event.origin);
+				return;
+			}
 
-		const updateHeight = () => {
-			const elem = doc.scrollingElement ?? doc.body;
-			if (previewFrame && elem) {
-				previewFrame.style.height = `${Math.max(100, elem.scrollHeight)}px`;
+			if (!previewFrame) {
+				return;
+			}
+
+			if (event.data?.message === 'updateHeight' && event.data?.height) {
+				previewFrame.style.height = `${event.data.height}px`;
 			}
 		};
+		window.addEventListener('message', messageListener);
 
-		// The load event doesn't seem to fire in some browsers (Safari/iOS).
-		// Also update the height immediately.
-		updateHeight();
+		removeMessageListener = () => {
+			window.removeEventListener('message', messageListener);
+		};
 
-		// After loading, ensure that the preview window is large enough for its content.
-		previewFrame.contentWindow?.addEventListener('load', () => {
-			// Additional time for any async code to run
-			setTimeout(() => {
-				updateHeight();
-			}, 0);
-		});
+		controlsArea.insertAdjacentElement('afterend', previewFrame);
 	};
 
 	editorContainer.appendChild(controlsArea);
