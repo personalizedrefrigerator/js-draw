@@ -130,6 +130,10 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		// Sandboxing:
 		previewFrame.setAttribute('sandbox', 'allow-scripts allow-modals');
 
+		// This *should* allow including </script> tags in strings in most cases.
+		// TODO: Find another way to do this.
+		const escapedJs = js.replace(/<[/]script>/ig, '<\\/script>');
+
 		previewFrame.srcdoc = `
 			<!DOCTYPE html>
 			<html>
@@ -148,7 +152,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 				<script>
 					"use strict";
 					(async () => {
-						${js}
+						${escapedJs}
 					})();
 				</script>
 			</html>
