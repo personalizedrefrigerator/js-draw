@@ -1,6 +1,6 @@
-// If from an NPM package,
 import { Editor, EditorEventType, EventDispatcher, makeEdgeToolbar } from 'js-draw';
 import 'js-draw/styles';
+import MaterialIconProvider from '@js-draw/material-icons';
 
 import { Localization, getLocalizationTable } from './localization';
 import makeLoadFromSaveList from './ui/makeLoadFromSaveList';
@@ -17,7 +17,6 @@ import makeNewImageDialog from './ui/makeNewImageDialog';
 import { AppNotifier } from './types';
 import { loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
 import makeSettingsDialog from './ui/makeSettingsDialog';
-import MaterialIconProvider from '@js-draw/material-icons';
 
 // Creates and sets up a new Editor
 const createEditor = async (
@@ -40,9 +39,10 @@ const createEditor = async (
 		keyboardShortcutOverrides: loadKeybindingOverrides(),
 		iconProvider: new MaterialIconProvider(),
 
+		// Specify a custom app name for the about dialog,
+		// but not a custom version.
 		appInfo: {
 			name: 'js-draw demo',
-			version: '1.2.3',
 		},
 	});
 
