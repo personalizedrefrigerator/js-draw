@@ -52,7 +52,7 @@ export default class EditorImage {
 	public constructor() {
 		this.root = new RootImageNode();
 		this.background = new RootImageNode();
-		this.componentsById = {};
+		this.componentsById = Object.create(null);
 
 		this.notifier = new EventDispatcher();
 		this.importExportViewport = new Viewport(() => {

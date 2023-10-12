@@ -5,6 +5,9 @@ import './style.css';
 const editor = new jsdraw.Editor(document.body);
 editor.addToolbar();
 
+// To facilitate debugging,
+(window as any).editor = editor;
+
 const clientId = `${(new Date().getTime())}-${Math.random()}`;
 
 

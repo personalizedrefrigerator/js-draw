@@ -80,15 +80,25 @@ export default class Erase extends SerializableCommand {
 	}
 
 	protected serializeToJSON() {
-		const elemIds = this.toRemove.map(elem => elem.getId());
-		return elemIds;
+		// If applied, the elements can't be fetched from the image because they're
+		// erased. Serialize and return the elements themselves.
+		const elems = this.toRemove.map(elem => elem.serialize());
+		return elems;
 	}
 
 	static {
 		SerializableCommand.register('erase', (json: any, editor) => {
+			if (!Array.isArray(json)) {
+				throw new Error('seralized erase data must be an array');
+			}
+
 			const elems = json
-				.map((elemId: string) => editor.image.lookupElement(elemId))
-				.filter((elem: AbstractComponent|null) => elem !== null);
+				.map((elemData: any) => {
+					const componentId = typeof elemData === 'string' ? elemData : `${elemData.id}`;
+
+					const component = editor.image.lookupElement(componentId) ?? AbstractComponent.deserialize(elemData);
+					return component;
+				});
 			return new Erase(elems);
 		});
 	}

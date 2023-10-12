@@ -16,7 +16,7 @@ const invertCommand = <T extends Command> (command: T): T extends SerializableCo
 				command.unapply(editor);
 			}
 			public unapply(editor: Editor) {
-				command.unapply(editor);
+				command.apply(editor);
 			}
 			public override onDrop(editor: Editor) {
 				command.onDrop(editor);
