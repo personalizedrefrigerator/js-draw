@@ -88,6 +88,15 @@ export interface EditorSettings {
 	 * Additional messages to show in the "about" dialog.
 	 */
 	notices: AboutDialogEntry[],
+
+	/**
+	 * Information about the app/website js-draw is running within
+	 * to show at the beginning of the about dialog.
+	 */
+	appInfo: {
+		name: string,
+		version?: string,
+	}|null,
 }
 
 /**
@@ -242,6 +251,7 @@ export class Editor {
 			keyboardShortcutOverrides: settings.keyboardShortcutOverrides ?? {},
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 			notices: [],
+			appInfo: settings.appInfo ? { ...settings.appInfo } : null,
 		};
 
 		// Validate settings
@@ -1514,16 +1524,36 @@ export class Editor {
 		const iconLicenseText = this.icons.licenseInfo();
 
 		const notices: AboutDialogEntry[] = [];
+
+		if (this.settings.appInfo) {
+			const versionLines = [];
+			if (this.settings.appInfo.version) {
+				versionLines.push(`v${this.settings.appInfo.version}`, '');
+			}
+
+			notices.push({
+				heading: `${this.settings.appInfo.name}`,
+				text: [
+					...versionLines,
+					`Powered by js-draw v${version.number}.`,
+				].join('\n'),
+			});
+		} else {
+			notices.push({
+				heading: 'js-draw',
+				text: `v${version.number}`,
+			});
+		}
+
 		notices.push({
-			heading: 'js-draw',
+			heading: 'Developer information',
 			text: [
-				`v${version.number}`,
-				'',
 				'Image debug information (from when this dialog was opened):',
 				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()} rotation`,
 				`    ${this.image.estimateNumElements()} components`,
 				`    ${this.getImportExportRect().w}x${this.getImportExportRect().h} size`,
 			].join('\n'),
+			minimized: true,
 		});
 
 		notices.push({

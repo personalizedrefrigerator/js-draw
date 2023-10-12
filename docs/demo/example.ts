@@ -39,6 +39,11 @@ const createEditor = async (
 	const editor = new Editor(parentElement, {
 		keyboardShortcutOverrides: loadKeybindingOverrides(),
 		iconProvider: new MaterialIconProvider(),
+
+		appInfo: {
+			name: 'js-draw demo',
+			version: '1.2.3',
+		},
 	});
 
 	const { hasChanges } = watchForChanges(editor, appNotifier);
