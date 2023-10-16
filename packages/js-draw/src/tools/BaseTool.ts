@@ -180,6 +180,7 @@ export default abstract class BaseTool implements InputEventListener {
 	public onDestroy() {
 		this.#readOnlyEditorChangeListener?.remove();
 		this.#readOnlyEditorChangeListener = null;
+		this.#group = null;
 	}
 }
 

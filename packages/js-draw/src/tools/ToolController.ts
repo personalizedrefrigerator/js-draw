@@ -117,15 +117,22 @@ export default class ToolController implements InputEventListener {
 		this.primaryToolGroup = primaryToolGroup ?? new ToolEnabledGroup();
 	}
 
-	// Add a tool that acts like one of the primary tools (only one primary tool can be enabled at a time).
-	// This should be called before creating the app's toolbar.
+	/**
+	 * Add a tool that acts like one of the primary tools (only one primary tool can be enabled at a time).
+	 *
+	 * If the tool is already added to this, the tool is converted to a primary tool.
+	 *
+	 * This should be called before creating the app's toolbar.
+	 */
 	public addPrimaryTool(tool: BaseTool) {
 		tool.setToolGroup(this.primaryToolGroup);
 		if (tool.isEnabled()) {
 			this.primaryToolGroup.notifyEnabled(tool);
 		}
 
-		this.addTool(tool);
+		if (!this.tools.includes(tool)) {
+			this.addTool(tool);
+		}
 	}
 
 	public getPrimaryTools(): BaseTool[] {
@@ -136,8 +143,71 @@ export default class ToolController implements InputEventListener {
 
 	// Add a tool to the end of this' tool list (the added tool receives events after tools already added to this).
 	// This should be called before creating the app's toolbar.
+	//
+	// A tool should only be added once.
 	public addTool(tool: BaseTool) {
-		this.tools.push(tool);
+		// Only add if not already present.
+		if (!this.tools.includes(tool)) {
+			this.tools.push(tool);
+		}
+	}
+
+	/**
+	 * Removes **and destroys** all tools in `tools` from this.
+	 */
+	public removeAndDestroyTools(tools: BaseTool[]) {
+		const newTools = [];
+
+		for (const tool of this.tools) {
+			if (tools.includes(tool)) {
+				if (this.activeTool === tool) {
+					this.activeTool = null;
+				}
+				tool.onDestroy();
+			} else {
+				newTools.push(tool);
+			}
+		}
+
+		this.tools = newTools;
+	}
+
+	private insertTools(insertNear: BaseTool, toolsToInsert: BaseTool[], mode: 'before'|'after') {
+		this.tools = this.tools.filter(tool => !toolsToInsert.includes(tool));
+
+		const newTools = [];
+		for (const tool of this.tools) {
+			if (mode === 'after') {
+				newTools.push(tool);
+			}
+
+			if (tool === insertNear) {
+				newTools.push(...toolsToInsert);
+			}
+
+			if (mode === 'before') {
+				newTools.push(tool);
+			}
+		}
+
+		this.tools = newTools;
+	}
+
+	/**
+	 * Removes a tool from this' tool list and replaces it with `replaceWith`.
+	 *
+	 * If any of `toolsToInsert` have already been added to this, the tools are
+	 * moved.
+	 *
+	 * This should be called before creating the editor's toolbar.
+	 */
+	public insertToolsAfter(insertAfter: BaseTool, toolsToInsert: BaseTool[]) {
+		this.insertTools(insertAfter, toolsToInsert, 'after');
+	}
+
+	/** @see {@link insertToolsAfter} */
+	public insertToolsBefore(insertBefore: BaseTool, toolsToInsert: BaseTool[]) {
+		this.insertTools(insertBefore, toolsToInsert, 'before');
 	}
 
 	// @internal use `dispatchEvent` rather than calling `onEvent` directly.

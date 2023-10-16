@@ -423,7 +423,7 @@ export class Mat33 {
 	/**
 	 * **Note**: Assumes `this.c1 = this.c2 = 0` and `this.c3 = 1`.
 	 *
-	 * @see {@link fromCSSMatrix} and {@link toSafeCSSTransformList}
+	 * @see {@link fromCSSMatrix}
 	 */
 	public toCSSMatrix(): string {
 		return `matrix(${this.a1},${this.b1},${this.a2},${this.b2},${this.a3},${this.b3})`;
