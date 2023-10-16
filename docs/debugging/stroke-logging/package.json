@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/debug-stroke-logging",
-	"version": "1.5.0",
+	"version": "1.6.0",
 	"description": "Allows sending logs",
 	"license": "MIT",
 	"private": true,
@@ -11,7 +11,7 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"js-draw": "^1.5.0"
+		"js-draw": "^1.6.0"
 	},
 	"devDependencies": {
 		"@js-draw/build-tool": "^1.4.0"
