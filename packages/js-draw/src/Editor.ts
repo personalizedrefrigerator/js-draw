@@ -1535,7 +1535,7 @@ export class Editor {
 				heading: `${this.settings.appInfo.name}`,
 				text: [
 					...versionLines,
-					`Powered by js-draw v${version.number}.`,
+					`Image editor library: js-draw v${version.number}.`,
 				].join('\n'),
 			});
 		} else {
