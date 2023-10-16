@@ -1,15 +1,15 @@
 
 
 <div align="center">
-    <img height="190" src="./docs/img/readme-images/logo.svg" alt="js-draw logo"/>
+    <img height="190" src="docs/img/readme-images/logo.svg" alt="js-draw logo"/>
 </div>
 
 <h1 align="center">js-draw</h1>
-<center>
+<div align="center">
 
 [NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/js_draw.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
 
-</center>
+</div>
 
 ![](docs/img/readme-images/js-draw.jpg)
 
