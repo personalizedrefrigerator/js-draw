@@ -1,3 +1,9 @@
+# 1.6.1
+ * Bug fixes
+    * Fix selected items not moved to the top of an image on click.
+ * Changes
+    * Dependency upgrades ([929349a9cde63a8d286bd3a3467cce9a8ba5476e](https://github.com/personalizedrefrigerator/js-draw/commit/929349a9cde63a8d286bd3a3467cce9a8ba5476e) and [ae6b04f53dcddce86fce6c1554f35f3eaa99899f](https://github.com/personalizedrefrigerator/js-draw/commit/ae6b04f53dcddce86fce6c1554f35f3eaa99899f))
+
 # 1.6.0
  * Features
     * Allow specifying a custom app name and version in `EditorSettings` for the about dialog.
