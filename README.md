@@ -11,7 +11,7 @@
 
 </div>
 
-![](docs/img/readme-images/js-draw.jpg)
+![](docs/img/readme-images/js-draw.png)
 
 For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/).
 
