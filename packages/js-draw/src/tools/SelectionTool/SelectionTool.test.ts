@@ -367,4 +367,24 @@ describe('SelectionTool', () => {
 		// Should not have a selection after setting the selection to contain no objects
 		expect(selectionTool.getSelection()).toBe(null);
 	});
+
+	it('should make selected objects toplevel on click', () => {
+		const {
+			editor, testStroke: selectedStroke,
+		} = createEditorWithSingleObjectSelection(150);
+
+		const {
+			addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke
+		} = createSquareStroke(40);
+		editor.dispatch(addOtherStrokeCommand);
+
+		// otherStroke should initially be below selectedStroke
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		const clickLocation = selectedStroke.getBBox().center;
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, clickLocation);
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, clickLocation);
+
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+	});
 });

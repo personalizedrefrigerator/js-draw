@@ -201,12 +201,14 @@ export default class Selection {
 		this.originalRegion = this.originalRegion.transformedBoundingBox(this.transform);
 		this.transform = Mat33.identity;
 
-		// Make the commands undo-able, but only if the transform is non-empty.
-		if (!fullTransform.eq(Mat33.identity)) {
-			await this.editor.dispatch(new Selection.ApplyTransformationCommand(
-				this, selectedElems, fullTransform
-			));
-		}
+		// Make the commands undo-able.
+		// Don't check for non-empty transforms because this breaks changing the
+		// z-index of the just-transformed commands.
+		//
+		// TODO: Check whether the selectedElems are already all toplevel.
+		await this.editor.dispatch(new Selection.ApplyTransformationCommand(
+			this, selectedElems, fullTransform
+		));
 
 		// Clear renderings of any in-progress transformations
 		const wetInkRenderer = this.editor.display.getWetInkRenderer();
