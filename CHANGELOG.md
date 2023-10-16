@@ -1,3 +1,16 @@
+# 1.6.0
+ * Features
+    * Allow specifying a custom app name and version in `EditorSettings` for the about dialog.
+    * Improve the `ToolController` API for adding/removing tools
+ * Bug fixes
+    * Keyboard shortcut handling: Fix keyup events potentially triggered more times each time the editor loses focus.
+    * Toolbar: Fix pressing space not toggling dropdowns after switching toolbars.
+    * Toolbar: Fix tool widgets not set to selected when first added to the toolbar when enabled.
+    * Toolbar: Fix small (1px) space between the toolbar and rendered content
+    * Material icon integration: Fix rounded pen icon has flat stroke edges.
+    * SVGLoader: Support loading SVGs within sandboxed `iframes`.
+    * Collaborative editing: Fix inverted `Erase` commands having no effect after serialized then deserialized.
+
 # 1.5.0
  * Bug fixes
     * Make tooltips less likely to appear when scrolling the toolbar with touch.
