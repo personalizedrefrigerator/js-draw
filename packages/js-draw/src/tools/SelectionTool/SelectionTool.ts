@@ -387,6 +387,8 @@ export default class SelectionTool extends BaseTool {
 			));
 			const oldTransform = this.selectionBox.getTransform();
 			this.selectionBox.setTransform(oldTransform.rightMul(transform));
+
+			this.selectionBox.scrollTo();
 		}
 
 		if (this.selectionBox && !handled && (event.key === 'Delete' || event.key === 'Backspace')) {

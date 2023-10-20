@@ -71,9 +71,9 @@ export default class ToPointerAutoscroller {
 	}
 
 	public stop() {
-		this.stopUpdateLoop();
 		this.targetPoint = null;
 		this.started = false;
+		this.stopUpdateLoop();
 	}
 
 	private startUpdateLoop() {

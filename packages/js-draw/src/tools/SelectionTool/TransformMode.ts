@@ -19,7 +19,7 @@ export class DragTransformer {
 		));
 	}
 	public onDragEnd() {
-		this.selection.finalizeTransform();
+		return this.selection.finalizeTransform();
 	}
 }
 
@@ -104,7 +104,7 @@ export class ResizeTransformer {
 		}
 	}
 	public onDragEnd() {
-		this.selection.finalizeTransform();
+		return this.selection.finalizeTransform();
 	}
 }
 
@@ -169,6 +169,6 @@ export class RotateTransformer {
 			this.setRotationTo(Math.PI / 2);
 		}
 
-		this.selection.finalizeTransform();
+		return this.selection.finalizeTransform();
 	}
 }

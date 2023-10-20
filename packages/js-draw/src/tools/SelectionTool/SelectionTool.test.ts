@@ -74,7 +74,7 @@ describe('SelectionTool', () => {
 		});
 	});
 
-	it('sending keyboard events to the selected region should move selected items', () => {
+	it('sending keyboard events to the selected region should move selected items', async () => {
 		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(50);
 		const selection = selectionTool.getSelection();
 		expect(selection).not.toBeNull();
@@ -296,7 +296,7 @@ describe('SelectionTool', () => {
 		expect(editor.image.findParent(testStroke)).toBeNull();
 
 		// The test stroke should be translated when we finish dragging.
-		selection.onDragEnd();
+		await selection.onDragEnd();
 
 		expect(editor.image.findParent(testStroke)).not.toBeNull();
 		expect(testStroke.getBBox()).objEq(new Rect2(30, 10, 150, 150));

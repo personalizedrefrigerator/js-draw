@@ -158,7 +158,7 @@ export default class Selection {
 		return this.editor.viewport.getRotationAngle();
 	}
 
-	public get screenRegion(): Rect2 {
+	public getScreenRegion(): Rect2 {
 		const toScreen = this.editor.viewport.canvasToScreenTransform;
 		const scaleFactor = this.editor.viewport.getScaleFactor();
 
@@ -183,28 +183,32 @@ export default class Selection {
 	}
 
 	// Applies the current transformation to the selection
-	public async finalizeTransform() {
+	public finalizeTransform() {
 		const fullTransform = this.transform;
 		const selectedElems = this.selectedElems;
-
-		void this.scrollTo();
 
 		// Reset for the next drag
 		this.originalRegion = this.originalRegion.transformedBoundingBox(this.transform);
 		this.transform = Mat33.identity;
+
+		this.scrollTo();
 
 		// Make the commands undo-able.
 		// Don't check for non-empty transforms because this breaks changing the
 		// z-index of the just-transformed commands.
 		//
 		// TODO: Check whether the selectedElems are already all toplevel.
-		await this.editor.dispatch(new Selection.ApplyTransformationCommand(
-			this, selectedElems, fullTransform
-		));
+		const transformPromise = this.editor.dispatch(
+			new Selection.ApplyTransformationCommand(
+				this, selectedElems, fullTransform,
+			)
+		);
 
 		// Clear renderings of any in-progress transformations
 		const wetInkRenderer = this.editor.display.getWetInkRenderer();
 		wetInkRenderer.clear();
+
+		return transformPromise;
 	}
 
 	static {
@@ -300,6 +304,10 @@ export default class Selection {
 
 	// Preview the effects of the current transformation on the selection
 	private previewTransformCmds() {
+		if (this.selectedElems.length === 0) {
+			return;
+		}
+
 		// Don't render what we're moving if it's likely to be slow.
 		if (this.selectedElems.length > maxPreviewElemCount) {
 			this.updateUI();
@@ -405,13 +413,15 @@ export default class Selection {
 			return;
 		}
 
+		const screenRegion = this.getScreenRegion();
+
 		// marginLeft, marginTop: Display relative to the top left of the selection overlay.
 		// left, top don't work for this.
-		this.backgroundElem.style.marginLeft = `${this.screenRegion.topLeft.x}px`;
-		this.backgroundElem.style.marginTop = `${this.screenRegion.topLeft.y}px`;
+		this.backgroundElem.style.marginLeft = `${screenRegion.topLeft.x}px`;
+		this.backgroundElem.style.marginTop = `${screenRegion.topLeft.y}px`;
 
-		this.backgroundElem.style.width = `${this.screenRegion.width}px`;
-		this.backgroundElem.style.height = `${this.screenRegion.height}px`;
+		this.backgroundElem.style.width = `${screenRegion.width}px`;
+		this.backgroundElem.style.height = `${screenRegion.height}px`;
 
 		const rotationDeg = this.screenRegionRotation * 180 / Math.PI;
 		this.backgroundElem.style.transform = `rotate(${rotationDeg}deg)`;
@@ -560,25 +570,36 @@ export default class Selection {
 	}
 
 	// Scroll the viewport to this. Does not zoom
-	public async scrollTo() {
+	public scrollTo() {
 		if (this.selectedElems.length === 0) {
-			return;
+			return false;
 		}
 
-		const screenRect = new Rect2(0, 0, this.editor.display.width, this.editor.display.height);
-		if (!screenRect.containsPoint(this.screenRegion.center)) {
-			const closestPoint = screenRect.getClosestPointOnBoundaryTo(this.screenRegion.center);
-			const screenDelta = this.screenRegion.center.minus(closestPoint);
-			const delta = this.editor.viewport.screenToCanvasTransform.transformVec3(screenDelta);
-			await this.editor.dispatchNoAnnounce(
-				Viewport.transformBy(Mat33.translation(delta.times(-1))), false
+		const screenSize = this.editor.viewport.getScreenRectSize();
+		const screenRect = new Rect2(0, 0, screenSize.x, screenSize.y);
+
+		const selectionScreenRegion = this.getScreenRegion();
+
+		if (!screenRect.containsPoint(selectionScreenRegion.center)) {
+			const targetPointScreen = selectionScreenRegion.center;
+			const closestPointScreen = screenRect.getClosestPointOnBoundaryTo(targetPointScreen);
+			const closestPointCanvas = this.editor.viewport.screenToCanvas(closestPointScreen);
+
+			const targetPointCanvas = this.region.center;
+			const delta = closestPointCanvas.minus(targetPointCanvas);
+
+			this.editor.dispatchNoAnnounce(
+				Viewport.transformBy(Mat33.translation(delta.times(0.5))), false
 			);
 
-			// Re-renders clear wet ink, so we need to re-draw the preview
-			// after the full re-render.
-			await this.editor.queueRerender();
-			this.previewTransformCmds();
+			this.editor.queueRerender().then(() => {
+				this.previewTransformCmds();
+			});
+
+			return true;
 		}
+
+		return false;
 	}
 
 	public deleteSelectedObjects(): Command {

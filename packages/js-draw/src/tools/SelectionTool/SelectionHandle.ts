@@ -34,7 +34,7 @@ export const handleSize = 30;
 // `startPoint` is in screen coordinates
 export type DragStartCallback = (startPoint: Point2)=>void;
 export type DragUpdateCallback = (canvasPoint: Point2)=> void;
-export type DragEndCallback = ()=> void;
+export type DragEndCallback = ()=> Promise<void>|void;
 
 export default class SelectionHandle {
 	private element: HTMLElement;
@@ -98,7 +98,7 @@ export default class SelectionHandle {
 	 * selection box.
 	 */
 	private getBBoxParentCoords() {
-		const parentRect = this.parent.screenRegion;
+		const parentRect = this.parent.getScreenRegion();
 		const size = Vec2.of(handleSize, handleSize);
 		const topLeft = parentRect.size.scale(this.parentSide)
 			// Center
@@ -166,7 +166,7 @@ export default class SelectionHandle {
 		if (!this.dragLastPos) {
 			return;
 		}
-		this.onDragEnd();
+		return this.onDragEnd();
 	}
 
 	public setSnapToGrid(snap: boolean) {
