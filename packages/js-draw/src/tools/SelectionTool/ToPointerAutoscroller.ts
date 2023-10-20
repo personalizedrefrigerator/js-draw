@@ -12,7 +12,7 @@ export default class ToPointerAutoscroller {
 	private updateLoopId: number = 0;
 	private updateLoopRunning = false;
 	private targetPoint: Point2|null = null;
-	private scrollRate: number = 600; // px/s
+	private scrollRate: number = 800; // px/s
 
 	public constructor(private viewport: Viewport, private scrollByCanvasDelta: ScrollByCallback) {
 	}
