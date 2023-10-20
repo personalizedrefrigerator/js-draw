@@ -56,10 +56,19 @@
 }
 
 .overlay.handleOverlay {
-	height: 0;
-	overflow: visible;
+	// When expanding a selection with shift+click&drag, multiple selection boxes
+	// can be present in the same handleOverlay. As such, so that other overlayed
+	// selection boxes are in the correct place, the outer container needs to have
+	// zero height.
+	//
+	// This is in addition to the overlay container, which needs zero height to prevent
+	// other overlay containers from being affected by its size.
+	&, .selection-tool-selection-outer-container {
+		height: 0;
+		overflow: visible;
+	}
 
-	& > .selection-tool-selection-container {
+	.selection-tool-selection-inner-container {
 		width: var(--editor-current-display-width-px);
 		height: var(--editor-current-display-height-px);
 		overflow: hidden;

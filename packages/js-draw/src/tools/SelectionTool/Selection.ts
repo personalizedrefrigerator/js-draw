@@ -36,7 +36,8 @@ export default class Selection {
 
 	private selectedElems: AbstractComponent[] = [];
 
-	private container: HTMLElement;
+	private outerContainer: HTMLElement;
+	private innerContainer: HTMLElement;
 	private backgroundElem: HTMLElement;
 
 	private hasParent: boolean = true;
@@ -49,11 +50,21 @@ export default class Selection {
 			rotate: new RotateTransformer(editor, this),
 		};
 
-		this.container = document.createElement('div');
-		this.container.classList.add(`${cssPrefix}selection-container`);
+
+		// We need two containers for some CSS to apply (the outer container
+		// needs zero height, the inner needs to prevent the selection background
+		// from being visible outside of the editor).
+		this.outerContainer = document.createElement('div');
+		this.outerContainer.classList.add(`${cssPrefix}selection-outer-container`);
+
+		this.innerContainer = document.createElement('div');
+		this.innerContainer.classList.add(`${cssPrefix}selection-inner-container`);
+
 		this.backgroundElem = document.createElement('div');
 		this.backgroundElem.classList.add(`${cssPrefix}selection-background`);
-		this.container.appendChild(this.backgroundElem);
+
+		this.innerContainer.appendChild(this.backgroundElem);
+		this.outerContainer.appendChild(this.innerContainer);
 
 		const makeResizeHandle = (mode: ResizeMode, side: Vec2) => {
 			const modeToAction = {
@@ -431,9 +442,9 @@ export default class Selection {
 		// If closer to perpendicular, apply different CSS
 		const perpendicularClassName = `${cssPrefix}rotated-near-perpendicular`;
 		if (Math.abs(Math.sin(this.screenRegionRotation)) > 0.5) {
-			this.container.classList.add(perpendicularClassName);
+			this.innerContainer.classList.add(perpendicularClassName);
 		} else {
-			this.container.classList.remove(perpendicularClassName);
+			this.innerContainer.classList.remove(perpendicularClassName);
 		}
 
 		for (const handle of this.handles) {
@@ -663,11 +674,11 @@ export default class Selection {
 	}
 
 	public addTo(elem: HTMLElement) {
-		if (this.container.parentElement) {
-			this.container.remove();
+		if (this.outerContainer.parentElement) {
+			this.outerContainer.remove();
 		}
 
-		elem.appendChild(this.container);
+		elem.appendChild(this.outerContainer);
 		this.hasParent = true;
 	}
 
@@ -679,8 +690,8 @@ export default class Selection {
 	}
 
 	public cancelSelection() {
-		if (this.container.parentElement) {
-			this.container.remove();
+		if (this.outerContainer.parentElement) {
+			this.outerContainer.remove();
 		}
 		this.originalRegion = Rect2.empty;
 		this.selectionTightBoundingBox = null;
