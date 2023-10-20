@@ -495,18 +495,20 @@ export default class Selection {
 
 		let result = false;
 
-		for (const handle of this.handles) {
-			if (handle.containsPoint(pointer.canvasPos)) {
-				this.targetHandle = handle;
-				result = true;
-			}
-		}
-
 		this.backgroundDragging = false;
 		if (this.region.containsPoint(pointer.canvasPos)) {
 			this.backgroundDragging = true;
 			result = true;
 		}
+
+		for (const handle of this.handles) {
+			if (handle.containsPoint(pointer.canvasPos)) {
+				this.targetHandle = handle;
+				this.backgroundDragging = false;
+				result = true;
+			}
+		}
+
 
 		if (result) {
 			this.removeDeletedElemsFromSelection();

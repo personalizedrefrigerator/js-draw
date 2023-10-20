@@ -190,10 +190,11 @@ export default class SelectionTool extends BaseTool {
 			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
 		}
 
-		this.selectionBox.setToPoint(currentPointer.canvasPos);
 
 		// Were we expanding the previous selection?
 		if (this.expandingSelectionBox && this.prevSelectionBox) {
+			this.selectionBox.setToPoint(currentPointer.canvasPos);
+
 			// If so, finish expanding.
 			this.expandingSelectionBox = false;
 			this.selectionBox.resolveToObjects();

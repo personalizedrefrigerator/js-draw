@@ -110,6 +110,10 @@ export class ResizeTransformer {
 
 export class RotateTransformer {
 	private startAngle: number = 0;
+	private targetRotation: number = 0;
+	private maximumDistFromStart = 0;
+	private startPoint: Point2;
+
 	public constructor(private readonly editor: Editor, private selection: Selection) { }
 
 	private getAngle(canvasPoint: Point2) {
@@ -125,16 +129,17 @@ export class RotateTransformer {
 	}
 
 	public onDragStart(startPoint: Vec3) {
+		this.startPoint = startPoint;
 		this.selection.setTransform(Mat33.identity);
 		this.startAngle = this.getAngle(startPoint);
+		this.maximumDistFromStart = 0;
+		this.targetRotation = 0;
 	}
 
-	public onDragUpdate(canvasPos: Vec3) {
-		const targetRotation = this.roundAngle(this.getAngle(canvasPos) - this.startAngle);
-
+	private setRotationTo(angle: number) {
 		// Transform in canvas space
 		const canvasSelCenter = this.editor.viewport.roundPoint(this.selection.preTransformRegion.center);
-		const unrounded = Mat33.zRotation(targetRotation);
+		const unrounded = Mat33.zRotation(angle);
 		const roundedRotationTransform = unrounded.mapEntries(entry => Viewport.roundScaleRatio(entry));
 
 		const fullRoundedTransform = Mat33
@@ -144,7 +149,26 @@ export class RotateTransformer {
 
 		this.selection.setTransform(fullRoundedTransform);
 	}
+
+	public onDragUpdate(canvasPos: Vec3) {
+		this.targetRotation = this.roundAngle(this.getAngle(canvasPos) - this.startAngle);
+
+		this.setRotationTo(this.targetRotation);
+
+		const distFromStart = canvasPos.minus(this.startPoint).magnitude();
+		if (distFromStart > this.maximumDistFromStart) {
+			this.maximumDistFromStart = distFromStart;
+		}
+	}
+
 	public onDragEnd() {
+		// Anything less than this is considered a click
+		const clickThreshold = 15;
+
+		if (this.maximumDistFromStart < clickThreshold && this.targetRotation === 0) {
+			this.setRotationTo(Math.PI / 2);
+		}
+
 		this.selection.finalizeTransform();
 	}
 }
