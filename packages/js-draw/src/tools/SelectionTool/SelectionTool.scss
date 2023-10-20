@@ -56,7 +56,7 @@
 }
 
 .overlay.handleOverlay {
-	pointer-events: none;
+	touch-action: none;
 
 	// When expanding a selection with shift+click&drag, multiple selection boxes
 	// can be present in the same handleOverlay. As such, so that other overlayed
@@ -74,6 +74,18 @@
 		width: var(--editor-current-display-width-px);
 		height: var(--editor-current-display-height-px);
 		overflow: hidden;
+
+		// Disable pointer events: If the parent (or the container) has
+		// captured pointers and the container is removed, this prevents
+		// us from receiving the following events (e.g. in Firefox).
+		pointer-events: none;
+
+		& > * {
+			// We *do* want pointer events for handles and the background. This
+			// allows the mouse cursor to change shape when hovering over resize
+			// handles.
+			pointer-events: all;
+		}
 	}
 }
 
