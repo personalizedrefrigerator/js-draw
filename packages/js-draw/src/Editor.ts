@@ -1535,7 +1535,7 @@ export class Editor {
 				heading: `${this.settings.appInfo.name}`,
 				text: [
 					...versionLines,
-					`Image editor library: js-draw v${version.number}.`,
+					`(js-draw v${version.number})`,
 				].join('\n'),
 			});
 		} else {
@@ -1559,6 +1559,8 @@ export class Editor {
 		notices.push({
 			heading: 'Libraries',
 			text: [
+				`This image editor is powered by js-draw v${version.number}.`,
+				'',
 				'js-draw uses several libraries at runtime. Particularly noteworthy are:',
 				' - The Coloris color picker: https://github.com/mdbassit/Coloris',
 				' - The bezier.js Bézier curve library: https://github.com/Pomax/bezierjs'

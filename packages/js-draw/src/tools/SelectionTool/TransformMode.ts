@@ -26,13 +26,51 @@ export class DragTransformer {
 export class ResizeTransformer {
 	private mode: ResizeMode = ResizeMode.Both;
 	private dragStartPoint: Point2;
+
+	private transformOrigin: Point2;
+	private scaleRate: Vec2;
+
 	public constructor(private readonly editor: Editor, private selection: Selection) { }
 
 	public onDragStart(startPoint: Vec3, mode: ResizeMode) {
 		this.selection.setTransform(Mat33.identity);
 		this.mode = mode;
 		this.dragStartPoint = startPoint;
+
+		this.computeOriginAndScaleRate();
 	}
+
+	private computeOriginAndScaleRate() {
+		// Store the index of the furthest corner from startPoint. We'll use that
+		// to determine where the transform considers (0, 0) (where we scale from).
+		const selectionRect = this.selection.preTransformRegion;
+		const selectionBoxCorners = selectionRect.corners;
+		let largestDistSquared = 0;
+
+		for (let i = 0; i < selectionBoxCorners.length; i ++) {
+			const currentCorner = selectionBoxCorners[i];
+			const distSquaredToCurrent = this.dragStartPoint.minus(currentCorner).magnitudeSquared();
+			if (distSquaredToCurrent > largestDistSquared) {
+				largestDistSquared = distSquaredToCurrent;
+				this.transformOrigin = currentCorner;
+			}
+		}
+
+		// Determine whether moving the mouse to the right increases or decreases the width.
+		let widthScaleRate = 1;
+		let heightScaleRate = 1;
+
+		if (this.transformOrigin.x > selectionRect.center.x) {
+			widthScaleRate = -1;
+		}
+
+		if (this.transformOrigin.y > selectionRect.center.y) {
+			heightScaleRate = -1;
+		}
+
+		this.scaleRate = Vec2.of(widthScaleRate, heightScaleRate);
+	}
+
 	public onDragUpdate(canvasPos: Vec3) {
 		const canvasDelta = canvasPos.minus(this.dragStartPoint);
 
@@ -41,12 +79,12 @@ export class ResizeTransformer {
 
 		let scale = Vec2.of(1, 1);
 		if (this.mode === ResizeMode.HorizontalOnly) {
-			const newWidth = origWidth + canvasDelta.x;
+			const newWidth = origWidth + canvasDelta.x * this.scaleRate.x;
 			scale = Vec2.of(newWidth / origWidth, scale.y);
 		}
 
 		if (this.mode === ResizeMode.VerticalOnly) {
-			const newHeight = origHeight + canvasDelta.y;
+			const newHeight = origHeight + canvasDelta.y * this.scaleRate.y;
 			scale = Vec2.of(scale.x, newHeight / origHeight);
 		}
 
@@ -61,7 +99,7 @@ export class ResizeTransformer {
 		scale = scale.map(component => Viewport.roundScaleRatio(component, 2));
 
 		if (scale.x !== 0 && scale.y !== 0) {
-			const origin = this.editor.viewport.roundPoint(this.selection.preTransformRegion.topLeft);
+			const origin = this.editor.viewport.roundPoint(this.transformOrigin);
 			this.selection.setTransform(Mat33.scaling2D(scale, origin));
 		}
 	}

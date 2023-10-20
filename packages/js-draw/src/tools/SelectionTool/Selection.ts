@@ -54,41 +54,32 @@ export default class Selection {
 		this.backgroundElem.classList.add(`${cssPrefix}selection-background`);
 		this.container.appendChild(this.backgroundElem);
 
-		const resizeHorizontalHandle = new SelectionHandle(
-			{
-				action: HandleAction.ResizeX,
-				side: Vec2.of(1, 0.5),
-			},
-			this,
-			this.editor.viewport,
-			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.HorizontalOnly),
-			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
-			() => this.transformers.resize.onDragEnd(),
-		);
+		const makeResizeHandle = (mode: ResizeMode, side: Vec2) => {
+			const modeToAction = {
+				[ResizeMode.Both]: HandleAction.ResizeXY,
+				[ResizeMode.HorizontalOnly]: HandleAction.ResizeX,
+				[ResizeMode.VerticalOnly]: HandleAction.ResizeY,
+			};
 
-		const resizeVerticalHandle = new SelectionHandle(
-			{
-				action: HandleAction.ResizeY,
-				side: Vec2.of(0.5, 1),
-			},
-			this,
-			this.editor.viewport,
-			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.VerticalOnly),
-			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
-			() => this.transformers.resize.onDragEnd(),
-		);
+			return new SelectionHandle(
+				{
+					action: modeToAction[mode],
+					side,
+				},
+				this,
+				this.editor.viewport,
+				(startPoint) => this.transformers.resize.onDragStart(startPoint, mode),
+				(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
+				() => this.transformers.resize.onDragEnd(),
+			);
+		};
 
-		const resizeBothHandle = new SelectionHandle(
-			{
-				action: HandleAction.ResizeXY,
-				side: Vec2.of(1, 1),
-			},
-			this,
-			this.editor.viewport,
-			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.Both),
-			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
-			() => this.transformers.resize.onDragEnd(),
-		);
+		const resizeHorizontalHandles = [
+			makeResizeHandle(ResizeMode.HorizontalOnly, Vec2.of(0, 0.5)),
+			makeResizeHandle(ResizeMode.HorizontalOnly, Vec2.of(1, 0.5)),
+		];
+		const resizeVerticalHandle = makeResizeHandle(ResizeMode.VerticalOnly, Vec2.of(0.5, 1));
+		const resizeBothHandle = makeResizeHandle(ResizeMode.Both, Vec2.of(1, 1));
 
 		const rotationHandle = new SelectionHandle(
 			{
@@ -105,7 +96,7 @@ export default class Selection {
 
 		this.handles = [
 			resizeBothHandle,
-			resizeHorizontalHandle,
+			...resizeHorizontalHandles,
 			resizeVerticalHandle,
 			rotationHandle,
 		];
