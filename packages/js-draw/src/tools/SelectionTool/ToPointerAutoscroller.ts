@@ -20,38 +20,23 @@ export default class ToPointerAutoscroller {
 	private getScrollForPoint(screenPoint: Point2) {
 		const screenSize = this.viewport.getScreenRectSize();
 		const screenRect = new Rect2(0, 0, screenSize.x, screenSize.y);
-		const closestEdgePoint = screenRect.getClosestPointOnBoundaryTo(screenPoint);
-		const distToEdge = closestEdgePoint.minus(screenPoint).magnitude();
 
-		const isWithinScreen = screenRect.containsPoint(screenPoint);
+		// Starts autoscrolling when the cursor is **outside of** this region
+		const marginSize = 30;
+		const autoscrollBoundary = screenRect.grownBy(-marginSize);
 
-		// Only scroll if within the outer 20px of the viewport
-		const minScrollDist = 20;
-		if (distToEdge > minScrollDist && isWithinScreen) {
+		if (autoscrollBoundary.containsPoint(screenPoint)) {
 			return Vec2.zero;
 		}
 
-		let toEdge = screenPoint.minus(closestEdgePoint);
-		if (toEdge.eq(Vec2.zero)) {
-			// Grow such that the point is no longer on the edge
-			const grownRect = screenRect.grownBy(1);
-			const closestEdgePoint = grownRect.getClosestPointOnBoundaryTo(screenPoint);
+		const closestEdgePoint = autoscrollBoundary.getClosestPointOnBoundaryTo(screenPoint);
+		const distToEdge = closestEdgePoint.minus(screenPoint).magnitude();
 
-			toEdge = screenPoint.minus(closestEdgePoint);
-		}
-		else if (!isWithinScreen) {
-			toEdge = toEdge.times(-1);
-		}
+		const toEdge = closestEdgePoint.minus(screenPoint);
 
-		// Go faster for points closer to the edge (or outside of the screen).
-		let scaleFactor = 1;
-		if (isWithinScreen) {
-			// Distance from the point at which we start scrolling
-			const distFromScrollStartPoint = minScrollDist - distToEdge;
-
-			// * 1.25: Reach the maximum scroll rate before hitting the edge.
-			scaleFactor = Math.min(1, distFromScrollStartPoint / minScrollDist * 1.05);
-		}
+		// Go faster for points further away from the boundary.
+		// * 1.25: Reach the maximum scroll rate before hitting the edge.
+		const scaleFactor = Math.min(2, distToEdge / marginSize);
 
 		return toEdge.normalizedOrZero().times(scaleFactor);
 	}
