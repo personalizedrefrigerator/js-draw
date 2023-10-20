@@ -9,6 +9,8 @@ import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
 import { duplicateSelectionShortcut, selectAllKeyboardShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
+import ToPointerAutoscroller from './ToPointerAutoscroller';
+import Pointer from 'js-draw/src/Pointer';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -24,8 +26,26 @@ export default class SelectionTool extends BaseTool {
 	private shiftKeyPressed: boolean = false;
 	private snapToGrid: boolean = false;
 
+	private lastPointer: Pointer|null = null;
+
+	private autoscroller: ToPointerAutoscroller;
+
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
+
+		this.autoscroller = new ToPointerAutoscroller(editor.viewport, (scrollBy: Vec2) => {
+			editor.dispatch(Viewport.transformBy(Mat33.translation(scrollBy)), false);
+
+			// Update the selection box/content to match the new viewport.
+			if (this.lastPointer) {
+				// The viewport has changed -- ensure that the screen and canvas positions
+				// of the pointer are both correct
+				const updatedPointer = this.lastPointer.withScreenPosition(
+					this.lastPointer.screenPos, editor.viewport
+				);
+				this.onMainPointerUpdated(updatedPointer);
+			}
+		});
 
 		this.handleOverlay = document.createElement('div');
 		editor.createHTMLOverlay(this.handleOverlay);
@@ -109,15 +129,24 @@ export default class SelectionTool extends BaseTool {
 				this.makeSelectionBox(current.canvasPos);
 			}
 
+			this.autoscroller.start();
+
 			return true;
 		}
 		return false;
 	}
 
 	public override onPointerMove(event: PointerEvt): void {
+		this.onMainPointerUpdated(event.current);
+	}
+
+	private onMainPointerUpdated(currentPointer: Pointer) {
+		this.lastPointer = currentPointer;
+
 		if (!this.selectionBox) return;
 
-		let currentPointer = event.current;
+		this.autoscroller.onPointerMove(currentPointer.screenPos);
+
 		if (!this.expandingSelectionBox && this.shiftKeyPressed && this.startPoint) {
 			const screenPos = this.editor.viewport.canvasToScreen(this.startPoint);
 			currentPointer = currentPointer.lockedToXYAxesScreen(screenPos, this.editor.viewport);
@@ -136,6 +165,8 @@ export default class SelectionTool extends BaseTool {
 
 	// Called after a gestureCancel and a pointerUp
 	private onGestureEnd() {
+		this.autoscroller.stop();
+
 		if (!this.selectionBox) return;
 
 		if (!this.selectionBoxHandlingEvt) {
@@ -148,6 +179,7 @@ export default class SelectionTool extends BaseTool {
 
 
 		this.selectionBoxHandlingEvt = false;
+		this.lastPointer = null;
 	}
 
 	public override onPointerUp(event: PointerEvt): void {

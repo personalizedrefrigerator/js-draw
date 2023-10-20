@@ -178,7 +178,6 @@ export default class Selection {
 		this.transform = transform;
 
 		if (preview && this.hasParent) {
-			this.scrollTo();
 			this.previewTransformCmds();
 		}
 	}
@@ -187,6 +186,8 @@ export default class Selection {
 	public async finalizeTransform() {
 		const fullTransform = this.transform;
 		const selectedElems = this.selectedElems;
+
+		void this.scrollTo();
 
 		// Reset for the next drag
 		this.originalRegion = this.originalRegion.transformedBoundingBox(this.transform);
