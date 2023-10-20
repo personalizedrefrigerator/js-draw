@@ -50,6 +50,7 @@ export default class Selection {
 		};
 
 		this.container = document.createElement('div');
+		this.container.classList.add(`${cssPrefix}selection-container`);
 		this.backgroundElem = document.createElement('div');
 		this.backgroundElem.classList.add(`${cssPrefix}selection-background`);
 		this.container.appendChild(this.backgroundElem);

@@ -3,7 +3,6 @@
 	background-color: var(--selection-background-color);
 	opacity: 0.5;
 	overflow: visible;
-	position: absolute;
 }
 
 .selection-tool-handle {
@@ -59,6 +58,12 @@
 .overlay.handleOverlay {
 	height: 0;
 	overflow: visible;
+
+	& > .selection-tool-selection-container {
+		width: var(--editor-current-display-width-px);
+		height: var(--editor-current-display-height-px);
+		overflow: hidden;
+	}
 }
 
 @keyframes selection-duplicated-animation {
