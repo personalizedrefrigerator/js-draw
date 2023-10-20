@@ -166,7 +166,7 @@ export class RotateTransformer {
 		const clickThreshold = 15;
 
 		if (this.maximumDistFromStart < clickThreshold && this.targetRotation === 0) {
-			this.setRotationTo(Math.PI / 2);
+			this.setRotationTo(-Math.PI / 2);
 		}
 
 		return this.selection.finalizeTransform();
