@@ -136,8 +136,10 @@ describe('SelectionTool.selecting', () => {
 	it('should not select a stroke if not intersecting the stroke\'s edge', async () => {
 		const editor = createEditor();
 
+		// Create the stroke near (100,100) to avoid the potential scroll caused by selecting
+		// near the edge of the screen.
 		const testStroke = new Stroke([
-			pathToRenderable(Path.fromString('m0,0 l10,0'), {
+			pathToRenderable(Path.fromString('m100,100 l10,0'), {
 				fill: Color4.transparent,
 				stroke: {
 					width: 10,
@@ -152,17 +154,17 @@ describe('SelectionTool.selecting', () => {
 		selectionTool.setEnabled(true);
 
 		// Select the start point of the stroke, but within the stroke width
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-1, -1));
-		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(1, 1));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(1, 1));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(99, 99));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(100, 100));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 100));
 
 		// Because the selection is within the stroke width, nothing should be selected
 		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
 
 		// A larger selection, however, should select the stroke
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-12, -12));
-		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(1, 1));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(1, 1));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(80, 80));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(100, 100));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 100));
 
 		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
 	});
