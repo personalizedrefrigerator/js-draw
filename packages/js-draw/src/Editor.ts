@@ -1545,13 +1545,15 @@ export class Editor {
 			});
 		}
 
+		const screenSize = this.viewport.getScreenRectSize();
 		notices.push({
 			heading: 'Developer information',
 			text: [
 				'Image debug information (from when this dialog was opened):',
 				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()} rotation`,
 				`    ${this.image.estimateNumElements()} components`,
-				`    ${this.getImportExportRect().w}x${this.getImportExportRect().h} size`,
+				`    ${this.getImportExportRect().w}x${this.getImportExportRect().h} image size`,
+				`    ${screenSize.x}x${screenSize.y} screen size`,
 			].join('\n'),
 			minimized: true,
 		});
