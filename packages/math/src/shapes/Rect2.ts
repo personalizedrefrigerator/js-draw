@@ -224,7 +224,7 @@ export class Rect2 extends Abstract2DShape {
 	}
 
 	public get center() {
-		return this.topLeft.plus(this.size.times(0.5));
+		return Vec2.of(this.x + this.w / 2, this.y + this.h / 2);
 	}
 
 	// Returns edges in the order
