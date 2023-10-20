@@ -128,8 +128,10 @@ export default class SelectionTool extends BaseTool {
 				this.expandingSelectionBox = this.shiftKeyPressed;
 				this.makeSelectionBox(current.canvasPos);
 			}
-
-			this.autoscroller.start();
+			else {
+				// Only autoscroll if we're transforming an existing selection
+				this.autoscroller.start();
+			}
 
 			return true;
 		}
