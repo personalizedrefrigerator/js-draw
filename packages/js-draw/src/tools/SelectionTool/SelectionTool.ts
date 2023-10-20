@@ -165,26 +165,9 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	// Called after a gestureCancel and a pointerUp
-	private onGestureEnd() {
+	public override onPointerUp(event: PointerEvt): void {
 		this.autoscroller.stop();
 
-		if (!this.selectionBox) return;
-
-		if (!this.selectionBoxHandlingEvt) {
-			// Expand/shrink the selection rectangle, if applicable
-			this.selectionBox.resolveToObjects();
-			this.onSelectionUpdated();
-		} else {
-			this.selectionBox.onDragEnd();
-		}
-
-
-		this.selectionBoxHandlingEvt = false;
-		this.lastPointer = null;
-	}
-
-	public override onPointerUp(event: PointerEvt): void {
 		if (!this.selectionBox) return;
 
 		let currentPointer = event.current;
@@ -204,11 +187,21 @@ export default class SelectionTool extends BaseTool {
 				...this.prevSelectionBox.getSelectedObjects(),
 			]);
 		} else {
-			this.onGestureEnd();
+			if (!this.selectionBoxHandlingEvt) {
+				// Expand/shrink the selection rectangle, if applicable
+				this.selectionBox.resolveToObjects();
+				this.onSelectionUpdated();
+			} else {
+				this.selectionBox.onDragEnd();
+			}
+
+			this.selectionBoxHandlingEvt = false;
+			this.lastPointer = null;
 		}
 	}
 
 	public override onGestureCancel(): void {
+		this.autoscroller.stop();
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox?.onDragCancel();
 		} else {
@@ -221,6 +214,8 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		this.expandingSelectionBox = false;
+		this.lastPointer = null;
+		this.selectionBoxHandlingEvt = false;
 	}
 
 	private lastSelectedObjects: AbstractComponent[] = [];

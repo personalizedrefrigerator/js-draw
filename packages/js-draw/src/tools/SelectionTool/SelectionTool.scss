@@ -56,6 +56,8 @@
 }
 
 .overlay.handleOverlay {
+	pointer-events: none;
+
 	// When expanding a selection with shift+click&drag, multiple selection boxes
 	// can be present in the same handleOverlay. As such, so that other overlayed
 	// selection boxes are in the correct place, the outer container needs to have

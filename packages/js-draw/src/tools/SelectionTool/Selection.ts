@@ -455,7 +455,7 @@ export default class Selection {
 	// Maps IDs to whether we removed the component from the image
 	private removedFromImage: Record<string, boolean> = {};
 
-	// Add/remove the contents of this' seleciton from the editor.
+	// Add/remove the contents of this seleciton from the editor.
 	// Used to prevent previewed content from looking like duplicate content
 	// while dragging.
 	//
@@ -463,6 +463,9 @@ export default class Selection {
 	// the editor image is likely to be slow.)
 	//
 	// If removed from the image, selected elements are drawn as wet ink.
+	//
+	// [inImage] should be `true` if the selected elements should be added to the
+	// main image, `false` if they should be removed.
 	private addRemoveSelectionFromImage(inImage: boolean) {
 		// Don't hide elements if doing so will be slow.
 		if (!inImage && this.selectedElems.length > maxPreviewElemCount) {
@@ -579,6 +582,7 @@ export default class Selection {
 		this.setTransform(Mat33.identity);
 
 		this.addRemoveSelectionFromImage(true);
+		this.updateUI();
 	}
 
 	// Scroll the viewport to this. Does not zoom
