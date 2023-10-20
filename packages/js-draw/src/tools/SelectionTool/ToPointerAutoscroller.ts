@@ -12,7 +12,7 @@ export default class ToPointerAutoscroller {
 	private updateLoopId: number = 0;
 	private updateLoopRunning = false;
 	private targetPoint: Point2|null = null;
-	private scrollRate: number = 400; // px/s
+	private scrollRate: number = 600; // px/s
 
 	public constructor(private viewport: Viewport, private scrollByCanvasDelta: ScrollByCallback) {
 	}
@@ -25,8 +25,8 @@ export default class ToPointerAutoscroller {
 
 		const isWithinScreen = screenRect.containsPoint(screenPoint);
 
-		// Only scroll if within the outer 15px of the viewport
-		const minScrollDist = 15;
+		// Only scroll if within the outer 20px of the viewport
+		const minScrollDist = 20;
 		if (distToEdge > minScrollDist && isWithinScreen) {
 			return Vec2.zero;
 		}
@@ -44,10 +44,13 @@ export default class ToPointerAutoscroller {
 		}
 
 		// Go faster for points closer to the edge (or outside of the screen).
-		let scaleFactor = 4;
+		let scaleFactor = 1;
 		if (isWithinScreen) {
-			const fractionToEdge = (minScrollDist - distToEdge) / minScrollDist;
-			scaleFactor = fractionToEdge * scaleFactor;
+			// Distance from the point at which we start scrolling
+			const distFromScrollStartPoint = minScrollDist - distToEdge;
+
+			// * 1.25: Reach the maximum scroll rate before hitting the edge.
+			scaleFactor = Math.min(1, distFromScrollStartPoint / minScrollDist * 1.05);
 		}
 
 		return toEdge.normalizedOrZero().times(scaleFactor);
