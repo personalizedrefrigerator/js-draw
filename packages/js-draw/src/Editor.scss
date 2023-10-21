@@ -34,9 +34,6 @@
 
 	// Color used for some button/input foregrounds
 	--primary-action-foreground-color: #15b;
-
-	// Default to light mode for controls
-	color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -56,8 +53,6 @@
 		--background-color-transparent: rgba(50, 50, 50, 0.5);
 
 		--primary-action-foreground-color: #7ae;
-
-		color-scheme: dark;
 	}
 }
 
