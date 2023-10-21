@@ -75,7 +75,9 @@
 				Filled-in translation templates are compiled into JavaScript. Therefore,
 				translations can execute arbitrary JavaScript code. While this
 				translations and their scripts are run within a
-				<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox">
+				<a
+					href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox"
+				>
 				sandboxed <code>iframe</code></a>, you
 				should still avoid testing translations that you haven't looked through first.
 			</li>
@@ -118,6 +120,12 @@
 	parent.postMessage({
 		message: 'loaded',
 	}, '*');
+
+	// Make all links work within the sandbox
+	const links = document.querySelectorAll('a');
+	for (const link of links) {
+		link.target = '_top';
+	}
 </script>
 
 </html>
