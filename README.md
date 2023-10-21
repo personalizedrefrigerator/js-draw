@@ -19,8 +19,6 @@ If you're coming from version 0.25, [read the migration guide!](https://js-draw.
 
 # API
 
-To use `js-draw`,
-
 ## Creating an `Editor`
 
 ### With a bundler that supports importing `.css` files
