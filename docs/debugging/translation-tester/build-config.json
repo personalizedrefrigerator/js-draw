@@ -1,0 +1,8 @@
+{
+	"bundledFiles": [
+		{
+			"name": "jsdraw",
+			"inPath": "./sandbox.ts"
+		}
+	]
+}

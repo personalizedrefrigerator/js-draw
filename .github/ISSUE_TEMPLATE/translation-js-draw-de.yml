@@ -13,6 +13,10 @@ body:
   - type: markdown
     attributes:
       value: |
+         If you would like to test the translation, **after publishing this issue**, select everything from the first "Language" heading to just above the "Additional information" heading and paste into [the translation testing tool](https://js-draw.web.app/debugging/translation-tester/). 
+  - type: markdown
+    attributes:
+      value: |
          (Optional) If you would like to submit a pull request that applies this translation, note that existing translations are present in [packages/js-draw/src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations). 
   - type: input
     id: language-name
@@ -120,7 +124,7 @@ body:
 or
 {{browse}}`.
 
-> **Note**:
+> **Note**
 > Uses {{curly braces}} to denote bold text"
       placeholder: "Drag and drop here
 or
@@ -516,7 +520,7 @@ or
       label: "closeSidebar"
       description: "Translate ``(toolName) => `Close sidebar for ${toolName}` ``.
 
-> **Note**:
+> **Note**
 > Currently used as an accessibilty label"
       placeholder: "(toolName) => `Close sidebar for ${toolName}`"
       value: "(toolName) => `Close sidebar for ${toolName}`"

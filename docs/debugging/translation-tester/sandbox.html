@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>Translation tester | js-draw</title>
+	<style>
+		:root {
+			font-family: sans-serif;
+		}
+
+		main {
+			max-width: 500px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		textarea#localization-data {
+			width: 100%;
+			box-sizing: border-box;
+			height: 200px;
+		}
+
+		.js-draw.imageEditorContainer {
+			width: 100vw;
+			height: 100vh;
+			position: fixed;
+			top: 0;
+			left: 0;
+		}
+
+		.generated-code {
+			max-height: min(80vh, 500px);
+			overflow: auto;
+		}
+
+		.generated-code pre {
+			white-space: pre-wrap;
+			border: 1px solid black;
+			border-radius: 5px;
+		}
+	</style>
+</head>
+
+<body>
+	<main>
+		<h1>Translation tester</h1>
+		<p>
+			This page allows previewing translations created with
+			<a href="https://github.com/personalizedrefrigerator/js-draw/issues/new/choose">
+				the relevant GitHub issue templates.
+			</a> This page assumes you have already created a translation issue using
+			one of the linked templates. To use this page,
+		</p>
+		<ol>
+			<li>
+				Copy the full text of the translation issue
+				(<a href="https://github.com/personalizedrefrigerator/js-draw/issues/35">example translation issue</a>),
+				from "<code>Language</code>" to the response for "<code>Additional information</code>".
+			</li>
+			<li>
+				Paste the copied text into the "Localization data" textbox below.
+			</li>
+			<li>
+				Click "Test translation".
+			</li>
+		</ol>
+
+		<p>
+			<strong>Notes:</strong> 
+		</p>
+		<ul>
+			<li>
+				Filled-in translation templates are compiled into JavaScript. Therefore,
+				translations can execute arbitrary JavaScript code. While this
+				translations and their scripts are run within a
+				<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox">
+				sandboxed <code>iframe</code></a>, you
+				should still avoid testing translations that you haven't looked through first.
+			</li>
+			<li>
+				The contents of the textbox below are discarded after clicking "Test" &mdash; it's easy to accidentally
+				lose changes made in the textbox.
+			</li>
+		</ul>
+
+		<hr/>
+
+		<label for="localization-data">
+			Localization data (copy-paste from GitHub issues):
+		</label>
+		<textarea id="localization-data"></textarea>
+
+		<div class="generated-code">
+			<h1>Generated code</h1>
+			<h2>Generated TypeScript</h2>
+			<pre id="generated-typescript"></pre>
+
+			<h2>Generated JavaScript</h2>
+			<pre id="generated-javascript"></pre>
+		</div>
+
+		<button id="submit-button">Test translation</button>
+	</main>
+</body>
+<script>
+	// We're in a sandboxed iframe. As such, resources must be loaded
+	// via postMessage
+	window.onmessage = event => {
+		if (event.source === parent && event.data?.loadScript) {
+			window.onmessage = undefined;
+
+			eval(event.data.loadScript);
+		}
+	};
+
+	parent.postMessage({
+		message: 'loaded',
+	}, '*');
+</script>
+
+</html>

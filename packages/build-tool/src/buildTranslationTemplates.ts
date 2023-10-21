@@ -95,6 +95,12 @@ const generateTranslationTemplate = (
 	`));
 
 	addLabel(collapseSpaces(`
+		If you would like to test the translation, **after publishing this issue**, select everything
+		from the first "Language" heading to just above the "Additional information" heading and paste
+		into [the translation testing tool](https://js-draw.web.app/debugging/translation-tester/).
+	`));
+
+	addLabel(collapseSpaces(`
 		(Optional) If you would like to submit a pull request that applies this translation, 
 		note that existing translations are present in
 		[packages/js-draw/src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations).
@@ -119,7 +125,7 @@ const generateTranslationTemplate = (
 		if (typeof comments === 'string') {
 			comments = [ comments ];
 		}
-		comments = comments.map(comment => `> **Note**:\n> ${comment.replace(/\n/g, '\n> ')}`);
+		comments = comments.map(comment => `> **Note**\n> ${comment.replace(/\n/g, '\n> ')}`);
 
 		const description = [
 			`Translate ${codeFormat(englishTranslation)}.`,
