@@ -24,7 +24,7 @@ body:
       value: |
         1. Open ...
         2. Switch to the ... tool.
-        3 . ...
+        3. ...
       placeholder: "Reproduction steps"
   - type: textarea
     id: expected-behavior
@@ -43,7 +43,7 @@ body:
     attributes:
       label: "Version information"
       description: "What version of js-draw were you using?"
-      placeholder: "version (like 1.2.3)"
+      placeholder: "version (e.g. 1.7.0, 0.20.5, or unknown)"
     validations:
       required: true
   - type: textarea
