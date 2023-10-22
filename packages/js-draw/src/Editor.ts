@@ -855,6 +855,37 @@ export class Editor {
 		}, otherEventsFilter);
 	}
 
+	/** @internal */
+	protected handleHTMLKeyDownEvent(htmlEvent: KeyboardEvent) {
+		console.assert(
+			htmlEvent.type === 'keydown',
+			`handling a keydown event with type ${htmlEvent.type}`
+		);
+
+		const event = keyPressEventFromHTMLEvent(htmlEvent);
+		if (this.toolController.dispatchInputEvent(event)) {
+			htmlEvent.preventDefault();
+		} else if (event.key === 't' || event.key === 'T') {
+			htmlEvent.preventDefault();
+			this.display.rerenderAsText();
+		} else if (event.key === 'Escape') {
+			this.renderingRegion.blur();
+		}
+	}
+
+	/** @internal */
+	protected handleHTMLKeyUpEvent(htmlEvent: KeyboardEvent) {
+		console.assert(
+			htmlEvent.type === 'keyup',
+			`Handling a keyup event with type ${htmlEvent.type}`,
+		);
+
+		const event = keyUpEventFromHTMLEvent(htmlEvent);
+		if (this.toolController.dispatchInputEvent(event)) {
+			htmlEvent.preventDefault();
+		}
+	}
+
 	/**
 	 * Adds event listners for keypresses (and drop events) on `elem` and forwards those
 	 * events to the editor.
@@ -869,21 +900,10 @@ export class Editor {
 		listenForKeyboardEventsFrom(elem, {
 			filter,
 			handleKeyDown: (htmlEvent) => {
-				const event = keyPressEventFromHTMLEvent(htmlEvent);
-				if (this.toolController.dispatchInputEvent(event)) {
-					htmlEvent.preventDefault();
-				} else if (event.key === 't' || event.key === 'T') {
-					htmlEvent.preventDefault();
-					this.display.rerenderAsText();
-				} else if (event.key === 'Escape') {
-					this.renderingRegion.blur();
-				}
+				this.handleHTMLKeyDownEvent(htmlEvent);
 			},
 			handleKeyUp: (htmlEvent) => {
-				const event = keyUpEventFromHTMLEvent(htmlEvent);
-				if (this.toolController.dispatchInputEvent(event)) {
-					htmlEvent.preventDefault();
-				}
+				this.handleHTMLKeyUpEvent(htmlEvent);
 			},
 		});
 
