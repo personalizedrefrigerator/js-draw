@@ -228,7 +228,7 @@ export default class SVGRenderer extends AbstractRenderer {
 				this.textContainerTransform = transform;
 				this.textParentStyle = { ...defaultTextStyle, ...style };
 			}
-		} else {
+		} else if (text !== '') {
 			const elem = document.createElementNS(svgNameSpace, 'tspan');
 			elem.appendChild(document.createTextNode(text));
 			this.textContainer.appendChild(elem);
