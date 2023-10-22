@@ -63,5 +63,5 @@ body:
     id: additional-info
     attributes:
       label: "Additional information"
-      descripiton: "Any additional context or information (e.g. screenshots)."
+      description: "Any additional context or information (e.g. screenshots)."
       render: markdown
