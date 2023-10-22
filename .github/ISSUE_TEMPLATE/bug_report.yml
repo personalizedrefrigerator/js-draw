@@ -1,6 +1,6 @@
 name: "Bug report"
 description: "Report an issue with js-draw."
-title: "bug: "
+title: 
 labels: [bug]
 assignees: []
 body:
@@ -26,7 +26,6 @@ body:
         2. Switch to the ... tool.
         3 . ...
       placeholder: "Reproduction steps"
-      render: markdown
   - type: textarea
     id: expected-behavior
     attributes:
@@ -56,7 +55,7 @@ body:
     id: logs
     attributes:
       label: "Logs"
-      description: "If appropriate, [it be helpful to create and attach an input log](https://js-draw.web.app/debugging/stroke-logging/)."
+      description: "If appropriate, [it may be helpful to create and attach an input log](https://js-draw.web.app/debugging/stroke-logging/)."
       placeholder: "Input log"
       render: shell
   - type: textarea
@@ -64,4 +63,3 @@ body:
     attributes:
       label: "Additional information"
       description: "Any additional context or information (e.g. screenshots)."
-      render: markdown
