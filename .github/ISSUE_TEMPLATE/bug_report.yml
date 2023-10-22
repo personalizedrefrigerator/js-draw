@@ -1,21 +1,21 @@
-name: Bug report
-description: Report an issue with js-draw.
-title: "[bug]: "
+name: "Bug report"
+description: "Report an issue with js-draw."
+title: "bug: "
 labels: [bug]
 assignees: []
 body:
   - type: markdown
     attributes:
-    value: |
-      Use this template to report an issue with `js-draw` (or any of the other packages in this repository).
+      value: |
+        Use this template to report an issue with `js-draw` (or any of the other packages in this repository).
   - type: textarea
     id: issue-description
-  attributes:
-    label: "Describe the issue"
-    description: "This should be a short and simple description of the issue."
-    placeholder: "A clear and concise description of the issue."
-  validations:
-    required: true
+    attributes:
+      label: "Describe the issue"
+      description: "This should be a short and simple description of the issue."
+      placeholder: "A clear and concise description of the issue."
+    validations:
+      required: true
   - type: textarea
     id: reproduction-steps
     attributes:
