@@ -35,13 +35,14 @@ export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect
 	const path = pathFromRenderable(renderablePath);
 	const strokeWidth = renderablePath.style.stroke?.width ?? 0;
 	const onlyStroked = strokeWidth > 0 && renderablePath.style.fill.a === 0;
+	const styledPathBBox = path.bbox.grownBy(strokeWidth);
 
 	// Are we close enough to the path that it fills the entire screen?
 	if (
 		onlyStroked
 		&& renderablePath.style.stroke
 		&& strokeWidth > visibleRect.maxDimension
-		&& path.bbox.containsRect(visibleRect)
+		&& styledPathBBox.containsRect(visibleRect)
 	) {
 		const strokeRadius = strokeWidth / 2;
 
@@ -62,7 +63,7 @@ export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect
 		.transformedBoundingBox(Mat33.scaling2D(4, visibleRect.center));
 
 	// TODO: Handle simplifying very small paths.
-	if (expandedRect.containsRect(path.bbox.grownBy(strokeWidth))) {
+	if (expandedRect.containsRect(styledPathBBox)) {
 		return renderablePath;
 	}
 

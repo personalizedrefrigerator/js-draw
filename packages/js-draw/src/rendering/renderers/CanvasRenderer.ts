@@ -183,12 +183,10 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 
 		// If part of a huge object, it might be worth trimming the path
-		if (this.currentObjectBBox?.containsRect(this.getViewport().visibleRect)) {
+		const visibleRect = this.getViewport().visibleRect;
+		if (this.currentObjectBBox?.containsRect(visibleRect)) {
 			// Try to trim/remove parts of the path outside of the bounding box.
-			path = visualEquivalent(
-				path,
-				this.getViewport().visibleRect
-			);
+			path = visualEquivalent(path, visibleRect);
 		}
 
 		super.drawPath(path);
