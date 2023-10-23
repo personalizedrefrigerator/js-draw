@@ -113,6 +113,7 @@ export class RotateTransformer {
 	private targetRotation: number = 0;
 	private maximumDistFromStart = 0;
 	private startPoint: Point2;
+	private startTime: number;
 
 	public constructor(private readonly editor: Editor, private selection: Selection) { }
 
@@ -132,8 +133,11 @@ export class RotateTransformer {
 		this.startPoint = startPoint;
 		this.selection.setTransform(Mat33.identity);
 		this.startAngle = this.getAngle(startPoint);
-		this.maximumDistFromStart = 0;
 		this.targetRotation = 0;
+
+		// Used to determine whether the user clicked or not.
+		this.maximumDistFromStart = 0;
+		this.startTime = performance.now();
 	}
 
 	private setRotationTo(angle: number) {
@@ -162,10 +166,14 @@ export class RotateTransformer {
 	}
 
 	public onDragEnd() {
-		// Anything less than this is considered a click
-		const clickThreshold = 15;
+		// Anything with motion less than this is considered a click
+		const clickThresholdDist = 10;
+		const clickThresholdTime = 0.4; // s
+		const dragTimeSeconds = (performance.now() - this.startTime) / 1000;
 
-		if (this.maximumDistFromStart < clickThreshold && this.targetRotation === 0) {
+		if (dragTimeSeconds < clickThresholdTime
+			&& this.maximumDistFromStart < clickThresholdDist
+			&& this.targetRotation === 0) {
 			this.setRotationTo(-Math.PI / 2);
 		}
 
