@@ -1,3 +1,18 @@
+
+# 1.7.0
+ * Features and improvements
+    * Selection tool
+      * Improved autoscroll while dragging/transforming large selections
+      * Decreased visible size of most selection handles ([see discussion](https://github.com/personalizedrefrigerator/js-draw/discussions/38))
+      * Mapped clicking the rotate handle to a counter-clockwise rotation of 90 degrees (matching the icon).
+    * Show more information in the about dialog.
+    * Performance improvement when zooming in near the endpoints of a large, stroked (and not filled) stroke.
+ * Bug fixes
+    * Fix inability to select immediately after touchscreen pinch zooming with an existing selection.
+    * Fix selection boundary visible outside of the editor on pages where the editor isn't fullscreen.
+    * Fix close/exit icon in the material icon pack's size in the dropdown toolbar.
+    * Fix modifier keys (`shift`, `ctrl`, etc.) not registered as pressed if first pressed before focusing the editor.
+
 # 1.6.1
  * Bug fixes
     * Fix selected items not moved to the top of an image on click.
