@@ -12,7 +12,7 @@ export default class ToPointerAutoscroller {
 	private updateLoopId: number = 0;
 	private updateLoopRunning = false;
 	private targetPoint: Point2|null = null;
-	private scrollRate: number = 800; // px/s
+	private scrollRate: number = 1000; // px/s
 
 	public constructor(private viewport: Viewport, private scrollByCanvasDelta: ScrollByCallback) {
 	}
@@ -22,7 +22,7 @@ export default class ToPointerAutoscroller {
 		const screenRect = new Rect2(0, 0, screenSize.x, screenSize.y);
 
 		// Starts autoscrolling when the cursor is **outside of** this region
-		const marginSize = 40;
+		const marginSize = 44;
 		const autoscrollBoundary = screenRect.grownBy(-marginSize);
 
 		if (autoscrollBoundary.containsPoint(screenPoint)) {
@@ -35,8 +35,8 @@ export default class ToPointerAutoscroller {
 		const toEdge = closestEdgePoint.minus(screenPoint);
 
 		// Go faster for points further away from the boundary.
-		// * 1.25: Reach the maximum scroll rate before hitting the edge.
-		const scaleFactor = Math.min(2, distToEdge / marginSize);
+		const maximumScaleFactor = 1.25;
+		const scaleFactor = Math.min(distToEdge / marginSize, maximumScaleFactor);
 
 		return toEdge.normalizedOrZero().times(scaleFactor);
 	}
