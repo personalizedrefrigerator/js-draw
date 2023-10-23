@@ -29,6 +29,7 @@ export interface HandlePresentation {
 	action: HandleAction;
 }
 
+// The *interactable* handle size. The visual size will be slightly smaller.
 export const handleSize = 30;
 
 // `startPoint` is in screen coordinates
@@ -57,11 +58,16 @@ export default class SelectionHandle {
 			`${cssPrefix}${presentation.action}`,
 		);
 
+		// Create a slightly smaller content/background element.
+		const visibleContent = document.createElement('div');
+		visibleContent.classList.add(`${cssPrefix}content`);
+		this.element.appendChild(visibleContent);
+
 		this.parentSide = presentation.side;
 
 		const icon = presentation.icon;
 		if (icon) {
-			this.element.appendChild(icon);
+			visibleContent.appendChild(icon);
 			icon.classList.add('icon');
 		}
 
