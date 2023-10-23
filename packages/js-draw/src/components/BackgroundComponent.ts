@@ -167,7 +167,12 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		if (!this.contentBBox.eq(importExportRect)) {
 			this.contentBBox = importExportRect;
 
-			needsRerender = true;
+			// If the box already fills the screen, rerendering it will have
+			// no visual effect.
+			//
+			// TODO: This decision should be made by queueRerenderOf and not here.
+			//
+			needsRerender ||= !this.fillsScreen;
 		}
 
 		const imageAutoresizes = image.getAutoresizeEnabled();

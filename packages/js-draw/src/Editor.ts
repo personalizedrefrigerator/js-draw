@@ -1366,8 +1366,6 @@ export class Editor {
 		const originalBackgrounds = this.image.getBackgroundComponents();
 		const eraseBackgroundCommand = new Erase(originalBackgrounds);
 
-		let autoresizeEnabled = false;
-
 		await loader.start(async (component) => {
 			await this.dispatchNoAnnounce(EditorImage.addElement(component));
 		}, (countProcessed: number, totalToProcess: number) => {
@@ -1383,17 +1381,12 @@ export class Editor {
 			this.dispatchNoAnnounce(this.viewport.zoomTo(importExportRect), false);
 
 			if (options) {
-				autoresizeEnabled = options.autoresize;
+				this.dispatchNoAnnounce(
+					this.image.setAutoresizeEnabled(options.autoresize),
+					false,
+				);
 			}
 		});
-
-		// TODO: Move this call into the callback above. Currently, this would cause
-		//       decrease in performance as the main background would be repeatedly added
-		//       and removed from the editor every time another component is added.
-		this.dispatchNoAnnounce(
-			this.image.setAutoresizeEnabled(autoresizeEnabled),
-			false,
-		);
 
 		// Ensure that we don't have multiple overlapping BackgroundComponents. Remove
 		// old BackgroundComponents.
