@@ -22,7 +22,7 @@ export default class ToPointerAutoscroller {
 		const screenRect = new Rect2(0, 0, screenSize.x, screenSize.y);
 
 		// Starts autoscrolling when the cursor is **outside of** this region
-		const marginSize = 30;
+		const marginSize = 40;
 		const autoscrollBoundary = screenRect.grownBy(-marginSize);
 
 		if (autoscrollBoundary.containsPoint(screenPoint)) {
