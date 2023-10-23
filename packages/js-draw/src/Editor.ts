@@ -96,6 +96,11 @@ export interface EditorSettings {
 	 */
 	appInfo: {
 		name: string,
+
+		// (Optional) A brief description of the app
+		description?: string;
+
+		// (Optional) The app version
 		version?: string,
 	}|null,
 }
@@ -1494,15 +1499,19 @@ export class Editor {
 		const notices: AboutDialogEntry[] = [];
 
 		if (this.settings.appInfo) {
-			const versionLines = [];
+			const descriptionLines = [];
 			if (this.settings.appInfo.version) {
-				versionLines.push(`v${this.settings.appInfo.version}`, '');
+				descriptionLines.push(`v${this.settings.appInfo.version}`, '');
+			}
+
+			if (this.settings.appInfo.description) {
+				descriptionLines.push(this.settings.appInfo.description + '\n');
 			}
 
 			notices.push({
 				heading: `${this.settings.appInfo.name}`,
 				text: [
-					...versionLines,
+					...descriptionLines,
 					`(js-draw v${version.number})`,
 				].join('\n'),
 			});
@@ -1515,19 +1524,26 @@ export class Editor {
 
 		const screenSize = this.viewport.getScreenRectSize();
 		notices.push({
-			heading: 'Developer information',
+			heading: this.localization.developerInformation,
 			text: [
 				'Image debug information (from when this dialog was opened):',
-				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()} rotation`,
+				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()}° rotation`,
 				`    ${this.image.estimateNumElements()} components`,
+				`    auto-resize: ${this.image.getAutoresizeEnabled() ? 'enabled' : 'disabled'}`,
 				`    ${this.getImportExportRect().w}x${this.getImportExportRect().h} image size`,
 				`    ${screenSize.x}x${screenSize.y} screen size`,
+				'    cache:',
+				`        ${
+					this.display.getCache().getDebugInfo()
+						// Indent
+						.replace(/([\n])/g, '\n        ')
+				}`,
 			].join('\n'),
 			minimized: true,
 		});
 
 		notices.push({
-			heading: 'Libraries',
+			heading: this.localization.softwareLibraries,
 			text: [
 				`This image editor is powered by js-draw v${version.number}.`,
 				'',

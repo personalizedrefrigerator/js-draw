@@ -68,4 +68,26 @@ export class CacheRecordManager {
 		this.cacheRecords.sort((a, b) => a.getLastUsedCycle() - b.getLastUsedCycle());
 		return this.cacheRecords[0];
 	}
+
+	// Returns information to (hopefully) help debug performance issues
+	public getDebugInfo() {
+		let numberAllocd = 0;
+		let averageReassignedCount = 0;
+		for (const cacheRecord of this.cacheRecords) {
+			averageReassignedCount += cacheRecord.allocCount;
+
+			if (cacheRecord.isAllocd()) {
+				numberAllocd ++;
+			}
+		}
+		averageReassignedCount /= Math.max(this.cacheRecords.length, 0);
+
+		const debugInfo = [
+			`${this.cacheRecords.length} cache records (max ${this.maxCanvases})`,
+			`${numberAllocd} assigned to screen regions`,
+			`Average number of times reassigned: ${Math.round(averageReassignedCount * 100) / 100}`,
+		];
+
+		return debugInfo.join('\n');
+	}
 }

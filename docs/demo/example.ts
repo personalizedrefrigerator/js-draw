@@ -43,6 +43,7 @@ const createEditor = async (
 		// but not a custom version.
 		appInfo: {
 			name: 'js-draw demo',
+			description: 'An app demonstrating the js-draw library\'s functionality.',
 		},
 	});
 

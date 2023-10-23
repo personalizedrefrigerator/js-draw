@@ -63,4 +63,8 @@ export default class RenderingCache {
 			image.render(screenRenderer, visibleRect);
 		}
 	}
+
+	public getDebugInfo() {
+		return this.recordManager.getDebugInfo();
+	}
 }
