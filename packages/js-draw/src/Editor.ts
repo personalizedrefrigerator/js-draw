@@ -1506,14 +1506,13 @@ export class Editor {
 
 			if (this.settings.appInfo.description) {
 				descriptionLines.push(this.settings.appInfo.description + '\n');
+			} else {
+				descriptionLines.push(`js-draw v${version.number}`);
 			}
 
 			notices.push({
 				heading: `${this.settings.appInfo.name}`,
-				text: [
-					...descriptionLines,
-					`(js-draw v${version.number})`,
-				].join('\n'),
+				text: descriptionLines.join('\n'),
 			});
 		} else {
 			notices.push({

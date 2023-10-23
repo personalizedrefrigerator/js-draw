@@ -1,4 +1,8 @@
 
+# 1.7.2
+ * Changes
+    * Hide `(js-draw v{{version}})` in about dialog if the application provides a custom description.
+
 # 1.7.1
  * Bug fixes
     * Selection: Makes it more difficult to accidentally trigger the "rotate 90 degrees counter-clockwise feature" when dragging the rotate handle.
