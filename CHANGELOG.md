@@ -1,4 +1,8 @@
 
+# 1.7.1
+ * Bug fixes
+    * Selection: Makes it more difficult to accidentally trigger the "rotate 90 degrees counter-clockwise feature" when dragging the rotate handle.
+
 # 1.7.0
  * Features and improvements
     * Selection tool
