@@ -36,6 +36,27 @@ export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect
 	const strokeWidth = renderablePath.style.stroke?.width ?? 0;
 	const onlyStroked = strokeWidth > 0 && renderablePath.style.fill.a === 0;
 
+	// Are we close enough to the path that it fills the entire screen?
+	if (
+		onlyStroked
+		&& renderablePath.style.stroke
+		&& strokeWidth > visibleRect.maxDimension
+		&& path.bbox.containsRect(visibleRect)
+	) {
+		const strokeRadius = strokeWidth / 2;
+
+		// Do a fast, but with many false negatives, check.
+		for (const point of path.startEndPoints()) {
+			// If within the strokeRadius of any point
+			if (visibleRect.isWithinRadiusOf(strokeRadius, point)) {
+				return pathToRenderable(
+					Path.fromRect(visibleRect),
+					{ fill: renderablePath.style.stroke.color },
+				);
+			}
+		}
+	}
+
 	// Scale the expanded rect --- the visual equivalent is only close for huge strokes.
 	const expandedRect = visibleRect.grownBy(strokeWidth)
 		.transformedBoundingBox(Mat33.scaling2D(4, visibleRect.center));
@@ -44,6 +65,7 @@ export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect
 	if (expandedRect.containsRect(path.bbox.grownBy(strokeWidth))) {
 		return renderablePath;
 	}
+
 	const parts: PathCommand[] = [];
 	let startPoint = path.startPoint;
 

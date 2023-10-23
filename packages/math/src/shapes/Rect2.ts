@@ -190,6 +190,23 @@ export class Rect2 extends Abstract2DShape {
 		return closest!;
 	}
 
+	/**
+	 * Returns `true` iff all points in this rectangle are within `distance` from `point`:
+	 *
+	 * If $R$ is the set of points in this rectangle, returns `true` iff
+	 * $$
+	 * 	\forall {\bf a} \in R, \|\texttt{point} - {\bf a}\| < \texttt{radius}
+	 * $$
+	 */
+	public isWithinRadiusOf(radius: number, point: Point2) {
+		if (this.maxDimension > radius) {
+			return false;
+		}
+
+		const squareRadius = radius * radius;
+		return this.corners.every(corner => corner.minus(point).magnitudeSquared() < squareRadius);
+	}
+
 	public get corners(): Point2[] {
 		return [
 			this.bottomRight,

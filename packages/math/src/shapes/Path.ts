@@ -644,9 +644,13 @@ export class Path {
 		return false;
 	}
 
-	// Returns a path that outlines [rect]. If [lineWidth] is not given, the resultant path is
-	// the outline of [rect]. Otherwise, the resultant path represents a line of width [lineWidth]
-	// that traces [rect].
+	/**
+	 * Returns a path that outlines `rect`.
+	 *
+	 * If `lineWidth` is given, the resultant path traces a `lineWidth` thick
+	 * border around `rect`. Otherwise, the resultant path is just the border
+	 * of `rect`.
+	 */
 	public static fromRect(rect: Rect2, lineWidth: number|null = null): Path {
 		const commands: PathCommand[] = [];
 
