@@ -30,7 +30,10 @@ body:
     id: translation-pen
     attributes:
       label: "pen"
-      description: "Translate `Pen`."
+      description: "Translate `Pen`.
+
+> **Note**
+> Likely unused"
       placeholder: "Pen"
       value: "Stift"
       render: "shell"
@@ -1289,6 +1292,24 @@ or
       description: "Translate ``(commandDescription) => `Redid ${commandDescription}` ``."
       placeholder: "(commandDescription) => `Redid ${commandDescription}`"
       value: "(commandDescription) => `${commandDescription} wiederholt`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-softwareLibraries
+    attributes:
+      label: "softwareLibraries"
+      description: "Translate `Libraries`."
+      placeholder: "Libraries"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-developerInformation
+    attributes:
+      label: "developerInformation"
+      description: "Translate `Developer information`."
+      placeholder: "Developer information"
       render: "shell"
     validations:
       required: false
