@@ -17,7 +17,7 @@
 	// Maximum size of the visible region (make the handle slightly larger
 	// so that the resize cursor is visible everywhere in the actual selection
 	// box).
-	--max-size: 12px;
+	--max-size: 15px;
 
 	.selection-tool-content {
 		border: 1px solid var(--foreground-color-1);
