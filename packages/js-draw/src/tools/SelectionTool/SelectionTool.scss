@@ -17,7 +17,7 @@
 	// Maximum size of the visible region (make the handle slightly larger
 	// so that the resize cursor is visible everywhere in the actual selection
 	// box).
-	--max-size: 15px;
+	--max-size: 17px;
 
 	.selection-tool-content {
 		border: 1px solid var(--foreground-color-1);
@@ -46,7 +46,7 @@
 
 	&.selection-tool-rotate {
 		// Shrink less if a rotation handle
-		--max-size: 26px;
+		--max-size: 28px;
 
 		cursor: grab;
 	}
