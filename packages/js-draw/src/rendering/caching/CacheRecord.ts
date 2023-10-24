@@ -68,10 +68,11 @@ export default class CacheRecord {
 	}
 
 	public setRenderingRegion(drawTo: Rect2) {
-		this.renderer.setTransform(
-			// Invert to map objects instead of the viewport
-			this.getTransform(drawTo)
-		);
-		this.renderer.overrideVisibleRect(drawTo);
+		const transform = this.getTransform(drawTo);
+		this.renderer.setTransform(transform);
+
+		// The visible region may be slightly larger than where we're actually drawing
+		// to (because of rounding).
+		this.renderer.overrideVisibleRect(drawTo.grownBy(1/transform.getScaleFactor()));
 	}
 }
