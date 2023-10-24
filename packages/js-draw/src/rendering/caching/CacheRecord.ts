@@ -72,5 +72,6 @@ export default class CacheRecord {
 			// Invert to map objects instead of the viewport
 			this.getTransform(drawTo)
 		);
+		this.renderer.overrideVisibleRect(drawTo);
 	}
 }

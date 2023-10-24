@@ -411,23 +411,6 @@ export default class SVGRenderer extends AbstractRenderer {
 		return false;
 	}
 
-	private visibleRectOverride: Rect2|null = null;
-
-	/**
-	 * Overrides the visible region returned by `getVisibleRect`.
-	 *
-	 * This is useful when the `viewport`'s transform has been modified,
-	 * for example, to compensate for storing part of the image's
-	 * transformation in an SVG property.
-	 */
-	private overrideVisibleRect(newRect: Rect2) {
-		this.visibleRectOverride = newRect;
-	}
-
-	public override getVisibleRect(): Rect2 {
-		return this.visibleRectOverride ?? super.getVisibleRect();
-	}
-
 	/**
 	 * Creates a new SVG element and `SVGRenerer` with `width`, `height`, `viewBox`,
 	 * and other metadata attributes set for the given `Viewport`.

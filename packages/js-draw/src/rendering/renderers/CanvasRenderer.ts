@@ -183,7 +183,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 
 		// If part of a huge object, it might be worth trimming the path
-		const visibleRect = this.getViewport().visibleRect;
+		const visibleRect = this.getVisibleRect();
 		if (this.currentObjectBBox?.containsRect(visibleRect)) {
 			// Try to trim/remove parts of the path outside of the bounding box.
 			path = visualEquivalent(path, visibleRect);
@@ -233,7 +233,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		if (!this.ignoringObject && clip) {
 			// Don't clip if it would only remove content already trimmed by
 			// the edge of the screen.
-			const clippedIsOutsideScreen = boundingBox.containsRect(this.getViewport().visibleRect);
+			const clippedIsOutsideScreen = boundingBox.containsRect(this.getVisibleRect());
 
 			if (!clippedIsOutsideScreen) {
 				this.clipLevels.push(this.objectLevel);
