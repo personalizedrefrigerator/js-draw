@@ -6,10 +6,16 @@ import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/Renderi
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
-import RenderablePathSpec, { pathFromRenderable, pathToRenderable } from '../rendering/RenderablePathSpec';
+import RenderablePathSpec, { pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
+}
+
+interface SimplificationRecord {
+	forVisibleRect: Rect2;
+	parts: StrokePart[];
+	occludes: boolean;
 }
 
 /**
@@ -205,9 +211,61 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return super.intersectsRect(rect);
 	}
 
+	private simplifiedPath: SimplificationRecord|null = null;
+
+	private computeSimplifiedPathFor(visibleRect: Rect2): SimplificationRecord {
+		const simplifiedParts: StrokePart[] = [];
+		let occludes = false;
+		let skipSimplification = false;
+
+		for (const part of this.parts) {
+			if (skipSimplification) {
+				simplifiedParts.push(part);
+				continue;
+			}
+
+			const mapping = simplifyPathToFullScreenOrEmpty(part, visibleRect);
+
+			if (mapping) {
+				simplifiedParts.push(mapping.path);
+
+				if (mapping.fullScreen && mapping.path.style.fill.a > 0.99) {
+					occludes = true;
+					skipSimplification = true;
+				}
+			} else {
+				simplifiedParts.push(part);
+			}
+		}
+
+		return {
+			forVisibleRect: visibleRect,
+			parts: simplifiedParts,
+			occludes,
+		};
+	}
+
+	public override occludesEverythingBelowWhenRenderedInRect(rect: Rect2) {
+		if (!this.getBBox().containsRect(rect)) {
+			return false;
+		}
+
+		if (!this.simplifiedPath || !this.simplifiedPath.forVisibleRect.eq(rect)) {
+			this.simplifiedPath = this.computeSimplifiedPathFor(rect);
+		}
+
+		return this.simplifiedPath.occludes;
+	}
+
 	public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.getBBox());
-		for (const part of this.parts) {
+
+		let parts = this.parts;
+		if (visibleRect && this.simplifiedPath?.forVisibleRect?.containsRect(visibleRect)) {
+			parts = this.simplifiedPath.parts;
+		}
+
+		for (const part of parts) {
 			const bbox = this.bboxForPart(part.path.bbox, part.style);
 			if (visibleRect) {
 				if (!bbox.intersects(visibleRect)) {

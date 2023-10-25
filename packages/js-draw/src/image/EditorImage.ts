@@ -844,13 +844,31 @@ export class ImageNode {
 		}
 		sortLeavesByZIndex(leaves);
 
-		for (const leaf of leaves) {
+		// If some components hide others (and we're permitted to simplify,
+		// which is true in the case of visibleRect being defined), then only
+		// draw the non-hidden components:
+		let startIndex = 0;
+		if (visibleRect) {
+			for (let i = leaves.length - 1; i >= 0; i--) {
+				if (leaves[i].getContent()?.occludesEverythingBelowWhenRenderedInRect(visibleRect)) {
+					startIndex = i;
+					break;
+				}
+			}
+		}
+
+		for (let i = startIndex; i < leaves.length; i ++) {
+			const leaf = leaves[i];
 			// Leaves by definition have content
 			leaf.getContent()!.render(renderer, visibleRect);
 		}
 
 		// Show debug information
 		if (debugMode && visibleRect) {
+			if (startIndex !== 0) {
+				console.log('EditorImage: skipped ', startIndex, 'nodes due to occlusion');
+			}
+
 			this.renderDebugBoundingBoxes(renderer, visibleRect);
 		}
 	}

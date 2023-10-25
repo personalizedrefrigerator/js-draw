@@ -151,6 +151,18 @@ export default abstract class AbstractComponent {
 		return ComponentSizingMode.BoundingBox;
 	}
 
+	/**
+	 * **Optimization**
+	 *
+	 * Should return `true` if this component covers the entire `visibleRect`
+	 * and would prevent anything below this component from being visible.
+	 *
+	 * Should return `false` otherwise.
+	 */
+	public occludesEverythingBelowWhenRenderedInRect(visibleRect: Rect2) {
+		return false;
+	}
+
 	/** Called when this component is added to the given image. */
 	public onAddToImage(_image: EditorImage): void { }
 	public onRemoveFromImage(): void { }

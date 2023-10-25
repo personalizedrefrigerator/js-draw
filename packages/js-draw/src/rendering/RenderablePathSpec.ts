@@ -1,5 +1,5 @@
 
-import { Mat33, Path, PathCommand, PathCommandType, Point2, Rect2 } from '@js-draw/math';
+import { Color4, Mat33, Path, PathCommand, PathCommandType, Point2, Rect2 } from '@js-draw/math';
 import RenderingStyle from './RenderingStyle';
 
 interface RenderablePathSpec {
@@ -7,6 +7,10 @@ interface RenderablePathSpec {
 	commands: PathCommand[];
 	style: RenderingStyle;
 	path?: Path;
+}
+
+interface RenderablePathSpecWithPath extends RenderablePathSpec {
+	path: Path;
 }
 
 /** Converts a renderable path (a path with a `startPoint`, `commands`, and `style`). */
@@ -18,7 +22,7 @@ export const pathFromRenderable = (renderable: RenderablePathSpec): Path => {
 	return new Path(renderable.startPoint, renderable.commands);
 };
 
-export const pathToRenderable = (path: Path, style: RenderingStyle): RenderablePathSpec => {
+export const pathToRenderable = (path: Path, style: RenderingStyle): RenderablePathSpecWithPath => {
 	return {
 		startPoint: path.startPoint,
 		style,
@@ -27,35 +31,114 @@ export const pathToRenderable = (path: Path, style: RenderingStyle): RenderableP
 	};
 };
 
+/**
+ * Fills the optional `path` field in `RenderablePathSpec`
+ * with `path` if not already filled
+ */
+const pathIncluded = (renderablePath: RenderablePathSpec, path: Path): RenderablePathSpecWithPath => {
+	if (renderablePath.path) {
+		return renderablePath as RenderablePathSpecWithPath;
+	}
+
+	return {
+		...renderablePath,
+		path,
+	};
+};
+
+interface RectangleSimplificationResult {
+	rectangle: Rect2;
+	path: RenderablePathSpecWithPath;
+	fullScreen: boolean;
+}
 
 /**
- * @returns a Path that, when rendered, looks roughly equivalent to the given path.
+ * Tries to simplify the given path to a fullscreen rectangle.
+ * Returns `null` on failure.
+ *
+ * @internal
  */
-export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect: Rect2): RenderablePathSpec => {
+export const simplifyPathToFullScreenOrEmpty = (
+	renderablePath: RenderablePathSpec,
+	visibleRect: Rect2,
+	options: { fastCheck: boolean, expensiveCheck: boolean } = { fastCheck: true, expensiveCheck: true}
+): RectangleSimplificationResult|null => {
 	const path = pathFromRenderable(renderablePath);
 	const strokeWidth = renderablePath.style.stroke?.width ?? 0;
 	const onlyStroked = strokeWidth > 0 && renderablePath.style.fill.a === 0;
 	const styledPathBBox = path.bbox.grownBy(strokeWidth);
 
 	// Are we close enough to the path that it fills the entire screen?
-	if (
+	const isOnlyStrokedAndCouldFillScreen = (
 		onlyStroked
-		&& renderablePath.style.stroke
 		&& strokeWidth > visibleRect.maxDimension
 		&& styledPathBBox.containsRect(visibleRect)
-	) {
+	);
+	if (options.fastCheck && isOnlyStrokedAndCouldFillScreen && renderablePath.style.stroke) {
 		const strokeRadius = strokeWidth / 2;
 
+		// Are we completely within the stroke?
 		// Do a fast, but with many false negatives, check.
 		for (const point of path.startEndPoints()) {
 			// If within the strokeRadius of any point
 			if (visibleRect.isWithinRadiusOf(strokeRadius, point)) {
-				return pathToRenderable(
-					Path.fromRect(visibleRect),
-					{ fill: renderablePath.style.stroke.color },
-				);
+				return {
+					rectangle: visibleRect,
+					path: pathToRenderable(
+						Path.fromRect(visibleRect),
+						{ fill: renderablePath.style.stroke.color },
+					),
+					fullScreen: true,
+				};
 			}
 		}
+	}
+
+	// Try filtering again, but with slightly more expensive checks
+	if (
+		options.expensiveCheck &&
+		isOnlyStrokedAndCouldFillScreen && renderablePath.style.stroke
+		&& strokeWidth > visibleRect.maxDimension * 3
+	) {
+		const signedDist = path.signedDistance(visibleRect.center, strokeWidth / 2);
+		if (signedDist < -visibleRect.maxDimension / 2 - strokeWidth / 6) {
+			return {
+				path: pathToRenderable(
+					Path.fromRect(visibleRect),
+					{ fill: renderablePath.style.stroke.color },
+				),
+				rectangle: visibleRect,
+				fullScreen: true,
+			};
+		} else if (signedDist > visibleRect.maxDimension / 2 + strokeWidth / 6) {
+			return {
+				path: pathToRenderable(
+					Path.empty,
+					{ fill: Color4.transparent },
+				),
+				rectangle: Rect2.empty,
+				fullScreen: false,
+			};
+		}
+	}
+
+	return null;
+};
+
+/**
+ * @returns a Path that, when rendered, looks roughly equivalent to the given path.
+ */
+export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect: Rect2): RenderablePathSpecWithPath => {
+	const path = pathFromRenderable(renderablePath);
+	const strokeWidth = renderablePath.style.stroke?.width ?? 0;
+	const onlyStroked = strokeWidth > 0 && renderablePath.style.fill.a === 0;
+	const styledPathBBox = path.bbox.grownBy(strokeWidth);
+
+	let rectangleSimplification = simplifyPathToFullScreenOrEmpty(
+		renderablePath, visibleRect, { fastCheck: true, expensiveCheck: false, }
+	);
+	if (rectangleSimplification) {
+		return rectangleSimplification.path;
 	}
 
 	// Scale the expanded rect --- the visual equivalent is only close for huge strokes.
@@ -64,7 +147,7 @@ export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect
 
 	// TODO: Handle simplifying very small paths.
 	if (expandedRect.containsRect(styledPathBBox)) {
-		return renderablePath;
+		return pathIncluded(renderablePath, path);
 	}
 
 	const parts: PathCommand[] = [];
@@ -104,7 +187,16 @@ export const visualEquivalent = (renderablePath: RenderablePathSpec, visibleRect
 		startPoint = endPoint;
 	}
 
-	return pathToRenderable(new Path(path.startPoint, parts), renderablePath.style);
+	const newPath = new Path(path.startPoint, parts);
+	const newStyle = renderablePath.style;
+
+	rectangleSimplification = simplifyPathToFullScreenOrEmpty(renderablePath, visibleRect, { fastCheck: false, expensiveCheck: true, });
+	if (rectangleSimplification) {
+		return rectangleSimplification.path;
+	}
+
+	return pathToRenderable(newPath, newStyle);
 };
+
 
 export default RenderablePathSpec;

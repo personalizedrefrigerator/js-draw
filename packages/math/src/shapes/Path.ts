@@ -225,6 +225,20 @@ export class Path {
 		return Rect2.bboxOf(points);
 	}
 
+	/** **Note**: `strokeRadius = strokeWidth / 2` */
+	public signedDistance(point: Point2, strokeRadius: number) {
+		let minDist = Infinity;
+
+		for (const part of this.geometry) {
+			const currentDist = part.signedDistance(point) - strokeRadius;
+			if (currentDist < minDist) {
+				minDist = currentDist;
+			}
+		}
+
+		return minDist;
+	}
+
 	/**
 	 * Let `S` be a closed path a distance `strokeRadius` from this path.
 	 *

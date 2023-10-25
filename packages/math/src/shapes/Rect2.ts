@@ -220,6 +220,10 @@ export class Rect2 extends Abstract2DShape {
 		return Math.max(this.w, this.h);
 	}
 
+	public get minDimension() {
+		return Math.min(this.w, this.h);
+	}
+
 	public get bottomRight() {
 		return this.topLeft.plus(this.size);
 	}
