@@ -211,15 +211,25 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return super.intersectsRect(rect);
 	}
 
+	// A simplification of the path for a given visibleRect. Intended
+	// to help check for occlusion.
 	private simplifiedPath: SimplificationRecord|null = null;
-
 	private computeSimplifiedPathFor(visibleRect: Rect2): SimplificationRecord {
 		const simplifiedParts: StrokePart[] = [];
 		let occludes = false;
 		let skipSimplification = false;
 
 		for (const part of this.parts) {
-			if (skipSimplification) {
+			if (
+				skipSimplification
+
+				// Simplification currently only works for stroked paths
+				|| !part.style.stroke
+
+				// One of the main purposes of this is to check for occlusion.
+				// We can't occlude things if the stroke is partially transparent.
+				|| part.style.stroke.color.a < 0.99
+			) {
 				simplifiedParts.push(part);
 				continue;
 			}
@@ -229,7 +239,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			if (mapping) {
 				simplifiedParts.push(mapping.path);
 
-				if (mapping.fullScreen && mapping.path.style.fill.a > 0.99) {
+				if (mapping.fullScreen) {
 					occludes = true;
 					skipSimplification = true;
 				}
@@ -261,6 +271,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.getBBox());
 
+		// Can we use a cached simplified path for faster rendering?
 		let parts = this.parts;
 		if (visibleRect && this.simplifiedPath?.forVisibleRect?.containsRect(visibleRect)) {
 			parts = this.simplifiedPath.parts;
