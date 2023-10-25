@@ -101,7 +101,9 @@ export const simplifyPathToFullScreenOrEmpty = (
 		&& strokeWidth > visibleRect.maxDimension * 3
 	) {
 		const signedDist = path.signedDistance(visibleRect.center, strokeWidth / 2);
-		if (signedDist < -visibleRect.maxDimension / 2 - strokeWidth / 6) {
+		const margin = strokeWidth / 6;
+
+		if (signedDist < -visibleRect.maxDimension / 2 - margin) {
 			return {
 				path: pathToRenderable(
 					Path.fromRect(visibleRect),
@@ -110,7 +112,7 @@ export const simplifyPathToFullScreenOrEmpty = (
 				rectangle: visibleRect,
 				fullScreen: true,
 			};
-		} else if (signedDist > visibleRect.maxDimension / 2 + strokeWidth / 6) {
+		} else if (signedDist > visibleRect.maxDimension / 2 + margin) {
 			return {
 				path: pathToRenderable(
 					Path.empty,

@@ -159,7 +159,7 @@ export default abstract class AbstractComponent {
 	 *
 	 * Should return `false` otherwise.
 	 */
-	public occludesEverythingBelowWhenRenderedInRect(visibleRect: Rect2) {
+	public occludesEverythingBelowWhenRenderedInRect(_visibleRect: Rect2) {
 		return false;
 	}
 

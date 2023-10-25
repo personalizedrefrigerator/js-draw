@@ -246,6 +246,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	}
 
 	public override occludesEverythingBelowWhenRenderedInRect(rect: Rect2) {
+		// Can't occlude if doesn't contain.
 		if (!this.getBBox().containsRect(rect)) {
 			return false;
 		}
@@ -263,6 +264,9 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		let parts = this.parts;
 		if (visibleRect && this.simplifiedPath?.forVisibleRect?.containsRect(visibleRect)) {
 			parts = this.simplifiedPath.parts;
+		} else {
+			// Save memory
+			this.simplifiedPath = null;
 		}
 
 		for (const part of parts) {
