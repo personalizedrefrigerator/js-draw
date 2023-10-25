@@ -849,7 +849,7 @@ export class ImageNode {
 		// draw the non-hidden components:
 		let startIndex = 0;
 		if (visibleRect) {
-			for (let i = leaves.length - 1; i >= 0; i--) {
+			for (let i = leaves.length - 1; i >= 1; i--) {
 				if (leaves[i].getContent()?.occludesEverythingBelowWhenRenderedInRect(visibleRect)) {
 					startIndex = i;
 					break;
