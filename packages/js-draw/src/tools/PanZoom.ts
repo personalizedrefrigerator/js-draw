@@ -104,6 +104,7 @@ export default class PanZoom extends BaseTool {
 	// Set to `true` only when scaling has started (if two fingers are down and have moved
 	// far enough).
 	private isScaling: boolean = false;
+	private isRotating: boolean = false;
 
 	private inertialScroller: InertialScroller|null = null;
 	private velocity: Vec2|null = null;
@@ -160,6 +161,10 @@ export default class PanZoom extends BaseTool {
 			this.initialViewportRotation = this.editor.viewport.getRotationAngle();
 			this.isScaling = false;
 
+			// We're initially rotated if `initialViewportRotation` isn't near a multiple of pi/2.
+			// In other words, if sin(2 initialViewportRotation) is near zero.
+			this.isRotating = Math.abs(Math.sin(this.initialViewportRotation * 2)) > 1e-3;
+
 			handlingGesture = true;
 		} else if (pointers.length === 1 && (
 			(this.mode & PanZoomMode.OneFingerTouchGestures && allAreTouch)
@@ -168,6 +173,7 @@ export default class PanZoom extends BaseTool {
 		)) {
 			this.lastScreenCenter = pointers[0].screenPos;
 			this.isScaling = false;
+
 			handlingGesture = true;
 		}
 
@@ -229,7 +235,9 @@ export default class PanZoom extends BaseTool {
 
 		// The maximum angle for which we snap the given angle to a multiple of
 		// `snapToMultipleOf`.
-		const maxSnapAngle = 0.07;
+		// Use a smaller snap angle if already rotated (to avoid pinch zoom gestures from
+		// starting rotation).
+		const maxSnapAngle = this.isRotating ? 0.07 : 0.22;
 
 		// Snap the rotation
 		if (Math.abs(fullRotation - roundedFullRotation) < maxSnapAngle) {
@@ -256,6 +264,12 @@ export default class PanZoom extends BaseTool {
 			deltaRotation = 0;
 		} else {
 			deltaRotation = this.toSnappedRotationDelta(angle);
+		}
+
+		// If any rotation, make a note of this (affects rotation snap
+		// angles).
+		if (Math.abs(deltaRotation) > 1e-8) {
+			this.isRotating = true;
 		}
 
 		this.updateVelocity(screenCenter);

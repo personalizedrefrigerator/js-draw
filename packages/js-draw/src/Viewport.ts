@@ -201,6 +201,8 @@ export class Viewport {
 	/**
 	 * @returns the angle of the canvas in radians.
 	 * This is the angle by which the canvas is rotated relative to the screen.
+	 *
+	 * Returns an angle in the range $[-\pi, \pi]$ (the same range as {@link Vec3.angle}).
 	 */
 	public getRotationAngle(): number {
 		return this.transform.transformVec3(Vec3.unitX).angle();

@@ -77,6 +77,15 @@ export class Vec3 {
 	 * Return this' angle in the XY plane (treats this as a Vec2).
 	 *
 	 * This is equivalent to `Math.atan2(vec.y, vec.x)`.
+	 *
+	 * As such, observing that `Math.atan2(-0, -1)` $\approx -\pi$ and `Math.atan2(0, -1)`$\approx \pi$
+	 * the resultant angle is in the range $[-\pi, pi]$.
+	 *
+	 * ```ts,runnable,console
+	 * import { Vec2 } from '@js-draw/math';
+	 * console.log(Vec2.of(-1, -0).angle()); // atan2(-0, -1)
+	 * console.log(Vec2.of(-1, 0).angle());  // atan2(0, -1)
+	 * ```
 	 */
 	public angle(): number {
 		return Math.atan2(this.y, this.x);
