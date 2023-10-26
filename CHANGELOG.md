@@ -1,4 +1,11 @@
 
+# 1.8.0
+ * Features and improvements
+    * Increased the minimum pinch rotation required to start rotation.
+    * Performance improvement when zooming in to large strokes (particularly when these strokes are opaque).
+ * Bug fixes
+    * Fixed some rendering-cache-related display issues. 
+
 # 1.7.2
  * Changes
     * Hide `(js-draw v{{version}})` in about dialog if the application provides a custom description.
