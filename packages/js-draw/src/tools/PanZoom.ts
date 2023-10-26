@@ -90,6 +90,13 @@ class InertialScroller {
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;
 
+	// Constants
+	// initialRotationSnapAngle is larger than afterRotationStartSnapAngle to
+	// make it more difficult to start rotating (and easier to continue rotating).
+	private readonly initialRotationSnapAngle = 0.22; // radians
+	private readonly afterRotationStartSnapAngle = 0.07; // radians
+	private readonly pinchZoomStartThreshold = 1.08; // scale factor
+
 	// Distance between two touch points at the **start** of a gesture.
 	private startDist: number;
 
@@ -237,7 +244,8 @@ export default class PanZoom extends BaseTool {
 		// `snapToMultipleOf`.
 		// Use a smaller snap angle if already rotated (to avoid pinch zoom gestures from
 		// starting rotation).
-		const maxSnapAngle = this.isRotating ? 0.07 : 0.22;
+		const maxSnapAngle =
+			this.isRotating ? this.afterRotationStartSnapAngle : this.initialRotationSnapAngle;
 
 		// Snap the rotation
 		if (Math.abs(fullRotation - roundedFullRotation) < maxSnapAngle) {
@@ -281,7 +289,9 @@ export default class PanZoom extends BaseTool {
 			const initialScaleFactor = dist / this.startDist;
 
 			// Only start scaling if scaling done so far exceeds some threshold.
-			if (initialScaleFactor > 1.05 || initialScaleFactor < 0.95) {
+			const upperBound = this.pinchZoomStartThreshold;
+			const lowerBound = 1/this.pinchZoomStartThreshold;
+			if (initialScaleFactor > upperBound || initialScaleFactor < lowerBound) {
 				scaleFactor = initialScaleFactor;
 				this.isScaling = true;
 			}
