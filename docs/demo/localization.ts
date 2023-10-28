@@ -25,10 +25,14 @@ export interface Localization {
 	delete: string;
 	reallyDelete: (imageName: string) => string;
 
+	// Settings screen
 	settings: string;
 	reset: string,
 	keyboardShortcuts: string;
 	bindingParseError: (errorMessage: string) => string;
+
+	debugging: string;
+	enableDebugToolbarWidget: string;
 
 	// Save screen:
 	imageTitleLabel: string;
@@ -72,6 +76,8 @@ localizationTables.en = {
 	keyboardShortcuts: 'Keyboard Shortcuts',
 	reset: 'Reset',
 	bindingParseError: (errorMessage: string) => `Error: ${errorMessage}`,
+	debugging: 'Debugging',
+	enableDebugToolbarWidget: 'Enable debug toolbar widget',
 
 	imageTitleLabel: 'Image title: ',
 	viewGeneratedSVGImage: 'View generated SVG image',

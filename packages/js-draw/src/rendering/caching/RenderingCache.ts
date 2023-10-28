@@ -17,6 +17,7 @@ export default class RenderingCache {
 			props: cacheProps,
 			currentRenderingCycle: 0,
 			recordManager: this.recordManager,
+			debugMode: false,
 		};
 		this.recordManager.setSharedState(this.sharedState);
 	}
@@ -66,5 +67,9 @@ export default class RenderingCache {
 
 	public getDebugInfo() {
 		return this.recordManager.getDebugInfo();
+	}
+
+	public setIsDebugMode(debugMode: boolean) {
+		this.sharedState.debugMode = debugMode;
 	}
 }

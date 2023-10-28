@@ -11,9 +11,6 @@ import { CacheState } from './types';
 // 3x3 divisions for each node.
 const cacheDivisionSize = 3;
 
-// True: Show rendering updates.
-const debugMode = false;
-
 export default class RenderingCacheNode {
 	// invariant: instantiatedChildren.length === 9
 	private instantiatedChildren: RenderingCacheNode[] = [];
@@ -210,8 +207,8 @@ export default class RenderingCacheNode {
 			return;
 		}
 
-		if (debugMode) {
-			screenRenderer.drawRect(this.region, 0.5 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.yellow });
+		if (this.cacheState.debugMode) {
+			screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.yellow });
 		}
 
 		// Could we render direclty from [this] or do we need to recurse?
@@ -302,11 +299,11 @@ export default class RenderingCacheNode {
 								}
 							}
 
-							if (debugMode) {
-								screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
+							if (this.cacheState.debugMode) {
+								screenRenderer.drawRect(this.region, 1.5 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
 							}
 						}
-					} else if (debugMode) {
+					} else if (this.cacheState.debugMode) {
 						console.log('Decided on a full re-render. Reason: At least one of the following is false:',
 							'\n leafIds.length > this.renderedIds.length: ', leafIds.length > this.renderedIds.length,
 							'\n this.allRenderedIdsIn(leafIds): ', this.allRenderedIdsIn(leafIds),
@@ -327,7 +324,7 @@ export default class RenderingCacheNode {
 							leaf.render(thisRenderer, this.region);
 						}
 
-						if (debugMode) {
+						if (this.cacheState.debugMode) {
 							screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.red });
 						}
 					}

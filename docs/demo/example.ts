@@ -1,6 +1,7 @@
 import { Editor, EditorEventType, EventDispatcher, makeEdgeToolbar } from 'js-draw';
 import 'js-draw/styles';
 import MaterialIconProvider from '@js-draw/material-icons';
+import { DebugToolbarWidget } from '@js-draw/debugging';
 
 import { Localization, getLocalizationTable } from './localization';
 import makeLoadFromSaveList from './ui/makeLoadFromSaveList';
@@ -15,7 +16,7 @@ import FloatingActionButton from './ui/FloatingActionButton';
 import { makeIconFromText } from './icons';
 import makeNewImageDialog from './ui/makeNewImageDialog';
 import { AppNotifier } from './types';
-import { loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
+import { isDebugWidgetEnabled, loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
 import makeSettingsDialog from './ui/makeSettingsDialog';
 
 // Creates and sets up a new Editor
@@ -76,6 +77,11 @@ const createEditor = async (
 	const saveButton = toolbar.addSaveButton(() => {
 		saveCallback();
 	});
+
+
+	if (isDebugWidgetEnabled()) {
+		toolbar.addWidget(new DebugToolbarWidget(editor));
+	}
 
 
 	// Save toolbar state whenever tool state changes (which could be caused by a

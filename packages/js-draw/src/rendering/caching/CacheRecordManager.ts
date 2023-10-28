@@ -2,8 +2,6 @@ import { BeforeDeallocCallback, CacheProps, CacheState } from './types';
 import CacheRecord from './CacheRecord';
 import { Rect2 } from '@js-draw/math';
 
-const debugMode = false;
-
 export class CacheRecordManager {
 	// Fixed-size array: Cache blocks are assigned indicies into [cachedCanvases].
 	private cacheRecords: CacheRecord[] = [];
@@ -30,7 +28,7 @@ export class CacheRecordManager {
 			record.setRenderingRegion(drawTo);
 			this.cacheRecords.push(record);
 
-			if (debugMode) {
+			if (this.cacheState.debugMode) {
 				console.log('[Cache] Cache spaces used: ', this.cacheRecords.length, ' of ', this.maxCanvases);
 			}
 
@@ -38,7 +36,7 @@ export class CacheRecordManager {
 		} else {
 			const lru = this.getLeastRecentlyUsedRecord()!;
 
-			if (debugMode) {
+			if (this.cacheState.debugMode) {
 				console.log(
 					'[Cache] Re-alloc. Times allocated: ', lru.allocCount,
 					'\nLast used cycle: ', lru.getLastUsedCycle(),
@@ -49,7 +47,7 @@ export class CacheRecordManager {
 			lru.realloc(onDealloc);
 			lru.setRenderingRegion(drawTo);
 
-			if (debugMode) {
+			if (this.cacheState.debugMode) {
 				console.log(
 					'[Cache] Now re-alloc\'d. Last used cycle: ', lru.getLastUsedCycle()
 				);

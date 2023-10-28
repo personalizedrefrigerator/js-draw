@@ -71,3 +71,23 @@ export const loadKeybindingOverrides = (): Record<string, KeyBinding[]> => {
 
 	return overrides;
 };
+
+const debugWidgetLocalStorageKey = 'debug-widget-enabled';
+
+export const saveIsDebugWidgetEnabled = (isEnabled: boolean) => {
+	try {
+		localStorage.setItem(debugWidgetLocalStorageKey, `${isEnabled}`);
+	} catch (error) {
+		console.warn('Error saving debug widget enabled: ', error);
+	}
+};
+
+export const isDebugWidgetEnabled = () => {
+	try {
+		return localStorage.getItem(debugWidgetLocalStorageKey) === 'true';
+	} catch (error) {
+		console.warn('Error saving debug widget enabled: ', error);
+	}
+
+	return false;
+};

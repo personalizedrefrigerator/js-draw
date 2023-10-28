@@ -30,7 +30,7 @@ export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image:
  */
 export type PreRenderComponentCallback = (component: AbstractComponent, componentsProcessed: number, totalComponents: number)=>Promise<boolean>;
 
-const debugMode = false;
+let debugMode = false;
 
 // Handles lookup/storage of elements in the image
 export default class EditorImage {
@@ -415,6 +415,19 @@ export default class EditorImage {
 				image: this,
 			});
 		}
+	}
+
+	/**
+	 * @internal
+	 *
+	 * Enables debug mode for **all** `EditorImage`s.
+	 *
+	 * **Only use for debugging**.
+	 *
+	 * @internal
+	 */
+	public setDebugMode(newDebugMode: boolean) {
+		debugMode = newDebugMode;
 	}
 
 	// Handles resizing the background import/export region of the image.

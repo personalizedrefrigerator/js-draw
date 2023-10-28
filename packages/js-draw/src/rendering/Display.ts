@@ -221,8 +221,16 @@ export default class Display {
 	 * @internal
 	 */
 	public setDevicePixelRatio(dpr: number) {
-		this.devicePixelRatio = dpr;
-		this.resizeSurfacesCallback?.();
+		const minDpr = 0.001;
+		const maxDpr = 10;
+		if (isFinite(dpr) && dpr >= minDpr && dpr <= maxDpr && dpr !== this.devicePixelRatio) {
+			this.devicePixelRatio = dpr;
+			this.resizeSurfacesCallback?.();
+
+			return this.editor.queueRerender();
+		}
+
+		return undefined;
 	}
 
 	/**
