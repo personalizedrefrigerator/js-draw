@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/personalizedrefrigerator/js-draw.git"
 	},
 	"author": "Henry Heino",
-	"license": "MIT",
+	"license": "(MIT AND Apache-2.0)",
 	"private": false,
 	"scripts": {
 		"dist": "npm run build",
