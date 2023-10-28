@@ -532,6 +532,34 @@ export default class EditorImage {
 	};
 }
 
+/**
+ * Determines the first index in `sortedLeaves` that needs to be rendered
+ * (based on occlusion -- everything before that index can be skipped and
+ * produce a visually-equivalent image).
+ *
+ * Does nothing if visibleRect is not provided
+ *
+ * @internal
+ */
+export const computeFirstIndexToRender = (sortedLeaves: Array<ImageNode>, visibleRect?: Rect2) => {
+	let startIndex = 0;
+
+	if (visibleRect) {
+		for (let i = sortedLeaves.length - 1; i >= 1; i--) {
+			if (
+				// Check for occlusion
+				sortedLeaves[i].getBBox().containsRect(visibleRect)
+				&& sortedLeaves[i].getContent()?.occludesEverythingBelowWhenRenderedInRect(visibleRect)
+			) {
+				startIndex = i;
+				break;
+			}
+		}
+	}
+
+	return startIndex;
+};
+
 type TooSmallToRenderCheck = (rect: Rect2)=> boolean;
 
 /**
@@ -860,15 +888,7 @@ export class ImageNode {
 		// If some components hide others (and we're permitted to simplify,
 		// which is true in the case of visibleRect being defined), then only
 		// draw the non-hidden components:
-		let startIndex = 0;
-		if (visibleRect) {
-			for (let i = leaves.length - 1; i >= 1; i--) {
-				if (leaves[i].getContent()?.occludesEverythingBelowWhenRenderedInRect(visibleRect)) {
-					startIndex = i;
-					break;
-				}
-			}
-		}
+		const startIndex = computeFirstIndexToRender(leaves);
 
 		for (let i = startIndex; i < leaves.length; i ++) {
 			const leaf = leaves[i];

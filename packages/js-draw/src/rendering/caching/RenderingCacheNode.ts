@@ -1,7 +1,7 @@
 
 // A cache record with sub-nodes.
 
-import { ImageNode, sortLeavesByZIndex } from '../../image/EditorImage';
+import { ImageNode, computeFirstIndexToRender, sortLeavesByZIndex } from '../../image/EditorImage';
 import { Rect2, Color4 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';
@@ -300,7 +300,8 @@ export default class RenderingCacheNode {
 							}
 
 							if (this.cacheState.debugMode) {
-								screenRenderer.drawRect(this.region, 1.5 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
+								// Clay for adding new elements
+								screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
 							}
 						}
 					} else if (this.cacheState.debugMode) {
@@ -316,7 +317,10 @@ export default class RenderingCacheNode {
 						thisRenderer.clear();
 
 						this.renderedMaxZIndex = null;
-						for (const leaf of leaves) {
+						const startIndex = computeFirstIndexToRender(leaves, this.region);
+						for (let i = startIndex; i < leaves.length; i++) {
+							const leaf = leaves[i];
+
 							const content = leaf.getContent()!;
 							this.renderedMaxZIndex ??= content.getZIndex();
 							this.renderedMaxZIndex = Math.max(this.renderedMaxZIndex, content.getZIndex());
@@ -325,7 +329,8 @@ export default class RenderingCacheNode {
 						}
 
 						if (this.cacheState.debugMode) {
-							screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.red });
+							// Red for full rerender
+							screenRenderer.drawRect(this.region, 3 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.red });
 						}
 					}
 					this.renderedIds = leafIds;
@@ -347,6 +352,11 @@ export default class RenderingCacheNode {
 					}
 
 					screenRenderer.endObject();
+
+					if (this.cacheState.debugMode) {
+						// Green for no cache needed render
+						screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.green });
+					}
 				}
 			} else {
 				thisRenderer = this.cachedRenderer!.startRender();
