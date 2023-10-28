@@ -1,4 +1,11 @@
 
+# 1.9.0
+ * Performance improvements
+    * Don't render components that will be completely covered by other (opaque) components in more cases.
+    * Fix some browsers unable to garbage collect the SVG DOM element that an `EditorImage` was loaded from (when garbage collection should be okay).
+ * Improvements
+    * Support high resolution displays
+
 # 1.8.0
  * Features and improvements
     * Increased the minimum pinch rotation required to start rotation.
