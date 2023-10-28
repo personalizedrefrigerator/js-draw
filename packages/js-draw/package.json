@@ -55,7 +55,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
+    "dist-test": "cd dist-test/test_imports && npm install && npm run test",
     "dist": "npm run build && npm run dist-test",
     "build": "rm -rf ./dist/* && mkdir -p dist && build-tool build",
     "watch": "rm -rf ./dist/* && mkdir -p dist && build-tool watch",
