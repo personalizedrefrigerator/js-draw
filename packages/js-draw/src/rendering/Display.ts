@@ -31,6 +31,7 @@ export default class Display {
 	private textRenderer: TextOnlyRenderer;
 	private textRerenderOutput: HTMLElement|null = null;
 	private cache: RenderingCache;
+	private devicePixelRatio: number = window.devicePixelRatio ?? 1;
 	private resizeSurfacesCallback?: ()=> void;
 	private flattenCallback?: ()=> void;
 
@@ -136,17 +137,32 @@ export default class Display {
 		}
 
 		this.resizeSurfacesCallback = () => {
+			const expectedWidth = (canvas: HTMLCanvasElement): number => {
+				return Math.ceil(canvas.clientWidth * this.devicePixelRatio);
+			};
+			const expectedHeight = (canvas: HTMLCanvasElement): number => {
+				return Math.ceil(canvas.clientHeight * this.devicePixelRatio);
+			};
+
 			const hasSizeMismatch = (canvas: HTMLCanvasElement): boolean => {
-				return canvas.clientHeight !== canvas.height || canvas.clientWidth !== canvas.width;
+				return expectedHeight(canvas) !== canvas.height || expectedWidth(canvas) !== canvas.width;
 			};
 
 			// Ensure that the drawing surfaces sizes match the
 			// canvas' sizes to prevent stretching.
 			if (hasSizeMismatch(dryInkCanvas) || hasSizeMismatch(wetInkCanvas)) {
-				dryInkCanvas.width = dryInkCanvas.clientWidth;
-				dryInkCanvas.height = dryInkCanvas.clientHeight;
-				wetInkCanvas.width = wetInkCanvas.clientWidth;
-				wetInkCanvas.height = wetInkCanvas.clientHeight;
+				dryInkCanvas.width = expectedWidth(dryInkCanvas);
+				dryInkCanvas.height = expectedHeight(dryInkCanvas);
+				wetInkCanvas.width = expectedWidth(wetInkCanvas);
+				wetInkCanvas.height = expectedHeight(wetInkCanvas);
+
+				// Ensure correct drawing operations on high-resolution screens.
+				// See
+				// https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_for_high_resolution_displays
+				wetInkCtx.resetTransform();
+				dryInkCtx.resetTransform();
+				dryInkCtx.scale(this.devicePixelRatio, this.devicePixelRatio);
+				wetInkCtx.scale(this.devicePixelRatio, this.devicePixelRatio);
 
 				this.editor.notifier.dispatch(EditorEventType.DisplayResized, {
 					kind: EditorEventType.DisplayResized,
@@ -160,7 +176,10 @@ export default class Display {
 		this.resizeSurfacesCallback();
 
 		this.flattenCallback = () => {
+			dryInkCtx.save();
+			dryInkCtx.resetTransform();
 			dryInkCtx.drawImage(wetInkCanvas, 0, 0);
+			dryInkCtx.restore();
 		};
 
 		this.getColorAt = (screenPos: Point2) => {
@@ -192,6 +211,18 @@ export default class Display {
 
 		textRendererOutputContainer.replaceChildren(rerenderButton, this.textRerenderOutput);
 		this.editor.createHTMLOverlay(textRendererOutputContainer);
+	}
+
+	/**
+	 * Sets the device-pixel-ratio.
+	 *
+	 * Intended for debugging. Users do not need to call this manually.
+	 *
+	 * @internal
+	 */
+	public setDevicePixelRatio(dpr: number) {
+		this.devicePixelRatio = dpr;
+		this.resizeSurfacesCallback?.();
 	}
 
 	/**

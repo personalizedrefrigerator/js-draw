@@ -101,7 +101,10 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	public clear() {
+		this.ctx.save();
+		this.ctx.resetTransform();
 		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+		this.ctx.restore();
 	}
 
 	protected beginPath(startPoint: Point2) {
