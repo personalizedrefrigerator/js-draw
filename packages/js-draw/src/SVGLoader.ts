@@ -10,6 +10,7 @@ import RenderingStyle from './rendering/RenderingStyle';
 import TextRenderingStyle from './rendering/TextRenderingStyle';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 import RenderablePathSpec, { pathToRenderable } from './rendering/RenderablePathSpec';
+import { renderedStylesheetId } from './rendering/renderers/SVGRenderer';
 
 type OnFinishListener = ()=> void;
 
@@ -47,7 +48,7 @@ export interface SVGLoaderOptions {
 	disableUnknownObjectWarnings?: boolean;
 
 	// @internal
-	loadMethod?: 'iframe'|'domparser';
+	loadMethod?: SVGLoaderLoadMethod;
 }
 
 const supportedStrokeFillStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
@@ -68,7 +69,7 @@ export default class SVGLoader implements ImageLoader {
 
 	private constructor(
 		private source: Element,
-		private onFinish: OnFinishListener,
+		private onFinish: OnFinishListener|null,
 		options: SVGLoaderOptions,
 	) {
 		this.storeUnknown = !(options.sanitize ?? false);
@@ -604,7 +605,13 @@ export default class SVGLoader implements ImageLoader {
 			this.updateSVGAttrs(node as SVGSVGElement);
 			break;
 		case 'style':
-			await this.addUnknownNode(node as SVGStyleElement);
+			// Keeping unnecessary style sheets can cause the browser to keep all
+			// SVG elements *referenced* by the style sheet in some browsers.
+			//
+			// Only keep the style sheet if it won't be discarded on save.
+			if (node.getAttribute('id') !== renderedStylesheetId) {
+				await this.addUnknownNode(node as SVGStyleElement);
+			}
 			break;
 		default:
 			if (!this.disableUnknownObjectWarnings) {
@@ -663,6 +670,7 @@ export default class SVGLoader implements ImageLoader {
 		}
 
 		this.onFinish?.();
+		this.onFinish = null;
 	}
 
 	/**
@@ -678,7 +686,7 @@ export default class SVGLoader implements ImageLoader {
 		text: string,
 		options: Partial<SVGLoaderOptions>|boolean = false
 	): SVGLoader {
-		const domParserLoad = typeof options !== 'boolean' && options?.loadMethod === 'domparser';
+		const domParserLoad = typeof options !== 'boolean' && options?.loadMethod === SVGLoaderLoadMethod.DOMParser;
 
 		const { svgElem, cleanUp } = (() => {
 			// If the user requested an iframe load (the default) try to load with an iframe.
@@ -735,6 +743,8 @@ export default class SVGLoader implements ImageLoader {
 					const cleanUp = () => {
 						svgElem.remove();
 						sandbox.remove();
+
+						sandbox.src = '';
 					};
 
 					return { svgElem, cleanUp };
