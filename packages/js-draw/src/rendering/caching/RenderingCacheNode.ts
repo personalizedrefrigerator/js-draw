@@ -252,7 +252,9 @@ export default class RenderingCacheNode {
 
 				let leafApproxRenderTime = 0;
 				for (const leaf of leavesByIds) {
-					leafApproxRenderTime += leaf.getContent()!.getProportionalRenderingTime();
+					if (!tooSmallToRender(leaf.getBBox())) {
+						leafApproxRenderTime += leaf.getContent()!.getProportionalRenderingTime();
+					}
 				}
 
 				// Is it worth it to render the items?
