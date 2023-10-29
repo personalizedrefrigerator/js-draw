@@ -349,6 +349,7 @@ export class Editor {
 				this.viewport.resetTransform(resetTransform);
 			}
 			else if (!isFinite(zoom)) {
+				// Recover from possible division-by-zero
 				console.warn(
 					`Non-finite zoom (${zoom}) detected. Resetting the viewport. This was likely caused by division by zero.`
 				);

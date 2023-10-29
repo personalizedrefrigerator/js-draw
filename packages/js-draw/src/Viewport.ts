@@ -177,6 +177,11 @@ export class Viewport {
 		return 50 / scaleFactor;
 	}
 
+	/**
+	 * Snaps `canvasPos` to the nearest grid cell corner.
+	 *
+	 * @see {@link getGridSize} and {@link getScaleFactorToNearestPowerOf}.
+	 */
 	public snapToGrid(canvasPos: Point2) {
 		const scaleFactor = this.getScaleFactorToNearestPowerOf(2);
 
@@ -234,7 +239,7 @@ export class Viewport {
 		return point.map(roundComponent);
 	}
 
-	// Round a point with a tolerance of ±1 screen unit.
+	/** Round a point with a tolerance of ±1 screen unit. */
 	public roundPoint(point: Point2): Point2 {
 		return Viewport.roundPoint(point, 1 / this.getScaleFactor());
 	}
