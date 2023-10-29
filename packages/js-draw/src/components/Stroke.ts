@@ -6,7 +6,7 @@ import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/Renderi
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
-import RenderablePathSpec, { pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
+import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -361,6 +361,20 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				style: newStyle,
 			};
 		});
+	}
+
+	/**
+	 * @returns A list of the parts that make up this path. Many paths only have one part.
+	 *
+	 * Each part (a {@link RenderablePathSpec}) contains information about the style and geometry
+	 * of that part of the stroke. Use the `.path` property to do collision detection and other
+	 * operations involving the stroke's geometry.
+	 *
+	 * Note that many of {@link Path}'s methods (e.g. {@link Path.intersection}) take a
+	 * `strokeWidth` parameter that can be gotten from {@link RenderablePathSpec.style} `.stroke.width`.
+	 */
+	public getParts(): Readonly<RenderablePathSpecWithPath>[] {
+		return [...this.parts];
 	}
 
 	/**
