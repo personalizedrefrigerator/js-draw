@@ -51,9 +51,6 @@ interface IntersectionResult {
 	point: Point2;
 }
 
-type GeometryType = Abstract2DShape;
-type GeometryArrayType = Array<GeometryType>;
-
 /**
  * Represents a union of lines and curves.
  */
@@ -85,16 +82,16 @@ export class Path {
 		return Rect2.union(...bboxes);
 	}
 
-	private cachedGeometry: GeometryArrayType|null = null;
+	private cachedGeometry: Abstract2DShape[]|null = null;
 
 	// Lazy-loads and returns this path's geometry
-	public get geometry(): GeometryArrayType {
+	public get geometry(): Abstract2DShape[] {
 		if (this.cachedGeometry) {
 			return this.cachedGeometry;
 		}
 
 		let startPoint = this.startPoint;
-		const geometry: GeometryArrayType = [];
+		const geometry: Abstract2DShape[] = [];
 
 		for (const part of this.parts) {
 			let exhaustivenessCheck: never;
@@ -258,7 +255,7 @@ export class Path {
 
 		type DistanceFunction = (point: Point2) => number;
 		type DistanceFunctionRecord = {
-			part: GeometryType,
+			part: Abstract2DShape,
 			bbox: Rect2,
 			distFn: DistanceFunction,
 		};
@@ -297,7 +294,7 @@ export class Path {
 
 		// Returns the minimum distance to a part in this stroke, where only parts that the given
 		// line could intersect are considered.
-		const sdf = (point: Point2): [GeometryType|null, number] => {
+		const sdf = (point: Point2): [Abstract2DShape|null, number] => {
 			let minDist = Infinity;
 			let minDistPart: Abstract2DShape|null = null;
 
