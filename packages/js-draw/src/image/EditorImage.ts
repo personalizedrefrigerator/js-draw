@@ -337,11 +337,31 @@ export default class EditorImage {
 		);
 	}
 
+	/** @see {@link setAutoresizeEnabled} */
 	public getAutoresizeEnabled() {
 		return this.shouldAutoresizeExportViewport;
 	}
 
-	/** Returns a `Command` that sets whether the image should autoresize. */
+	/**
+	 * Returns a `Command` that sets whether the image should autoresize when
+	 * {@link AbstractComponent}s are added/removed.
+	 *
+	 * @example
+	 *
+	 * ```ts,runnable
+	 * import { Editor } from 'js-draw';
+	 *
+	 * const editor = new Editor(document.body);
+	 * editor.addToolbar();
+	 *
+	 * // To set autoresize without announcing for accessibility/making undoable
+	 * const addToHistory = false;
+	 * editor.dispatchNoAnnounce(editor.image.setAutoresizeEnabled(true), addToHistory);
+	 *
+	 * // Add to undo history **and** announce for accessibility
+	 * //editor.dispatch(editor.image.setAutoresizeEnabled(true), true);
+	 * ```
+	 */
 	public setAutoresizeEnabled(autoresize: boolean): Command {
 		if (autoresize === this.shouldAutoresizeExportViewport) {
 			return Command.empty;

@@ -22,6 +22,10 @@ export const pathFromRenderable = (renderable: RenderablePathSpec): Path => {
 	return new Path(renderable.startPoint, renderable.commands);
 };
 
+/**
+ * Converts `path` into a format that can be rendered (by passing to a {@link Stroke} constructor
+ * or directly to an {@link AbstractRenderer.drawPath}).
+ */
 export const pathToRenderable = (path: Path, style: RenderingStyle): RenderablePathSpecWithPath => {
 	return {
 		startPoint: path.startPoint,

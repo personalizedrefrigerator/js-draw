@@ -102,6 +102,42 @@ class SerializableUnion extends SerializableCommand {
 	}
 }
 
+/**
+ * Creates a single command from `commands`. This is useful when undoing should undo *all* commands
+ * in `commands` at once, rather than one at a time.
+ *
+ * @example
+ *
+ * ```ts,runnable
+ * import { Editor, pathToRenderable, Stroke, uniteCommands } from 'js-draw';
+ * import { Path, Color4 } from '@js-draw/math';
+ *
+ * const editor = new Editor(document.body);
+ * editor.addToolbar();
+ *
+ * // Create strokes!
+ * const strokes = [];
+ * for (let i = 0; i < 10; i++) {
+ *   const renderablePath = pathToRenderable(
+ *     Path.fromString(`M0,${i * 10} L100,100 L300,30 z`),
+ *     { fill: Color4.transparent, stroke: { color: Color4.red, width: 1, } }
+ *   );
+ *   strokes.push(new Stroke([ renderablePath ]));
+ * }
+ *
+ * // Convert to commands
+ * const addStrokesCommands = strokes.map(stroke => editor.image.addElement(stroke));
+ *
+ * // Apply all as a single undoable command (try applying each in a loop instead!)
+ * await editor.dispatch(uniteCommands(addStrokesCommands));
+ *
+ * // The second parameter to uniteCommands is for very large numbers of commands, when
+ * // applying them shouldn't be done all at once (which would block the UI).
+ *
+ * // The second parameter to uniteCommands is for very large numbers of commands, when
+ * // applying them shouldn't be done all at once (which would block the UI).
+ * ```
+ */
 const uniteCommands = <T extends Command> (commands: T[], applyChunkSize?: number): T extends SerializableCommand ? SerializableCommand : Command => {
 	let allSerializable = true;
 	for (const command of commands) {
