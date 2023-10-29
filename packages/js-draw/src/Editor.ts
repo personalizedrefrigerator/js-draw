@@ -328,22 +328,34 @@ export class Editor {
 
 		// Enforce zoom limits.
 		this.notifier.on(EditorEventType.ViewportChanged, evt => {
-			if (evt.kind === EditorEventType.ViewportChanged) {
-				const zoom = evt.newTransform.transformVec3(Vec2.unitX).length();
-				if (zoom > this.settings.maxZoom || zoom < this.settings.minZoom) {
-					const oldZoom = evt.oldTransform.transformVec3(Vec2.unitX).length();
-					let resetTransform = Mat33.identity;
+			if (evt.kind !== EditorEventType.ViewportChanged) return;
 
-					if (oldZoom <= this.settings.maxZoom && oldZoom >= this.settings.minZoom) {
-						resetTransform = evt.oldTransform;
-					} else {
-						// If 1x zoom isn't acceptable, try a zoom between the minimum and maximum.
-						resetTransform = Mat33.scaling2D(
-							(this.settings.minZoom + this.settings.maxZoom) / 2
-						);
-					}
+			const getZoom = (mat: Mat33) => mat.transformVec3(Vec2.unitX).length();
 
-					this.viewport.resetTransform(resetTransform);
+			const zoom = getZoom(evt.newTransform);
+			if (zoom > this.settings.maxZoom || zoom < this.settings.minZoom) {
+				const oldZoom = getZoom(evt.oldTransform);
+				let resetTransform = Mat33.identity;
+
+				if (oldZoom <= this.settings.maxZoom && oldZoom >= this.settings.minZoom) {
+					resetTransform = evt.oldTransform;
+				} else {
+					// If 1x zoom isn't acceptable, try a zoom between the minimum and maximum.
+					resetTransform = Mat33.scaling2D(
+						(this.settings.minZoom + this.settings.maxZoom) / 2
+					);
+				}
+
+				this.viewport.resetTransform(resetTransform);
+			}
+			else if (!isFinite(zoom)) {
+				console.warn(
+					`Non-finite zoom (${zoom}) detected. Resetting the viewport. This was likely caused by division by zero.`
+				);
+				if (isFinite(getZoom(evt.oldTransform))) {
+					this.viewport.resetTransform(evt.oldTransform);
+				} else {
+					this.viewport.resetTransform();
 				}
 			}
 		});
