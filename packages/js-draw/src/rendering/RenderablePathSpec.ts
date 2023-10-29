@@ -9,7 +9,7 @@ interface RenderablePathSpec {
 	path?: Path;
 }
 
-interface RenderablePathSpecWithPath extends RenderablePathSpec {
+export interface RenderablePathSpecWithPath extends RenderablePathSpec {
 	path: Path;
 }
 

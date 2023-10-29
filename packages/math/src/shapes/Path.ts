@@ -466,6 +466,8 @@ export class Path {
 	 * intersections are approximated with the surface `strokeRadius` away from this.
 	 *
 	 * If `strokeRadius > 0`, the resultant `parameterValue` has no defined value.
+	 *
+	 * **Note**: `strokeRadius` is half of a stroke's width.
 	 */
 	public intersection(line: LineSegment2, strokeRadius?: number): IntersectionResult[] {
 		let result: IntersectionResult[] = [];
@@ -576,6 +578,16 @@ export class Path {
 		}
 	}
 
+	/**
+	 * Like {@link closedRoughlyIntersects} except takes stroke width into account.
+	 *
+	 * This is intended to be a very fast and rough approximation. Use {@link intersection}
+	 * and {@link signedDistance} for more accurate (but much slower) intersection calculations.
+	 *
+	 * **Note**: Unlike other methods, this accepts `strokeWidth` (and not `strokeRadius`).
+	 *
+	 * `strokeRadius` is half of `strokeWidth`.
+	 */
 	public roughlyIntersects(rect: Rect2, strokeWidth: number = 0) {
 		if (this.parts.length === 0) {
 			return rect.containsPoint(this.startPoint);
@@ -609,7 +621,7 @@ export class Path {
 		return false;
 	}
 
-	// Treats this as a closed path and returns true if part of `rect` is roughly within
+	// Treats this as a closed path and returns true if part of `rect` is *roughly* within
 	// this path's interior.
 	//
 	// Note: Assumes that this is a closed, non-self-intersecting path.
