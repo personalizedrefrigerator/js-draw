@@ -1,4 +1,10 @@
 
+# 1.9.1
+ * Bug fixes
+    * Fix color selector tool broken on displays with `window.devicePixelRatio` not equal to 1.
+ * Improvements
+    * Work around possible division-by-zero errors in setting transforms by resetting the transform and logging a warning. Previously, this was unrecoverable.
+
 # 1.9.0
  * Performance improvements
     * Don't render components that will be completely covered by other (opaque) components in more cases.
