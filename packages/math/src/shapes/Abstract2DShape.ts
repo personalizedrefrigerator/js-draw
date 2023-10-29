@@ -2,7 +2,7 @@ import LineSegment2 from './LineSegment2';
 import { Point2 } from '../Vec2';
 import Rect2 from './Rect2';
 
-abstract class Abstract2DShape {
+export abstract class Abstract2DShape {
 	protected static readonly smallValue = 1e-12;
 
 	/**

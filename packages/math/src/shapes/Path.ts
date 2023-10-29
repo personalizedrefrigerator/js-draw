@@ -62,13 +62,21 @@ export class Path {
 	 */
 	public readonly bbox: Rect2;
 
-	public constructor(public readonly startPoint: Point2, public readonly parts: PathCommand[]) {
+	/** The individual shapes that make up this path. */
+	public readonly parts: Readonly<PathCommand>[];
+
+	public constructor(
+		public readonly startPoint: Point2,
+		parts: Readonly<PathCommand>[],
+	) {
+		this.parts = parts;
+
 		// Initial bounding box contains one point: the start point.
 		this.bbox = Rect2.bboxOf([startPoint]);
 
 		// Convert into a representation of the geometry (cache for faster intersection
 		// calculation)
-		for (const part of parts) {
+		for (const part of this.parts) {
 			this.bbox = this.bbox.union(Path.computeBBoxForSegment(startPoint, part));
 		}
 	}

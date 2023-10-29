@@ -30,6 +30,7 @@ export {
 } from './shapes/Path';
 export { Rect2 } from './shapes/Rect2';
 export { QuadraticBezier } from './shapes/QuadraticBezier';
+export { Abstract2DShape } from './shapes/Abstract2DShape';
 
 export { Mat33, Mat33Array } from './Mat33';
 export { Point2, Vec2 } from './Vec2';
