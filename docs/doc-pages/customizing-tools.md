@@ -5,7 +5,7 @@ Let's say that I want to change the default pen type and color for the second pe
 
 There are a few ways to do this, some more fragile than others. All use `editor.toolController` to access and modify the available tools.
 
-## Method 1: Get the 2nd pen tool and modify it
+## Method 1: Get the second pen tool and modify it
 
 This method uses `ToolController.getMatchingTools` with a type of `PenTool`, then uses methods like `PenTool.setThickness` to change the default properties of the tool:
 
@@ -36,8 +36,7 @@ This method is a bit fragile. Let's say that a future release of `js-draw` only 
 
 ## Method 2: Use a custom set of default tools
 
-This method is a bit more robust, but may mean your app won't benefit from changes to the default set
-of tools.
+This method creates new tools and adds them to the list of default tools. Be sure to do this before initializing the toolbar — most toolbar widgets are created based on the presence/absence of tools in the `ToolController`.
 
 ```ts,runnable
 import {

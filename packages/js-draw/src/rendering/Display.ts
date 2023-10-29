@@ -159,6 +159,9 @@ export default class Display {
 				// Ensure correct drawing operations on high-resolution screens.
 				// See
 				// https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_for_high_resolution_displays
+				//
+				// This scaling causes the rendering contexts to automatically convert
+				// between screen coordinates and pixel coordinates.
 				wetInkCtx.resetTransform();
 				dryInkCtx.resetTransform();
 				dryInkCtx.scale(this.devicePixelRatio, this.devicePixelRatio);
@@ -183,6 +186,9 @@ export default class Display {
 		};
 
 		this.getColorAt = (screenPos: Point2) => {
+			// getImageData isn't affected by a transformation matrix -- we need to
+			// pre-transform screenPos to convert it from screen coordinates into pixel
+			// coordinates.
 			const adjustedScreenPos = screenPos.times(this.devicePixelRatio);
 			const pixel = dryInkCtx.getImageData(adjustedScreenPos.x, adjustedScreenPos.y, 1, 1);
 			const data = pixel?.data;
