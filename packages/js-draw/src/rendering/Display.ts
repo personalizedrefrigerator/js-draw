@@ -183,7 +183,8 @@ export default class Display {
 		};
 
 		this.getColorAt = (screenPos: Point2) => {
-			const pixel = dryInkCtx.getImageData(screenPos.x, screenPos.y, 1, 1);
+			const adjustedScreenPos = screenPos.times(this.devicePixelRatio);
+			const pixel = dryInkCtx.getImageData(adjustedScreenPos.x, adjustedScreenPos.y, 1, 1);
 			const data = pixel?.data;
 
 			if (data) {
