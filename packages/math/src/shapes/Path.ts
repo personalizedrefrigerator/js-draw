@@ -65,6 +65,12 @@ export class Path {
 	/** The individual shapes that make up this path. */
 	public readonly parts: Readonly<PathCommand>[];
 
+	/**
+	 * Creates a new `Path` that starts at `startPoint` and is made up of the path commands,
+	 * `parts`.
+	 *
+	 * See also {@link fromString}
+	 */
 	public constructor(
 		public readonly startPoint: Point2,
 		parts: Readonly<PathCommand>[],
@@ -730,8 +736,16 @@ export class Path {
 
 	private cachedStringVersion: string|null = null;
 
-	public toString(useNonAbsCommands?: boolean): string {
-		if (this.cachedStringVersion) {
+	/**
+	 * Convert to an [SVG path representation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths).
+	 *
+	 * If `useNonAbsCommands` is given, relative path commands (e.g. `l10,0`) are to be used instead of
+	 * absolute commands (e.g. `L10,0`).
+	 *
+	 * See also {@link fromString}.
+	 */
+	public toString(useNonAbsCommands?: boolean, ignoreCache: boolean = false): string {
+		if (this.cachedStringVersion && !ignoreCache) {
 			return this.cachedStringVersion;
 		}
 
@@ -834,12 +848,20 @@ export class Path {
 	}
 
 	/**
-	 * Create a Path from a SVG path specification.
+	 * Create a `Path` from a subset of the SVG path specification.
 	 *
 	 * ## To-do
 	 * - TODO: Support a larger subset of SVG paths
 	 *   - Elliptical arcs are currently unsupported.
 	 * - TODO: Support `s`,`t` commands shorthands.
+	 *
+	 * @example
+	 * ```ts,runnable,console
+	 * import { Path } from '@js-draw/math';
+	 *
+	 * const path = Path.fromString('m0,0l100,100');
+	 * console.log(path.toString(true)); // true: Prefer relative to absolute path commands
+	 * ```
 	 */
 	public static fromString(pathString: string): Path {
 		// See the MDN reference:

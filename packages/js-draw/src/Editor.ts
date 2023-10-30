@@ -197,6 +197,38 @@ export class Editor {
 
 	/**
 	 * Global event dispatcher/subscriber.
+	 *
+	 * @example
+	 *
+	 * ```ts,runnable
+	 * import { Editor, EditorEventType, SerializableCommand } from 'js-draw';
+	 *
+	 * // Create a minimal editor
+	 * const editor = new Editor(document.body);
+	 * editor.addToolbar();
+	 *
+	 * // Create a place to show text output
+	 * const log = document.createElement('textarea');
+	 * document.body.appendChild(log);
+	 * log.style.width = '100%';
+	 * log.style.height = '200px';
+	 *
+	 * // Listen for CommandDone events (there's also a CommandUndone)
+	 * editor.notifier.on(EditorEventType.CommandDone, event => {
+	 *   // Type narrowing for TypeScript -- event will always be of kind CommandDone,
+	 *   // but TypeScript doesn't know this.
+	 *   if (event.kind !== EditorEventType.CommandDone) return;
+	 *
+	 *   log.value = `Command done ${event.command.description(editor, editor.localization)}\n`;
+	 *
+	 *   if (event.command instanceof SerializableCommand) {
+	 *     log.value += `serializes to: ${JSON.stringify(event.command.serialize())}`;
+	 *   }
+	 * });
+	 *
+	 * // Dispatch an initial command to trigger the event listener for the first time
+	 * editor.dispatch(editor.image.setAutoresizeEnabled(true));
+	 * ```
 	 */
 	public readonly notifier: EditorNotifier;
 

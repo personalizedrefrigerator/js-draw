@@ -2,7 +2,11 @@ import LineSegment2 from './LineSegment2';
 import { Point2 } from '../Vec2';
 import Rect2 from './Rect2';
 
+/**
+ * An abstract base class for 2D shapes.
+ */
 export abstract class Abstract2DShape {
+	// @internal
 	protected static readonly smallValue = 1e-12;
 
 	/**
