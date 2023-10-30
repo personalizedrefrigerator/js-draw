@@ -352,8 +352,16 @@ export default class EditorImage {
 	 * import { Editor } from 'js-draw';
 	 *
 	 * const editor = new Editor(document.body);
-	 * editor.addToolbar();
+	 * const toolbar = editor.addToolbar();
 	 *
+	 * // Add a save button to demonstrate what the output looks like
+	 * // (it should change size to fit whatever was drawn)
+	 * toolbar.addSaveButton(() => {
+	 *   document.body.replaceChildren(editor.toSVG({ sanitize: true }));
+	 * });
+	 *
+	 * // Actually using setAutoresizeEnabled:
+	 * //
 	 * // To set autoresize without announcing for accessibility/making undoable
 	 * const addToHistory = false;
 	 * editor.dispatchNoAnnounce(editor.image.setAutoresizeEnabled(true), addToHistory);
