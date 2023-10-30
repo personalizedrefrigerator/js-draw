@@ -25,6 +25,8 @@ const noOpSetUpdateListener = () => {
  *
  * Static methods in the `ReactiveValue` and `MutableReactiveValue` classes are
  * constructors (e.g. `fromImmutable`).
+ *
+ * Avoid extending this class from an external library, as that may not be stable.
  */
 export abstract class ReactiveValue<T> {
 	/**
