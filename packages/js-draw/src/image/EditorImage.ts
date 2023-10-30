@@ -240,6 +240,9 @@ export default class EditorImage {
 	 * rendered onto the main rendering canvas instead of doing a full re-render.
 	 *
 	 * @see {@link Display.flatten}
+	 *
+	 * @example
+	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
 	 */
 	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {
 		return new EditorImage.AddElementCommand(elem, applyByFlattening);

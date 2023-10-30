@@ -33,6 +33,9 @@ interface SimplificationRecord {
  * ```ts
  * editor.dispatch(stroke.transformBy(Mat33.translation(Vec2.of(10, 0))));
  * ```
+ *
+ * **Adding**:
+ * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
  */
 export default class Stroke extends AbstractComponent implements RestyleableComponent {
 	private parts: StrokePart[];
@@ -57,7 +60,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	 *
 	 * const stroke = new Stroke([
 	 *     // Fill with red
-	 *     pathToRenderable({ fill: Color4.red })
+	 *     pathToRenderable(path, { fill: Color4.red })
 	 * ]);
 	 * ```
 	 */

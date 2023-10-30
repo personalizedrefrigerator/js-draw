@@ -4,7 +4,12 @@ import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
-// Represents a raster image.
+/**
+ * Represents a raster image.
+ *
+ * **Example: Adding images**:
+ * [[include:doc-pages/inline-examples/adding-an-image-and-data-urls.md]]
+ */
 export default class ImageComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 	private image: RenderableImage;
@@ -35,7 +40,12 @@ export default class ImageComponent extends AbstractComponent {
 		this.contentBBox = this.contentBBox.transformedBoundingBox(this.image.transform);
 	}
 
-	// Load from an image. Waits for the image to load if incomplete.
+	/**
+	 * Load from an image. Waits for the image to load if incomplete.
+	 *
+	 * The image, `elem`, must not [taint](https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image#security_and_tainted_canvases)
+	 * an HTMLCanvasElement when rendered.
+	 */
 	public static async fromImage(elem: HTMLImageElement, transform: Mat33) {
 		if (!elem.complete) {
 			await new Promise((resolve, reject) => {
@@ -92,6 +102,7 @@ export default class ImageComponent extends AbstractComponent {
 		canvas.endObject(this.getLoadSaveData());
 	}
 
+	// A *very* rough estimate of how long it takes to render this component
 	public override getProportionalRenderingTime(): number {
 		// Estimate: Equivalent to a stroke with 10 segments.
 		return 10;
@@ -121,6 +132,7 @@ export default class ImageComponent extends AbstractComponent {
 		return this.image.label;
 	}
 
+	// The base64 image URL of this image.
 	public getURL() {
 		return this.image.base64Url;
 	}

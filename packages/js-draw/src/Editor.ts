@@ -1264,6 +1264,12 @@ export class Editor {
 		sendPenEvent(this, eventType, point, allPointers);
 	}
 
+	/**
+	 * Adds all components in `components` such that they are in the center of the screen.
+	 * This is a convenience method that creates **and applies** a single command.
+	 *
+	 * If `selectComponents` is true (the default), the components are selected.
+	 */
 	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true) {
 		let bbox: Rect2|null = null;
 		for (const component of components) {
@@ -1322,6 +1328,9 @@ export class Editor {
 	 *
 	 * The export resolution is the same as the size of the drawing canvas, unless `outputSize`
 	 * is given.
+	 *
+	 * **Example**:
+	 * [[include:doc-pages/inline-examples/adding-an-image-and-data-urls.md]]
 	 */
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png', outputSize?: Vec2): string {
 		const canvas = document.createElement('canvas');
