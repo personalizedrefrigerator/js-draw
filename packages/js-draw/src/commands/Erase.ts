@@ -8,8 +8,28 @@ import SerializableCommand from './SerializableCommand';
 /**
  * Removes the given {@link AbstractComponent}s from the image.
  *
- * @example
- * ```ts
+ * **Example**:
+ * ```ts,runnable
+ * import { Editor, Erase, uniteCommands, Color4, Path, Stroke, Rect2, pathToRenderable } from 'js-draw';
+ *
+ * const editor = new Editor(document.body);
+ * editor.addToolbar();
+ *
+ * // Add a large number of strokes
+ * const commands = [];
+ * for (let x = -20; x < 20; x++) {
+ *   for (let y = 0; y < 60; y++) {
+ *     const stroke = new Stroke([
+ *       pathToRenderable(
+ *         Path.fromString(`m${x * 5},${y * 5}l1,1`),
+ *         { fill: Color4.transparent, stroke: {width: 2, color: Color4.ofRGB(x / 10, y / 10, 0.5)}} )
+ *       ]);
+ *     commands.push(editor.image.addElement(stroke));
+ *   }
+ * }
+ * await editor.dispatch(uniteCommands(commands, 100));
+ *
+ * ---visible---
  * // Given some editor...
  *
  * // Find all elements intersecting the rectangle with top left (-10,-30) and
