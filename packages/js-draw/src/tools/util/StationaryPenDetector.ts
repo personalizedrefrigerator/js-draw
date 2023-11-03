@@ -65,10 +65,13 @@ export default class StationaryPenDetector {
 		// velocity too significantly.
 		this.averageVelocity = this.averageVelocity.lerp(currentVelocity, 0.5); // px/s
 
+		const dtFromStart = currentPointer.timeStamp - this.stationaryStartPointer.timeStamp; // ms
+
 		// If not stationary
 		if (
 			dxFromStationaryStart.length() > this.config.maxRadius
 			|| this.averageVelocity.length() > this.config.maxSpeed
+			|| dtFromStart < this.config.minTimeSeconds
 		) {
 			this.stationaryStartPointer = currentPointer;
 			this.lastPointer = currentPointer;
@@ -78,7 +81,6 @@ export default class StationaryPenDetector {
 			return false;
 		}
 
-		const dtFromStart = currentPointer.timeStamp - this.stationaryStartPointer.timeStamp; // ms
 		const stationaryTimeoutMs = this.config.minTimeSeconds * 1000 - dtFromStart;
 
 		this.lastPointer = currentPointer;
@@ -103,14 +105,23 @@ export default class StationaryPenDetector {
 	}
 
 	private setStationaryTimeout(timeoutMs: number) {
-		this.cancelStationaryTimeout();
+		if (this.timeout !== null) {
+			return;
+		}
 
 		if (timeoutMs <= 0) {
 			this.onStationary(this.lastPointer);
 		} else {
 			this.timeout = setTimeout(() => {
 				this.timeout = null;
-				this.onStationary(this.lastPointer);
+
+				const timeSinceStationaryStart = performance.now() - this.stationaryStartPointer.timeStamp;
+				const timeRemaining = this.config.minTimeSeconds * 1000 - timeSinceStationaryStart;
+				if (timeRemaining <= 0) {
+					this.onStationary(this.lastPointer);
+				} else {
+					this.setStationaryTimeout(timeRemaining);
+				}
 			}, timeoutMs);
 		}
 	}
