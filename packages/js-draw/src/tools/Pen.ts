@@ -127,9 +127,9 @@ export default class Pen extends BaseTool {
 			this.currentDeviceType = current.device;
 
 			const stationaryDetectionConfig = {
-				maxSpeed: 6, // screenPx/s
+				maxSpeed: 5, // screenPx/s
 				maxRadius: 10, // screenPx
-				minTimeSeconds: 1.0, // s
+				minTimeSeconds: 0.7, // s
 			};
 			this.stationaryDetector = new StationaryPenDetector(
 				current, stationaryDetectionConfig, pointer => this.autocompleteShape(pointer),
@@ -215,7 +215,7 @@ export default class Pen extends BaseTool {
 	}
 
 	private removedCompletedShapeRecently() {
-		return this.removedCompletedShapeTime > performance.now() - 250;
+		return this.removedCompletedShapeTime > performance.now() - 320;
 	}
 
 	private async autocompleteShape(_lastPointer: Pointer) {
