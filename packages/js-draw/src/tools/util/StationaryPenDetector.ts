@@ -20,7 +20,7 @@ type OnStationaryCallback = (lastPointer: Pointer)=>void;
 export default class StationaryPenDetector {
 	// Stores the pointer of the last event or, if the pen hasn't moved
 	// significantly, the first pointer event, away from which the pen hasn't moved.
-	private stationaryStartPointer: Pointer;
+	private stationaryStartPointer: Pointer|null;
 	private lastPointer: Pointer;
 	private averageVelocity: Vec2;
 
@@ -42,6 +42,11 @@ export default class StationaryPenDetector {
 
 	// Returns true if stationary
 	public onPointerMove(currentPointer: Pointer) {
+		if (!this.stationaryStartPointer) {
+			// Destoroyed
+			return;
+		}
+
 		if (currentPointer.id !== this.stationaryStartPointer.id) {
 			return false;
 		}
@@ -88,13 +93,14 @@ export default class StationaryPenDetector {
 	}
 
 	public onPointerUp(pointer: Pointer) {
-		if (pointer.id !== this.stationaryStartPointer.id) {
+		if (pointer.id !== this.stationaryStartPointer?.id) {
 			this.cancelStationaryTimeout();
 		}
 	}
 
-	public cancel() {
+	public destroy() {
 		this.cancelStationaryTimeout();
+		this.stationaryStartPointer = null;
 	}
 
 	private cancelStationaryTimeout() {
@@ -114,6 +120,11 @@ export default class StationaryPenDetector {
 		} else {
 			this.timeout = setTimeout(() => {
 				this.timeout = null;
+
+				if (!this.stationaryStartPointer) {
+					// Destroyed
+					return;
+				}
 
 				const timeSinceStationaryStart = performance.now() - this.stationaryStartPointer.timeStamp;
 				const timeRemaining = this.config.minTimeSeconds * 1000 - timeSinceStationaryStart;

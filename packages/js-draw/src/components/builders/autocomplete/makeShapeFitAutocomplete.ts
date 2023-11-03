@@ -1,4 +1,4 @@
-import { Rect2, Point2, LineSegment2, Vec2 } from '@js-draw/math';
+import { Rect2, Point2, LineSegment2 } from '@js-draw/math';
 import Viewport from '../../../Viewport';
 import { StrokeDataPoint } from '../../../types';
 import AbstractComponent from '../../AbstractComponent';
@@ -22,14 +22,6 @@ const makeLineTemplate = (startPoint: Point2, points: Point2[], _bbox: Rect2) =>
 
 const makeRectangleTemplate = (_startPoint: Point2, _points: Point2[], bbox: Rect2) => {
 	return [ ...bbox.corners, bbox.corners[0] ];
-};
-
-const makeSquareTemplate = (_startPoint: Point2, _points: Point2[], bbox: Rect2) => {
-	const center = bbox.center;
-	const radius = Math.min(bbox.w, bbox.h) / 2;
-	const square = new Rect2(center.x, center.y, 0, 0).grownBy(radius);
-
-	return [ ...square.corners, square.corners[0] ];
 };
 
 class ShapeFitBuilder implements ComponentBuilder {
@@ -78,7 +70,6 @@ class ShapeFitBuilder implements ComponentBuilder {
 		// Create templates
 		const templates = [
 			makeLineTemplate(startPoint, points, bbox),
-			makeSquareTemplate(startPoint, points, bbox),
 			makeRectangleTemplate(startPoint, points, bbox),
 		];
 

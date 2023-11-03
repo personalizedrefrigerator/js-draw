@@ -210,7 +210,8 @@ export default class Pen extends BaseTool {
 	public override onGestureCancel() {
 		this.builder = null;
 		this.editor.clearWetInk();
-		this.stationaryDetector?.cancel();
+		this.stationaryDetector?.destroy();
+		this.stationaryDetector = null;
 	}
 
 	private removedCompletedShapeRecently() {
@@ -258,6 +259,9 @@ export default class Pen extends BaseTool {
 		this.completedShape = null;
 		this.lastCompletedShape = null;
 		this.editor.clearWetInk();
+
+		this.stationaryDetector?.destroy();
+		this.stationaryDetector = null;
 	}
 
 	private noteUpdated() {
