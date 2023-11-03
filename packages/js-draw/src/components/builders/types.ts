@@ -9,6 +9,14 @@ export interface ComponentBuilder {
 	build(): AbstractComponent;
 	preview(renderer: AbstractRenderer): void;
 
+	// Called when the pen is stationary (or the user otherwise
+	// activates autocomplete). This might attempt to fit the user's
+	// drawing to a particular shape.
+	//
+	// Although this returns a Promise, it should return *as fast as
+	// possible*.
+	autocompleteShape?: ()=>Promise<AbstractComponent|null>;
+
 	addPoint(point: StrokeDataPoint): void;
 }
 

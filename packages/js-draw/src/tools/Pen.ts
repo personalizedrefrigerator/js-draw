@@ -11,6 +11,8 @@ import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 import InputStabilizer from './InputFilter/InputStabilizer';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
+import StationaryPenDetector from './util/StationaryPenDetector';
+import AbstractComponent from '../components/AbstractComponent';
 
 export interface PenStyle {
 	readonly color: Color4;
@@ -25,6 +27,11 @@ export default class Pen extends BaseTool {
 	private currentDeviceType: PointerDevice|null = null;
 	private styleValue: MutableReactiveValue<PenStyle>;
 	private style: PenStyle;
+
+	private completedShape: AbstractComponent|null = null;
+	private lastCompletedShape: AbstractComponent|null = null;
+	private removedCompletedShapeTime: number = 0;
+	private stationaryDetector: StationaryPenDetector|null = null;
 
 	public constructor(
 		private editor: Editor,
@@ -77,7 +84,14 @@ export default class Pen extends BaseTool {
 	// Displays the stroke that is currently being built with the display's `wetInkRenderer`.
 	protected previewStroke() {
 		this.editor.clearWetInk();
-		this.builder?.preview(this.editor.display.getWetInkRenderer());
+		const wetInkRenderer = this.editor.display.getWetInkRenderer();
+
+		if (this.completedShape) {
+			const visibleRect = this.editor.viewport.visibleRect;
+			this.completedShape.render(wetInkRenderer, visibleRect);
+		} else {
+			this.builder?.preview(wetInkRenderer);
+		}
 	}
 
 	// Throws if no stroke builder exists.
@@ -111,6 +125,17 @@ export default class Pen extends BaseTool {
 			this.startPoint = this.toStrokePoint(current);
 			this.builder = this.style.factory(this.startPoint, this.editor.viewport);
 			this.currentDeviceType = current.device;
+
+			const stationaryDetectionConfig = {
+				maxSpeed: 6, // screenPx/s
+				maxRadius: 10, // screenPx
+				minTimeSeconds: 1.0, // s
+			};
+			this.stationaryDetector = new StationaryPenDetector(
+				current, stationaryDetectionConfig, pointer => this.autocompleteShape(pointer),
+			);
+			this.lastCompletedShape = null;
+			this.removedCompletedShapeTime = 0;
 			return true;
 		}
 
@@ -144,7 +169,16 @@ export default class Pen extends BaseTool {
 		if (!this.builder) return;
 		if (current.device !== this.currentDeviceType) return;
 
-		this.addPointToStroke(this.toStrokePoint(current));
+		const isStationary = this.stationaryDetector?.onPointerMove(current);
+
+		if (!isStationary) {
+			this.addPointToStroke(this.toStrokePoint(current));
+
+			if (this.completedShape) {
+				this.removedCompletedShapeTime = performance.now();
+				this.completedShape = null;
+			}
+		}
 	}
 
 	public override onPointerUp({ current }: PointerEvt) {
@@ -154,6 +188,8 @@ export default class Pen extends BaseTool {
 			// device type.
 			return true;
 		}
+
+		this.stationaryDetector?.onPointerUp(current);
 
 		// onPointerUp events can have zero pressure. Use the last pressure instead.
 		const currentPoint = this.toStrokePoint(current);
@@ -174,11 +210,39 @@ export default class Pen extends BaseTool {
 	public override onGestureCancel() {
 		this.builder = null;
 		this.editor.clearWetInk();
+		this.stationaryDetector?.cancel();
+	}
+
+	private removedCompletedShapeRecently() {
+		return this.removedCompletedShapeTime > performance.now() - 250;
+	}
+
+	private async autocompleteShape(_lastPointer: Pointer) {
+		if (!this.builder || !this.builder.autocompleteShape) return;
+
+		// If already completed, do nothing
+		if (this.completedShape) return;
+
+		// Activate stroke fitting
+		const completedShape = await this.builder.autocompleteShape();
+		if (!this.builder || !completedShape) {
+			return;
+		}
+
+		this.completedShape = completedShape;
+		this.lastCompletedShape = completedShape;
+		this.previewStroke();
 	}
 
 	private finalizeStroke() {
 		if (this.builder) {
-			const stroke = this.builder.build();
+			// If completedShape was cleared recently enough, it was
+			// probably by mistake. Reset it.
+			if (this.lastCompletedShape && this.removedCompletedShapeRecently()) {
+				this.completedShape = this.lastCompletedShape;
+			}
+
+			const stroke = this.completedShape ?? this.builder.build();
 			this.previewStroke();
 
 			if (stroke.getBBox().area > 0) {
@@ -191,6 +255,8 @@ export default class Pen extends BaseTool {
 		}
 		this.builder = null;
 		this.lastPoint = null;
+		this.completedShape = null;
+		this.lastCompletedShape = null;
 		this.editor.clearWetInk();
 	}
 
