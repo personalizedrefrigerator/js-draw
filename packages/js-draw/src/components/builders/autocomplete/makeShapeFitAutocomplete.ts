@@ -32,20 +32,6 @@ const makeSquareTemplate = (_startPoint: Point2, _points: Point2[], bbox: Rect2)
 	return [ ...square.corners, square.corners[0] ];
 };
 
-const makeCircleTemplate = (_startPoint: Point2, _points: Point2[], bbox: Rect2) => {
-	const center = bbox.center;
-	const radius = Math.min(bbox.w, bbox.h) / 2;
-
-	const points = [];
-
-	const delta = 0.04;
-	for (let i = 0; i < Math.PI * 2 + delta; i += delta) {
-		points.push(center.plus(Vec2.of(Math.cos(i) * radius, Math.sin(i) * radius)));
-	}
-
-	return points;
-};
-
 class ShapeFitBuilder implements ComponentBuilder {
 	private builder: ComponentBuilder;
 	private points: StrokeDataPoint[];
@@ -93,7 +79,6 @@ class ShapeFitBuilder implements ComponentBuilder {
 		const templates = [
 			makeLineTemplate(startPoint, points, bbox),
 			makeSquareTemplate(startPoint, points, bbox),
-			makeCircleTemplate(startPoint, points, bbox),
 			makeRectangleTemplate(startPoint, points, bbox),
 		];
 
