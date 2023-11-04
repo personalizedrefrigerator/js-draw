@@ -101,11 +101,11 @@ body:
     validations:
       required: false
   - type: textarea
-    id: translation-decreaseImageQuality
+    id: translation-decreaseImageSize
     attributes:
-      label: "decreaseImageQuality"
-      description: "Translate `Decrease image quality`."
-      placeholder: "Decrease image quality"
+      label: "decreaseImageSize"
+      description: "Translate `Decrease image size`."
+      placeholder: "Decrease image size"
       render: "shell"
     validations:
       required: false

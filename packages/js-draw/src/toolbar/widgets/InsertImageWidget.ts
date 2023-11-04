@@ -81,6 +81,7 @@ export default class InsertImageWidget extends BaseWidget {
 		const actionButtonRow = document.createElement('div');
 
 		actionButtonRow.classList.add('action-button-row');
+		this.statusView.classList.add('insert-image-image-status-view');
 
 		this.submitButton = document.createElement('button');
 		this.selectedFiles = selectedFiles;
@@ -172,12 +173,16 @@ export default class InsertImageWidget extends BaseWidget {
 			Math.round(size), units
 		);
 
+		// Add a button to allow decreasing the size of large images.
 		const decreaseSizeButton = document.createElement('button');
-		decreaseSizeButton.innerText = this.localizationTable.decreaseImageQuality;
+		decreaseSizeButton.innerText = this.localizationTable.decreaseImageSize;
 		decreaseSizeButton.onclick = () => {
 			const canvas = document.createElement('canvas');
-			canvas.width = this.imagePreview.naturalWidth * 3 / 4;
-			canvas.height = this.imagePreview.naturalHeight * 3 / 4;
+
+			const resizeFactor = 3/4;
+			canvas.width = this.imagePreview.naturalWidth * resizeFactor;
+			canvas.height = this.imagePreview.naturalHeight * resizeFactor;
+
 			const ctx = canvas.getContext('2d');
 			ctx?.drawImage(this.imagePreview, 0, 0, canvas.width, canvas.height);
 
@@ -188,7 +193,8 @@ export default class InsertImageWidget extends BaseWidget {
 			this.updateImageData(canvas.toDataURL(format));
 		};
 
-		if (sizeInMiB > 0.3) {
+		const largeImageThreshold = 0.3;
+		if (sizeInMiB > largeImageThreshold) {
 			this.statusView.replaceChildren(sizeText, decreaseSizeButton);
 		} else {
 			this.statusView.replaceChildren(sizeText);

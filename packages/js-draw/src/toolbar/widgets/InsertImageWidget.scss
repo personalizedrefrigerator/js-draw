@@ -20,6 +20,11 @@ $image-widget-selector: '.insert-image-widget-dropdown-content';
 		margin-right: auto;
 	}
 
+	.insert-image-image-status-view {
+		display: flex;
+		justify-content: space-between;
+	}
+
 	.action-button-row {
 		margin-top: 4px;
 		display: flex;
