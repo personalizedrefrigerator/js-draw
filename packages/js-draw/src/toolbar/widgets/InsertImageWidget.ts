@@ -120,18 +120,7 @@ export default class InsertImageWidget extends BaseWidget {
 				this.statusView.innerText = this.localizationTable.imageLoadError(e);
 			}
 
-			this.imageBase64URL = data;
-
-			if (data) {
-				this.imagePreview.src = data;
-				this.submitButton.disabled = false;
-				this.submitButton.style.display = '';
-				this.updateImageSizeDisplay();
-			} else {
-				this.submitButton.disabled = true;
-				this.submitButton.style.display = 'none';
-				this.statusView.innerText = '';
-			}
+			this.updateImageData(data);
 		});
 
 		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
@@ -143,6 +132,21 @@ export default class InsertImageWidget extends BaseWidget {
 
 		dropdown.replaceChildren(container);
 		return true;
+	}
+
+	private updateImageData(base64Data: string|null) {
+		this.imageBase64URL = base64Data;
+
+		if (base64Data) {
+			this.imagePreview.src = base64Data;
+			this.submitButton.disabled = false;
+			this.submitButton.style.display = '';
+			this.updateImageSizeDisplay();
+		} else {
+			this.submitButton.disabled = true;
+			this.submitButton.style.display = 'none';
+			this.statusView.innerText = '';
+		}
 	}
 
 	private hideDialog() {
@@ -163,9 +167,32 @@ export default class InsertImageWidget extends BaseWidget {
 			units = 'MiB';
 		}
 
-		this.statusView.innerText = this.localizationTable.imageSize(
+		const sizeText = document.createElement('span');
+		sizeText.innerText = this.localizationTable.imageSize(
 			Math.round(size), units
 		);
+
+		const decreaseSizeButton = document.createElement('button');
+		decreaseSizeButton.innerText = this.localizationTable.decreaseImageQuality;
+		decreaseSizeButton.onclick = () => {
+			const canvas = document.createElement('canvas');
+			canvas.width = this.imagePreview.naturalWidth * 3 / 4;
+			canvas.height = this.imagePreview.naturalHeight * 3 / 4;
+			const ctx = canvas.getContext('2d');
+			ctx?.drawImage(this.imagePreview, 0, 0, canvas.width, canvas.height);
+
+			// JPEG can be much smaller than PNG for the same image size. Prefer it if
+			// the image is already a JPEG.
+			const format =
+				this.imageBase64URL?.startsWith('data:image/jpeg;') ? 'image/jpeg' : 'image/png';
+			this.updateImageData(canvas.toDataURL(format));
+		};
+
+		if (sizeInMiB > 0.3) {
+			this.statusView.replaceChildren(sizeText, decreaseSizeButton);
+		} else {
+			this.statusView.replaceChildren(sizeText);
+		}
 	}
 
 	private updateInputs() {

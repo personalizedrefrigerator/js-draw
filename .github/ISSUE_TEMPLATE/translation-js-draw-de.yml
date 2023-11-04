@@ -110,6 +110,15 @@ body:
     validations:
       required: false
   - type: textarea
+    id: translation-decreaseImageQuality
+    attributes:
+      label: "decreaseImageQuality"
+      description: "Translate `Decrease image quality`."
+      placeholder: "Decrease image quality"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-chooseFile
     attributes:
       label: "chooseFile"
