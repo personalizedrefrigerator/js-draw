@@ -13,12 +13,68 @@ import { toolbarCSSPrefix } from '../constants';
 import makeFileInput from './components/makeFileInput';
 import { MutableReactiveValue } from '../../util/ReactiveValue';
 
+class ImageWrapper {
+	private readonly originalSrc: string;
+
+	private constructor(
+		private imageBase64Url: string,
+		private preview: HTMLImageElement,
+		private onUrlUpdate: ()=>void,
+	) {
+		this.originalSrc = imageBase64Url;
+		preview.src = imageBase64Url;
+	}
+
+	private updateImageData(base64DataUrl: string) {
+		this.preview.src = base64DataUrl;
+		this.imageBase64Url = base64DataUrl;
+		this.onUrlUpdate();
+	}
+
+	public decreaseSize(resizeFactor: number = 3/4) {
+		const canvas = document.createElement('canvas');
+
+		canvas.width = this.preview.naturalWidth * resizeFactor;
+		canvas.height = this.preview.naturalHeight * resizeFactor;
+
+		const ctx = canvas.getContext('2d');
+		ctx?.drawImage(this.preview, 0, 0, canvas.width, canvas.height);
+
+		// JPEG can be much smaller than PNG for the same image size. Prefer it if
+		// the image is already a JPEG.
+		const format =
+			this.originalSrc?.startsWith('data:image/jpeg;') ? 'image/jpeg' : 'image/png';
+		this.updateImageData(canvas.toDataURL(format));
+	}
+
+	public reset() {
+		this.updateImageData(this.originalSrc);
+	}
+
+	public isChanged() {
+		return this.imageBase64Url !== this.originalSrc;
+	}
+
+	public getBase64Url() {
+		return this.imageBase64Url;
+	}
+
+	public static fromSrcAndPreview(
+		initialBase64Src: string,
+		preview: HTMLImageElement,
+		onUrlUpdate: ()=>void,
+	) {
+		return new ImageWrapper(initialBase64Src, preview, onUrlUpdate);
+	}
+}
+
 export default class InsertImageWidget extends BaseWidget {
 	private imagePreview: HTMLImageElement;
+	private image: ImageWrapper|null = null;
+
 	private selectedFiles: MutableReactiveValue<File[]>|null;
 	private imageAltTextInput: HTMLInputElement;
 	private statusView: HTMLElement;
-	private imageBase64URL: string|null;
 	private submitButton: HTMLButtonElement;
 
 	public constructor(editor: Editor, localization?: ToolbarLocalization) {
@@ -103,9 +159,8 @@ export default class InsertImageWidget extends BaseWidget {
 
 		this.selectedFiles.onUpdateAndNow(async files => {
 			if (files.length === 0) {
-				this.imagePreview.style.display = 'none';
-				this.submitButton.disabled = true;
-				this.submitButton.style.display = 'none';
+				this.image = null;
+				this.onImageDataUpdate();
 				return;
 			}
 
@@ -121,7 +176,14 @@ export default class InsertImageWidget extends BaseWidget {
 				this.statusView.innerText = this.localizationTable.imageLoadError(e);
 			}
 
-			this.updateImageData(data);
+			if (data) {
+				this.image = ImageWrapper.fromSrcAndPreview(
+					data, this.imagePreview, () => this.onImageDataUpdate(),
+				);
+			} else {
+				this.image = null;
+			}
+			this.onImageDataUpdate();
 		});
 
 		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
@@ -135,18 +197,20 @@ export default class InsertImageWidget extends BaseWidget {
 		return true;
 	}
 
-	private updateImageData(base64Data: string|null) {
-		this.imageBase64URL = base64Data;
+	private onImageDataUpdate() {
+		const base64Data = this.image?.getBase64Url();
 
 		if (base64Data) {
-			this.imagePreview.src = base64Data;
 			this.submitButton.disabled = false;
 			this.submitButton.style.display = '';
+			this.imagePreview.style.display = '';
 			this.updateImageSizeDisplay();
 		} else {
 			this.submitButton.disabled = true;
 			this.submitButton.style.display = 'none';
 			this.statusView.innerText = '';
+			this.imagePreview.style.display = 'none';
+			this.submitButton.disabled = true;
 		}
 	}
 
@@ -155,7 +219,7 @@ export default class InsertImageWidget extends BaseWidget {
 	}
 
 	private updateImageSizeDisplay() {
-		const imageData = this.imageBase64URL ?? '';
+		const imageData = this.image?.getBase64Url() ?? '';
 
 		const sizeInKiB = imageData.length / 1024;
 		const sizeInMiB = sizeInKiB / 1024;
@@ -177,27 +241,22 @@ export default class InsertImageWidget extends BaseWidget {
 		const decreaseSizeButton = document.createElement('button');
 		decreaseSizeButton.innerText = this.localizationTable.decreaseImageSize;
 		decreaseSizeButton.onclick = () => {
-			const canvas = document.createElement('canvas');
-
-			const resizeFactor = 3/4;
-			canvas.width = this.imagePreview.naturalWidth * resizeFactor;
-			canvas.height = this.imagePreview.naturalHeight * resizeFactor;
-
-			const ctx = canvas.getContext('2d');
-			ctx?.drawImage(this.imagePreview, 0, 0, canvas.width, canvas.height);
-
-			// JPEG can be much smaller than PNG for the same image size. Prefer it if
-			// the image is already a JPEG.
-			const format =
-				this.imageBase64URL?.startsWith('data:image/jpeg;') ? 'image/jpeg' : 'image/png';
-			this.updateImageData(canvas.toDataURL(format));
+			this.image?.decreaseSize();
 		};
 
-		const largeImageThreshold = 0.3;
+		const resetSizeButton = document.createElement('button');
+		resetSizeButton.innerText = this.localizationTable.resetImage;
+		resetSizeButton.onclick = () => {
+			this.image?.reset();
+		};
+
+		this.statusView.replaceChildren(sizeText);
+
+		const largeImageThreshold = 0.25; // MiB
 		if (sizeInMiB > largeImageThreshold) {
-			this.statusView.replaceChildren(sizeText, decreaseSizeButton);
-		} else {
-			this.statusView.replaceChildren(sizeText);
+			this.statusView.appendChild(decreaseSizeButton);
+		} else if (this.image?.isChanged()) {
+			this.statusView.appendChild(resetSizeButton);
 		}
 	}
 
@@ -224,13 +283,13 @@ export default class InsertImageWidget extends BaseWidget {
 			editingImage = selectedObjects[0];
 
 			this.imageAltTextInput.value = editingImage.getAltText() ?? '';
-			this.imagePreview.style.display = 'block';
-			this.submitButton.disabled = false;
+			this.image = ImageWrapper.fromSrcAndPreview(
+				editingImage.getURL(),
+				this.imagePreview,
+				() => this.onImageDataUpdate(),
+			);
 
-			this.imageBase64URL = editingImage.getURL();
-			this.imagePreview.src = this.imageBase64URL;
-
-			this.updateImageSizeDisplay();
+			this.onImageDataUpdate();
 		} else if (selectedObjects.length > 0) {
 			// If not, clear the selection.
 			selectionTools.forEach(tool => tool.clearSelection());
@@ -245,12 +304,12 @@ export default class InsertImageWidget extends BaseWidget {
 		};
 
 		this.submitButton.onclick = async () => {
-			if (!this.imageBase64URL) {
+			if (!this.image) {
 				return;
 			}
 
 			const image = new Image();
-			image.src = this.imageBase64URL;
+			image.src = this.image.getBase64Url();
 			image.setAttribute('alt', this.imageAltTextInput.value);
 
 			const component = await ImageComponent.fromImage(image, Mat33.identity);
@@ -265,9 +324,15 @@ export default class InsertImageWidget extends BaseWidget {
 			if (editingImage) {
 				const eraseCommand = new Erase([ editingImage ]);
 
+				// Try to preserve the original width
+				const originalTransform = editingImage.getTransformation();
+				const originalWidth = editingImage.getBBox().width || 1;
+				const newWidth = component.getBBox().transformedBoundingBox(originalTransform).width || 1;
+				const widthAdjustTransform = Mat33.scaling2D(originalWidth / newWidth);
+
 				await this.editor.dispatch(uniteCommands([
 					EditorImage.addElement(component),
-					component.transformBy(editingImage.getTransformation()),
+					component.transformBy(originalTransform.rightMul(widthAdjustTransform)),
 					component.setZIndex(editingImage.getZIndex()),
 					eraseCommand,
 				]));

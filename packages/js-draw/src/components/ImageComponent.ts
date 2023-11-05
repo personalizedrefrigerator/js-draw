@@ -3,6 +3,7 @@ import AbstractRenderer, { RenderableImage } from '../rendering/renderers/Abstra
 import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
+import waitForImageLoaded from '../util/waitForImageLoaded';
 
 /**
  * Represents a raster image.
@@ -47,13 +48,7 @@ export default class ImageComponent extends AbstractComponent {
 	 * an HTMLCanvasElement when rendered.
 	 */
 	public static async fromImage(elem: HTMLImageElement, transform: Mat33) {
-		if (!elem.complete) {
-			await new Promise((resolve, reject) => {
-				elem.onload = resolve;
-				elem.onerror = reject;
-				elem.onabort = reject;
-			});
-		}
+		await waitForImageLoaded(elem);
 
 		let width, height;
 		if (
