@@ -113,8 +113,17 @@ body:
     id: translation-decreaseImageSize
     attributes:
       label: "decreaseImageSize"
-      description: "Translate `Decrease image size`."
-      placeholder: "Decrease image size"
+      description: "Translate `Decrease size`."
+      placeholder: "Decrease size"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-resetImage
+    attributes:
+      label: "resetImage"
+      description: "Translate `Reset`."
+      placeholder: "Reset"
       render: "shell"
     validations:
       required: false
