@@ -312,7 +312,14 @@ export default class InsertImageWidget extends BaseWidget {
 			image.src = this.image.getBase64Url();
 			image.setAttribute('alt', this.imageAltTextInput.value);
 
-			const component = await ImageComponent.fromImage(image, Mat33.identity);
+			let component;
+			try {
+				component = await ImageComponent.fromImage(image, Mat33.identity);
+			} catch (error) {
+				console.error('Error loading image', error);
+				this.statusView.innerText = this.localizationTable.imageLoadError(error);
+				return;
+			}
 
 			if (component.getBBox().area === 0) {
 				this.statusView.innerText = this.localizationTable.errorImageHasZeroSize;
@@ -326,6 +333,7 @@ export default class InsertImageWidget extends BaseWidget {
 
 				// Try to preserve the original width
 				const originalTransform = editingImage.getTransformation();
+				// || 1: Prevent division by zero
 				const originalWidth = editingImage.getBBox().width || 1;
 				const newWidth = component.getBBox().transformedBoundingBox(originalTransform).width || 1;
 				const widthAdjustTransform = Mat33.scaling2D(originalWidth / newWidth);

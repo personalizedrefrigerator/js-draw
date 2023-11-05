@@ -2,9 +2,9 @@
 const waitForImageLoad = async (image: HTMLImageElement) => {
 	if (!image.complete) {
 		await new Promise((resolve, reject) => {
-			image.onload = resolve;
-			image.onerror = reject;
-			image.onabort = reject;
+			image.onload = event => resolve(event);
+			image.onerror = event => reject(event);
+			image.onabort = event => reject(event);
 		});
 	}
 };
