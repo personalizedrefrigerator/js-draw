@@ -431,8 +431,17 @@ or
     id: translation-inputStabilization
     attributes:
       label: "inputStabilization"
-      description: "Translate `Input stabilization`."
-      placeholder: "Input stabilization"
+      description: "Translate `Stabilization`."
+      placeholder: "Stabilization"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-strokeAutocorrect
+    attributes:
+      label: "strokeAutocorrect"
+      description: "Translate `Autocorrect`."
+      placeholder: "Autocorrect"
       render: "shell"
     validations:
       required: false
