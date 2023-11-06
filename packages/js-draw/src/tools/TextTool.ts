@@ -53,6 +53,10 @@ export default class TextTool extends BaseTool {
 			.${overlayCSSClass} {
 				height: 0;
 				overflow: visible;
+
+				/* Allows absolutely-positioned textareas to scroll with
+				   the containing overlay. */
+				position: relative;
 			}
 
 			.${overlayCSSClass} textarea {
@@ -157,7 +161,7 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.fontSize = `${this.textStyle.size}px`;
 		this.textInputElem.style.color = this.textStyle.renderingStyle.fill.toHexString();
 
-		this.textInputElem.style.position = 'relative';
+		this.textInputElem.style.position = 'absolute';
 		this.textInputElem.style.left = `${textScreenPos.x}px`;
 		this.textInputElem.style.top = `${textScreenPos.y}px`;
 		this.textInputElem.style.margin = '0';
