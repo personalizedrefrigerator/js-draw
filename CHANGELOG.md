@@ -1,4 +1,11 @@
 
+# 1.10.0
+ * Features
+    * Added **autocorrect** for strokes &mdash; holding the pen stationary after drawing replaces near-rectangles and lines with lines and rectangles.
+    * Added a "decrease image size" button to the image dialog to decrease the size of large images.
+ * Bug fixes
+    * Fixed: some tools unusable were unusable in right-to-left layout mode 
+
 # 1.9.1
  * Bug fixes
     * Fix color selector tool broken on displays with `window.devicePixelRatio` not equal to 1.
