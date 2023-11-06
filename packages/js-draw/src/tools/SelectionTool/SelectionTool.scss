@@ -83,6 +83,12 @@
 .overlay.handleOverlay {
 	touch-action: none;
 
+	// The selection tool makes some assumptions about margin-left, margin-top,
+	// and the initial (unmodified) position of the selection.
+	//
+	// For now, as we're not showing text in the selection box, force LTR.
+	direction: ltr;
+
 	// When expanding a selection with shift+click&drag, multiple selection boxes
 	// can be present in the same handleOverlay. As such, so that other overlayed
 	// selection boxes are in the correct place, the outer container needs to have
