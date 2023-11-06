@@ -308,7 +308,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
-		const stabilizationOption = this.createStrokeCorrectionOptions();
+		const toggleButtonRow = this.createStrokeCorrectionOptions();
 
 		this.updateInputs = () => {
 			setColorInputValue(this.tool.getColor());
@@ -318,15 +318,19 @@ export default class PenToolWidget extends BaseToolWidget {
 
 			// Update the selected stroke factory.
 			penTypeSelect.setValue(this.getCurrentPenTypeIdx());
-			stabilizationOption.update();
+			toggleButtonRow.update();
 		};
 		this.updateInputs();
 
 		container.replaceChildren(colorRow, thicknessRow);
 		penTypeSelect.addTo(container);
-		stabilizationOption.addTo(container);
 
 		dropdown.replaceChildren(container);
+
+		// Add the toggle button row *outside* of the main content (use different
+		// spacing with respect to the sides of the container).
+		toggleButtonRow.addTo(dropdown);
+
 		return true;
 	}
 
