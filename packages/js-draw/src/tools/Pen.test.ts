@@ -257,4 +257,59 @@ describe('Pen', () => {
 		const firstStroke = allElems[0] as StrokeComponent;
 		expect(firstStroke.getPath().bbox).objEq(new Rect2(0, 0, 10, 10));
 	});
+
+	it('holding the pen stationary after a stroke should enable autocorrection', async() => {
+		const editor = createEditor();
+		editor.viewport.resetTransform(Mat33.identity);
+
+		const penTool = editor.toolController.getMatchingTools(PenTool)[0];
+		penTool.setStrokeFactory(makeFreehandLineBuilder);
+		penTool.setStrokeAutocorrectEnabled(true);
+
+		const tolerance = 0.01;
+		// To help with bbox calculations (so that stroke width can be ignored)
+		penTool.setThickness(tolerance / 100);
+
+		jest.useFakeTimers();
+
+		const drawLineWithBump = async (includePause: boolean) => {
+			sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0));
+			await jest.advanceTimersByTimeAsync(100);
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(40, 9));
+			await jest.advanceTimersByTimeAsync(100);
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(50, 7));
+			await jest.advanceTimersByTimeAsync(100);
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(60, 9));
+			await jest.advanceTimersByTimeAsync(100);
+			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(100, 0));
+			if (includePause) {
+				for (let i = 0; i < 12; i++) {
+					await jest.advanceTimersByTimeAsync(200);
+					sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(100, 0));
+				}
+			} else {
+				await jest.advanceTimersByTimeAsync(200);
+			}
+			sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 0));
+		};
+
+		await drawLineWithBump(false);
+		await drawLineWithBump(true);
+
+		const allElems = editor.image.getAllElements();
+		expect(allElems).toHaveLength(2);
+
+		// Should roughly have a bump (roughly because stroke smoothing will adjust this)
+		const firstStroke = allElems[0] as StrokeComponent;
+		const firstStrokeBBox = firstStroke.getPath().bbox;
+		expect(firstStrokeBBox.topLeft).objEq(Vec2.of(0, 0), 4);
+		expect(firstStrokeBBox.bottomRight).objEq(Vec2.of(100, 10), 4);
+
+		const secondStroke = allElems[1] as StrokeComponent;
+		expect(secondStroke.getPath().bbox).objEq(new Rect2(0, 0, 100, 0), tolerance);
+
+		// Should still be able to draw
+		await drawLineWithBump(false);
+		expect(editor.image.getAllElements()).toHaveLength(3);
+	});
 });
