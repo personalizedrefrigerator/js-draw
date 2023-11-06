@@ -101,6 +101,15 @@ export default class DebugToolbarWidget extends BaseWidget {
 		addLabeledInput('EditorImage debugging', rendererDebugModeCheckbox);
 
 
+		const rightToLeftModeCheckbox = document.createElement('input');
+		rightToLeftModeCheckbox.type = 'checkbox';
+		rightToLeftModeCheckbox.oninput = () => {
+			this.editor.getRootElement().style.direction = rightToLeftModeCheckbox.checked ? 'rtl' : 'ltr';
+		};
+		rightToLeftModeCheckbox.checked = getComputedStyle(this.editor.getRootElement()).direction === 'rtl';
+		addLabeledInput('RTL', rightToLeftModeCheckbox);
+
+
 		dropdown.replaceChildren(container);
 
 		// We filled the dropdown (returning false disables the dropdown)
