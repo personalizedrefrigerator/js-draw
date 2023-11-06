@@ -28,7 +28,7 @@ export default class Pen extends BaseTool {
 	private styleValue: MutableReactiveValue<PenStyle>;
 	private style: PenStyle;
 
-	private shapeAutocompletionEnabled: boolean = true;
+	private shapeAutocompletionEnabled: boolean = false;
 	private completedShape: AbstractComponent|null = null;
 	private lastCompletedShape: AbstractComponent|null = null;
 	private removedCompletedShapeTime: number = 0;
@@ -131,7 +131,7 @@ export default class Pen extends BaseTool {
 				const stationaryDetectionConfig = {
 					maxSpeed: 5, // screenPx/s
 					maxRadius: 10, // screenPx
-					minTimeSeconds: 0.7, // s
+					minTimeSeconds: 0.5, // s
 				};
 				this.stationaryDetector = new StationaryPenDetector(
 					current, stationaryDetectionConfig, pointer => this.autocompleteShape(pointer),
