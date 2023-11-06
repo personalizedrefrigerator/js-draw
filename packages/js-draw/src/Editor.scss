@@ -74,6 +74,13 @@
 	min-height: 220px;
 	min-width: 100px;
 
+	// A vertical writing mode breaks assumptions about how toolbars/overlays
+	// are aligned, resulting in unusable toolbars/text.
+	//
+	// TODO: Fix this.
+	//
+	writing-mode: horizontal-tb;
+
 	box-sizing: border-box;
 
 	display: flex;
