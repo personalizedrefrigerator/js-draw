@@ -55,6 +55,8 @@ import CloudUpload from './icons/CloudUpload.svg';
 import RotateLeft from './icons/RotateLeft.svg';
 import Select from './icons/Select.svg';
 import Close from './icons/Close.svg';
+import Shapes from './icons/Shapes.svg';
+import Draw from './icons/Draw.svg';
 
 const icon = (data: string) => {
 	const icon = document.createElement('div');
@@ -142,6 +144,12 @@ class MaterialIconProvider extends IconProvider {
 	// makeIconFromFactory(pen: Pen, factory: ComponentBuilderFactory, includeTransparencyGrid?: boolean): IconElemType;
 	// makePipetteIcon(color?: Color4): IconElemType;
 	// makeFormatSelectionIcon(): IconElemType;
+	public override makeShapeAutocorrectIcon(): IconElemType {
+		return icon(Shapes);
+	}
+	public override makeStrokeSmoothingIcon(): IconElemType {
+		return icon(Draw);
+	}
 	public override makeResizeImageToSelectionIcon(): IconElemType {
 		return icon(Resize);
 	}
