@@ -13,15 +13,21 @@ const makeShapeFitAutocorrect = (sourceFactory: ComponentBuilderFactory): Compon
 
 export default makeShapeFitAutocorrect;
 
-const makeLineTemplate = (startPoint: Point2, points: Point2[], _bbox: Rect2) => {
-	return [
+interface ShapeTemplate {
+	points: Point2[];
+	toleranceMultiplier?: number;
+}
+
+const makeLineTemplate = (startPoint: Point2, points: Point2[], _bbox: Rect2): ShapeTemplate => {
+	const templatePoints = [
 		startPoint,
 		points[points.length - 1],
 	];
+	return { points: templatePoints, };
 };
 
-const makeRectangleTemplate = (_startPoint: Point2, _points: Point2[], bbox: Rect2) => {
-	return [ ...bbox.corners, bbox.corners[0] ];
+const makeRectangleTemplate = (_startPoint: Point2, _points: Point2[], bbox: Rect2): ShapeTemplate => {
+	return { points: [ ...bbox.corners, bbox.corners[0] ], };
 };
 
 class ShapeFitBuilder implements ComponentBuilder {
@@ -55,10 +61,21 @@ class ShapeFitBuilder implements ComponentBuilder {
 	}
 
 	public async autocorrectShape() {
-		// Use screen points so that snapped shapes rotate with the screen.
+		// Use screen points so that autocorrected shapes rotate with the screen.
 		const startPoint = this.viewport.canvasToScreen(this.startPoint.pos);
 		const points = this.points.map(point => this.viewport.canvasToScreen(point.pos));
 		const bbox = Rect2.bboxOf(points);
+
+		const snappedStartPoint =
+			this.viewport.canvasToScreen(
+				this.viewport.snapToGrid(this.startPoint.pos)
+			);
+		const snappedPoints = this.points.map(point =>
+			this.viewport.canvasToScreen(
+				this.viewport.snapToGrid(point.pos)
+			),
+		);
+		const snappedBBox = Rect2.bboxOf(snappedPoints);
 
 		// Only fit larger shapes
 		if (bbox.maxDimension < 32) {
@@ -69,20 +86,36 @@ class ShapeFitBuilder implements ComponentBuilder {
 
 		// Create templates
 		const templates = [
+			{
+				...makeLineTemplate(snappedStartPoint, snappedPoints, snappedBBox),
+				toleranceMultiplier: 0.5,
+			},
 			makeLineTemplate(startPoint, points, bbox),
+			{
+				...makeRectangleTemplate(snappedStartPoint, snappedPoints, snappedBBox),
+				toleranceMultiplier: 0.6,
+			},
 			makeRectangleTemplate(startPoint, points, bbox),
 		];
 
 		// Find a good fit fit
-		const selectTemplate = (maximumError: number) => {
+		const selectTemplate = (maximumAllowedError: number) => {
 			for (const template of templates) {
+				const templatePoints = template.points;
+
+				// Maximum square error to accept the template
+				const acceptMaximumSquareError =
+					maximumAllowedError * maximumAllowedError * (template.toleranceMultiplier ?? 1);
+
+				// Gets the point at index, wrapping the the start of the template if
+				// outside the array of points.
 				const templateAt = (index: number) => {
 					while (index < 0) {
-						index += template.length;
+						index += templatePoints.length;
 					}
 
-					index %= template.length;
-					return template[index];
+					index %= templatePoints.length;
+					return templatePoints[index];
 				};
 
 				let closestToFirst: Point2|null = null;
@@ -90,8 +123,8 @@ class ShapeFitBuilder implements ComponentBuilder {
 				let templateStartIndex = 0;
 
 				// Find the closest point to the startPoint
-				for (let i = 0; i < template.length; i++) {
-					const current = template[i];
+				for (let i = 0; i < templatePoints.length; i++) {
+					const current = templatePoints[i];
 					const currentSqrDist = current.minus(startPoint).magnitudeSquared();
 					if (!closestToFirst || currentSqrDist < closestToFirstSqrDist) {
 						closestToFirstSqrDist = currentSqrDist;
@@ -133,13 +166,13 @@ class ShapeFitBuilder implements ComponentBuilder {
 					templateIndex = minimumErrorAtIndex;
 					maximumSqrError = Math.max(minimumCurrentSqrError, maximumSqrError);
 
-					if (maximumSqrError > maximumError * maximumError) {
+					if (maximumSqrError > acceptMaximumSquareError) {
 						break;
 					}
 				}
 
-				if (maximumSqrError < maximumError * maximumError) {
-					return template;
+				if (maximumSqrError < acceptMaximumSquareError) {
+					return templatePoints;
 				}
 			}
 
