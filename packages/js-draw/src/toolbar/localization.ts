@@ -56,6 +56,7 @@ export interface ToolbarLocalization {
 
 	about: string;
 	inputStabilization: string;
+	strokeAutocorrect: string;
 
 	errorImageHasZeroSize: string;
 
@@ -113,7 +114,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	enableAutoresizeOption: 'Auto-resize',
 	toggleOverflow: 'More',
 	about: 'About',
-	inputStabilization: 'Input stabilization',
+	inputStabilization: 'Stabilization',
+	strokeAutocorrect: 'Autocorrect',
 
 	touchPanning: 'Touchscreen panning',
 

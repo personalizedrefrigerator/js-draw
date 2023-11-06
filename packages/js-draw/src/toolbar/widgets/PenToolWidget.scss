@@ -1,0 +1,30 @@
+
+
+// Repeat selector for extra specificity
+.toolbar--pen-tool-toggle-buttons.toolbar--pen-tool-toggle-buttons {
+	justify-content: stretch;
+	padding-top: 0;
+
+	& > * {
+		flex-grow: 1;
+	}
+
+	& > :nth-child(1) {
+		text-align: start;
+		margin-right: 2px;
+
+		.icon {
+			margin-left: 0;
+		}
+	}
+
+	& > :last-child {
+		text-align: right;
+		margin-left: 2px;
+
+		.icon {
+			float: right;
+			margin-right: 0;
+		}
+	}
+}

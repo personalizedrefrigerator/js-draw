@@ -28,6 +28,7 @@ export default class Pen extends BaseTool {
 	private styleValue: MutableReactiveValue<PenStyle>;
 	private style: PenStyle;
 
+	private shapeAutocompletionEnabled: boolean = true;
 	private completedShape: AbstractComponent|null = null;
 	private lastCompletedShape: AbstractComponent|null = null;
 	private removedCompletedShapeTime: number = 0;
@@ -126,14 +127,18 @@ export default class Pen extends BaseTool {
 			this.builder = this.style.factory(this.startPoint, this.editor.viewport);
 			this.currentDeviceType = current.device;
 
-			const stationaryDetectionConfig = {
-				maxSpeed: 5, // screenPx/s
-				maxRadius: 10, // screenPx
-				minTimeSeconds: 0.7, // s
-			};
-			this.stationaryDetector = new StationaryPenDetector(
-				current, stationaryDetectionConfig, pointer => this.autocompleteShape(pointer),
-			);
+			if (this.shapeAutocompletionEnabled) {
+				const stationaryDetectionConfig = {
+					maxSpeed: 5, // screenPx/s
+					maxRadius: 10, // screenPx
+					minTimeSeconds: 0.7, // s
+				};
+				this.stationaryDetector = new StationaryPenDetector(
+					current, stationaryDetectionConfig, pointer => this.autocompleteShape(pointer),
+				);
+			} else {
+				this.stationaryDetector = null;
+			}
 			this.lastCompletedShape = null;
 			this.removedCompletedShapeTime = 0;
 			return true;
@@ -220,6 +225,7 @@ export default class Pen extends BaseTool {
 
 	private async autocompleteShape(_lastPointer: Pointer) {
 		if (!this.builder || !this.builder.autocompleteShape) return;
+		if (!this.shapeAutocompletionEnabled) return;
 
 		// If already completed, do nothing
 		if (this.completedShape) return;
@@ -312,6 +318,17 @@ export default class Pen extends BaseTool {
 			this.setInputMapper(new InputStabilizer(this.editor.viewport));
 		}
 		this.noteUpdated();
+	}
+
+	public setStrokeAutocorrectEnabled(enabled: boolean) {
+		if (enabled !== this.shapeAutocompletionEnabled) {
+			this.shapeAutocompletionEnabled = enabled;
+			this.noteUpdated();
+		}
+	}
+
+	public getStrokeAutocorrectionEnabled() {
+		return this.shapeAutocompletionEnabled;
 	}
 
 	public getThickness() { return this.style.thickness; }

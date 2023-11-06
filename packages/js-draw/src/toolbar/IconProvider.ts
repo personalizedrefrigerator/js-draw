@@ -726,6 +726,25 @@ export default class IconProvider {
 		return icon;
 	}
 
+	public makeShapeAutocorrectIcon(): IconElemType {
+		const fill = 'none';
+		const strokeColor = 'var(--icon-color)';
+		return this.makeIconFromPath(`
+			m 79.129476,33.847107 9.967823,-0.03218 v 55 h -55 l 0.03218,-9.96782
+			M 71.1,40.8 a 30,30 0 0 1 -30,30 30,30 0 0 1 -30,-30 30,30 0 0 1 30,-30 30,30 0 0 1 30,30 L 71.1,40.8
+			M 34.1,58.8 v -25 h 25 v 0
+		`, fill, strokeColor, '7px');
+	}
+
+	public makeStrokeSmoothingIcon(): IconElemType {
+		const fill = 'none';
+		const strokeColor = 'var(--icon-color)';
+		return this.makeIconFromPath(`
+			m 31,83.2 c -50,0 30,-65 -20,-65
+			M 75,17.3 40,59.7 38.2,77.6 55.5,72.4 90.5,30 Z
+		`, fill, strokeColor, '7px');
+	}
+
 	/** Unused. @deprecated */
 	public makeFormatSelectionIcon(): IconElemType {
 		return this.makeIconFromPath(`

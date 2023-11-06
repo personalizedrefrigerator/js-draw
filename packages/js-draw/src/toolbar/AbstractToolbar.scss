@@ -217,6 +217,26 @@
 	justify-content: center;
 }
 
+.toolbar-element .toolbar--toggle-button {
+	color: var(--foreground-color-1);
+	font-weight: normal;
+
+	&[aria-checked=true] {
+		background: var(--selection-background-color);
+		color: var(--selection-foreground-color);
+	}
+
+	> .icon {
+		width: 25px;
+		height: 25px;
+		margin: 0 5px;
+	}
+
+	> * {
+		vertical-align: middle;
+	}
+}
+
 .toolbar-closeColorPickerOverlay {
 	display: none;
 	position: fixed;
