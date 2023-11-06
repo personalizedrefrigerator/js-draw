@@ -6,10 +6,13 @@ import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
+import makeSnapToGridAutocomplete from './autocomplete/makeSnapToGridAutocomplete';
 
-export const makeOutlinedCircleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	return new CircleBuilder(initialPoint, viewport);
-};
+export const makeOutlinedCircleBuilder: ComponentBuilderFactory = makeSnapToGridAutocomplete(
+	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+		return new CircleBuilder(initialPoint, viewport);
+	},
+);
 
 class CircleBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;

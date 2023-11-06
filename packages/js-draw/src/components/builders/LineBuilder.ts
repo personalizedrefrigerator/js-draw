@@ -6,10 +6,13 @@ import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
+import makeSnapToGridAutocomplete from './autocomplete/makeSnapToGridAutocomplete';
 
-export const makeLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	return new LineBuilder(initialPoint, viewport);
-};
+export const makeLineBuilder: ComponentBuilderFactory = makeSnapToGridAutocomplete(
+	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+		return new LineBuilder(initialPoint, viewport);
+	},
+);
 
 export default class LineBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;
