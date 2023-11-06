@@ -236,6 +236,12 @@ export default class Pen extends BaseTool {
 			return;
 		}
 
+		// Don't complete to empty shapes.
+		const bboxArea = correctedShape.getBBox().area;
+		if (bboxArea === 0 || !isFinite(bboxArea)) {
+			return;
+		}
+
 		this.autocorrectedShape = correctedShape;
 		this.lastAutocorrectedShape = correctedShape;
 		this.previewStroke();
