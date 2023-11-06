@@ -5,13 +5,13 @@ import AbstractComponent from '../../AbstractComponent';
 import { ComponentBuilder, ComponentBuilderFactory } from '../types';
 import AbstractRenderer from '../../../rendering/renderers/AbstractRenderer';
 
-const makeSnapToGridAutocomplete = (sourceFactory: ComponentBuilderFactory): ComponentBuilderFactory => {
+const makeSnapToGridAutocorrect = (sourceFactory: ComponentBuilderFactory): ComponentBuilderFactory => {
 	return (startPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new SnapToGridAutocompleteBuilder(sourceFactory, startPoint, viewport);
 	};
 };
 
-export default makeSnapToGridAutocomplete;
+export default makeSnapToGridAutocorrect;
 
 class SnapToGridAutocompleteBuilder implements ComponentBuilder {
 	private builder: ComponentBuilder;
@@ -43,7 +43,7 @@ class SnapToGridAutocompleteBuilder implements ComponentBuilder {
 		this.builder.addPoint(point);
 	}
 
-	public async autocompleteShape() {
+	public async autocorrectShape() {
 		const snapToGrid = (point: StrokeDataPoint) => {
 			return {
 				...point,

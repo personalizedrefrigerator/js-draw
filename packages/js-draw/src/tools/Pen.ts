@@ -29,9 +29,9 @@ export default class Pen extends BaseTool {
 	private style: PenStyle;
 
 	private shapeAutocompletionEnabled: boolean = false;
-	private completedShape: AbstractComponent|null = null;
-	private lastCompletedShape: AbstractComponent|null = null;
-	private removedCompletedShapeTime: number = 0;
+	private autocorrectedShape: AbstractComponent|null = null;
+	private lastAutocorrectedShape: AbstractComponent|null = null;
+	private removedAutocorrectedShapeTime: number = 0;
 	private stationaryDetector: StationaryPenDetector|null = null;
 
 	public constructor(
@@ -87,9 +87,9 @@ export default class Pen extends BaseTool {
 		this.editor.clearWetInk();
 		const wetInkRenderer = this.editor.display.getWetInkRenderer();
 
-		if (this.completedShape) {
+		if (this.autocorrectedShape) {
 			const visibleRect = this.editor.viewport.visibleRect;
-			this.completedShape.render(wetInkRenderer, visibleRect);
+			this.autocorrectedShape.render(wetInkRenderer, visibleRect);
 		} else {
 			this.builder?.preview(wetInkRenderer);
 		}
@@ -134,13 +134,13 @@ export default class Pen extends BaseTool {
 					minTimeSeconds: 0.5, // s
 				};
 				this.stationaryDetector = new StationaryPenDetector(
-					current, stationaryDetectionConfig, pointer => this.autocompleteShape(pointer),
+					current, stationaryDetectionConfig, pointer => this.autocorrectShape(pointer),
 				);
 			} else {
 				this.stationaryDetector = null;
 			}
-			this.lastCompletedShape = null;
-			this.removedCompletedShapeTime = 0;
+			this.lastAutocorrectedShape = null;
+			this.removedAutocorrectedShapeTime = 0;
 			return true;
 		}
 
@@ -179,9 +179,9 @@ export default class Pen extends BaseTool {
 		if (!isStationary) {
 			this.addPointToStroke(this.toStrokePoint(current));
 
-			if (this.completedShape) {
-				this.removedCompletedShapeTime = performance.now();
-				this.completedShape = null;
+			if (this.autocorrectedShape) {
+				this.removedAutocorrectedShapeTime = performance.now();
+				this.autocorrectedShape = null;
 			}
 		}
 	}
@@ -219,37 +219,37 @@ export default class Pen extends BaseTool {
 		this.stationaryDetector = null;
 	}
 
-	private removedCompletedShapeRecently() {
-		return this.removedCompletedShapeTime > performance.now() - 320;
+	private removedAutocorrectedShapeRecently() {
+		return this.removedAutocorrectedShapeTime > performance.now() - 320;
 	}
 
-	private async autocompleteShape(_lastPointer: Pointer) {
-		if (!this.builder || !this.builder.autocompleteShape) return;
+	private async autocorrectShape(_lastPointer: Pointer) {
+		if (!this.builder || !this.builder.autocorrectShape) return;
 		if (!this.shapeAutocompletionEnabled) return;
 
-		// If already completed, do nothing
-		if (this.completedShape) return;
+		// If already corrected, do nothing
+		if (this.autocorrectedShape) return;
 
 		// Activate stroke fitting
-		const completedShape = await this.builder.autocompleteShape();
-		if (!this.builder || !completedShape) {
+		const correctedShape = await this.builder.autocorrectShape();
+		if (!this.builder || !correctedShape) {
 			return;
 		}
 
-		this.completedShape = completedShape;
-		this.lastCompletedShape = completedShape;
+		this.autocorrectedShape = correctedShape;
+		this.lastAutocorrectedShape = correctedShape;
 		this.previewStroke();
 	}
 
 	private finalizeStroke() {
 		if (this.builder) {
-			// If completedShape was cleared recently enough, it was
+			// If autocorrectedShape was cleared recently enough, it was
 			// probably by mistake. Reset it.
-			if (this.lastCompletedShape && this.removedCompletedShapeRecently()) {
-				this.completedShape = this.lastCompletedShape;
+			if (this.lastAutocorrectedShape && this.removedAutocorrectedShapeRecently()) {
+				this.autocorrectedShape = this.lastAutocorrectedShape;
 			}
 
-			const stroke = this.completedShape ?? this.builder.build();
+			const stroke = this.autocorrectedShape ?? this.builder.build();
 			this.previewStroke();
 
 			if (stroke.getBBox().area > 0) {
@@ -262,8 +262,8 @@ export default class Pen extends BaseTool {
 		}
 		this.builder = null;
 		this.lastPoint = null;
-		this.completedShape = null;
-		this.lastCompletedShape = null;
+		this.autocorrectedShape = null;
+		this.lastAutocorrectedShape = null;
 		this.editor.clearWetInk();
 
 		this.stationaryDetector?.destroy();

@@ -6,9 +6,9 @@ import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
-import makeSnapToGridAutocomplete from './autocomplete/makeSnapToGridAutocomplete';
+import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
-export const makeLineBuilder: ComponentBuilderFactory = makeSnapToGridAutocomplete(
+export const makeLineBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new LineBuilder(initialPoint, viewport);
 	},

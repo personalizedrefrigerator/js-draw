@@ -5,13 +5,13 @@ import AbstractComponent from '../../AbstractComponent';
 import { ComponentBuilder, ComponentBuilderFactory } from '../types';
 import AbstractRenderer from '../../../rendering/renderers/AbstractRenderer';
 
-const makeShapeFitAutocomplete = (sourceFactory: ComponentBuilderFactory): ComponentBuilderFactory => {
+const makeShapeFitAutocorrect = (sourceFactory: ComponentBuilderFactory): ComponentBuilderFactory => {
 	return (startPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new ShapeFitBuilder(sourceFactory, startPoint, viewport);
 	};
 };
 
-export default makeShapeFitAutocomplete;
+export default makeShapeFitAutocorrect;
 
 const makeLineTemplate = (startPoint: Point2, points: Point2[], _bbox: Rect2) => {
 	return [
@@ -54,7 +54,7 @@ class ShapeFitBuilder implements ComponentBuilder {
 		this.builder.addPoint(point);
 	}
 
-	public async autocompleteShape() {
+	public async autocorrectShape() {
 		// Use screen points so that snapped shapes rotate with the screen.
 		const startPoint = this.viewport.canvasToScreen(this.startPoint.pos);
 		const points = this.points.map(point => this.viewport.canvasToScreen(point.pos));

@@ -6,15 +6,15 @@ import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
-import makeSnapToGridAutocomplete from './autocomplete/makeSnapToGridAutocomplete';
+import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
-export const makeFilledRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocomplete(
+export const makeFilledRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new RectangleBuilder(initialPoint, true, viewport);
 	},
 );
 
-export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocomplete(
+export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new RectangleBuilder(initialPoint, false, viewport);
 	},

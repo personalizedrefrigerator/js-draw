@@ -15,7 +15,7 @@ export interface ComponentBuilder {
 	//
 	// Although this returns a Promise, it should return *as fast as
 	// possible*.
-	autocompleteShape?: ()=>Promise<AbstractComponent|null>;
+	autocorrectShape?: ()=>Promise<AbstractComponent|null>;
 
 	addPoint(point: StrokeDataPoint): void;
 }

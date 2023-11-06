@@ -7,9 +7,9 @@ import { StrokeDataPoint } from '../../types';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import RenderingStyle from '../../rendering/RenderingStyle';
 import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
-import makeShapeFitAutocomplete from './autocomplete/makeShapeFitAutocomplete';
+import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
-export const makeFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAutocomplete(
+export const makeFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
 		// less than ±1 px from the curve.
