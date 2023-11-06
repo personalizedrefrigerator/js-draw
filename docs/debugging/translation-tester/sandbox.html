@@ -73,13 +73,13 @@
 		<ul>
 			<li>
 				Filled-in translation templates are compiled into JavaScript. Therefore,
-				translations can execute arbitrary JavaScript code. While this
-				translations and their scripts are run within a
+				translations can execute arbitrary JavaScript code and are
+				thus run within a
 				<a
 					href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox"
 				>
-				sandboxed <code>iframe</code></a>, you
-				should still avoid testing translations that you haven't looked through first.
+				sandboxed <code>iframe</code></a>. It is recommended to read
+				translations before testing them.
 			</li>
 			<li>
 				The contents of the textbox below are discarded after clicking "Test" &mdash; it's easy to accidentally
