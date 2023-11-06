@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/debugging",
-	"version": "1.9.0",
+	"version": "1.10.0",
 	"description": "A debugging/development library for js-draw.",
 	"types": "./dist/mjs/lib.d.ts",
 	"main": "./dist/cjs/lib.js",
