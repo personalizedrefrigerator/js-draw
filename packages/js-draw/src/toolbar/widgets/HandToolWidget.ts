@@ -145,10 +145,11 @@ export default class HandToolWidget extends BaseToolWidget {
 		const primaryTool =
 			(isGivenToolPrimary ? tool : HandToolWidget.getPrimaryHandTool(editor.toolController))
 				?? tool;
-		const overridePanZoomTool =
+		super(editor, primaryTool, 'hand-tool-widget', localizationTable);
+
+		this.overridePanZoomTool =
 			(isGivenToolPrimary ? HandToolWidget.getOverrideHandTool(editor.toolController) : tool)
 				?? tool;
-		super(editor, primaryTool, 'hand-tool-widget', localizationTable);
 
 		// Only allow toggling a hand tool if we're using the primary hand tool and not the override
 		// hand tool for this button.
@@ -163,7 +164,7 @@ export default class HandToolWidget extends BaseToolWidget {
 		const touchPanningWidget = new HandModeWidget(
 			editor,
 
-			overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
+			this.overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
 			() => this.editor.icons.makeTouchPanningIcon(),
 
 			localizationTable.touchPanning,
@@ -174,7 +175,7 @@ export default class HandToolWidget extends BaseToolWidget {
 		const rotationLockWidget = new HandModeWidget(
 			editor,
 
-			overridePanZoomTool, PanZoomMode.RotationLocked,
+			this.overridePanZoomTool, PanZoomMode.RotationLocked,
 			() => this.editor.icons.makeRotationLockIcon(),
 
 			localizationTable.lockRotation,

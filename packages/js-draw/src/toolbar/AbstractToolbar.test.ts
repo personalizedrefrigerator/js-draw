@@ -1,4 +1,4 @@
-import { EraserTool } from '../lib';
+import { Color4, EraserTool, PenTool } from '../lib';
 import createEditor from '../testing/createEditor';
 import { makeDropdownToolbar } from './DropdownToolbar';
 import { makeEdgeToolbar } from './EdgeToolbar';
@@ -72,5 +72,27 @@ describe('AbstractToolbar', () => {
 		toolbar2.addWidgetsForPrimaryTools();
 		expect(editorElement.querySelectorAll(eraserBtnQuerySelector)).toHaveLength(1);
 		expect(editorElement.querySelectorAll(selectionBtnQuerySelector)).toHaveLength(1);
+	});
+
+	test('should be possible to serialize/deserialize toolbar state', () => {
+		const editor1 = createEditor();
+		const toolbar1 = makeEdgeToolbar(editor1);
+		toolbar1.addDefaults();
+
+		const primaryPen = editor1.toolController.getMatchingTools(PenTool)[0];
+		expect(primaryPen.getColor()).not.objEq(Color4.orange);
+		primaryPen.setColor(Color4.orange);
+
+		// Should include pen color
+		const state = toolbar1.serializeState();
+
+		const editor2 = createEditor();
+		const toolbar2 = makeDropdownToolbar(editor2);
+		toolbar2.addDefaults();
+
+		const primaryPen2 = editor2.toolController.getMatchingTools(PenTool)[0];
+		expect(primaryPen2.getColor()).not.objEq(Color4.orange);
+		toolbar2.deserializeState(state);
+		expect(primaryPen2.getColor()).objEq(Color4.orange);
 	});
 });
