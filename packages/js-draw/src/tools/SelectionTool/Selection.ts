@@ -196,6 +196,20 @@ export default class Selection {
 		}
 	}
 
+	private getDeltaZIndexToMoveSelectionToTop() {
+		if (this.selectedElems.length === 0) {
+			return 0;
+		}
+
+		const selectedBottommostZIndex = this.selectedElems[0].getZIndex();
+
+		const visibleObjects = this.editor.image.getElementsIntersectingRegion(this.region);
+		const topMostVisibleZIndex = visibleObjects[visibleObjects.length - 1]?.getZIndex() ?? selectedBottommostZIndex;
+		const deltaZIndex = (topMostVisibleZIndex + 1) - selectedBottommostZIndex;
+
+		return deltaZIndex;
+	}
+
 	// Applies the current transformation to the selection
 	public finalizeTransform() {
 		const fullTransform = this.transform;
@@ -207,16 +221,19 @@ export default class Selection {
 
 		this.scrollTo();
 
+		let transformPromise: void|Promise<void> = undefined;
+
 		// Make the commands undo-able.
 		// Don't check for non-empty transforms because this breaks changing the
 		// z-index of the just-transformed commands.
-		//
-		// TODO: Check whether the selectedElems are already all toplevel.
-		const transformPromise = this.editor.dispatch(
-			new Selection.ApplyTransformationCommand(
-				this, selectedElems, fullTransform,
-			)
-		);
+		if (this.selectedElems.length > 0) {
+			const deltaZIndex = this.getDeltaZIndexToMoveSelectionToTop();
+			transformPromise = this.editor.dispatch(
+				new Selection.ApplyTransformationCommand(
+					this, selectedElems, fullTransform, deltaZIndex,
+				)
+			);
+		}
 
 		// Clear renderings of any in-progress transformations
 		const wetInkRenderer = this.editor.display.getWetInkRenderer();
@@ -250,8 +267,9 @@ export default class Selection {
 			// The selection box is lost when serializing/deserializing. No need to store box rotation
 			const fullTransform: Mat33 = new Mat33(...(json.transform as Mat33Array));
 			const elemIds: string[] = (json.elems as any[] ?? []);
+			const deltaZIndex = parseInt(json.deltaZIndex ?? 0);
 
-			return new this.ApplyTransformationCommand(null, elemIds, fullTransform);
+			return new this.ApplyTransformationCommand(null, elemIds, fullTransform, deltaZIndex);
 		});
 	}
 
@@ -267,6 +285,7 @@ export default class Selection {
 
 			// Full transformation used to transform elements.
 			private fullTransform: Mat33,
+			private deltaZIndex: number,
 		) {
 			super('selection-tool-transform');
 
@@ -280,7 +299,7 @@ export default class Selection {
 			} else {
 				this.selectedElemIds = (selectedElems as AbstractComponent[]).map(elem => elem.getId());
 				this.transformCommands = selectedElems.map(elem => {
-					return elem.transformBy(this.fullTransform);
+					return elem.transformBy(this.fullTransform, deltaZIndex);
 				});
 			}
 		}
@@ -297,7 +316,7 @@ export default class Selection {
 					throw new Error(`Unable to find element with ID, ${id}.`);
 				}
 
-				return elem.transformBy(this.fullTransform);
+				return elem.transformBy(this.fullTransform, this.deltaZIndex);
 			});
 		}
 
@@ -328,6 +347,7 @@ export default class Selection {
 			return {
 				elems: this.selectedElemIds,
 				transform: this.fullTransform.toArray(),
+				deltaZIndex: this.deltaZIndex,
 			};
 		}
 
@@ -352,7 +372,7 @@ export default class Selection {
 		wetInkRenderer.clear();
 		wetInkRenderer.pushTransform(this.transform);
 
-		const viewportVisibleRect = this.editor.viewport.visibleRect;
+		const viewportVisibleRect = this.editor.viewport.visibleRect.union(this.region);
 		const visibleRect = viewportVisibleRect.transformedBoundingBox(this.transform.inverse());
 
 		for (const elem of this.selectedElems) {
@@ -674,8 +694,9 @@ export default class Selection {
 		if (wasTransforming) {
 			// Don't update the selection's focus when redoing/undoing
 			const selectionToUpdate: Selection|null = null;
+			const deltaZIndex = this.getDeltaZIndexToMoveSelectionToTop();
 			tmpApplyCommand = new Selection.ApplyTransformationCommand(
-				selectionToUpdate, this.selectedElems, this.transform
+				selectionToUpdate, this.selectedElems, this.transform, deltaZIndex,
 			);
 
 			// Transform to ensure that the duplicates are in the correct location

@@ -214,14 +214,16 @@ export default abstract class AbstractComponent {
 
 	// Returns a command that, when applied, transforms this by [affineTransfm] and
 	// updates the editor.
-	// This also increases the element's z-index so that it is on top.
-	public transformBy(affineTransfm: Mat33): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);
+	// If `deltaZIndex` is not given, this also increases the element's z-index so that it is on top.
+	public transformBy(affineTransfm: Mat33, deltaZIndex?: number): SerializableCommand {
+		deltaZIndex ??= (AbstractComponent.zIndexCounter++) - this.getZIndex();
+		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), deltaZIndex, this);
 	}
 
 	// Returns a command that updates this component's z-index.
 	public setZIndex(newZIndex: number): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex, this.getZIndex());
+		const deltaZIndex = newZIndex - this.getZIndex();
+		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), deltaZIndex, this);
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
@@ -245,7 +247,10 @@ export default abstract class AbstractComponent {
 	private static transformElementCommandId = 'transform-element';
 
 	private static TransformElementCommand = class extends UnresolvedSerializableCommand {
-		private targetZIndex: number;
+		// Backwards compatibility.
+		// TODO: Remove at next major release
+		private _targetZIndex: number;
+		private _origZIndex: number;
 
 		// Construct a new TransformElementCommand. `component`, while optional, should
 		// be provided if available. If not provided, it will be fetched from the editor's
@@ -253,20 +258,22 @@ export default abstract class AbstractComponent {
 		public constructor(
 			private affineTransfm: Mat33,
 			componentID: string,
+			private deltaZIndex: number,
 			component?: AbstractComponent,
-			targetZIndex?: number,
-			private origZIndex?: number,
 		) {
 			super(AbstractComponent.transformElementCommandId, componentID, component);
-			this.targetZIndex = targetZIndex ?? AbstractComponent.zIndexCounter++;
+			this.deltaZIndex = deltaZIndex ?? null;
 
-			// Ensure that we keep drawing on top even after changing the z-index.
-			if (this.targetZIndex >= AbstractComponent.zIndexCounter) {
-				AbstractComponent.zIndexCounter = this.targetZIndex + 1;
-			}
+			// Set variables needed for backwards compatibility
+			this.setVariablesForBackwardsCompatibility();
+		}
 
-			if (component && origZIndex === undefined) {
-				this.origZIndex = component.getZIndex();
+		// Preconditions: 1. Command should not be applied
+		//                2. Component should not be resolved (does nothing if no component)
+		private setVariablesForBackwardsCompatibility() {
+			if (this.component) {
+				this._targetZIndex = this.component.getZIndex() + this.deltaZIndex;
+				this._origZIndex = this.component.getZIndex();
 			}
 		}
 
@@ -276,10 +283,9 @@ export default abstract class AbstractComponent {
 			}
 
 			super.resolveComponent(image);
-			this.origZIndex ??= this.component!.getZIndex();
 		}
 
-		private updateTransform(editor: Editor, newTransfm: Mat33) {
+		private updateTransform(editor: Editor, newTransfm: Mat33, newZIndex: number) {
 			if (!this.component) {
 				throw new Error('this.component is undefined or null!');
 			}
@@ -293,7 +299,13 @@ export default abstract class AbstractComponent {
 			}
 
 			this.component.applyTransformation(newTransfm);
+			this.component.zIndex = newZIndex;
 			this.component.lastChangedTime = (new Date()).getTime();
+
+			// Ensure that future drawings are on top of the drawing.
+			if (this.component.zIndex >= AbstractComponent.zIndexCounter) {
+				AbstractComponent.zIndexCounter = this.component.zIndex + 1;
+			}
 
 			// Add the element back to the document.
 			if (hadParent) {
@@ -303,18 +315,21 @@ export default abstract class AbstractComponent {
 
 		public apply(editor: Editor) {
 			this.resolveComponent(editor.image);
+			this.setVariablesForBackwardsCompatibility();
 
-			this.component!.zIndex = this.targetZIndex;
-			this.updateTransform(editor, this.affineTransfm);
+			const targetZIndex = this.component!.getZIndex() + this.deltaZIndex;
+			this.updateTransform(editor, this.affineTransfm, targetZIndex);
 			editor.queueRerender();
 		}
 
 		public unapply(editor: Editor) {
 			this.resolveComponent(editor.image);
 
-			this.component!.zIndex = this.origZIndex!;
-			this.updateTransform(editor, this.affineTransfm.inverse());
+			const targetZIndex = this.component!.getZIndex() - this.deltaZIndex;
+			this.updateTransform(editor, this.affineTransfm.inverse(), targetZIndex);
 			editor.queueRerender();
+
+			this.setVariablesForBackwardsCompatibility();
 		}
 
 		public description(_editor: Editor, localizationTable: EditorLocalization) {
@@ -325,15 +340,21 @@ export default abstract class AbstractComponent {
 			SerializableCommand.register(AbstractComponent.transformElementCommandId, (json: any, editor: Editor) => {
 				const elem = editor.image.lookupElement(json.id) ?? undefined;
 				const transform = new Mat33(...(json.transfm as Mat33Array));
-				const targetZIndex = json.targetZIndex;
-				const origZIndex = json.origZIndex ?? undefined;
+
+				let deltaZIndex = json.deltaZIndex;
+
+				if (!isFinite(deltaZIndex)) {
+					if (isFinite(json.targetZIndex) && isFinite(json.origZIndex)) {
+						deltaZIndex = json.targetZIndex - json.origZIndex;
+					}
+					deltaZIndex = 0;
+				}
 
 				return new AbstractComponent.TransformElementCommand(
 					transform,
 					json.id,
+					deltaZIndex,
 					elem,
-					targetZIndex,
-					origZIndex,
 				);
 			});
 		}
@@ -342,8 +363,11 @@ export default abstract class AbstractComponent {
 			return {
 				id: this.componentID,
 				transfm: this.affineTransfm.toArray(),
-				targetZIndex: this.targetZIndex,
-				origZIndex: this.origZIndex,
+				deltaZIndex: this.deltaZIndex,
+
+				// Attempt backwards compatibility
+				targetZIndex: this._targetZIndex,
+				origZIndex: this._origZIndex,
 			};
 		}
 	};
