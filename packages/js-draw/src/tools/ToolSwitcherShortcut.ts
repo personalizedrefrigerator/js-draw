@@ -8,7 +8,6 @@ import BaseTool from './BaseTool';
  *
  * This is in the default set of {@link ToolController} tools.
  *
- * @deprecated This may be replaced in the future.
  */
 export default class ToolSwitcherShortcut extends BaseTool {
 	public constructor(private editor: Editor) {
