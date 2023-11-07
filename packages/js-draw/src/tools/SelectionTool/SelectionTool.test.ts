@@ -387,4 +387,22 @@ describe('SelectionTool', () => {
 
 		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
 	});
+
+	it('sendToBack should return a serializable command that sends the selection to the back', () => {
+		const {
+			editor, testStroke: selectedStroke, selectionTool
+		} = createEditorWithSingleObjectSelection(150);
+
+		// Add another stroke and send it to the back
+		const {
+			addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke
+		} = createSquareStroke(40);
+		editor.dispatch(addOtherStrokeCommand);
+		editor.dispatch(otherStroke.setZIndex(-1));
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+
+		// sendToBack should send to the back
+		editor.dispatch(selectionTool.getSelection()!.sendToBack()!);
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+	});
 });

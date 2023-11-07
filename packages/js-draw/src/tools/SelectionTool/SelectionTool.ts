@@ -8,9 +8,9 @@ import BaseTool from '../BaseTool';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
-import { duplicateSelectionShortcut, selectAllKeyboardShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
+import { duplicateSelectionShortcut, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
-import Pointer from 'js-draw/src/Pointer';
+import Pointer from '../../Pointer';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -286,7 +286,10 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
-		if (this.selectionBox && shortcucts.matchesShortcut(duplicateSelectionShortcut, event)) {
+		if (this.selectionBox && (
+			shortcucts.matchesShortcut(duplicateSelectionShortcut, event)
+				|| shortcucts.matchesShortcut(sendToBackSelectionShortcut, event)
+		)) {
 			// Handle duplication on key up — we don't want to accidentally duplicate
 			// many times.
 			return true;
@@ -421,6 +424,14 @@ export default class SelectionTool extends BaseTool {
 			this.selectionBox.duplicateSelectedObjects().then(command => {
 				this.editor.dispatch(command);
 			});
+			return true;
+		}
+
+		if (this.selectionBox && shortcucts.matchesShortcut(sendToBackSelectionShortcut, evt)) {
+			const sendToBackCommand = this.selectionBox.sendToBack();
+			if (sendToBackCommand) {
+				this.editor.dispatch(sendToBackCommand);
+			}
 			return true;
 		}
 

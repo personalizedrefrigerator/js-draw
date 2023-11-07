@@ -1,4 +1,4 @@
-import ReactiveValue from 'js-draw/src/util/ReactiveValue';
+import ReactiveValue from '../../../util/ReactiveValue';
 
 /**
  * A class that manages whether/what content is shown for a widget.

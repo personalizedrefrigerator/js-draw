@@ -18,6 +18,7 @@ import Command from '../../commands/Command';
 import { DragTransformer, ResizeTransformer, RotateTransformer } from './TransformMode';
 import { ResizeMode } from './types';
 import EditorImage from '../../image/EditorImage';
+import uniteCommands from '../../commands/uniteCommands';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -34,6 +35,7 @@ export default class Selection {
 	private transformers;
 	private transform: Mat33 = Mat33.identity;
 
+	// invariant: sorted by increasing z-index
 	private selectedElems: AbstractComponent[] = [];
 
 	private outerContainer: HTMLElement;
@@ -221,6 +223,26 @@ export default class Selection {
 		wetInkRenderer.clear();
 
 		return transformPromise;
+	}
+
+	/** Sends all selected elements to the bottom of the visible image. */
+	public sendToBack() {
+		const visibleObjects = this.editor.image.getElementsIntersectingRegion(this.editor.viewport.visibleRect);
+
+		// VisibleObjects and selectedElems should both be sorted by z-index
+		const lowestVisibleZIndex = visibleObjects[0]?.getZIndex() ?? 0;
+		const highestSelectedZIndex = this.selectedElems[this.selectedElems.length - 1]?.getZIndex() ?? 0;
+
+		const targetHighestZIndex = lowestVisibleZIndex - 1;
+		const deltaZIndex = targetHighestZIndex - highestSelectedZIndex;
+
+		if (deltaZIndex !== 0) {
+			const commands = this.selectedElems.map(elem => {
+				return elem.setZIndex(elem.getZIndex() + deltaZIndex);
+			});
+			return uniteCommands(commands, updateChunkSize);
+		}
+		return null;
 	}
 
 	static {
@@ -706,7 +728,11 @@ export default class Selection {
 		this.addRemoveSelectionFromImage(true);
 		this.originalRegion = bbox;
 		this.selectionTightBoundingBox = bbox;
+
 		this.selectedElems = objects.filter(object => object.isSelectable());
+		// Enforce increasing z-index invariant
+		this.selectedElems.sort((a, b) => a.getZIndex() - b.getZIndex());
+
 		this.padRegion();
 		this.updateUI();
 	}
