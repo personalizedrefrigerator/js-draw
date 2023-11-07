@@ -1,4 +1,15 @@
 
+# 1.11.0
+ * Features
+    * Associate a keyboard shortcut with "Exit" (<kbd>Alt</kbd>-<kbd>Q</kbd>) and allow re-assigning it.
+    * Adds a keyboard shortcut for "send selection to back"
+ * Changes
+    * Fixed `AbstractToolbar.addDefaultToolWidgets` not always adding tool widgets in the correct order.
+       - To be consistent with keyboard shortcuts, tools should be added in the same order that they appear in the
+         list of primary tools.
+ * Bug fixes
+    * Fixed selection z-index not reset when undoing a deserialized selection transform command.
+
 # 1.10.0
  * Features
     * Added **autocorrect** for strokes &mdash; holding the pen stationary after drawing replaces near-rectangles and lines with lines and rectangles.
