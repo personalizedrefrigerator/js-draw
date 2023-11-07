@@ -59,6 +59,7 @@ export default abstract class AbstractComponent {
 	private id: string;
 
 	// Topmost z-index
+	// TODO: Should be a property of the EditorImage.
 	private static zIndexCounter: number = 0;
 
 	protected constructor(
@@ -423,8 +424,16 @@ export default abstract class AbstractComponent {
 		}
 
 		const instance = this.deserializationCallbacks[json.name]!(json.data);
-		instance.zIndex = json.zIndex;
 		instance.id = json.id;
+
+		if (isFinite(json.zIndex)) {
+			instance.zIndex = json.zIndex;
+
+			// Ensure that new components will be added on top.
+			AbstractComponent.zIndexCounter = Math.max(
+				AbstractComponent.zIndexCounter, instance.zIndex + 1
+			);
+		}
 
 		// TODO: What should we do with json.loadSaveData?
 		//       If we attach it to [instance], we create a potential security risk — loadSaveData
