@@ -274,6 +274,10 @@ export default class SelectionTool extends BaseTool {
 		'i', 'I', 'o', 'O',
 		'Control', 'Meta',
 	];
+	// Whether the last keypress corresponded to an action that didn't transform the
+	// selection (and thus does not need to be finalized on onKeyUp).
+	private hasUnfinalizedTransformFromKeyPress: boolean = false;
+
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		const shortcucts = this.editor.shortcuts;
 
@@ -386,6 +390,9 @@ export default class SelectionTool extends BaseTool {
 			this.selectionBox.setTransform(oldTransform.rightMul(transform));
 
 			this.selectionBox.scrollTo();
+
+			// The transformation needs to be finalized at some point (on key up)
+			this.hasUnfinalizedTransformFromKeyPress = true;
 		}
 
 		if (this.selectionBox && !handled && (event.key === 'Delete' || event.key === 'Backspace')) {
@@ -422,8 +429,14 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
+		// If we don't need to finalize the transform
+		if (!this.hasUnfinalizedTransformFromKeyPress) {
+			return true;
+		}
+
 		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
 			this.selectionBox.finalizeTransform();
+			this.hasUnfinalizedTransformFromKeyPress = false;
 			return true;
 		}
 		return false;
