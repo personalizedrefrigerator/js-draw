@@ -1,6 +1,6 @@
 {
   "name": "js-draw",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
   "types": "./dist/mjs/lib.d.ts",
   "main": "./dist/cjs/lib.js",
