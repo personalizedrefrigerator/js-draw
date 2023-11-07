@@ -386,6 +386,14 @@ describe('SelectionTool', () => {
 		sendPenEvent(editor, InputEvtType.PointerUpEvt, clickLocation);
 
 		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+
+		// Undoing should undo changing the z-index
+		editor.history.undo();
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		// ...and redoing should also work
+		editor.history.redo();
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
 	});
 
 	it('sendToBack should return a serializable command that sends the selection to the back', () => {
@@ -404,5 +412,9 @@ describe('SelectionTool', () => {
 		// sendToBack should send to the back
 		editor.dispatch(selectionTool.getSelection()!.sendToBack()!);
 		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		// Undo should work correctly
+		editor.history.undo();
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
 	});
 });
