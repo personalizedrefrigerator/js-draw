@@ -127,22 +127,32 @@ class HandModeWidget extends BaseWidget {
 export default class HandToolWidget extends BaseToolWidget {
 	private allowTogglingBaseTool: boolean;
 
+	// Pan zoom tool that overrides all other tools (enabling this tool for a device
+	// causes that device to pan/zoom instead of interact with the primary tools)
+	protected overridePanZoomTool: PanZoom;
+
 	public constructor(
 		editor: Editor,
-
-		// Pan zoom tool that overrides all other tools (enabling this tool for a device
-		// causes that device to pan/zoom instead of interact with the primary tools)
-		protected overridePanZoomTool: PanZoom,
-
+		// Can either be the primary pan/zoom tool (in the primary tools list) or
+		// the override pan/zoom tool.
+		// If the override pan/zoom tool, the primary will be gotten from the editor's
+		// tool controller.
+		// If the primary, the override will be gotten from the editor's tool controller.
+		tool: PanZoom,
 		localizationTable: ToolbarLocalization,
 	) {
-		const primaryHandTool = HandToolWidget.getPrimaryHandTool(editor.toolController);
-		const tool = primaryHandTool ?? overridePanZoomTool;
-		super(editor, tool, 'hand-tool-widget', localizationTable);
+		const isGivenToolPrimary = editor.toolController.getPrimaryTools().includes(tool);
+		const primaryTool =
+			(isGivenToolPrimary ? tool : HandToolWidget.getPrimaryHandTool(editor.toolController))
+				?? tool;
+		const overridePanZoomTool =
+			(isGivenToolPrimary ? HandToolWidget.getOverrideHandTool(editor.toolController) : tool)
+				?? tool;
+		super(editor, primaryTool, 'hand-tool-widget', localizationTable);
 
 		// Only allow toggling a hand tool if we're using the primary hand tool and not the override
 		// hand tool for this button.
-		this.allowTogglingBaseTool = primaryHandTool !== null;
+		this.allowTogglingBaseTool = primaryTool !== null;
 
 		// Allow showing/hiding the dropdown, even if `overridePanZoomTool` isn't enabled.
 		if (!this.allowTogglingBaseTool) {
@@ -175,14 +185,20 @@ export default class HandToolWidget extends BaseToolWidget {
 		this.addSubWidget(rotationLockWidget);
 	}
 
-	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
-		return false;
-	}
-
 	private static getPrimaryHandTool(toolController: ToolController): PanZoom|null {
 		const primaryPanZoomToolList = toolController.getPrimaryTools().filter(tool => tool instanceof PanZoom);
 		const primaryPanZoomTool = primaryPanZoomToolList[0];
 		return primaryPanZoomTool as PanZoom|null;
+	}
+
+	private static getOverrideHandTool(toolController: ToolController): PanZoom|null {
+		const panZoomToolList = toolController.getMatchingTools(PanZoom);
+		const panZoomTool = panZoomToolList[0];
+		return panZoomTool as PanZoom|null;
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
 	}
 
 	protected getTitle(): string {
