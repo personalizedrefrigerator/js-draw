@@ -63,7 +63,8 @@ export default abstract class BaseWidget {
 		this.icon = null;
 		this.container = document.createElement('div');
 		this.container.classList.add(
-			`${toolbarCSSPrefix}toolContainer`, `${toolbarCSSPrefix}toolButtonContainer`
+			`${toolbarCSSPrefix}toolContainer`, `${toolbarCSSPrefix}toolButtonContainer`,
+			`${toolbarCSSPrefix}internalWidgetId--${id.replace(/[^a-zA-Z0-9_]/g, '-')}`,
 		);
 		this.dropdownContent = document.createElement('div');
 		this.#hasDropdown = false;

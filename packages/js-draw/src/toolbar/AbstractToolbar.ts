@@ -22,6 +22,7 @@ import { DispatcherEventListener } from '../EventDispatcher';
 import { Color4 } from '@js-draw/math';
 import { toolbarCSSPrefix } from './constants';
 import SaveActionWidget from './widgets/SaveActionWidget';
+import { BaseTool } from '../lib';
 
 type UpdateColorisCallback = ()=>void;
 type WidgetByIdMap = Record<string, BaseWidget>;
@@ -505,34 +506,54 @@ export default abstract class AbstractToolbar {
 	}
 
 	/**
-	 * Adds toolbar widgets based on the enabled tools.
+	 * Adds widgets for pen/eraser/selection/text/pan-zoom primary tools.
+	 *
+	 * If `filter` returns `false` for a tool, no widget is added for that tool.
+	 * See {@link addDefaultToolWidgets}
+	 */
+	public addWidgetsForPrimaryTools(filter?: (tool: BaseTool)=>boolean) {
+		for (const tool of this.editor.toolController.getPrimaryTools()) {
+			if (filter && !filter?.(tool)) {
+				continue;
+			}
+
+			if (tool instanceof PenTool) {
+				const widget = new PenToolWidget(
+					this.editor, tool, this.localizationTable,
+				);
+				this.addWidget(widget);
+			}
+			else if (tool instanceof EraserTool) {
+				this.addWidget(new EraserWidget(this.editor, tool, this.localizationTable));
+			}
+			else if (tool instanceof SelectionTool) {
+				this.addWidget(new SelectionToolWidget(this.editor, tool, this.localizationTable));
+			}
+			else if (tool instanceof TextTool) {
+				this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
+			}
+			else if (tool instanceof PanZoomTool) {
+				this.addWidget(new HandToolWidget(this.editor, tool, this.localizationTable));
+			}
+		}
+	}
+
+	/**
+	 * Adds toolbar widgets based on the enabled tools, and additional tool-like
+	 * buttons (e.g. {@link DocumentPropertiesWidget} and {@link InsertImageWidget}).
 	 */
 	public addDefaultToolWidgets() {
-		const toolController = this.editor.toolController;
-		for (const tool of toolController.getMatchingTools(PenTool)) {
-			const widget = new PenToolWidget(
-				this.editor, tool, this.localizationTable,
-			);
-			this.addWidget(widget);
-		}
+		this.addWidgetsForPrimaryTools();
+		this.addDefaultEditorControlWidgets();
+	}
 
-		for (const tool of toolController.getMatchingTools(EraserTool)) {
-			this.addWidget(new EraserWidget(this.editor, tool, this.localizationTable));
-		}
-
-		for (const tool of toolController.getMatchingTools(SelectionTool)) {
-			this.addWidget(new SelectionToolWidget(this.editor, tool, this.localizationTable));
-		}
-
-		for (const tool of toolController.getMatchingTools(TextTool)) {
-			this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
-		}
-
-		const panZoomTool = toolController.getMatchingTools(PanZoomTool)[0];
-		if (panZoomTool) {
-			this.addWidget(new HandToolWidget(this.editor, panZoomTool, this.localizationTable));
-		}
-
+	/**
+	 * Adds widgets that don't correspond to tools, but do allow the user to control
+	 * the editor in some way.
+	 *
+	 * By default, this includes {@link DocumentPropertiesWidget} and {@link InsertImageWidget}.
+	 */
+	public addDefaultEditorControlWidgets() {
 		this.addWidget(new DocumentPropertiesWidget(this.editor, this.localizationTable));
 		this.addWidget(new InsertImageWidget(this.editor, this.localizationTable));
 	}

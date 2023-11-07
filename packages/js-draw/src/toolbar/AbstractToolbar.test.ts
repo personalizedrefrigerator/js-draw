@@ -1,3 +1,4 @@
+import { EraserTool } from '../lib';
 import createEditor from '../testing/createEditor';
 import { makeDropdownToolbar } from './DropdownToolbar';
 import { makeEdgeToolbar } from './EdgeToolbar';
@@ -5,7 +6,7 @@ import { makeEdgeToolbar } from './EdgeToolbar';
 const toolbarConstructors = [ makeDropdownToolbar, makeEdgeToolbar ];
 
 describe('AbstractToolbar', () => {
-	it('should allow overriding labels and icons of save and exit buttons', () => {
+	test('should allow overriding labels and icons of save and exit buttons', () => {
 		const editor = createEditor();
 		const editorElement = editor.getRootElement();
 
@@ -51,5 +52,25 @@ describe('AbstractToolbar', () => {
 			// Clean up for the next toolbar
 			toolbar.remove();
 		}
+	});
+
+	test('addWidgetsForPrimaryTools should support filtering', () => {
+		const editor = createEditor();
+		const editorElement = editor.getRootElement();
+
+		const toolbar1 = makeEdgeToolbar(editor);
+		toolbar1.addWidgetsForPrimaryTools(tool => !(tool instanceof EraserTool));
+
+		const eraserBtnQuerySelector = '.toolbar-internalWidgetId--eraser-tool-widget';
+		expect(editorElement.querySelectorAll(eraserBtnQuerySelector)).toHaveLength(0);
+		const selectionBtnQuerySelector = '.toolbar-internalWidgetId--selection-tool-widget';
+		expect(editorElement.querySelectorAll(selectionBtnQuerySelector)).toHaveLength(1);
+
+		toolbar1.remove();
+
+		const toolbar2 = makeEdgeToolbar(editor);
+		toolbar2.addWidgetsForPrimaryTools();
+		expect(editorElement.querySelectorAll(eraserBtnQuerySelector)).toHaveLength(1);
+		expect(editorElement.querySelectorAll(selectionBtnQuerySelector)).toHaveLength(1);
 	});
 });
