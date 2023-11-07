@@ -21,6 +21,11 @@ for (let i = 0; i < selectStrokeTypeKeyboardShortcutIds.length; i++) {
 // Save
 export const saveKeyboardShortcut = 'jsdraw.toolbar.SaveActionWidget.save';
 KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	saveKeyboardShortcut, [ 'ctrlOrMeta+KeyS' ], 'Save'
+	saveKeyboardShortcut, [ 'ctrlOrMeta+KeyS' ], 'Save',
 );
 
+// Exit
+export const exitKeyboardShortcut = 'jsdraw.toolbar.ExitActionWidget.exit';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	exitKeyboardShortcut, [ 'Alt+KeyQ' ], 'Exit',
+);

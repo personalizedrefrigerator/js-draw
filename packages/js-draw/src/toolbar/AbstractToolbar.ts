@@ -23,6 +23,7 @@ import { Color4 } from '@js-draw/math';
 import { toolbarCSSPrefix } from './constants';
 import SaveActionWidget from './widgets/SaveActionWidget';
 import { BaseTool } from '../lib';
+import ExitActionWidget from './widgets/ExitActionWidget';
 
 type UpdateColorisCallback = ()=>void;
 type WidgetByIdMap = Record<string, BaseWidget>;
@@ -420,7 +421,6 @@ export default abstract class AbstractToolbar {
 		const widget = new SaveActionWidget(
 			this.editor, this.localizationTable, saveCallback, labelOverride,
 		);
-		widget.setTags([ ToolbarWidgetTag.Save ]);
 		this.addWidget(widget);
 
 		return widget;
@@ -429,7 +429,7 @@ export default abstract class AbstractToolbar {
 	/**
 	 * Adds an "Exit" button that, when clicked, calls `exitCallback`.
 	 *
-	 * **Note**: This is roughly equivalent to
+	 * **Note**: This is *roughly* equivalent to
 	 * ```ts
 	 * toolbar.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
 	 *   label: this.editor.localization.exit,
@@ -446,15 +446,12 @@ export default abstract class AbstractToolbar {
 	 * @final
 	 */
 	public addExitButton(exitCallback: ()=>void, labelOverride: Partial<ActionButtonIcon> = {}): BaseWidget {
-		return this.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
-			label: this.editor.localization.exit,
-			icon: this.editor.icons.makeCloseIcon(),
-			...labelOverride,
-		}, () => {
-			exitCallback();
-		}, {
-			autoDisableInReadOnlyEditors: false,
-		});
+		const widget = new ExitActionWidget(
+			this.editor, this.localizationTable, exitCallback, labelOverride,
+		);
+		this.addWidget(widget);
+
+		return widget;
 	}
 
 	/**
