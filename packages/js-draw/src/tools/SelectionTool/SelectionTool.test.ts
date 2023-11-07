@@ -10,6 +10,7 @@ import { Rect2, Vec2, Path, Color4 } from '@js-draw/math';
 import sendPenEvent from '../../testing/sendPenEvent';
 import { pathToRenderable } from '../../rendering/RenderablePathSpec';
 import { EditorEventType } from '../../types';
+import SerializableCommand from '../../commands/SerializableCommand';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(SelectionTool)[0];
@@ -416,5 +417,18 @@ describe('SelectionTool', () => {
 		// Undo should work correctly
 		editor.history.undo();
 		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+
+		// Should be serializable
+		const serialized = selectionTool.getSelection()!.sendToBack()!.serialize();
+		const deserialized = SerializableCommand.deserialize(serialized, editor);
+
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+		editor.dispatch(deserialized);
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		editor.history.undo();
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+		editor.history.redo();
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
 	});
 });

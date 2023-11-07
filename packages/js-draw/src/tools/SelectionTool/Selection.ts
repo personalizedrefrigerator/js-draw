@@ -299,12 +299,14 @@ export default class Selection {
 			} else {
 				this.selectedElemIds = (selectedElems as AbstractComponent[]).map(elem => elem.getId());
 				this.transformCommands = selectedElems.map(elem => {
-					return elem.transformBy(this.fullTransform, deltaZIndex);
+					return elem.setZIndexAndTransformBy(
+						this.fullTransform, elem.getZIndex() + deltaZIndex
+					);
 				});
 			}
 		}
 
-		private resolveToElems(editor: Editor) {
+		private resolveToElems(editor: Editor, isUndoing: boolean) {
 			if (this.transformCommands) {
 				return;
 			}
@@ -316,12 +318,24 @@ export default class Selection {
 					throw new Error(`Unable to find element with ID, ${id}.`);
 				}
 
-				return elem.transformBy(this.fullTransform, this.deltaZIndex);
+				let originalZIndex = elem.getZIndex();
+				let targetZIndex = elem.getZIndex() + this.deltaZIndex;
+
+				// If the command has already been applied, the element should currently
+				// have the target z-index.
+				if (isUndoing) {
+					targetZIndex = elem.getZIndex();
+					originalZIndex = elem.getZIndex() - this.deltaZIndex;
+				}
+
+				return elem.setZIndexAndTransformBy(
+					this.fullTransform, targetZIndex, originalZIndex,
+				);
 			});
 		}
 
 		public async apply(editor: Editor) {
-			this.resolveToElems(editor);
+			this.resolveToElems(editor, false);
 
 			this.selection?.setTransform(this.fullTransform, false);
 			this.selection?.updateUI();
@@ -332,7 +346,7 @@ export default class Selection {
 		}
 
 		public async unapply(editor: Editor) {
-			this.resolveToElems(editor);
+			this.resolveToElems(editor, true);
 
 			this.selection?.setTransform(this.fullTransform.inverse(), false);
 			this.selection?.updateUI();
