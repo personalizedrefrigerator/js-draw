@@ -570,6 +570,19 @@ export class Editor {
 	}
 
 	/**
+	 * A protected method that can override setPointerCapture in environments where it may fail
+	 * (e.g. with synthetic events). @internal
+	 */
+	protected setPointerCapture(target: HTMLElement, pointerId: number) {
+		target.setPointerCapture(pointerId);
+	}
+
+	/** Can be overridden in a testing environment to handle synthetic events. @internal */
+	protected releasePointerCapture(target: HTMLElement, pointerId: number) {
+		target.releasePointerCapture(pointerId);
+	}
+
+	/**
 	 * Dispatches a `PointerEvent` to the editor. The target element for `evt` must have the same top left
 	 * as the content of the editor.
 	 */
@@ -581,7 +594,7 @@ export class Editor {
 			const pointer = Pointer.ofEvent(evt, true, this.viewport, eventsRelativeTo);
 			this.pointers[pointer.id] = pointer;
 
-			eventTarget.setPointerCapture(pointer.id);
+			this.setPointerCapture(eventTarget, pointer.id);
 			const event: PointerEvt = {
 				kind: InputEvtType.PointerDownEvt,
 				current: pointer,
@@ -625,7 +638,7 @@ export class Editor {
 			}
 
 			this.pointers[pointer.id] = pointer;
-			eventTarget.releasePointerCapture(pointer.id);
+			this.releasePointerCapture(eventTarget, pointer.id);
 			if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.PointerUpEvt,
 				current: pointer,
@@ -856,7 +869,7 @@ export class Editor {
 				};
 
 				// Capture the pointer so we receive future events even if the overlay is hidden.
-				elem.setPointerCapture(event.pointerId);
+				this.setPointerCapture(elem, event.pointerId);
 
 				// Don't send to the editor.
 				sendToEditor = false;
@@ -892,7 +905,7 @@ export class Editor {
 				(eventName === 'pointerup' || eventName === 'pointercancel')
 				&& gestureData[pointerId] && gestureData[pointerId].eventBuffer.length > 0
 			) {
-				elem.releasePointerCapture(event.pointerId);
+				this.releasePointerCapture(elem, event.pointerId);
 
 				// Don't send to the editor.
 				sendToEditor = false;

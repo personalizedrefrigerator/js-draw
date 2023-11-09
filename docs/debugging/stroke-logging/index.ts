@@ -19,6 +19,12 @@ const addToLog = (data: any) => {
 };
 autoUpdateLogCheckbox.oninput = () => updateLog();
 
+const playbackButton = document.querySelector<HTMLButtonElement>('#playback-btn')!;
+playbackButton.style.display = 'none';
+log.oninput = () => {
+	playbackButton.style.display = '';
+};
+
 
 class LoggingEditor extends jsdraw.Editor {
 	public override handleHTMLPointerEvent(eventType: 'pointerdown'|'pointermove'|'pointerup'|'pointercancel', evt: PointerEvent) {
@@ -41,6 +47,22 @@ class LoggingEditor extends jsdraw.Editor {
 		addToLog(data);
 
 		return result;
+	}
+
+	protected override setPointerCapture(target: HTMLElement, pointer: number) {
+		try {
+			target.setPointerCapture(pointer);
+		} catch(error) {
+			console.warn(error);
+		}
+	}
+
+	protected override releasePointerCapture(target: HTMLElement, pointer: number) {
+		try {
+			target.releasePointerCapture(pointer);
+		} catch(error) {
+			console.warn(error);
+		}
 	}
 
 	private logKeyEvent(htmlEvent: KeyboardEvent, type: string) {
@@ -137,8 +159,74 @@ clearButton.onclick = () => {
 	updateLog();
 };
 
+const playBackLog = async (rate: number) => {
+	const data = JSON.parse('[' + log.value + ']');
+	data.reverse();
+
+	let lastEventTimestamp: number|null = null;
+	let encounteredKeyOrPointerDown = false;
+
+	for (const event of data) {
+		if (!event.timeStamp) continue;
+
+		lastEventTimestamp ??= event.timeStamp;
+		const deltaTime = event.timeStamp - lastEventTimestamp!;
+
+		// Ignore any mouse movement/extraneous events that the
+		// user probably doesn't care about.
+		if (encounteredKeyOrPointerDown) {
+			await new Promise<void>((resolve) => {
+				setTimeout(() => resolve(), deltaTime / rate);
+			});
+		}
+
+		lastEventTimestamp = event.timeStamp;
+
+		if (['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].includes(event.eventType)) {
+
+			const ptrEvent = new PointerEvent(event.eventType, {
+				clientX: event.x,
+				clientY: event.y,
+				x: event.x,
+				y: event.y,
+				isPrimary: event.isPrimary,
+				pointerType: event.pointerType,
+				pointerId: event.pointerId,
+				buttons: event.buttons,
+				pressure: event.pressure,
+			} as any);
+
+			editor.handleHTMLPointerEvent(event.eventType, ptrEvent);
+
+		}
+		else if (event.eventType === 'keydown' || event.eventType === 'keyup') {
+			lastEventTimestamp ??= event.timeStamp;
+			const keyEvent = new KeyboardEvent(event.eventType, {
+				key: event.key,
+				code: event.code,
+
+				ctrlKey: event.ctrlKey,
+				altKey: event.altKey,
+				metaKey: event.metaKey,
+				shiftKey: event.shiftKey,
+			});
+
+			if (event.eventType === 'keydown') {
+				editor.handleHTMLKeyDownEvent(keyEvent);
+			} else {
+				editor.handleHTMLKeyUpEvent(keyEvent);
+			}
+		}
+
+		if (event.eventType === 'keydown' || event.eventType === 'pointerdown') {
+			encounteredKeyOrPointerDown = true;
+		}
+	}
+};
+playbackButton.onclick = () => playBackLog(1);
+
 log.value = 'Started successfully! Click "Update" to show the log.';
 
 // To facilitate debugging
 (window as any).editor = editor;
-
+(window as any).playBackLog = playBackLog;
