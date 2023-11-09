@@ -74,7 +74,7 @@ export default class Display {
 			},
 			blockResolution: cacheBlockResolution,
 			cacheSize: 600 * 600 * 4 * 90,
-			maxScale: 1.3,
+			maxScale: Math.max(1, 1.3 / window.devicePixelRatio),
 
 			// Require about 20 strokes with 4 parts each to cache an image in one of the
 			// parts of the cache grid.
