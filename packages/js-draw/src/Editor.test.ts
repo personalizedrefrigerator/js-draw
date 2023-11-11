@@ -1,5 +1,5 @@
 import { BaseTool, InputEvtType, RenderingMode, SelectionTool, sendPenEvent } from './lib';
-import { Vec2 } from '@js-draw/math';
+import { Point2, Vec2 } from '@js-draw/math';
 import Editor from './Editor';
 import createEditor from './testing/createEditor';
 
@@ -217,5 +217,57 @@ describe('Editor', () => {
 		selectFirstTool();
 		drawStroke();
 		expect(editor.image.getAllElements()).toHaveLength(2);
+	});
+
+	it('handlePointerEventsExceptClicksFrom should not consider a large circle a click', async () => {
+		const editor = createEditor();
+		expect(editor.image.getAllElements()).toHaveLength(0);
+
+		const testElement = document.createElement('div');
+		const eventHandler = editor.handlePointerEventsExceptClicksFrom(testElement);
+
+		const dispatchEventAt = (eventName: 'pointerdown'|'pointermove'|'pointerup', pos: Point2) => {
+			testElement.dispatchEvent(new PointerEvent(eventName, {
+				clientX: pos.x,
+				clientY: pos.y,
+				screenX: pos.x,
+				screenY: pos.y,
+				pointerId: 0,
+				pointerType: 'mouse',
+				isPrimary: true,
+			}));
+		};
+
+		// An actual click
+		dispatchEventAt('pointerdown', Vec2.of(100, 0));
+		await jest.advanceTimersByTimeAsync(10);
+		dispatchEventAt('pointermove', Vec2.of(100.01, 0.01));
+		await jest.advanceTimersByTimeAsync(10);
+		dispatchEventAt('pointerup', Vec2.of(100.01, 0.01));
+		await jest.advanceTimersByTimeAsync(10);
+
+		// Should not have handled a click
+		expect(editor.image.getAllElements()).toHaveLength(0);
+
+		// Should allow drawing a circle
+		const circleRadius = 200;
+		dispatchEventAt('pointerdown', Vec2.of(circleRadius, 0));
+
+		const maxSteps = 10;
+		for (let i = 0; i <= maxSteps; i += 1) {
+			await jest.advanceTimersByTimeAsync(10);
+
+			const angle = i / maxSteps * Math.PI * 2;
+			const circlePoint = Vec2.of(Math.cos(angle) * circleRadius, Math.sin(angle) * circleRadius);
+			dispatchEventAt('pointermove', circlePoint);
+		}
+
+		dispatchEventAt('pointermove', Vec2.of(circleRadius, 0));
+		dispatchEventAt('pointerup', Vec2.of(circleRadius, 0));
+		await jest.advanceTimersByTimeAsync(10);
+
+		expect(editor.image.getAllElements()).toHaveLength(1);
+
+		eventHandler.remove();
 	});
 });

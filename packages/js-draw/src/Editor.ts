@@ -841,6 +841,7 @@ export class Editor {
 			// Buffer events: Send events to the editor only if the pointer has moved enough to
 			// suggest that the user is attempting to draw, rather than click to close the color picker.
 			eventBuffer: [ HTMLPointerEventName, PointerEvent ][];
+			hasMovedSignificantly: boolean;
 			startPoint: Point2;
 		};
 
@@ -853,7 +854,10 @@ export class Editor {
 			}
 
 			// Position of the current event.
-			const currentPos = Vec2.of(event.pageX, event.pageY);
+			// jsdom doesn't seem to support pageX/pageY -- use clientX/clientY if unavailable
+			const currentPos = Vec2.of(
+				event.pageX ?? event.clientX, event.pageY ?? event.clientY
+			);
 
 			const pointerId = event.pointerId ?? 0;
 
@@ -866,6 +870,7 @@ export class Editor {
 				gestureData[pointerId] = {
 					eventBuffer: [ [eventName, event] ],
 					startPoint: currentPos,
+					hasMovedSignificantly: false,
 				};
 
 				// Capture the pointer so we receive future events even if the overlay is hidden.
@@ -881,7 +886,7 @@ export class Editor {
 				// Skip if the pointer hasn't moved enough to not be a "click".
 				const strokeStartThreshold = 10;
 				const isWithinClickThreshold = gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold;
-				if (isWithinClickThreshold) {
+				if (isWithinClickThreshold && !gestureData[pointerId].hasMovedSignificantly) {
 					eventBuffer.push([ eventName, event ]);
 					sendToEditor = false;
 				} else {
@@ -891,6 +896,7 @@ export class Editor {
 					}
 
 					gestureData[pointerId].eventBuffer = [];
+					gestureData[pointerId].hasMovedSignificantly = true;
 					sendToEditor = true;
 				}
 			}
