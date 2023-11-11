@@ -42,6 +42,7 @@ module.exports = {
 			'error',
 			'always'
 		],
+		'no-constant-binary-expression': 'error',
 		'no-trailing-spaces': 'error',
 		'@typescript-eslint/no-empty-function': 'off',
 		'@typescript-eslint/no-empty-interface': 'off',
