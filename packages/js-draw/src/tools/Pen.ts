@@ -129,8 +129,8 @@ export default class Pen extends BaseTool {
 
 			if (this.shapeAutocompletionEnabled) {
 				const stationaryDetectionConfig = {
-					maxSpeed: 5, // screenPx/s
-					maxRadius: 10, // screenPx
+					maxSpeed: 8.5, // screenPx/s
+					maxRadius: 11, // screenPx
 					minTimeSeconds: 0.5, // s
 				};
 				this.stationaryDetector = new StationaryPenDetector(
