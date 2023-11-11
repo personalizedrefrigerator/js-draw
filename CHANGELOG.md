@@ -1,4 +1,11 @@
 
+# 1.11.1
+ * Bug fixes and improvements
+    * Fix pressing <kbd>shift</kbd> not immediately allowing selections to snap to the x/y axes on drag.
+    * Decrease blurriness on high resolution displays at some zoom levels.
+    * Slightly increase the maximum motion required to trigger autocorrect. It was previously difficult to trigger autocorrect on some devices.
+    * Fix icons not fading correctly when disabled on some devices.
+
 # 1.11.0
  * Features
     * Associate a keyboard shortcut with "Exit" (<kbd>Alt</kbd>-<kbd>Q</kbd>) and allow re-assigning it.
