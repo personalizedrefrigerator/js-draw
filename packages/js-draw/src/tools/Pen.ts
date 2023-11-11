@@ -182,6 +182,8 @@ export default class Pen extends BaseTool {
 			if (this.autocorrectedShape) {
 				this.removedAutocorrectedShapeTime = performance.now();
 				this.autocorrectedShape = null;
+
+				this.editor.announceForAccessibility(this.editor.localization.autocorrectionCanceled);
 			}
 		}
 	}
@@ -242,6 +244,11 @@ export default class Pen extends BaseTool {
 			return;
 		}
 
+		const shapeDescription = correctedShape.description(this.editor.localization);
+		this.editor.announceForAccessibility(
+			this.editor.localization.autocorrectedTo(shapeDescription)
+		);
+
 		this.autocorrectedShape = correctedShape;
 		this.lastAutocorrectedShape = correctedShape;
 		this.previewStroke();
@@ -259,6 +266,12 @@ export default class Pen extends BaseTool {
 			this.previewStroke();
 
 			if (stroke.getBBox().area > 0) {
+				if (stroke === this.autocorrectedShape) {
+					this.editor.announceForAccessibility(
+						this.editor.localization.autocorrectedTo(stroke.description(this.editor.localization))
+					);
+				}
+
 				const canFlatten = true;
 				const action = EditorImage.addElement(stroke, canFlatten);
 				this.editor.dispatch(action);

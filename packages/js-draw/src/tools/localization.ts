@@ -11,6 +11,9 @@ export interface ToolLocalization {
 	pipetteTool: string;
 	rightClickDragPanTool: string;
 
+	autocorrectedTo: (description: string) => string;
+	autocorrectionCanceled: string;
+
 	textTool: string;
 	enterTextToInsert: string;
 	changeTool: string;
@@ -48,6 +51,9 @@ export const defaultToolLocalization: ToolLocalization = {
 	rightClickDragPanTool: 'Right-click drag',
 	pipetteTool: 'Pick color from screen',
 	keyboardPanZoom: 'Keyboard pan/zoom shortcuts',
+
+	autocorrectedTo: (strokeDescription) => `Autocorrected to ${strokeDescription}`,
+	autocorrectionCanceled: 'Autocorrect cancelled',
 
 	textTool: 'Text',
 	enterTextToInsert: 'Text to insert',
