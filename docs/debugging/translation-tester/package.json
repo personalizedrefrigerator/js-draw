@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/translation-tester",
-	"version": "1.11.0",
+	"version": "1.11.1",
 	"description": "Allows testing a translation from a GitHub issue",
 	"license": "MIT",
 	"private": true,
@@ -11,10 +11,10 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"@js-draw/material-icons": "^1.11.0",
-		"js-draw": "^1.11.0"
+		"@js-draw/material-icons": "^1.11.1",
+		"js-draw": "^1.11.1"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.7.0"
+		"@js-draw/build-tool": "^1.11.1"
 	}
 }
