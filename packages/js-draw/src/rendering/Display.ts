@@ -74,6 +74,9 @@ export default class Display {
 			},
 			blockResolution: cacheBlockResolution,
 			cacheSize: 600 * 600 * 4 * 90,
+
+			// On higher resolution displays, don't scale cache blocks as much to decrease blurriness.
+			// TODO: Decrease the minimum cache scale as well.
 			maxScale: Math.max(1, 1.3 / window.devicePixelRatio),
 
 			// Require about 20 strokes with 4 parts each to cache an image in one of the
