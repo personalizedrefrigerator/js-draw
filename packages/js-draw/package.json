@@ -65,7 +65,7 @@
   },
   "dependencies": {
     "@js-draw/math": "^1.10.0",
-    "@melloware/coloris": "0.21.0"
+    "@melloware/coloris": "0.22.0"
   },
   "devDependencies": {
     "@js-draw/build-tool": "^1.7.0",
