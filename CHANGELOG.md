@@ -1,4 +1,8 @@
 
+# 1.11.2
+ * Bug fixes
+    * Fix drawing circles when a menu is open. Drawing while a menu is open should close the menu and allow the user to continue drawing. In this case, circles (and other shapes with start points roughly equivalent to their end points) were recognized as clicks.
+
 # 1.11.1
  * Bug fixes and improvements
     * Fix pressing <kbd>shift</kbd> not immediately allowing selections to snap to the x/y axes on drag.
