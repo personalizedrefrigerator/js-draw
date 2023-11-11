@@ -155,7 +155,7 @@ export default class ImageComponent extends AbstractComponent {
 		};
 	}
 
-	public static deserializeFromJSON(data: any): ImageComponent {
+	public static deserializeFromJSON(this: void, data: any): ImageComponent {
 		if (!(typeof data.src === 'string')) {
 			throw new Error(`${data} has invalid format! Expected src property.`);
 		}

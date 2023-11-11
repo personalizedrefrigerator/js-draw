@@ -6,7 +6,7 @@ import replaceElementWithRunnableCode from './editor/replaceElementWithRunnableC
 import { imagesPath, basePath } from './constants';
 
 
-const initRunnableElements = async () => {
+const initRunnableElements = () => {
 	const runnableElements = [...document.querySelectorAll('pre.runnable-code')] as HTMLTextAreaElement[];
 
 	for (const runnable of runnableElements) {
@@ -66,8 +66,8 @@ window.addEventListener('DOMContentLoaded', () => {
 	navigateBasedOnURL();
 });
 
-window.addEventListener('load', async () => {
-	await initRunnableElements();
+window.addEventListener('load', () => {
+	initRunnableElements();
 });
 
 (window as any).navigateTo = (packageName: string, _exportName: string) => {

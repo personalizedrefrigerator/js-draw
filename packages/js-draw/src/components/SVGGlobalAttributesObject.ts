@@ -76,7 +76,7 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 		return JSON.stringify(this.attrs);
 	}
 
-	public static deserializeFromString(_data: string): AbstractComponent {
+	public static deserializeFromString(this: void, _data: string): AbstractComponent {
 		// To be safe, don't deserialize any attributes
 		return new SVGGlobalAttributesObject([]);
 	}

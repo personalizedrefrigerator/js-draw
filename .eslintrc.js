@@ -55,6 +55,30 @@ module.exports = {
 		'@typescript-eslint/no-empty-interface': 'off',
 		'@typescript-eslint/no-inferrable-types': 'off',
 		'@typescript-eslint/no-non-null-assertion': 'off',
+
+		// A subset of the default recommended-type-checked rules.
+		// See https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/configs/recommended-type-checked.ts
+		// for the full list.
+		// Disallows TypeScript directives that restrict error reporting
+		'@typescript-eslint/ban-ts-comment': 'error',
+		// Bans types like Function and Object that should be more specific
+		'@typescript-eslint/ban-types': 'error',
+		'no-array-constructor': 'off',
+		'no-implied-eval': 'off',
+		'@typescript-eslint/no-implied-eval': 'error',
+		'no-loss-of-precision': 'off',
+		'@typescript-eslint/no-loss-of-precision': 'error',
+		'@typescript-eslint/no-array-constructor': 'error',
+		'@typescript-eslint/no-duplicate-enum-values': 'error',
+		'@typescript-eslint/no-duplicate-type-constituents': 'error',
+		'@typescript-eslint/no-extra-non-null-assertion': 'error',
+		'@typescript-eslint/no-for-in-array': 'error',
+		'@typescript-eslint/no-misused-new': 'error',
+		// Disallows ! non-null assertions in conditional chains (e.g. thing?.test!).
+		'@typescript-eslint/no-non-null-asserted-optional-chain': 'error',
+		'@typescript-eslint/no-this-alias': 'error',
+		'@typescript-eslint/unbound-method': 'error',
+
 		'@typescript-eslint/no-unused-vars': [
 			'error',
 			{

@@ -364,7 +364,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 	}
 
 	// @internal
-	public static deserializeFromJSON(json: any) {
+	public static deserializeFromJSON(this: void, json: any) {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}

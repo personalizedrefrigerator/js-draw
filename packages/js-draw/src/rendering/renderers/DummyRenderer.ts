@@ -139,4 +139,8 @@ export default class DummyRenderer extends AbstractRenderer {
 			return transform.transformVec2(point);
 		}));
 	}
+
+	public override toString() {
+		return '[DummyRenderer]';
+	}
 }

@@ -2,7 +2,7 @@
 // See https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API
 
 import path, { dirname } from 'path';
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as fs from 'fs';
 
 import forEachFileInDirectory from './forEachFileInDirectory';
@@ -17,7 +17,7 @@ type ModuleType = 'mjs'|'cjs';
 // See https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#writing-an-incremental-program-watcher
 const formatHost: ts.FormatDiagnosticsHost = {
 	getCanonicalFileName: filePath => filePath,
-	getCurrentDirectory: ts.sys.getCurrentDirectory,
+	getCurrentDirectory: () => ts.sys.getCurrentDirectory(),
 	getNewLine: () => ts.sys.newLine,
 };
 
@@ -48,14 +48,14 @@ class CompiledTypeScriptDirectory {
 		const searchPath = './';
 		let path = ts.findConfigFile(
 			searchPath,
-			ts.sys.fileExists,
+			path => ts.sys.fileExists(path),
 			'tsconfig.json'
 		);
 
 		if (!path) {
 			path = ts.findConfigFile(
 				rootDir,
-				ts.sys.fileExists,
+				path => ts.sys.fileExists(path),
 				'tsconfig.json'
 			);
 		}
@@ -63,7 +63,7 @@ class CompiledTypeScriptDirectory {
 		const defaultConfig = {};
 
 		if (path) {
-			const config = ts.readConfigFile(path, ts.sys.readFile);
+			const config = ts.readConfigFile(path, ts.sys.readFile.bind(ts.sys));
 			if (config.error) {
 				this.reportDiagnostic(config.error);
 				throw new Error('Unable to read config file.');
@@ -164,10 +164,10 @@ class CompiledTypeScriptDirectory {
 				getCurrentDirectory: () => process.cwd(),
 				getCompilationSettings: () => options,
 				getDefaultLibFileName: ts.getDefaultLibFilePath,
-				fileExists: ts.sys.fileExists,
-				readFile: ts.sys.readFile,
-				directoryExists: ts.sys.directoryExists,
-				getDirectories: ts.sys.getDirectories,
+				fileExists: ts.sys.fileExists.bind(ts.sys),
+				readFile: ts.sys.readFile.bind(ts.sys),
+				directoryExists: ts.sys.directoryExists.bind(ts.sys),
+				getDirectories: ts.sys.getDirectories.bind(ts.sys),
 			};
 
 			const services = ts.createLanguageService(servicesHost, documentRegistry);

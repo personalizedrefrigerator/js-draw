@@ -413,7 +413,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	}
 
 	/** @internal */
-	public static deserializeFromJSON(json: any): Stroke {
+	public static deserializeFromJSON(this: void, json: any): Stroke {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}

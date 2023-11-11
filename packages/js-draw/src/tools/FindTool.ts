@@ -55,7 +55,7 @@ export default class FindTool extends BaseTool {
 
 		if (matchIdx < matches.length) {
 			const undoable = false;
-			this.editor.dispatch(this.editor.viewport.zoomTo(matches[matchIdx], true, true), undoable);
+			void this.editor.dispatch(this.editor.viewport.zoomTo(matches[matchIdx], true, true), undoable);
 			this.editor.announceForAccessibility(
 				this.editor.localization.focusedFoundText(matchIdx + 1, matches.length)
 			);
