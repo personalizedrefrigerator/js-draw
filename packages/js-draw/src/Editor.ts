@@ -968,6 +968,9 @@ export class Editor {
 			handleKeyUp: (htmlEvent) => {
 				this.handleHTMLKeyUpEvent(htmlEvent);
 			},
+			getHandlesKeyEventsFrom: (element) => {
+				return this.eventListenerTargets.includes(element as HTMLElement);
+			},
 		});
 
 		// Allow drop.

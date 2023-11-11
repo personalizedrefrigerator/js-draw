@@ -3,6 +3,12 @@ interface Callbacks {
 	filter(event: KeyboardEvent): boolean;
 	handleKeyDown(event: KeyboardEvent): void;
 	handleKeyUp(event: KeyboardEvent): void;
+
+	/**
+	 * Should return `true` iff `source` is also registered as an event listener source.
+	 * If `false` and focus leaves the original source, keyup events are fired.
+	 */
+	getHandlesKeyEventsFrom(source: Node): boolean;
 }
 
 /**
@@ -93,7 +99,12 @@ const listenForKeyboardEventsFrom = (elem: HTMLElement, callbacks: Callbacks) =>
 	});
 
 	elem.addEventListener('focusout', (focusEvent: FocusEvent) => {
-		const stillHasFocus = focusEvent.relatedTarget && elem.contains(focusEvent.relatedTarget as Node);
+		let stillHasFocus = false;
+		if (focusEvent.relatedTarget) {
+			const relatedTarget = focusEvent.relatedTarget as Node;
+			stillHasFocus = elem.contains(relatedTarget) || callbacks.getHandlesKeyEventsFrom(relatedTarget);
+		}
+
 		if (!stillHasFocus) {
 			for (const event of keysDown) {
 				callbacks.handleKeyUp(new KeyboardEvent('keyup', {

@@ -303,9 +303,12 @@ export default class SelectionTool extends BaseTool {
 			// Pass it to another tool, if apliccable.
 			return false;
 		}
-		else if (event.key === 'Shift') {
+		else if (event.shiftKey || event.key === 'Shift') {
 			this.shiftKeyPressed = true;
-			return true;
+
+			if (event.key === 'Shift') {
+				return true;
+			}
 		}
 
 		let rotationSteps = 0;
@@ -435,10 +438,20 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
+		// Here, we check if shiftKey === false because, as of this writing,
+		// evt.shiftKey is an optional property. Being falsey could just mean
+		// that it wasn't set.
+		if (evt.shiftKey === false) {
+			this.shiftKeyPressed = false;
+			// Don't return immediately -- event may be otherwise handled
+		}
+
+		// Also check for key === 'Shift' (for the case where shiftKey is undefined)
 		if (evt.key === 'Shift') {
 			this.shiftKeyPressed = false;
 			return true;
 		}
+
 
 		// If we don't need to finalize the transform
 		if (!this.hasUnfinalizedTransformFromKeyPress) {
