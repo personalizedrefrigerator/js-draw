@@ -45,5 +45,5 @@ window.PointerEvent ??= class extends MouseEvent {
 	}
 } as any;
 
-HTMLElement.prototype.setPointerCapture ??= jest.fn();
-HTMLElement.prototype.releasePointerCapture ??= jest.fn();
+HTMLElement.prototype.setPointerCapture ??= () => {};
+HTMLElement.prototype.releasePointerCapture ??= () => {};
