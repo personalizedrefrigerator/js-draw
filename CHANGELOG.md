@@ -4,6 +4,8 @@
     * Fix pressing <kbd>shift</kbd> not immediately allowing selections to snap to the x/y axes on drag.
     * Decrease blurriness on high resolution displays at some zoom levels.
     * Slightly increase the maximum motion required to trigger autocorrect. It was previously difficult to trigger autocorrect on some devices.
+    * Fix color picker toggle button's clickable region was smaller than the visible button.
+    * Update Coloris.
     * Fix icons not fading correctly when disabled on some devices.
 
 # 1.11.0

@@ -34,7 +34,7 @@
 		// the full height of the container.
 		// Because the color picker is always shown below or above the input, 5px is
 		// subtracted to make the picker better align with the input's container.
-		height: calc(100% - 5px);
+		height: calc(100% - 6px);
 	}
 
 	&.picker-open .clr-field {
