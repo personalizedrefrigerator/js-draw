@@ -502,7 +502,12 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public override setEnabled(enabled: boolean) {
+		const wasEnabled = this.isEnabled();
 		super.setEnabled(enabled);
+
+		if (wasEnabled === enabled) {
+			return;
+		}
 
 		// Clear the selection
 		this.selectionBox?.cancelSelection();
