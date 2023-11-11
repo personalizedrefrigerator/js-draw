@@ -161,7 +161,7 @@ export default class SelectionTool extends BaseTool {
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox.onDragUpdate(currentPointer);
 		} else {
-			this.selectionBox!.setToPoint(currentPointer.canvasPos);
+			this.selectionBox.setToPoint(currentPointer.canvasPos);
 		}
 	}
 

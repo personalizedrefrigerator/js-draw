@@ -8,7 +8,7 @@ describe('Editor', () => {
 		const editor = createEditor();
 		const rootElem = editor.getRootElement();
 
-		const inputArea = rootElem.querySelector('textarea')! as HTMLTextAreaElement;
+		const inputArea = rootElem.querySelector('textarea')!;
 
 		// Set the only tool to a tool that reports which keys are pressed.
 		const keyPressMock = jest.fn(() => true);

@@ -9,12 +9,18 @@ module.exports = {
 		'plugin:@typescript-eslint/eslint-recommended',
 		'plugin:@typescript-eslint/recommended'
 	],
+	// See https://typescript-eslint.io/linting/troubleshooting/#i-get-errors-telling-me-eslint-was-configured-to-run--however-that-tsconfig-does-not--none-of-those-tsconfigs-include-this-file
 	'overrides': [
+		{
+			'extends': ['plugin:@typescript-eslint/disable-type-checked'],
+			'files': ['./**/*.js'],
+		},
 	],
 	'parser': '@typescript-eslint/parser',
 	'parserOptions': {
 		'ecmaVersion': 'latest',
-		'sourceType': 'module'
+		'sourceType': 'module',
+		'project': './tsconfig.eslint.json',
 	},
 	'plugins': [
 		'@typescript-eslint'
@@ -44,6 +50,7 @@ module.exports = {
 		],
 		'no-constant-binary-expression': 'error',
 		'no-trailing-spaces': 'error',
+		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'@typescript-eslint/no-empty-function': 'off',
 		'@typescript-eslint/no-empty-interface': 'off',
 		'@typescript-eslint/no-inferrable-types': 'off',

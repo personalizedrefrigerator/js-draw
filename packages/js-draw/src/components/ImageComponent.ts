@@ -55,8 +55,8 @@ export default class ImageComponent extends AbstractComponent {
 			typeof elem.width === 'number' && typeof elem.height === 'number'
 			&& elem.width !== 0 && elem.height !== 0
 		) {
-			width = elem.width as number;
-			height = elem.height as number;
+			width = elem.width;
+			height = elem.height;
 		} else {
 			width = elem.clientWidth;
 			height = elem.clientHeight;

@@ -295,9 +295,9 @@ export default class Selection {
 
 			// If a list of element IDs,
 			if (isIDList(selectedElems)) {
-				this.selectedElemIds = selectedElems as string[];
+				this.selectedElemIds = selectedElems;
 			} else {
-				this.selectedElemIds = (selectedElems as AbstractComponent[]).map(elem => elem.getId());
+				this.selectedElemIds = selectedElems.map(elem => elem.getId());
 				this.transformCommands = selectedElems.map(elem => {
 					return elem.setZIndexAndTransformBy(
 						this.fullTransform, elem.getZIndex() + deltaZIndex

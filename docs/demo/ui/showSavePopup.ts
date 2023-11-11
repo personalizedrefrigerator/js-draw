@@ -171,7 +171,7 @@ const showSavePopup = (
 	// Only do so if requested.
 	const previewRegion = popupDoc.querySelector('#previewRegion')!;
 
-	const filenameLabel = popupDoc.querySelector('#filenameLabel')! as HTMLLabelElement;
+	const filenameLabel = popupDoc.querySelector<HTMLElement>('#filenameLabel')!;
 	filenameLabel.innerText = localization.imageTitleLabel;
 
 	const previewSVGButton = popupDoc.createElement('button');

@@ -16,7 +16,7 @@ const initRunnableElements = async () => {
 
 // Fix image URLs that are relative to the root of the repository
 const fixImageURLs = () => {
-	const images = document.querySelectorAll('img[src^="docs/img/"]') as NodeListOf<HTMLImageElement>;
+	const images = document.querySelectorAll<HTMLImageElement>('img[src^="docs/img/"]');
 	for (const image of images) {
 		// Determine the path to the image relative to the docs/img/ directory
 		const imagePath = image.src.replace(/^.*(docs[/]img[/])/, '');
@@ -49,7 +49,7 @@ const navigateBasedOnURL = () => {
 	if (urlMatch) {
 		const target = urlMatch[1];
 
-		const candidateLinks = document.querySelectorAll('a.tsd-index-link') as NodeListOf<HTMLAnchorElement>;
+		const candidateLinks = document.querySelectorAll<HTMLAnchorElement>('a.tsd-index-link');
 		for (const link of candidateLinks) {
 			const label = link.querySelector('span');
 			if (label && label.innerText === target) {

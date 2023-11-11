@@ -286,7 +286,7 @@ export default class RenderingCacheNode {
 							}
 						}
 
-						if (minNewZIndex !== null && minNewZIndex > this.renderedMaxZIndex!) {
+						if (minNewZIndex !== null && minNewZIndex > this.renderedMaxZIndex) {
 							fullRerenderNeeded = false;
 							thisRenderer = this.cachedRenderer.startRender();
 

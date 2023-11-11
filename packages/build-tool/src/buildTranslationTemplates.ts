@@ -113,7 +113,7 @@ const generateTranslationTemplate = (
 	}, true);
 
 	for (const key in defaultLocaleStrings) {
-		const englishTranslation = `${(defaultLocaleStrings as any)[key]}`;
+		const englishTranslation = `${defaultLocaleStrings[key]}`;
 		let currentTranslation = (destLocaleStrings ?? {})[key];
 
 		// If matching the default, it probably hasn't been translated yet.

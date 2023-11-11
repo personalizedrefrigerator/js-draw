@@ -662,7 +662,7 @@ export class Editor {
 				}
 			}
 
-			currentElem = (currentElem as Element).parentElement;
+			currentElem = currentElem.parentElement;
 		}
 		return false;
 	}
