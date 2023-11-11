@@ -9,7 +9,7 @@
     "watch-docs": "typedoc --watch --options typedoc.json",
     "test": "jest",
     "lint": "eslint .",
-    "linter-precommit": "eslint --fix --ext .js --ext .ts",
+    "linter-precommit": "eslint --max-warnings=0 --fix",
     "lint-staged": "lint-staged",
     "lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
     "build-translation-templates": "lerna run build-translation-templates",

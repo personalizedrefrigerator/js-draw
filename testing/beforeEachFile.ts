@@ -45,5 +45,7 @@ window.PointerEvent ??= class extends MouseEvent {
 	}
 } as any;
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.setPointerCapture ??= () => {};
+// eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.releasePointerCapture ??= () => {};

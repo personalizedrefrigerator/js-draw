@@ -1,6 +1,6 @@
 
 module.exports = {
-	'**/*.{js,ts}': [
-		'npm run linter-precommit',
+	'*.{js,ts,tsx}': [
+		'eslint --fix',
 	],
 };

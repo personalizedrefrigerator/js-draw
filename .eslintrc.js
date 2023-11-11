@@ -77,7 +77,12 @@ module.exports = {
 		// Disallows ! non-null assertions in conditional chains (e.g. thing?.test!).
 		'@typescript-eslint/no-non-null-asserted-optional-chain': 'error',
 		'@typescript-eslint/no-this-alias': 'error',
-		'@typescript-eslint/unbound-method': 'error',
+		'@typescript-eslint/unbound-method': [
+			'error',
+			{
+				'ignoreStatic': true
+			},
+		],
 
 		'@typescript-eslint/no-unused-vars': [
 			'error',
