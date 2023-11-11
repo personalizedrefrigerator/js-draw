@@ -45,7 +45,8 @@
 }
 
 .toolbar-button.disabled {
-	filter: opacity(0.5) sepia(0.2);
+	filter: sepia(0.2);
+	opacity: 0.45;
 	cursor: unset;
 }
 
@@ -103,7 +104,7 @@
 
 .toolbar-root button:disabled {
 	cursor: inherit;
-	filter: opacity(0.5);
+	opacity: 0.5;
 }
 
 .toolbar-root .toolbar-icon {
