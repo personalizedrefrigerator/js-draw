@@ -36,10 +36,21 @@ const loadRendererHooks = (renderer: Renderer) => {
 		);
 	});
 
+	renderer.hooks.on('body.end', (event) => {
+		return (
+			<>
+				<a style="float: right;" href={event.relativeURL('assets/licenses.txt')}>
+					OpenSource licenses
+				</a>
+			</>
+		);
+	});
+
 	renderer.on(RendererEvent.END, (event: RendererEvent) => {
 		const filesToCopy = [
 			'js-draw-typedoc-extension--browser.js',
 			'js-draw-typedoc-extension--iframe.js',
+			'licenses.txt',
 		].map(fileName => path.resolve(distDir, fileName));
 
 		// Copy fonts

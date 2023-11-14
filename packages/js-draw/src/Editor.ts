@@ -34,6 +34,7 @@ import version from './version';
 import { editorImageToSVGSync, editorImageToSVGAsync } from './image/export/editorImageToSVG';
 import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
 import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
+import mitLicenseAttribution from './util/mitLicenseAttribution';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -1622,9 +1623,19 @@ export class Editor {
 			text: [
 				`This image editor is powered by js-draw v${version.number}.`,
 				'',
-				'js-draw uses several libraries at runtime. Particularly noteworthy are:',
+				'At runtime, js-draw uses',
 				' - The Coloris color picker: https://github.com/mdbassit/Coloris',
-				' - The bezier.js Bézier curve library: https://github.com/Pomax/bezierjs'
+				' - The bezier.js Bézier curve library: https://github.com/Pomax/bezierjs',
+				'',
+				'Both are licensed under the MIT license:',
+				'',
+				'',
+				'== Coloris ==',
+				mitLicenseAttribution('2021 Mohammed Bassit'),
+				'',
+				'',
+				'== Bezier.js ==',
+				mitLicenseAttribution('2023 Mike "Pomax" Kamermans'),
 			].join('\n'),
 			minimized: true,
 		});
