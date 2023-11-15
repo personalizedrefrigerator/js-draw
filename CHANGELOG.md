@@ -30,10 +30,10 @@
 
 # 1.10.0
  * Features
-    * Added **autocorrect** for strokes &mdash; holding the pen stationary after drawing replaces near-rectangles and lines with lines and rectangles.
+    * Added autocorrect for strokes &mdash; holding the pen stationary after drawing replaces near-rectangles and lines with lines and rectangles.
     * Added a "decrease image size" button to the image dialog to decrease the size of large images.
  * Bug fixes
-    * Fixed: some tools unusable were unusable in right-to-left layout mode 
+    * Fixed: some tools unusable were unusable in right-to-left layout mode
 
 # 1.9.1
  * Bug fixes
@@ -53,7 +53,7 @@
     * Increased the minimum pinch rotation required to start rotation.
     * Performance improvement when zooming in to large strokes (particularly when these strokes are opaque).
  * Bug fixes
-    * Fixed some rendering-cache-related display issues. 
+    * Fixed some rendering-cache-related display issues.
 
 # 1.7.2
  * Changes
@@ -61,7 +61,7 @@
 
 # 1.7.1
  * Bug fixes
-    * Selection: Makes it more difficult to accidentally trigger the "rotate 90 degrees counter-clockwise feature" when dragging the rotate handle.
+    * Selection: Make it more difficult to accidentally trigger the "rotate 90 degrees counter-clockwise feature" when dragging the rotate handle.
 
 # 1.7.0
  * Features and improvements
