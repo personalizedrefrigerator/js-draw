@@ -248,10 +248,18 @@ export class StrokeSmoother {
 			controlPoint = intersection.point;
 		}
 
-		// No intersection or the intersection is one of the end points?
-		if (!controlPoint || segmentStart.eq(controlPoint) || segmentEnd.eq(controlPoint)) {
-			// Position the control point roughly between the two end points
-			controlPoint = segmentStart.lerp(segmentEnd, 0.5).lerp(segmentStart.plus(enteringVec.times(startEndDist)), 0.25);
+		// No intersection?
+		if (!controlPoint) {
+			// Estimate the control point position based on the entering tangent line
+			controlPoint = segmentStart
+				.lerp(segmentEnd, 0.5)
+				.lerp(segmentStart.plus(enteringVec.times(startEndDist)), 0.25);
+		}
+
+		// Equal to an endpoint?
+		if (segmentStart.eq(controlPoint) || segmentEnd.eq(controlPoint)) {
+			// Position the control point between the two end points
+			controlPoint = segmentStart.lerp(segmentEnd, 0.5);
 		}
 
 		console.assert(!segmentStart.eq(controlPoint, 1e-11), 'Start and control points are equal!');
