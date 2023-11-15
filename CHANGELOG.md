@@ -1,4 +1,9 @@
 
+# 1.12.0
+ * Improvements
+    * Stroke smoothing/curve fitting: Make it less likely for strokes to have large spikes when drawing very fast.
+    * About dialog: Include full text of the MIT license for dependencies bundled with the app.
+
 # 1.11.2
  * Bug fixes
     * Fix drawing circles when a menu is open. Drawing while a menu is open should close the menu and allow the user to continue drawing. In this case, circles (and other shapes with start points roughly equivalent to their end points) were recognized as clicks.
