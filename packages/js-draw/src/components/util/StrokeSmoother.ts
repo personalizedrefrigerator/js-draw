@@ -18,6 +18,7 @@ export class StrokeSmoother {
 	private isFirstSegment: boolean = true;
 
 	private buffer: Point2[];
+	private centerOfMass: Point2|null = null;
 	private lastPoint: StrokeDataPoint;
 	private lastExitingVec: Vec2|null = null;
 	private currentCurve: QuadraticBezier|null = null;
@@ -93,6 +94,7 @@ export class StrokeSmoother {
 			this.buffer[this.buffer.length - 2], lastPoint,
 		];
 		this.currentCurve = null;
+		this.centerOfMass = null;
 
 		this.isFirstSegment = false;
 	}
@@ -150,11 +152,22 @@ export class StrokeSmoother {
 				return;
 			}
 
+			if (!this.centerOfMass) {
+				this.centerOfMass = newPoint.pos;
+			} else {
+				this.centerOfMass = this.centerOfMass
+					.times(this.buffer.length)
+					.plus(newPoint.pos).times(1/(this.buffer.length + 1));
+			}
+
+			const toCenterOfMass = this.centerOfMass.minus(newPoint.pos);
+
 			const deltaTimeSeconds = deltaTime / 1000;
 			const velocity = newPoint.pos.minus(this.lastPoint.pos).times(1 / deltaTimeSeconds);
 
 			// TODO: Do we need momentum smoothing? (this.momentum.lerp(velocity, 0.9);)
-			this.momentum = velocity;
+			const k = 1;
+			this.momentum = velocity.plus(toCenterOfMass.times(k));
 		}
 
 		const lastPoint = this.lastPoint ?? newPoint;
@@ -201,7 +214,7 @@ export class StrokeSmoother {
 		let exitingVec = this.computeExitingVec();
 
 		// Find the intersection between the entering vector and the exiting vector
-		const maxRelativeLength = 2.4;
+		const maxRelativeLength = 2.0;
 		const segmentStart = this.buffer[0];
 		const segmentEnd = newPoint.pos;
 		const startEndDist = segmentEnd.minus(segmentStart).magnitude();
@@ -237,9 +250,8 @@ export class StrokeSmoother {
 
 		// No intersection or the intersection is one of the end points?
 		if (!controlPoint || segmentStart.eq(controlPoint) || segmentEnd.eq(controlPoint)) {
-			// Position the control point closer to the first -- the connecting
-			// segment will be roughly a line.
-			controlPoint = segmentStart.plus(enteringVec.times(startEndDist / 4));
+			// Position the control point roughly between the two end points
+			controlPoint = segmentStart.lerp(segmentEnd, 0.5).lerp(segmentStart.plus(enteringVec.times(startEndDist)), 0.25);
 		}
 
 		console.assert(!segmentStart.eq(controlPoint, 1e-11), 'Start and control points are equal!');
