@@ -456,45 +456,7 @@ export class Editor {
 		this.handlePointerEventsFrom(this.accessibilityAnnounceArea);
 
 		this.container.addEventListener('wheel', evt => {
-			let delta = Vec3.of(evt.deltaX, evt.deltaY, evt.deltaZ);
-
-			// Process wheel events if the ctrl key is down, even if disabled -- we do want to handle
-			// pinch-zooming.
-			if (!evt.ctrlKey && !evt.metaKey) {
-				if (!this.settings.wheelEventsEnabled) {
-					return;
-				} else if (this.settings.wheelEventsEnabled === 'only-if-focused') {
-					const focusedChild = this.container.querySelector(':focus');
-
-					if (!focusedChild) {
-						return;
-					}
-				}
-			}
-
-			if (evt.deltaMode === WheelEvent.DOM_DELTA_LINE) {
-				delta = delta.times(15);
-			} else if (evt.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
-				delta = delta.times(100);
-			}
-
-			if (evt.ctrlKey || evt.metaKey) {
-				delta = Vec3.of(0, 0, evt.deltaY);
-			}
-
-			// Ensure that `pos` is relative to `this.renderingRegion`
-			const bbox = this.renderingRegion.getBoundingClientRect();
-			const pos = Vec2.of(evt.clientX, evt.clientY).minus(Vec2.of(bbox.left, bbox.top));
-
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.WheelEvt,
-				delta,
-				screenPos: pos,
-			})) {
-				evt.preventDefault();
-				return true;
-			}
-			return false;
+			this.handleHTMLWheelEvent(evt);
 		});
 
 		const handleResize = () => {
@@ -554,6 +516,49 @@ export class Editor {
 		this.container.style.setProperty(
 			'--editor-current-display-height-px', `${this.renderingRegion.clientHeight}px`
 		);
+	}
+
+	/** @internal */
+	protected handleHTMLWheelEvent(event: WheelEvent) {
+		let delta = Vec3.of(event.deltaX, event.deltaY, event.deltaZ);
+
+		// Process wheel events if the ctrl key is down, even if disabled -- we do want to handle
+		// pinch-zooming.
+		if (!event.ctrlKey && !event.metaKey) {
+			if (!this.settings.wheelEventsEnabled) {
+				return;
+			} else if (this.settings.wheelEventsEnabled === 'only-if-focused') {
+				const focusedChild = this.container.querySelector(':focus');
+
+				if (!focusedChild) {
+					return;
+				}
+			}
+		}
+
+		if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+			delta = delta.times(15);
+		} else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+			delta = delta.times(100);
+		}
+
+		if (event.ctrlKey || event.metaKey) {
+			delta = Vec3.of(0, 0, event.deltaY);
+		}
+
+		// Ensure that `pos` is relative to `this.renderingRegion`
+		const bbox = this.renderingRegion.getBoundingClientRect();
+		const pos = Vec2.of(event.clientX, event.clientY).minus(Vec2.of(bbox.left, bbox.top));
+
+		if (this.toolController.dispatchInputEvent({
+			kind: InputEvtType.WheelEvt,
+			delta,
+			screenPos: pos,
+		})) {
+			event.preventDefault();
+			return true;
+		}
+		return false;
 	}
 
 	private pointers: Record<number, Pointer> = {};
@@ -935,12 +940,17 @@ export class Editor {
 		const event = keyPressEventFromHTMLEvent(htmlEvent);
 		if (this.toolController.dispatchInputEvent(event)) {
 			htmlEvent.preventDefault();
+			return true;
 		} else if (event.key === 't' || event.key === 'T') {
 			htmlEvent.preventDefault();
 			this.display.rerenderAsText();
+			return true;
 		} else if (event.key === 'Escape') {
 			this.renderingRegion.blur();
+			return true;
 		}
+
+		return false;
 	}
 
 	/** @internal */
@@ -953,7 +963,9 @@ export class Editor {
 		const event = keyUpEventFromHTMLEvent(htmlEvent);
 		if (this.toolController.dispatchInputEvent(event)) {
 			htmlEvent.preventDefault();
+			return true;
 		}
+		return false;
 	}
 
 	/**

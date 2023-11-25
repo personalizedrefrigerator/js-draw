@@ -29,7 +29,10 @@ log.oninput = () => {
 
 
 class LoggingEditor extends jsdraw.Editor {
-	public override handleHTMLPointerEvent(eventType: 'pointerdown'|'pointermove'|'pointerup'|'pointercancel', evt: PointerEvent) {
+	// Override and log several internal event handler callbacks
+	public override handleHTMLPointerEvent(
+		eventType: 'pointerdown'|'pointermove'|'pointerup'|'pointercancel', evt: PointerEvent
+	) {
 		const result = super.handleHTMLPointerEvent(eventType, evt);
 
 		const data = {
@@ -55,6 +58,8 @@ class LoggingEditor extends jsdraw.Editor {
 		try {
 			target.setPointerCapture(pointer);
 		} catch(error) {
+			// release/setPointerCapture can fail on event playback (when `pointer`
+			// isn't actually down anymore)
 			console.warn(error);
 		}
 	}
@@ -71,7 +76,7 @@ class LoggingEditor extends jsdraw.Editor {
 		const data = {
 			eventType: type,
 			type: htmlEvent.type,
-			currentTime: (new Date().getTime()),
+			currentTime: Date.now(),
 			timeStamp: htmlEvent.timeStamp,
 
 			key: htmlEvent.key,
@@ -95,6 +100,28 @@ class LoggingEditor extends jsdraw.Editor {
 	public override handleHTMLKeyUpEvent(htmlEvent: KeyboardEvent) {
 		const result = super.handleHTMLKeyUpEvent(htmlEvent);
 		this.logKeyEvent(htmlEvent, 'keyup');
+		return result;
+	}
+
+	public override handleHTMLWheelEvent(event: WheelEvent) {
+		const result = super.handleHTMLWheelEvent(event);
+
+		addToLog({
+			eventType: 'wheel',
+			type: event.type,
+			currentTime: Date.now(),
+			timeStamp: event.timeStamp,
+
+			clientX: event.clientX,
+			clientY: event.clientY,
+			deltaX: event.deltaX,
+			deltaY: event.deltaY,
+			deltaZ: event.deltaZ,
+			deltaMode: event.deltaMode,
+			ctrlKey: event.ctrlKey,
+			metaKey: event.metaKey,
+		});
+
 		return result;
 	}
 }
@@ -168,7 +195,7 @@ const playBackLog = async (rate: number) => {
 	data.reverse();
 
 	let lastEventTimestamp: number|null = null;
-	let encounteredKeyOrPointerDown = false;
+	let encounteredSignificantEvent = false;
 
 	for (const event of data) {
 		if (!event.timeStamp) continue;
@@ -178,7 +205,7 @@ const playBackLog = async (rate: number) => {
 
 		// Ignore any mouse movement/extraneous events that the
 		// user probably doesn't care about.
-		if (encounteredKeyOrPointerDown) {
+		if (encounteredSignificantEvent) {
 			await new Promise<void>((resolve) => {
 				setTimeout(() => resolve(), deltaTime / rate);
 			});
@@ -201,9 +228,7 @@ const playBackLog = async (rate: number) => {
 			} as any);
 
 			editor.handleHTMLPointerEvent(event.eventType, ptrEvent);
-
-		}
-		else if (event.eventType === 'keydown' || event.eventType === 'keyup') {
+		} else if (event.eventType === 'keydown' || event.eventType === 'keyup') {
 			lastEventTimestamp ??= event.timeStamp;
 			const keyEvent = new KeyboardEvent(event.eventType, {
 				key: event.key,
@@ -220,10 +245,24 @@ const playBackLog = async (rate: number) => {
 			} else {
 				editor.handleHTMLKeyUpEvent(keyEvent);
 			}
+		} else if (event.eventType === 'wheel') {
+			lastEventTimestamp ??= event.timeStamp;
+			const wheelEvent = new WheelEvent(event.eventType, {
+				clientX: event.clientX,
+				clientY: event.clientY,
+				deltaX: event.deltaX,
+				deltaY: event.deltaY,
+				deltaZ: event.deltaZ,
+				deltaMode: event.deltaMode,
+				ctrlKey: event.ctrlKey,
+				metaKey: event.metaKey,
+			});
+
+			editor.handleHTMLWheelEvent(wheelEvent);
 		}
 
-		if (event.eventType === 'keydown' || event.eventType === 'pointerdown') {
-			encounteredKeyOrPointerDown = true;
+		if (['wheel', 'keydown', 'pointerdown'].includes(event.eventType)) {
+			encounteredSignificantEvent = true;
 		}
 	}
 };
