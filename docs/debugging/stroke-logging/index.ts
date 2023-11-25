@@ -268,7 +268,12 @@ const playBackLog = async (rate: number) => {
 };
 playbackButton.onclick = () => playBackLog(1);
 
-log.value = 'Started successfully! Click "Update" to show the log.';
+log.value = '';
+log.placeholder = [
+	'Started successfully! Click "Update" to show the log.',
+	'',
+	'Alternatively, paste an input log into this textbox, then click "play back log".'
+].join('\n');
 
 // To facilitate debugging
 (window as any).editor = editor;
