@@ -1,5 +1,6 @@
 import { MutableReactiveValue } from '../../../util/ReactiveValue';
 import stopPropagationOfScrollingWheelEvents from '../../../util/stopPropagationOfScrollingWheelEvents';
+import addLongPressOrHoverCssClasses from '../../../util/addLongPressOrHoverCssClasses';
 import { IconElemType } from '../../IconProvider';
 import { toolbarCSSPrefix } from '../../constants';
 
@@ -64,6 +65,10 @@ const makeGridSelector = <ChoiceIdType> (
 		button.type = 'radio';
 		button.id = `${toolbarCSSPrefix}-grid-select-button-${idCounter++}`;
 
+		// Some toolbars only show the label on hover. Having long press or hover
+		// CSS classes are helpful here.
+		addLongPressOrHoverCssClasses(buttonContainer);
+
 		// Clicking any part of labelContainer triggers the radio button.
 		const labelContainer = document.createElement('label');
 
@@ -119,6 +124,10 @@ const makeGridSelector = <ChoiceIdType> (
 
 		button.onblur = () => {
 			buttonContainer.classList.remove('focus-visible');
+		};
+
+		buttonContainer.oncontextmenu = event => {
+			event.preventDefault();
 		};
 
 		buttonContainer.replaceChildren(button, labelContainer);

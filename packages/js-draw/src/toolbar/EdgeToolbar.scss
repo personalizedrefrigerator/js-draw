@@ -39,10 +39,16 @@
 		100% { opacity: 0.1; }
 	}
 
-	@keyframes show-label {
+	@keyframes show-label-delayed {
 		0% { opacity: 0; }
 		// Keep the label hidden before showing
 		80% { opacity: 0; }
+		100% { opacity: $label-visible-opacity; }
+	}
+
+	@keyframes show-label-now {
+		0% { opacity: 0; }
+		5% { opacity: 0; }
 		100% { opacity: $label-visible-opacity; }
 	}
 
@@ -51,25 +57,23 @@
 		100% { opacity: 0; }
 	}
 
-
-	$hover-active-animation: ease show-label;
-
-	// Avoids sticky hover on touch devices. See
-	// https://css-tricks.com/solving-sticky-hover-states-with-media-hover-hover/
-	// When the primary device supports hover:
-	@media (hover: hover) {
+	// Using CSS classes set by addLongPressOrHoverCssClasses avoids sticky
+	// hover on touch devices.
+	&:not(.no-long-press-or-hover):not(.has-long-press-or-hover) {
 		// Only show an animation when opening the label due to a hover --
 		// show the label immediately otherwise.
-		&:hover:not(:focus-visible) > #{$label-selector} {
+		&:hover:not(:focus-visible) > #{$label-selector},
+		// When the user is pressing/long-pressing the button
+		&:active > #{$label-selector}
+		{
 			opacity: $label-visible-opacity;
-			animation: 1s $hover-active-animation;
+			animation: 1s ease show-label-delayed;
 		}
 	}
 
-	// When the user is pressing/long-pressing the button
-	&:active > #{$label-selector} {
+	&.has-long-press-or-hover > #{$label-selector} {
 		opacity: $label-visible-opacity;
-		animation: 1s $hover-active-animation;
+		animation: 0.4s ease show-label-now;
 	}
 
 	$keyboard-hide-animation: 1.5s ease rehide-label;

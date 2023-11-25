@@ -5,6 +5,7 @@ import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import DropdownLayoutManager from './layout/DropdownLayoutManager';
 import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
+import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
 
 export type SavedToolbuttonState = Record<string, any>;
 
@@ -80,6 +81,7 @@ export default abstract class BaseWidget {
 		this.button.oncontextmenu = event => {
 			event.preventDefault();
 		};
+		addLongPressOrHoverCssClasses(this.button);
 	}
 
 	#addEditorListeners() {
