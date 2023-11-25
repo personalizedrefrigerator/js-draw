@@ -11,7 +11,9 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"js-draw": "^1.12.0"
+		"js-draw": "^1.12.0",
+		"@js-draw/material-icons": "^1.12.0",
+		"@js-draw/debugging": "^1.11.1"
 	},
 	"devDependencies": {
 		"@js-draw/build-tool": "^1.11.1"

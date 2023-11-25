@@ -1,4 +1,6 @@
 import * as jsdraw from 'js-draw';
+import MaterialIconProvider from '@js-draw/material-icons';
+import { DebugToolbarWidget } from '@js-draw/debugging';
 import 'js-draw/styles';
 
 const log = document.querySelector('#log') as HTMLTextAreaElement;
@@ -6,7 +8,7 @@ const logData: any[] = [];
 
 const updateLog = () => {
 	log.value = (
-		logData.slice().reverse().map(item => JSON.stringify(item)).join(', ')
+		logData.slice().reverse().map(item => JSON.stringify(item)).join(',\n')
 	);
 };
 
@@ -97,9 +99,11 @@ class LoggingEditor extends jsdraw.Editor {
 	}
 }
 
-const editor = new LoggingEditor(document.body);
-const defaultLayout = true;
-editor.addToolbar(defaultLayout);
+const editor = new LoggingEditor(document.body, {
+	iconProvider: new MaterialIconProvider(),
+});
+const toolbar = editor.addToolbar();
+toolbar.addWidget(new DebugToolbarWidget(editor));
 
 editor.notifier.on(jsdraw.EditorEventType.CommandDone, event => {
 	if (event.kind !== jsdraw.EditorEventType.CommandDone) throw '';
