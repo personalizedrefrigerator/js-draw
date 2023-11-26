@@ -66,7 +66,16 @@ const listenForLongPressOrHover = (target: HTMLElement, options: Options) => {
 		if (event.type === 'pointerenter') {
 			pointersInside.set(event.pointerId, eventRecord);
 		} else if (event.type === 'pointerleave' || event.type === 'pointercancel') {
-			pointersInside.delete(event.pointerId);
+			// In some cases (for example, a click with a stylus on Android/Chrome), moving the pen
+			// over the target, clicking, then moving the pen out of the target produces input
+			// similar to this:
+			// - pointerenter (pointerId: 4)
+			// - pointerleave (pointerId: 4)
+			// - pointerenter (pointerId: 6)
+			// - pointerenter (pointerId: 1)
+			// - pointerleave (pointerId: 6)
+			// Observe that no pointerleave event was fired for the pointer with ID 1.
+			pointersInside.clear();
 		}
 
 		updateTimeout();

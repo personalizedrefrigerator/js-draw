@@ -126,6 +126,9 @@ const makeGridSelector = <ChoiceIdType> (
 			buttonContainer.classList.remove('focus-visible');
 		};
 
+		// Prevent the right-click menu from being shown on long-press
+		// (important for some toolbars that use long-press gestures to
+		// show grid selector labels).
 		buttonContainer.oncontextmenu = event => {
 			event.preventDefault();
 		};
