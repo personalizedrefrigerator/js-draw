@@ -355,9 +355,6 @@ export default class EdgeToolbar extends AbstractToolbar {
 			if (event.target === this.menuContainer) {
 				if (eventName === 'pointerdown') {
 					this.sidebarVisible.set(false);
-				}
-
-				if (eventName === 'pointerup') {
 					this.editor.focus();
 				}
 
