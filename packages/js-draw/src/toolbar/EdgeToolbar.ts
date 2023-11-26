@@ -355,7 +355,9 @@ export default class EdgeToolbar extends AbstractToolbar {
 			if (event.target === this.menuContainer) {
 				if (eventName === 'pointerdown') {
 					this.sidebarVisible.set(false);
-					this.editor.focus();
+
+					// A delay seems necessary for the editor
+					setTimeout(() => this.editor.focus(), 0);
 				}
 
 				return true;
