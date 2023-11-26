@@ -1,6 +1,6 @@
 import { KeyboardShortcutManager, KeyBinding } from 'js-draw';
 import { Localization } from '../localization';
-import { isDebugWidgetEnabled, loadKeybindingOverrides, saveIsDebugWidgetEnabled, saveKeybindingOverrides } from '../storage/settings';
+import { getIsEdgeToolbar, isDebugWidgetEnabled, loadKeybindingOverrides, saveIsDebugWidgetEnabled, saveIsEdgeToolbar, saveKeybindingOverrides } from '../storage/settings';
 import './settingsDialog.css';
 
 
@@ -122,33 +122,55 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 		return onSave;
 	};
 
-	const makeDebugSetting = () => {
-		const debugHeader = document.createElement('h2');
-		debugHeader.innerText = localization.debugging;
 
-		const debugContainer = document.createElement('div');
-		const debugLabel = document.createElement('label');
-		const debugInput = document.createElement('input');
+	const makeCheckboxSection = (
+		headerText: string, labelText: string, initialValue: boolean, onSave: (checked: boolean)=>void,
+	) => {
+		const toolbarHeader = document.createElement('h2');
+		toolbarHeader.innerText = headerText;
 
-		debugInput.id = 'debug-mode-setting-checkbox';
-		debugLabel.htmlFor = debugInput.id;
-		debugLabel.innerText = localization.enableDebugToolbarWidget;
+		const row = document.createElement('div');
+		const labelElement = document.createElement('label');
+		const checkboxElement = document.createElement('input');
 
-		debugInput.type = 'checkbox';
-		debugInput.checked = isDebugWidgetEnabled();
+		checkboxElement.id = 'toolbar-mode-setting-checkbox';
+		labelElement.htmlFor = checkboxElement.id;
+		labelElement.innerText = labelText;
 
-		debugContainer.replaceChildren(debugLabel, debugInput);
+		checkboxElement.type = 'checkbox';
+		checkboxElement.checked = initialValue;
 
-		dialog.appendChild(debugContainer);
+		row.replaceChildren(labelElement, checkboxElement);
 
-		const onSave = () => {
-			saveIsDebugWidgetEnabled(debugInput.checked);
+		dialog.appendChild(toolbarHeader);
+		dialog.appendChild(row);
+
+		return () => {
+			onSave(checkboxElement.checked);
 		};
-		return onSave;
+	};
+
+	const makeToolbarSetting = () => {
+		return makeCheckboxSection(
+			localization.toolbarType,
+			localization.useEdgeToolbar,
+			getIsEdgeToolbar(),
+			(checked) => saveIsEdgeToolbar(checked),
+		);
+	};
+
+	const makeDebugSetting = () => {
+		return makeCheckboxSection(
+			localization.debugging,
+			localization.enableDebugToolbarWidget,
+			isDebugWidgetEnabled(),
+			(checked) => saveIsDebugWidgetEnabled(checked),
+		);
 	};
 
 	const saveKeybindings = makeKeybindingSettings();
 	const saveDebugMode = makeDebugSetting();
+	const saveToolbarMode = makeToolbarSetting();
 
 	dialog.appendChild(saveButton);
 	container.appendChild(dialog);
@@ -158,6 +180,7 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 	const saveResults = () => {
 		saveKeybindings();
 		saveDebugMode();
+		saveToolbarMode();
 	};
 
 	return new Promise<void>((resolve, reject) => {

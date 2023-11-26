@@ -33,6 +33,8 @@ export interface Localization {
 
 	debugging: string;
 	enableDebugToolbarWidget: string;
+	toolbarType: string;
+	useEdgeToolbar: string;
 
 	// Save screen:
 	imageTitleLabel: string;
@@ -78,6 +80,9 @@ localizationTables.en = {
 	bindingParseError: (errorMessage: string) => `Error: ${errorMessage}`,
 	debugging: 'Debugging',
 	enableDebugToolbarWidget: 'Enable debug toolbar widget',
+
+	toolbarType: 'Toolbar type',
+	useEdgeToolbar: 'Use edgemenu-style toolbar',
 
 	imageTitleLabel: 'Image title: ',
 	viewGeneratedSVGImage: 'View generated SVG image',

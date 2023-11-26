@@ -91,3 +91,24 @@ export const isDebugWidgetEnabled = () => {
 
 	return false;
 };
+
+
+const toolbarModeStorageKey = 'toolbar-mode';
+
+export const saveIsEdgeToolbar = (edgeToolbar: boolean) => {
+	try {
+		localStorage.setItem(toolbarModeStorageKey, edgeToolbar ? 'edge' : 'dropdown');
+	} catch (error) {
+		console.warn('Error saving toolbar type: ', error);
+	}
+};
+
+export const getIsEdgeToolbar = () => {
+	try {
+		return localStorage.getItem(toolbarModeStorageKey) !== 'dropdown';
+	} catch (error) {
+		console.warn('Error saving toolbar type: ', error);
+	}
+
+	return false;
+};

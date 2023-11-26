@@ -24,12 +24,14 @@ import { toolbarCSSPrefix } from './constants';
  * });
  * ```
  *
+ * Returns a subclass of {@link AbstractToolbar}.
+ *
  * @see
  * - {@link makeEdgeToolbar}
  * - {@link AbstractToolbar.addSaveButton}
  * - {@link AbstractToolbar.addExitButton}
  */
-export const makeDropdownToolbar = (editor: Editor): AbstractToolbar => {
+export const makeDropdownToolbar = (editor: Editor): DropdownToolbar => {
 	return new DropdownToolbar(editor, editor.getRootElement());
 };
 

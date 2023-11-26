@@ -1,4 +1,4 @@
-import { Editor, EditorEventType, EventDispatcher, makeEdgeToolbar } from 'js-draw';
+import { AbstractToolbar, Editor, EditorEventType, EventDispatcher, makeDropdownToolbar, makeEdgeToolbar } from 'js-draw';
 import 'js-draw/styles';
 import MaterialIconProvider from '@js-draw/material-icons';
 import { DebugToolbarWidget } from '@js-draw/debugging';
@@ -16,7 +16,7 @@ import FloatingActionButton from './ui/FloatingActionButton';
 import { makeIconFromText } from './icons';
 import makeNewImageDialog from './ui/makeNewImageDialog';
 import { AppNotifier } from './types';
-import { isDebugWidgetEnabled, loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
+import { getIsEdgeToolbar, isDebugWidgetEnabled, loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
 import makeSettingsDialog from './ui/makeSettingsDialog';
 
 // Creates and sets up a new Editor
@@ -53,9 +53,17 @@ const createEditor = async (
 	// Although new Editor(parentElement) created an Editor, it doesn't have a toolbar
 	// yet. `.addToolbar()` creates a toolbar and adds it to the document, using the
 	// default toolbar layout.
-	const toolbar = makeEdgeToolbar(editor);
+	let toolbar: AbstractToolbar;
+	if (getIsEdgeToolbar()) {
+		toolbar = makeEdgeToolbar(editor);
+		toolbar.addDefaultToolWidgets();
+	} else {
+		const dropdownToolbar = makeDropdownToolbar(editor);
+		dropdownToolbar.addDefaultToolWidgets();
+		dropdownToolbar.addOverflowWidget();
+		toolbar = dropdownToolbar;
+	}
 
-	toolbar.addDefaultToolWidgets();
 
 	const closeEditor = () => {
 		editor.remove();
