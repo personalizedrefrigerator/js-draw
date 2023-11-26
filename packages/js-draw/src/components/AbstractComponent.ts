@@ -212,11 +212,13 @@ export default abstract class AbstractComponent {
 	// Private helper for transformBy: Apply the given transformation to all points of this.
 	protected abstract applyTransformation(affineTransfm: Mat33): void;
 
-	// Returns a command that, when applied, transforms this by [affineTransfm] and
-	// updates the editor.
-	//
-	// The transformed component is also moved to the top (use {@link setZIndexAndTransformBy} to
-	// avoid this behavior).
+	/**
+	 * Returns a command that, when applied, transforms this by [affineTransfm] and
+	 * updates the editor.
+	 *
+	 * The transformed component is also moved to the top (use
+	 * {@link AbstractComponent.setZIndexAndTransformBy} to avoid this behavior).
+	 */
 	public transformBy(affineTransfm: Mat33): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);
 	}
