@@ -201,8 +201,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 				this.menuContainer.style.opacity = '1';
 
 
-				// Focus the close button when first shown.
-				this.closeButton.focus();
+				// Focus the close button when first shown, but prevent scroll because the button
+				// is likely at the bottom of the screen (and we want the full sidebar to remain
+				// visible).
+				this.closeButton.focus({ preventScroll: true, });
 			} else {
 				this.closeColorPickers();
 
