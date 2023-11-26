@@ -78,9 +78,13 @@
 
 	$keyboard-hide-animation: 1.5s ease rehide-label;
 
-	&:focus-visible > #{$label-selector} {
-		animation: $keyboard-hide-animation;
-		opacity: 0;
+	// .focus-visible: Allow setting focus-visible from JS (in cases where this
+	// element isn't the focus target and the browser doesn't support :has).
+	&:focus-visible, &.focus-visible {
+		& > #{$label-selector} {
+			animation: $keyboard-hide-animation;
+			opacity: 0;
+		}
 	}
 
 	// Make the :has selector separate its own statement -- some browsers don't
