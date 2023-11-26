@@ -1,3 +1,5 @@
+@use "./utils/labelVisibleOnHover.scss";
+
 @keyframes toolbar--edgemenu-transition-in {
 	from { transform: translate(0, 100%); }
 	to { transform: translate(0, 0); }
@@ -21,102 +23,6 @@
 	to { overflow-y: hidden; }
 }
 
-// Shows a lable on hover
-// Uses the --button-label-hover-offset-y and --button-label-hover-offset-x
-// variables to determine the label's position.
-//
-// If the label is in a scrolling container, that container should have position: relative;
-// as this allows absolutely positioned children to scroll with the container (rather than
-// remaining stationary).
-@mixin label-visible-on-hover($label-selector) {
-	$label-visible-opacity: 0.8;
-
-	// Make the label hide only when hovering.
-
-	@keyframes rehide-label {
-		0% { opacity: $label-visible-opacity; }
-		80% { opacity: $label-visible-opacity; }
-		100% { opacity: 0.1; }
-	}
-
-	@keyframes show-label-delayed {
-		0% { opacity: 0; }
-		// Keep the label hidden before showing
-		80% { opacity: 0; }
-		100% { opacity: $label-visible-opacity; }
-	}
-
-	@keyframes show-label-now {
-		0% { opacity: 0; }
-		5% { opacity: 0; }
-		100% { opacity: $label-visible-opacity; }
-	}
-
-	@keyframes keep-label-hidden {
-		0% { opacity: 0; }
-		100% { opacity: 0; }
-	}
-
-	// Using CSS classes set by addLongPressOrHoverCssClasses avoids sticky
-	// hover on touch devices.
-	&:not(.no-long-press-or-hover):not(.has-long-press-or-hover) {
-		// Only show an animation when opening the label due to a hover --
-		// show the label immediately otherwise.
-		&:hover:not(:focus-visible) > #{$label-selector},
-		// When the user is pressing/long-pressing the button
-		&:active > #{$label-selector}
-		{
-			opacity: $label-visible-opacity;
-			animation: 1s ease show-label-delayed;
-		}
-	}
-
-	&.has-long-press-or-hover > #{$label-selector} {
-		opacity: $label-visible-opacity;
-		animation: 0.4s ease show-label-now;
-	}
-
-	$keyboard-hide-animation: 1.5s ease rehide-label;
-
-	// .focus-visible: Allow setting focus-visible from JS (in cases where this
-	// element isn't the focus target and the browser doesn't support :has).
-	&:focus-visible, &.focus-visible {
-		& > #{$label-selector} {
-			animation: $keyboard-hide-animation;
-			opacity: 0;
-		}
-	}
-
-	// Make the :has selector separate its own statement -- some browsers don't
-	// support :has, which would make the entire statement block have no effect.
-	&:has(:focus-visible) > #{$label-selector} {
-		animation: $keyboard-hide-animation;
-		opacity: 0;
-	}
-
-	& > #{$label-selector} {
-		opacity: 0;
-		position: absolute;
-		margin-top: var(--button-label-hover-offset-y);
-		margin-left: var(--button-label-hover-offset-x);
-
-		// The label is often mostly invisible/just below a toolbar item.
-		// If there are multiple toolbar rows, ensure that a label doesn't prevent
-		// clicking on items in the second row:
-		pointer-events: none;
-
-		background-color: var(--background-color-1);
-		color: var(--foreground-color-1);
-		border-radius: 25px;
-		padding: 10px;
-
-		transition: 0.2s ease opacity, 0.2s ease margin-top;
-
-		@media (prefers-reduced-motion: reduce) {
-			transition: none;
-		}
-	}
-}
 
 // The toolbar portion (the bar along the top of the screen)
 .toolbar-edge-toolbar {
@@ -142,7 +48,7 @@
 		}
 	}
 
-	// Hide labels when above a certain width
+	// Hide inline labels when above a certain width
 	@media screen and (max-width: 700px) {
 		&.one-row > * > .toolbar-toolContainer.label-inline {
 			font-size: 0.9em;
@@ -160,7 +66,8 @@
 					animation: 0.2s linear hide-initially;
 				}
 
-				@include label-visible-on-hover(label);
+				// DO show the labels on hover.
+				@include labelVisibleOnHover.label-visible-on-hover(label);
 
 				// Clear additional margins added because of the left/right side labels.
 				// (Repeat selector to increase specificity).
@@ -304,14 +211,21 @@
 	--button-label-hover-offset-y: var(--label-hover-offset-size);
 	--button-label-hover-offset-x: 0;
 
-	.toolbar-toolContainer:not(.no-icon):not(.label-inline) .toolbar-button {
-		width: calc(var(--toolbar-button-size) + var(--extra-left-right-padding));
+	.toolbar-toolContainer:not(.no-icon):not(.label-inline) {
 
-		// Note: EdgeToolbar.ts currently assumes that the height of a button is
-		//       equivalent to --toolbar-button-size.
-		height: var(--toolbar-button-size);
+		.toolbar-button {
+			width: calc(var(--toolbar-button-size) + var(--extra-left-right-padding));
 
-		@include label-visible-on-hover(label);
+			// Note: EdgeToolbar.ts currently assumes that the height of a button is
+			//       equivalent to --toolbar-button-size.
+			height: var(--toolbar-button-size);
+
+			@include labelVisibleOnHover.label-visible-on-hover(label);
+		}
+
+		&.dropdownVisible > .toolbar-button {
+			@include labelVisibleOnHover.show-label-now(label);
+		}
 	}
 
 	& > div > .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
@@ -396,7 +310,7 @@
 	// Special styles for the enum selector 
 	.toolbar-grid-selector .choice-button {
 		--button-label-hover-offset-y: var(--button-size);
-		@include label-visible-on-hover('label > .button-label-text');
+		@include labelVisibleOnHover.label-visible-on-hover('label > .button-label-text');
 	}
 }
 
