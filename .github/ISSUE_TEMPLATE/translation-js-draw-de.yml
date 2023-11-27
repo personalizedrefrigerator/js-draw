@@ -728,6 +728,25 @@ or
     validations:
       required: false
   - type: textarea
+    id: translation-autocorrectedTo
+    attributes:
+      label: "autocorrectedTo"
+      description: "Translate ``(strokeDescription) => `Autocorrected to ${strokeDescription}` ``."
+      placeholder: "(strokeDescription) => `Autocorrected to ${strokeDescription}`"
+      value: "(strokeDescription) => `Autocorrected to ${strokeDescription}`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-autocorrectionCanceled
+    attributes:
+      label: "autocorrectionCanceled"
+      description: "Translate `Autocorrect cancelled`."
+      placeholder: "Autocorrect cancelled"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-textTool
     attributes:
       label: "textTool"
