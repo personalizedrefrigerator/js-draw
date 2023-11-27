@@ -1,4 +1,13 @@
 
+# 1.13.0
+ * Bug fixes
+    * Fix keyboard shortcuts don't work after closing tool menus by clicking away.
+    * Fix tooltips don't disappear when triggered by touchscreens on some devices.
+    * Fix main window scrolls when opening the toolbar (editor embedded in a page).
+ * Other changes & improvements
+    * Further adjustments to stroke smoothing (fix regression: strokes not smoothed when input rate is very low).
+    * Include device-pixel-ratio in debug information screen.
+
 # 1.12.0
  * Improvements
     * Stroke smoothing/curve fitting: Make it less likely for strokes to have large spikes when drawing very fast.
