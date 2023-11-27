@@ -37,7 +37,7 @@ const listenForLongPressOrHover = (target: HTMLElement, options: Options) => {
 				timeSinceFirstPointer = Math.max(timeSince, timeSinceFirstPointer);
 			}
 
-			const longPressTimeout = options.longPressTimeout ?? 400; // ms
+			const longPressTimeout = options.longPressTimeout ?? 700; // ms
 
 			if (timeoutId !== null) {
 				clearTimeout(timeoutId);
