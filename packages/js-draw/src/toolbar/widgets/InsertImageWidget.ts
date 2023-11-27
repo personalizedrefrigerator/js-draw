@@ -169,11 +169,13 @@ export default class InsertImageWidget extends BaseWidget {
 			const image = files[0];
 
 			let data: string|null = null;
+			let errorMessage: string|null = null;
 
 			try {
 				data = await fileToBase64(image);
-			} catch(e) {
-				this.statusView.innerText = this.localizationTable.imageLoadError(e);
+			} catch (error) {
+				console.error('Image load error', error);
+				errorMessage = this.localizationTable.imageLoadError(error);
 			}
 
 			if (data) {
@@ -183,7 +185,14 @@ export default class InsertImageWidget extends BaseWidget {
 			} else {
 				this.image = null;
 			}
+
 			this.onImageDataUpdate();
+
+			// Show the error after image update callbacks to ensure it is
+			// actually shown.
+			if (errorMessage) {
+				this.statusView.innerText = errorMessage;
+			}
 		});
 
 		altTextRow.replaceChildren(imageAltTextLabel, this.imageAltTextInput);
