@@ -243,6 +243,11 @@ export default class Display {
 		return undefined;
 	}
 
+	/** @internal */
+	public getDevicePixelRatio() {
+		return this.devicePixelRatio;
+	}
+
 	/**
 	 * Rerenders the text-based display.
 	 * The text-based display is intended for screen readers and can be navigated to by pressing `tab`.

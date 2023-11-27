@@ -1618,8 +1618,9 @@ export class Editor {
 				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()}° rotation`,
 				`    ${this.image.estimateNumElements()} components`,
 				`    auto-resize: ${this.image.getAutoresizeEnabled() ? 'enabled' : 'disabled'}`,
-				`    ${this.getImportExportRect().w}x${this.getImportExportRect().h} image size`,
-				`    ${screenSize.x}x${screenSize.y} screen size`,
+				`    image size: ${this.getImportExportRect().w}x${this.getImportExportRect().h}`,
+				`    screen size: ${screenSize.x}x${screenSize.y}`,
+				`    device pixel ratio: ${this.display.getDevicePixelRatio()}`,
 				'    cache:',
 				`        ${
 					this.display.getCache().getDebugInfo()
