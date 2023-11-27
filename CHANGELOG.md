@@ -1,4 +1,8 @@
 
+# 1.13.1
+ * Changes
+    * Slight stroke smoothing adjustment
+
 # 1.13.0
  * Bug fixes
     * Fix keyboard shortcuts don't work after closing tool menus by clicking away.
