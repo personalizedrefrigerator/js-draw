@@ -31,7 +31,7 @@ window.PointerEvent ??= class extends MouseEvent {
 	public twist: number;
 
 	public constructor(
-		type: 'pointerdown'|'pointermove'|'pointerup', initDict: PointerEventInit,
+		type: 'pointerdown'|'pointermove'|'pointerup', initDict: PointerEventInit = {},
 	) {
 		super(type, initDict);
 
