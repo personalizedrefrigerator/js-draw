@@ -103,6 +103,7 @@ body:
       label: "inputAltText"
       description: "Translate `Alt text`."
       placeholder: "Alt text"
+      value: "Texto alternativo"
       render: "shell"
     validations:
       required: false
@@ -121,6 +122,7 @@ body:
       label: "resetImage"
       description: "Translate `Reset`."
       placeholder: "Reset"
+      value: "Reiniciar"
       render: "shell"
     validations:
       required: false
@@ -401,6 +403,7 @@ or
       label: "enableAutoresizeOption"
       description: "Translate `Auto-resize`."
       placeholder: "Auto-resize"
+      value: "Redimensionar automático"
       render: "shell"
     validations:
       required: false
@@ -420,6 +423,7 @@ or
       label: "about"
       description: "Translate `About`."
       placeholder: "About"
+      value: "Acerca de"
       render: "shell"
     validations:
       required: false
@@ -627,7 +631,7 @@ or
       label: "penTool"
       description: "Translate ``(penId) => `Pen ${penId}` ``."
       placeholder: "(penId) => `Pen ${penId}`"
-      value: "(penId) => { return `Lapiz ${penId}`; }"
+      value: "(penId) => `Lapiz ${penId}`"
       render: "shell"
     validations:
       required: false
@@ -685,6 +689,7 @@ or
       label: "undoRedoTool"
       description: "Translate `Undo/Redo`."
       placeholder: "Undo/Redo"
+      value: "Deshace/rehace"
       render: "shell"
     validations:
       required: false
@@ -904,7 +909,7 @@ or
       label: "toolEnabledAnnouncement"
       description: "Translate ``(toolName) => `${toolName} enabled` ``."
       placeholder: "(toolName) => `${toolName} enabled`"
-      value: "(toolName) => `${toolName} enabled`"
+      value: "(toolName) => `${toolName} fue activado`"
       render: "shell"
     validations:
       required: false
@@ -914,7 +919,7 @@ or
       label: "toolDisabledAnnouncement"
       description: "Translate ``(toolName) => `${toolName} disabled` ``."
       placeholder: "(toolName) => `${toolName} disabled`"
-      value: "(toolName) => `${toolName} disabled`"
+      value: "(toolName) => `${toolName} fue desactivado`"
       render: "shell"
     validations:
       required: false
@@ -943,7 +948,7 @@ or
       label: "resizeOutputCommand"
       description: "Translate ``(newSize) => `Resized image to ${newSize.w}x${newSize.h}` ``."
       placeholder: "(newSize) => `Resized image to ${newSize.w}x${newSize.h}`"
-      value: "(newSize) => `Resized image to ${newSize.w}x${newSize.h}`"
+      value: "(newSize) => `Tamaño de imagen fue cambiado a ${newSize.w}x${newSize.h}`"
       render: "shell"
     validations:
       required: false
@@ -981,7 +986,7 @@ or
       label: "eraseAction"
       description: "Translate ``(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}` ``."
       placeholder: "(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`"
-      value: "(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`"
+      value: "(componentDescription, numElems) => `Borrado: ${numElems} ${componentDescription}`"
       render: "shell"
     validations:
       required: false
