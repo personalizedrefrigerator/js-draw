@@ -15,7 +15,7 @@ import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 import untilNextAnimationFrame from './util/untilNextAnimationFrame';
-import fileToBase64 from './util/fileToBase64';
+import fileToBase64Url from './util/fileToBase64Url';
 import uniteCommands from './commands/uniteCommands';
 import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
@@ -709,7 +709,7 @@ export class Editor {
 				};
 
 				try {
-					const data = await fileToBase64(file, onprogress);
+					const data = await fileToBase64Url(file, { onprogress });
 
 					if (data && this.toolController.dispatchInputEvent({
 						kind: InputEvtType.PasteEvent,

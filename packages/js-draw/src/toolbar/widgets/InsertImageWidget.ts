@@ -5,7 +5,7 @@ import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
 import SelectionTool from '../../tools/SelectionTool/SelectionTool';
 import { Mat33 } from '@js-draw/math';
-import fileToBase64 from '../../util/fileToBase64';
+import fileToBase64Url from '../../util/fileToBase64Url';
 import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 import { EditorEventType } from '../../types';
@@ -172,7 +172,7 @@ export default class InsertImageWidget extends BaseWidget {
 			let errorMessage: string|null = null;
 
 			try {
-				data = await fileToBase64(image);
+				data = await fileToBase64Url(image);
 			} catch (error) {
 				console.error('Image load error', error);
 				errorMessage = this.localizationTable.imageLoadError(error);
