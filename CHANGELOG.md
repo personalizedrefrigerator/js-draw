@@ -1,4 +1,8 @@
 
+# 1.13.2
+ * Bug fixes
+    * Fix "insert image" tool doesn't work in iOS lockdown mode.
+
 # 1.13.1
  * Changes
     * Slight stroke smoothing adjustment
