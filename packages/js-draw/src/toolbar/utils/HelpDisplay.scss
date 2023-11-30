@@ -2,6 +2,8 @@
 .toolbar-help-overlay {
 	width: 100%;
 	height: 100%;
+	max-width: none;
+	max-height: none;
 	border: none;
 	margin: 0;
 	padding: 0;
@@ -11,10 +13,15 @@
 	// TODO: Use theme colors
 	color: white;
 	--icon-color: white;
-	background-color: rgba(0, 0, 0, 0.8);
 
-	backdrop-filter: blur(1px);
-	-webkit-backdrop-filter: blur(1px);
+	background-color: transparent;
+
+	&::backdrop {
+		background-color: rgba(0, 0, 0, 0.8);
+
+		backdrop-filter: blur(1px);
+		-webkit-backdrop-filter: blur(1px);
+	}
 
 	display: flex;
 	flex-direction: column;

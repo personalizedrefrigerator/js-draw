@@ -304,7 +304,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			this.editor,
 		);
 		helpOverlay.registerTextHelpForElement(
-			dropdown, [this.getTitle(), this.localizationTable.penDropdown__baseHelpText].join('\n')
+			dropdown, [this.getTitle(), this.localizationTable.penDropdown__baseHelpText].join('\n\n')
 		);
 
 		// Thickness: Value of the input is squared to allow for finer control/larger values.

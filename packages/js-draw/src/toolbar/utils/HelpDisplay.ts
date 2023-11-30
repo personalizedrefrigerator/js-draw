@@ -24,12 +24,13 @@ const createHelpPage = (item: HelpRecord) => {
 		return Rect2.union(...itemBoundingBoxes);
 	};
 
-	const refreshLabelPosition = () => {
+	const updateLabelPosition = () => {
 		const labelBBox = Rect2.of(textLabel.getBoundingClientRect());
 		const combinedBBox = getCombinedBBox();
 
 		if (labelBBox.intersects(combinedBBox)) {
 			const containerBBox = Rect2.of(container.getBoundingClientRect());
+
 			const spaceAboveCombined = combinedBBox.topLeft.y;
 			const spaceBelowCombined = containerBBox.bottomLeft.y - combinedBBox.bottomLeft.y;
 
@@ -86,11 +87,11 @@ const createHelpPage = (item: HelpRecord) => {
 		addToParent: (parent: HTMLElement) => {
 			refreshContent();
 			parent.appendChild(container);
-			refreshLabelPosition();
+			updateLabelPosition();
 		},
 		refresh: () => {
 			refreshContent();
-			refreshLabelPosition();
+			updateLabelPosition();
 		},
 	};
 };
@@ -224,7 +225,7 @@ export default class HelpDisplay {
 		);
 
 		this.createOverlay(overlay);
-		overlay.show();
+		overlay.showModal();
 
 		const minDragOffsetToTransition = 30;
 		const setDragOffset = (offset: number) => {
