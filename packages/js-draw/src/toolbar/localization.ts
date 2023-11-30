@@ -60,6 +60,14 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 
 	errorImageHasZeroSize: string;
 
+	// Help text
+	penDropdown__baseHelpText: string;
+	penDropdown__colorHelpText: string;
+	penDropdown__thicknessHelpText: string;
+	penDropdown__penTypeHelpText: string;
+	penDropdown__autocorrectHelpText: string;
+	penDropdown__stabilizationHelpText: string;
+
 	// closeSidebar is used for accessibility in a button label.
 	closeSidebar: (toolName: string)=>string;
 	dropdownShown: (toolName: string)=> string;
@@ -132,6 +140,18 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	paste: 'Paste',
 
+	errorImageHasZeroSize: 'Error: Image has zero size',
+
+	// Help text
+	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines. The settings below apply to this pen.',
+	penDropdown__colorHelpText: 'Changes the pen\'s color',
+	penDropdown__thicknessHelpText:
+		'Changes the pen\'s size.\n\nZooming in or out keeps the pen\'s visible size the same (it changes the size of the pen in the image.)',
+	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen tip” or a “pen shape” can be selected.',
+	penDropdown__autocorrectHelpText:
+		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
+	penDropdown__stabilizationHelpText:
+		'Draws smoother strokes.\n\nThis also adds a short delay between the mouse/stylus and the stroke.',
 
 	closeSidebar: (toolName: string) => `Close sidebar for ${toolName}`,
 	dropdownShown: (toolName) => `Menu for ${toolName} shown`,
@@ -141,6 +161,5 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	colorChangedAnnouncement: (color: string) => `Color changed to ${color}`,
 	imageSize: (size: number, units: string) => `Image size: ${size} ${units}`,
 
-	errorImageHasZeroSize: 'Error: Image has zero size',
 	imageLoadError: (message: string)=> `Error loading image: ${message}`,
 };

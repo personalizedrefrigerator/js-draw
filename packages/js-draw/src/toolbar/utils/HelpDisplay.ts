@@ -2,70 +2,95 @@ import { Rect2, Vec2 } from '@js-draw/math';
 import { ToolbarContext } from '../types';
 import makeDraggable from './makeDraggable';
 import { MutableReactiveValue } from '../../util/ReactiveValue';
+import cloneElementWithStyles from '../../util/cloneElementWithStyles';
 
 interface HelpRecord {
-	targetElement: HTMLElement;
-	helpText: string;
+	readonly targetElements: HTMLElement[];
+	readonly helpText: string;
 }
-
-const cloneElementWithStyles = (element: HTMLElement) => {
-	const restyle = (originalElement: HTMLElement, clonedElement: HTMLElement) => {
-		const originalComputedStyle = getComputedStyle(originalElement);
-
-		for (const propertyName of originalComputedStyle) {
-			const propertyValue = originalComputedStyle.getPropertyValue(propertyName);
-			clonedElement.style.setProperty(propertyName, propertyValue);
-		}
-
-		for (let i = 0; i < originalElement.children.length; i++) {
-			const originalChild = originalElement.children.item(i) as HTMLElement;
-			const clonedChild = clonedElement.children.item(i) as HTMLElement;
-
-			if (originalChild && clonedChild) {
-				restyle(originalChild, clonedChild);
-			} else {
-				console.warn('Missing child');
-			}
-		}
-	};
-
-	const elementClone = element.cloneNode(true) as HTMLElement;
-	restyle(element, elementClone);
-	return elementClone;
-};
 
 const createHelpPage = (item: HelpRecord) => {
 	const container = document.createElement('div');
 	container.classList.add('help-page-container');
 
 	const textLabel = document.createElement('div');
-	textLabel.classList.add('label');
+	textLabel.classList.add('label', '-space-above');
 	textLabel.innerText = item.helpText;
 
-	const refreshContent = () => {
-		const targetBBox = Rect2.of(item.targetElement.getBoundingClientRect());
-		const clonedElementContainer = document.createElement('div');
-
-		const clonedElement = cloneElementWithStyles(item.targetElement);
-		clonedElement.style.margin = '0';
-
-		clonedElementContainer.classList.add('cloned-element-container');
-		clonedElementContainer.style.position = 'absolute';
-		clonedElementContainer.style.left = `${targetBBox.topLeft.x}px`;
-		clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
-		clonedElementContainer.style.backgroundColor = 'var(--background-color-1)';
-		clonedElementContainer.style.borderRadius = '10px';
-
-		clonedElementContainer.appendChild(clonedElement);
-		container.replaceChildren(clonedElementContainer, textLabel);
+	const getCombinedBBox = () => {
+		const itemBoundingBoxes = item.targetElements.map(
+			element => Rect2.of(element.getBoundingClientRect())
+		);
+		return Rect2.union(...itemBoundingBoxes);
 	};
+
+	const refreshLabelPosition = () => {
+		const labelBBox = Rect2.of(textLabel.getBoundingClientRect());
+		const combinedBBox = getCombinedBBox();
+
+		if (labelBBox.intersects(combinedBBox)) {
+			const spaceAboveCombined = combinedBBox.topLeft.y;
+			const spaceBelowCombined = combinedBBox.bottomLeft.y;
+
+			if (spaceAboveCombined > spaceBelowCombined && spaceAboveCombined > labelBBox.height / 2) {
+				// Push to the very top
+				textLabel.classList.remove('-small-space-above', '-large-space-above');
+				textLabel.classList.add('-large-space-below');
+			}
+
+			if (spaceAboveCombined < spaceBelowCombined && spaceBelowCombined > labelBBox.height) {
+				// Push to the very bottom
+				textLabel.classList.add('-large-space-above');
+				textLabel.classList.remove('-large-space-below');
+			}
+		}
+	};
+
+	const refreshContent = () => {
+		container.replaceChildren();
+
+		for (const targetElement of item.targetElements) {
+			const targetBBox = Rect2.of(targetElement.getBoundingClientRect());
+
+			const clonedElement = cloneElementWithStyles(targetElement);
+
+			// Interacting with the clone won't trigger event listeners, so disable
+			// all inputs.
+			for (const input of clonedElement.querySelectorAll('input')) {
+				input.disabled = true;
+			}
+
+			clonedElement.style.margin = '0';
+
+			const clonedElementContainer = document.createElement('div');
+			clonedElementContainer.classList.add('cloned-element-container');
+			clonedElementContainer.style.position = 'absolute';
+			clonedElementContainer.style.left = `${targetBBox.topLeft.x}px`;
+			clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
+			clonedElementContainer.style.backgroundColor = 'var(--background-color-1)';
+			clonedElementContainer.style.borderRadius = '10px';
+
+			clonedElementContainer.replaceChildren(clonedElement);
+
+			container.appendChild(clonedElementContainer);
+		}
+
+		textLabel.classList.remove('-large-space-above');
+		textLabel.classList.add('-small-space-above', '-large-space-below');
+		container.appendChild(textLabel);
+	};
+
 
 	return {
 		addToParent: (parent: HTMLElement) => {
 			refreshContent();
 			parent.appendChild(container);
+			refreshLabelPosition();
 		},
-		refresh: refreshContent,
+		refresh: () => {
+			refreshContent();
+			refreshLabelPosition();
+		},
 	};
 };
 
@@ -101,6 +126,7 @@ export default class HelpDisplay {
 			const currentPage = MutableReactiveValue.fromInitialValue(0);
 
 			const content = document.createElement('div');
+			content.classList.add('navigation-content');
 
 			const showPage = (pageIndex: number) => {
 				if (pageIndex >= this.#helpData.length || pageIndex < 0) {
@@ -199,6 +225,7 @@ export default class HelpDisplay {
 		this.createOverlay(overlay);
 		overlay.show();
 
+		const minDragOffsetToTransition = 30;
 		const setDragOffset = (offset: number) => {
 			if (offset > 0 && !navigation.hasPrevious()) {
 				offset = 0;
@@ -208,8 +235,28 @@ export default class HelpDisplay {
 				offset = 0;
 			}
 
+			// Clamp offset
+			if (offset > minDragOffsetToTransition || offset < -minDragOffsetToTransition) {
+				offset = minDragOffsetToTransition * Math.sign(offset);
+			}
+
 			overlay.style.transform = `translate(${offset}px, 0px)`;
+
+			if (offset >= minDragOffsetToTransition) {
+				navigationButtons.classList.add('-highlight-previous');
+			} else {
+				navigationButtons.classList.remove('-highlight-previous');
+			}
+
+			if (offset <= -minDragOffsetToTransition) {
+				navigationButtons.classList.add('-highlight-next');
+			} else {
+				navigationButtons.classList.remove('-highlight-next');
+			}
 		};
+
+
+		// Listeners
 
 		const dragListener = makeDraggable(overlay, {
 			draggableChildElements: [ navigation.content ],
@@ -222,9 +269,11 @@ export default class HelpDisplay {
 				setDragOffset(0);
 
 				if (!dragStatistics.roughlyClick) {
-					if (dragStatistics.displacement.x > 0) {
+					const xDisplacement = dragStatistics.displacement.x;
+
+					if (xDisplacement > minDragOffsetToTransition) {
 						navigation.toPrevious();
-					} else {
+					} else if (xDisplacement < -minDragOffsetToTransition) {
 						navigation.toNext();
 					}
 				}
@@ -239,15 +288,29 @@ export default class HelpDisplay {
 			resizeObserver.observe(overlay);
 		}
 
+		const onMediaChangeListener = () => {
+			// Refresh the cloned elements and their styles after a delay.
+			// This is necessary because styles are cloned, in addition to elements.
+			requestAnimationFrame(() => navigation.refreshCurrent());
+		};
+		const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+		mediaQueryList.addEventListener('change', onMediaChangeListener);
+
 		overlay.addEventListener('close', () => {
+			mediaQueryList.removeEventListener('change', onMediaChangeListener);
 			dragListener.removeListeners();
-			overlay.remove();
 			resizeObserver?.disconnect();
+
+			overlay.remove();
 		});
 	}
 
 	public registerTextHelpForElement(targetElement: HTMLElement, helpText: string) {
-		this.#helpData.push({ targetElement, helpText });
+		this.registerTextHelpForElements([ targetElement ], helpText);
+	}
+
+	public registerTextHelpForElements(targetElements: HTMLElement[], helpText: string) {
+		this.#helpData.push({ targetElements: [ ...targetElements ], helpText });
 	}
 
 	public createToggleButton(): HTMLButtonElement {

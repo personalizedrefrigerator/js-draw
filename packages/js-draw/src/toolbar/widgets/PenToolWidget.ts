@@ -167,7 +167,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 
 	// Creates a widget that allows selecting different pen types
-	private createPenTypeSelector() {
+	private createPenTypeSelector(helpOverlay: HelpDisplay) {
 		const allChoices = this.penTypes.map((penType, index) => {
 			return {
 				id: index,
@@ -195,6 +195,11 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		penSelector.value.onUpdate(onSelectorUpdate);
 		shapeSelector.value.onUpdate(onSelectorUpdate);
+
+		helpOverlay.registerTextHelpForElements(
+			[penSelector.getRootElement(), shapeSelector.getRootElement()],
+			this.localizationTable.penDropdown__penTypeHelpText,
+		);
 
 		return {
 			setValue: (penTypeIndex: number) => {
@@ -263,7 +268,6 @@ export default class PenToolWidget extends BaseToolWidget {
 		stabilizationOption.setOnInputListener(enabled => {
 			this.tool.setHasStabilization(enabled);
 		});
-		stabilizationOption.addHelpText('Draws smoother strokes');
 
 		const autocorrectOption = addToggleButton(
 			this.localizationTable.strokeAutocorrect,
@@ -272,9 +276,10 @@ export default class PenToolWidget extends BaseToolWidget {
 		autocorrectOption.setOnInputListener(enabled => {
 			this.tool.setStrokeAutocorrectEnabled(enabled);
 		});
-		autocorrectOption.addHelpText(
-			'When “Autocorrect” is enabled, holding the pen stationary corrects strokes to rectangles and lines.'
-		);
+
+		// Help text
+		autocorrectOption.addHelpText(this.localizationTable.penDropdown__autocorrectHelpText);
+		stabilizationOption.addHelpText(this.localizationTable.penDropdown__stabilizationHelpText);
 
 		return {
 			update: () => {
@@ -298,14 +303,14 @@ export default class PenToolWidget extends BaseToolWidget {
 			element => this.editor.createHTMLOverlay(element),
 			this.editor,
 		);
-		helpOverlay.registerTextHelpForElement(dropdown, 'Pen tool');
+		helpOverlay.registerTextHelpForElement(
+			dropdown, [this.getTitle(), this.localizationTable.penDropdown__baseHelpText].join('\n')
+		);
 
 		// Thickness: Value of the input is squared to allow for finer control/larger values.
 		const { container: thicknessRow, setValue: setThickness } = makeThicknessSlider(this.editor, thickness => {
 			this.tool.setThickness(thickness);
 		});
-
-		const penTypeSelect = this.createPenTypeSelector();
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
@@ -322,9 +327,21 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
-		helpOverlay.registerTextHelpForElement(colorRow, 'Select the color of the pen');
-
+		// Autocorrect and stabilization options
 		const toggleButtonRow = this.createStrokeCorrectionOptions(helpOverlay);
+
+		const penTypeSelect = this.createPenTypeSelector(helpOverlay);
+
+		// Add help text for color and thickness last, as these are likely to be
+		// features users are least interested in.
+		helpOverlay.registerTextHelpForElement(
+			colorRow,
+			this.localizationTable.penDropdown__colorHelpText
+		);
+		helpOverlay.registerTextHelpForElement(
+			thicknessRow, this.localizationTable.penDropdown__thicknessHelpText,
+		);
+
 
 		this.updateInputs = () => {
 			setColorInputValue(this.tool.getColor());
