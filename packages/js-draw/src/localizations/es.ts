@@ -34,7 +34,7 @@ const localization: EditorLocalization = {
 	enableAutoresizeOption: 'Redimensionar automático',
 	toggleOverflow: 'Más',
 	about: 'Acerca de',
-	touchPanning: 'Mover la pantalla con un dedo',
+	touchDrawing: 'Dibujar con un dedo',
 	roundedTipPen: 'Lapiz Redondeado',
 	arrowPen: 'Flecha',
 	linePen: 'Línea',

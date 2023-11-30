@@ -3,7 +3,7 @@
 export interface ToolbarLocalization {
 	fontLabel: string;
 	textSize: string;
-	touchPanning: string;
+	touchDrawing: string;
 	lockRotation: string;
 	outlinedRectanglePen: string;
 	outlinedCirclePen: string,
@@ -117,7 +117,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	inputStabilization: 'Stabilization',
 	strokeAutocorrect: 'Autocorrect',
 
-	touchPanning: 'Touchscreen panning',
+	touchDrawing: 'Touch drawing',
 
 	roundedTipPen: 'Round',
 	flatTipPen: 'Flat',

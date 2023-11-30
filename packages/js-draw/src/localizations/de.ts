@@ -34,7 +34,6 @@ const localization: EditorLocalization = {
 	pickColorFromScreen: 'Farbe von Bildschirm auswählen',
 	clickToPickColorAnnouncement: 'Klicke auf den Bildschirm, um eine Farbe auszuwählen',
 	selectionToolKeyboardShortcuts: 'Auswahl-Werkzeug: Verwende die Pfeiltasten, um ausgewählte Elemente zu verschieben und ‚i‘ und ‚o‘, um ihre Größe zu ändern.',
-	touchPanning: 'Ansicht mit Touchscreen verschieben',
 	anyDevicePanning: 'Ansicht mit jedem Eingabegerät verschieben',
 
 	selectPenTip: 'Objekt-Typ: ',

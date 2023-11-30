@@ -79,7 +79,10 @@ class HandModeWidget extends BaseWidget {
 	public constructor(
 		editor: Editor,
 
-		protected tool: PanZoom, protected flag: PanZoomMode, protected makeIcon: ()=> Element,
+		protected tool: PanZoom,
+		protected flag: PanZoomMode,
+		protected enabledWhenFlagIsPresent: boolean,
+		protected makeIcon: ()=> Element,
 		private title: string,
 
 		localizationTable?: ToolbarLocalization,
@@ -89,7 +92,11 @@ class HandModeWidget extends BaseWidget {
 		editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
 			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === tool) {
 				const allEnabled = !!(tool.getMode() & PanZoomMode.SinglePointerGestures);
-				this.setSelected(!!(tool.getMode() & flag) || allEnabled);
+
+				// Whether the flag is present or functionally present.
+				const flagPresent = !!(tool.getMode() & flag) || allEnabled;
+
+				this.setSelected(flagPresent === enabledWhenFlagIsPresent);
 
 				// Unless this widget toggles all single pointer gestures, toggling while
 				// single pointer gestures are enabled should have no effect
@@ -108,7 +115,7 @@ class HandModeWidget extends BaseWidget {
 	}
 
 	protected handleClick() {
-		this.setModeFlag(!this.isSelected());
+		this.setModeFlag(this.isSelected() !== this.enabledWhenFlagIsPresent);
 	}
 
 	protected getTitle(): string {
@@ -164,10 +171,12 @@ export default class HandToolWidget extends BaseToolWidget {
 		const touchPanningWidget = new HandModeWidget(
 			editor,
 
-			this.overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
+			this.overridePanZoomTool,
+			PanZoomMode.OneFingerTouchGestures,
+			false,
 			() => this.editor.icons.makeTouchPanningIcon(),
 
-			localizationTable.touchPanning,
+			localizationTable.touchDrawing,
 
 			localizationTable,
 		);
@@ -175,7 +184,9 @@ export default class HandToolWidget extends BaseToolWidget {
 		const rotationLockWidget = new HandModeWidget(
 			editor,
 
-			this.overridePanZoomTool, PanZoomMode.RotationLocked,
+			this.overridePanZoomTool,
+			PanZoomMode.RotationLocked,
+			true,
 			() => this.editor.icons.makeRotationLockIcon(),
 
 			localizationTable.lockRotation,
