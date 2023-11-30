@@ -29,10 +29,11 @@ const createHelpPage = (item: HelpRecord) => {
 		const combinedBBox = getCombinedBBox();
 
 		if (labelBBox.intersects(combinedBBox)) {
+			const containerBBox = Rect2.of(container.getBoundingClientRect());
 			const spaceAboveCombined = combinedBBox.topLeft.y;
-			const spaceBelowCombined = combinedBBox.bottomLeft.y;
+			const spaceBelowCombined = containerBBox.bottomLeft.y - combinedBBox.bottomLeft.y;
 
-			if (spaceAboveCombined > spaceBelowCombined && spaceAboveCombined > labelBBox.height / 2) {
+			if (spaceAboveCombined > spaceBelowCombined && spaceAboveCombined > labelBBox.height / 3) {
 				// Push to the very top
 				textLabel.classList.remove('-small-space-above', '-large-space-above');
 				textLabel.classList.add('-large-space-below');
