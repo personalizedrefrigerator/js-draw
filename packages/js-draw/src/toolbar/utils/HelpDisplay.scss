@@ -9,6 +9,7 @@
 	padding: 0;
 	z-index: 5;
 	touch-action: none;
+	overflow: hidden;
 
 	// TODO: Use theme colors
 	color: white;
@@ -128,16 +129,16 @@
 				margin: 0;
 			}
 
+			* {
+				pointer-events: none !important;
+			}
+
 			&:not(.-clickable) * {
 				cursor: unset !important;
 			}
 
 			&.-clickable {
 				cursor: pointer;
-
-				* {
-					pointer-events: none !important;
-				}
 
 				z-index: 2;
 				touch-action: none;
@@ -215,20 +216,25 @@
 }
 
 
-.toolbar-element .help-button {
-	float: right;
-	border: 1px solid var(--icon-color);
-	color: var(--icon-color);
-	background-color: var(--background-color-1);
+.toolbar-element .toolbar-help-overlay-button {
+	height: 0;
+	position: relative;
 
-	margin: 15px;
-	margin-top: 0;
+	> .button {
+		position: absolute;
+		right: 0;
+		margin: 15px;
+		margin-top: 0;
 
-	border-radius: 100%;
-	width: 1.2em;
-	height: 1.2em;
-	padding: 0;
+		border: 1px solid var(--icon-color);
+		color: var(--icon-color);
 
-	text-align: center;
-	opacity: 0.5;
+		border-radius: 100%;
+		width: 1.2em;
+		height: 1.2em;
+		padding: 0;
+
+		text-align: center;
+		opacity: 0.5;
+	}
 }

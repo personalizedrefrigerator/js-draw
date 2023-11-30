@@ -167,7 +167,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 
 	// Creates a widget that allows selecting different pen types
-	private createPenTypeSelector(helpOverlay: HelpDisplay) {
+	private createPenTypeSelector(helpOverlay?: HelpDisplay) {
 		const allChoices = this.penTypes.map((penType, index) => {
 			return {
 				id: index,
@@ -196,7 +196,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		penSelector.value.onUpdate(onSelectorUpdate);
 		shapeSelector.value.onUpdate(onSelectorUpdate);
 
-		helpOverlay.registerTextHelpForElements(
+		helpOverlay?.registerTextHelpForElements(
 			[penSelector.getRootElement(), shapeSelector.getRootElement()],
 			this.localizationTable.penDropdown__penTypeHelpText,
 		);
@@ -219,7 +219,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		};
 	}
 
-	protected createStrokeCorrectionOptions(helpOverlay: HelpDisplay) {
+	protected createStrokeCorrectionOptions(helpOverlay?: HelpDisplay) {
 		const container = document.createElement('div');
 		container.classList.add('action-button-row', `${toolbarCSSPrefix}-pen-tool-toggle-buttons`);
 
@@ -251,7 +251,7 @@ export default class PenToolWidget extends BaseToolWidget {
 					onChangeListener = listener;
 				},
 				addHelpText(text: string) {
-					helpOverlay.registerTextHelpForElement(button, text);
+					helpOverlay?.registerTextHelpForElement(button, text);
 				},
 			};
 			button.onclick = () => {
@@ -293,18 +293,14 @@ export default class PenToolWidget extends BaseToolWidget {
 		};
 	}
 
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
+	protected override getHelpText() {
+		return this.localizationTable.penDropdown__baseHelpText;
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		const container = document.createElement('div');
 		container.classList.add(
 			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
-		);
-
-		const helpOverlay = new HelpDisplay(
-			element => this.editor.createHTMLOverlay(element),
-			this.editor,
-		);
-		helpOverlay.registerTextHelpForElement(
-			dropdown, [this.getTitle(), this.localizationTable.penDropdown__baseHelpText].join('\n\n')
 		);
 
 		// Thickness: Value of the input is squared to allow for finer control/larger values.
@@ -328,17 +324,17 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorInputContainer);
 
 		// Autocorrect and stabilization options
-		const toggleButtonRow = this.createStrokeCorrectionOptions(helpOverlay);
+		const toggleButtonRow = this.createStrokeCorrectionOptions(helpDisplay);
 
-		const penTypeSelect = this.createPenTypeSelector(helpOverlay);
+		const penTypeSelect = this.createPenTypeSelector(helpDisplay);
 
 		// Add help text for color and thickness last, as these are likely to be
 		// features users are least interested in.
-		helpOverlay.registerTextHelpForElement(
+		helpDisplay?.registerTextHelpForElement(
 			colorRow,
 			this.localizationTable.penDropdown__colorHelpText
 		);
-		helpOverlay.registerTextHelpForElement(
+		helpDisplay?.registerTextHelpForElement(
 			thicknessRow, this.localizationTable.penDropdown__thicknessHelpText,
 		);
 
@@ -358,7 +354,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		container.replaceChildren(colorRow, thicknessRow);
 		penTypeSelect.addTo(container);
 
-		dropdown.replaceChildren(helpOverlay.createToggleButton(), container);
+		dropdown.replaceChildren(container);
 
 		// Add the toggle button row *outside* of the main content (use different
 		// spacing with respect to the sides of the container).

@@ -345,17 +345,32 @@ export default class HelpDisplay {
 		});
 	}
 
+	/** Marks `helpText` as associated with a single `targetElement`. */
 	public registerTextHelpForElement(targetElement: HTMLElement, helpText: string) {
 		this.registerTextHelpForElements([ targetElement ], helpText);
 	}
 
+	/** Marks `helpText` as associated with all elements in `targetElements`. */
 	public registerTextHelpForElements(targetElements: HTMLElement[], helpText: string) {
 		this.#helpData.push({ targetElements: [ ...targetElements ], helpText });
 	}
 
-	public createToggleButton(): HTMLButtonElement {
+	/** Returns true if any help text has been registered. */
+	public hasHelpText() {
+		return this.#helpData.length > 0;
+	}
+
+	/**
+	 * Creates and returns a button that toggles the help display.
+	 *
+	 * @internal
+	 */
+	public createToggleButton(): HTMLElement {
+		const buttonContainer = document.createElement('div');
+		buttonContainer.classList.add('toolbar-help-overlay-button');
+
 		const helpButton = document.createElement('button');
-		helpButton.classList.add('help-button');
+		helpButton.classList.add('button');
 		helpButton.innerText = '?';
 		helpButton.setAttribute('aria-label', this.context.localization.help);
 
@@ -363,6 +378,8 @@ export default class HelpDisplay {
 			this.showHelpOverlay();
 		};
 
-		return helpButton;
+		buttonContainer.appendChild(helpButton);
+
+		return buttonContainer;
 	}
 }

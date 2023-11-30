@@ -67,6 +67,11 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	penDropdown__penTypeHelpText: string;
 	penDropdown__autocorrectHelpText: string;
 	penDropdown__stabilizationHelpText: string;
+	handDropdown__baseHelpText: string;
+	handDropdown__zoomHelpText: string;
+	handDropdown__touchPanningHelpText: string;
+	handDropdown__lockRotationHelpText: string;
+
 
 	// closeSidebar is used for accessibility in a button label.
 	closeSidebar: (toolName: string)=>string;
@@ -152,6 +157,14 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
 	penDropdown__stabilizationHelpText:
 		'Draws smoother strokes.\n\nThis also adds a short delay between the mouse/stylus and the stroke.',
+	handDropdown__baseHelpText:
+		'This tool is responsible for scrolling, rotating, and zooming the editor. Its behavior can be configured below.',
+	handDropdown__zoomHelpText:
+		'Increase/decrease the zoom or reset zoom and scroll.',
+	handDropdown__touchPanningHelpText:
+		'When enabled, touch gestures move the image rather than select or draw.',
+	handDropdown__lockRotationHelpText:
+		'When enabled, prevents touch gestures from rotating the screen.',
 
 	closeSidebar: (toolName: string) => `Close sidebar for ${toolName}`,
 	dropdownShown: (toolName) => `Menu for ${toolName} shown`,
