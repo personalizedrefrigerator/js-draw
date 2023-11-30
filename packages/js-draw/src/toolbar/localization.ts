@@ -1,6 +1,6 @@
+import { ToolbarUtilsLocalization, defaultToolbarUtilsLocalization } from './utils/localization';
 
-
-export interface ToolbarLocalization {
+export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	fontLabel: string;
 	textSize: string;
 	touchPanning: string;
@@ -72,6 +72,8 @@ export interface ToolbarLocalization {
 }
 
 export const defaultToolbarLocalization: ToolbarLocalization = {
+	...defaultToolbarUtilsLocalization,
+
 	pen: 'Pen',
 	eraser: 'Eraser',
 	select: 'Select',

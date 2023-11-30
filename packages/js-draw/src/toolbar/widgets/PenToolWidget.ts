@@ -19,6 +19,7 @@ import { toolbarCSSPrefix } from '../constants';
 import makeThicknessSlider from './components/makeThicknessSlider';
 import makeGridSelector from './components/makeGridSelector';
 import { IconElemType } from '../IconProvider';
+import HelpDisplay from '../utils/HelpDisplay';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -213,7 +214,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		};
 	}
 
-	protected createStrokeCorrectionOptions() {
+	protected createStrokeCorrectionOptions(helpOverlay: HelpDisplay) {
 		const container = document.createElement('div');
 		container.classList.add('action-button-row', `${toolbarCSSPrefix}-pen-tool-toggle-buttons`);
 
@@ -244,6 +245,9 @@ export default class PenToolWidget extends BaseToolWidget {
 				setOnInputListener(listener: (checked: boolean)=>void) {
 					onChangeListener = listener;
 				},
+				addHelpText(text: string) {
+					helpOverlay.registerTextHelpForElement(button, text);
+				},
 			};
 			button.onclick = () => {
 				result.setChecked(!checked);
@@ -259,6 +263,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		stabilizationOption.setOnInputListener(enabled => {
 			this.tool.setHasStabilization(enabled);
 		});
+		stabilizationOption.addHelpText('Draws smoother strokes');
 
 		const autocorrectOption = addToggleButton(
 			this.localizationTable.strokeAutocorrect,
@@ -267,6 +272,9 @@ export default class PenToolWidget extends BaseToolWidget {
 		autocorrectOption.setOnInputListener(enabled => {
 			this.tool.setStrokeAutocorrectEnabled(enabled);
 		});
+		autocorrectOption.addHelpText(
+			'When “Autocorrect” is enabled, holding the pen stationary corrects strokes to rectangles and lines.'
+		);
 
 		return {
 			update: () => {
@@ -276,7 +284,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 			addTo: (parent: HTMLElement) => {
 				parent.appendChild(container);
-			}
+			},
 		};
 	}
 
@@ -285,6 +293,12 @@ export default class PenToolWidget extends BaseToolWidget {
 		container.classList.add(
 			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
 		);
+
+		const helpOverlay = new HelpDisplay(
+			element => this.editor.createHTMLOverlay(element),
+			this.editor,
+		);
+		helpOverlay.registerTextHelpForElement(dropdown, 'Pen tool');
 
 		// Thickness: Value of the input is squared to allow for finer control/larger values.
 		const { container: thicknessRow, setValue: setThickness } = makeThicknessSlider(this.editor, thickness => {
@@ -308,7 +322,9 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
-		const toggleButtonRow = this.createStrokeCorrectionOptions();
+		helpOverlay.registerTextHelpForElement(colorRow, 'Select the color of the pen');
+
+		const toggleButtonRow = this.createStrokeCorrectionOptions(helpOverlay);
 
 		this.updateInputs = () => {
 			setColorInputValue(this.tool.getColor());
@@ -325,7 +341,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		container.replaceChildren(colorRow, thicknessRow);
 		penTypeSelect.addTo(container);
 
-		dropdown.replaceChildren(container);
+		dropdown.replaceChildren(helpOverlay.createToggleButton(), container);
 
 		// Add the toggle button row *outside* of the main content (use different
 		// spacing with respect to the sides of the container).
