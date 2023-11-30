@@ -126,8 +126,21 @@
 				margin: 0;
 			}
 
-			* {
+			&:not(.-clickable) * {
 				cursor: unset !important;
+			}
+
+			&.-clickable {
+				&, * {
+					cursor: pointer !important;
+				}
+
+				z-index: 2;
+			}
+
+			opacity: 0.001;
+			&.-active {
+				opacity: 1;
 			}
 		}
 	}

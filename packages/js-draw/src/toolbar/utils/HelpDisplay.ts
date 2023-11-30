@@ -9,16 +9,26 @@ interface HelpRecord {
 	readonly helpText: string;
 }
 
-const createHelpPage = (item: HelpRecord) => {
+const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>void) => {
 	const container = document.createElement('div');
 	container.classList.add('help-page-container');
 
 	const textLabel = document.createElement('div');
 	textLabel.classList.add('label', '-space-above');
-	textLabel.innerText = item.helpText;
+
+	let currentItem: HelpRecord|null = items[0] ?? null;
+
+	const onItemChange = () => {
+		textLabel.innerText = currentItem?.helpText ?? '';
+	};
+	onItemChange();
 
 	const getCombinedBBox = () => {
-		const itemBoundingBoxes = item.targetElements.map(
+		if (!currentItem) {
+			return Rect2.empty;
+		}
+
+		const itemBoundingBoxes = currentItem.targetElements.map(
 			element => Rect2.of(element.getBoundingClientRect())
 		);
 		return Rect2.union(...itemBoundingBoxes);
@@ -51,30 +61,46 @@ const createHelpPage = (item: HelpRecord) => {
 	const refreshContent = () => {
 		container.replaceChildren();
 
-		for (const targetElement of item.targetElements) {
-			const targetBBox = Rect2.of(targetElement.getBoundingClientRect());
+		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+			const item = items[itemIndex];
 
-			const clonedElement = cloneElementWithStyles(targetElement);
+			for (const targetElement of item.targetElements) {
+				const targetBBox = Rect2.of(targetElement.getBoundingClientRect());
 
-			// Interacting with the clone won't trigger event listeners, so disable
-			// all inputs.
-			for (const input of clonedElement.querySelectorAll('input')) {
-				input.disabled = true;
+				const clonedElement = cloneElementWithStyles(targetElement);
+
+				// Interacting with the clone won't trigger event listeners, so disable
+				// all inputs.
+				for (const input of clonedElement.querySelectorAll('input')) {
+					input.disabled = true;
+				}
+
+				clonedElement.style.margin = '0';
+
+				const clonedElementContainer = document.createElement('div');
+				clonedElementContainer.classList.add('cloned-element-container');
+				clonedElementContainer.style.position = 'absolute';
+				clonedElementContainer.style.left = `${targetBBox.topLeft.x}px`;
+				clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
+				clonedElementContainer.style.backgroundColor = 'var(--background-color-1)';
+				clonedElementContainer.style.borderRadius = '10px';
+
+				clonedElementContainer.replaceChildren(clonedElement);
+
+				if (item === currentItem) {
+					clonedElementContainer.classList.add('-active');
+				} else {
+					clonedElementContainer.classList.add('-clickable');
+					clonedElementContainer.setAttribute('aria-hidden', 'true');
+
+					const index = itemIndex;
+					clonedElementContainer.onclick = () => {
+						onItemClick(index);
+					};
+				}
+
+				container.appendChild(clonedElementContainer);
 			}
-
-			clonedElement.style.margin = '0';
-
-			const clonedElementContainer = document.createElement('div');
-			clonedElementContainer.classList.add('cloned-element-container');
-			clonedElementContainer.style.position = 'absolute';
-			clonedElementContainer.style.left = `${targetBBox.topLeft.x}px`;
-			clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
-			clonedElementContainer.style.backgroundColor = 'var(--background-color-1)';
-			clonedElementContainer.style.borderRadius = '10px';
-
-			clonedElementContainer.replaceChildren(clonedElement);
-
-			container.appendChild(clonedElementContainer);
 		}
 
 		textLabel.classList.remove('-large-space-above');
@@ -82,6 +108,10 @@ const createHelpPage = (item: HelpRecord) => {
 		container.appendChild(textLabel);
 	};
 
+	const refresh = () => {
+		refreshContent();
+		updateLabelPosition();
+	};
 
 	return {
 		addToParent: (parent: HTMLElement) => {
@@ -89,9 +119,11 @@ const createHelpPage = (item: HelpRecord) => {
 			parent.appendChild(container);
 			updateLabelPosition();
 		},
-		refresh: () => {
-			refreshContent();
-			updateLabelPosition();
+		refresh,
+		setPageIndex: (pageIndex: number) => {
+			currentItem = items[pageIndex];
+			onItemChange();
+			refresh();
 		},
 	};
 };
@@ -124,11 +156,15 @@ export default class HelpDisplay {
 		};
 
 		const makeNavigationContent = () => {
-			const helpPages = this.#helpData.map(item => createHelpPage(item));
 			const currentPage = MutableReactiveValue.fromInitialValue(0);
 
 			const content = document.createElement('div');
 			content.classList.add('navigation-content');
+
+			const helpPage = createHelpPage(
+				this.#helpData, newPageIndex => currentPage.set(newPageIndex)
+			);
+			helpPage.addToParent(content);
 
 			const showPage = (pageIndex: number) => {
 				if (pageIndex >= this.#helpData.length || pageIndex < 0) {
@@ -136,8 +172,7 @@ export default class HelpDisplay {
 					return;
 				}
 
-				content.replaceChildren();
-				helpPages[pageIndex].addToParent(content);
+				helpPage.setPageIndex(pageIndex);
 			};
 			currentPage.onUpdateAndNow(showPage);
 
@@ -156,7 +191,7 @@ export default class HelpDisplay {
 					}
 				},
 				hasNext: () => {
-					return currentPage.get() + 1 < helpPages.length;
+					return currentPage.get() + 1 < this.#helpData.length;
 				},
 				hasPrevious: () => {
 					return currentPage.get() > 0;
