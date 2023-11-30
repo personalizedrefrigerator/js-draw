@@ -61,6 +61,8 @@ const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>v
 	const refreshContent = () => {
 		container.replaceChildren();
 
+		const currentBBox = getCombinedBBox();
+
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			const item = items[itemIndex];
 
@@ -82,14 +84,14 @@ const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>v
 				clonedElementContainer.style.position = 'absolute';
 				clonedElementContainer.style.left = `${targetBBox.topLeft.x}px`;
 				clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
-				clonedElementContainer.style.backgroundColor = 'var(--background-color-1)';
-				clonedElementContainer.style.borderRadius = '10px';
 
 				clonedElementContainer.replaceChildren(clonedElement);
 
 				if (item === currentItem) {
 					clonedElementContainer.classList.add('-active');
-				} else {
+				}
+				// Otherwise, if not containing the current element
+				else if (!targetBBox.containsRect(currentBBox)) {
 					clonedElementContainer.classList.add('-clickable');
 					clonedElementContainer.setAttribute('aria-hidden', 'true');
 
@@ -139,6 +141,7 @@ export default class HelpDisplay {
 
 	private showHelpOverlay() {
 		const overlay = document.createElement('dialog');
+		overlay.setAttribute('autofocus', 'true');
 		overlay.classList.add('toolbar-help-overlay');
 
 		const makeCloseButton = () => {
