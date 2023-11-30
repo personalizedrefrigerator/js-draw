@@ -374,8 +374,11 @@ export default class EdgeToolbar extends AbstractToolbar {
 			return event.target === this.menuContainer;
 		}));
 
+		// Set lastGestureWasRoughlyClick to `true` initially because on page load
+		// performance.now() is zero.
+		let lastGestureWasRoughlyClick = true;
 		let gestureEndTimestamp = 0;
-		let lastGestureWasRoughlyClick = false;
+
 		const dragController = makeDraggable(this.sidebarContainer, {
 			draggableChildElements: dragElements,
 			onDrag: (deltaX, deltaY) => this.handleDrag(deltaX, deltaY),
