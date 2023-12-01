@@ -1,3 +1,3 @@
 export default {
-	number: '1.13.2',
+	number: '1.14.0',
 };

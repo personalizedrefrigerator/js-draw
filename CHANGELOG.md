@@ -1,4 +1,8 @@
 
+# 1.14.0
+ * Changes
+    * Reverts recent changes to stroke smoothing. (Caused possible regressions while drawing.)
+
 # 1.13.2
  * Bug fixes
     * Fix "insert image" tool doesn't work in iOS lockdown mode.
