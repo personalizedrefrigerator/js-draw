@@ -12,14 +12,17 @@
 	overflow: hidden;
 
 	// TODO: Use theme colors
-	color: white;
-	--icon-color: white;
+	$help-overlay-foreground: white;
+	$help-overlay-background: rgba(0, 0, 0, 0.8);
+
+	color: $help-overlay-foreground;
+	--icon-color: #{$help-overlay-foreground};
 
 	// We use ::backdrop for background styling
 	background-color: transparent;
 
 	&::backdrop {
-		background-color: rgba(0, 0, 0, 0.8);
+		background-color: $help-overlay-background;
 
 		backdrop-filter: blur(1px);
 		-webkit-backdrop-filter: blur(1px);
@@ -85,7 +88,7 @@
 
 		background: transparent;
 		border: none;
-		color: white;
+		color: var(--help-overlay-foreground);
 
 		border-radius: 15px;
 	}
