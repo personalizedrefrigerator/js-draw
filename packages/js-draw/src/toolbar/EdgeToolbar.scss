@@ -436,6 +436,11 @@
 			margin-top: 5px;
 			min-height: 35px;
 
+			// No extra space above the first
+			&:first-child {
+				margin-top: 0;
+			}
+
 			// Align inputs (assumes labels come first)
 			& > label {
 				padding-right: 35px;
