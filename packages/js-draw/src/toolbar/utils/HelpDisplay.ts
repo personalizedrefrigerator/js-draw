@@ -9,20 +9,46 @@ interface HelpRecord {
 	readonly helpText: string;
 }
 
-const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>void) => {
+const createHelpPage = (
+	helpItems: HelpRecord[],
+	onItemClick: (itemIndex: number)=>void,
+	onBackgroundClick: ()=>void,
+) => {
 	const container = document.createElement('div');
 	container.classList.add('help-page-container');
 
 	const textLabel = document.createElement('div');
 	textLabel.classList.add('label', '-space-above');
 
-	let currentItem: HelpRecord|null = items[0] ?? null;
+	// The current active item in helpItems.
+	// (Only one item is active at a time, but each item can have multiple HTMLElements).
+	let currentItemIndex = 0;
+	let currentItem: HelpRecord|null = helpItems[0] ?? null;
 
-	const onItemChange = () => {
-		textLabel.innerText = currentItem?.helpText ?? '';
-	};
-	onItemChange();
+	// Each help item can have multiple associated elements. We store clones of each
+	// of these elements in their own container.
+	//
+	// clonedElementContainers maps from help item indicies to **arrays** of containers.
+	//
+	// For example, clonedElementContainers would be
+	//   [ [ Container1, Container2 ], [ Container3 ], [ Container4 ]]
+	//       ↑                            ↑              ↑
+	//       HelpItem 1                   HelpItem 2     HelpItem 3
+	// if the first help item had two elements (and thus two cloned element containers).
+	//
+	let clonedElementContainers: HTMLElement[][] = [];
 
+	// Clicking on the background of the help area should send an event (e.g. to allow the
+	// help container to be closed).
+	container.addEventListener('click', event => {
+		// If clicking directly on the container (and not on a child)
+		if (event.target === container) {
+			onBackgroundClick();
+		}
+	});
+
+	// Returns the combined bounding box of all elements associated with the currentItem
+	// (all active help items).
 	const getCombinedBBox = () => {
 		if (!currentItem) {
 			return Rect2.empty;
@@ -34,6 +60,36 @@ const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>v
 		return Rect2.union(...itemBoundingBoxes);
 	};
 
+	// Updates each cloned element's click listener and CSS classes based on whether
+	// that element is the current focused element.
+	const updateClonedElementStates = () => {
+		const currentItemBBox = getCombinedBBox();
+		for (let index = 0; index < clonedElementContainers.length; index++) {
+			for (const container of clonedElementContainers[index]) {
+				const containerBBox = Rect2.of(container.getBoundingClientRect());
+
+				container.classList.remove('-active', '-clickable');
+				container.setAttribute('aria-hidden', 'true');
+
+				if (index === currentItemIndex) {
+					container.classList.add('-active');
+					container.removeAttribute('aria-hidden');
+					container.onclick = () => {};
+				}
+				// Otherwise, if not containing the current element
+				else if (!containerBBox.containsRect(currentItemBBox)) {
+					container.classList.add('-clickable');
+
+					const containerIndex = index;
+					container.onclick = () => {
+						onItemClick(containerIndex);
+					};
+				}
+			}
+		}
+	};
+
+	// Ensures that the item label doesn't overlap the current help item's cloned element.
 	const updateLabelPosition = () => {
 		const labelBBox = Rect2.of(textLabel.getBoundingClientRect());
 		const combinedBBox = getCombinedBBox();
@@ -61,10 +117,10 @@ const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>v
 	const refreshContent = () => {
 		container.replaceChildren();
 
-		const currentBBox = getCombinedBBox();
-
-		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
-			const item = items[itemIndex];
+		clonedElementContainers = [];
+		for (let itemIndex = 0; itemIndex < helpItems.length; itemIndex++) {
+			const item = helpItems[itemIndex];
+			const itemCloneContainers = [];
 
 			for (const targetElement of item.targetElements) {
 				const targetBBox = Rect2.of(targetElement.getBoundingClientRect());
@@ -87,23 +143,14 @@ const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>v
 
 				clonedElementContainer.replaceChildren(clonedElement);
 
-				if (item === currentItem) {
-					clonedElementContainer.classList.add('-active');
-				}
-				// Otherwise, if not containing the current element
-				else if (!targetBBox.containsRect(currentBBox)) {
-					clonedElementContainer.classList.add('-clickable');
-					clonedElementContainer.setAttribute('aria-hidden', 'true');
-
-					const index = itemIndex;
-					clonedElementContainer.onclick = () => {
-						onItemClick(index);
-					};
-				}
-
+				itemCloneContainers.push(clonedElementContainer);
 				container.appendChild(clonedElementContainer);
 			}
+
+			clonedElementContainers.push(itemCloneContainers);
 		}
+
+		updateClonedElementStates();
 
 		textLabel.classList.remove('-large-space-above');
 		textLabel.classList.add('-small-space-above', '-large-space-below');
@@ -115,6 +162,13 @@ const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>v
 		updateLabelPosition();
 	};
 
+	const onItemChange = () => {
+		textLabel.innerText = currentItem?.helpText ?? '';
+
+		updateClonedElementStates();
+	};
+	onItemChange();
+
 	return {
 		addToParent: (parent: HTMLElement) => {
 			refreshContent();
@@ -123,9 +177,9 @@ const createHelpPage = (items: HelpRecord[], onItemClick: (itemIndex: number)=>v
 		},
 		refresh,
 		setPageIndex: (pageIndex: number) => {
-			currentItem = items[pageIndex];
+			currentItemIndex = pageIndex;
+			currentItem = helpItems[pageIndex];
 			onItemChange();
-			refresh();
 		},
 	};
 };
@@ -143,6 +197,8 @@ export default class HelpDisplay {
 		const overlay = document.createElement('dialog');
 		overlay.setAttribute('autofocus', 'true');
 		overlay.classList.add('toolbar-help-overlay');
+
+		const onBackgroundClick = () => { overlay.close(); };
 
 		const makeCloseButton = () => {
 			const closeButton = document.createElement('button');
@@ -165,17 +221,22 @@ export default class HelpDisplay {
 			content.classList.add('navigation-content');
 
 			const helpPage = createHelpPage(
-				this.#helpData, newPageIndex => currentPage.set(newPageIndex)
+				this.#helpData,
+				newPageIndex => currentPage.set(newPageIndex),
+				onBackgroundClick,
 			);
 			helpPage.addToParent(content);
 
 			const showPage = (pageIndex: number) => {
 				if (pageIndex >= this.#helpData.length || pageIndex < 0) {
-					content.replaceChildren();
-					return;
-				}
+					// Hide if out of bounds
+					console.warn('Help screen: Navigated to out-of-bounds page', pageIndex);
+					content.style.display = 'none';
+				} else {
+					content.style.display = '';
 
-				helpPage.setPageIndex(pageIndex);
+					helpPage.setPageIndex(pageIndex);
+				}
 			};
 			currentPage.onUpdateAndNow(showPage);
 
@@ -200,7 +261,7 @@ export default class HelpDisplay {
 					return currentPage.get() > 0;
 				},
 				refreshCurrent: () => {
-					showPage(currentPage.get());
+					helpPage.refresh();
 				},
 			};
 			return navigationControl;
@@ -335,6 +396,15 @@ export default class HelpDisplay {
 		};
 		const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
 		mediaQueryList.addEventListener('change', onMediaChangeListener);
+
+		// Close the overlay when clicking on the background (*directly* on any of the
+		// elements in closeOverlayTriggers).
+		const closeOverlayTriggers = [ navigation.content, navigationButtons, overlay ];
+		overlay.onclick = event => {
+			if (closeOverlayTriggers.includes(event.target as any)) {
+				onBackgroundClick();
+			}
+		};
 
 		overlay.addEventListener('close', () => {
 			mediaQueryList.removeEventListener('change', onMediaChangeListener);

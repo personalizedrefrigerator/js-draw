@@ -131,6 +131,7 @@
 
 			* {
 				pointer-events: none !important;
+				transition: 0.3s ease opacity !important;
 			}
 
 			&:not(.-clickable) * {
@@ -142,6 +143,15 @@
 
 				z-index: 2;
 				touch-action: none;
+
+				&:hover, &:active {
+					filter: opacity(0.5);
+
+					> * {
+						opacity: 0 !important;
+						transition: 0s ease opacity !important;
+					}
+				}
 			}
 
 			filter: opacity(0);
@@ -149,7 +159,7 @@
 				filter: opacity(1);
 			}
 
-			transition: 0.1s ease opacity;
+			transition: 0.3s ease filter;
 		}
 	}
 
