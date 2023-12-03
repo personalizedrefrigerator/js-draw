@@ -6,7 +6,7 @@ import listenForLongPressOrHover from './listenForLongPressOrHover';
  *
  * When no pointers are inside `element`, adds the CSS class `no-long-press-or-hover`.
  */
-const addLongPressOrHoverCssClasses = (element: HTMLElement) => {
+const addLongPressOrHoverCssClasses = (element: HTMLElement, options?: { timeout: number, }) => {
 	const hasLongPressClass = 'has-long-press-or-hover';
 	const noLongPressClass = 'no-long-press-or-hover';
 
@@ -21,6 +21,7 @@ const addLongPressOrHoverCssClasses = (element: HTMLElement) => {
 			element.classList.add(noLongPressClass);
 			element.classList.remove(hasLongPressClass);
 		},
+		longPressTimeout: options?.timeout,
 	});
 
 	return {

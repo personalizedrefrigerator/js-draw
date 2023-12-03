@@ -3,6 +3,7 @@ import { ToolbarContext } from '../types';
 import makeDraggable from './makeDraggable';
 import { MutableReactiveValue } from '../../util/ReactiveValue';
 import cloneElementWithStyles from '../../util/cloneElementWithStyles';
+import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
 
 interface HelpRecord {
 	readonly targetElements: HTMLElement[];
@@ -68,22 +69,25 @@ const createHelpPage = (
 			for (const container of clonedElementContainers[index]) {
 				const containerBBox = Rect2.of(container.getBoundingClientRect());
 
-				container.classList.remove('-active', '-clickable');
-				container.setAttribute('aria-hidden', 'true');
-
 				if (index === currentItemIndex) {
 					container.classList.add('-active');
+					container.classList.remove('-clickable');
 					container.removeAttribute('aria-hidden');
 					container.onclick = () => {};
 				}
 				// Otherwise, if not containing the current element
 				else if (!containerBBox.containsRect(currentItemBBox)) {
 					container.classList.add('-clickable');
+					container.classList.remove('-active');
+					container.setAttribute('aria-hidden', 'true');
 
 					const containerIndex = index;
 					container.onclick = () => {
 						onItemClick(containerIndex);
 					};
+				} else {
+					container.classList.remove('-active', '-clickable');
+					container.setAttribute('aria-hidden', 'true');
 				}
 			}
 		}
@@ -142,6 +146,8 @@ const createHelpPage = (
 				clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
 
 				clonedElementContainer.replaceChildren(clonedElement);
+
+				addLongPressOrHoverCssClasses(clonedElementContainer, { timeout: 0 });
 
 				itemCloneContainers.push(clonedElementContainer);
 				container.appendChild(clonedElementContainer);
