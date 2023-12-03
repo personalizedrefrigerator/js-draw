@@ -14,6 +14,7 @@ const createHelpPage = (
 	helpItems: HelpRecord[],
 	onItemClick: (itemIndex: number)=>void,
 	onBackgroundClick: ()=>void,
+	context: ToolbarContext,
 ) => {
 	const container = document.createElement('div');
 	container.classList.add('help-page-container');
@@ -182,7 +183,17 @@ const createHelpPage = (
 	};
 
 	const onItemChange = () => {
-		textLabel.innerText = currentItem?.helpText ?? '';
+		const instructionsElement = document.createElement('div');
+		instructionsElement.innerText = currentItem?.helpText ?? '';
+
+		const helpElement = document.createElement('div');
+		helpElement.innerText = context.localization.helpScreenNavigationHelp;
+		helpElement.classList.add('navigation-help');
+
+		textLabel.replaceChildren(
+			instructionsElement,
+			...(currentItemIndex === 0 ? [ helpElement ] : []),
+		);
 
 		updateClonedElementStates();
 	};
@@ -249,6 +260,7 @@ export default class HelpDisplay {
 				this.#helpData,
 				newPageIndex => currentPage.set(newPageIndex),
 				onBackgroundClick,
+				this.context,
 			);
 			helpPage.addToParent(content);
 
