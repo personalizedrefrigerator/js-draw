@@ -152,7 +152,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	errorImageHasZeroSize: 'Error: Image has zero size',
 
 	// Help text
-	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines. The settings below apply to this pen.',
+	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines.',
 	penDropdown__colorHelpText: 'Changes the pen\'s color',
 	penDropdown__thicknessHelpText:
 		'Changes the thickness of strokes drawn by the pen.',
@@ -162,7 +162,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	penDropdown__stabilizationHelpText:
 		'Draws smoother strokes.\n\nThis also adds a short delay between the mouse/stylus and the stroke.',
 	handDropdown__baseHelpText:
-		'This tool is responsible for scrolling, rotating, and zooming the editor. Its behavior can be configured below.',
+		'This tool is responsible for scrolling, rotating, and zooming the editor.',
 	handDropdown__zoomInHelpText: 'Zooms in.',
 	handDropdown__zoomOutHelpText: 'Zooms out.',
 	handDropdown__resetViewHelpText:
