@@ -134,9 +134,11 @@ const createHelpPage = (
 				let targetBBox = Rect2.of(targetElement.getBoundingClientRect());
 
 				// Move the element onto the screen if not visible
-				if (!screenBBox.containsRect(targetBBox)) {
-					const bottomCenter = screenBBox.bottomLeft.lerp(screenBBox.bottomRight, 0.5);
-					const delta = bottomCenter.minus(targetBBox.center);
+				if (!screenBBox.intersects(targetBBox)) {
+					const screenBottomCenter = screenBBox.bottomLeft.lerp(screenBBox.bottomRight, 0.5);
+					const targetBottomCenter = targetBBox.bottomLeft.lerp(targetBBox.bottomRight, 0.5);
+
+					const delta = screenBottomCenter.minus(targetBottomCenter);
 					targetBBox = targetBBox.translatedBy(delta);
 				}
 
