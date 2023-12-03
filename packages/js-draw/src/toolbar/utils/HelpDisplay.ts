@@ -228,11 +228,22 @@ export default class HelpDisplay {
 		overlay.setAttribute('autofocus', 'true');
 		overlay.classList.add('toolbar-help-overlay');
 
+		// Closes the overlay with a closing animation
+		const closing = false;
+		const closeOverlay = () => {
+			if (closing) return;
+
+			// If changing animationDelay, be sure to also update the CSS.
+			const animationDelay = 250; // ms
+			overlay.classList.add('-hiding');
+			setTimeout(() => overlay.close(), animationDelay);
+		};
+
 		let lastDragTimestamp = 0;
 		const onBackgroundClick = () => {
 			const wasJustDragging = performance.now() - lastDragTimestamp < 100;
 			if (!wasJustDragging) {
-				overlay.close();
+				closeOverlay();
 			}
 		};
 
@@ -245,7 +256,7 @@ export default class HelpDisplay {
 			closeButton.setAttribute('aria-label', label);
 			closeButton.setAttribute('title', label);
 
-			closeButton.onclick = () => { overlay.close(); };
+			closeButton.onclick = () => { closeOverlay(); };
 
 			return closeButton;
 		};
