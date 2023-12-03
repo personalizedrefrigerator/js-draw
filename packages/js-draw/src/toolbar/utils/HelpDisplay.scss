@@ -200,7 +200,7 @@
 			}
 		}
 
-		> .next:not(:disabled) {
+		&:not(.-has-previous) > .next:not(:disabled) {
 			@keyframes highlight-button {
 				0% { transform: scale(1); }
 				50% { transform: scale(1.2); }
@@ -235,6 +235,7 @@
 
 		&.-highlight-next > .next, &.-highlight-previous > .previous {
 			font-weight: bold;
+			background-color: rgba(200, 200, 200, 0.1);
 			font-size: 1.4em;
 		}
 	}
