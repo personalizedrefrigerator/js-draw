@@ -37,7 +37,9 @@ const createHelpPage = (
 	//       HelpItem 1                   HelpItem 2     HelpItem 3
 	// if the first help item had two elements (and thus two cloned element containers).
 	//
-	let clonedElementContainers: HTMLElement[][] = [];
+	// We also store the original bounding box -- the bounding box of the clones can change
+	// while dragging to switch pages.
+	let clonedElementContainers: { container: HTMLElement, bbox: Rect2 }[][] = [];
 
 	// Clicking on the background of the help area should send an event (e.g. to allow the
 	// help container to be closed).
@@ -66,9 +68,7 @@ const createHelpPage = (
 	const updateClonedElementStates = () => {
 		const currentItemBBox = getCombinedBBox();
 		for (let index = 0; index < clonedElementContainers.length; index++) {
-			for (const container of clonedElementContainers[index]) {
-				const containerBBox = Rect2.of(container.getBoundingClientRect());
-
+			for (const { container, bbox: containerBBox } of clonedElementContainers[index]) {
 				if (index === currentItemIndex) {
 					container.classList.add('-active');
 					container.classList.remove('-clickable', '-background');
@@ -151,7 +151,7 @@ const createHelpPage = (
 
 				addLongPressOrHoverCssClasses(clonedElementContainer, { timeout: 0 });
 
-				itemCloneContainers.push(clonedElementContainer);
+				itemCloneContainers.push({ container: clonedElementContainer, bbox: targetBBox });
 				container.appendChild(clonedElementContainer);
 			}
 
