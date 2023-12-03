@@ -74,6 +74,10 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	handDropdown__resetViewHelpText: string;
 	handDropdown__touchPanningHelpText: string;
 	handDropdown__lockRotationHelpText: string;
+	selectionDropdown__resizeToHelpText: string;
+	selectionDropdown__deleteHelpText: string;
+	selectionDropdown__duplicateHelpText: string;
+	selectionDropdown__changeColorHelpText: string;
 	colorPickerPipetteHelpText: string;
 	colorPickerToggleHelpText: string;
 
@@ -173,6 +177,10 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'When enabled, touch gestures move the image rather than select or draw.',
 	handDropdown__lockRotationHelpText:
 		'When enabled, prevents touch gestures from rotating the screen.',
+	selectionDropdown__resizeToHelpText: 'Crops the drawing to the size of what\'s currently selected.\n\nIf auto-resize is enabled, it will be disabled.',
+	selectionDropdown__deleteHelpText: 'Erases selected items.',
+	selectionDropdown__duplicateHelpText: 'Makes a copy of selected items.',
+	selectionDropdown__changeColorHelpText: 'Changes the color of selected items.',
 	colorPickerPipetteHelpText: 'Picks a color from the screen.',
 	colorPickerToggleHelpText: 'Opens/closes the color picker.',
 

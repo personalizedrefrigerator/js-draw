@@ -12,8 +12,13 @@ import BaseToolWidget from './BaseToolWidget';
 import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
 import { toolbarCSSPrefix } from '../constants';
+import HelpDisplay from '../utils/HelpDisplay';
 
-const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizationTable: ToolbarLocalization) => {
+const makeFormatMenu = (
+	editor: Editor,
+	selectionTool: SelectionTool,
+	localizationTable: ToolbarLocalization,
+) => {
 	const container = document.createElement('div');
 	container.classList.add(
 		'selection-format-menu', `${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}indentedList`
@@ -21,9 +26,7 @@ const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizati
 
 	const colorRow = document.createElement('div');
 	const colorLabel = document.createElement('label');
-	const {
-		input: colorInput, container: colorInputContainer, setValue: setColorInputValue
-	} = makeColorInput(editor, color => {
+	const colorInputControl = makeColorInput(editor, color => {
 		const selection = selectionTool.getSelection();
 
 		if (selection) {
@@ -39,6 +42,7 @@ const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizati
 			editor.dispatch(unitedCommand);
 		}
 	});
+	const { input: colorInput, container: colorInputContainer } = colorInputControl;
 
 	colorLabel.innerText = localizationTable.colorLabel;
 
@@ -57,11 +61,11 @@ const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizati
 					}
 				}
 			}
-			setColorInputValue(Color4.average(colors));
+			colorInputControl.setValue(Color4.average(colors));
 		} else {
 			colorInput.disabled = true;
 			container.classList.add('disabled');
-			setColorInputValue(Color4.transparent);
+			colorInputControl.setValue(Color4.transparent);
 		}
 	};
 
@@ -73,6 +77,10 @@ const makeFormatMenu = (editor: Editor, selectionTool: SelectionTool, localizati
 			parent.appendChild(container);
 		},
 		update,
+		registerHelpText: (helpDisplay: HelpDisplay) => {
+			helpDisplay.registerTextHelpForElement(colorRow, localizationTable.selectionDropdown__changeColorHelpText);
+			colorInputControl.registerWithHelpTextDisplay(helpDisplay);
+		},
 	};
 };
 
@@ -93,6 +101,8 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			},
 			localization,
 		);
+		resizeButton.setHelpText(this.localizationTable.selectionDropdown__resizeToHelpText);
+
 		const deleteButton = new ActionButtonWidget(
 			editor, 'delete-btn',
 			() => editor.icons.makeDeleteSelectionIcon(),
@@ -104,6 +114,8 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			},
 			localization,
 		);
+		deleteButton.setHelpText(this.localizationTable.selectionDropdown__deleteHelpText);
+
 		const duplicateButton = new ActionButtonWidget(
 			editor, 'duplicate-btn',
 			() => editor.icons.makeDuplicateSelectionIcon(),
@@ -115,6 +127,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			},
 			localization,
 		);
+		duplicateButton.setHelpText(this.localizationTable.selectionDropdown__duplicateHelpText);
 
 		this.addSubWidget(resizeButton);
 		this.addSubWidget(deleteButton);
@@ -175,8 +188,12 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		return this.editor.icons.makeSelectionIcon();
 	}
 
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
-		super.fillDropdown(dropdown);
+	protected override getHelpText(): string {
+		return 'Selects content and manipulates the selection';
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
+		super.fillDropdown(dropdown, helpDisplay);
 
 		const controlsContainer = document.createElement('div');
 		controlsContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
@@ -187,6 +204,10 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		const formatMenu = makeFormatMenu(this.editor, this.tool, this.localizationTable);
 		formatMenu.addTo(controlsContainer);
 		this.updateFormatMenu = () => formatMenu.update();
+
+		if (helpDisplay) {
+			formatMenu.registerHelpText(helpDisplay);
+		}
 
 		formatMenu.update();
 
