@@ -198,7 +198,13 @@ export default class HelpDisplay {
 		overlay.setAttribute('autofocus', 'true');
 		overlay.classList.add('toolbar-help-overlay');
 
-		const onBackgroundClick = () => { overlay.close(); };
+		let lastDragTimestamp = 0;
+		const onBackgroundClick = () => {
+			const wasJustDragging = performance.now() - lastDragTimestamp < 100;
+			if (!wasJustDragging) {
+				overlay.close();
+			}
+		};
 
 		const makeCloseButton = () => {
 			const closeButton = document.createElement('button');
@@ -358,7 +364,6 @@ export default class HelpDisplay {
 
 
 		// Listeners
-
 		const dragListener = makeDraggable(overlay, {
 			draggableChildElements: [ navigation.content ],
 			onDrag: (_deltaX: number, _deltaY: number, totalDisplacement: Vec2) => {
@@ -377,6 +382,8 @@ export default class HelpDisplay {
 					} else if (xDisplacement < -minDragOffsetToTransition) {
 						navigation.toNext();
 					}
+
+					lastDragTimestamp = dragStatistics.endTimestamp;
 				}
 			},
 		});
