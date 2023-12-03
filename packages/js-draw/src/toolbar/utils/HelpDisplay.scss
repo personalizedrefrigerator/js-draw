@@ -251,7 +251,6 @@
 	// Use flex so that items reverse in RTL
 	display: flex;
 	justify-content: end;
-	align-items: last baseline;
 
 	> .button {
 		margin: 4px;
