@@ -371,7 +371,11 @@ export default class HelpDisplay {
 
 		const helpButton = document.createElement('button');
 		helpButton.classList.add('button');
-		helpButton.innerText = '?';
+
+		const icon = this.context.icons.makeHelpIcon();
+		icon.classList.add('icon');
+		helpButton.appendChild(icon);
+
 		helpButton.setAttribute('aria-label', this.context.localization.help);
 
 		helpButton.onclick = () => {

@@ -220,14 +220,14 @@
 	height: 0;
 	position: relative;
 
-	> .button {
-		position: absolute;
-		right: 0;
-		margin: 15px;
-		margin-top: 0;
+	// Use flex so that items reverse in RTL
+	display: flex;
+	justify-content: end;
+	align-items: last baseline;
 
-		border: 1px solid var(--icon-color);
-		color: var(--icon-color);
+	> .button {
+		margin: 4px;
+		margin-top: 0;
 
 		border-radius: 100%;
 		width: 1.2em;
@@ -236,5 +236,10 @@
 
 		text-align: center;
 		opacity: 0.5;
+
+		> .icon {
+			width: 100%;
+			height: 100%;
+		}
 	}
 }
