@@ -53,6 +53,13 @@ $pipette-button-size: 30px;
 	display: inline-flex;
 }
 
+.color-input-container {
+	> .color-input-wrapper {
+		display: flex;
+		justify-content: stretch;
+	}
+}
+
 .color-input-container .pipetteButton > svg {
 	width: 100%;
 }

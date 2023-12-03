@@ -310,11 +310,10 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const {
-			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
-		} = makeColorInput(this.editor, color => {
+		const colorInputControl = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
+		const { input: colorInput, container: colorInputContainer } = colorInputControl;
 
 		colorInput.id = `${toolbarCSSPrefix}colorInput${PenToolWidget.idCounter++}`;
 		colorLabel.innerText = this.localizationTable.colorLabel;
@@ -334,13 +333,18 @@ export default class PenToolWidget extends BaseToolWidget {
 			colorRow,
 			this.localizationTable.penDropdown__colorHelpText
 		);
+
+		if (helpDisplay) {
+			colorInputControl.registerWithHelpTextDisplay(helpDisplay);
+		}
+
 		helpDisplay?.registerTextHelpForElement(
 			thicknessRow, this.localizationTable.penDropdown__thicknessHelpText,
 		);
 
 
 		this.updateInputs = () => {
-			setColorInputValue(this.tool.getColor());
+			colorInputControl.setValue(this.tool.getColor());
 			setThickness(this.tool.getThickness());
 
 			penTypeSelect.updateIcons();

@@ -74,7 +74,8 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	handDropdown__resetViewHelpText: string;
 	handDropdown__touchPanningHelpText: string;
 	handDropdown__lockRotationHelpText: string;
-
+	colorPickerPipetteHelpText: string;
+	colorPickerToggleHelpText: string;
 
 	// closeSidebar is used for accessibility in a button label.
 	closeSidebar: (toolName: string)=>string;
@@ -172,6 +173,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'When enabled, touch gestures move the image rather than select or draw.',
 	handDropdown__lockRotationHelpText:
 		'When enabled, prevents touch gestures from rotating the screen.',
+	colorPickerPipetteHelpText: 'Picks a color from the screen.',
+	colorPickerToggleHelpText: 'Opens/closes the color picker.',
 
 	closeSidebar: (toolName: string) => `Close sidebar for ${toolName}`,
 	dropdownShown: (toolName) => `Menu for ${toolName} shown`,
