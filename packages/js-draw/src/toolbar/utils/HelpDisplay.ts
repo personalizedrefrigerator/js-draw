@@ -123,13 +123,22 @@ const createHelpPage = (
 	const refreshContent = () => {
 		container.replaceChildren();
 
+		const screenBBox = new Rect2(0, 0, window.innerWidth, window.innerHeight);
+
 		clonedElementContainers = [];
 		for (let itemIndex = 0; itemIndex < helpItems.length; itemIndex++) {
 			const item = helpItems[itemIndex];
 			const itemCloneContainers = [];
 
 			for (const targetElement of item.targetElements) {
-				const targetBBox = Rect2.of(targetElement.getBoundingClientRect());
+				let targetBBox = Rect2.of(targetElement.getBoundingClientRect());
+
+				// Move the element onto the screen if not visible
+				if (!screenBBox.containsRect(targetBBox)) {
+					const bottomCenter = screenBBox.bottomLeft.lerp(screenBBox.bottomRight, 0.5);
+					const delta = bottomCenter.minus(targetBBox.center);
+					targetBBox = targetBBox.translatedBy(delta);
+				}
 
 				const clonedElement = cloneElementWithStyles(targetElement);
 
