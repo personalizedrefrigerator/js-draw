@@ -126,6 +126,10 @@
 			position: absolute;
 			z-index: 0;
 
+			// Prevent selecton on long-press
+			user-select: none;
+			-webkit-user-select: none;
+
 			border-radius: 10px;
 
 			* {
