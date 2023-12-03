@@ -71,14 +71,14 @@ const createHelpPage = (
 
 				if (index === currentItemIndex) {
 					container.classList.add('-active');
-					container.classList.remove('-clickable');
+					container.classList.remove('-clickable', '-background');
 					container.removeAttribute('aria-hidden');
 					container.onclick = () => {};
 				}
 				// Otherwise, if not containing the current element
 				else if (!containerBBox.containsRect(currentItemBBox)) {
 					container.classList.add('-clickable');
-					container.classList.remove('-active');
+					container.classList.remove('-active', '-background');
 					container.setAttribute('aria-hidden', 'true');
 
 					const containerIndex = index;
@@ -86,8 +86,10 @@ const createHelpPage = (
 						onItemClick(containerIndex);
 					};
 				} else {
+					container.classList.add('-background');
 					container.classList.remove('-active', '-clickable');
 					container.setAttribute('aria-hidden', 'true');
+					container.onclick = () => {};
 				}
 			}
 		}

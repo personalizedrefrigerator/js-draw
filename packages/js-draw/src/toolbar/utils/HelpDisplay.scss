@@ -70,6 +70,7 @@
 		align-self: flex-start;
 		width: 48px;
 		height: 48px;
+		z-index: 1;
 
 		> svg {
 			width: 100%;
@@ -97,6 +98,8 @@
 			margin-right: 15px;
 			margin-top: 0px;
 
+			z-index: 1;
+
 			&.-large-space-below {
 				margin-top: 0;
 				margin-bottom: auto;
@@ -121,7 +124,7 @@
 
 		> .cloned-element-container {
 			position: absolute;
-			z-index: -1;
+			z-index: 0;
 
 			border-radius: 10px;
 
@@ -139,11 +142,15 @@
 				cursor: unset !important;
 			}
 
+			&.-clickable, &.-background {
+				z-index: 1;
+				touch-action: none;
+			}
+
 			&.-clickable {
 				cursor: pointer;
 
 				z-index: 2;
-				touch-action: none;
 
 				&.has-long-press-or-hover {
 					opacity: 0.5 !important;

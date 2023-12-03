@@ -68,7 +68,10 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	penDropdown__autocorrectHelpText: string;
 	penDropdown__stabilizationHelpText: string;
 	handDropdown__baseHelpText: string;
-	handDropdown__zoomHelpText: string;
+	handDropdown__zoomDisplayHelpText: string;
+	handDropdown__zoomInHelpText: string;
+	handDropdown__zoomOutHelpText: string;
+	handDropdown__resetViewHelpText: string;
 	handDropdown__touchPanningHelpText: string;
 	handDropdown__lockRotationHelpText: string;
 
@@ -159,8 +162,12 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'Draws smoother strokes.\n\nThis also adds a short delay between the mouse/stylus and the stroke.',
 	handDropdown__baseHelpText:
 		'This tool is responsible for scrolling, rotating, and zooming the editor. Its behavior can be configured below.',
-	handDropdown__zoomHelpText:
-		'Increase/decrease the zoom or reset zoom and scroll.',
+	handDropdown__zoomInHelpText: 'Zooms in.',
+	handDropdown__zoomOutHelpText: 'Zooms out.',
+	handDropdown__resetViewHelpText:
+		'Resets the zoom level to 100% and resets scroll.',
+	handDropdown__zoomDisplayHelpText:
+		'Shows the current zoom level. 100% shows the image at its actual size.',
 	handDropdown__touchPanningHelpText:
 		'When enabled, touch gestures move the image rather than select or draw.',
 	handDropdown__lockRotationHelpText:

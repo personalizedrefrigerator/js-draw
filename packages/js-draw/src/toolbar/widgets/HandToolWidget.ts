@@ -11,7 +11,7 @@ import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 import makeSeparator from './components/makeSeparator';
 import HelpDisplay from '../utils/HelpDisplay';
 
-const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
+const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor, helpDisplay?: HelpDisplay) => {
 	const zoomLevelRow = document.createElement('div');
 
 	const increaseButton = document.createElement('button');
@@ -72,6 +72,11 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 			editor.viewport.canvasToScreenTransform.inverse()
 		), addToHistory);
 	};
+
+	helpDisplay?.registerTextHelpForElement(increaseButton, localizationTable.handDropdown__zoomInHelpText);
+	helpDisplay?.registerTextHelpForElement(decreaseButton, localizationTable.handDropdown__zoomOutHelpText);
+	helpDisplay?.registerTextHelpForElement(resetViewButton, localizationTable.handDropdown__resetViewHelpText);
+	helpDisplay?.registerTextHelpForElement(zoomLevelDisplay, localizationTable.handDropdown__zoomDisplayHelpText);
 
 	return zoomLevelRow;
 };
@@ -242,11 +247,9 @@ export default class HandToolWidget extends BaseToolWidget {
 
 		makeSeparator().addTo(nonbuttonActionContainer);
 
-		const zoomControl = makeZoomControl(this.localizationTable, this.editor);
+		const zoomControl = makeZoomControl(this.localizationTable, this.editor, helpDisplay);
 		nonbuttonActionContainer.appendChild(zoomControl);
 		dropdown.appendChild(nonbuttonActionContainer);
-
-		helpDisplay?.registerTextHelpForElement(zoomControl, this.localizationTable.handDropdown__zoomHelpText);
 
 		return true;
 	}
