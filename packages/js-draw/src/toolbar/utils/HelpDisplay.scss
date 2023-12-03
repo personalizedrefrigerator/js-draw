@@ -134,7 +134,7 @@
 
 			> * {
 				margin: 0;
-				opacity: 0.01;
+				opacity: 0.01 !important;
 				transition: 0.3s ease opacity !important;
 			}
 
@@ -154,11 +154,6 @@
 
 				&.has-long-press-or-hover {
 					opacity: 0.5 !important;
-
-					> * {
-						opacity: 0.01 !important;
-						transition: 0s ease opacity !important;
-					}
 				}
 			}
 
