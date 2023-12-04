@@ -74,10 +74,16 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	handDropdown__resetViewHelpText: string;
 	handDropdown__touchPanningHelpText: string;
 	handDropdown__lockRotationHelpText: string;
+	selectionDropdown__baseHelpText: string;
 	selectionDropdown__resizeToHelpText: string;
 	selectionDropdown__deleteHelpText: string;
 	selectionDropdown__duplicateHelpText: string;
 	selectionDropdown__changeColorHelpText: string;
+	pageDropdown__baseHelpText: string;
+	pageDropdown__backgroundColorHelpText: string;
+	pageDropdown__gridCheckboxHelpText: string;
+	pageDropdown__aboutButtonHelpText: string;
+	pageDropdown__autoresizeCheckboxHelpText: string;
 	colorPickerPipetteHelpText: string;
 	colorPickerToggleHelpText: string;
 
@@ -177,10 +183,16 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'When enabled, touch gestures move the image rather than select or draw.',
 	handDropdown__lockRotationHelpText:
 		'When enabled, prevents touch gestures from rotating the screen.',
+	selectionDropdown__baseHelpText: 'Selects content and manipulates the selection',
 	selectionDropdown__resizeToHelpText: 'Crops the drawing to the size of what\'s currently selected.\n\nIf auto-resize is enabled, it will be disabled.',
 	selectionDropdown__deleteHelpText: 'Erases selected items.',
 	selectionDropdown__duplicateHelpText: 'Makes a copy of selected items.',
 	selectionDropdown__changeColorHelpText: 'Changes the color of selected items.',
+	pageDropdown__baseHelpText: 'Controls the drawing canvas\' background color, pattern, and size.',
+	pageDropdown__backgroundColorHelpText: 'Changes the background color of the drawing canvas.',
+	pageDropdown__gridCheckboxHelpText: 'Controls whether the drawing canvas has a background grid pattern.',
+	pageDropdown__autoresizeCheckboxHelpText: 'When checked, the page grows to fit the drawing.\n\nWhen unchecked, the page is visible and its size can be set manually.',
+	pageDropdown__aboutButtonHelpText: 'Shows version, debug, and other information.',
 	colorPickerPipetteHelpText: 'Picks a color from the screen.',
 	colorPickerToggleHelpText: 'Opens/closes the color picker.',
 

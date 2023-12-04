@@ -189,7 +189,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 	}
 
 	protected override getHelpText(): string {
-		return 'Selects content and manipulates the selection';
+		return this.localizationTable.selectionDropdown__baseHelpText;
 	}
 
 	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {

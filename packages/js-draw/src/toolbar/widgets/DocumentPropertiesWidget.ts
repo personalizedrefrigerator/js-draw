@@ -10,6 +10,7 @@ import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from './components/makeColorInput';
 import BaseWidget from './BaseWidget';
+import HelpDisplay from '../utils/HelpDisplay';
 
 export default class DocumentPropertiesWidget extends BaseWidget {
 	private updateDropdownContent: ()=>void = () => {};
@@ -121,9 +122,13 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		this.editor.queueRerender();
 	}
 
+	protected override getHelpText(): string {
+		return this.localizationTable.pageDropdown__baseHelpText;
+	}
+
 	private static idCounter = 0;
 
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
+	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		const container = document.createElement('div');
 		container.classList.add(
 			`${toolbarCSSPrefix}spacedList`,
@@ -139,7 +144,10 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			backgroundColorLabel.innerText = this.localizationTable.backgroundColor;
 
 			const {
-				input: colorInput, container: backgroundColorInputContainer, setValue: setBgColorInputValue
+				input: colorInput,
+				container: backgroundColorInputContainer,
+				setValue: setBgColorInputValue,
+				registerWithHelpTextDisplay: registerHelpForInputs,
 			} = makeColorInput(this.editor, color => {
 				if (!color.eq(this.getBackgroundColor())) {
 					this.setBackgroundColor(color);
@@ -150,9 +158,26 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			backgroundColorLabel.htmlFor = colorInput.id;
 
 			backgroundColorRow.replaceChildren(backgroundColorLabel, backgroundColorInputContainer);
-			return { setBgColorInputValue, backgroundColorRow };
+
+			const registerWithHelp = (helpDisplay?: HelpDisplay) => {
+				if (!helpDisplay) {
+					return;
+				}
+
+				helpDisplay?.registerTextHelpForElement(
+					backgroundColorRow, this.localizationTable.pageDropdown__backgroundColorHelpText,
+				);
+
+				registerHelpForInputs(helpDisplay);
+			};
+
+			return { setBgColorInputValue, backgroundColorRow, registerWithHelp, };
 		};
-		const { backgroundColorRow, setBgColorInputValue } = makeBackgroundColorInput();
+		const {
+			backgroundColorRow,
+			setBgColorInputValue,
+			registerWithHelp: registerBackgroundRowWithHelp,
+		} = makeBackgroundColorInput();
 
 		const makeCheckboxRow = (labelText: string, onChange: (newValue: boolean)=>void) => {
 			const rowContainer = document.createElement('div');
@@ -261,6 +286,17 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			this.editor.showAboutDialog();
 		};
 
+		// Add help text
+		registerBackgroundRowWithHelp(helpDisplay);
+		helpDisplay?.registerTextHelpForElement(
+			useGridRow, this.localizationTable.pageDropdown__gridCheckboxHelpText,
+		);
+		helpDisplay?.registerTextHelpForElement(
+			auroresizeRow, this.localizationTable.pageDropdown__autoresizeCheckboxHelpText,
+		);
+		helpDisplay?.registerTextHelpForElement(
+			aboutButton, this.localizationTable.pageDropdown__aboutButtonHelpText,
+		);
 
 		this.updateDropdownContent = () => {
 			setBgColorInputValue(this.getBackgroundColor());
