@@ -13,8 +13,17 @@ interface GridSelectChoice<ChoiceIdType> {
 
 interface GridSelector<ChoiceIdType> {
 	value: MutableReactiveValue<ChoiceIdType>,
+
+	/**
+	 * Connects this grid selector with `other` such that only one item in
+	 * either this or `other` can be selected at a time.
+	 */
 	linkWith: (other: GridSelector<ChoiceIdType>)=>void;
+
+	/** Re-builds the icons shown in the grid selector. */
 	updateIcons: ()=>void;
+
+	getRootElement: ()=>HTMLElement;
 	addTo: (parent: HTMLElement)=>void;
 
 	/** Used internally @internal */
@@ -188,6 +197,10 @@ const makeGridSelector = <ChoiceIdType> (
 
 		updateIcons: () => {
 			buttons.forEach(button => button.updateIcon());
+		},
+
+		getRootElement() {
+			return outerContainer;
 		},
 
 		addTo: (parent: HTMLElement) => {

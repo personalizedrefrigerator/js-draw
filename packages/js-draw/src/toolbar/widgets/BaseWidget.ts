@@ -6,6 +6,7 @@ import { ToolbarLocalization } from '../localization';
 import DropdownLayoutManager from './layout/DropdownLayoutManager';
 import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
 import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
+import HelpDisplay from '../utils/HelpDisplay';
 
 export type SavedToolbuttonState = Record<string, any>;
 
@@ -201,7 +202,7 @@ export default abstract class BaseWidget {
 
 	// Add content to the widget's associated dropdown menu.
 	// Returns true if such a menu should be created, false otherwise.
-	protected fillDropdown(dropdown: HTMLElement): boolean {
+	protected fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		if (Object.keys(this.subWidgets).length === 0) {
 			return false;
 		}
@@ -209,10 +210,27 @@ export default abstract class BaseWidget {
 		for (const widgetId in this.subWidgets) {
 			const widget = this.subWidgets[widgetId];
 
-			widget.addTo(dropdown);
+			const widgetElement = widget.addTo(dropdown);
 			widget.setIsToplevel(false);
+
+			// Add help information
+			const helpText = widget.getHelpText();
+			if (helpText) {
+				helpDisplay?.registerTextHelpForElement(
+					widgetElement, helpText,
+				);
+			}
 		}
 		return true;
+	}
+
+	/**
+	 * Should return a 1-2 sentence description of the widget.
+	 *
+	 * At present, this is only used if this widget has an associated dropdown.
+	 */
+	protected getHelpText(): undefined|string {
+		return undefined;
 	}
 
 	/** @deprecated Renamed to `setUpButtonEventListeners`. */
@@ -329,10 +347,23 @@ export default abstract class BaseWidget {
 		this.button.replaceChildren(this.icon!, this.label);
 		this.container.appendChild(this.button);
 
+		const helpDisplay = new HelpDisplay(
+			content => this.editor.createHTMLOverlay(content),
+			this.editor,
+		);
+		const helpText = this.getHelpText();
+		if (helpText) {
+			helpDisplay.registerTextHelpForElement(
+				this.dropdownContent,
+				[ this.getTitle(), helpText ].join('\n\n'),
+			);
+		}
+
 		// Clear the dropdownContainer in case this element is being moved to another
 		// parent.
 		this.dropdownContent.replaceChildren();
-		this.#hasDropdown = this.fillDropdown(this.dropdownContent);
+		this.#hasDropdown = this.fillDropdown(this.dropdownContent, helpDisplay);
+
 		if (this.#hasDropdown) {
 			this.button.classList.add('has-dropdown');
 
@@ -363,6 +394,9 @@ export default abstract class BaseWidget {
 				}
 			});
 
+			if (helpDisplay.hasHelpText()) {
+				this.dropdown.appendChild(helpDisplay.createToggleButton());
+			}
 			this.dropdown.appendChild(this.dropdownContent);
 		}
 

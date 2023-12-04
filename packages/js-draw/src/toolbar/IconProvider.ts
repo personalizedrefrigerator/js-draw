@@ -884,6 +884,34 @@ export default class IconProvider {
 		`);
 	}
 
+	public makeHelpIcon(): IconElemType {
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.innerHTML = `
+			<circle
+				style="stroke-width:1.587; stroke: var(--icon-color);"
+				fill="none"
+				cx="13.23"
+				cy="13.23"
+				r="11.9"
+			/>
+			<path
+				style="stroke-width: 3; stroke-linecap: butt; stroke: var(--icon-color);"
+				fill="none"
+				d="M 9.26,6.61 C 18.7,3.25 19.95,10.4 14.3,13.4 c -1.15,0.61 -1.32,1.32 -1.32,2.65 v 2.12"
+			/>
+			<circle
+				style="fill: var(--icon-color);"
+				cx="13"
+				cy="21.32"
+				r="1.9"
+			/>
+		`;
+		svg.setAttribute('viewBox', '0 0 26.46 26.46');
+		svg.setAttribute('width', '100');
+		svg.setAttribute('height', '100');
+		return svg;
+	}
+
 	/**
 	 * @param pathData - SVG path data (e.g. `m10,10l30,30z`)
 	 * @param fill - A valid CSS color (e.g. `var(--icon-color)` or `#f0f`). This can be `none`.

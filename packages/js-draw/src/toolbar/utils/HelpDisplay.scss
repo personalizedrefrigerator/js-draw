@@ -1,0 +1,315 @@
+
+.toolbar-help-overlay {
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	max-height: none;
+	border: none;
+	margin: 0;
+	padding: 0;
+	z-index: 5;
+	touch-action: none;
+	overflow: hidden;
+
+	// TODO: Use theme colors
+	$help-overlay-foreground: white;
+	$help-overlay-background: rgba(0, 0, 0, 0.8);
+
+	color: $help-overlay-foreground;
+	--icon-color: #{$help-overlay-foreground};
+
+	// We use ::backdrop for background styling
+	background-color: transparent;
+
+	&::backdrop {
+		background-color: $help-overlay-background;
+
+		backdrop-filter: blur(1px);
+		-webkit-backdrop-filter: blur(1px);
+	}
+
+	display: flex;
+	flex-direction: column;
+
+	// Show/hide animations
+	&, &::backdrop {
+		@keyframes transition-in {
+			0% { opacity: 0; }
+			100% { opacity: 1; }
+		}
+		animation: 0.25s ease transition-in;
+	}
+
+	&.-hiding {
+		@keyframes transition-out {
+			0% { opacity: 1; }
+			100% { opacity: 0; }
+		}
+
+		&, &::backdrop {
+			animation: 0.25s ease transition-out;
+			opacity: 0;
+		}
+	}
+
+
+	// For drag transitions
+	transition: 0.3s ease transform;
+	&.-dragging {
+		transition: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
+
+
+	@media screen and (min-width: 800px) {
+		// Move the navigation buttons to the bottom of the screen
+		> .navigation-buttons {
+			order: 1;
+			margin-top: auto;
+		}
+	}
+
+	// -- sub-components --
+
+	.with-text-shadow {
+		text-shadow: 0 0 3px rgba(20, 20, 20, 0.9);
+		filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.5));
+	}
+
+	button:not(:disabled) {
+		cursor: pointer;
+	}
+
+	button {
+		@extend .with-text-shadow;
+
+		background: transparent;
+		border: none;
+		color: var(--help-overlay-foreground);
+
+		border-radius: 15px;
+	}
+
+	.close-button {
+		align-self: flex-start;
+		width: 48px;
+		height: 48px;
+		z-index: 1;
+
+		> svg {
+			width: 100%;
+		}
+	}
+
+	.navigation-content {
+		flex-grow: 1;
+		display: flex;
+	}
+
+	.help-page-container {
+		display: flex;
+		align-items: center;
+		flex-grow: 1;
+		touch-action: none;
+
+		> .label {
+			@extend .with-text-shadow;
+
+			flex-grow: 1;
+			text-align: center;
+			font-size: 18.5pt;
+			margin-left: 15px;
+			margin-right: 15px;
+			margin-top: 0px;
+
+			z-index: 1;
+
+			&.-large-space-below {
+				margin-top: 0;
+				margin-bottom: auto;
+			}
+
+			&.-small-space-above {
+				margin-top: 40px;
+				margin-bottom: auto;
+			}
+
+			&.-large-space-above {
+				margin-top: auto;
+				margin-bottom: 10px;
+			}
+
+			transition: 0.5s ease margin-top;
+
+			@media (prefers-reduced-motion: reduce) {
+				transition: none;
+			}
+		}
+
+		> .cloned-element-container {
+			position: absolute;
+			z-index: 0;
+
+			// Prevent selecton on long-press
+			user-select: none;
+			-webkit-user-select: none;
+
+			border-radius: 10px;
+
+			* {
+				pointer-events: none !important;
+			}
+
+			> * {
+				margin: 0;
+				opacity: 0.01 !important;
+				transition: 0.3s ease opacity !important;
+			}
+
+			&:not(.-clickable) * {
+				cursor: unset !important;
+			}
+
+			&.-clickable, &.-background {
+				z-index: 1;
+				touch-action: none;
+			}
+
+			&.-clickable {
+				cursor: pointer;
+
+				z-index: 2;
+
+				&.has-long-press-or-hover {
+					opacity: 0.5 !important;
+				}
+			}
+
+			&.-clickable.has-long-press-or-hover, &.-active {
+				background-color: var(--background-color-1);
+			}
+
+			opacity: 0.01;
+			background-color: rgba(100, 100, 100, 0.01);
+			box-shadow: none;
+
+			&.-active {
+				opacity: 1;
+				background-color: var(--background-color-1);
+				box-shadow: 0 0 3px rgba(100, 100, 100, 0.5);
+
+				> * {
+					opacity: 1 !important;
+				}
+			}
+
+			transition: 0.5s ease opacity, 0.5s ease background-color;
+		}
+	}
+
+	.navigation-buttons {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+
+		// Enforce left-to-right (enforces consistency with drag)
+		direction: ltr;
+
+		> button:disabled {
+			opacity: 0.5;
+		}
+
+		> .next, > .previous {
+			font-size: 1em;
+			padding: 10px;
+			transition: 0.2s ease font-size;
+			z-index: 3;
+
+			@media (prefers-reduced-motion: reduce) {
+				transition: none;
+			}
+		}
+
+		&:not(.-has-previous) > .next:not(:disabled) {
+			@keyframes highlight-button {
+				0% { transform: scale(1); }
+				50% { transform: scale(1.2); }
+				55% { transform: scale(1.2) rotate(2deg); }
+				65% { transform: scale(1.2) rotate(-2deg); }
+				100% { transform: scale(1); }
+			}
+			animation: 0.5s ease highlight-button 0.5s;
+
+			@media (prefers-reduced-motion: reduce) {
+				animation: none;
+			}
+		}
+
+		> .next::after {
+			content: "❯";
+			margin-left: 3px;
+		}
+
+		> .previous::before {
+			content: "❮";
+			margin-right: 3px;
+		}
+
+		&.-has-next > .next {
+			font-size: 1.4em;
+		}
+
+		&.-has-previous > .previous {
+			font-size: 1.4em;
+		}
+
+		&.-highlight-next > .next, &.-highlight-previous > .previous {
+			font-weight: bold;
+			background-color: rgba(200, 200, 200, 0.1);
+			font-size: 1.4em;
+		}
+	}
+
+	.navigation-help {
+		margin-top: 1em;
+		font-size: 0.7em;	
+	}
+}
+
+
+.toolbar-element .toolbar-help-overlay-button {
+	height: 0;
+	position: relative;
+
+	// Use flex so that items reverse in RTL
+	display: flex;
+	justify-content: end;
+
+	> .button {
+		margin: 0;
+		padding: 5px;
+		padding-top: 0;
+		padding-bottom: 0;
+
+		box-shadow: none;
+
+		text-align: center;
+		opacity: 0.5;
+
+		> .icon {
+			width: 1.18em;
+			height: 1.18em;
+
+			transition: 0.2s ease filter;
+		}
+
+		&:focus-visible, &:hover {
+			> .icon {
+				filter: drop-shadow(0px 0px 1px var(--shadow-color));
+			}
+		}
+	}
+}

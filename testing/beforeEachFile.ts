@@ -49,3 +49,14 @@ window.PointerEvent ??= class extends MouseEvent {
 HTMLElement.prototype.setPointerCapture ??= () => {};
 // eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.releasePointerCapture ??= () => {};
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+HTMLDialogElement.prototype.showModal ??= function() {
+	this.style.display = 'block';
+};
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+HTMLDialogElement.prototype.close ??= function() {
+	this.style.display = 'none';
+	this.dispatchEvent(new Event('close'));
+};

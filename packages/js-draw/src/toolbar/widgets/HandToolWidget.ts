@@ -9,8 +9,9 @@ import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 import makeSeparator from './components/makeSeparator';
+import HelpDisplay from '../utils/HelpDisplay';
 
-const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
+const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor, helpDisplay?: HelpDisplay) => {
 	const zoomLevelRow = document.createElement('div');
 
 	const increaseButton = document.createElement('button');
@@ -72,6 +73,11 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 		), addToHistory);
 	};
 
+	helpDisplay?.registerTextHelpForElement(increaseButton, localizationTable.handDropdown__zoomInHelpText);
+	helpDisplay?.registerTextHelpForElement(decreaseButton, localizationTable.handDropdown__zoomOutHelpText);
+	helpDisplay?.registerTextHelpForElement(resetViewButton, localizationTable.handDropdown__resetViewHelpText);
+	helpDisplay?.registerTextHelpForElement(zoomLevelDisplay, localizationTable.handDropdown__zoomDisplayHelpText);
+
 	return zoomLevelRow;
 };
 
@@ -79,8 +85,11 @@ class HandModeWidget extends BaseWidget {
 	public constructor(
 		editor: Editor,
 
-		protected tool: PanZoom, protected flag: PanZoomMode, protected makeIcon: ()=> Element,
+		protected tool: PanZoom,
+		protected flag: PanZoomMode,
+		protected makeIcon: ()=> Element,
 		private title: string,
+		private helpText: string,
 
 		localizationTable?: ToolbarLocalization,
 	) {
@@ -121,6 +130,10 @@ class HandModeWidget extends BaseWidget {
 
 	protected override fillDropdown(_dropdown: HTMLElement): boolean {
 		return false;
+	}
+
+	protected override getHelpText() {
+		return this.helpText;
 	}
 }
 
@@ -168,6 +181,7 @@ export default class HandToolWidget extends BaseToolWidget {
 			() => this.editor.icons.makeTouchPanningIcon(),
 
 			localizationTable.touchPanning,
+			localizationTable.handDropdown__touchPanningHelpText,
 
 			localizationTable,
 		);
@@ -179,6 +193,8 @@ export default class HandToolWidget extends BaseToolWidget {
 			() => this.editor.icons.makeRotationLockIcon(),
 
 			localizationTable.lockRotation,
+			localizationTable.handDropdown__lockRotationHelpText,
+
 			localizationTable,
 		);
 
@@ -218,17 +234,21 @@ export default class HandToolWidget extends BaseToolWidget {
 		}
 	}
 
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
-		super.fillDropdown(dropdown);
+	protected override getHelpText(): string {
+		return this.localizationTable.handDropdown__baseHelpText;
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
+		super.fillDropdown(dropdown, helpDisplay);
 
 		// The container for all actions that come after the toolbar buttons.
 		const nonbuttonActionContainer = document.createElement('div');
 		nonbuttonActionContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
 
 		makeSeparator().addTo(nonbuttonActionContainer);
-		nonbuttonActionContainer.appendChild(
-			makeZoomControl(this.localizationTable, this.editor)
-		);
+
+		const zoomControl = makeZoomControl(this.localizationTable, this.editor, helpDisplay);
+		nonbuttonActionContainer.appendChild(zoomControl);
 		dropdown.appendChild(nonbuttonActionContainer);
 
 		return true;

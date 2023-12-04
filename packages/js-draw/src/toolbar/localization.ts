@@ -1,6 +1,6 @@
+import { ToolbarUtilsLocalization, defaultToolbarUtilsLocalization } from './utils/localization';
 
-
-export interface ToolbarLocalization {
+export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	fontLabel: string;
 	textSize: string;
 	touchPanning: string;
@@ -60,6 +60,33 @@ export interface ToolbarLocalization {
 
 	errorImageHasZeroSize: string;
 
+	// Help text
+	penDropdown__baseHelpText: string;
+	penDropdown__colorHelpText: string;
+	penDropdown__thicknessHelpText: string;
+	penDropdown__penTypeHelpText: string;
+	penDropdown__autocorrectHelpText: string;
+	penDropdown__stabilizationHelpText: string;
+	handDropdown__baseHelpText: string;
+	handDropdown__zoomDisplayHelpText: string;
+	handDropdown__zoomInHelpText: string;
+	handDropdown__zoomOutHelpText: string;
+	handDropdown__resetViewHelpText: string;
+	handDropdown__touchPanningHelpText: string;
+	handDropdown__lockRotationHelpText: string;
+	selectionDropdown__baseHelpText: string;
+	selectionDropdown__resizeToHelpText: string;
+	selectionDropdown__deleteHelpText: string;
+	selectionDropdown__duplicateHelpText: string;
+	selectionDropdown__changeColorHelpText: string;
+	pageDropdown__baseHelpText: string;
+	pageDropdown__backgroundColorHelpText: string;
+	pageDropdown__gridCheckboxHelpText: string;
+	pageDropdown__aboutButtonHelpText: string;
+	pageDropdown__autoresizeCheckboxHelpText: string;
+	colorPickerPipetteHelpText: string;
+	colorPickerToggleHelpText: string;
+
 	// closeSidebar is used for accessibility in a button label.
 	closeSidebar: (toolName: string)=>string;
 	dropdownShown: (toolName: string)=> string;
@@ -72,6 +99,8 @@ export interface ToolbarLocalization {
 }
 
 export const defaultToolbarLocalization: ToolbarLocalization = {
+	...defaultToolbarUtilsLocalization,
+
 	pen: 'Pen',
 	eraser: 'Eraser',
 	select: 'Select',
@@ -130,6 +159,42 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	paste: 'Paste',
 
+	errorImageHasZeroSize: 'Error: Image has zero size',
+
+	// Help text
+	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines.',
+	penDropdown__colorHelpText: 'Changes the pen\'s color',
+	penDropdown__thicknessHelpText:
+		'Changes the thickness of strokes drawn by the pen.',
+	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.',
+	penDropdown__autocorrectHelpText:
+		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
+	penDropdown__stabilizationHelpText:
+		'Draws smoother strokes.\n\nThis also adds a short delay between the mouse/stylus and the stroke.',
+	handDropdown__baseHelpText:
+		'This tool is responsible for scrolling, rotating, and zooming the editor.',
+	handDropdown__zoomInHelpText: 'Zooms in.',
+	handDropdown__zoomOutHelpText: 'Zooms out.',
+	handDropdown__resetViewHelpText:
+		'Resets the zoom level to 100% and resets scroll.',
+	handDropdown__zoomDisplayHelpText:
+		'Shows the current zoom level. 100% shows the image at its actual size.',
+	handDropdown__touchPanningHelpText:
+		'When enabled, touch gestures move the image rather than select or draw.',
+	handDropdown__lockRotationHelpText:
+		'When enabled, prevents touch gestures from rotating the screen.',
+	selectionDropdown__baseHelpText: 'Selects content and manipulates the selection',
+	selectionDropdown__resizeToHelpText: 'Crops the drawing to the size of what\'s currently selected.\n\nIf auto-resize is enabled, it will be disabled.',
+	selectionDropdown__deleteHelpText: 'Erases selected items.',
+	selectionDropdown__duplicateHelpText: 'Makes a copy of selected items.',
+	selectionDropdown__changeColorHelpText: 'Changes the color of selected items.',
+	pageDropdown__baseHelpText: 'Controls the drawing canvas\' background color, pattern, and size.',
+	pageDropdown__backgroundColorHelpText: 'Changes the background color of the drawing canvas.',
+	pageDropdown__gridCheckboxHelpText: 'Controls whether the drawing canvas has a background grid pattern.',
+	pageDropdown__autoresizeCheckboxHelpText: 'When checked, the page grows to fit the drawing.\n\nWhen unchecked, the page is visible and its size can be set manually.',
+	pageDropdown__aboutButtonHelpText: 'Shows version, debug, and other information.',
+	colorPickerPipetteHelpText: 'Picks a color from the screen.',
+	colorPickerToggleHelpText: 'Opens/closes the color picker.',
 
 	closeSidebar: (toolName: string) => `Close sidebar for ${toolName}`,
 	dropdownShown: (toolName) => `Menu for ${toolName} shown`,
@@ -139,6 +204,5 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	colorChangedAnnouncement: (color: string) => `Color changed to ${color}`,
 	imageSize: (size: number, units: string) => `Image size: ${size} ${units}`,
 
-	errorImageHasZeroSize: 'Error: Image has zero size',
 	imageLoadError: (message: string)=> `Error loading image: ${message}`,
 };

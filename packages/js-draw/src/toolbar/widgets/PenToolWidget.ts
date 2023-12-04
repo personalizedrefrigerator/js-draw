@@ -19,6 +19,7 @@ import { toolbarCSSPrefix } from '../constants';
 import makeThicknessSlider from './components/makeThicknessSlider';
 import makeGridSelector from './components/makeGridSelector';
 import { IconElemType } from '../IconProvider';
+import HelpDisplay from '../utils/HelpDisplay';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -166,7 +167,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 
 	// Creates a widget that allows selecting different pen types
-	private createPenTypeSelector() {
+	private createPenTypeSelector(helpOverlay?: HelpDisplay) {
 		const allChoices = this.penTypes.map((penType, index) => {
 			return {
 				id: index,
@@ -195,6 +196,11 @@ export default class PenToolWidget extends BaseToolWidget {
 		penSelector.value.onUpdate(onSelectorUpdate);
 		shapeSelector.value.onUpdate(onSelectorUpdate);
 
+		helpOverlay?.registerTextHelpForElements(
+			[penSelector.getRootElement(), shapeSelector.getRootElement()],
+			this.localizationTable.penDropdown__penTypeHelpText,
+		);
+
 		return {
 			setValue: (penTypeIndex: number) => {
 				penSelector.value.set(penTypeIndex);
@@ -213,7 +219,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		};
 	}
 
-	protected createStrokeCorrectionOptions() {
+	protected createStrokeCorrectionOptions(helpOverlay?: HelpDisplay) {
 		const container = document.createElement('div');
 		container.classList.add('action-button-row', `${toolbarCSSPrefix}-pen-tool-toggle-buttons`);
 
@@ -244,6 +250,9 @@ export default class PenToolWidget extends BaseToolWidget {
 				setOnInputListener(listener: (checked: boolean)=>void) {
 					onChangeListener = listener;
 				},
+				addHelpText(text: string) {
+					helpOverlay?.registerTextHelpForElement(button, text);
+				},
 			};
 			button.onclick = () => {
 				result.setChecked(!checked);
@@ -268,6 +277,10 @@ export default class PenToolWidget extends BaseToolWidget {
 			this.tool.setStrokeAutocorrectEnabled(enabled);
 		});
 
+		// Help text
+		autocorrectOption.addHelpText(this.localizationTable.penDropdown__autocorrectHelpText);
+		stabilizationOption.addHelpText(this.localizationTable.penDropdown__stabilizationHelpText);
+
 		return {
 			update: () => {
 				stabilizationOption.setChecked(!!this.tool.getInputMapper());
@@ -276,11 +289,15 @@ export default class PenToolWidget extends BaseToolWidget {
 
 			addTo: (parent: HTMLElement) => {
 				parent.appendChild(container);
-			}
+			},
 		};
 	}
 
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
+	protected override getHelpText() {
+		return this.localizationTable.penDropdown__baseHelpText;
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		const container = document.createElement('div');
 		container.classList.add(
 			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
@@ -291,15 +308,12 @@ export default class PenToolWidget extends BaseToolWidget {
 			this.tool.setThickness(thickness);
 		});
 
-		const penTypeSelect = this.createPenTypeSelector();
-
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const {
-			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
-		} = makeColorInput(this.editor, color => {
+		const colorInputControl = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
+		const { input: colorInput, container: colorInputContainer } = colorInputControl;
 
 		colorInput.id = `${toolbarCSSPrefix}colorInput${PenToolWidget.idCounter++}`;
 		colorLabel.innerText = this.localizationTable.colorLabel;
@@ -308,10 +322,29 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
-		const toggleButtonRow = this.createStrokeCorrectionOptions();
+		// Autocorrect and stabilization options
+		const toggleButtonRow = this.createStrokeCorrectionOptions(helpDisplay);
+
+		const penTypeSelect = this.createPenTypeSelector(helpDisplay);
+
+		// Add help text for color and thickness last, as these are likely to be
+		// features users are least interested in.
+		helpDisplay?.registerTextHelpForElement(
+			colorRow,
+			this.localizationTable.penDropdown__colorHelpText
+		);
+
+		if (helpDisplay) {
+			colorInputControl.registerWithHelpTextDisplay(helpDisplay);
+		}
+
+		helpDisplay?.registerTextHelpForElement(
+			thicknessRow, this.localizationTable.penDropdown__thicknessHelpText,
+		);
+
 
 		this.updateInputs = () => {
-			setColorInputValue(this.tool.getColor());
+			colorInputControl.setValue(this.tool.getColor());
 			setThickness(this.tool.getThickness());
 
 			penTypeSelect.updateIcons();

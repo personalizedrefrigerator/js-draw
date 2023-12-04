@@ -4,6 +4,7 @@ import BaseWidget from './BaseWidget';
 
 export default class ActionButtonWidget extends BaseWidget {
 	#autoDisableInReadOnlyEditors: boolean;
+	#helpText: string|undefined = undefined;
 
 	public constructor(
 		editor: Editor,
@@ -19,6 +20,19 @@ export default class ActionButtonWidget extends BaseWidget {
 	) {
 		super(editor, id, localizationTable);
 		this.#autoDisableInReadOnlyEditors = autoDisableInReadOnlyEditors;
+	}
+
+	/**
+	 * Sets the text shown in a help overlay for this button.
+	 *
+	 * See {@link getHelpText}.
+	 */
+	public setHelpText(helpText: string) {
+		this.#helpText = helpText;
+	}
+
+	protected override getHelpText() {
+		return this.#helpText;
 	}
 
 	protected override shouldAutoDisableInReadOnlyEditor(): boolean {

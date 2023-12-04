@@ -1,3 +1,5 @@
+import { Vec2 } from '@js-draw/math';
+
 interface DragStatistics {
 	// Whether the drag was small enough that it was roughly
 	// a click event.
@@ -6,6 +8,9 @@ interface DragStatistics {
 	// Timestamp (as from performance.now) that the drag
 	// ended.
 	endTimestamp: number;
+
+	// Change in x and y position from the start of the gesture
+	displacement: Vec2;
 }
 
 interface DraggableOptions {
@@ -13,7 +18,7 @@ interface DraggableOptions {
 	// regardless of tag name
 	draggableChildElements: HTMLElement[];
 
-	onDrag(deltaX: number, deltaY: number): void;
+	onDrag(deltaX: number, deltaY: number, totalDisplacement: Vec2): void;
 	onDragEnd(dragStatistics: DragStatistics): void;
 }
 
@@ -118,6 +123,7 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		options.onDragEnd({
 			roughlyClick: isRoughlyClick(),
 			endTimestamp: performance.now(),
+			displacement: Vec2.of(lastX - startX, lastY - startY),
 		});
 		pointerDown = false;
 		startedDragging = false;
@@ -151,7 +157,7 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 			Math.abs(x - startX) <= clickThreshold && Math.abs(y - startY) <= clickThreshold;
 
 		if (!isClick || startedDragging) {
-			options.onDrag(dx, dy);
+			options.onDrag(dx, dy, Vec2.of(x - startX, y - startY));
 
 			lastX = x;
 			lastY = y;
