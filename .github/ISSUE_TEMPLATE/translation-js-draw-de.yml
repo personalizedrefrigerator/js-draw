@@ -27,6 +27,60 @@ body:
     validations:
       required: true
   - type: textarea
+    id: translation-help
+    attributes:
+      label: "help"
+      description: "Translate `Help`."
+      placeholder: "Help"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-helpHidden
+    attributes:
+      label: "helpHidden"
+      description: "Translate `Help hidden`."
+      placeholder: "Help hidden"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-next
+    attributes:
+      label: "next"
+      description: "Translate `Next`."
+      placeholder: "Next"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-previous
+    attributes:
+      label: "previous"
+      description: "Translate `Previous`."
+      placeholder: "Previous"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-close
+    attributes:
+      label: "close"
+      description: "Translate `Close`."
+      placeholder: "Close"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-helpScreenNavigationHelp
+    attributes:
+      label: "helpScreenNavigationHelp"
+      description: "Translate `Click on a control for more information.`."
+      placeholder: "Click on a control for more information."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-pen
     attributes:
       label: "pen"
@@ -545,6 +599,261 @@ or
     validations:
       required: false
   - type: textarea
+    id: translation-errorImageHasZeroSize
+    attributes:
+      label: "errorImageHasZeroSize"
+      description: "Translate `Error: Image has zero size`."
+      placeholder: "Error: Image has zero size"
+      value: "Fehler: Bild hat Größe Null"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__baseHelpText
+    attributes:
+      label: "penDropdown__baseHelpText"
+      description: "Translate `This tool draws shapes or freehand lines.`."
+      placeholder: "This tool draws shapes or freehand lines."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__colorHelpText
+    attributes:
+      label: "penDropdown__colorHelpText"
+      description: "Translate `Changes the pen's color`."
+      placeholder: "Changes the pen's color"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__thicknessHelpText
+    attributes:
+      label: "penDropdown__thicknessHelpText"
+      description: "Translate `Changes the thickness of strokes drawn by the pen.`."
+      placeholder: "Changes the thickness of strokes drawn by the pen."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__penTypeHelpText
+    attributes:
+      label: "penDropdown__penTypeHelpText"
+      description: "Translate `Changes the pen style.
+
+Either a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.`."
+      placeholder: "Changes the pen style.
+
+Either a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__autocorrectHelpText
+    attributes:
+      label: "penDropdown__autocorrectHelpText"
+      description: "Translate `Converts approximate freehand lines and rectangles to perfect ones.
+
+The pen must be held stationary at the end of a stroke to trigger a correction.`."
+      placeholder: "Converts approximate freehand lines and rectangles to perfect ones.
+
+The pen must be held stationary at the end of a stroke to trigger a correction."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__stabilizationHelpText
+    attributes:
+      label: "penDropdown__stabilizationHelpText"
+      description: "Translate `Draws smoother strokes.
+
+This also adds a short delay between the mouse/stylus and the stroke.`."
+      placeholder: "Draws smoother strokes.
+
+This also adds a short delay between the mouse/stylus and the stroke."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__baseHelpText
+    attributes:
+      label: "handDropdown__baseHelpText"
+      description: "Translate `This tool is responsible for scrolling, rotating, and zooming the editor.`."
+      placeholder: "This tool is responsible for scrolling, rotating, and zooming the editor."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__zoomInHelpText
+    attributes:
+      label: "handDropdown__zoomInHelpText"
+      description: "Translate `Zooms in.`."
+      placeholder: "Zooms in."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__zoomOutHelpText
+    attributes:
+      label: "handDropdown__zoomOutHelpText"
+      description: "Translate `Zooms out.`."
+      placeholder: "Zooms out."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__resetViewHelpText
+    attributes:
+      label: "handDropdown__resetViewHelpText"
+      description: "Translate `Resets the zoom level to 100% and resets scroll.`."
+      placeholder: "Resets the zoom level to 100% and resets scroll."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__zoomDisplayHelpText
+    attributes:
+      label: "handDropdown__zoomDisplayHelpText"
+      description: "Translate `Shows the current zoom level. 100% shows the image at its actual size.`."
+      placeholder: "Shows the current zoom level. 100% shows the image at its actual size."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__touchPanningHelpText
+    attributes:
+      label: "handDropdown__touchPanningHelpText"
+      description: "Translate `When enabled, touch gestures move the image rather than select or draw.`."
+      placeholder: "When enabled, touch gestures move the image rather than select or draw."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__lockRotationHelpText
+    attributes:
+      label: "handDropdown__lockRotationHelpText"
+      description: "Translate `When enabled, prevents touch gestures from rotating the screen.`."
+      placeholder: "When enabled, prevents touch gestures from rotating the screen."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__baseHelpText
+    attributes:
+      label: "selectionDropdown__baseHelpText"
+      description: "Translate `Selects content and manipulates the selection`."
+      placeholder: "Selects content and manipulates the selection"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__resizeToHelpText
+    attributes:
+      label: "selectionDropdown__resizeToHelpText"
+      description: "Translate `Crops the drawing to the size of what's currently selected.
+
+If auto-resize is enabled, it will be disabled.`."
+      placeholder: "Crops the drawing to the size of what's currently selected.
+
+If auto-resize is enabled, it will be disabled."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__deleteHelpText
+    attributes:
+      label: "selectionDropdown__deleteHelpText"
+      description: "Translate `Erases selected items.`."
+      placeholder: "Erases selected items."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__duplicateHelpText
+    attributes:
+      label: "selectionDropdown__duplicateHelpText"
+      description: "Translate `Makes a copy of selected items.`."
+      placeholder: "Makes a copy of selected items."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__changeColorHelpText
+    attributes:
+      label: "selectionDropdown__changeColorHelpText"
+      description: "Translate `Changes the color of selected items.`."
+      placeholder: "Changes the color of selected items."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__baseHelpText
+    attributes:
+      label: "pageDropdown__baseHelpText"
+      description: "Translate `Controls the drawing canvas' background color, pattern, and size.`."
+      placeholder: "Controls the drawing canvas' background color, pattern, and size."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__backgroundColorHelpText
+    attributes:
+      label: "pageDropdown__backgroundColorHelpText"
+      description: "Translate `Changes the background color of the drawing canvas.`."
+      placeholder: "Changes the background color of the drawing canvas."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__gridCheckboxHelpText
+    attributes:
+      label: "pageDropdown__gridCheckboxHelpText"
+      description: "Translate `Controls whether the drawing canvas has a background grid pattern.`."
+      placeholder: "Controls whether the drawing canvas has a background grid pattern."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__autoresizeCheckboxHelpText
+    attributes:
+      label: "pageDropdown__autoresizeCheckboxHelpText"
+      description: "Translate `When checked, the page grows to fit the drawing.
+
+When unchecked, the page is visible and its size can be set manually.`."
+      placeholder: "When checked, the page grows to fit the drawing.
+
+When unchecked, the page is visible and its size can be set manually."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__aboutButtonHelpText
+    attributes:
+      label: "pageDropdown__aboutButtonHelpText"
+      description: "Translate `Shows version, debug, and other information.`."
+      placeholder: "Shows version, debug, and other information."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-colorPickerPipetteHelpText
+    attributes:
+      label: "colorPickerPipetteHelpText"
+      description: "Translate `Picks a color from the screen.`."
+      placeholder: "Picks a color from the screen."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-colorPickerToggleHelpText
+    attributes:
+      label: "colorPickerToggleHelpText"
+      description: "Translate `Opens/closes the color picker.`."
+      placeholder: "Opens/closes the color picker."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-closeSidebar
     attributes:
       label: "closeSidebar"
@@ -604,16 +913,6 @@ or
       description: "Translate ``(size, units) => `Image size: ${size} ${units}` ``."
       placeholder: "(size, units) => `Image size: ${size} ${units}`"
       value: "(size, units) => `Bild-Größe: ${size} ${units}`"
-      render: "shell"
-    validations:
-      required: false
-  - type: textarea
-    id: translation-errorImageHasZeroSize
-    attributes:
-      label: "errorImageHasZeroSize"
-      description: "Translate `Error: Image has zero size`."
-      placeholder: "Error: Image has zero size"
-      value: "Fehler: Bild hat Größe Null"
       render: "shell"
     validations:
       required: false
