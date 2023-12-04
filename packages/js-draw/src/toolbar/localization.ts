@@ -160,7 +160,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	penDropdown__colorHelpText: 'Changes the pen\'s color',
 	penDropdown__thicknessHelpText:
 		'Changes the thickness of strokes drawn by the pen.',
-	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nChoosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.',
+	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.',
 	penDropdown__autocorrectHelpText:
 		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
 	penDropdown__stabilizationHelpText:
