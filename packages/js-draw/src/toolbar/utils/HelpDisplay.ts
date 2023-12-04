@@ -5,11 +5,25 @@ import { MutableReactiveValue } from '../../util/ReactiveValue';
 import cloneElementWithStyles from '../../util/cloneElementWithStyles';
 import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
 
-interface HelpRecord {
-	readonly targetElements: HTMLElement[];
+export interface HelpRecord {
 	readonly helpText: string;
+
+	/**
+	 * Elements that have `helpText`. Conceptually, these
+	 * `HTMLElement`s form a single control (e.g. different radio
+	 * buttons in a button group).
+	 *
+	 * The elements are all shown at once by a `HelpDisplay`.
+	 */
+	readonly targetElements: HTMLElement[];
 }
 
+/**
+ * Creates the main content of the help overlay.
+ *
+ * Shows the label for a `HelpRecord` and a highlighted copy
+ * of that label's `targetElements`.
+ */
 const createHelpPage = (
 	helpItems: HelpRecord[],
 	onItemClick: (itemIndex: number)=>void,
@@ -183,16 +197,19 @@ const createHelpPage = (
 	};
 
 	const onItemChange = () => {
-		const instructionsElement = document.createElement('div');
-		instructionsElement.innerText = currentItem?.helpText ?? '';
+		const helpTextElement = document.createElement('div');
+		helpTextElement.innerText = currentItem?.helpText ?? '';
 
-		const helpElement = document.createElement('div');
-		helpElement.innerText = context.localization.helpScreenNavigationHelp;
-		helpElement.classList.add('navigation-help');
+		// For tests
+		helpTextElement.classList.add('current-item-help');
+
+		const navigationHelpElement = document.createElement('div');
+		navigationHelpElement.innerText = context.localization.helpScreenNavigationHelp;
+		navigationHelpElement.classList.add('navigation-help');
 
 		textLabel.replaceChildren(
-			instructionsElement,
-			...(currentItemIndex === 0 ? [ helpElement ] : []),
+			helpTextElement,
+			...(currentItemIndex === 0 ? [ navigationHelpElement ] : []),
 		);
 
 		updateClonedElementStates();
@@ -214,16 +231,24 @@ const createHelpPage = (
 	};
 };
 
+/**
+ * Creates and manages an overlay that shows help text for a set of
+ * `HTMLElement`s.
+ *
+ * @see {@link BaseWidget.fillDropdown}.
+ */
 export default class HelpDisplay {
 	#helpData: HelpRecord[] = [];
 
+	/** Constructed internally by BaseWidget. @internal */
 	public constructor(
 		private createOverlay: (htmlElement: HTMLElement)=>void,
 		private context: ToolbarContext,
 	) {
 	}
 
-	private showHelpOverlay() {
+	/** @internal */
+	public showHelpOverlay() {
 		const overlay = document.createElement('dialog');
 		overlay.setAttribute('autofocus', 'true');
 		overlay.classList.add('toolbar-help-overlay');
@@ -261,6 +286,7 @@ export default class HelpDisplay {
 			return closeButton;
 		};
 
+		// Wraps the label and clickable help elements
 		const makeNavigationContent = () => {
 			const currentPage = MutableReactiveValue.fromInitialValue(0);
 
@@ -315,6 +341,7 @@ export default class HelpDisplay {
 			return navigationControl;
 		};
 
+		// Creates next/previous buttons.
 		const makeNavigationButtons = (navigation: ReturnType<typeof makeNavigationContent>) => {
 			const navigationButtonContainer = document.createElement('div');
 			navigationButtonContainer.classList.add('navigation-buttons');
@@ -373,6 +400,7 @@ export default class HelpDisplay {
 
 		this.createOverlay(overlay);
 		overlay.showModal();
+
 
 		const minDragOffsetToTransition = 30;
 		const setDragOffset = (offset: number) => {
@@ -443,8 +471,10 @@ export default class HelpDisplay {
 			// This is necessary because styles are cloned, in addition to elements.
 			requestAnimationFrame(() => navigation.refreshCurrent());
 		};
-		const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
-		mediaQueryList.addEventListener('change', onMediaChangeListener);
+
+		// matchMedia is unsupported by jsdom
+		const mediaQueryList = window.matchMedia?.('(prefers-color-scheme: dark)');
+		mediaQueryList?.addEventListener('change', onMediaChangeListener);
 
 		// Close the overlay when clicking on the background (*directly* on any of the
 		// elements in closeOverlayTriggers).
@@ -473,7 +503,7 @@ export default class HelpDisplay {
 		overlay.addEventListener('close', () => {
 			this.context.announceForAccessibility(this.context.localization.helpHidden);
 
-			mediaQueryList.removeEventListener('change', onMediaChangeListener);
+			mediaQueryList?.removeEventListener('change', onMediaChangeListener);
 			dragListener.removeListeners();
 			resizeObserver?.disconnect();
 
@@ -498,8 +528,6 @@ export default class HelpDisplay {
 
 	/**
 	 * Creates and returns a button that toggles the help display.
-	 *
-	 * @internal
 	 */
 	public createToggleButton(): HTMLElement {
 		const buttonContainer = document.createElement('div');

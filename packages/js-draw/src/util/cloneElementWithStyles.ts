@@ -7,7 +7,11 @@ const cloneElementWithStyles = (element: HTMLElement) => {
 	const restyle = (originalElement: HTMLElement, clonedElement: HTMLElement) => {
 		const originalComputedStyle = getComputedStyle(originalElement);
 
-		for (const propertyName of originalComputedStyle) {
+		// jsdom doesn't support iterators in CSSStyleDeclarations. Iterate with
+		// an index.
+		for (let index = 0; index < originalComputedStyle.length; index++) {
+			const propertyName = originalComputedStyle.item(index);
+
 			const propertyValue = originalComputedStyle.getPropertyValue(propertyName);
 			clonedElement.style.setProperty(propertyName, propertyValue);
 		}
