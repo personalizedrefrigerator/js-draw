@@ -460,6 +460,14 @@ export default class HelpDisplay {
 				closeOverlay();
 				event.preventDefault();
 			}
+			else if (event.code === 'ArrowRight') {
+				navigation.toNext();
+				event.preventDefault();
+			}
+			else if (event.code === 'ArrowLeft') {
+				navigation.toPrevious();
+				event.preventDefault();
+			}
 		};
 
 		overlay.addEventListener('close', () => {
