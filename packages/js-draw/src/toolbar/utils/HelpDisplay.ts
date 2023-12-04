@@ -21,6 +21,7 @@ const createHelpPage = (
 
 	const textLabel = document.createElement('div');
 	textLabel.classList.add('label', '-space-above');
+	textLabel.setAttribute('aria-live', 'polite');
 
 	// The current active item in helpItems.
 	// (Only one item is active at a time, but each item can have multiple HTMLElements).
@@ -73,7 +74,6 @@ const createHelpPage = (
 				if (index === currentItemIndex) {
 					container.classList.add('-active');
 					container.classList.remove('-clickable', '-background');
-					container.removeAttribute('aria-hidden');
 					container.onclick = () => {};
 				}
 				// Otherwise, if not containing the current element
@@ -85,7 +85,6 @@ const createHelpPage = (
 						container.classList.add('-background');
 						container.classList.remove('-active', '-clickable');
 					}
-					container.setAttribute('aria-hidden', 'true');
 
 					const containerIndex = index;
 					container.onclick = () => {
@@ -123,6 +122,11 @@ const createHelpPage = (
 
 	const refreshContent = () => {
 		container.replaceChildren();
+
+		// Add the text label first so that screen readers will visit it first.
+		textLabel.classList.remove('-large-space-above');
+		textLabel.classList.add('-small-space-above', '-large-space-below');
+		container.appendChild(textLabel);
 
 		const screenBBox = new Rect2(0, 0, window.innerWidth, window.innerHeight);
 
@@ -171,10 +175,6 @@ const createHelpPage = (
 		}
 
 		updateClonedElementStates();
-
-		textLabel.classList.remove('-large-space-above');
-		textLabel.classList.add('-small-space-above', '-large-space-below');
-		container.appendChild(textLabel);
 	};
 
 	const refresh = () => {
@@ -455,7 +455,16 @@ export default class HelpDisplay {
 			}
 		};
 
+		overlay.onkeyup = event => {
+			if (event.code === 'Escape') {
+				closeOverlay();
+				event.preventDefault();
+			}
+		};
+
 		overlay.addEventListener('close', () => {
+			this.context.announceForAccessibility(this.context.localization.helpHidden);
+
 			mediaQueryList.removeEventListener('change', onMediaChangeListener);
 			dragListener.removeListeners();
 			resizeObserver?.disconnect();
