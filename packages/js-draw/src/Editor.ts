@@ -1649,6 +1649,11 @@ export class Editor {
 				'',
 				'== Bezier.js ==',
 				mitLicenseAttribution('2023 Mike "Pomax" Kamermans'),
+				'',
+				'',
+				'== js-draw ==',
+				mitLicenseAttribution('2023 Henry Heino'),
+				'',
 			].join('\n'),
 			minimized: true,
 		});
