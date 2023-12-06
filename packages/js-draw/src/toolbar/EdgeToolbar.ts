@@ -187,8 +187,13 @@ export default class EdgeToolbar extends AbstractToolbar {
 			this.menuContainer.style.opacity = '0';
 		}
 
+		const prefersReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
 		this.sidebarVisible.onUpdate(visible => {
 			const animationProperties = `${animationDuration}ms ease`;
+
+			// We need to use different animations when reducing motion.
+			const reduceMotion = prefersReduceMotion.matches ? '-reduce-motion' : '';
 
 			if (visible) {
 				this.sidebarY.set(this.snappedSidebarY());
@@ -199,8 +204,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 				}
 
 				this.menuContainer.style.display = '';
-				this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-in`;
-				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-in`;
+				this.sidebarContainer.style.animation =
+					`${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-in${reduceMotion}`;
+				this.menuContainer.style.animation =
+					`${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-in${reduceMotion}`;
 				this.menuContainer.style.opacity = '1';
 
 
@@ -212,8 +219,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 				this.closeColorPickers();
 
 				if (animationTimeout === null) {
-					this.sidebarContainer.style.animation = ` ${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-out`;
-					this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-out`;
+					this.sidebarContainer.style.animation =
+						`${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-out${reduceMotion}`;
+					this.menuContainer.style.animation =
+						`${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-out${reduceMotion}`;
 
 					// Manually set the container's opacity to prevent flickering when closing
 					// the toolbar.

@@ -5,10 +5,20 @@
 	to { transform: translate(0, 0); }
 }
 
+@keyframes toolbar--edgemenu-transition-in-reduce-motion {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
 @keyframes toolbar--edgemenu-transition-out {
 	// Don't include `from { translate: 0 }` because initially,
 	// the translation might not be zero (e.g. during a drag).
 	to { transform: translate(0, 100%); }
+}
+
+@keyframes toolbar--edgemenu-transition-out-reduce-motion {
+	from { opacity: 1; }
+	to { opacity: 0; }
 }
 
 @keyframes toolbar--edgemenu-container-transition-in {
@@ -269,9 +279,11 @@
 .toolbar-edgemenu-container {
 	background-color: var(--background-color-transparent);
 
-	transition: 0.15s ease-in-out height, 0.15s ease-in-out background-color, 0.2s ease-in-out opacity;
+	$motion-transition: 0.15s ease-in-out height;
+	$non-motion-transition: 0.15s ease-in-out background-color, 0.2s ease-in-out opacity;
+	transition: $motion-transition, $non-motion-transition;
 	@media (prefers-reduced-motion: reduce) {
-		transition: none;
+		transition: $non-motion-transition;
 	}
 
 	position: absolute;
