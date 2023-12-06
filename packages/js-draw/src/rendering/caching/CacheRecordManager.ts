@@ -78,7 +78,7 @@ export class CacheRecordManager {
 				numberAllocd ++;
 			}
 		}
-		averageReassignedCount /= Math.max(this.cacheRecords.length, 0);
+		averageReassignedCount /= Math.max(this.cacheRecords.length, 1);
 
 		const debugInfo = [
 			`${this.cacheRecords.length} cache records (max ${this.maxCanvases})`,
