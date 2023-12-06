@@ -187,7 +187,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 			this.menuContainer.style.opacity = '0';
 		}
 
-		const prefersReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const prefersReduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)') ?? '';
 
 		this.sidebarVisible.onUpdate(visible => {
 			const animationProperties = `${animationDuration}ms ease`;
