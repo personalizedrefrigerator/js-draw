@@ -1,7 +1,16 @@
 
+# 1.15.0
+ * Features
+    * Added a "help" feature to the pen, select, and page tools.
+    * Find tool: Search in image alt text, in addition to text boxes.
+ * Changes
+    * Re-enable changes to stroke smoothing, with some adjustements to improve drawing many fast, small lines.
+ * Bug fixes
+    * Fix animation for showing the help dialog has motion even when [`reduce-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion) is enabled.
+
 # 1.14.0
  * Changes
-    * Reverts recent changes to stroke smoothing. (Caused possible regressions while drawing.)
+    * Reverts recent changes to stroke smoothing. (Caused possible regressions while drawing fast, small lines.)
 
 # 1.13.2
  * Bug fixes
