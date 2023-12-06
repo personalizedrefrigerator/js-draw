@@ -153,6 +153,8 @@ export default class InsertImageWidget extends BaseWidget {
 		imageAltTextLabel.innerText = this.localizationTable.inputAltText;
 		this.imageAltTextInput.type = 'text';
 
+		this.imageAltTextInput.placeholder = this.localizationTable.describeTheImage;
+
 		this.statusView.setAttribute('aria-live', 'polite');
 
 		this.submitButton.innerText = this.localizationTable.submit;

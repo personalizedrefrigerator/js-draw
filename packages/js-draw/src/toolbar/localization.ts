@@ -59,6 +59,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	strokeAutocorrect: string;
 
 	errorImageHasZeroSize: string;
+	describeTheImage: string;
 
 	// Help text
 	penDropdown__baseHelpText: string;
@@ -160,6 +161,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	paste: 'Paste',
 
 	errorImageHasZeroSize: 'Error: Image has zero size',
+	describeTheImage: 'Description of the image',
 
 	// Help text
 	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines.',
