@@ -192,7 +192,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	selectionDropdown__changeColorHelpText: 'Changes the color of selected items.',
 	pageDropdown__baseHelpText: 'Controls the drawing canvas\' background color, pattern, and size.',
 	pageDropdown__backgroundColorHelpText: 'Changes the background color of the drawing canvas.',
-	pageDropdown__gridCheckboxHelpText: 'Controls whether the drawing canvas has a background grid pattern.',
+	pageDropdown__gridCheckboxHelpText: 'Enables/disables a background grid pattern.',
 	pageDropdown__autoresizeCheckboxHelpText: 'When checked, the page grows to fit the drawing.\n\nWhen unchecked, the page is visible and its size can be set manually.',
 	pageDropdown__aboutButtonHelpText: 'Shows version, debug, and other information.',
 	colorPickerPipetteHelpText: 'Picks a color from the screen.',
