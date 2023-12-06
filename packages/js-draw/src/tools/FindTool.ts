@@ -4,6 +4,7 @@
 
 import Editor from '../Editor';
 import TextComponent from '../components/TextComponent';
+import ImageComponent from '../components/ImageComponent';
 import { Rect2 } from '@js-draw/math';
 import { KeyPressEvent } from '../inputEvents';
 import BaseTool from './BaseTool';
@@ -32,17 +33,27 @@ export default class FindTool extends BaseTool {
 	}
 
 	private getMatches(searchFor: string): Rect2[] {
-		searchFor = searchFor.toLocaleLowerCase();
-		const allTextComponents = this.editor.image.getAllElements()
-			.filter(
-				elem => elem instanceof TextComponent
-			) as TextComponent[];
+		const lowerSearchFor = searchFor.toLocaleLowerCase();
 
-		const matches = allTextComponents.filter(
-			text => text.getText().toLocaleLowerCase().indexOf(searchFor) !== -1
-		);
+		const matchingComponents = this.editor.image.getAllElements().filter(component => {
+			let text = '';
+			if (component instanceof TextComponent) {
+				text = component.getText();
+			}
+			else if (component instanceof ImageComponent) {
+				text = component.getAltText() ?? '';
+			}
+			else {
+				return false;
+			}
 
-		return matches.map(match => match.getBBox());
+			const hasLowercaseMatch = text.toLocaleLowerCase().indexOf(lowerSearchFor) !== -1;
+			const hasSameCaseMatch = text.indexOf(searchFor) !== -1;
+
+			return hasLowercaseMatch || hasSameCaseMatch;
+		});
+
+		return matchingComponents.map(match => match.getBBox());
 	}
 
 	private focusCurrentMatch() {
