@@ -107,6 +107,7 @@ export default class PanZoom extends BaseTool {
 	private lastPointerDownTimestamp: number = 0;
 	private initialTouchAngle: number = 0;
 	private initialViewportRotation: number = 0;
+	private initialViewportScale: number = 0;
 
 	// Set to `true` only when scaling has started (if two fingers are down and have moved
 	// far enough).
@@ -166,6 +167,7 @@ export default class PanZoom extends BaseTool {
 			this.lastScreenCenter = screenCenter;
 			this.initialTouchAngle = angle;
 			this.initialViewportRotation = this.editor.viewport.getRotationAngle();
+			this.initialViewportScale = this.editor.viewport.getScaleFactor();
 			this.isScaling = false;
 
 			// We're initially rotated if `initialViewportRotation` isn't near a multiple of pi/2.
@@ -262,6 +264,26 @@ export default class PanZoom extends BaseTool {
 		return fullRotation - this.editor.viewport.getRotationAngle();
 	}
 
+	/**
+	 * Given a scale update, `scaleFactor`, returns a new scale factor snapped
+	 * to a power of two (if within some tolerance of that scale).
+	 */
+	private toSnappedScaleFactor(touchDist: number) {
+		// scaleFactor is applied to the current transformation of the viewport.
+		const newScale = this.initialViewportScale * touchDist / this.startDist;
+		const currentScale = this.editor.viewport.getScaleFactor();
+
+		const logNewScale = Math.log(newScale) / Math.log(10);
+		const roundedLogNewScale = Math.round(logNewScale);
+
+		const logTolerance = 0.04;
+		if (Math.abs(roundedLogNewScale - logNewScale) < logTolerance) {
+			return Math.pow(10, roundedLogNewScale) / currentScale;
+		}
+
+		return touchDist / this.lastDist;
+	}
+
 	private handleTwoFingerMove(allPointers: Pointer[]) {
 		const { screenCenter, canvasCenter, angle, dist } = this.computePinchData(allPointers[0], allPointers[1]);
 
@@ -282,19 +304,23 @@ export default class PanZoom extends BaseTool {
 
 		this.updateVelocity(screenCenter);
 
-		let scaleFactor = 1;
-		if (this.isScaling) {
-			scaleFactor = dist / this.lastDist;
-		} else {
+		if (!this.isScaling) {
 			const initialScaleFactor = dist / this.startDist;
 
 			// Only start scaling if scaling done so far exceeds some threshold.
 			const upperBound = this.pinchZoomStartThreshold;
 			const lowerBound = 1/this.pinchZoomStartThreshold;
 			if (initialScaleFactor > upperBound || initialScaleFactor < lowerBound) {
-				scaleFactor = initialScaleFactor;
 				this.isScaling = true;
 			}
+		}
+
+		let scaleFactor = 1;
+		if (this.isScaling) {
+			scaleFactor = this.toSnappedScaleFactor(dist);
+
+			// Don't set lastDist until we start scaling
+			this.lastDist = dist;
 		}
 
 		const transformUpdate = Mat33.translation(delta)
@@ -302,7 +328,6 @@ export default class PanZoom extends BaseTool {
 			.rightMul(Mat33.zRotation(deltaRotation, canvasCenter));
 
 		this.lastScreenCenter = screenCenter;
-		this.lastDist = dist;
 		this.transform = Viewport.transformBy(
 			this.transform!.transform.rightMul(transformUpdate)
 		);
