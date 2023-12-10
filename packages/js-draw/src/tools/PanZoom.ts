@@ -98,13 +98,21 @@ export default class PanZoom extends BaseTool {
 	private readonly pinchZoomStartThreshold = 1.08; // scale factor
 
 	// Distance between two touch points at the **start** of a gesture.
-	private startDist: number;
+	private startTouchDist: number;
 
-	// Distance between two touch points the last time input data was received.
-	private lastDist: number;
+	// Distance between two touch points the last time **this input was used
+	// to scale the screen**.
+	private lastTouchDist: number;
+
+	// Center of the two touch points at the last time inpput was received
 	private lastScreenCenter: Point2;
+
+	// Timestamp (as from performance.now()) at which the last input was received
 	private lastTimestamp: number;
+
+	// Last timestamp at which a pointerdown event was received
 	private lastPointerDownTimestamp: number = 0;
+
 	private initialTouchAngle: number = 0;
 	private initialViewportRotation: number = 0;
 	private initialViewportScale: number = 0;
@@ -162,8 +170,8 @@ export default class PanZoom extends BaseTool {
 
 		if (allAreTouch && pointers.length === 2 && this.mode & PanZoomMode.TwoFingerTouchGestures) {
 			const { screenCenter, angle, dist } = this.computePinchData(pointers[0], pointers[1]);
-			this.lastDist = dist;
-			this.startDist = dist;
+			this.lastTouchDist = dist;
+			this.startTouchDist = dist;
 			this.lastScreenCenter = screenCenter;
 			this.initialTouchAngle = angle;
 			this.initialViewportRotation = this.editor.viewport.getRotationAngle();
@@ -270,7 +278,7 @@ export default class PanZoom extends BaseTool {
 	 */
 	private toSnappedScaleFactor(touchDist: number) {
 		// scaleFactor is applied to the current transformation of the viewport.
-		const newScale = this.initialViewportScale * touchDist / this.startDist;
+		const newScale = this.initialViewportScale * touchDist / this.startTouchDist;
 		const currentScale = this.editor.viewport.getScaleFactor();
 
 		const logNewScale = Math.log(newScale) / Math.log(10);
@@ -281,7 +289,7 @@ export default class PanZoom extends BaseTool {
 			return Math.pow(10, roundedLogNewScale) / currentScale;
 		}
 
-		return touchDist / this.lastDist;
+		return touchDist / this.lastTouchDist;
 	}
 
 	private handleTwoFingerMove(allPointers: Pointer[]) {
@@ -305,7 +313,7 @@ export default class PanZoom extends BaseTool {
 		this.updateVelocity(screenCenter);
 
 		if (!this.isScaling) {
-			const initialScaleFactor = dist / this.startDist;
+			const initialScaleFactor = dist / this.startTouchDist;
 
 			// Only start scaling if scaling done so far exceeds some threshold.
 			const upperBound = this.pinchZoomStartThreshold;
@@ -319,8 +327,8 @@ export default class PanZoom extends BaseTool {
 		if (this.isScaling) {
 			scaleFactor = this.toSnappedScaleFactor(dist);
 
-			// Don't set lastDist until we start scaling
-			this.lastDist = dist;
+			// Don't set lastDist until we start scaling --
+			this.lastTouchDist = dist;
 		}
 
 		const transformUpdate = Mat33.translation(delta)
