@@ -1,4 +1,3 @@
-import { toRoundedString, toStringOfSamePrecision } from '../rounding';
 import LineSegment2 from './LineSegment2';
 import Mat33 from '../Mat33';
 import Rect2 from './Rect2';
@@ -7,6 +6,8 @@ import Abstract2DShape from './Abstract2DShape';
 import CubicBezier from './CubicBezier';
 import QuadraticBezier from './QuadraticBezier';
 import PointShape2D from './PointShape2D';
+import toRoundedString from '../rounding/toRoundedString';
+import toStringOfSamePrecision from '../rounding/toStringOfSamePrecision';
 
 export enum PathCommandType {
 	LineTo,
