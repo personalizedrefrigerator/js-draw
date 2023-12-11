@@ -1,4 +1,12 @@
 
+# 1.16.0
+ * Features
+    * Snap zoom to powers of 10 when zooming with touch. This should make it easier to maintain a consistent zoom in some cases.
+ * Bug fixes
+    * Collaborative editing: Fix exception thrown when undoing selection transforms that have been partially erased by another user.
+    * Selection: Prevent the selection handles from being briefly visible at the top left corner of the screen when starting a new selection.
+    * Viewing: Fix large strokes flicker while rotating the screen.
+
 # 1.15.0
  * Features
     * Added a "help" feature to the pen, select, and page tools.
