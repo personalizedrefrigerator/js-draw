@@ -1,5 +1,6 @@
 import { Color4, TextComponent, TextRenderingStyle, AbstractComponent, AbstractRenderer, CanvasRenderer, Mat33, Path, Rect2, StrokeComponent, Vec2, Viewport, PathCommand, PathCommandType, pathToRenderable } from 'js-draw';
-import { AnnotationMode, PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
+import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
+import type * as PDFJsLib from 'pdfjs-dist';
 
 interface PDFPage {
 	/**
@@ -47,7 +48,7 @@ class PDFDocumentWrapper {
 
 	private pageLoadListeners: Array<()=>void> = [];
 
-	private constructor(private pdf: PDFDocumentProxy) {
+	private constructor(private pdf: PDFDocumentProxy, private pdfJsLib: typeof PDFJsLib) {
 		this.loadPages();
 
 		// TODO: REMOVE:
@@ -93,7 +94,7 @@ class PDFDocumentWrapper {
 			totalY += pageRect.height;
 
 			this.pageRects.push(pageRect);
-			this.pages.push(PDFDocumentWrapper.buildPage(pageRect, page));
+			this.pages.push(this.buildPage(pageRect, page));
 
 			this.bbox = this.bbox.union(pageRect);
 		}
@@ -103,7 +104,7 @@ class PDFDocumentWrapper {
 		this.geometryLoaded = true;
 	}
 
-	private static buildPage(bbox: Rect2, pdfPage: PDFPageProxy): PDFPage {
+	private buildPage(bbox: Rect2, pdfPage: PDFPageProxy): PDFPage {
 		// TODO: Use a kd tree (probably based on the RenderingCache built into js-draw).
 		const canvas = document.createElement('canvas');
 		const ctx = canvas.getContext('2d')!;
@@ -167,7 +168,7 @@ class PDFDocumentWrapper {
 					viewport: pageViewport,
 
 					// Annotations will be rendered separately.
-					annotationMode: AnnotationMode.DISABLE,
+					annotationMode: this.pdfJsLib.AnnotationMode.DISABLE,
 				}).promise;
 
 				rendered = true;
@@ -294,8 +295,8 @@ class PDFDocumentWrapper {
 	/**
 	 * Create a new `PDFDocumentWrapper` from a [pdfjs `pdf`](https://github.com/mozilla/pdf.js).
 	 */
-	public static fromPDFJS(pdf: PDFDocumentProxy) {
-		return new PDFDocumentWrapper(pdf);
+	public static fromPDFJS(pdf: PDFDocumentProxy, pdfjs: typeof PDFJsLib) {
+		return new PDFDocumentWrapper(pdf, pdfjs);
 	}
 }
 
