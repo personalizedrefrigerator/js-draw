@@ -118,6 +118,8 @@ export default class Selection {
 		for (const handle of this.handles) {
 			handle.addTo(this.backgroundElem);
 		}
+
+		this.updateUI();
 	}
 
 	// @internal Intended for unit tests
@@ -507,6 +509,13 @@ export default class Selection {
 			this.innerContainer.classList.add(perpendicularClassName);
 		} else {
 			this.innerContainer.classList.remove(perpendicularClassName);
+		}
+
+		// Hide handles when empty
+		if (screenRegion.width === 0 && screenRegion.height === 0) {
+			this.innerContainer.classList.add('-empty');
+		} else {
+			this.innerContainer.classList.remove('-empty');
 		}
 
 		for (const handle of this.handles) {
