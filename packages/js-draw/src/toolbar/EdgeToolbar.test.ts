@@ -27,7 +27,7 @@ describe('EdgeToolbar', () => {
 
 		const editorRoot = editor.getRootElement();
 		const toolButtons = editorRoot.querySelectorAll('.toolbar-edge-toolbar .toolbar-button');
-		const edgemenuContainer = editorRoot.querySelector('.toolbar-edgemenu-container')! as HTMLElement;
+		const edgemenuContainer = editorRoot.querySelector<HTMLElement>('.toolbar-edgemenu-container')!;
 
 		expect(edgemenuContainer).toBeTruthy();
 		expect(toolButtons.length).toBeGreaterThan(3);
@@ -43,7 +43,7 @@ describe('EdgeToolbar', () => {
 		expect(getComputedStyle(edgemenuContainer).opacity).not.toBe('0'); // Should be fading in
 
 		// The focused button should close the toolbar when clicked (and be within the menu container).
-		const closeButton = edgemenuContainer.querySelector(':focus')! as HTMLElement;
+		const closeButton = edgemenuContainer.querySelector<HTMLElement>(':focus')!;
 		expect(closeButton).toBeTruthy();
 
 		closeButton.click();

@@ -1,6 +1,6 @@
 @use "./widgets/InsertImageWidget.scss";
 @use "./widgets/OverflowWidget.css";
-@use "./widgets/PenToolWidget.css";
+@use "./widgets/PenToolWidget.scss";
 @use "./widgets/HandToolWidget.scss";
 @use "./widgets/SelectionToolWidget.scss";
 @use "./widgets/DocumentPropertiesWidget.scss";
@@ -9,3 +9,5 @@
 @use "./AbstractToolbar.scss";
 @use "./EdgeToolbar.scss";
 @use "./DropdownToolbar.scss";
+
+@use "./utils/HelpDisplay.scss";

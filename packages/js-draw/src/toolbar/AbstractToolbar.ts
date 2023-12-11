@@ -22,6 +22,8 @@ import { DispatcherEventListener } from '../EventDispatcher';
 import { Color4 } from '@js-draw/math';
 import { toolbarCSSPrefix } from './constants';
 import SaveActionWidget from './widgets/SaveActionWidget';
+import { BaseTool } from '../lib';
+import ExitActionWidget from './widgets/ExitActionWidget';
 
 type UpdateColorisCallback = ()=>void;
 type WidgetByIdMap = Record<string, BaseWidget>;
@@ -37,6 +39,16 @@ export interface SpacerOptions {
 	// Maximum size (e.g. "50px")
 	maxSize: string;
 }
+
+export type ToolbarActionButtonOptions = {
+	// Effect of mustBeToplevel depends on the toolbar. In the dropdown toolbar,
+	// this determines whether the button can be placed in the toolbar's overflow menu
+	// or not.
+	mustBeToplevel?: boolean;
+
+	// Whether to auto-disable the button in read-only editors. True by default.
+	autoDisableInReadOnlyEditors?: boolean;
+};
 
 export default abstract class AbstractToolbar {
 	#listeners: DispatcherEventListener[] = [];
@@ -317,8 +329,17 @@ export default abstract class AbstractToolbar {
 	protected makeActionButton(
 		title: string|ActionButtonIcon,
 		command: ()=>void,
-		mustBeToplevel: boolean = true,
+		options: ToolbarActionButtonOptions|boolean = true,
 	): BaseWidget {
+		// Parse options
+		if (typeof options === 'boolean') {
+			options = {
+				mustBeToplevel: options,
+			};
+		}
+		const mustBeToplevel = options.mustBeToplevel ?? true;
+		const autoDisableInReadOnlyEditors = options.autoDisableInReadOnlyEditors ?? true;
+
 		const titleString = typeof title === 'string' ? title : title.label;
 		const widgetId = 'action-button';
 
@@ -338,6 +359,7 @@ export default abstract class AbstractToolbar {
 			command,
 			this.editor.localization,
 			mustBeToplevel,
+			autoDisableInReadOnlyEditors,
 		);
 
 		return widget;
@@ -346,14 +368,18 @@ export default abstract class AbstractToolbar {
 	/**
 	 * Adds an action button with `title` to this toolbar (or to the given `parent` element).
 	 *
+	 * `options` can either be an object with properties `mustBeToplevel` and/or
+	 * `autoDisableInReadOnlyEditors` or a boolean value. If a boolean, it is interpreted
+	 * as being the value of `mustBeToplevel`.
+	 *
 	 * @return The added button.
 	 */
 	public addActionButton(
 		title: string|ActionButtonIcon,
 		command: ()=> void,
-		mustBeToplevel: boolean = true
+		options: ToolbarActionButtonOptions|boolean = true,
 	): BaseWidget {
-		const widget = this.makeActionButton(title, command, mustBeToplevel);
+		const widget = this.makeActionButton(title, command, options);
 		this.addWidget(widget);
 		return widget;
 	}
@@ -366,9 +392,9 @@ export default abstract class AbstractToolbar {
 		tags: (ToolbarWidgetTag|string)[],
 		title: string|ActionButtonIcon,
 		command: ()=>void,
-		mustBeToplevel = true
+		options: ToolbarActionButtonOptions|boolean = true,
 	): BaseWidget {
-		const widget = this.makeActionButton(title, command, mustBeToplevel);
+		const widget = this.makeActionButton(title, command, options);
 		widget.setTags(tags);
 		this.addWidget(widget);
 
@@ -388,10 +414,13 @@ export default abstract class AbstractToolbar {
 	 * toolbar.addDefaults();
 	 * toolbar.addSaveButton(() => alert('save clicked!'));
 	 * ```
+	 *
+	 * `labelOverride` can optionally be used to change the `label` or `icon` of the button.
 	 */
-	public addSaveButton(saveCallback: ()=>void): BaseWidget {
-		const widget = new SaveActionWidget(this.editor, this.localizationTable, saveCallback);
-		widget.setTags([ ToolbarWidgetTag.Save ]);
+	public addSaveButton(saveCallback: ()=>void, labelOverride: Partial<ActionButtonIcon> = {}): BaseWidget {
+		const widget = new SaveActionWidget(
+			this.editor, this.localizationTable, saveCallback, labelOverride,
+		);
 		this.addWidget(widget);
 
 		return widget;
@@ -400,25 +429,29 @@ export default abstract class AbstractToolbar {
 	/**
 	 * Adds an "Exit" button that, when clicked, calls `exitCallback`.
 	 *
-	 * **Note**: This is equivalent to
+	 * **Note**: This is *roughly* equivalent to
 	 * ```ts
 	 * toolbar.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
 	 *   label: this.editor.localization.exit,
 	 *   icon: this.editor.icons.makeCloseIcon(),
+	 *
+	 *   // labelOverride can be used to override label or icon.
+	 *   ...labelOverride,
 	 * }, () => {
 	 *   exitCallback();
 	 * });
 	 * ```
+	 * with some additional configuration.
 	 *
 	 * @final
 	 */
-	public addExitButton(exitCallback: ()=>void): BaseWidget {
-		return this.addTaggedActionButton([ ToolbarWidgetTag.Exit ], {
-			label: this.editor.localization.exit,
-			icon: this.editor.icons.makeCloseIcon(),
-		}, () => {
-			exitCallback();
-		});
+	public addExitButton(exitCallback: ()=>void, labelOverride: Partial<ActionButtonIcon> = {}): BaseWidget {
+		const widget = new ExitActionWidget(
+			this.editor, this.localizationTable, exitCallback, labelOverride,
+		);
+		this.addWidget(widget);
+
+		return widget;
 	}
 
 	/**
@@ -470,34 +503,54 @@ export default abstract class AbstractToolbar {
 	}
 
 	/**
-	 * Adds toolbar widgets based on the enabled tools.
+	 * Adds widgets for pen/eraser/selection/text/pan-zoom primary tools.
+	 *
+	 * If `filter` returns `false` for a tool, no widget is added for that tool.
+	 * See {@link addDefaultToolWidgets}
+	 */
+	public addWidgetsForPrimaryTools(filter?: (tool: BaseTool)=>boolean) {
+		for (const tool of this.editor.toolController.getPrimaryTools()) {
+			if (filter && !filter?.(tool)) {
+				continue;
+			}
+
+			if (tool instanceof PenTool) {
+				const widget = new PenToolWidget(
+					this.editor, tool, this.localizationTable,
+				);
+				this.addWidget(widget);
+			}
+			else if (tool instanceof EraserTool) {
+				this.addWidget(new EraserWidget(this.editor, tool, this.localizationTable));
+			}
+			else if (tool instanceof SelectionTool) {
+				this.addWidget(new SelectionToolWidget(this.editor, tool, this.localizationTable));
+			}
+			else if (tool instanceof TextTool) {
+				this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
+			}
+			else if (tool instanceof PanZoomTool) {
+				this.addWidget(new HandToolWidget(this.editor, tool, this.localizationTable));
+			}
+		}
+	}
+
+	/**
+	 * Adds toolbar widgets based on the enabled tools, and additional tool-like
+	 * buttons (e.g. {@link DocumentPropertiesWidget} and {@link InsertImageWidget}).
 	 */
 	public addDefaultToolWidgets() {
-		const toolController = this.editor.toolController;
-		for (const tool of toolController.getMatchingTools(PenTool)) {
-			const widget = new PenToolWidget(
-				this.editor, tool, this.localizationTable,
-			);
-			this.addWidget(widget);
-		}
+		this.addWidgetsForPrimaryTools();
+		this.addDefaultEditorControlWidgets();
+	}
 
-		for (const tool of toolController.getMatchingTools(EraserTool)) {
-			this.addWidget(new EraserWidget(this.editor, tool, this.localizationTable));
-		}
-
-		for (const tool of toolController.getMatchingTools(SelectionTool)) {
-			this.addWidget(new SelectionToolWidget(this.editor, tool, this.localizationTable));
-		}
-
-		for (const tool of toolController.getMatchingTools(TextTool)) {
-			this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
-		}
-
-		const panZoomTool = toolController.getMatchingTools(PanZoomTool)[0];
-		if (panZoomTool) {
-			this.addWidget(new HandToolWidget(this.editor, panZoomTool, this.localizationTable));
-		}
-
+	/**
+	 * Adds widgets that don't correspond to tools, but do allow the user to control
+	 * the editor in some way.
+	 *
+	 * By default, this includes {@link DocumentPropertiesWidget} and {@link InsertImageWidget}.
+	 */
+	public addDefaultEditorControlWidgets() {
 		this.addWidget(new DocumentPropertiesWidget(this.editor, this.localizationTable));
 		this.addWidget(new InsertImageWidget(this.editor, this.localizationTable));
 	}
@@ -511,7 +564,10 @@ export default abstract class AbstractToolbar {
 	 */
 	public abstract addDefaults(): void;
 
-	/** Remove this toolbar from its container and clean up listeners. */
+	/**
+	 * Remove this toolbar from its container and clean up listeners.
+	 * This should only be called **once** for a given toolbar.
+	 */
 	public remove() {
 		this.closeColorPickerOverlay?.remove();
 
@@ -521,6 +577,10 @@ export default abstract class AbstractToolbar {
 		this.#listeners = [];
 
 		this.onRemove();
+
+		for (const widget of this.#widgetList) {
+			widget.remove();
+		}
 	}
 
 	/**

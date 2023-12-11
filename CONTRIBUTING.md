@@ -1,4 +1,5 @@
 # Building and testing
+
 `js-draw` uses `npm` as its build system and to manage dependencies. Thus, to install dependencies and build the project for the first time,
 ```bash
 # After cloning the project,
@@ -18,6 +19,7 @@ bash$ npm run doc
 ```
 
 ## Running/building the example projects
+
 First, switch to the `docs` directory:
 ```console
 bash$ cd path/to/js-draw/
@@ -46,6 +48,7 @@ bash$ python3 -m http.server
 ```
 
 ### Collaborative editing project
+
 ```bash
 bash$ cd docs/examples/example-collaborative/
 
@@ -60,6 +63,7 @@ bash$ python3 server.py
 ```
 
 # Notable files and directories
+
 > If this list is outdated, please open an issue.
 
 - [`packages/js-draw/src/localizations`](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations) and [`getLocalizationTable.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/packages/js-draw/src/localizations/getLocalizationTable.ts).
@@ -72,7 +76,40 @@ bash$ python3 server.py
 The coding style is, for the most part, enforced by a pre-commit hook.
 
 Because `js-draw` was originally created as a part of a pull request for the Joplin note-taking app,
-[it mostly follows Joplin's style guide](https://github.com/laurent22/joplin/blob/dev/readme/coding_style.md),
+[it mostly follows Joplin's style guide](https://github.com/laurent22/joplin/blob/dev/readme/dev/coding_style.md),
 with the exception that TypeDoc-style comments (`/** */`) are encouraged for documentation.
 
 Note that `//`-style comments can also be used for documentation.
+
+# Development FAQ
+## How can I test changes to curve fitting for strokes?
+
+As of the time of this writing, curve fitting related code lives in [`StrokeSmoother.ts`](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/components/util/).
+
+Here's one possible workflow for making and testing changes:
+
+**Setup**:
+1. Run `npm install` in the project's root directory (if you haven't already)
+2. Start the compiler in `watch` mode in both `packages/js-draw/` and `docs/debugging/stroke-logging`:
+```bash
+# Shell #1
+$ cd packages/js-draw
+$ npm run watch
+
+# Shell #2
+$ cd docs/debugging/stroke-logging
+$ npm run watch
+```
+3. Start a development server in the `docs` directory
+```bash
+$ cd docs
+$ python3 -m http.server
+# ↑
+# Should serve to http://localhost:8000/ by default
+```
+
+4. Open http://localhost:8000/debugging/stroke-logging/ in a web browser
+5. Open https://js-draw.web.app/debugging/stroke-logging/ in a web browser
+
+The stroke-logging debug utility allows pasting an input log into a textbox and playing back the input events. This can be used to see how changes to `StrokeSmoother.ts` change the rendered output, for the same input.
+

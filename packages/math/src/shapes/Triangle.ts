@@ -41,13 +41,13 @@ export default class Triangle extends Abstract2DShape {
 
 	// Transform, treating this as composed of 2D points.
 	public transformed2DBy(affineTransform: Mat33) {
-		return this.map(affineTransform.transformVec2);
+		return this.map(vertex => affineTransform.transformVec2(vertex));
 	}
 
 	// Transforms this by a linear transform --- verticies are treated as
 	// 3D points.
 	public transformedBy(linearTransform: Mat33) {
-		return this.map(linearTransform.transformVec3);
+		return this.map(vertex => linearTransform.transformVec3(vertex));
 	}
 
 	#sides: TriangleBoundary|undefined = undefined;

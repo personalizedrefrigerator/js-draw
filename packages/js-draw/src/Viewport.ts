@@ -98,7 +98,7 @@ export class Viewport {
 		return result;
 	}
 
-	// @internal
+	/** Resizes the screen rect to the given size. @internal */
 	public updateScreenSize(screenSize: Vec2) {
 		this.screenRect = this.screenRect.resizedTo(screenSize);
 	}
@@ -142,7 +142,7 @@ export class Viewport {
 		return this.transform;
 	}
 
-	/** @returns the size of the visible region in pixels. */
+	/** @returns the size of the visible region in pixels (screen units). */
 	public getScreenRectSize(): Vec2 {
 		return this.screenRect.size;
 	}
@@ -177,6 +177,11 @@ export class Viewport {
 		return 50 / scaleFactor;
 	}
 
+	/**
+	 * Snaps `canvasPos` to the nearest grid cell corner.
+	 *
+	 * @see {@link getGridSize} and {@link getScaleFactorToNearestPowerOf}.
+	 */
 	public snapToGrid(canvasPos: Point2) {
 		const scaleFactor = this.getScaleFactorToNearestPowerOf(2);
 
@@ -201,6 +206,8 @@ export class Viewport {
 	/**
 	 * @returns the angle of the canvas in radians.
 	 * This is the angle by which the canvas is rotated relative to the screen.
+	 *
+	 * Returns an angle in the range $[-\pi, \pi]$ (the same range as {@link Vec3.angle}).
 	 */
 	public getRotationAngle(): number {
 		return this.transform.transformVec3(Vec3.unitX).angle();
@@ -232,7 +239,7 @@ export class Viewport {
 		return point.map(roundComponent);
 	}
 
-	// Round a point with a tolerance of ±1 screen unit.
+	/** Round a point with a tolerance of ±1 screen unit. */
 	public roundPoint(point: Point2): Point2 {
 		return Viewport.roundPoint(point, 1 / this.getScaleFactor());
 	}
@@ -256,8 +263,21 @@ export class Viewport {
 	public computeZoomToTransform(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Mat33 {
 		let transform = Mat33.identity;
 
+		// Invalid size? (Would divide by zero)
 		if (toMakeVisible.w === 0 || toMakeVisible.h === 0) {
-			throw new Error(`${toMakeVisible.toString()} rectangle is empty! Cannot zoom to!`);
+			// Create a new rectangle with a valid size
+			let newSize = Math.max(toMakeVisible.w, toMakeVisible.h);
+
+			// Choose a reasonable default size, but don't zoom.
+			if (newSize === 0) {
+				newSize = 50;
+				allowZoomIn = false;
+				allowZoomOut = false;
+			}
+
+			toMakeVisible = new Rect2(
+				toMakeVisible.x, toMakeVisible.y, newSize, newSize,
+			);
 		}
 
 		if (isNaN(toMakeVisible.size.magnitude())) {

@@ -4,7 +4,7 @@ describe('ReactiveValue', () => {
 	it('should fire update listeners on update', () => {
 		const value = ReactiveValue.fromInitialValue(3);
 		const listener = jest.fn();
-		const { remove: removeListener } = value.onUpdateAndNow(listener);
+		const onUpdateListener = value.onUpdateAndNow(listener);
 
 		expect(listener).toHaveBeenCalledWith(3);
 		expect(listener).toHaveBeenCalledTimes(1);
@@ -14,13 +14,13 @@ describe('ReactiveValue', () => {
 		expect(listener).toHaveBeenLastCalledWith(2);
 		expect(listener).toHaveBeenCalledTimes(2);
 
-		removeListener();
+		onUpdateListener.remove();
 
 		value.set(4);
 		expect(listener).toHaveBeenCalledTimes(2);
 
 		// Should be able to call remove multiple times without error.
-		removeListener();
+		onUpdateListener.remove();
 		value.set(6);
 	});
 

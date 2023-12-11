@@ -1,0 +1,137 @@
+
+.selection-tool-selection-background {
+	background-color: var(--selection-background-color);
+	opacity: 0.5;
+	overflow: visible;
+}
+
+.selection-tool-handle {
+	position: absolute;
+	box-sizing: border-box;
+
+	// Center content
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	// Maximum size of the visible region (make the handle slightly larger
+	// so that the resize cursor is visible everywhere in the actual selection
+	// box).
+	--max-size: 17px;
+
+	.selection-tool-content {
+		border: 1px solid var(--foreground-color-1);
+		background: var(--background-color-1);
+		box-sizing: border-box;
+
+		max-width: var(--max-size);
+		max-height: var(--max-size);
+		width: 100%;
+		height: 100%;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		padding: 3px;
+		.icon {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	&.selection-tool-circle .selection-tool-content {
+		border-radius: 100%;
+	}
+
+	&.selection-tool-rotate {
+		// Shrink less if a rotation handle
+		--max-size: 28px;
+
+		cursor: grab;
+	}
+}
+
+.selection-tool-handle {
+	&.selection-tool-resize-x {
+		cursor: ew-resize;
+	}
+
+	&.selection-tool-resize-y {
+		cursor: ns-resize;
+	}
+
+	&.selection-tool-resize-xy {
+		cursor: nwse-resize;
+	}
+}
+
+.selection-tool-rotated-near-perpendicular .selection-tool-handle {
+	&.selection-tool-resize-x {
+		cursor: ns-resize;
+	}
+
+	&.selection-tool-resize-y {
+		cursor: ew-resize;
+	}
+
+	&.selection-tool-resize-xy {
+		cursor: nesw-resize;
+	}
+}
+
+.overlay.handleOverlay {
+	touch-action: none;
+
+	// The selection tool makes some assumptions about margin-left, margin-top,
+	// and the initial (unmodified) position of the selection.
+	//
+	// For now, as we're not showing text in the selection box, force LTR.
+	direction: ltr;
+
+	// When expanding a selection with shift+click&drag, multiple selection boxes
+	// can be present in the same handleOverlay. As such, so that other overlayed
+	// selection boxes are in the correct place, the outer container needs to have
+	// zero height.
+	//
+	// This is in addition to the overlay container, which needs zero height to prevent
+	// other overlay containers from being affected by its size.
+	&, .selection-tool-selection-outer-container {
+		height: 0;
+		overflow: visible;
+	}
+
+	.selection-tool-selection-inner-container {
+		width: var(--editor-current-display-width-px);
+		height: var(--editor-current-display-height-px);
+		overflow: hidden;
+
+		// Disable pointer events: If the parent (or the container) has
+		// captured pointers and the container is removed, this prevents
+		// us from receiving the following events (e.g. in Firefox).
+		pointer-events: none;
+
+		& > * {
+			// We *do* want pointer events for handles and the background. This
+			// allows the mouse cursor to change shape when hovering over resize
+			// handles.
+			pointer-events: all;
+		}
+
+		&.-empty {
+			opacity: 0;
+		}
+	}
+}
+
+@keyframes selection-duplicated-animation {
+	0% { scale: 1 1; }
+	50% { scale: 1.02 1.02; }
+	100% { scale: 1 1; }
+}
+
+/* Do not run the animation when the user has disabled motion animations. */
+@media (prefers-reduced-motion: reduce) {
+	@keyframes selection-duplicated-animation {
+	}
+}

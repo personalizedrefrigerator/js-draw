@@ -3,8 +3,14 @@ import AbstractRenderer, { RenderableImage } from '../rendering/renderers/Abstra
 import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
+import waitForImageLoaded from '../util/waitForImageLoaded';
 
-// Represents a raster image.
+/**
+ * Represents a raster image.
+ *
+ * **Example: Adding images**:
+ * [[include:doc-pages/inline-examples/adding-an-image-and-data-urls.md]]
+ */
 export default class ImageComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 	private image: RenderableImage;
@@ -35,23 +41,22 @@ export default class ImageComponent extends AbstractComponent {
 		this.contentBBox = this.contentBBox.transformedBoundingBox(this.image.transform);
 	}
 
-	// Load from an image. Waits for the image to load if incomplete.
+	/**
+	 * Load from an image. Waits for the image to load if incomplete.
+	 *
+	 * The image, `elem`, must not [taint](https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image#security_and_tainted_canvases)
+	 * an HTMLCanvasElement when rendered.
+	 */
 	public static async fromImage(elem: HTMLImageElement, transform: Mat33) {
-		if (!elem.complete) {
-			await new Promise((resolve, reject) => {
-				elem.onload = resolve;
-				elem.onerror = reject;
-				elem.onabort = reject;
-			});
-		}
+		await waitForImageLoaded(elem);
 
 		let width, height;
 		if (
 			typeof elem.width === 'number' && typeof elem.height === 'number'
 			&& elem.width !== 0 && elem.height !== 0
 		) {
-			width = elem.width as number;
-			height = elem.height as number;
+			width = elem.width;
+			height = elem.height;
 		} else {
 			width = elem.clientWidth;
 			height = elem.clientHeight;
@@ -92,6 +97,7 @@ export default class ImageComponent extends AbstractComponent {
 		canvas.endObject(this.getLoadSaveData());
 	}
 
+	// A *very* rough estimate of how long it takes to render this component
 	public override getProportionalRenderingTime(): number {
 		// Estimate: Equivalent to a stroke with 10 segments.
 		return 10;
@@ -121,6 +127,7 @@ export default class ImageComponent extends AbstractComponent {
 		return this.image.label;
 	}
 
+	// The base64 image URL of this image.
 	public getURL() {
 		return this.image.base64Url;
 	}
@@ -148,7 +155,7 @@ export default class ImageComponent extends AbstractComponent {
 		};
 	}
 
-	public static deserializeFromJSON(data: any): ImageComponent {
+	public static deserializeFromJSON(this: void, data: any): ImageComponent {
 		if (!(typeof data.src === 'string')) {
 			throw new Error(`${data} has invalid format! Expected src property.`);
 		}

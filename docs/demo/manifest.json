@@ -1,6 +1,6 @@
 {
-    "short_name": "JS-Draw",
-    "name": "JS-Draw: Demo",
+    "short_name": "JS-draw",
+    "name": "JS-draw: Demo",
     "icons": [
         {
             "src": "./icons/js-draw-icon-vector-large.svg",

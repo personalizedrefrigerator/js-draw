@@ -16,7 +16,7 @@
  */
 
 import Editor, { EditorSettings } from './Editor';
-export { default as EditorImage } from './EditorImage';
+export * from './image/lib';
 export * from './types';
 export * from './inputEvents';
 export { default as getLocalizationTable, matchingLocalizationTable } from './localizations/getLocalizationTable';

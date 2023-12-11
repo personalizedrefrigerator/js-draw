@@ -22,7 +22,7 @@
  * // Add a toolbar
  * const toolbar = makeEdgeToolbar(editor);
  *
- * // ...width the default elements
+ * // ...with the default elements
  * toolbar.addDefaults();
  * ```
  *
@@ -39,7 +39,6 @@ import ExpandMore from './icons/ExpandMore.svg';
 import Undo from './icons/Undo.svg';
 import Redo from './icons/Redo.svg';
 import InkEraser from './icons/InkEraser.svg';
-import ArrowSelectorTool from './icons/ArrowSelectorTool.svg';
 import PanTool from './icons/PanTool.svg';
 import TouchApp from './icons/TouchApp.svg';
 import ScreenLockRotation from './icons/ScreenLockRotation.svg';
@@ -53,6 +52,11 @@ import Check from './icons/Check.svg';
 import InkHighlighter from './icons/InkHighlighter.svg';
 import Edit from './icons/Edit.svg';
 import CloudUpload from './icons/CloudUpload.svg';
+import RotateLeft from './icons/RotateLeft.svg';
+import Select from './icons/Select.svg';
+import Close from './icons/Close.svg';
+import Shapes from './icons/Shapes.svg';
+import Draw from './icons/Draw.svg';
 
 const icon = (data: string) => {
 	const icon = document.createElement('div');
@@ -77,7 +81,10 @@ class MaterialIconProvider extends IconProvider {
 		return icon(InkEraser);
 	}
 	public override makeSelectionIcon(): IconElemType {
-		return icon(ArrowSelectorTool);
+		return icon(Select);
+	}
+	public override makeRotateIcon(): IconElemType {
+		return icon(RotateLeft);
 	}
 	public override makeHandToolIcon(): IconElemType {
 		return icon(PanTool);
@@ -113,6 +120,8 @@ class MaterialIconProvider extends IconProvider {
 
 		if (!this.isRoundedTipPen(style)) {
 			line.style.strokeLinecap = 'square';
+		} else {
+			line.style.strokeLinecap = 'round';
 		}
 
 		svg.insertAdjacentElement('afterbegin', line);
@@ -135,6 +144,12 @@ class MaterialIconProvider extends IconProvider {
 	// makeIconFromFactory(pen: Pen, factory: ComponentBuilderFactory, includeTransparencyGrid?: boolean): IconElemType;
 	// makePipetteIcon(color?: Color4): IconElemType;
 	// makeFormatSelectionIcon(): IconElemType;
+	public override makeShapeAutocorrectIcon(): IconElemType {
+		return icon(Shapes);
+	}
+	public override makeStrokeSmoothingIcon(): IconElemType {
+		return icon(Draw);
+	}
 	public override makeResizeImageToSelectionIcon(): IconElemType {
 		return icon(Resize);
 	}
@@ -143,6 +158,9 @@ class MaterialIconProvider extends IconProvider {
 	}
 	public override makeDeleteSelectionIcon(): IconElemType {
 		return icon(Delete);
+	}
+	public override makeCloseIcon(): IconElemType {
+		return icon(Close);
 	}
 	public override makeSaveIcon(): IconElemType {
 		return icon(Check);

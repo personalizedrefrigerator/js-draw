@@ -6,6 +6,7 @@ import sendTouchEvent from '../testing/sendTouchEvent';
 import { InputEvtType } from '../inputEvents';
 import waitForTimeout from '../util/waitForTimeout';
 import PanZoom, { PanZoomMode } from './PanZoom';
+import startPinchGesture from '../testing/startPinchGesture';
 
 const selectPanZom = (editor: Editor): PanZoom => {
 	const primaryTools = editor.toolController.getPrimaryTools();
@@ -306,6 +307,64 @@ describe('PanZoom', () => {
 
 			lastVisibleRect = editor.viewport.visibleRect;
 		}
+	});
+
+	it('should have a larger rotation snap distance when first starting a rotation gesture', () => {
+		const editor = createEditor();
+		selectPanZom(editor);
+		editor.viewport.resetTransform(Mat33.identity);
+
+		const pinchCenter = Vec2.of(50, 50);
+		const pinchDistance = 10;
+		const pinchGesture = startPinchGesture(editor, pinchCenter, pinchDistance, 0);
+
+		const expectedScale = 1;
+		expect(editor.viewport.getScaleFactor()).toBe(expectedScale);
+		expect(editor.viewport.canvasToScreen(Vec2.zero)).objEq(Vec2.zero);
+
+		// We're just starting the gesture, so the snap angle should be larger
+		const maxIterations = 10;
+		for (let i = 0; i < maxIterations; i++) {
+			jest.advanceTimersByTime(100);
+
+			// Should snap for small angles
+			pinchGesture.update(pinchCenter, pinchDistance, i / maxIterations * 0.2);
+			expect(editor.viewport.getRotationAngle()).toBeCloseTo(0);
+		}
+
+		// Larger angles should cause rotation
+		pinchGesture.update(pinchCenter, pinchDistance, 0.4);
+		expect(editor.viewport.getRotationAngle()).toBeCloseTo(0.4);
+
+		// Going back to a smaller angle should still not snap...
+		pinchGesture.update(pinchCenter, pinchDistance, 0.2);
+		expect(editor.viewport.getRotationAngle()).toBeCloseTo(0.2);
+
+		// ...until we get very close to zero
+		pinchGesture.update(pinchCenter, pinchDistance, 0.01);
+		expect(editor.viewport.getRotationAngle()).toBeCloseTo(0);
+
+		// Suddenly rotating to another angle should still work
+		pinchGesture.update(pinchCenter, pinchDistance, Math.PI / 2);
+		expect(editor.viewport.getRotationAngle()).toBeCloseTo(Math.PI / 2);
+
+		// ...and if that angle is a multiple of 90 degrees (= PI/2 radians),
+		// we should snap to it.
+		pinchGesture.update(pinchCenter, pinchDistance, Math.PI / 2 + 0.04);
+		expect(editor.viewport.getRotationAngle()).toBeCloseTo(Math.PI / 2);
+
+		pinchGesture.update(pinchCenter, pinchDistance, -Math.PI / 2 + 0.03);
+		expect(editor.viewport.getRotationAngle()).toBeCloseTo(-Math.PI / 2);
+
+		pinchGesture.update(pinchCenter, pinchDistance, Math.PI + 0.02);
+		// Inspect the sine and cosine rather than the actual angle -- the rotation angle
+		// could be near either +pi or -pi.
+		expect(Math.cos(editor.viewport.getRotationAngle())).toBeCloseTo(-1);
+		expect(Math.sin(editor.viewport.getRotationAngle())).toBeCloseTo(0);
+
+		pinchGesture.update(pinchCenter, pinchDistance, Math.PI/2 + 0.01);
+		pinchGesture.end();
+		expect(editor.viewport.getRotationAngle()).toBeCloseTo(Math.PI/2);
 	});
 
 	it('"r" and "R" keyboard shortcuts should rotate the viewport in opposite directions', () => {

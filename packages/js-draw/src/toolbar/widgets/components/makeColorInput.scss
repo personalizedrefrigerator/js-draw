@@ -29,6 +29,14 @@
 	display: inline-flex;
 	flex-direction: row;
 
+	.coloris_input {
+		// Ensure that the region that can be clicked to open the input is roughly
+		// the full height of the container.
+		// Because the color picker is always shown below or above the input, 5px is
+		// subtracted to make the picker better align with the input's container.
+		height: calc(100% - 6px);
+	}
+
 	&.picker-open .clr-field {
 		// Work around what seems to be a Coloris bug -- clicking on the input button
 		// keeps the color picker open (while clicking anywhere else closes the picker).
@@ -43,6 +51,13 @@ $pipette-button-size: 30px;
 	height: $pipette-button-size;
 	padding: 0;
 	display: inline-flex;
+}
+
+.color-input-container {
+	> .color-input-wrapper {
+		display: flex;
+		justify-content: stretch;
+	}
 }
 
 .color-input-container .pipetteButton > svg {

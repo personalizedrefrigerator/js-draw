@@ -9,8 +9,9 @@ import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 import makeSeparator from './components/makeSeparator';
+import HelpDisplay from '../utils/HelpDisplay';
 
-const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor) => {
+const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor, helpDisplay?: HelpDisplay) => {
 	const zoomLevelRow = document.createElement('div');
 
 	const increaseButton = document.createElement('button');
@@ -72,6 +73,11 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor)
 		), addToHistory);
 	};
 
+	helpDisplay?.registerTextHelpForElement(increaseButton, localizationTable.handDropdown__zoomInHelpText);
+	helpDisplay?.registerTextHelpForElement(decreaseButton, localizationTable.handDropdown__zoomOutHelpText);
+	helpDisplay?.registerTextHelpForElement(resetViewButton, localizationTable.handDropdown__resetViewHelpText);
+	helpDisplay?.registerTextHelpForElement(zoomLevelDisplay, localizationTable.handDropdown__zoomDisplayHelpText);
+
 	return zoomLevelRow;
 };
 
@@ -79,8 +85,11 @@ class HandModeWidget extends BaseWidget {
 	public constructor(
 		editor: Editor,
 
-		protected tool: PanZoom, protected flag: PanZoomMode, protected makeIcon: ()=> Element,
+		protected tool: PanZoom,
+		protected flag: PanZoomMode,
+		protected makeIcon: ()=> Element,
 		private title: string,
+		private helpText: string,
 
 		localizationTable?: ToolbarLocalization,
 	) {
@@ -97,6 +106,10 @@ class HandModeWidget extends BaseWidget {
 			}
 		});
 		this.setSelected(false);
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
 	}
 
 	private setModeFlag(enabled: boolean) {
@@ -118,27 +131,42 @@ class HandModeWidget extends BaseWidget {
 	protected override fillDropdown(_dropdown: HTMLElement): boolean {
 		return false;
 	}
+
+	protected override getHelpText() {
+		return this.helpText;
+	}
 }
 
 export default class HandToolWidget extends BaseToolWidget {
 	private allowTogglingBaseTool: boolean;
 
+	// Pan zoom tool that overrides all other tools (enabling this tool for a device
+	// causes that device to pan/zoom instead of interact with the primary tools)
+	protected overridePanZoomTool: PanZoom;
+
 	public constructor(
 		editor: Editor,
-
-		// Pan zoom tool that overrides all other tools (enabling this tool for a device
-		// causes that device to pan/zoom instead of interact with the primary tools)
-		protected overridePanZoomTool: PanZoom,
-
+		// Can either be the primary pan/zoom tool (in the primary tools list) or
+		// the override pan/zoom tool.
+		// If the override pan/zoom tool, the primary will be gotten from the editor's
+		// tool controller.
+		// If the primary, the override will be gotten from the editor's tool controller.
+		tool: PanZoom,
 		localizationTable: ToolbarLocalization,
 	) {
-		const primaryHandTool = HandToolWidget.getPrimaryHandTool(editor.toolController);
-		const tool = primaryHandTool ?? overridePanZoomTool;
-		super(editor, tool, 'hand-tool-widget', localizationTable);
+		const isGivenToolPrimary = editor.toolController.getPrimaryTools().includes(tool);
+		const primaryTool =
+			(isGivenToolPrimary ? tool : HandToolWidget.getPrimaryHandTool(editor.toolController))
+				?? tool;
+		super(editor, primaryTool, 'hand-tool-widget', localizationTable);
+
+		this.overridePanZoomTool =
+			(isGivenToolPrimary ? HandToolWidget.getOverrideHandTool(editor.toolController) : tool)
+				?? tool;
 
 		// Only allow toggling a hand tool if we're using the primary hand tool and not the override
 		// hand tool for this button.
-		this.allowTogglingBaseTool = primaryHandTool !== null;
+		this.allowTogglingBaseTool = primaryTool !== null;
 
 		// Allow showing/hiding the dropdown, even if `overridePanZoomTool` isn't enabled.
 		if (!this.allowTogglingBaseTool) {
@@ -149,10 +177,11 @@ export default class HandToolWidget extends BaseToolWidget {
 		const touchPanningWidget = new HandModeWidget(
 			editor,
 
-			overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
+			this.overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
 			() => this.editor.icons.makeTouchPanningIcon(),
 
 			localizationTable.touchPanning,
+			localizationTable.handDropdown__touchPanningHelpText,
 
 			localizationTable,
 		);
@@ -160,10 +189,12 @@ export default class HandToolWidget extends BaseToolWidget {
 		const rotationLockWidget = new HandModeWidget(
 			editor,
 
-			overridePanZoomTool, PanZoomMode.RotationLocked,
+			this.overridePanZoomTool, PanZoomMode.RotationLocked,
 			() => this.editor.icons.makeRotationLockIcon(),
 
 			localizationTable.lockRotation,
+			localizationTable.handDropdown__lockRotationHelpText,
+
 			localizationTable,
 		);
 
@@ -175,6 +206,16 @@ export default class HandToolWidget extends BaseToolWidget {
 		const primaryPanZoomToolList = toolController.getPrimaryTools().filter(tool => tool instanceof PanZoom);
 		const primaryPanZoomTool = primaryPanZoomToolList[0];
 		return primaryPanZoomTool as PanZoom|null;
+	}
+
+	private static getOverrideHandTool(toolController: ToolController): PanZoom|null {
+		const panZoomToolList = toolController.getMatchingTools(PanZoom);
+		const panZoomTool = panZoomToolList[0];
+		return panZoomTool as PanZoom|null;
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
 	}
 
 	protected getTitle(): string {
@@ -193,17 +234,21 @@ export default class HandToolWidget extends BaseToolWidget {
 		}
 	}
 
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
-		super.fillDropdown(dropdown);
+	protected override getHelpText(): string {
+		return this.localizationTable.handDropdown__baseHelpText;
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
+		super.fillDropdown(dropdown, helpDisplay);
 
 		// The container for all actions that come after the toolbar buttons.
 		const nonbuttonActionContainer = document.createElement('div');
 		nonbuttonActionContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
 
 		makeSeparator().addTo(nonbuttonActionContainer);
-		nonbuttonActionContainer.appendChild(
-			makeZoomControl(this.localizationTable, this.editor)
-		);
+
+		const zoomControl = makeZoomControl(this.localizationTable, this.editor, helpDisplay);
+		nonbuttonActionContainer.appendChild(zoomControl);
 		dropdown.appendChild(nonbuttonActionContainer);
 
 		return true;

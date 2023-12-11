@@ -1,7 +1,8 @@
 
 @use './makeAboutDialog.scss';
 
-.dialog-container {
+// Repeat to increase specificity -- dialog containers are often overlays
+.dialog-container.dialog-container {
 	background-color: var( --background-color-transparent);
 
 	backdrop-filter: blur(5px);

@@ -131,7 +131,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const textObject of this.textObjects) {
-			const transform = cursor.update(textObject);
+			const transform = cursor.update(textObject).transform;
 			const currentBBox = this.computeUntransformedBBoxOfPart(textObject).transformedBoundingBox(transform);
 
 			bbox ??= currentBBox;
@@ -141,25 +141,32 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		this.contentBBox = bbox ?? Rect2.empty;
 	}
 
-	private renderInternal(canvas: AbstractRenderer) {
+	private renderInternal(canvas: AbstractRenderer, visibleRect?: Rect2) {
 		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const textObject of this.textObjects) {
-			const transform = cursor.update(textObject);
+			const { transform, bbox } = cursor.update(textObject);
+
+			if (visibleRect && !visibleRect.intersects(bbox)) {
+				continue;
+			}
 
 			if (typeof textObject === 'string') {
 				canvas.drawText(textObject, transform, this.style);
 			} else {
 				canvas.pushTransform(transform);
-				textObject.renderInternal(canvas);
+
+				textObject.renderInternal(
+					canvas, visibleRect?.transformedBoundingBox(transform.inverse())
+				);
 				canvas.popTransform();
 			}
 		}
 	}
 
-	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+	public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.contentBBox);
-		this.renderInternal(canvas);
+		this.renderInternal(canvas, visibleRect);
 		canvas.endObject(this.getLoadSaveData());
 	}
 
@@ -172,7 +179,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 		for (const subObject of this.textObjects) {
 			// Convert canvas space to internal space relative to the current object.
-			const invTransform = cursor.update(subObject).inverse();
+			const invTransform = cursor.update(subObject).transform.inverse();
 			const transformedLine = lineSegment.transformedBy(invTransform);
 
 			if (typeof subObject === 'string') {
@@ -376,11 +383,11 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		) { }
 
 		/**
-		 * Based on previous calls to `update`, returns the transformation of
-		 * the given `element` (including the parentTransform given to this cursor's
-		 * constructor).
+		 * Based on previous calls to `update`, returns the transformation and bounding box (relative
+		 * to the parent element, or if none, the canvas) of the given `element`. Note that
+		 * this is computed in part using the `parentTransform` provivded to this cursor's constructor.
 		 *
-		 * The result does not take into account
+		 * Warning: There may be edge cases here that are not taken into account.
 		 */
 		public update(elem: TextElement) {
 			let elementTransform = Mat33.identity;
@@ -421,7 +428,11 @@ export default class TextComponent extends AbstractComponent implements Restylea
 			const endShiftTransform = Mat33.translation(Vec2.of(textSize.width, 0));
 			this.transform = elementTransform.rightMul(elemInternalTransform).rightMul(endShiftTransform);
 
-			return this.parentTransform.rightMul(elementTransform);
+			const transform = this.parentTransform.rightMul(elementTransform);
+			return {
+				transform,
+				bbox: textSize.transformedBoundingBox(transform),
+			};
 		}
 	};
 }

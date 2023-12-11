@@ -1,0 +1,57 @@
+
+.ScrollbarTool-overlay {
+	width: 0;
+	height: 0;
+	overflow: visible;
+
+	$visible-opacity: 0.2;
+	opacity: $visible-opacity;
+	pointer-events: none;
+
+	--fade-out-animation: 1s ease 0s fade-out;
+
+	@media (prefers-reduced-motion: reduce) {
+		--fade-out-animation: none !important;
+	}
+
+	@keyframes fade-out {
+		from { opacity: $visible-opacity; }
+		to { opacity: 0; }
+	}
+
+	&:not(.just-updated) {
+		animation: var(--fade-out-animation);
+		opacity: 0;
+	}
+
+	--scrollbar-size: 3px;
+
+	.vertical-scrollbar, .horizontal-scrollbar {
+		width: var(--scrollbar-size);
+		height: var(--scrollbar-size);
+
+		min-width: var(--scrollbar-size);
+		min-height: var(--scrollbar-size);
+
+		background-color: var(--foreground-color-1);
+		border-radius: var(--scrollbar-size);
+		position: absolute;
+
+		&.represents-no-scroll {
+			animation: var(--fade-out-animation);
+			opacity: 0;
+		}
+	}
+
+	&:not(.scrollbar-left) {
+		.vertical-scrollbar {
+			margin-left: calc(var(--editor-current-display-width-px) - var(--scrollbar-size));
+		}
+	}
+	
+	&:not(.scrollbar-top) {
+		.horizontal-scrollbar {
+			margin-top: calc(var(--editor-current-display-height-px) - var(--scrollbar-size));
+		}
+	}
+}

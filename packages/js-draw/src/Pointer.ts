@@ -167,7 +167,7 @@ export default class Pointer {
 		pressure: number|null = null
 	): Pointer {
 		const screenPos = viewport.canvasToScreen(canvasPos);
-		const timeStamp = (new Date()).getTime();
+		const timeStamp = performance.now();
 
 		return new Pointer(
 			screenPos,

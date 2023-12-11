@@ -1,9 +1,9 @@
-import { Renderer, JSX, MarkdownEvent, RendererEvent, Options } from 'typedoc';
+import { Renderer, JSX, MarkdownEvent, RendererEvent } from 'typedoc';
 import { readdirSync, copyFileSync } from 'node:fs';
 import * as path from 'node:path';
 import transformMarkdown from './transformMarkdown';
 
-const loadRendererHooks = (renderer: Renderer, options: Options) => {
+const loadRendererHooks = (renderer: Renderer) => {
 	const distDir = path.dirname(__dirname);
 
 	renderer.on(
@@ -19,14 +19,11 @@ const loadRendererHooks = (renderer: Renderer, options: Options) => {
 	);
 
 	renderer.hooks.on('head.end', (event) => {
-		const sidebarReplacements = options.getValue('sidebarReplacements') as Record<string, string>;
-
 		// Additional variable declarations for the browser script
 		const pageVariables = `
 			window.basePath = ${JSON.stringify(event.relativeURL('.'))}
 			window.assetsURL = ${JSON.stringify(event.relativeURL('assets/'))};
 			window.imagesURL = ${JSON.stringify(event.relativeURL('../img/'))};
-			window.sidebarReplacements = ${JSON.stringify(sidebarReplacements)};
 		`;
 
 		return (
@@ -39,10 +36,21 @@ const loadRendererHooks = (renderer: Renderer, options: Options) => {
 		);
 	});
 
+	renderer.hooks.on('body.end', (event) => {
+		return (
+			<>
+				<a style="float: right;" href={event.relativeURL('assets/licenses.txt')}>
+					OpenSource licenses
+				</a>
+			</>
+		);
+	});
+
 	renderer.on(RendererEvent.END, (event: RendererEvent) => {
 		const filesToCopy = [
 			'js-draw-typedoc-extension--browser.js',
 			'js-draw-typedoc-extension--iframe.js',
+			'licenses.txt',
 		].map(fileName => path.resolve(distDir, fileName));
 
 		// Copy fonts

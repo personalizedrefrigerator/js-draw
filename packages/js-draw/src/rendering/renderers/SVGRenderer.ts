@@ -17,6 +17,17 @@ const defaultTextStyle: Partial<TextRenderingStyle> = {
 	fontStyle: 'normal',
 };
 
+type FromViewportOptions = {
+	sanitize?: boolean;
+
+	/**
+	 * Rather than having the top left of the `viewBox` set to (0, 0),
+	 * if `useViewBoxForPositioning` is `true`, the `viewBox`'s top left
+	 * is based on the top left of the rendering viewport's `visibleRect`.
+	 */
+	useViewBoxForPositioning?: boolean;
+};
+
 /**
  * Renders onto an `SVGElement`.
  *
@@ -151,27 +162,18 @@ export default class SVGRenderer extends AbstractRenderer {
 
 	// Apply [elemTransform] to [elem]. Uses both a `matrix` and `.x`, `.y` properties if `setXY` is true.
 	// Otherwise, just uses a `matrix`.
-	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false, setXY: boolean = true) {
-		let transform = !inCanvasSpace ? this.getCanvasToScreenTransform().rightMul(elemTransform) : elemTransform;
-		const translation = transform.transformVec2(Vec2.zero);
-
-		if (setXY) {
-			transform = transform.rightMul(Mat33.translation(translation.times(-1)));
-		}
+	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false) {
+		const transform = !inCanvasSpace ? this.getCanvasToScreenTransform().rightMul(elemTransform) : elemTransform;
 
 		if (!transform.eq(Mat33.identity)) {
-			elem.style.transform = `matrix(
-				${transform.a1}, ${transform.b1},
-				${transform.a2}, ${transform.b2},
-				${transform.a3}, ${transform.b3}
-			)`;
+			const matrixString = transform.toCSSMatrix();
+			elem.style.transform = matrixString;
+
+			// Most browsers round the components of CSS transforms.
+			// Include a higher precision copy of the element's transform.
+			elem.setAttribute('data-highp-transform', matrixString);
 		} else {
 			elem.style.transform = '';
-		}
-
-		if (setXY) {
-			elem.setAttribute('x', `${toRoundedString(translation.x)}`);
-			elem.setAttribute('y', `${toRoundedString(translation.y)}`);
 		}
 	}
 
@@ -216,10 +218,7 @@ export default class SVGRenderer extends AbstractRenderer {
 			const container = document.createElementNS(svgNameSpace, 'text');
 			container.appendChild(document.createTextNode(text));
 
-			// Don't set .x/.y properties (just use .style.transform).
-			// Child nodes aren't translated by .x/.y properties, but are by .style.transform.
-			const setXY = false;
-			this.transformFrom(transform, container, true, setXY);
+			this.transformFrom(transform, container, true);
 			applyTextStyles(container, style);
 
 			this.elem.appendChild(container);
@@ -412,16 +411,52 @@ export default class SVGRenderer extends AbstractRenderer {
 		return false;
 	}
 
-	// Creates a new SVG element and SVGRenerer with attributes set for the given Viewport.
-	public static fromViewport(viewport: Viewport, sanitize: boolean = true) {
+	/**
+	 * Creates a new SVG element and `SVGRenerer` with `width`, `height`, `viewBox`,
+	 * and other metadata attributes set for the given `Viewport`.
+	 *
+	 * If `options` is a `boolean`, it is interpreted as whether to sanitize (not add unknown
+	 * SVG entities to) the output.
+	 */
+	public static fromViewport(viewport: Viewport, options: FromViewportOptions|boolean = true) {
+		let sanitize: boolean;
+		let useViewBoxForPositioning: boolean;
+		if (typeof options === 'boolean') {
+			sanitize = options;
+			useViewBoxForPositioning = false;
+		} else {
+			sanitize = options.sanitize ?? true;
+			useViewBoxForPositioning = options.useViewBoxForPositioning ?? false;
+		}
+
 		const svgNameSpace = 'http://www.w3.org/2000/svg';
 		const result = document.createElementNS(svgNameSpace, 'svg');
 
-		const rect = viewport.getScreenRectSize();
+		const screenRectSize = viewport.getScreenRectSize();
+		const visibleRect = viewport.visibleRect;
+
+		let viewBoxComponents: number[];
+		if (useViewBoxForPositioning) {
+			const exportRect = viewport.visibleRect;
+			viewBoxComponents = [
+				exportRect.x, exportRect.y, exportRect.w, exportRect.h,
+			];
+
+			// Replace the viewport with a copy that has a modified transform.
+			// (Avoids modifying the original viewport).
+			viewport = viewport.getTemporaryClone();
+
+			// TODO: This currently discards any rotation information.
+			// Render with (0,0) at (0,0) -- the translation is handled by the viewBox.
+			viewport.resetTransform(Mat33.identity);
+		} else {
+			viewBoxComponents = [0, 0, screenRectSize.x, screenRectSize.y];
+		}
+
 		// rect.x -> size of rect in x direction, rect.y -> size of rect in y direction.
-		result.setAttribute('viewBox', [0, 0, rect.x, rect.y].map(part => toRoundedString(part)).join(' '));
-		result.setAttribute('width', toRoundedString(rect.x));
-		result.setAttribute('height', toRoundedString(rect.y));
+		result.setAttribute('viewBox', viewBoxComponents.map(part => toRoundedString(part)).join(' '));
+		result.setAttribute('width', toRoundedString(screenRectSize.x));
+		result.setAttribute('height', toRoundedString(screenRectSize.y));
 
 		// Ensure the image can be identified as an SVG if downloaded.
 		// See https://jwatt.org/svg/authoring/
@@ -429,6 +464,12 @@ export default class SVGRenderer extends AbstractRenderer {
 		result.setAttribute('baseProfile', 'full');
 		result.setAttribute('xmlns', svgNameSpace);
 
-		return { element: result, renderer: new SVGRenderer(result, viewport, sanitize) };
+		const renderer = new SVGRenderer(result, viewport, sanitize);
+
+		if (!visibleRect.eq(viewport.visibleRect)) {
+			renderer.overrideVisibleRect(visibleRect);
+		}
+
+		return { element: result, renderer };
 	}
 }

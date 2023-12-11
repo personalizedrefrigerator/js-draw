@@ -8,7 +8,9 @@ import BaseTool from '../BaseTool';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
-import { duplicateSelectionShortcut, selectAllKeyboardShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
+import { duplicateSelectionShortcut, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
+import ToPointerAutoscroller from './ToPointerAutoscroller';
+import Pointer from '../../Pointer';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -24,8 +26,26 @@ export default class SelectionTool extends BaseTool {
 	private shiftKeyPressed: boolean = false;
 	private snapToGrid: boolean = false;
 
+	private lastPointer: Pointer|null = null;
+
+	private autoscroller: ToPointerAutoscroller;
+
 	public constructor(private editor: Editor, description: string) {
 		super(editor.notifier, description);
+
+		this.autoscroller = new ToPointerAutoscroller(editor.viewport, (scrollBy: Vec2) => {
+			editor.dispatch(Viewport.transformBy(Mat33.translation(scrollBy)), false);
+
+			// Update the selection box/content to match the new viewport.
+			if (this.lastPointer) {
+				// The viewport has changed -- ensure that the screen and canvas positions
+				// of the pointer are both correct
+				const updatedPointer = this.lastPointer.withScreenPosition(
+					this.lastPointer.screenPos, editor.viewport
+				);
+				this.onMainPointerUpdated(updatedPointer);
+			}
+		});
 
 		this.handleOverlay = document.createElement('div');
 		editor.createHTMLOverlay(this.handleOverlay);
@@ -38,6 +58,11 @@ export default class SelectionTool extends BaseTool {
 			// hasn't been finalized yet. Clear before updating the UI.
 			this.editor.clearWetInk();
 
+			// If not currently selecting, ensure that the selection box
+			// is large enough.
+			if (!this.expandingSelectionBox) {
+				this.selectionBox?.padRegion();
+			}
 			this.selectionBox?.updateUI();
 		});
 
@@ -103,6 +128,10 @@ export default class SelectionTool extends BaseTool {
 				this.expandingSelectionBox = this.shiftKeyPressed;
 				this.makeSelectionBox(current.canvasPos);
 			}
+			else {
+				// Only autoscroll if we're transforming an existing selection
+				this.autoscroller.start();
+			}
 
 			return true;
 		}
@@ -110,9 +139,16 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public override onPointerMove(event: PointerEvt): void {
+		this.onMainPointerUpdated(event.current);
+	}
+
+	private onMainPointerUpdated(currentPointer: Pointer) {
+		this.lastPointer = currentPointer;
+
 		if (!this.selectionBox) return;
 
-		let currentPointer = event.current;
+		this.autoscroller.onPointerMove(currentPointer.screenPos);
+
 		if (!this.expandingSelectionBox && this.shiftKeyPressed && this.startPoint) {
 			const screenPos = this.editor.viewport.canvasToScreen(this.startPoint);
 			currentPointer = currentPointer.lockedToXYAxesScreen(screenPos, this.editor.viewport);
@@ -125,27 +161,13 @@ export default class SelectionTool extends BaseTool {
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox.onDragUpdate(currentPointer);
 		} else {
-			this.selectionBox!.setToPoint(currentPointer.canvasPos);
+			this.selectionBox.setToPoint(currentPointer.canvasPos);
 		}
-	}
-
-	// Called after a gestureCancel and a pointerUp
-	private onGestureEnd() {
-		if (!this.selectionBox) return;
-
-		if (!this.selectionBoxHandlingEvt) {
-			// Expand/shrink the selection rectangle, if applicable
-			this.selectionBox.resolveToObjects();
-			this.onSelectionUpdated();
-		} else {
-			this.selectionBox.onDragEnd();
-		}
-
-
-		this.selectionBoxHandlingEvt = false;
 	}
 
 	public override onPointerUp(event: PointerEvt): void {
+		this.autoscroller.stop();
+
 		if (!this.selectionBox) return;
 
 		let currentPointer = event.current;
@@ -165,11 +187,21 @@ export default class SelectionTool extends BaseTool {
 				...this.prevSelectionBox.getSelectedObjects(),
 			]);
 		} else {
-			this.onGestureEnd();
+			if (!this.selectionBoxHandlingEvt) {
+				// Expand/shrink the selection rectangle, if applicable
+				this.selectionBox.resolveToObjects();
+				this.onSelectionUpdated();
+			} else {
+				this.selectionBox.onDragEnd();
+			}
+
+			this.selectionBoxHandlingEvt = false;
+			this.lastPointer = null;
 		}
 	}
 
 	public override onGestureCancel(): void {
+		this.autoscroller.stop();
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox?.onDragCancel();
 		} else {
@@ -182,6 +214,8 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		this.expandingSelectionBox = false;
+		this.lastPointer = null;
+		this.selectionBoxHandlingEvt = false;
 	}
 
 	private lastSelectedObjects: AbstractComponent[] = [];
@@ -240,6 +274,10 @@ export default class SelectionTool extends BaseTool {
 		'i', 'I', 'o', 'O',
 		'Control', 'Meta',
 	];
+	// Whether the last keypress corresponded to an action that didn't transform the
+	// selection (and thus does not need to be finalized on onKeyUp).
+	private hasUnfinalizedTransformFromKeyPress: boolean = false;
+
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		const shortcucts = this.editor.shortcuts;
 
@@ -248,7 +286,10 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
-		if (this.selectionBox && shortcucts.matchesShortcut(duplicateSelectionShortcut, event)) {
+		if (this.selectionBox && (
+			shortcucts.matchesShortcut(duplicateSelectionShortcut, event)
+				|| shortcucts.matchesShortcut(sendToBackSelectionShortcut, event)
+		)) {
 			// Handle duplication on key up — we don't want to accidentally duplicate
 			// many times.
 			return true;
@@ -262,9 +303,12 @@ export default class SelectionTool extends BaseTool {
 			// Pass it to another tool, if apliccable.
 			return false;
 		}
-		else if (event.key === 'Shift') {
+		else if (event.shiftKey || event.key === 'Shift') {
 			this.shiftKeyPressed = true;
-			return true;
+
+			if (event.key === 'Shift') {
+				return true;
+			}
 		}
 
 		let rotationSteps = 0;
@@ -350,6 +394,11 @@ export default class SelectionTool extends BaseTool {
 			));
 			const oldTransform = this.selectionBox.getTransform();
 			this.selectionBox.setTransform(oldTransform.rightMul(transform));
+
+			this.selectionBox.scrollTo();
+
+			// The transformation needs to be finalized at some point (on key up)
+			this.hasUnfinalizedTransformFromKeyPress = true;
 		}
 
 		if (this.selectionBox && !handled && (event.key === 'Delete' || event.key === 'Backspace')) {
@@ -381,13 +430,37 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
+		if (this.selectionBox && shortcucts.matchesShortcut(sendToBackSelectionShortcut, evt)) {
+			const sendToBackCommand = this.selectionBox.sendToBack();
+			if (sendToBackCommand) {
+				this.editor.dispatch(sendToBackCommand);
+			}
+			return true;
+		}
+
+		// Here, we check if shiftKey === false because, as of this writing,
+		// evt.shiftKey is an optional property. Being falsey could just mean
+		// that it wasn't set.
+		if (evt.shiftKey === false) {
+			this.shiftKeyPressed = false;
+			// Don't return immediately -- event may be otherwise handled
+		}
+
+		// Also check for key === 'Shift' (for the case where shiftKey is undefined)
 		if (evt.key === 'Shift') {
 			this.shiftKeyPressed = false;
 			return true;
 		}
 
+
+		// If we don't need to finalize the transform
+		if (!this.hasUnfinalizedTransformFromKeyPress) {
+			return true;
+		}
+
 		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
 			this.selectionBox.finalizeTransform();
+			this.hasUnfinalizedTransformFromKeyPress = false;
 			return true;
 		}
 		return false;
@@ -429,7 +502,12 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public override setEnabled(enabled: boolean) {
+		const wasEnabled = this.isEnabled();
 		super.setEnabled(enabled);
+
+		if (wasEnabled === enabled) {
+			return;
+		}
 
 		// Clear the selection
 		this.selectionBox?.cancelSelection();

@@ -8,17 +8,20 @@ import { StrokeDataPoint } from '../../types';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import RenderingStyle from '../../rendering/RenderingStyle';
 import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
+import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
-export const makePressureSensitiveFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
-	// less than ±1 px from the curve.
-	const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
-	const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
+export const makePressureSensitiveFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
+	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+		// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
+		// less than ±1 px from the curve.
+		const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
+		const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
 
-	return new PressureSensitiveFreehandLineBuilder(
-		initialPoint, minSmoothingDist, maxSmoothingDist, viewport
-	);
-};
+		return new PressureSensitiveFreehandLineBuilder(
+			initialPoint, minSmoothingDist, maxSmoothingDist, viewport
+		);
+	}
+);
 
 type CurrentSegmentToPathResult = {
 	upperCurveCommand: QuadraticBezierPathCommand,

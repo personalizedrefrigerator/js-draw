@@ -30,12 +30,13 @@ export {
 } from './shapes/Path';
 export { Rect2 } from './shapes/Rect2';
 export { QuadraticBezier } from './shapes/QuadraticBezier';
+export { Abstract2DShape } from './shapes/Abstract2DShape';
 
 export { Mat33, Mat33Array } from './Mat33';
 export { Point2, Vec2 } from './Vec2';
 export { Vec3 } from './Vec3';
 export { Color4 } from './Color4';
-export { toRoundedString } from './rounding';
+export * from './rounding/lib';
 
 
 // Note: All above exports cannot use `export { default as ... } from "..."` because this

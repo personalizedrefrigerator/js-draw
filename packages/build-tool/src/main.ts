@@ -8,7 +8,7 @@ import buildTranslationTemplates from './buildTranslationTemplates';
 import { BuildConfig, BuildMode, BundledFileRecord, TranslationSourcePair } from './types';
 import compileSCSS from './compileSCSS';
 
-type BuildCommand = BuildMode|'build-translation-template';
+type BuildCommand = BuildMode|'build-translation-templates';
 
 // TODO: These currently assume that build-tool is private to js-draw.
 const scriptDir = realpathSync(path.resolve(__dirname));
@@ -20,7 +20,7 @@ const isBuildMode = (a: string): a is BuildMode => {
 };
 
 const isBuildCommand = (a: string): a is BuildCommand => {
-	return isBuildMode(a) || a === 'build-translation-template';
+	return isBuildMode(a) || a === 'build-translation-templates';
 };
 
 const printUsage = () => {
@@ -219,7 +219,7 @@ const main = async () => {
 		console.log('Done.');
 	}
 
-	if (buildMode === 'build-translation-template') {
+	if (buildMode === 'build-translation-templates') {
 		console.log('Building translation templates...');
 		buildTranslationTemplates(config);
 	} else {

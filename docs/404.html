@@ -49,10 +49,27 @@
 			<h1>404 Error</h1>
 			<p>You might be looking for...</p>
 			<ul>
-				<li><a href="./typedoc"><code>js-draw</code> documentation</a></li>
-				<li><a href="./demo">The <code>js-draw</code> demo app</a></li>
+				<li><a href="/typedoc"><code>js-draw</code> documentation</a></li>
+				<li><a href="/demo">The <code>js-draw</code> demo app</a></li>
 				<li><a href="https://github.com/personalizedrefrigerator/js-draw"><code>js-draw</code> on GitHub</a></li>
 			</ul>
 		</main>
+		<script>
+			// Fix links if / doesn't link to the site root.
+			let baseURL = '';
+			if (location.href.match(/^https?:\/\/personalizedrefrigerator\.github\.io\/js-draw\//)) {
+				baseURL = '/js-draw';
+			}
+
+			const links = document.querySelectorAll('a[href]');
+
+			for (const link of links) {
+				const href = link.getAttribute('href');
+
+				if (href.startsWith('/')) {
+					link.setAttribute('href', `${baseURL}${href}`);
+				}
+			}
+		</script>
 	</body>
 </html>

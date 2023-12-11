@@ -1,5 +1,6 @@
 import { MutableReactiveValue } from '../../../util/ReactiveValue';
 import stopPropagationOfScrollingWheelEvents from '../../../util/stopPropagationOfScrollingWheelEvents';
+import addLongPressOrHoverCssClasses from '../../../util/addLongPressOrHoverCssClasses';
 import { IconElemType } from '../../IconProvider';
 import { toolbarCSSPrefix } from '../../constants';
 
@@ -12,8 +13,17 @@ interface GridSelectChoice<ChoiceIdType> {
 
 interface GridSelector<ChoiceIdType> {
 	value: MutableReactiveValue<ChoiceIdType>,
+
+	/**
+	 * Connects this grid selector with `other` such that only one item in
+	 * either this or `other` can be selected at a time.
+	 */
 	linkWith: (other: GridSelector<ChoiceIdType>)=>void;
+
+	/** Re-builds the icons shown in the grid selector. */
 	updateIcons: ()=>void;
+
+	getRootElement: ()=>HTMLElement;
 	addTo: (parent: HTMLElement)=>void;
 
 	/** Used internally @internal */
@@ -64,6 +74,10 @@ const makeGridSelector = <ChoiceIdType> (
 		button.type = 'radio';
 		button.id = `${toolbarCSSPrefix}-grid-select-button-${idCounter++}`;
 
+		// Some toolbars only show the label on hover. Having long press or hover
+		// CSS classes are helpful here.
+		addLongPressOrHoverCssClasses(buttonContainer);
+
 		// Clicking any part of labelContainer triggers the radio button.
 		const labelContainer = document.createElement('label');
 
@@ -109,6 +123,23 @@ const makeGridSelector = <ChoiceIdType> (
 			}
 
 			updateButtonCSS();
+		};
+
+		button.onfocus = () => {
+			if (buttonContainer.querySelector(':focus-visible')) {
+				buttonContainer.classList.add('focus-visible');
+			}
+		};
+
+		button.onblur = () => {
+			buttonContainer.classList.remove('focus-visible');
+		};
+
+		// Prevent the right-click menu from being shown on long-press
+		// (important for some toolbars that use long-press gestures to
+		// show grid selector labels).
+		buttonContainer.oncontextmenu = event => {
+			event.preventDefault();
 		};
 
 		buttonContainer.replaceChildren(button, labelContainer);
@@ -166,6 +197,10 @@ const makeGridSelector = <ChoiceIdType> (
 
 		updateIcons: () => {
 			buttons.forEach(button => button.updateIcon());
+		},
+
+		getRootElement() {
+			return outerContainer;
 		},
 
 		addTo: (parent: HTMLElement) => {

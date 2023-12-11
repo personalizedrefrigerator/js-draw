@@ -5,10 +5,13 @@ import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
+import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
-export const makeArrowBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	return new ArrowBuilder(initialPoint, viewport);
-};
+export const makeArrowBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
+	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+		return new ArrowBuilder(initialPoint, viewport);
+	}
+);
 
 export default class ArrowBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;

@@ -64,9 +64,28 @@ export class Vec3 {
 	}
 
 	/**
+	 * Returns the entry of this with the greatest magnitude.
+	 *
+	 * In other words, returns $\max \{ |x| : x \in {\bf v} \}$, where ${\bf v}$ is the set of
+	 * all entries of this vector.
+	 */
+	public maximumEntryMagnitude(): number {
+		return Math.max(Math.abs(this.x), Math.max(Math.abs(this.y), Math.abs(this.z)));
+	}
+
+	/**
 	 * Return this' angle in the XY plane (treats this as a Vec2).
 	 *
 	 * This is equivalent to `Math.atan2(vec.y, vec.x)`.
+	 *
+	 * As such, observing that `Math.atan2(-0, -1)` $\approx -\pi$ and `Math.atan2(0, -1)`$\approx \pi$
+	 * the resultant angle is in the range $[-\pi, pi]$.
+	 *
+	 * ```ts,runnable,console
+	 * import { Vec2 } from '@js-draw/math';
+	 * console.log(Vec2.of(-1, -0).angle()); // atan2(-0, -1)
+	 * console.log(Vec2.of(-1, 0).angle());  // atan2(0, -1)
+	 * ```
 	 */
 	public angle(): number {
 		return Math.atan2(this.y, this.x);

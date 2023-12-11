@@ -12,6 +12,10 @@ export interface EditorLocalization extends ToolbarLocalization, ToolLocalizatio
 	doneLoading: string;
 	loading: (percentage: number)=>string;
 	imageEditor: string;
+
+	// About dialog localization
+	softwareLibraries: string;
+	developerInformation: string;
 }
 
 export const defaultEditorLocalization: EditorLocalization = {
@@ -20,6 +24,7 @@ export const defaultEditorLocalization: EditorLocalization = {
 	...defaultCommandLocalization,
 	...defaultComponentLocalization,
 	...defaultTextRendererLocalization,
+
 	accessibilityInputInstructions: [
 		'Press "t" to read the contents of the viewport as text.',
 		'Use the arrow keys to move the viewport, click and drag to draw strokes.',
@@ -31,4 +36,7 @@ export const defaultEditorLocalization: EditorLocalization = {
 
 	undoAnnouncement: (commandDescription: string) => `Undid ${commandDescription}`,
 	redoAnnouncement: (commandDescription: string) => `Redid ${commandDescription}`,
+
+	softwareLibraries: 'Libraries',
+	developerInformation: 'Developer information',
 };

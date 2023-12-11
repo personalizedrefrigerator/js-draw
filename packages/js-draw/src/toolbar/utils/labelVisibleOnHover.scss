@@ -1,0 +1,114 @@
+
+$label-visible-opacity: 0.8;
+$show-delay: 0.3s;
+
+@keyframes rehide-label {
+	0% { opacity: $label-visible-opacity; }
+	80% { opacity: $label-visible-opacity; }
+	100% { opacity: 0.1; }
+}
+
+@keyframes show-label-delayed {
+	0% { opacity: 0; }
+	// Keep the label hidden before showing
+	80% { opacity: 0; }
+	100% { opacity: $label-visible-opacity; }
+}
+
+@keyframes show-label-now {
+	0% { opacity: 0; }
+	5% { opacity: 0; }
+	100% { opacity: $label-visible-opacity; }
+}
+
+@keyframes keep-label-hidden {
+	0% { opacity: 0; }
+	100% { opacity: 0; }
+}
+
+// Shows a lable on hover
+// Uses the --button-label-hover-offset-y and --button-label-hover-offset-x
+// variables to determine the label's position.
+//
+// If the label is in a scrolling container, that container should have position: relative;
+// as this allows absolutely positioned children to scroll with the container (rather than
+// remaining stationary).
+@mixin label-visible-on-hover($label-selector) {
+	// Using CSS classes set by addLongPressOrHoverCssClasses avoids sticky
+	// hover on touch devices.
+	&:not(.no-long-press-or-hover):not(.has-long-press-or-hover) {
+		// Only show an animation when opening the label due to a hover --
+		// show the label immediately otherwise.
+		&:hover:not(:focus-visible) > #{$label-selector},
+		// When the user is pressing/long-pressing the button
+		&:active > #{$label-selector}
+		{
+			opacity: $label-visible-opacity;
+			animation: 1s ease show-label-delayed;
+		}
+	}
+
+	&.has-long-press-or-hover > #{$label-selector} {
+		opacity: $label-visible-opacity;
+	}
+
+	$keyboard-hide-animation: 1.5s ease rehide-label;
+
+	// .focus-visible: Allow setting focus-visible from JS (in cases where this
+	// element isn't the focus target and the browser doesn't support :has).
+	&:focus-visible, &.focus-visible {
+		& > #{$label-selector} {
+			animation: $keyboard-hide-animation;
+			opacity: 0;
+		}
+	}
+
+	// Make the :has selector separate its own statement -- some browsers don't
+	// support :has, which would make the entire statement block have no effect.
+	&:has(:focus-visible) > #{$label-selector} {
+		animation: $keyboard-hide-animation;
+		opacity: 0;
+	}
+
+	& > #{$label-selector} {
+		opacity: 0;
+		position: absolute;
+		margin-top: var(--button-label-hover-offset-y);
+		margin-left: var(--button-label-hover-offset-x);
+		z-index: 1;
+
+		// The label is often mostly invisible/just below a toolbar item.
+		// If there are multiple toolbar rows, ensure that a label doesn't prevent
+		// clicking on items in the second row:
+		pointer-events: none;
+
+		background-color: var(--background-color-1);
+		color: var(--foreground-color-1);
+		border-radius: 25px;
+		padding: 10px;
+
+		transition: $show-delay ease opacity, 0.2s ease margin-top;
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+}
+
+// Allows manually showing the label
+@mixin show-label-now($label-selector) {
+	& > #{$label-selector} {
+		// Set opacity manually (rather than in an animation) to take advantage of
+		// `transition`. Without this, when animations are cancelled and replaced,
+		// the label may flicker.
+		opacity: $label-visible-opacity;
+
+		$hide-animation-length: 1.5s;
+		$keep-hidden-delay: calc($hide-animation-length + $show-delay);
+
+		$hide-animation: 1.5s ease rehide-label $show-delay;
+		$keep-hidden-animation: 1s ease keep-label-hidden $keep-hidden-delay infinite;
+
+		animation: $hide-animation, $keep-hidden-animation;
+	}
+}

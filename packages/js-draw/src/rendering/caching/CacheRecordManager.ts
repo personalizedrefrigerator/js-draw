@@ -2,8 +2,6 @@ import { BeforeDeallocCallback, CacheProps, CacheState } from './types';
 import CacheRecord from './CacheRecord';
 import { Rect2 } from '@js-draw/math';
 
-const debugMode = false;
-
 export class CacheRecordManager {
 	// Fixed-size array: Cache blocks are assigned indicies into [cachedCanvases].
 	private cacheRecords: CacheRecord[] = [];
@@ -30,7 +28,7 @@ export class CacheRecordManager {
 			record.setRenderingRegion(drawTo);
 			this.cacheRecords.push(record);
 
-			if (debugMode) {
+			if (this.cacheState.debugMode) {
 				console.log('[Cache] Cache spaces used: ', this.cacheRecords.length, ' of ', this.maxCanvases);
 			}
 
@@ -38,7 +36,7 @@ export class CacheRecordManager {
 		} else {
 			const lru = this.getLeastRecentlyUsedRecord()!;
 
-			if (debugMode) {
+			if (this.cacheState.debugMode) {
 				console.log(
 					'[Cache] Re-alloc. Times allocated: ', lru.allocCount,
 					'\nLast used cycle: ', lru.getLastUsedCycle(),
@@ -49,7 +47,7 @@ export class CacheRecordManager {
 			lru.realloc(onDealloc);
 			lru.setRenderingRegion(drawTo);
 
-			if (debugMode) {
+			if (this.cacheState.debugMode) {
 				console.log(
 					'[Cache] Now re-alloc\'d. Last used cycle: ', lru.getLastUsedCycle()
 				);
@@ -67,5 +65,27 @@ export class CacheRecordManager {
 	private getLeastRecentlyUsedRecord(): CacheRecord|null {
 		this.cacheRecords.sort((a, b) => a.getLastUsedCycle() - b.getLastUsedCycle());
 		return this.cacheRecords[0];
+	}
+
+	// Returns information to (hopefully) help debug performance issues
+	public getDebugInfo() {
+		let numberAllocd = 0;
+		let averageReassignedCount = 0;
+		for (const cacheRecord of this.cacheRecords) {
+			averageReassignedCount += cacheRecord.allocCount;
+
+			if (cacheRecord.isAllocd()) {
+				numberAllocd ++;
+			}
+		}
+		averageReassignedCount /= Math.max(this.cacheRecords.length, 1);
+
+		const debugInfo = [
+			`${this.cacheRecords.length} cache records (max ${this.maxCanvases})`,
+			`${numberAllocd} assigned to screen regions`,
+			`Average number of times reassigned: ${Math.round(averageReassignedCount * 100) / 100}`,
+		];
+
+		return debugInfo.join('\n');
 	}
 }

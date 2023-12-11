@@ -4,7 +4,7 @@ import DummyRenderer from '../renderers/DummyRenderer';
 import { createCache } from './testUtils';
 import Stroke from '../../components/Stroke';
 import { Path, Mat33, Color4 } from '@js-draw/math';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
 import Viewport from '../../Viewport';
 import { pathToRenderable } from '../RenderablePathSpec';
 

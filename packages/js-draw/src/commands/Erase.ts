@@ -1,15 +1,35 @@
 import AbstractComponent from '../components/AbstractComponent';
 import describeComponentList from '../components/util/describeComponentList';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { EditorLocalization } from '../localization';
 import SerializableCommand from './SerializableCommand';
 
 /**
  * Removes the given {@link AbstractComponent}s from the image.
  *
- * @example
- * ```ts
+ * **Example**:
+ * ```ts,runnable
+ * import { Editor, Erase, uniteCommands, Color4, Path, Stroke, Rect2, pathToRenderable } from 'js-draw';
+ *
+ * const editor = new Editor(document.body);
+ * editor.addToolbar();
+ *
+ * // Add a large number of strokes
+ * const commands = [];
+ * for (let x = -20; x < 20; x++) {
+ *   for (let y = 0; y < 60; y++) {
+ *     const stroke = new Stroke([
+ *       pathToRenderable(
+ *         Path.fromString(`m${x * 5},${y * 5}l1,1`),
+ *         { fill: Color4.transparent, stroke: {width: 2, color: Color4.ofRGB(x / 10, y / 10, 0.5)}} )
+ *       ]);
+ *     commands.push(editor.image.addElement(stroke));
+ *   }
+ * }
+ * await editor.dispatch(uniteCommands(commands, 100));
+ *
+ * ---visible---
  * // Given some editor...
  *
  * // Find all elements intersecting the rectangle with top left (-10,-30) and
@@ -42,8 +62,8 @@ export default class Erase extends SerializableCommand {
 			const parent = editor.image.findParent(part);
 
 			if (parent) {
-				editor.image.onDestroyElement(part);
 				parent.remove();
+				editor.image.onDestroyElement(part);
 			}
 		}
 
@@ -80,15 +100,25 @@ export default class Erase extends SerializableCommand {
 	}
 
 	protected serializeToJSON() {
-		const elemIds = this.toRemove.map(elem => elem.getId());
-		return elemIds;
+		// If applied, the elements can't be fetched from the image because they're
+		// erased. Serialize and return the elements themselves.
+		const elems = this.toRemove.map(elem => elem.serialize());
+		return elems;
 	}
 
 	static {
 		SerializableCommand.register('erase', (json: any, editor) => {
+			if (!Array.isArray(json)) {
+				throw new Error('seralized erase data must be an array');
+			}
+
 			const elems = json
-				.map((elemId: string) => editor.image.lookupElement(elemId))
-				.filter((elem: AbstractComponent|null) => elem !== null);
+				.map((elemData: any) => {
+					const componentId = typeof elemData === 'string' ? elemData : `${elemData.id}`;
+
+					const component = editor.image.lookupElement(componentId) ?? AbstractComponent.deserialize(elemData);
+					return component;
+				});
 			return new Erase(elems);
 		});
 	}

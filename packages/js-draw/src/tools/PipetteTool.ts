@@ -30,6 +30,10 @@ export default class PipetteTool extends BaseTool {
 		});
 	}
 
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
+	}
+
 	// Ensures that the root editor element correctly reflects whether color selection
 	// is in progress.
 	private updateSelectingStatus() {

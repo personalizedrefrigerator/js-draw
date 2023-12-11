@@ -101,7 +101,10 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	public clear() {
+		this.ctx.save();
+		this.ctx.resetTransform();
 		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+		this.ctx.restore();
 	}
 
 	protected beginPath(startPoint: Point2) {
@@ -183,12 +186,10 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 
 		// If part of a huge object, it might be worth trimming the path
-		if (this.currentObjectBBox?.containsRect(this.getViewport().visibleRect)) {
+		const visibleRect = this.getVisibleRect();
+		if (this.currentObjectBBox?.containsRect(visibleRect)) {
 			// Try to trim/remove parts of the path outside of the bounding box.
-			path = visualEquivalent(
-				path,
-				this.getViewport().visibleRect
-			);
+			path = visualEquivalent(path, visibleRect);
 		}
 
 		super.drawPath(path);
@@ -235,7 +236,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		if (!this.ignoringObject && clip) {
 			// Don't clip if it would only remove content already trimmed by
 			// the edge of the screen.
-			const clippedIsOutsideScreen = boundingBox.containsRect(this.getViewport().visibleRect);
+			const clippedIsOutsideScreen = boundingBox.containsRect(this.getVisibleRect());
 
 			if (!clippedIsOutsideScreen) {
 				this.clipLevels.push(this.objectLevel);
@@ -300,7 +301,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	// @internal
 	public isTooSmallToRender(rect: Rect2): boolean {
 		// Should we ignore all objects within this object's bbox?
-		const diagonal = this.getCanvasToScreenTransform().transformVec3(rect.size);
+		const diagonal = rect.size.times(this.getCanvasToScreenTransform().getScaleFactor());
 
 		const bothDimenMinSize = this.minRenderSizeBothDimens;
 		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;

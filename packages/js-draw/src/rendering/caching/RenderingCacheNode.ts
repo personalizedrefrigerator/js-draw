@@ -1,7 +1,7 @@
 
 // A cache record with sub-nodes.
 
-import { ImageNode, sortLeavesByZIndex } from '../../EditorImage';
+import { ImageNode, computeFirstIndexToRender, sortLeavesByZIndex } from '../../image/EditorImage';
 import { Rect2, Color4 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import AbstractRenderer from '../renderers/AbstractRenderer';
@@ -10,9 +10,6 @@ import { CacheState } from './types';
 
 // 3x3 divisions for each node.
 const cacheDivisionSize = 3;
-
-// True: Show rendering updates.
-const debugMode = false;
 
 export default class RenderingCacheNode {
 	// invariant: instantiatedChildren.length === 9
@@ -62,12 +59,16 @@ export default class RenderingCacheNode {
 	// Generates children, if missing.
 	private generateChildren() {
 		if (this.instantiatedChildren.length === 0) {
-			const childRects = this.region.divideIntoGrid(cacheDivisionSize, cacheDivisionSize);
-
-			if (this.region.size.x === 0 || this.region.size.y === 0) {
+			if (this.region.size.x / cacheDivisionSize === 0 || this.region.size.y / cacheDivisionSize === 0) {
 				console.warn('Cache element has zero size! Not generating children.');
 				return;
 			}
+
+			const childRects = this.region.divideIntoGrid(cacheDivisionSize, cacheDivisionSize);
+			console.assert(
+				childRects.length === cacheDivisionSize * cacheDivisionSize,
+				'Warning: divideIntoGrid created the wrong number of subrectangles!',
+			);
 
 			for (const rect of childRects) {
 				const child = new RenderingCacheNode(rect, this.cacheState);
@@ -206,8 +207,8 @@ export default class RenderingCacheNode {
 			return;
 		}
 
-		if (debugMode) {
-			screenRenderer.drawRect(this.region, 0.5 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.yellow });
+		if (this.cacheState.debugMode) {
+			screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.yellow });
 		}
 
 		// Could we render direclty from [this] or do we need to recurse?
@@ -251,7 +252,9 @@ export default class RenderingCacheNode {
 
 				let leafApproxRenderTime = 0;
 				for (const leaf of leavesByIds) {
-					leafApproxRenderTime += leaf.getContent()!.getProportionalRenderingTime();
+					if (!tooSmallToRender(leaf.getBBox())) {
+						leafApproxRenderTime += leaf.getContent()!.getProportionalRenderingTime();
+					}
 				}
 
 				// Is it worth it to render the items?
@@ -283,7 +286,7 @@ export default class RenderingCacheNode {
 							}
 						}
 
-						if (minNewZIndex !== null && minNewZIndex > this.renderedMaxZIndex!) {
+						if (minNewZIndex !== null && minNewZIndex > this.renderedMaxZIndex) {
 							fullRerenderNeeded = false;
 							thisRenderer = this.cachedRenderer.startRender();
 
@@ -298,11 +301,12 @@ export default class RenderingCacheNode {
 								}
 							}
 
-							if (debugMode) {
-								screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
+							if (this.cacheState.debugMode) {
+								// Clay for adding new elements
+								screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
 							}
 						}
-					} else if (debugMode) {
+					} else if (this.cacheState.debugMode) {
 						console.log('Decided on a full re-render. Reason: At least one of the following is false:',
 							'\n leafIds.length > this.renderedIds.length: ', leafIds.length > this.renderedIds.length,
 							'\n this.allRenderedIdsIn(leafIds): ', this.allRenderedIdsIn(leafIds),
@@ -315,7 +319,10 @@ export default class RenderingCacheNode {
 						thisRenderer.clear();
 
 						this.renderedMaxZIndex = null;
-						for (const leaf of leaves) {
+						const startIndex = computeFirstIndexToRender(leaves, this.region);
+						for (let i = startIndex; i < leaves.length; i++) {
+							const leaf = leaves[i];
+
 							const content = leaf.getContent()!;
 							this.renderedMaxZIndex ??= content.getZIndex();
 							this.renderedMaxZIndex = Math.max(this.renderedMaxZIndex, content.getZIndex());
@@ -323,8 +330,9 @@ export default class RenderingCacheNode {
 							leaf.render(thisRenderer, this.region);
 						}
 
-						if (debugMode) {
-							screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.red });
+						if (this.cacheState.debugMode) {
+							// Red for full rerender
+							screenRenderer.drawRect(this.region, 3 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.red });
 						}
 					}
 					this.renderedIds = leafIds;
@@ -346,6 +354,11 @@ export default class RenderingCacheNode {
 					}
 
 					screenRenderer.endObject();
+
+					if (this.cacheState.debugMode) {
+						// Green for no cache needed render
+						screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.green });
+					}
 				}
 			} else {
 				thisRenderer = this.cachedRenderer!.startRender();

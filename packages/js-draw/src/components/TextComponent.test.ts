@@ -1,4 +1,4 @@
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { Vec2, Mat33, Color4 } from '@js-draw/math';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import createEditor from '../testing/createEditor';
@@ -34,7 +34,7 @@ describe('TextComponent', () => {
 		expect(textComponent.getText()).toBe('Foo');
 		expect(textComponent.getTransform()).objEq(Mat33.identity);
 		expect(textComponent.getStyle().color!).objEq(Color4.black);
-		expect(textComponent.getTextStyle().fontFamily!).toBe('sans');
+		expect(textComponent.getTextStyle().fontFamily).toBe('sans');
 	});
 
 	it('should be restylable', () => {

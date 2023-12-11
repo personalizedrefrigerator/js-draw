@@ -45,7 +45,7 @@ class CommandDataStore:
 		})
 
 		# Limit the number of commands in storage
-		if len(self.command_data) > 500:
+		if len(self.command_data) > 8000:
 			self.command_data = self.command_data[1:]
 
 		self.command_data_mutex.release()
@@ -103,8 +103,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 			if isnan(target_len):
 				self.send_error(HTTPStatus.BAD_REQUEST, 'Content-Length must be a number')
 
-			# Limit size to 2 MiB
-			max_size = 1024 * 1024 * 2
+			# Limit size to 4 MiB
+			max_size = 1024 * 1024 * 8
 
 			if max_size < target_len:
 				self.send_error(

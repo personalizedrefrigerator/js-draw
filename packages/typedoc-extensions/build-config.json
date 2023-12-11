@@ -14,5 +14,6 @@
 	        "inPath": "./src/browser/iframe-preview-setup.ts",
             "outPath": "./dist/js-draw-typedoc-extension--iframe.js"
         }
-    ]
+    ],
+	"prebuild": { "scriptPath": "./tools/prebuild.js" }
 }

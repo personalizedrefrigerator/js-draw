@@ -1,10 +1,10 @@
-import { Path, Vec2, Mat33, Color4 } from '@js-draw/math';
+import { Path, Vec2, Mat33, Color4, PathCommandType } from '@js-draw/math';
 import Stroke from './Stroke';
 import createEditor from '../testing/createEditor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import AbstractComponent from './AbstractComponent';
 import { DummyRenderer, SerializableCommand } from '../lib';
-import { pathToRenderable } from '../rendering/RenderablePathSpec';
+import RenderablePathSpec, { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 describe('Stroke', () => {
 	it('empty stroke should have an empty bounding box', () => {
@@ -133,5 +133,38 @@ describe('Stroke', () => {
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#00f'));
 		updateStyleCommand.unapply(editor);
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#0f0'));
+	});
+
+	it('calling .getParts on a stroke should return (a copy of) that stroke\'s parts', () => {
+		const originalParts: RenderablePathSpec[] = [
+			{
+				startPoint: Vec2.zero,
+				commands: [
+					{ kind: PathCommandType.LineTo, point: Vec2.of(1, 2), },
+					{ kind: PathCommandType.LineTo, point: Vec2.of(0, 2), },
+				],
+				style: {
+					fill: Color4.blue,
+				},
+			},
+			{
+				startPoint: Vec2.zero,
+				commands: [
+					{ kind: PathCommandType.LineTo, point: Vec2.of(1, 2), },
+					{ kind: PathCommandType.LineTo, point: Vec2.of(100, 2), },
+				],
+				style: {
+					stroke: {
+						color: Color4.orange,
+						width: 1,
+					},
+					fill: Color4.transparent,
+				},
+			},
+		];
+		const stroke = new Stroke(originalParts);
+
+		expect(stroke.getParts()).toMatchObject(originalParts);
+		expect(stroke.getParts()).not.toBe(originalParts);
 	});
 });

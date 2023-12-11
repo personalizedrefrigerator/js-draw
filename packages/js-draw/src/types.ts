@@ -24,6 +24,8 @@ export enum EditorEventType {
 
 	SelectionUpdated,
 
+	ReadOnlyModeToggled,
+
 	/** @internal */
 	ColorPickerToggled,
 
@@ -94,6 +96,11 @@ export interface SelectionUpdated {
 	readonly tool: BaseTool;
 }
 
+export interface ReadOnlyToggled {
+	readonly kind: EditorEventType.ReadOnlyModeToggled;
+	readonly editorIsReadOnly: boolean;
+}
+
 export interface ColorPickerToggled {
 	readonly kind: EditorEventType.ColorPickerToggled;
 	readonly open: boolean;
@@ -115,7 +122,7 @@ export interface ToolbarDropdownShownEvent {
 export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
 	| EditorViewportChangedEvent | DisplayResizedEvent
 	| EditorUndoStackUpdated | CommandDoneEvent | CommandUndoneEvent
-	| SelectionUpdated
+	| SelectionUpdated | ReadOnlyToggled
 	| ColorPickerToggled | ColorPickerColorSelected
 	| ToolbarDropdownShownEvent;
 
@@ -128,10 +135,16 @@ export type OnProgressListener =
 
 export type ComponentAddedListener = (component: AbstractComponent)=> Promise<void>|void;
 
+
 // Called when a new estimate for the import/export rect has been generated. This can be called multiple times.
 // Only the last call to this listener must be accurate.
 // The import/export rect is also returned by [start].
-export type OnDetermineExportRectListener = (exportRect: Rect2)=> void;
+//
+// **Note**: In a future release, the `options` parameter may be required.
+export type OnDetermineExportRectListener = (
+	exportRect: Rect2,
+	options?: { autoresize: boolean },
+)=> void;
 
 export interface ImageLoader {
 	start(

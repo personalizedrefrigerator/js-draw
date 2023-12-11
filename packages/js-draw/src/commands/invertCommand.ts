@@ -9,6 +9,9 @@ const invertCommand = <T extends Command> (command: T): T extends SerializableCo
 	if (command instanceof SerializableCommand) {
 		// SerializableCommand that does the inverse of [command]
 		return new class extends SerializableCommand {
+			// For debugging
+			public _command = command;
+
 			protected serializeToJSON() {
 				return command.serialize();
 			}
@@ -16,7 +19,7 @@ const invertCommand = <T extends Command> (command: T): T extends SerializableCo
 				command.unapply(editor);
 			}
 			public unapply(editor: Editor) {
-				command.unapply(editor);
+				command.apply(editor);
 			}
 			public override onDrop(editor: Editor) {
 				command.onDrop(editor);

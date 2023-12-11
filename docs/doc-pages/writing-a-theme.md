@@ -34,6 +34,9 @@ Here's a runnable example:
 
 	/* Color used for some button/input foregrounds */
 	--primary-action-foreground-color: #f00;
+
+	/* Use light mode for controls. */
+	color-scheme: light;
 }
 
 ---ts---

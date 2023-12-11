@@ -21,7 +21,6 @@ export class Rect2 extends Abstract2DShape {
 	// topLeft assumes up is -y
 	public readonly topLeft: Point2;
 	public readonly size: Vec2;
-	public readonly bottomRight: Point2;
 	public readonly area: number;
 
 	public constructor(
@@ -45,7 +44,6 @@ export class Rect2 extends Abstract2DShape {
 		// Precompute/store vector forms.
 		this.topLeft = Vec2.of(this.x, this.y);
 		this.size = Vec2.of(this.w, this.h);
-		this.bottomRight = this.topLeft.plus(this.size);
 		this.area = this.w * this.h;
 	}
 
@@ -65,8 +63,8 @@ export class Rect2 extends Abstract2DShape {
 
 	public containsRect(other: Rect2): boolean {
 		return this.x <= other.x && this.y <= other.y
-				&& this.bottomRight.x >= other.bottomRight.x
-				&& this.bottomRight.y >= other.bottomRight.y;
+				&& this.x + this.w >= other.x + other.w
+				&& this.y + this.h >= other.y + other.h;
 	}
 
 	public intersects(other: Rect2): boolean {
@@ -159,6 +157,17 @@ export class Rect2 extends Abstract2DShape {
 			return this;
 		}
 
+		// Prevent width/height from being negative
+		if (margin < 0) {
+			const xMargin = -Math.min(-margin, this.w / 2);
+			const yMargin = -Math.min(-margin, this.h / 2);
+
+			return new Rect2(
+				this.x - xMargin, this.y - yMargin,
+				this.w + xMargin * 2, this.h + yMargin * 2,
+			);
+		}
+
 		return new Rect2(
 			this.x - margin, this.y - margin, this.w + margin * 2, this.h + margin * 2
 		);
@@ -181,6 +190,23 @@ export class Rect2 extends Abstract2DShape {
 		return closest!;
 	}
 
+	/**
+	 * Returns `true` iff all points in this rectangle are within `distance` from `point`:
+	 *
+	 * If $R$ is the set of points in this rectangle, returns `true` iff
+	 * $$
+	 * 	\forall {\bf a} \in R, \|\texttt{point} - {\bf a}\| < \texttt{radius}
+	 * $$
+	 */
+	public isWithinRadiusOf(radius: number, point: Point2) {
+		if (this.maxDimension > radius) {
+			return false;
+		}
+
+		const squareRadius = radius * radius;
+		return this.corners.every(corner => corner.minus(point).magnitudeSquared() < squareRadius);
+	}
+
 	public get corners(): Point2[] {
 		return [
 			this.bottomRight,
@@ -192,6 +218,14 @@ export class Rect2 extends Abstract2DShape {
 
 	public get maxDimension() {
 		return Math.max(this.w, this.h);
+	}
+
+	public get minDimension() {
+		return Math.min(this.w, this.h);
+	}
+
+	public get bottomRight() {
+		return this.topLeft.plus(this.size);
 	}
 
 	public get topRight() {
@@ -211,7 +245,7 @@ export class Rect2 extends Abstract2DShape {
 	}
 
 	public get center() {
-		return this.topLeft.plus(this.size.times(0.5));
+		return Vec2.of(this.x + this.w / 2, this.y + this.h / 2);
 	}
 
 	// Returns edges in the order
@@ -315,17 +349,17 @@ export class Rect2 extends Abstract2DShape {
 		}
 
 		const firstRect = rects[0];
-		let minX: number = firstRect.topLeft.x;
-		let minY: number = firstRect.topLeft.y;
-		let maxX: number = firstRect.bottomRight.x;
-		let maxY: number = firstRect.bottomRight.y;
+		let minX: number = firstRect.x;
+		let minY: number = firstRect.y;
+		let maxX: number = firstRect.x + firstRect.w;
+		let maxY: number = firstRect.y + firstRect.h;
 
 		for (let i = 1; i < rects.length; i++) {
 			const rect = rects[i];
-			minX = Math.min(minX, rect.topLeft.x);
-			minY = Math.min(minY, rect.topLeft.y);
-			maxX = Math.max(maxX, rect.bottomRight.x);
-			maxY = Math.max(maxY, rect.bottomRight.y);
+			minX = Math.min(minX, rect.x);
+			minY = Math.min(minY, rect.y);
+			maxX = Math.max(maxX, rect.x + rect.w);
+			maxY = Math.max(maxY, rect.y + rect.h);
 		}
 
 		return new Rect2(

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>Translation tester | js-draw</title>
+	<style>
+		iframe {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+
+			border: none;
+		}
+	</style>
+
+</head>
+
+<body>
+	<!--
+		Translation data can potentially load untrusted scripts
+		(if the translations aren't first reviewed carefully).
+
+		Run them in a sandboxed iframe to limit access to localStorage,
+		indexedDB, etc that could store potentially-sensitive user
+		data.
+	-->
+	<iframe id="sandboxed-iframe" sandbox="allow-scripts allow-top-navigation-by-user-activation"></iframe>
+</body>
+
+<script>
+	"use strict";
+
+	// Set up the sandbox
+	const sandbox = document.querySelector('#sandboxed-iframe');
+	let loaded = false;
+	window.onmessage = async event => {
+		if (event.source === sandbox.contentWindow) {
+			window.onmessage = undefined;
+
+			try {
+				const fetchData = await fetch('./sandbox.bundle.js');
+				const loadScript = await fetchData.text();
+
+				sandbox.contentWindow.postMessage({
+					loadScript,
+				}, '*');
+			} catch (error) {
+				document.body.innerText = `Error loading: ${error}`;
+			}
+		}
+	};
+
+	sandbox.src = './sandbox.html';
+</script>
+</html>

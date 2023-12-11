@@ -10,6 +10,7 @@ import RenderingStyle from './rendering/RenderingStyle';
 import TextRenderingStyle from './rendering/TextRenderingStyle';
 import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
 import RenderablePathSpec, { pathToRenderable } from './rendering/RenderablePathSpec';
+import { renderedStylesheetId } from './rendering/renderers/SVGRenderer';
 
 type OnFinishListener = ()=> void;
 
@@ -26,12 +27,29 @@ export const svgStyleAttributesDataKey = 'svgStyleAttrs';
 // was first loaded.
 export const svgLoaderAttributeContainerID = 'svgContainerID';
 
+// If present in the exported SVG's class list, the image will be
+// autoresized when components are added/removed.
+export const svgLoaderAutoresizeClassName = 'js-draw--autoresize';
+
 // [key, value]
 export type SVGLoaderUnknownAttribute = [ string, string ];
 
 // [key, value, priority]
 export type SVGLoaderUnknownStyleAttribute = { key: string, value: string, priority?: string };
 
+// @internal
+export enum SVGLoaderLoadMethod {
+	IFrame = 'iframe',
+	DOMParser = 'domparser',
+}
+
+export interface SVGLoaderOptions {
+	sanitize?: boolean;
+	disableUnknownObjectWarnings?: boolean;
+
+	// @internal
+	loadMethod?: SVGLoaderLoadMethod;
+}
 
 const supportedStrokeFillStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
 
@@ -45,8 +63,17 @@ export default class SVGLoader implements ImageLoader {
 	private totalToProcess: number = 0;
 	private rootViewBox: Rect2|null;
 
+	// Options
+	private readonly storeUnknown: boolean;
+	private readonly disableUnknownObjectWarnings: boolean;
+
 	private constructor(
-		private source: SVGSVGElement, private onFinish?: OnFinishListener, private readonly storeUnknown: boolean = true) {
+		private source: Element,
+		private onFinish: OnFinishListener|null,
+		options: SVGLoaderOptions,
+	) {
+		this.storeUnknown = !(options.sanitize ?? false);
+		this.disableUnknownObjectWarnings = !!options.disableUnknownObjectWarnings;
 	}
 
 	// If [computedStyles] is given, it is preferred to directly accessing node's style object.
@@ -55,7 +82,7 @@ export default class SVGLoader implements ImageLoader {
 		let stroke;
 
 		// If possible, use computedStyles (allows property inheritance).
-		const fillAttribute = node.getAttribute('fill') ?? computedStyles?.fill ?? node.style.fill;
+		const fillAttribute = node.getAttribute('fill') ?? computedStyles?.fill ?? node.style?.fill;
 		if (fillAttribute) {
 			try {
 				fill = Color4.fromString(fillAttribute);
@@ -64,8 +91,8 @@ export default class SVGLoader implements ImageLoader {
 			}
 		}
 
-		const strokeAttribute = node.getAttribute('stroke') ?? computedStyles?.stroke ?? node.style.stroke;
-		const strokeWidthAttr = node.getAttribute('stroke-width') ?? computedStyles?.strokeWidth ?? node.style.strokeWidth;
+		const strokeAttribute = node.getAttribute('stroke') ?? computedStyles?.stroke ?? node.style?.stroke ?? '';
+		const strokeWidthAttr = node.getAttribute('stroke-width') ?? computedStyles?.strokeWidth ?? node.style?.strokeWidth ?? '';
 		if (strokeAttribute && strokeWidthAttr) {
 			try {
 				let width = parseFloat(strokeWidthAttr ?? '1');
@@ -271,34 +298,59 @@ export default class SVGLoader implements ImageLoader {
 		}
 	}
 
+	private getComputedStyle(element: Element) {
+		try {
+			// getComputedStyle may fail in jsdom when using a DOMParser.
+			return window.getComputedStyle(element);
+		} catch (error) {
+			console.warn('Error computing style', error);
+			return undefined;
+		}
+	}
+
 	// If given, 'supportedAttrs' will have x, y, etc. attributes that were used in computing the transform added to it,
 	// to prevent storing duplicate transform information when saving the component.
 	private getTransform(elem: SVGElement, supportedAttrs?: string[], computedStyles?: CSSStyleDeclaration): Mat33 {
-		computedStyles ??= window.getComputedStyle(elem);
-
-		let transformProperty = computedStyles.transform;
-		if (transformProperty === '' || transformProperty === 'none') {
-			transformProperty = elem.style.transform || 'none';
-		}
-
-		// Prefer the actual .style.transform
-		// to the computed stylesheet -- in some browsers, the computedStyles version
-		// can have lower precision.
+		// If possible, load the js-draw specific transform attribute
+		const highpTransformAttribute = 'data-highp-transform';
+		const rawTransformData = elem.getAttribute(highpTransformAttribute);
 		let transform;
-		try {
-			transform = Mat33.fromCSSMatrix(elem.style.transform);
-		} catch(_e) {
-			transform = Mat33.fromCSSMatrix(transformProperty);
+		if (rawTransformData) {
+			try {
+				transform = Mat33.fromCSSMatrix(rawTransformData);
+				supportedAttrs?.push(highpTransformAttribute);
+			} catch(e) {
+				console.warn(`Unable to parse raw transform data, ${rawTransformData}. Falling back to CSS data.`);
+			}
 		}
 
-		const elemX = elem.getAttribute('x');
-		const elemY = elem.getAttribute('y');
-		if (elemX || elemY) {
-			const x = parseFloat(elemX ?? '0');
-			const y = parseFloat(elemY ?? '0');
-			if (!isNaN(x) && !isNaN(y)) {
-				supportedAttrs?.push('x', 'y');
-				transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
+		if (!transform) {
+			computedStyles ??= this.getComputedStyle(elem);
+
+			let transformProperty = computedStyles?.transform;
+			if (!transformProperty || transformProperty === 'none') {
+				transformProperty = elem.style?.transform || 'none';
+			}
+
+			// Prefer the actual .style.transform
+			// to the computed stylesheet -- in some browsers, the computedStyles version
+			// can have lower precision.
+			try {
+				transform = Mat33.fromCSSMatrix(elem.style.transform);
+			} catch(_e) {
+				console.warn('matrix parse error', _e);
+				transform = Mat33.fromCSSMatrix(transformProperty);
+			}
+
+			const elemX = elem.getAttribute('x');
+			const elemY = elem.getAttribute('y');
+			if (elemX || elemY) {
+				const x = parseFloat(elemX ?? '0');
+				const y = parseFloat(elemY ?? '0');
+				if (!isNaN(x) && !isNaN(y)) {
+					supportedAttrs?.push('x', 'y');
+					transform = transform.rightMul(Mat33.translation(Vec2.of(x, y)));
+				}
 			}
 		}
 
@@ -329,20 +381,20 @@ export default class SVGLoader implements ImageLoader {
 		}
 
 		// Compute styles.
-		const computedStyles = window.getComputedStyle(elem);
+		const computedStyles = this.getComputedStyle(elem);
 		const fontSizeExp = /^([-0-9.e]+)px/i;
 
 		// In some environments, computedStyles.fontSize can be increased by the system.
 		// Thus, to prevent text from growing on load/save, prefer .style.fontSize.
-		let fontSizeMatch = fontSizeExp.exec(elem.style.fontSize);
+		let fontSizeMatch = fontSizeExp.exec(elem.style?.fontSize ?? '');
 		if (!fontSizeMatch && elem.tagName.toLowerCase() === 'tspan' && elem.parentElement) {
 			// Try to inherit the font size of the parent text element.
-			fontSizeMatch = fontSizeExp.exec(elem.parentElement.style.fontSize);
+			fontSizeMatch = fontSizeExp.exec(elem.parentElement.style?.fontSize ?? '');
 		}
 
 		// If we still couldn't find a font size, try to use computedStyles (which can be
 		// wrong).
-		if (!fontSizeMatch) {
+		if (!fontSizeMatch && computedStyles) {
 			fontSizeMatch = fontSizeExp.exec(computedStyles.fontSize);
 		}
 
@@ -358,9 +410,9 @@ export default class SVGLoader implements ImageLoader {
 		}
 		const style: TextRenderingStyle = {
 			size: fontSize,
-			fontFamily: computedStyles.fontFamily || elem.style.fontFamily || 'sans-serif',
-			fontWeight: computedStyles.fontWeight || elem.style.fontWeight || undefined,
-			fontStyle: computedStyles.fontStyle || elem.style.fontStyle || undefined,
+			fontFamily: computedStyles?.fontFamily || elem.style?.fontFamily || 'sans-serif',
+			fontWeight: computedStyles?.fontWeight || elem.style?.fontWeight || undefined,
+			fontStyle: computedStyles?.fontStyle || elem.style?.fontStyle || undefined,
 			renderingStyle: this.getStyle(elem, computedStyles),
 		};
 
@@ -505,8 +557,10 @@ export default class SVGLoader implements ImageLoader {
 			return;
 		}
 
+		const autoresize = node.classList.contains(svgLoaderAutoresizeClassName);
+
 		this.rootViewBox = new Rect2(x, y, width, height);
-		this.onDetermineExportRect?.(this.rootViewBox);
+		this.onDetermineExportRect?.(this.rootViewBox, { autoresize });
 	}
 
 	private async updateSVGAttrs(node: SVGSVGElement) {
@@ -551,14 +605,22 @@ export default class SVGLoader implements ImageLoader {
 			this.updateSVGAttrs(node as SVGSVGElement);
 			break;
 		case 'style':
-			await this.addUnknownNode(node as SVGStyleElement);
+			// Keeping unnecessary style sheets can cause the browser to keep all
+			// SVG elements *referenced* by the style sheet in some browsers.
+			//
+			// Only keep the style sheet if it won't be discarded on save.
+			if (node.getAttribute('id') !== renderedStylesheetId) {
+				await this.addUnknownNode(node as SVGStyleElement);
+			}
 			break;
 		default:
-			console.warn('Unknown SVG element,', node, node.tagName);
-			if (!(node instanceof SVGElement)) {
-				console.warn(
-					'Element', node, 'is not an SVGElement!', this.storeUnknown ? 'Continuing anyway.' : 'Skipping.'
-				);
+			if (!this.disableUnknownObjectWarnings) {
+				console.warn('Unknown SVG element,', node, node.tagName);
+				if (!(node instanceof SVGElement)) {
+					console.warn(
+						'Element', node, 'is not an SVGElement!', this.storeUnknown ? 'Continuing anyway.' : 'Skipping.'
+					);
+				}
 			}
 
 			await this.addUnknownNode(node as SVGElement);
@@ -608,6 +670,7 @@ export default class SVGLoader implements ImageLoader {
 		}
 
 		this.onFinish?.();
+		this.onFinish = null;
 	}
 
 	/**
@@ -617,56 +680,115 @@ export default class SVGLoader implements ImageLoader {
 	 *
 	 * @see {@link Editor.loadFrom}
 	 * @param text - Textual representation of the SVG (e.g. `<svg viewbox='...'>...</svg>`).
-	 * @param sanitize - if `true`, don't store unknown attributes.
+	 * @param options - if `true` or `false`, treated as the `sanitize` option -- don't store unknown attributes.
 	 */
-	public static fromString(text: string, sanitize: boolean = false): SVGLoader {
-		const sandbox = document.createElement('iframe');
-		sandbox.src = 'about:blank';
-		sandbox.setAttribute('sandbox', 'allow-same-origin');
-		sandbox.setAttribute('csp', 'default-src \'about:blank\'');
-		sandbox.style.display = 'none';
+	public static fromString(
+		text: string,
+		options: Partial<SVGLoaderOptions>|boolean = false
+	): SVGLoader {
+		const domParserLoad = typeof options !== 'boolean' && options?.loadMethod === SVGLoaderLoadMethod.DOMParser;
 
-		// Required to access the frame's DOM. See https://stackoverflow.com/a/17777943/17055750
-		document.body.appendChild(sandbox);
+		const { svgElem, cleanUp } = (() => {
+			// If the user requested an iframe load (the default) try to load with an iframe.
+			// There are some cases (e.g. in a sandboxed iframe) where this doesn't work.
+			if (!domParserLoad) {
+				try {
+					const sandbox = document.createElement('iframe');
+					sandbox.src = 'about:blank';
 
-		if (!sandbox.hasAttribute('sandbox')) {
-			sandbox.remove();
-			throw new Error('SVG loading iframe is not sandboxed.');
+					// allow-same-origin is necessary for how we interact with the sandbox. As such,
+					// DO NOT ENABLE ALLOW-SCRIPTS.
+					sandbox.setAttribute('sandbox', 'allow-same-origin');
+					sandbox.setAttribute('csp', 'default-src \'about:blank\'');
+					sandbox.style.display = 'none';
+
+					// Required to access the frame's DOM. See https://stackoverflow.com/a/17777943/17055750
+					document.body.appendChild(sandbox);
+
+					if (!sandbox.hasAttribute('sandbox')) {
+						sandbox.remove();
+						throw new Error('SVG loading iframe is not sandboxed.');
+					}
+
+					const sandboxDoc = sandbox.contentWindow?.document ?? sandbox.contentDocument;
+					if (sandboxDoc == null) throw new Error('Unable to open a sandboxed iframe!');
+
+					sandboxDoc.open();
+					sandboxDoc.write(`
+						<!DOCTYPE html>
+						<html>
+							<head>
+								<title>SVG Loading Sandbox</title>
+								<meta name='viewport' conent='width=device-width,initial-scale=1.0'/>
+								<meta charset='utf-8'/>
+							</head>
+							<body style='font-size: 12px;'>
+								<script>
+									console.error('JavaScript should not be able to run here!');
+									throw new Error(
+										'The SVG sandbox is broken! Please double-check the sandboxing setting.'
+									);
+								</script>
+							</body>
+						</html>
+					`);
+					sandboxDoc.close();
+
+					const svgElem = sandboxDoc.createElementNS(
+						'http://www.w3.org/2000/svg', 'svg'
+					);
+					svgElem.innerHTML = text;
+					sandboxDoc.body.appendChild(svgElem);
+
+					const cleanUp = () => {
+						svgElem.remove();
+						sandbox.remove();
+
+						sandbox.src = '';
+					};
+
+					return { svgElem, cleanUp };
+				} catch(error) {
+					console.warn(
+						'Failed loading SVG via a sandboxed iframe. Some styles may not be loaded correctly. Error: ',
+						error
+					);
+				}
+			}
+
+			// Fall back to creating a DOMParser
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(
+				`<svg xmlns="http://www.w3.org/2000/svg">${text}</svg>`, 'text/html'
+			);
+			const svgElem = doc.querySelector('svg')!;
+
+			// Handle error messages reported while parsing. See
+			// https://developer.mozilla.org/en-US/docs/Web/Guide/Parsing_and_serializing_XML
+			const errorReportNode = doc.querySelector('parsererror');
+			if (errorReportNode) {
+				throw new Error('Parse error: ' + errorReportNode.textContent);
+			}
+
+			const cleanUp = () => { };
+
+			return { svgElem, cleanUp };
+		})();
+
+		// Handle options
+		let sanitize;
+		let disableUnknownObjectWarnings;
+
+		if (typeof options === 'boolean') {
+			sanitize = options;
+			disableUnknownObjectWarnings = false;
+		} else {
+			sanitize = options.sanitize ?? false;
+			disableUnknownObjectWarnings = options.disableUnknownObjectWarnings ?? false;
 		}
 
-		const sandboxDoc = sandbox.contentWindow?.document ?? sandbox.contentDocument;
-		if (sandboxDoc == null) throw new Error('Unable to open a sandboxed iframe!');
-
-		sandboxDoc.open();
-		sandboxDoc.write(`
-			<!DOCTYPE html>
-			<html>
-				<head>
-					<title>SVG Loading Sandbox</title>
-					<meta name='viewport' conent='width=device-width,initial-scale=1.0'/>
-					<meta charset='utf-8'/>
-				</head>
-				<body style='font-size: 12px;'>
-					<script>
-						console.error('JavaScript should not be able to run here!');
-						throw new Error(
-							'The SVG sandbox is broken! Please double-check the sandboxing setting.'
-						);
-					</script>
-				</body>
-			</html>
-		`);
-		sandboxDoc.close();
-
-		const svgElem = sandboxDoc.createElementNS(
-			'http://www.w3.org/2000/svg', 'svg'
-		);
-		svgElem.innerHTML = text;
-		sandboxDoc.body.appendChild(svgElem);
-
-		return new SVGLoader(svgElem, () => {
-			svgElem.remove();
-			sandbox.remove();
-		}, !sanitize);
+		return new SVGLoader(svgElem, cleanUp, {
+			sanitize, disableUnknownObjectWarnings,
+		});
 	}
 }

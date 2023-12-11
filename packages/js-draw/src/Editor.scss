@@ -56,6 +56,12 @@
 	}
 }
 
+// Derived colors
+.imageEditorContainer {
+	// Default icon color
+	--icon-color: var(--foreground-color-1);
+}
+
 .imageEditorContainer {
 	color: var(--foreground-color-1);
 	font-family: system-ui, -apple-system, sans-serif;
@@ -67,6 +73,13 @@
 	height: 400px;
 	min-height: 220px;
 	min-width: 100px;
+
+	// A vertical writing mode breaks assumptions about how toolbars/overlays
+	// are aligned, resulting in unusable toolbars/text.
+	//
+	// TODO: Fix this.
+	//
+	writing-mode: horizontal-tb;
 
 	box-sizing: border-box;
 
@@ -112,6 +125,8 @@
 	text-align: center;
 	font-size: 2em;
 
+	text-shadow: 0px 0px 1px var(--background-color-1);
+
 	bottom: 0;
 	left: 0;
 	right: 0;
@@ -126,8 +141,10 @@
 }
 
 .imageEditorContainer .textRendererOutputContainer {
-	width: 1px;
-	height: 1px;
+	// Needs to have non-zero size so that it can be accessibility-focused
+	// on iOS
+	width: 0.001px;
+	height: 0.001px;
 	overflow: hidden;
 }
 
@@ -135,6 +152,14 @@
 	overflow: visible;
 	z-index: 5;
 }
+
+// TODO: Apply this change during a future major release.
+// So as not to change the position of other overlays, all overlays should have
+// 0 height.
+// Uses the alternate overlay class name to decrease specificity.
+// .js-draw-editor-overlay {
+// 	//height: 0;
+// }
 
 @media print {
 	.imageEditorContainer .loadingMessage {

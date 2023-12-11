@@ -25,6 +25,8 @@ const noOpSetUpdateListener = () => {
  *
  * Static methods in the `ReactiveValue` and `MutableReactiveValue` classes are
  * constructors (e.g. `fromImmutable`).
+ *
+ * Avoid extending this class from an external library, as that may not be stable.
  */
 export abstract class ReactiveValue<T> {
 	/**
@@ -77,7 +79,7 @@ export abstract class ReactiveValue<T> {
 		callback: ()=>T, sourceValues: ReactiveValue<any>[]
 	): ReactiveValue<T>{
 		const result = new ReactiveValueImpl(callback());
-		const resultRef = window.WeakRef ? new WeakRef(result) : { deref: () => result };
+		const resultRef = (window as any).WeakRef ? new (window as any).WeakRef(result) : { deref: () => result };
 
 		for (const value of sourceValues) {
 			const listener = value.onUpdate(() => {
@@ -146,7 +148,7 @@ export abstract class ReactiveValue<T> {
 
 export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 	/**
-	 * Changes the value of this and fires all update listeners.
+	 * Changes the value of this and, if different, fires all update listeners.
 	 *
 	 * @see {@link onUpdate}
 	 */
@@ -159,7 +161,7 @@ export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 		const child = ReactiveValue.fromInitialValue(
 			sourceValue.get()[propertyName]
 		);
-		const childRef = window.WeakRef ? new WeakRef(child) : { deref: () => child };
+		const childRef = (window as any).WeakRef ? new (window as any).WeakRef(child) : { deref: () => child };
 
 		// When the source is updated...
 		const sourceListener = sourceValue.onUpdate(newValue => {

@@ -1,6 +1,6 @@
 import Stroke from '../../components/Stroke';
 import Editor from '../../Editor';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
 import { InputEvtType } from '../../inputEvents';
 import Selection from './Selection';
 import SelectionTool from './SelectionTool';
@@ -10,6 +10,7 @@ import { Rect2, Vec2, Path, Color4 } from '@js-draw/math';
 import sendPenEvent from '../../testing/sendPenEvent';
 import { pathToRenderable } from '../../rendering/RenderablePathSpec';
 import { EditorEventType } from '../../types';
+import SerializableCommand from '../../commands/SerializableCommand';
 
 const getSelectionTool = (editor: Editor): SelectionTool => {
 	return editor.toolController.getMatchingTools(SelectionTool)[0];
@@ -74,7 +75,7 @@ describe('SelectionTool', () => {
 		});
 	});
 
-	it('sending keyboard events to the selected region should move selected items', () => {
+	it('sending keyboard events to the selected region should move selected items', async () => {
 		const { editor, selectionTool, testStroke } = createEditorWithSingleObjectSelection(50);
 		const selection = selectionTool.getSelection();
 		expect(selection).not.toBeNull();
@@ -296,7 +297,7 @@ describe('SelectionTool', () => {
 		expect(editor.image.findParent(testStroke)).toBeNull();
 
 		// The test stroke should be translated when we finish dragging.
-		selection.onDragEnd();
+		await selection.onDragEnd();
 
 		expect(editor.image.findParent(testStroke)).not.toBeNull();
 		expect(testStroke.getBBox()).objEq(new Rect2(30, 10, 150, 150));
@@ -366,5 +367,68 @@ describe('SelectionTool', () => {
 
 		// Should not have a selection after setting the selection to contain no objects
 		expect(selectionTool.getSelection()).toBe(null);
+	});
+
+	it('should make selected objects toplevel on click', () => {
+		const {
+			editor, testStroke: selectedStroke,
+		} = createEditorWithSingleObjectSelection(150);
+
+		const {
+			addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke
+		} = createSquareStroke(40);
+		editor.dispatch(addOtherStrokeCommand);
+
+		// otherStroke should initially be below selectedStroke
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		const clickLocation = selectedStroke.getBBox().center;
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, clickLocation);
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, clickLocation);
+
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+
+		// Undoing should undo changing the z-index
+		editor.history.undo();
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		// ...and redoing should also work
+		editor.history.redo();
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+	});
+
+	it('sendToBack should return a serializable command that sends the selection to the back', () => {
+		const {
+			editor, testStroke: selectedStroke, selectionTool
+		} = createEditorWithSingleObjectSelection(150);
+
+		// Add another stroke and send it to the back
+		const {
+			addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke
+		} = createSquareStroke(40);
+		editor.dispatch(addOtherStrokeCommand);
+		editor.dispatch(otherStroke.setZIndex(-1));
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+
+		// sendToBack should send to the back
+		editor.dispatch(selectionTool.getSelection()!.sendToBack()!);
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		// Undo should work correctly
+		editor.history.undo();
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+
+		// Should be serializable
+		const serialized = selectionTool.getSelection()!.sendToBack()!.serialize();
+		const deserialized = SerializableCommand.deserialize(serialized, editor);
+
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+		editor.dispatch(deserialized);
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
+
+		editor.history.undo();
+		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
+		editor.history.redo();
+		expect(selectedStroke.getZIndex()).toBeLessThan(otherStroke.getZIndex());
 	});
 });

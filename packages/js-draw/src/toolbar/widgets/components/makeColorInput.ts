@@ -2,23 +2,29 @@ import { Color4 } from '@js-draw/math';
 import Editor from '../../../Editor';
 import PipetteTool from '../../../tools/PipetteTool';
 import { EditorEventType } from '../../../types';
+import type HelpDisplay from '../../utils/HelpDisplay';
 
 type OnColorChangeListener = (color: Color4)=>void;
 
 // Returns [ color input, input container, callback to change the color value ].
 export const makeColorInput = (
-	editor: Editor, onColorChange: OnColorChangeListener
+	editor: Editor,
+	onColorChange: OnColorChangeListener,
 ) => {
+	const container = document.createElement('span');
 
-	const colorInputContainer = document.createElement('span');
+	const inputWrapper = document.createElement('span');
 	const colorInput = document.createElement('input');
 
 	colorInput.type = 'button';
 	colorInput.classList.add('coloris_input');
-	colorInputContainer.classList.add('color-input-container');
+	container.classList.add('color-input-container');
+	inputWrapper.classList.add('color-input-wrapper');
 
-	colorInputContainer.appendChild(colorInput);
-	const pipetteController = addPipetteTool(editor, colorInputContainer, (color: Color4) => {
+	inputWrapper.appendChild(colorInput);
+	container.appendChild(inputWrapper);
+
+	const pipetteController = addPipetteTool(editor, container, (color: Color4) => {
 		colorInput.value = color.toHexString();
 		onInputEnd();
 
@@ -60,7 +66,7 @@ export const makeColorInput = (
 			open: true,
 		});
 		pipetteController.cancel();
-		colorInputContainer.classList.add('picker-open');
+		container.classList.add('picker-open');
 
 		// Focus the Coloris color picker, if it exists.
 		// Don't focus the text input within the color picker, however,
@@ -80,7 +86,7 @@ export const makeColorInput = (
 		// Restore focus to the input that opened the color picker
 		colorInput.focus();
 
-		colorInputContainer.classList.remove('picker-open');
+		container.classList.remove('picker-open');
 	};
 	colorInput.addEventListener('close', () => {
 		onClose();
@@ -100,17 +106,27 @@ export const makeColorInput = (
 
 	return {
 		input: colorInput,
-		container: colorInputContainer,
+		container,
 		setValue: setColorInputValue,
 		closePicker: () => {
 			if (isOpen) {
 				onInputEnd();
 			}
 		},
+		registerWithHelpTextDisplay: (helpDisplay: HelpDisplay) => {
+			helpDisplay.registerTextHelpForElement(
+				inputWrapper, editor.localization.colorPickerToggleHelpText,
+			);
+			pipetteController.registerWithHelpTextDisplay(helpDisplay);
+		},
 	};
 };
 
-const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: OnColorChangeListener) => {
+const addPipetteTool = (
+	editor: Editor,
+	container: HTMLElement,
+	onColorChange: OnColorChangeListener,
+) => {
 	const pipetteButton = document.createElement('button');
 	pipetteButton.classList.add('pipetteButton');
 	pipetteButton.title = editor.localization.pickColorFromScreen;
@@ -177,6 +193,12 @@ const addPipetteTool = (editor: Editor, container: HTMLElement, onColorChange: O
 		// Cancel a pipette color selection if one is in progress.
 		cancel: () => {
 			endColorSelectMode();
+		},
+
+		registerWithHelpTextDisplay: (helpDisplay: HelpDisplay) => {
+			helpDisplay.registerTextHelpForElement(
+				pipetteButton, editor.localization.colorPickerPipetteHelpText,
+			);
 		},
 	};
 };

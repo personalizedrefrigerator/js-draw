@@ -7,7 +7,7 @@ import SerializableCommand from '../../commands/SerializableCommand';
 import Editor from '../../Editor';
 import { Mat33, Rect2, Point2, Vec2, Mat33Array } from '@js-draw/math';
 import Pointer from '../../Pointer';
-import SelectionHandle, { HandleShape, handleSize } from './SelectionHandle';
+import SelectionHandle, { HandleAction, handleSize } from './SelectionHandle';
 import { cssPrefix } from './SelectionTool';
 import AbstractComponent from '../../components/AbstractComponent';
 import { EditorLocalization } from '../../localization';
@@ -17,7 +17,8 @@ import Duplicate from '../../commands/Duplicate';
 import Command from '../../commands/Command';
 import { DragTransformer, ResizeTransformer, RotateTransformer } from './TransformMode';
 import { ResizeMode } from './types';
-import EditorImage from '../../EditorImage';
+import EditorImage from '../../image/EditorImage';
+import uniteCommands from '../../commands/uniteCommands';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -27,12 +28,18 @@ export default class Selection {
 	private handles: SelectionHandle[];
 	private originalRegion: Rect2;
 
+	// The last-computed bounding box of selected content
+	// @see getTightBoundingBox
+	private selectionTightBoundingBox: Rect2|null = null;
+
 	private transformers;
 	private transform: Mat33 = Mat33.identity;
 
+	// invariant: sorted by increasing z-index
 	private selectedElems: AbstractComponent[] = [];
 
-	private container: HTMLElement;
+	private outerContainer: HTMLElement;
+	private innerContainer: HTMLElement;
 	private backgroundElem: HTMLElement;
 
 	private hasParent: boolean = true;
@@ -45,44 +52,55 @@ export default class Selection {
 			rotate: new RotateTransformer(editor, this),
 		};
 
-		this.container = document.createElement('div');
+
+		// We need two containers for some CSS to apply (the outer container
+		// needs zero height, the inner needs to prevent the selection background
+		// from being visible outside of the editor).
+		this.outerContainer = document.createElement('div');
+		this.outerContainer.classList.add(`${cssPrefix}selection-outer-container`);
+
+		this.innerContainer = document.createElement('div');
+		this.innerContainer.classList.add(`${cssPrefix}selection-inner-container`);
+
 		this.backgroundElem = document.createElement('div');
 		this.backgroundElem.classList.add(`${cssPrefix}selection-background`);
-		this.container.appendChild(this.backgroundElem);
 
-		const resizeHorizontalHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(1, 0.5),
-			this,
-			this.editor.viewport,
-			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.HorizontalOnly),
-			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
-			() => this.transformers.resize.onDragEnd(),
-		);
+		this.innerContainer.appendChild(this.backgroundElem);
+		this.outerContainer.appendChild(this.innerContainer);
 
-		const resizeVerticalHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(0.5, 1),
-			this,
-			this.editor.viewport,
-			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.VerticalOnly),
-			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
-			() => this.transformers.resize.onDragEnd(),
-		);
+		const makeResizeHandle = (mode: ResizeMode, side: Vec2) => {
+			const modeToAction = {
+				[ResizeMode.Both]: HandleAction.ResizeXY,
+				[ResizeMode.HorizontalOnly]: HandleAction.ResizeX,
+				[ResizeMode.VerticalOnly]: HandleAction.ResizeY,
+			};
 
-		const resizeBothHandle = new SelectionHandle(
-			HandleShape.Square,
-			Vec2.of(1, 1),
-			this,
-			this.editor.viewport,
-			(startPoint) => this.transformers.resize.onDragStart(startPoint, ResizeMode.Both),
-			(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
-			() => this.transformers.resize.onDragEnd(),
-		);
+			return new SelectionHandle(
+				{
+					action: modeToAction[mode],
+					side,
+				},
+				this,
+				this.editor.viewport,
+				(startPoint) => this.transformers.resize.onDragStart(startPoint, mode),
+				(currentPoint) => this.transformers.resize.onDragUpdate(currentPoint),
+				() => this.transformers.resize.onDragEnd(),
+			);
+		};
+
+		const resizeHorizontalHandles = [
+			makeResizeHandle(ResizeMode.HorizontalOnly, Vec2.of(0, 0.5)),
+			makeResizeHandle(ResizeMode.HorizontalOnly, Vec2.of(1, 0.5)),
+		];
+		const resizeVerticalHandle = makeResizeHandle(ResizeMode.VerticalOnly, Vec2.of(0.5, 1));
+		const resizeBothHandle = makeResizeHandle(ResizeMode.Both, Vec2.of(1, 1));
 
 		const rotationHandle = new SelectionHandle(
-			HandleShape.Circle,
-			Vec2.of(0.5, 0),
+			{
+				action: HandleAction.Rotate,
+				side: Vec2.of(0.5, 0),
+				icon: this.editor.icons.makeRotateIcon(),
+			},
 			this,
 			this.editor.viewport,
 			(startPoint) => this.transformers.rotate.onDragStart(startPoint),
@@ -92,7 +110,7 @@ export default class Selection {
 
 		this.handles = [
 			resizeBothHandle,
-			resizeHorizontalHandle,
+			...resizeHorizontalHandles,
 			resizeVerticalHandle,
 			rotationHandle,
 		];
@@ -100,6 +118,8 @@ export default class Selection {
 		for (const handle of this.handles) {
 			handle.addTo(this.backgroundElem);
 		}
+
+		this.updateUI();
 	}
 
 	// @internal Intended for unit tests
@@ -154,7 +174,7 @@ export default class Selection {
 		return this.editor.viewport.getRotationAngle();
 	}
 
-	public get screenRegion(): Rect2 {
+	public getScreenRegion(): Rect2 {
 		const toScreen = this.editor.viewport.canvasToScreenTransform;
 		const scaleFactor = this.editor.viewport.getScaleFactor();
 
@@ -174,13 +194,26 @@ export default class Selection {
 		this.transform = transform;
 
 		if (preview && this.hasParent) {
-			this.scrollTo();
 			this.previewTransformCmds();
 		}
 	}
 
+	private getDeltaZIndexToMoveSelectionToTop() {
+		if (this.selectedElems.length === 0) {
+			return 0;
+		}
+
+		const selectedBottommostZIndex = this.selectedElems[0].getZIndex();
+
+		const visibleObjects = this.editor.image.getElementsIntersectingRegion(this.region);
+		const topMostVisibleZIndex = visibleObjects[visibleObjects.length - 1]?.getZIndex() ?? selectedBottommostZIndex;
+		const deltaZIndex = (topMostVisibleZIndex + 1) - selectedBottommostZIndex;
+
+		return deltaZIndex;
+	}
+
 	// Applies the current transformation to the selection
-	public async finalizeTransform() {
+	public finalizeTransform() {
 		const fullTransform = this.transform;
 		const selectedElems = this.selectedElems;
 
@@ -188,14 +221,47 @@ export default class Selection {
 		this.originalRegion = this.originalRegion.transformedBoundingBox(this.transform);
 		this.transform = Mat33.identity;
 
-		// Make the commands undo-able
-		await this.editor.dispatch(new Selection.ApplyTransformationCommand(
-			this, selectedElems, fullTransform
-		));
+		this.scrollTo();
+
+		let transformPromise: void|Promise<void> = undefined;
+
+		// Make the commands undo-able.
+		// Don't check for non-empty transforms because this breaks changing the
+		// z-index of the just-transformed commands.
+		if (this.selectedElems.length > 0) {
+			const deltaZIndex = this.getDeltaZIndexToMoveSelectionToTop();
+			transformPromise = this.editor.dispatch(
+				new Selection.ApplyTransformationCommand(
+					this, selectedElems, fullTransform, deltaZIndex,
+				)
+			);
+		}
 
 		// Clear renderings of any in-progress transformations
 		const wetInkRenderer = this.editor.display.getWetInkRenderer();
 		wetInkRenderer.clear();
+
+		return transformPromise;
+	}
+
+	/** Sends all selected elements to the bottom of the visible image. */
+	public sendToBack() {
+		const visibleObjects = this.editor.image.getElementsIntersectingRegion(this.editor.viewport.visibleRect);
+
+		// VisibleObjects and selectedElems should both be sorted by z-index
+		const lowestVisibleZIndex = visibleObjects[0]?.getZIndex() ?? 0;
+		const highestSelectedZIndex = this.selectedElems[this.selectedElems.length - 1]?.getZIndex() ?? 0;
+
+		const targetHighestZIndex = lowestVisibleZIndex - 1;
+		const deltaZIndex = targetHighestZIndex - highestSelectedZIndex;
+
+		if (deltaZIndex !== 0) {
+			const commands = this.selectedElems.map(elem => {
+				return elem.setZIndex(elem.getZIndex() + deltaZIndex);
+			});
+			return uniteCommands(commands, updateChunkSize);
+		}
+		return null;
 	}
 
 	static {
@@ -203,8 +269,9 @@ export default class Selection {
 			// The selection box is lost when serializing/deserializing. No need to store box rotation
 			const fullTransform: Mat33 = new Mat33(...(json.transform as Mat33Array));
 			const elemIds: string[] = (json.elems as any[] ?? []);
+			const deltaZIndex = parseInt(json.deltaZIndex ?? 0);
 
-			return new this.ApplyTransformationCommand(null, elemIds, fullTransform);
+			return new this.ApplyTransformationCommand(null, elemIds, fullTransform, deltaZIndex);
 		});
 	}
 
@@ -220,6 +287,7 @@ export default class Selection {
 
 			// Full transformation used to transform elements.
 			private fullTransform: Mat33,
+			private deltaZIndex: number,
 		) {
 			super('selection-tool-transform');
 
@@ -229,16 +297,18 @@ export default class Selection {
 
 			// If a list of element IDs,
 			if (isIDList(selectedElems)) {
-				this.selectedElemIds = selectedElems as string[];
+				this.selectedElemIds = selectedElems;
 			} else {
-				this.selectedElemIds = (selectedElems as AbstractComponent[]).map(elem => elem.getId());
+				this.selectedElemIds = selectedElems.map(elem => elem.getId());
 				this.transformCommands = selectedElems.map(elem => {
-					return elem.transformBy(this.fullTransform);
+					return elem.setZIndexAndTransformBy(
+						this.fullTransform, elem.getZIndex() + deltaZIndex
+					);
 				});
 			}
 		}
 
-		private resolveToElems(editor: Editor) {
+		private resolveToElems(editor: Editor, isUndoing: boolean) {
 			if (this.transformCommands) {
 				return;
 			}
@@ -247,15 +317,33 @@ export default class Selection {
 				const elem = editor.image.lookupElement(id);
 
 				if (!elem) {
-					throw new Error(`Unable to find element with ID, ${id}.`);
+					// There may be valid reasons for an element lookup to fail:
+					// For example, if the element was deleted remotely and the remote deletion
+					// hasn't been undone.
+					console.warn(`Unable to find element with ID, ${id}.`);
+					return null;
 				}
 
-				return elem.transformBy(this.fullTransform);
-			});
+				let originalZIndex = elem.getZIndex();
+				let targetZIndex = elem.getZIndex() + this.deltaZIndex;
+
+				// If the command has already been applied, the element should currently
+				// have the target z-index.
+				if (isUndoing) {
+					targetZIndex = elem.getZIndex();
+					originalZIndex = elem.getZIndex() - this.deltaZIndex;
+				}
+
+				return elem.setZIndexAndTransformBy(
+					this.fullTransform, targetZIndex, originalZIndex,
+				);
+			}).filter( // Remove all null commands
+				command => command !== null,
+			) as SerializableCommand[];
 		}
 
 		public async apply(editor: Editor) {
-			this.resolveToElems(editor);
+			this.resolveToElems(editor, false);
 
 			this.selection?.setTransform(this.fullTransform, false);
 			this.selection?.updateUI();
@@ -266,7 +354,7 @@ export default class Selection {
 		}
 
 		public async unapply(editor: Editor) {
-			this.resolveToElems(editor);
+			this.resolveToElems(editor, true);
 
 			this.selection?.setTransform(this.fullTransform.inverse(), false);
 			this.selection?.updateUI();
@@ -281,6 +369,7 @@ export default class Selection {
 			return {
 				elems: this.selectedElemIds,
 				transform: this.fullTransform.toArray(),
+				deltaZIndex: this.deltaZIndex,
 			};
 		}
 
@@ -291,6 +380,10 @@ export default class Selection {
 
 	// Preview the effects of the current transformation on the selection
 	private previewTransformCmds() {
+		if (this.selectedElems.length === 0) {
+			return;
+		}
+
 		// Don't render what we're moving if it's likely to be slow.
 		if (this.selectedElems.length > maxPreviewElemCount) {
 			this.updateUI();
@@ -301,7 +394,7 @@ export default class Selection {
 		wetInkRenderer.clear();
 		wetInkRenderer.pushTransform(this.transform);
 
-		const viewportVisibleRect = this.editor.viewport.visibleRect;
+		const viewportVisibleRect = this.editor.viewport.visibleRect.union(this.region);
 		const visibleRect = viewportVisibleRect.transformedBoundingBox(this.transform.inverse());
 
 		for (const elem of this.selectedElems) {
@@ -350,6 +443,7 @@ export default class Selection {
 	// Returns false if the selection is empty.
 	public recomputeRegion(): boolean {
 		const newRegion = this.computeTightBoundingBox();
+		this.selectionTightBoundingBox = newRegion;
 
 		if (!newRegion) {
 			this.cancelSelection();
@@ -357,17 +451,26 @@ export default class Selection {
 		}
 
 		this.originalRegion = newRegion;
+		this.padRegion();
+
+		return true;
+	}
+
+	// Applies padding to the current region if it is too small.
+	// @internal
+	public padRegion() {
+		const sourceRegion = this.selectionTightBoundingBox ?? this.originalRegion;
 
 		const minSize = this.getMinCanvasSize();
-		if (this.originalRegion.w < minSize || this.originalRegion.h < minSize) {
+		if (sourceRegion.w < minSize || sourceRegion.h < minSize) {
 			// Add padding
 			const padding = minSize / 2;
 			this.originalRegion = Rect2.bboxOf(
-				this.originalRegion.corners, padding
+				sourceRegion.corners, padding
 			);
-		}
 
-		return true;
+			this.updateUI();
+		}
 	}
 
 	public getMinCanvasSize(): number {
@@ -386,17 +489,34 @@ export default class Selection {
 			return;
 		}
 
+		const screenRegion = this.getScreenRegion();
+
 		// marginLeft, marginTop: Display relative to the top left of the selection overlay.
 		// left, top don't work for this.
-		this.backgroundElem.style.marginLeft = `${this.screenRegion.topLeft.x}px`;
-		this.backgroundElem.style.marginTop = `${this.screenRegion.topLeft.y}px`;
+		this.backgroundElem.style.marginLeft = `${screenRegion.topLeft.x}px`;
+		this.backgroundElem.style.marginTop = `${screenRegion.topLeft.y}px`;
 
-		this.backgroundElem.style.width = `${this.screenRegion.width}px`;
-		this.backgroundElem.style.height = `${this.screenRegion.height}px`;
+		this.backgroundElem.style.width = `${screenRegion.width}px`;
+		this.backgroundElem.style.height = `${screenRegion.height}px`;
 
 		const rotationDeg = this.screenRegionRotation * 180 / Math.PI;
 		this.backgroundElem.style.transform = `rotate(${rotationDeg}deg)`;
 		this.backgroundElem.style.transformOrigin = 'center';
+
+		// If closer to perpendicular, apply different CSS
+		const perpendicularClassName = `${cssPrefix}rotated-near-perpendicular`;
+		if (Math.abs(Math.sin(this.screenRegionRotation)) > 0.5) {
+			this.innerContainer.classList.add(perpendicularClassName);
+		} else {
+			this.innerContainer.classList.remove(perpendicularClassName);
+		}
+
+		// Hide handles when empty
+		if (screenRegion.width === 0 && screenRegion.height === 0) {
+			this.innerContainer.classList.add('-empty');
+		} else {
+			this.innerContainer.classList.remove('-empty');
+		}
 
 		for (const handle of this.handles) {
 			handle.updatePosition();
@@ -406,7 +526,7 @@ export default class Selection {
 	// Maps IDs to whether we removed the component from the image
 	private removedFromImage: Record<string, boolean> = {};
 
-	// Add/remove the contents of this' seleciton from the editor.
+	// Add/remove the contents of this seleciton from the editor.
 	// Used to prevent previewed content from looking like duplicate content
 	// while dragging.
 	//
@@ -414,6 +534,9 @@ export default class Selection {
 	// the editor image is likely to be slow.)
 	//
 	// If removed from the image, selected elements are drawn as wet ink.
+	//
+	// [inImage] should be `true` if the selected elements should be added to the
+	// main image, `false` if they should be removed.
 	private addRemoveSelectionFromImage(inImage: boolean) {
 		// Don't hide elements if doing so will be slow.
 		if (!inImage && this.selectedElems.length > maxPreviewElemCount) {
@@ -468,18 +591,20 @@ export default class Selection {
 
 		let result = false;
 
-		for (const handle of this.handles) {
-			if (handle.containsPoint(pointer.canvasPos)) {
-				this.targetHandle = handle;
-				result = true;
-			}
-		}
-
 		this.backgroundDragging = false;
 		if (this.region.containsPoint(pointer.canvasPos)) {
 			this.backgroundDragging = true;
 			result = true;
 		}
+
+		for (const handle of this.handles) {
+			if (handle.containsPoint(pointer.canvasPos)) {
+				this.targetHandle = handle;
+				this.backgroundDragging = false;
+				result = true;
+			}
+		}
+
 
 		if (result) {
 			this.removeDeletedElemsFromSelection();
@@ -528,28 +653,40 @@ export default class Selection {
 		this.setTransform(Mat33.identity);
 
 		this.addRemoveSelectionFromImage(true);
+		this.updateUI();
 	}
 
 	// Scroll the viewport to this. Does not zoom
-	public async scrollTo() {
+	public scrollTo() {
 		if (this.selectedElems.length === 0) {
-			return;
+			return false;
 		}
 
-		const screenRect = new Rect2(0, 0, this.editor.display.width, this.editor.display.height);
-		if (!screenRect.containsPoint(this.screenRegion.center)) {
-			const closestPoint = screenRect.getClosestPointOnBoundaryTo(this.screenRegion.center);
-			const screenDelta = this.screenRegion.center.minus(closestPoint);
-			const delta = this.editor.viewport.screenToCanvasTransform.transformVec3(screenDelta);
-			await this.editor.dispatchNoAnnounce(
-				Viewport.transformBy(Mat33.translation(delta.times(-1))), false
+		const screenSize = this.editor.viewport.getScreenRectSize();
+		const screenRect = new Rect2(0, 0, screenSize.x, screenSize.y);
+
+		const selectionScreenRegion = this.getScreenRegion();
+
+		if (!screenRect.containsPoint(selectionScreenRegion.center)) {
+			const targetPointScreen = selectionScreenRegion.center;
+			const closestPointScreen = screenRect.getClosestPointOnBoundaryTo(targetPointScreen);
+			const closestPointCanvas = this.editor.viewport.screenToCanvas(closestPointScreen);
+
+			const targetPointCanvas = this.region.center;
+			const delta = closestPointCanvas.minus(targetPointCanvas);
+
+			this.editor.dispatchNoAnnounce(
+				Viewport.transformBy(Mat33.translation(delta.times(0.5))), false
 			);
 
-			// Re-renders clear wet ink, so we need to re-draw the preview
-			// after the full re-render.
-			await this.editor.queueRerender();
-			this.previewTransformCmds();
+			this.editor.queueRerender().then(() => {
+				this.previewTransformCmds();
+			});
+
+			return true;
 		}
+
+		return false;
 	}
 
 	public deleteSelectedObjects(): Command {
@@ -586,8 +723,9 @@ export default class Selection {
 		if (wasTransforming) {
 			// Don't update the selection's focus when redoing/undoing
 			const selectionToUpdate: Selection|null = null;
+			const deltaZIndex = this.getDeltaZIndexToMoveSelectionToTop();
 			tmpApplyCommand = new Selection.ApplyTransformationCommand(
-				selectionToUpdate, this.selectedElems, this.transform
+				selectionToUpdate, this.selectedElems, this.transform, deltaZIndex,
 			);
 
 			// Transform to ensure that the duplicates are in the correct location
@@ -612,31 +750,40 @@ export default class Selection {
 	}
 
 	public addTo(elem: HTMLElement) {
-		if (this.container.parentElement) {
-			this.container.remove();
+		if (this.outerContainer.parentElement) {
+			this.outerContainer.remove();
 		}
 
-		elem.appendChild(this.container);
+		elem.appendChild(this.outerContainer);
 		this.hasParent = true;
 	}
 
 	public setToPoint(point: Point2) {
 		this.originalRegion = this.originalRegion.grownToPoint(point);
+		this.selectionTightBoundingBox = null;
+
 		this.updateUI();
 	}
 
 	public cancelSelection() {
-		if (this.container.parentElement) {
-			this.container.remove();
+		if (this.outerContainer.parentElement) {
+			this.outerContainer.remove();
 		}
 		this.originalRegion = Rect2.empty;
+		this.selectionTightBoundingBox = null;
 		this.hasParent = false;
 	}
 
 	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
 		this.addRemoveSelectionFromImage(true);
 		this.originalRegion = bbox;
+		this.selectionTightBoundingBox = bbox;
+
 		this.selectedElems = objects.filter(object => object.isSelectable());
+		// Enforce increasing z-index invariant
+		this.selectedElems.sort((a, b) => a.getZIndex() - b.getZIndex());
+
+		this.padRegion();
 		this.updateUI();
 	}
 

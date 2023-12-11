@@ -71,3 +71,44 @@ export const loadKeybindingOverrides = (): Record<string, KeyBinding[]> => {
 
 	return overrides;
 };
+
+const debugWidgetLocalStorageKey = 'debug-widget-enabled';
+
+export const saveIsDebugWidgetEnabled = (isEnabled: boolean) => {
+	try {
+		localStorage.setItem(debugWidgetLocalStorageKey, `${isEnabled}`);
+	} catch (error) {
+		console.warn('Error saving debug widget enabled: ', error);
+	}
+};
+
+export const isDebugWidgetEnabled = () => {
+	try {
+		return localStorage.getItem(debugWidgetLocalStorageKey) === 'true';
+	} catch (error) {
+		console.warn('Error saving debug widget enabled: ', error);
+	}
+
+	return false;
+};
+
+
+const toolbarModeStorageKey = 'toolbar-mode';
+
+export const saveIsEdgeToolbar = (edgeToolbar: boolean) => {
+	try {
+		localStorage.setItem(toolbarModeStorageKey, edgeToolbar ? 'edge' : 'dropdown');
+	} catch (error) {
+		console.warn('Error saving toolbar type: ', error);
+	}
+};
+
+export const getIsEdgeToolbar = () => {
+	try {
+		return localStorage.getItem(toolbarModeStorageKey) !== 'dropdown';
+	} catch (error) {
+		console.warn('Error saving toolbar type: ', error);
+	}
+
+	return false;
+};

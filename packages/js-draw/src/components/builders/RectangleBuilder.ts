@@ -6,14 +6,19 @@ import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
 import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
+import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
-export const makeFilledRectangleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	return new RectangleBuilder(initialPoint, true, viewport);
-};
+export const makeFilledRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
+	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+		return new RectangleBuilder(initialPoint, true, viewport);
+	},
+);
 
-export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	return new RectangleBuilder(initialPoint, false, viewport);
-};
+export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
+	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+		return new RectangleBuilder(initialPoint, false, viewport);
+	},
+);
 
 export default class RectangleBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;

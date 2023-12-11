@@ -5,25 +5,46 @@ import Selection from './Selection';
 import Pointer from '../../Pointer';
 import Viewport from '../../Viewport';
 
-export enum HandleShape {
+enum HandleShape {
 	Circle,
 	Square,
 }
 
+export enum HandleAction {
+	ResizeXY = 'resize-xy',
+	Rotate = 'rotate',
+	ResizeX = 'resize-x',
+	ResizeY = 'resize-y',
+}
+
+export interface HandlePresentation {
+	// (1,1) corresponds to the bottom right of the parent,
+	// (1, 0) corresponds to the top left.
+	side: Vec2;
+
+	// An icon to optionally display within the handle
+	icon?: Element;
+
+	// Determines the handle's shape/style
+	action: HandleAction;
+}
+
+// The *interactable* handle size. The visual size will be slightly smaller.
 export const handleSize = 30;
 
 // `startPoint` is in screen coordinates
 export type DragStartCallback = (startPoint: Point2)=>void;
 export type DragUpdateCallback = (canvasPoint: Point2)=> void;
-export type DragEndCallback = ()=> void;
+export type DragEndCallback = ()=> Promise<void>|void;
 
 export default class SelectionHandle {
 	private element: HTMLElement;
 	private snapToGrid: boolean;
+	private shape: HandleShape;
+	private parentSide: Vec2;
 
 	public constructor(
-		readonly shape: HandleShape,
-		private readonly parentSide: Vec2,
+		readonly presentation: HandlePresentation,
 		private readonly parent: Selection,
 		private readonly viewport: Viewport,
 
@@ -32,9 +53,31 @@ export default class SelectionHandle {
 		private readonly onDragEnd: DragEndCallback,
 	) {
 		this.element = document.createElement('div');
-		this.element.classList.add(`${cssPrefix}handle`);
+		this.element.classList.add(
+			`${cssPrefix}handle`,
+			`${cssPrefix}${presentation.action}`,
+		);
 
-		switch (shape) {
+		// Create a slightly smaller content/background element.
+		const visibleContent = document.createElement('div');
+		visibleContent.classList.add(`${cssPrefix}content`);
+		this.element.appendChild(visibleContent);
+
+		this.parentSide = presentation.side;
+
+		const icon = presentation.icon;
+		if (icon) {
+			visibleContent.appendChild(icon);
+			icon.classList.add('icon');
+		}
+
+		if (presentation.action === HandleAction.Rotate) {
+			this.shape = HandleShape.Circle;
+		} else {
+			this.shape = HandleShape.Square;
+		}
+
+		switch (this.shape) {
 		case HandleShape.Circle:
 			this.element.classList.add(`${cssPrefix}circle`);
 			break;
@@ -42,7 +85,7 @@ export default class SelectionHandle {
 			this.element.classList.add(`${cssPrefix}square`);
 			break;
 		default:
-			assertUnreachable(shape);
+			assertUnreachable(this.shape);
 		}
 
 		this.updatePosition();
@@ -61,7 +104,7 @@ export default class SelectionHandle {
 	 * selection box.
 	 */
 	private getBBoxParentCoords() {
-		const parentRect = this.parent.screenRegion;
+		const parentRect = this.parent.getScreenRegion();
 		const size = Vec2.of(handleSize, handleSize);
 		const topLeft = parentRect.size.scale(this.parentSide)
 			// Center
@@ -129,7 +172,7 @@ export default class SelectionHandle {
 		if (!this.dragLastPos) {
 			return;
 		}
-		this.onDragEnd();
+		return this.onDragEnd();
 	}
 
 	public setSnapToGrid(snap: boolean) {

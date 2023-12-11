@@ -13,6 +13,10 @@ body:
   - type: markdown
     attributes:
       value: |
+         If you would like to test the translation, **after publishing this issue**, select everything from the first "Language" heading to just above the "Additional information" heading and paste into [the translation testing tool](https://js-draw.web.app/debugging/translation-tester/). 
+  - type: markdown
+    attributes:
+      value: |
          (Optional) If you would like to submit a pull request that applies this translation, note that existing translations are present in [packages/js-draw/src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations). 
   - type: input
     id: language-name
@@ -22,1097 +26,1636 @@ body:
       value: "de"
     validations:
       required: true
-  - type: input
+  - type: textarea
+    id: translation-help
+    attributes:
+      label: "help"
+      description: "Translate `Help`."
+      placeholder: "Help"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-helpHidden
+    attributes:
+      label: "helpHidden"
+      description: "Translate `Help hidden`."
+      placeholder: "Help hidden"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-next
+    attributes:
+      label: "next"
+      description: "Translate `Next`."
+      placeholder: "Next"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-previous
+    attributes:
+      label: "previous"
+      description: "Translate `Previous`."
+      placeholder: "Previous"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-close
+    attributes:
+      label: "close"
+      description: "Translate `Close`."
+      placeholder: "Close"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-helpScreenNavigationHelp
+    attributes:
+      label: "helpScreenNavigationHelp"
+      description: "Translate `Click on a control for more information.`."
+      placeholder: "Click on a control for more information."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-pen
     attributes:
       label: "pen"
-      description: "Translate `Pen`."
+      description: "Translate `Pen`.
+
+> **Note**
+> Likely unused"
       placeholder: "Pen"
       value: "Stift"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-eraser
     attributes:
       label: "eraser"
       description: "Translate `Eraser`."
       placeholder: "Eraser"
       value: "Radierer"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-select
     attributes:
       label: "select"
       description: "Translate `Select`."
       placeholder: "Select"
       value: "Auswahl"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-handTool
     attributes:
       label: "handTool"
       description: "Translate `Pan`."
       placeholder: "Pan"
       value: "Verschieben"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-zoom
     attributes:
       label: "zoom"
       description: "Translate `Zoom`."
       placeholder: "Zoom"
       value: "Vergrößerung"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-image
     attributes:
       label: "image"
       description: "Translate `Image`."
       placeholder: "Image"
       value: "Bild"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-reformatSelection
     attributes:
       label: "reformatSelection"
       description: "Translate `Format selection`."
       placeholder: "Format selection"
       value: "Formatiere Auswahl"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-inputAltText
     attributes:
       label: "inputAltText"
       description: "Translate `Alt text`."
       placeholder: "Alt text"
       value: "Alt-Text: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
+    id: translation-decreaseImageSize
+    attributes:
+      label: "decreaseImageSize"
+      description: "Translate `Decrease size`."
+      placeholder: "Decrease size"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-resetImage
+    attributes:
+      label: "resetImage"
+      description: "Translate `Reset`."
+      placeholder: "Reset"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-chooseFile
     attributes:
       label: "chooseFile"
       description: "Translate `Choose file`."
       placeholder: "Choose file"
       value: "Wähle Datei: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-dragAndDropHereOrBrowse
     attributes:
       label: "dragAndDropHereOrBrowse"
       description: "Translate `Drag and drop here
 or
-{{browse}}`."
+{{browse}}`.
+
+> **Note**
+> Uses {{curly braces}} to denote bold text"
       placeholder: "Drag and drop here
 or
 {{browse}}"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-submit
     attributes:
       label: "submit"
       description: "Translate `Submit`."
       placeholder: "Submit"
       value: "Absenden"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-cancel
     attributes:
       label: "cancel"
       description: "Translate `Cancel`."
       placeholder: "Cancel"
       value: "Abbrechen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-resetView
     attributes:
       label: "resetView"
       description: "Translate `Reset view`."
       placeholder: "Reset view"
       value: "Ansicht zurücksetzen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-thicknessLabel
     attributes:
       label: "thicknessLabel"
       description: "Translate `Thickness`."
       placeholder: "Thickness"
       value: "Dicke: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-colorLabel
     attributes:
       label: "colorLabel"
       description: "Translate `Color`."
       placeholder: "Color"
       value: "Farbe: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-fontLabel
     attributes:
       label: "fontLabel"
       description: "Translate `Font`."
       placeholder: "Font"
       value: "Schriftart: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-textSize
     attributes:
       label: "textSize"
       description: "Translate `Size`."
       placeholder: "Size"
       value: "Größe: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-resizeImageToSelection
     attributes:
       label: "resizeImageToSelection"
       description: "Translate `Resize image to selection`."
       placeholder: "Resize image to selection"
       value: "Bildgröße an Auswahl anpassen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-deleteSelection
     attributes:
       label: "deleteSelection"
       description: "Translate `Delete selection`."
       placeholder: "Delete selection"
       value: "Auswahl löschen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-duplicateSelection
     attributes:
       label: "duplicateSelection"
       description: "Translate `Duplicate selection`."
       placeholder: "Duplicate selection"
       value: "Auswahl duplizieren"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
+    id: translation-exit
+    attributes:
+      label: "exit"
+      description: "Translate `Exit`."
+      placeholder: "Exit"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-save
+    attributes:
+      label: "save"
+      description: "Translate `Save`."
+      placeholder: "Save"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-undo
     attributes:
       label: "undo"
       description: "Translate `Undo`."
       placeholder: "Undo"
       value: "Rückgängig"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-redo
     attributes:
       label: "redo"
       description: "Translate `Redo`."
       placeholder: "Redo"
       value: "Wiederholen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-selectPenTip
     attributes:
       label: "selectPenTip"
       description: "Translate `Pen tip`."
       placeholder: "Pen tip"
       value: "Objekt-Typ: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-selectShape
     attributes:
       label: "selectShape"
       description: "Translate `Shape`."
       placeholder: "Shape"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-pickColorFromScreen
     attributes:
       label: "pickColorFromScreen"
       description: "Translate `Pick color from screen`."
       placeholder: "Pick color from screen"
       value: "Farbe von Bildschirm auswählen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-clickToPickColorAnnouncement
     attributes:
       label: "clickToPickColorAnnouncement"
       description: "Translate `Click on the screen to pick a color`."
       placeholder: "Click on the screen to pick a color"
       value: "Klicke auf den Bildschirm, um eine Farbe auszuwählen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-colorSelectionCanceledAnnouncement
     attributes:
       label: "colorSelectionCanceledAnnouncement"
       description: "Translate `Color selection canceled`."
       placeholder: "Color selection canceled"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-selectionToolKeyboardShortcuts
     attributes:
       label: "selectionToolKeyboardShortcuts"
       description: "Translate `Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.`."
       placeholder: "Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize."
       value: "Auswahl-Werkzeug: Verwende die Pfeiltasten, um ausgewählte Elemente zu verschieben und ‚i‘ und ‚o‘, um ihre Größe zu ändern."
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-documentProperties
     attributes:
       label: "documentProperties"
       description: "Translate `Page`."
       placeholder: "Page"
       value: "Seite"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-backgroundColor
     attributes:
       label: "backgroundColor"
       description: "Translate `Background color`."
       placeholder: "Background color"
       value: "Hintergrundfarbe: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-imageWidthOption
     attributes:
       label: "imageWidthOption"
       description: "Translate `Width`."
       placeholder: "Width"
       value: "Breite: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-imageHeightOption
     attributes:
       label: "imageHeightOption"
       description: "Translate `Height`."
       placeholder: "Height"
       value: "Höhe: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-useGridOption
     attributes:
       label: "useGridOption"
       description: "Translate `Grid`."
       placeholder: "Grid"
       value: "Gitter: "
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
+    id: translation-enableAutoresizeOption
+    attributes:
+      label: "enableAutoresizeOption"
+      description: "Translate `Auto-resize`."
+      placeholder: "Auto-resize"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-toggleOverflow
     attributes:
       label: "toggleOverflow"
       description: "Translate `More`."
       placeholder: "More"
       value: "Mehr"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-about
     attributes:
       label: "about"
       description: "Translate `About`."
       placeholder: "About"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-inputStabilization
     attributes:
       label: "inputStabilization"
-      description: "Translate `Input stabilization`."
-      placeholder: "Input stabilization"
+      description: "Translate `Stabilization`."
+      placeholder: "Stabilization"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
+    id: translation-strokeAutocorrect
+    attributes:
+      label: "strokeAutocorrect"
+      description: "Translate `Autocorrect`."
+      placeholder: "Autocorrect"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-touchPanning
     attributes:
       label: "touchPanning"
       description: "Translate `Touchscreen panning`."
       placeholder: "Touchscreen panning"
       value: "Ansicht mit Touchscreen verschieben"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-roundedTipPen
     attributes:
       label: "roundedTipPen"
       description: "Translate `Round`."
       placeholder: "Round"
       value: "Freihand"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-flatTipPen
     attributes:
       label: "flatTipPen"
       description: "Translate `Flat`."
       placeholder: "Flat"
       value: "Stift (druckempfindlich)"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-arrowPen
     attributes:
       label: "arrowPen"
       description: "Translate `Arrow`."
       placeholder: "Arrow"
       value: "Pfeil"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-linePen
     attributes:
       label: "linePen"
       description: "Translate `Line`."
       placeholder: "Line"
       value: "Linie"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-outlinedRectanglePen
     attributes:
       label: "outlinedRectanglePen"
       description: "Translate `Outlined rectangle`."
       placeholder: "Outlined rectangle"
       value: "Umrissenes Rechteck"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-filledRectanglePen
     attributes:
       label: "filledRectanglePen"
       description: "Translate `Filled rectangle`."
       placeholder: "Filled rectangle"
       value: "Ausgefülltes Rechteck"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-outlinedCirclePen
     attributes:
       label: "outlinedCirclePen"
       description: "Translate `Outlined circle`."
       placeholder: "Outlined circle"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-lockRotation
     attributes:
       label: "lockRotation"
       description: "Translate `Lock rotation`."
       placeholder: "Lock rotation"
       value: "Sperre Rotation"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-paste
     attributes:
       label: "paste"
       description: "Translate `Paste`."
       placeholder: "Paste"
       value: "Einfügen"
+      render: "shell"
     validations:
       required: false
-  - type: input
-    id: translation-closeSidebar
-    attributes:
-      label: "closeSidebar"
-      description: "Translate ``(toolName) => `Close sidebar for ${toolName}` ``."
-      placeholder: "(toolName) => `Close sidebar for ${toolName}`"
-      value: "(toolName) => `Close sidebar for ${toolName}`"
-    validations:
-      required: false
-  - type: input
-    id: translation-dropdownShown
-    attributes:
-      label: "dropdownShown"
-      description: "Translate ``(toolName) => `Menu for ${toolName} shown` ``."
-      placeholder: "(toolName) => `Menu for ${toolName} shown`"
-      value: "(toolName) => `Dropdown-Menü für ${toolName} angezeigt`"
-    validations:
-      required: false
-  - type: input
-    id: translation-dropdownHidden
-    attributes:
-      label: "dropdownHidden"
-      description: "Translate ``(toolName) => `Menu for ${toolName} hidden` ``."
-      placeholder: "(toolName) => `Menu for ${toolName} hidden`"
-      value: "(toolName) => `Dropdown-Menü für ${toolName} versteckt`"
-    validations:
-      required: false
-  - type: input
-    id: translation-zoomLevel
-    attributes:
-      label: "zoomLevel"
-      description: "Translate ``(zoomPercent) => `Zoom: ${zoomPercent}%` ``."
-      placeholder: "(zoomPercent) => `Zoom: ${zoomPercent}%`"
-      value: "(zoomPercent) => `Vergößerung: ${zoomPercent}%`"
-    validations:
-      required: false
-  - type: input
-    id: translation-colorChangedAnnouncement
-    attributes:
-      label: "colorChangedAnnouncement"
-      description: "Translate ``(color) => `Color changed to ${color}` ``."
-      placeholder: "(color) => `Color changed to ${color}`"
-      value: "(color) => `Farbe zu ${color} geändert`"
-    validations:
-      required: false
-  - type: input
-    id: translation-imageSize
-    attributes:
-      label: "imageSize"
-      description: "Translate ``(size, units) => `Image size: ${size} ${units}` ``."
-      placeholder: "(size, units) => `Image size: ${size} ${units}`"
-      value: "(size, units) => `Bild-Größe: ${size} ${units}`"
-    validations:
-      required: false
-  - type: input
+  - type: textarea
     id: translation-errorImageHasZeroSize
     attributes:
       label: "errorImageHasZeroSize"
       description: "Translate `Error: Image has zero size`."
       placeholder: "Error: Image has zero size"
       value: "Fehler: Bild hat Größe Null"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
+    id: translation-penDropdown__baseHelpText
+    attributes:
+      label: "penDropdown__baseHelpText"
+      description: "Translate `This tool draws shapes or freehand lines.`."
+      placeholder: "This tool draws shapes or freehand lines."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__colorHelpText
+    attributes:
+      label: "penDropdown__colorHelpText"
+      description: "Translate `Changes the pen's color`."
+      placeholder: "Changes the pen's color"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__thicknessHelpText
+    attributes:
+      label: "penDropdown__thicknessHelpText"
+      description: "Translate `Changes the thickness of strokes drawn by the pen.`."
+      placeholder: "Changes the thickness of strokes drawn by the pen."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__penTypeHelpText
+    attributes:
+      label: "penDropdown__penTypeHelpText"
+      description: "Translate `Changes the pen style.
+
+Either a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.`."
+      placeholder: "Changes the pen style.
+
+Either a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__autocorrectHelpText
+    attributes:
+      label: "penDropdown__autocorrectHelpText"
+      description: "Translate `Converts approximate freehand lines and rectangles to perfect ones.
+
+The pen must be held stationary at the end of a stroke to trigger a correction.`."
+      placeholder: "Converts approximate freehand lines and rectangles to perfect ones.
+
+The pen must be held stationary at the end of a stroke to trigger a correction."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__stabilizationHelpText
+    attributes:
+      label: "penDropdown__stabilizationHelpText"
+      description: "Translate `Draws smoother strokes.
+
+This also adds a short delay between the mouse/stylus and the stroke.`."
+      placeholder: "Draws smoother strokes.
+
+This also adds a short delay between the mouse/stylus and the stroke."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__baseHelpText
+    attributes:
+      label: "handDropdown__baseHelpText"
+      description: "Translate `This tool is responsible for scrolling, rotating, and zooming the editor.`."
+      placeholder: "This tool is responsible for scrolling, rotating, and zooming the editor."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__zoomInHelpText
+    attributes:
+      label: "handDropdown__zoomInHelpText"
+      description: "Translate `Zooms in.`."
+      placeholder: "Zooms in."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__zoomOutHelpText
+    attributes:
+      label: "handDropdown__zoomOutHelpText"
+      description: "Translate `Zooms out.`."
+      placeholder: "Zooms out."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__resetViewHelpText
+    attributes:
+      label: "handDropdown__resetViewHelpText"
+      description: "Translate `Resets the zoom level to 100% and resets scroll.`."
+      placeholder: "Resets the zoom level to 100% and resets scroll."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__zoomDisplayHelpText
+    attributes:
+      label: "handDropdown__zoomDisplayHelpText"
+      description: "Translate `Shows the current zoom level. 100% shows the image at its actual size.`."
+      placeholder: "Shows the current zoom level. 100% shows the image at its actual size."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__touchPanningHelpText
+    attributes:
+      label: "handDropdown__touchPanningHelpText"
+      description: "Translate `When enabled, touch gestures move the image rather than select or draw.`."
+      placeholder: "When enabled, touch gestures move the image rather than select or draw."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-handDropdown__lockRotationHelpText
+    attributes:
+      label: "handDropdown__lockRotationHelpText"
+      description: "Translate `When enabled, prevents touch gestures from rotating the screen.`."
+      placeholder: "When enabled, prevents touch gestures from rotating the screen."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__baseHelpText
+    attributes:
+      label: "selectionDropdown__baseHelpText"
+      description: "Translate `Selects content and manipulates the selection`."
+      placeholder: "Selects content and manipulates the selection"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__resizeToHelpText
+    attributes:
+      label: "selectionDropdown__resizeToHelpText"
+      description: "Translate `Crops the drawing to the size of what's currently selected.
+
+If auto-resize is enabled, it will be disabled.`."
+      placeholder: "Crops the drawing to the size of what's currently selected.
+
+If auto-resize is enabled, it will be disabled."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__deleteHelpText
+    attributes:
+      label: "selectionDropdown__deleteHelpText"
+      description: "Translate `Erases selected items.`."
+      placeholder: "Erases selected items."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__duplicateHelpText
+    attributes:
+      label: "selectionDropdown__duplicateHelpText"
+      description: "Translate `Makes a copy of selected items.`."
+      placeholder: "Makes a copy of selected items."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionDropdown__changeColorHelpText
+    attributes:
+      label: "selectionDropdown__changeColorHelpText"
+      description: "Translate `Changes the color of selected items.`."
+      placeholder: "Changes the color of selected items."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__baseHelpText
+    attributes:
+      label: "pageDropdown__baseHelpText"
+      description: "Translate `Controls the drawing canvas' background color, pattern, and size.`."
+      placeholder: "Controls the drawing canvas' background color, pattern, and size."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__backgroundColorHelpText
+    attributes:
+      label: "pageDropdown__backgroundColorHelpText"
+      description: "Translate `Changes the background color of the drawing canvas.`."
+      placeholder: "Changes the background color of the drawing canvas."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__gridCheckboxHelpText
+    attributes:
+      label: "pageDropdown__gridCheckboxHelpText"
+      description: "Translate `Controls whether the drawing canvas has a background grid pattern.`."
+      placeholder: "Controls whether the drawing canvas has a background grid pattern."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__autoresizeCheckboxHelpText
+    attributes:
+      label: "pageDropdown__autoresizeCheckboxHelpText"
+      description: "Translate `When checked, the page grows to fit the drawing.
+
+When unchecked, the page is visible and its size can be set manually.`."
+      placeholder: "When checked, the page grows to fit the drawing.
+
+When unchecked, the page is visible and its size can be set manually."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-pageDropdown__aboutButtonHelpText
+    attributes:
+      label: "pageDropdown__aboutButtonHelpText"
+      description: "Translate `Shows version, debug, and other information.`."
+      placeholder: "Shows version, debug, and other information."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-colorPickerPipetteHelpText
+    attributes:
+      label: "colorPickerPipetteHelpText"
+      description: "Translate `Picks a color from the screen.`."
+      placeholder: "Picks a color from the screen."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-colorPickerToggleHelpText
+    attributes:
+      label: "colorPickerToggleHelpText"
+      description: "Translate `Opens/closes the color picker.`."
+      placeholder: "Opens/closes the color picker."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-closeSidebar
+    attributes:
+      label: "closeSidebar"
+      description: "Translate ``(toolName) => `Close sidebar for ${toolName}` ``.
+
+> **Note**
+> Currently used as an accessibilty label"
+      placeholder: "(toolName) => `Close sidebar for ${toolName}`"
+      value: "(toolName) => `Close sidebar for ${toolName}`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-dropdownShown
+    attributes:
+      label: "dropdownShown"
+      description: "Translate ``(toolName) => `Menu for ${toolName} shown` ``."
+      placeholder: "(toolName) => `Menu for ${toolName} shown`"
+      value: "(toolName) => `Dropdown-Menü für ${toolName} angezeigt`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-dropdownHidden
+    attributes:
+      label: "dropdownHidden"
+      description: "Translate ``(toolName) => `Menu for ${toolName} hidden` ``."
+      placeholder: "(toolName) => `Menu for ${toolName} hidden`"
+      value: "(toolName) => `Dropdown-Menü für ${toolName} versteckt`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-zoomLevel
+    attributes:
+      label: "zoomLevel"
+      description: "Translate ``(zoomPercent) => `Zoom: ${zoomPercent}%` ``."
+      placeholder: "(zoomPercent) => `Zoom: ${zoomPercent}%`"
+      value: "(zoomPercent) => `Vergößerung: ${zoomPercent}%`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-colorChangedAnnouncement
+    attributes:
+      label: "colorChangedAnnouncement"
+      description: "Translate ``(color) => `Color changed to ${color}` ``."
+      placeholder: "(color) => `Color changed to ${color}`"
+      value: "(color) => `Farbe zu ${color} geändert`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-imageSize
+    attributes:
+      label: "imageSize"
+      description: "Translate ``(size, units) => `Image size: ${size} ${units}` ``."
+      placeholder: "(size, units) => `Image size: ${size} ${units}`"
+      value: "(size, units) => `Bild-Größe: ${size} ${units}`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-imageLoadError
     attributes:
       label: "imageLoadError"
       description: "Translate ``(message) => `Error loading image: ${message}` ``."
       placeholder: "(message) => `Error loading image: ${message}`"
       value: "(message) => `Fehler beim Laden des Bildes: ${message}`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-penTool
     attributes:
       label: "penTool"
       description: "Translate ``(penId) => `Pen ${penId}` ``."
       placeholder: "(penId) => `Pen ${penId}`"
       value: "(penNumber) => `Stift ${penNumber}`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-selectionTool
     attributes:
       label: "selectionTool"
       description: "Translate `Selection`."
       placeholder: "Selection"
       value: "Auswahl"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-selectAllTool
     attributes:
       label: "selectAllTool"
       description: "Translate `Select all shortcut`."
       placeholder: "Select all shortcut"
       value: "Alle auswählen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-eraserTool
     attributes:
       label: "eraserTool"
       description: "Translate `Eraser`."
       placeholder: "Eraser"
       value: "Radiergummi"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-touchPanTool
     attributes:
       label: "touchPanTool"
       description: "Translate `Touch panning`."
       placeholder: "Touch panning"
       value: "Ansicht mit Touchscreen verschieben"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-twoFingerPanZoomTool
     attributes:
       label: "twoFingerPanZoomTool"
       description: "Translate `Panning and zooming`."
       placeholder: "Panning and zooming"
       value: "Ansicht verschieben und vergrößern"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-undoRedoTool
     attributes:
       label: "undoRedoTool"
       description: "Translate `Undo/Redo`."
       placeholder: "Undo/Redo"
       value: "Rückgängig/Wiederholen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-rightClickDragPanTool
     attributes:
       label: "rightClickDragPanTool"
       description: "Translate `Right-click drag`."
       placeholder: "Right-click drag"
       value: "Rechtsklick-Ziehen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-pipetteTool
     attributes:
       label: "pipetteTool"
       description: "Translate `Pick color from screen`."
       placeholder: "Pick color from screen"
       value: "Farbe von Bildschirm auswählen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-keyboardPanZoom
     attributes:
       label: "keyboardPanZoom"
       description: "Translate `Keyboard pan/zoom shortcuts`."
       placeholder: "Keyboard pan/zoom shortcuts"
       value: "Tastaturkürzel zum Verschieben/Vergrößern der Ansicht"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
+    id: translation-autocorrectedTo
+    attributes:
+      label: "autocorrectedTo"
+      description: "Translate ``(strokeDescription) => `Autocorrected to ${strokeDescription}` ``."
+      placeholder: "(strokeDescription) => `Autocorrected to ${strokeDescription}`"
+      value: "(strokeDescription) => `Autocorrected to ${strokeDescription}`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-autocorrectionCanceled
+    attributes:
+      label: "autocorrectionCanceled"
+      description: "Translate `Autocorrect cancelled`."
+      placeholder: "Autocorrect cancelled"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-textTool
     attributes:
       label: "textTool"
       description: "Translate `Text`."
       placeholder: "Text"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-enterTextToInsert
     attributes:
       label: "enterTextToInsert"
       description: "Translate `Text to insert`."
       placeholder: "Text to insert"
       value: "Einzufügender Text"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-changeTool
     attributes:
       label: "changeTool"
       description: "Translate `Change tool`."
       placeholder: "Change tool"
       value: "Wechsle Werkzeug"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-pasteHandler
     attributes:
       label: "pasteHandler"
       description: "Translate `Copy paste handler`."
       placeholder: "Copy paste handler"
       value: "Copy-Paste-Handler"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-soundExplorer
     attributes:
       label: "soundExplorer"
       description: "Translate `Sound-based image exploration`."
       placeholder: "Sound-based image exploration"
       value: "Klangbasierte Bilderkundung"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-disableAccessibilityExploreTool
     attributes:
       label: "disableAccessibilityExploreTool"
       description: "Translate `Disable sound-based exploration`."
       placeholder: "Disable sound-based exploration"
       value: "Deaktiviere klangbasierte Erkundung"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-enableAccessibilityExploreTool
     attributes:
       label: "enableAccessibilityExploreTool"
       description: "Translate `Enable sound-based exploration`."
       placeholder: "Enable sound-based exploration"
       value: "Aktiviere klangbasierte Erkundung"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-soundExplorerUsageAnnouncement
     attributes:
       label: "soundExplorerUsageAnnouncement"
       description: "Translate `Sound-based image exploration enabled: Click/drag the screen to play a sound representation of different parts of the image.`."
       placeholder: "Sound-based image exploration enabled: Click/drag the screen to play a sound representation of different parts of the image."
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-findLabel
     attributes:
       label: "findLabel"
       description: "Translate `Find`."
       placeholder: "Find"
       value: "Finde"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-toNextMatch
     attributes:
       label: "toNextMatch"
       description: "Translate `Next`."
       placeholder: "Next"
       value: "Nächstes"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-closeDialog
     attributes:
       label: "closeDialog"
       description: "Translate `Close`."
       placeholder: "Close"
       value: "Schließen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-findDialogShown
     attributes:
       label: "findDialogShown"
       description: "Translate `Find dialog shown`."
       placeholder: "Find dialog shown"
       value: "Finde-Dialog angezeigt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-findDialogHidden
     attributes:
       label: "findDialogHidden"
       description: "Translate `Find dialog hidden`."
       placeholder: "Find dialog hidden"
       value: "Finde-Dialog versteckt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-focusedFoundText
     attributes:
       label: "focusedFoundText"
       description: "Translate ``(matchIdx, totalMatches) => `Viewing match ${matchIdx} of ${totalMatches}` ``."
       placeholder: "(matchIdx, totalMatches) => `Viewing match ${matchIdx} of ${totalMatches}`"
       value: "(matchIdx, totalMatches) => `Sieh Treffer ${matchIdx} von ${totalMatches} an`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-anyDevicePanning
     attributes:
       label: "anyDevicePanning"
       description: "Translate `Any device panning`."
       placeholder: "Any device panning"
       value: "Ansicht mit jedem Eingabegerät verschieben"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-copied
     attributes:
       label: "copied"
       description: "Translate ``(count, description) => `Copied ${count} ${description}` ``."
       placeholder: "(count, description) => `Copied ${count} ${description}`"
       value: "(count, description) => `${count} ${description} kopiert`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-pasted
     attributes:
       label: "pasted"
       description: "Translate ``(count, description) => `Pasted ${count} ${description}` ``."
       placeholder: "(count, description) => `Pasted ${count} ${description}`"
       value: "(count, description) => `${count} ${description} eingefügt`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-toolEnabledAnnouncement
     attributes:
       label: "toolEnabledAnnouncement"
       description: "Translate ``(toolName) => `${toolName} enabled` ``."
       placeholder: "(toolName) => `${toolName} enabled`"
       value: "(toolName) => `${toolName} aktiviert`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-toolDisabledAnnouncement
     attributes:
       label: "toolDisabledAnnouncement"
       description: "Translate ``(toolName) => `${toolName} disabled` ``."
       placeholder: "(toolName) => `${toolName} disabled`"
       value: "(toolName) => `${toolName} deaktiviert`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-updatedViewport
     attributes:
       label: "updatedViewport"
       description: "Translate `Transformed Viewport`."
       placeholder: "Transformed Viewport"
       value: "Transformierte Ansicht"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-transformedElements
     attributes:
       label: "transformedElements"
       description: "Translate ``(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}` ``."
       placeholder: "(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`"
       value: "(elemCount) => `${elemCount} Element${1 === elemCount ? '' : 'e'} transformiert`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-resizeOutputCommand
     attributes:
       label: "resizeOutputCommand"
       description: "Translate ``(newSize) => `Resized image to ${newSize.w}x${newSize.h}` ``."
       placeholder: "(newSize) => `Resized image to ${newSize.w}x${newSize.h}`"
       value: "(newSize) => `Bildgröße auf ${newSize.w}x${newSize.h} geändert`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
+    id: translation-enabledAutoresizeOutputCommand
+    attributes:
+      label: "enabledAutoresizeOutputCommand"
+      description: "Translate `Enabled output autoresize`."
+      placeholder: "Enabled output autoresize"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-disabledAutoresizeOutputCommand
+    attributes:
+      label: "disabledAutoresizeOutputCommand"
+      description: "Translate `Disabled output autoresize`."
+      placeholder: "Disabled output autoresize"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-addElementAction
     attributes:
       label: "addElementAction"
       description: "Translate ``(componentDescription) => `Added ${componentDescription}` ``."
       placeholder: "(componentDescription) => `Added ${componentDescription}`"
       value: "(componentDescription) => `${componentDescription} hinzugefügt`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-eraseAction
     attributes:
       label: "eraseAction"
       description: "Translate ``(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}` ``."
       placeholder: "(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`"
       value: "(elemDescription, countErased) => `${countErased} ${elemDescription} gelöscht`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-duplicateAction
     attributes:
       label: "duplicateAction"
       description: "Translate ``(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}` ``."
       placeholder: "(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}`"
       value: "(elemDescription, countErased) => `${countErased} ${elemDescription} dupliziert`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-unionOf
     attributes:
       label: "unionOf"
       description: "Translate ``(actionDescription, actionCount) => `Union: ${actionCount} ${actionDescription}` ``."
       placeholder: "(actionDescription, actionCount) => `Union: ${actionCount} ${actionDescription}`"
       value: "(actionDescription, actionCount) => `Vereinigung: ${actionCount} ${actionDescription}`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-inverseOf
     attributes:
       label: "inverseOf"
       description: "Translate ``(actionDescription) => `Inverse of ${actionDescription}` ``."
       placeholder: "(actionDescription) => `Inverse of ${actionDescription}`"
       value: "(actionDescription) => `${actionDescription} umgekehrt`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-elements
     attributes:
       label: "elements"
       description: "Translate `Elements`."
       placeholder: "Elements"
       value: "Elemente"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-erasedNoElements
     attributes:
       label: "erasedNoElements"
       description: "Translate `Erased nothing`."
       placeholder: "Erased nothing"
       value: "Nichts entfernt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-duplicatedNoElements
     attributes:
       label: "duplicatedNoElements"
       description: "Translate `Duplicated nothing`."
       placeholder: "Duplicated nothing"
       value: "Nichts dupliziert"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-rotatedBy
     attributes:
       label: "rotatedBy"
       description: "Translate ``(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}` ``."
       placeholder: "(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`"
       value: "(degrees) => `${Math.abs(degrees)} Grad ${degrees < 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn'} gedreht`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-movedLeft
     attributes:
       label: "movedLeft"
       description: "Translate `Moved left`."
       placeholder: "Moved left"
       value: "Nacht links bewegt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-movedUp
     attributes:
       label: "movedUp"
       description: "Translate `Moved up`."
       placeholder: "Moved up"
       value: "Nacht oben bewegt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-movedDown
     attributes:
       label: "movedDown"
       description: "Translate `Moved down`."
       placeholder: "Moved down"
       value: "Nacht unten bewegt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-movedRight
     attributes:
       label: "movedRight"
       description: "Translate `Moved right`."
       placeholder: "Moved right"
       value: "Nacht rechts bewegt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-zoomedOut
     attributes:
       label: "zoomedOut"
       description: "Translate `Zoomed out`."
       placeholder: "Zoomed out"
       value: "Ansicht verkleinert"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-zoomedIn
     attributes:
       label: "zoomedIn"
       description: "Translate `Zoomed in`."
       placeholder: "Zoomed in"
       value: "Ansicht vergrößert"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-selectedElements
     attributes:
       label: "selectedElements"
       description: "Translate ``(count) => `Selected ${count} element${count === 1 ? '' : 's'}` ``."
       placeholder: "(count) => `Selected ${count} element${count === 1 ? '' : 's'}`"
       value: "(count) => `${count} Element${1 === count ? '' : 'e'} ausgewählt`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-unlabeledImageNode
     attributes:
       label: "unlabeledImageNode"
       description: "Translate `Unlabeled image`."
       placeholder: "Unlabeled image"
       value: "Bild ohne Label"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-stroke
     attributes:
       label: "stroke"
       description: "Translate `Stroke`."
       placeholder: "Stroke"
       value: "Strich"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-svgObject
     attributes:
       label: "svgObject"
       description: "Translate `SVG Object`."
       placeholder: "SVG Object"
       value: "SVG-Objekt"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-emptyBackground
     attributes:
       label: "emptyBackground"
       description: "Translate `Empty background`."
       placeholder: "Empty background"
       value: "Leerer Hintergrund"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-gridBackground
     attributes:
       label: "gridBackground"
       description: "Translate `Grid background`."
       placeholder: "Grid background"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-filledBackgroundWithColor
     attributes:
       label: "filledBackgroundWithColor"
       description: "Translate ``(color) => `Filled background (${color})` ``."
       placeholder: "(color) => `Filled background (${color})`"
       value: "(color) => `Gefüllter Hintergrund (${color})`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-text
     attributes:
       label: "text"
       description: "Translate ``(text) => `Text object: ${text}` ``."
       placeholder: "(text) => `Text object: ${text}`"
       value: "(text) => `Text-Objekt: ${text}`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-imageNode
     attributes:
       label: "imageNode"
       description: "Translate ``(label) => `Image: ${label}` ``."
       placeholder: "(label) => `Image: ${label}`"
       value: "label => `Bild: ${label}`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-restyledElement
     attributes:
       label: "restyledElement"
       description: "Translate ``(elementDescription) => `Restyled ${elementDescription}` ``."
       placeholder: "(elementDescription) => `Restyled ${elementDescription}`"
       value: "(elementDescription) => `${elementDescription} umgestaltet`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-pathNodeCount
     attributes:
       label: "pathNodeCount"
       description: "Translate ``(count) => `There are ${count} visible path objects.` ``."
       placeholder: "(count) => `There are ${count} visible path objects.`"
       value: "(count) => `Es gibt ${count} sichtbare Pfad-Objekte.`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-textNodeCount
     attributes:
       label: "textNodeCount"
       description: "Translate ``(count) => `There are ${count} visible text nodes.` ``."
       placeholder: "(count) => `There are ${count} visible text nodes.`"
       value: "(count) => `Es gibt ${count} sichtbare Text-Knotenpunkte.`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-imageNodeCount
     attributes:
       label: "imageNodeCount"
       description: "Translate ``(nodeCount) => `There are ${nodeCount} visible image nodes.` ``."
       placeholder: "(nodeCount) => `There are ${nodeCount} visible image nodes.`"
       value: "(nodeCount) => `Es gibt ${nodeCount} sichtbare Bild-Knoten.`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-textNode
     attributes:
       label: "textNode"
       description: "Translate ``(content) => `Text: ${content}` ``."
       placeholder: "(content) => `Text: ${content}`"
       value: "(content) => `Text: ${content}`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-rerenderAsText
     attributes:
       label: "rerenderAsText"
       description: "Translate `Re-render as text`."
       placeholder: "Re-render as text"
       value: "Als Text darstellen"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-accessibilityInputInstructions
     attributes:
       label: "accessibilityInputInstructions"
       description: "Translate `Press \"t\" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press \"w\" to zoom in and \"s\" to zoom out.`."
       placeholder: "Press \"t\" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press \"w\" to zoom in and \"s\" to zoom out."
       value: "Drücke ‚t‘, um den Inhalt des Ansichtsfensters als Text zu lesen. Verwende die Pfeiltasten, um die Ansicht zu verschieben, und klicke und ziehe, um Striche zu zeichnen. Drücke ‚w‘ zum Vergrößern und ‚s‘ zum Verkleinern der Ansicht."
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-loading
     attributes:
       label: "loading"
       description: "Translate ``(percentage) => `Loading ${percentage}%...` ``."
       placeholder: "(percentage) => `Loading ${percentage}%...`"
       value: "percentage => `Laden ${percentage}%...`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-imageEditor
     attributes:
       label: "imageEditor"
       description: "Translate `Image Editor`."
       placeholder: "Image Editor"
       value: "Bild-Editor"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-doneLoading
     attributes:
       label: "doneLoading"
       description: "Translate `Done loading`."
       placeholder: "Done loading"
       value: "Laden fertig"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-undoAnnouncement
     attributes:
       label: "undoAnnouncement"
       description: "Translate ``(commandDescription) => `Undid ${commandDescription}` ``."
       placeholder: "(commandDescription) => `Undid ${commandDescription}`"
       value: "(commandDescription) => `${commandDescription} rückgängig gemacht`"
+      render: "shell"
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: translation-redoAnnouncement
     attributes:
       label: "redoAnnouncement"
       description: "Translate ``(commandDescription) => `Redid ${commandDescription}` ``."
       placeholder: "(commandDescription) => `Redid ${commandDescription}`"
       value: "(commandDescription) => `${commandDescription} wiederholt`"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-softwareLibraries
+    attributes:
+      label: "softwareLibraries"
+      description: "Translate `Libraries`."
+      placeholder: "Libraries"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-developerInformation
+    attributes:
+      label: "developerInformation"
+      description: "Translate `Developer information`."
+      placeholder: "Developer information"
+      render: "shell"
     validations:
       required: false
   - type: textarea

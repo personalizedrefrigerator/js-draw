@@ -143,6 +143,10 @@ export default class SoundUITool extends BaseTool {
 		editor.createHTMLOverlay(this.toggleButtonContainer);
 	}
 
+	public override canReceiveInputInReadOnlyEditor() {
+		return true;
+	}
+
 	private updateToggleButtonText() {
 		const containerEnabledClass = 'sound-ui-tool-enabled';
 		if (this.isEnabled()) {
@@ -157,7 +161,7 @@ export default class SoundUITool extends BaseTool {
 	public override setEnabled(enabled: boolean): void {
 		super.setEnabled(enabled);
 
-		if (!enabled) {
+		if (!this.isEnabled()) {
 			this.soundFeedback?.close();
 			this.soundFeedback = null;
 		} else {

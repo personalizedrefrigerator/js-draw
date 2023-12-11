@@ -1,0 +1,33 @@
+
+
+// Repeat selector for extra specificity
+:root .toolbar--pen-tool-toggle-buttons.toolbar--pen-tool-toggle-buttons {
+	display: flex;
+	justify-content: stretch;
+	padding-top: 0;
+	padding-bottom: 5px;
+
+	// Some styles rely on left being start.
+	direction: ltr;
+
+	& > * {
+		flex-grow: 1;
+		text-align: start;
+		margin-inline-end: 5px;
+
+		.icon {
+			margin: 0;
+			margin-inline-start: 4px;
+			margin-inline-end: 10px;
+		}
+	}
+
+	& > :nth-child(1) {
+		direction: ltr;
+	}
+
+	& > :last-child {
+		// Reverse the last (show icon on the right)
+		direction: rtl;
+	}
+}

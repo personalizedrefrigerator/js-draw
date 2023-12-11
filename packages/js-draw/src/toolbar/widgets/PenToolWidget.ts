@@ -18,6 +18,8 @@ import { selectStrokeTypeKeyboardShortcutIds } from './keybindings';
 import { toolbarCSSPrefix } from '../constants';
 import makeThicknessSlider from './components/makeThicknessSlider';
 import makeGridSelector from './components/makeGridSelector';
+import { IconElemType } from '../IconProvider';
+import HelpDisplay from '../utils/HelpDisplay';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -165,7 +167,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 
 	// Creates a widget that allows selecting different pen types
-	private createPenTypeSelector() {
+	private createPenTypeSelector(helpOverlay?: HelpDisplay) {
 		const allChoices = this.penTypes.map((penType, index) => {
 			return {
 				id: index,
@@ -194,6 +196,11 @@ export default class PenToolWidget extends BaseToolWidget {
 		penSelector.value.onUpdate(onSelectorUpdate);
 		shapeSelector.value.onUpdate(onSelectorUpdate);
 
+		helpOverlay?.registerTextHelpForElements(
+			[penSelector.getRootElement(), shapeSelector.getRootElement()],
+			this.localizationTable.penDropdown__penTypeHelpText,
+		);
+
 		return {
 			setValue: (penTypeIndex: number) => {
 				penSelector.value.set(penTypeIndex);
@@ -212,38 +219,85 @@ export default class PenToolWidget extends BaseToolWidget {
 		};
 	}
 
-	private setInputStabilizationEnabled(enabled: boolean) {
-		this.tool.setHasStabilization(enabled);
-	}
+	protected createStrokeCorrectionOptions(helpOverlay?: HelpDisplay) {
+		const container = document.createElement('div');
+		container.classList.add('action-button-row', `${toolbarCSSPrefix}-pen-tool-toggle-buttons`);
 
-	protected createStabilizationOption() {
-		const stabilizationOption = document.createElement('div');
-		const stabilizationCheckbox = document.createElement('input');
-		const stabilizationLabel = document.createElement('label');
-		stabilizationLabel.innerText = this.localizationTable.inputStabilization;
+		const addToggleButton = (labelText: string, icon: IconElemType) => {
+			const button = document.createElement('button');
+			button.classList.add(`${toolbarCSSPrefix}-toggle-button`);
 
-		stabilizationCheckbox.type = 'checkbox';
-		stabilizationCheckbox.id = `${toolbarCSSPrefix}-penInputStabilizationCheckbox-${PenToolWidget.idCounter++}`;
-		stabilizationLabel.htmlFor = stabilizationCheckbox.id;
+			const iconElement = icon.cloneNode(true) as IconElemType;
+			iconElement.classList.add('icon');
 
-		stabilizationOption.replaceChildren(stabilizationLabel, stabilizationCheckbox);
+			const label = document.createElement('span');
+			label.innerText = labelText;
 
-		stabilizationCheckbox.oninput = () => {
-			this.setInputStabilizationEnabled(stabilizationCheckbox.checked);
+			button.replaceChildren(iconElement, label);
+			button.setAttribute('role', 'switch');
+
+			container.appendChild(button);
+
+			let checked = false;
+			let onChangeListener = (_checked: boolean)=>{};
+
+			const result = {
+				setChecked(newChecked: boolean) {
+					checked = newChecked;
+					button.setAttribute('aria-checked', `${checked}`);
+					onChangeListener(checked);
+				},
+				setOnInputListener(listener: (checked: boolean)=>void) {
+					onChangeListener = listener;
+				},
+				addHelpText(text: string) {
+					helpOverlay?.registerTextHelpForElement(button, text);
+				},
+			};
+			button.onclick = () => {
+				result.setChecked(!checked);
+			};
+
+			return result;
 		};
+
+		const stabilizationOption = addToggleButton(
+			this.localizationTable.inputStabilization,
+			this.editor.icons.makeStrokeSmoothingIcon(),
+		);
+		stabilizationOption.setOnInputListener(enabled => {
+			this.tool.setHasStabilization(enabled);
+		});
+
+		const autocorrectOption = addToggleButton(
+			this.localizationTable.strokeAutocorrect,
+			this.editor.icons.makeShapeAutocorrectIcon(),
+		);
+		autocorrectOption.setOnInputListener(enabled => {
+			this.tool.setStrokeAutocorrectEnabled(enabled);
+		});
+
+		// Help text
+		autocorrectOption.addHelpText(this.localizationTable.penDropdown__autocorrectHelpText);
+		stabilizationOption.addHelpText(this.localizationTable.penDropdown__stabilizationHelpText);
 
 		return {
 			update: () => {
-				stabilizationCheckbox.checked = !!this.tool.getInputMapper();
+				stabilizationOption.setChecked(!!this.tool.getInputMapper());
+				autocorrectOption.setChecked(this.tool.getStrokeAutocorrectionEnabled());
 			},
 
 			addTo: (parent: HTMLElement) => {
-				parent.appendChild(stabilizationOption);
-			}
+				parent.appendChild(container);
+			},
 		};
 	}
 
-	protected override fillDropdown(dropdown: HTMLElement): boolean {
+	protected override getHelpText() {
+		return this.localizationTable.penDropdown__baseHelpText;
+	}
+
+	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		const container = document.createElement('div');
 		container.classList.add(
 			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
@@ -254,15 +308,12 @@ export default class PenToolWidget extends BaseToolWidget {
 			this.tool.setThickness(thickness);
 		});
 
-		const penTypeSelect = this.createPenTypeSelector();
-
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const {
-			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
-		} = makeColorInput(this.editor, color => {
+		const colorInputControl = makeColorInput(this.editor, color => {
 			this.tool.setColor(color);
 		});
+		const { input: colorInput, container: colorInputContainer } = colorInputControl;
 
 		colorInput.id = `${toolbarCSSPrefix}colorInput${PenToolWidget.idCounter++}`;
 		colorLabel.innerText = this.localizationTable.colorLabel;
@@ -271,25 +322,48 @@ export default class PenToolWidget extends BaseToolWidget {
 		colorRow.appendChild(colorLabel);
 		colorRow.appendChild(colorInputContainer);
 
-		const stabilizationOption = this.createStabilizationOption();
+		// Autocorrect and stabilization options
+		const toggleButtonRow = this.createStrokeCorrectionOptions(helpDisplay);
+
+		const penTypeSelect = this.createPenTypeSelector(helpDisplay);
+
+		// Add help text for color and thickness last, as these are likely to be
+		// features users are least interested in.
+		helpDisplay?.registerTextHelpForElement(
+			colorRow,
+			this.localizationTable.penDropdown__colorHelpText
+		);
+
+		if (helpDisplay) {
+			colorInputControl.registerWithHelpTextDisplay(helpDisplay);
+		}
+
+		helpDisplay?.registerTextHelpForElement(
+			thicknessRow, this.localizationTable.penDropdown__thicknessHelpText,
+		);
+
 
 		this.updateInputs = () => {
-			setColorInputValue(this.tool.getColor());
+			colorInputControl.setValue(this.tool.getColor());
 			setThickness(this.tool.getThickness());
 
 			penTypeSelect.updateIcons();
 
 			// Update the selected stroke factory.
 			penTypeSelect.setValue(this.getCurrentPenTypeIdx());
-			stabilizationOption.update();
+			toggleButtonRow.update();
 		};
 		this.updateInputs();
 
 		container.replaceChildren(colorRow, thicknessRow);
 		penTypeSelect.addTo(container);
-		stabilizationOption.addTo(container);
 
 		dropdown.replaceChildren(container);
+
+		// Add the toggle button row *outside* of the main content (use different
+		// spacing with respect to the sides of the container).
+		toggleButtonRow.addTo(dropdown);
+
 		return true;
 	}
 
@@ -324,6 +398,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			thickness: this.tool.getThickness(),
 			strokeFactoryId: this.getCurrentPenType()?.id,
 			inputStabilization: !!this.tool.getInputMapper(),
+			strokeAutocorrect: this.tool.getStrokeAutocorrectionEnabled(),
 		};
 	}
 
@@ -363,7 +438,11 @@ export default class PenToolWidget extends BaseToolWidget {
 		}
 
 		if (state.inputStabilization !== undefined) {
-			this.setInputStabilizationEnabled(!!state.inputStabilization);
+			this.tool.setHasStabilization(!!state.inputStabilization);
+		}
+
+		if (state.strokeAutocorrect !== undefined) {
+			this.tool.setStrokeAutocorrectEnabled(!!state.strokeAutocorrect);
 		}
 	}
 }

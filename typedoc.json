@@ -28,7 +28,8 @@
 		"packages/math/src/lib": "@js-draw/math - {{version}}",
 		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}",
 		"MigratingToVersion1__": "Migrating to version 1",
-		"WritingATheme__": "Writing a theme"
+		"WritingATheme__": "Writing a theme",
+		"CustomizingTools__": "Customizing tools"
 	},
 
 	"excludePrivate": true,

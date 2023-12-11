@@ -32,8 +32,11 @@ export default abstract class AbstractRenderer {
 
 	protected constructor(private viewport: Viewport) { }
 
-	// this.canvasToScreen, etc. should be used instead of the corresponding
-	// methods on Viewport.
+	/**
+	 * this.canvasToScreen, etc. should be used instead of the corresponding
+	 * methods on `Viewport`, because the viewport may not accurately reflect
+	 * what is rendered.
+	 */
 	protected getViewport(): Viewport { return this.viewport; }
 
 	// Returns the size of the rendered region of this on
@@ -113,14 +116,14 @@ export default abstract class AbstractRenderer {
 	public drawPath(path: RenderablePathSpec) {
 		// If we're being called outside of an object,
 		// we can't delay rendering
-		if (this.objectLevel === 0) {
+		if (this.objectLevel === 0 || this.currentPaths === null) {
 			this.currentPaths = [path];
 			this.flushPath();
 			this.currentPaths = null;
 		} else {
 			// Otherwise, don't render paths all at once. This prevents faint lines between
 			// segments of the same stroke from being visible.
-			this.currentPaths!.push(path);
+			this.currentPaths.push(path);
 		}
 	}
 
@@ -228,5 +231,23 @@ export default abstract class AbstractRenderer {
 
 	public getSizeOfCanvasPixelOnScreen(): number {
 		return this.getCanvasToScreenTransform().transformVec3(Vec2.unitX).length();
+	}
+
+	private visibleRectOverride: Rect2|null;
+
+	/**
+	 * @internal
+	 */
+	public overrideVisibleRect(rect: Rect2|null) {
+		this.visibleRectOverride = rect;
+	}
+
+	// Returns the region in canvas space that is visible within the viewport this
+	// canvas is rendering to.
+	//
+	// Note that in some cases this might not be the same as the `visibleRect` given
+	// to components in their `render` method.
+	public getVisibleRect() {
+		return this.visibleRectOverride ?? this.viewport.visibleRect;
 	}
 }

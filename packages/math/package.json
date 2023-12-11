@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/math",
-	"version": "1.2.2",
+	"version": "1.16.0",
 	"description": "A math library for js-draw. ",
 	"types": "./dist/mjs/lib.d.ts",
 	"main": "./dist/cjs/lib.js",
@@ -19,19 +19,19 @@
 	"license": "MIT",
 	"private": false,
 	"scripts": {
-		"dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
+		"dist-test": "cd dist-test/test_imports && npm install && npm run test",
 		"dist": "npm run build && npm run dist-test",
 		"build": "rm -rf ./dist && mkdir dist && build-tool build",
-		"watch": "rm -rf ./dist && mkdir dist && build-tool watch"
+		"watch": "rm -rf ./dist/* && mkdir -p dist && build-tool watch"
 	},
 	"dependencies": {
 		"bezier-js": "6.1.3"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.2.2",
+		"@js-draw/build-tool": "^1.11.1",
 		"@types/bezier-js": "4.1.0",
-		"@types/jest": "29.5.3",
-		"@types/jsdom": "21.1.1"
+		"@types/jest": "29.5.5",
+		"@types/jsdom": "21.1.3"
 	},
 	"bugs": {
 		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"

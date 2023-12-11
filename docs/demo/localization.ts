@@ -11,6 +11,8 @@ export interface Localization {
 	templateLightGrid: string;
 	templateDarkGrid: string;
 
+	warningSaveTargetOnlySupportsOneImage: string;
+
 	confirmUnsavedChanges: string;
 
 	advancedOptions: string;
@@ -23,10 +25,16 @@ export interface Localization {
 	delete: string;
 	reallyDelete: (imageName: string) => string;
 
+	// Settings screen
 	settings: string;
 	reset: string,
 	keyboardShortcuts: string;
 	bindingParseError: (errorMessage: string) => string;
+
+	debugging: string;
+	enableDebugToolbarWidget: string;
+	toolbarType: string;
+	useEdgeToolbar: string;
 
 	// Save screen:
 	imageTitleLabel: string;
@@ -49,6 +57,8 @@ localizationTables.en = {
 	templateLightGrid: 'Light Grid',
 	templateDarkGrid: 'Dark Grid',
 
+	warningSaveTargetOnlySupportsOneImage: 'Warning: On this system, js-draw only supports saving one image. While this image will still be downloadable, you won\'t be able to save it to this website.',
+
 	confirmUnsavedChanges: 'There may be unsaved changes. Really quit?',
 
 	advancedOptions: 'Advanced...',
@@ -68,6 +78,11 @@ localizationTables.en = {
 	keyboardShortcuts: 'Keyboard Shortcuts',
 	reset: 'Reset',
 	bindingParseError: (errorMessage: string) => `Error: ${errorMessage}`,
+	debugging: 'Debugging',
+	enableDebugToolbarWidget: 'Enable debug toolbar widget',
+
+	toolbarType: 'Toolbar type',
+	useEdgeToolbar: 'Use edgemenu-style toolbar',
 
 	imageTitleLabel: 'Image title: ',
 	viewGeneratedSVGImage: 'View generated SVG image',

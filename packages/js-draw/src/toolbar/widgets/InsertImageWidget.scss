@@ -12,12 +12,17 @@ $image-widget-selector: '.insert-image-widget-dropdown-content';
 
 	img {
 		max-width: min(50vw, 75%);
-		max-height: 50vh;
+		max-height: min(300px, 50vh);
 	
 		/* Center */
 		display: block;
 		margin-left: auto;
 		margin-right: auto;
+	}
+
+	.insert-image-image-status-view {
+		display: flex;
+		justify-content: space-between;
 	}
 
 	.action-button-row {

@@ -3,12 +3,15 @@ import { WheelEvt, PointerEvt, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent,
 import ToolEnabledGroup from './ToolEnabledGroup';
 import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
+import { DispatcherEventListener } from '../EventDispatcher';
 
 export default abstract class BaseTool implements InputEventListener {
 	#enabled: MutableReactiveValue<boolean>;
 	#group: ToolEnabledGroup|null = null;
 
 	#inputMapper: InputMapper|null = null;
+
+	#readOnlyEditorChangeListener: DispatcherEventListener|null = null;
 
 	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
 		this.#enabled = ReactiveValue.fromInitialValue(true);
@@ -27,6 +30,12 @@ export default abstract class BaseTool implements InputEventListener {
 				});
 			}
 		});
+	}
+
+
+	/** Override this to allow this tool to be enabled in a read-only editor */
+	public canReceiveInputInReadOnlyEditor() {
+		return false;
 	}
 
 	public setInputMapper(mapper: InputMapper|null) {
@@ -164,6 +173,14 @@ export default abstract class BaseTool implements InputEventListener {
 		}
 
 		return null;
+	}
+
+	// Called when the tool is removed/when the editor is destroyed.
+	// Subclasses that override this method **must call super.onDestroy()**.
+	public onDestroy() {
+		this.#readOnlyEditorChangeListener?.remove();
+		this.#readOnlyEditorChangeListener = null;
+		this.#group = null;
 	}
 }
 

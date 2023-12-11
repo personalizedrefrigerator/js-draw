@@ -3,6 +3,9 @@ import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 
 export default class ActionButtonWidget extends BaseWidget {
+	#autoDisableInReadOnlyEditors: boolean;
+	#helpText: string|undefined = undefined;
+
 	public constructor(
 		editor: Editor,
 		id: string,
@@ -13,8 +16,27 @@ export default class ActionButtonWidget extends BaseWidget {
 
 		localizationTable?: ToolbarLocalization,
 		protected mustBeToplevel: boolean = false,
+		autoDisableInReadOnlyEditors: boolean = true,
 	) {
 		super(editor, id, localizationTable);
+		this.#autoDisableInReadOnlyEditors = autoDisableInReadOnlyEditors;
+	}
+
+	/**
+	 * Sets the text shown in a help overlay for this button.
+	 *
+	 * See {@link getHelpText}.
+	 */
+	public setHelpText(helpText: string) {
+		this.#helpText = helpText;
+	}
+
+	protected override getHelpText() {
+		return this.#helpText;
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return this.#autoDisableInReadOnlyEditors;
 	}
 
 	protected handleClick() {

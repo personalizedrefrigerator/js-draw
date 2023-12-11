@@ -1,74 +1,79 @@
 import { defaultEditorLocalization, EditorLocalization } from '../localization';
 
-// A partial Spanish localization.
+// A partial Spanish localization
 const localization: EditorLocalization = {
 	...defaultEditorLocalization,
-
-	// Strings for the main editor interface
-	// (see src/localization.ts)
-	loading: (percentage: number) => `Cargando: ${percentage}%...`,
-	imageEditor: 'Editor de dibujos',
-
-	undoAnnouncement: (commandDescription: string) => `${commandDescription} fue deshecho`,
-	redoAnnouncement: (commandDescription: string) => `${commandDescription} fue rehecho`,
-	undo: 'Deshace',
-	redo: 'Rehace',
-
-	// Strings for the toolbar
-	// (see src/toolbar/localization.ts)
 	pen: 'Lapiz',
 	eraser: 'Borrador',
 	select: 'Selecciona',
-	thicknessLabel: 'Tamaño',
-	colorLabel: 'Color',
-	doneLoading: 'El cargado terminó',
-	fontLabel: 'Fuente: ',
-	anyDevicePanning: 'Mover la pantalla con todo dispotivo',
-	touchPanning: 'Mover la pantalla con un dedo',
-	touchPanTool: 'Instrumento de mover la pantalla con un dedo',
-	outlinedRectanglePen: 'Rectángulo con nada más que un borde',
-	filledRectanglePen: 'Rectángulo sin borde',
-	linePen: 'Línea',
-	arrowPen: 'Flecha',
-	roundedTipPen: 'Lapiz Redondeado',
-	selectPenTip: 'Forma de dibuja',
 	handTool: 'Mover',
-	zoom: 'Zoom',
+	image: 'Imagen',
+	inputAltText: 'Texto alternativo',
+	resetImage: 'Reiniciar',
+	chooseFile: 'Seleccionar archivo',
+	cancel: 'Cancelar',
 	resetView: 'Reiniciar vista',
+	thicknessLabel: 'Tamaño',
+	fontLabel: 'Fuente:',
+	textSize: 'Tamaño',
 	resizeImageToSelection: 'Redimensionar la imagen a lo que está seleccionado',
 	deleteSelection: 'Borra la selección',
 	duplicateSelection: 'Duplica la selección',
+	exit: 'Salir',
+	save: 'Guardar',
+	undo: 'Deshace',
+	redo: 'Rehace',
+	selectPenTip: 'Punta',
+	selectShape: 'Forma',
 	pickColorFromScreen: 'Selecciona un color de la pantalla',
 	clickToPickColorAnnouncement: 'Haga un clic en la pantalla para seleccionar un color',
-	dropdownShown(toolName: string): string {
-		return `Menú por ${toolName} es visible`;
-	},
-	dropdownHidden: function (toolName: string): string {
-		return `Menú por ${toolName} fue ocultado`;
-	},
-	colorChangedAnnouncement: function (color: string): string {
-		return `Color fue cambiado a ${color}`;
-	},
-	keyboardPanZoom: 'Mover la pantalla con el teclado',
-	penTool: function (penId: number): string {
-		return `Lapiz ${penId}`;
-	},
-	selectionTool: 'Selecciona',
-	eraserTool: 'Borrador',
-	textTool: 'Texto',
-	enterTextToInsert: 'Entra texto',
-	textSize: 'Tamaño',
-	rerenderAsText: 'Redibuja la pantalla al texto',
-	lockRotation: 'Bloquea rotación',
-	image: 'Imagen',
-	imageSize: (size: number, units: string) => `Tamaño del imagen: ${size} ${units}`,
-	imageLoadError: (message: string)=> `Error cargando imagen: ${message}`,
-	toggleOverflow: 'Más',
-
 	documentProperties: 'Fondo',
+	backgroundColor: 'Color de fondo',
 	imageWidthOption: 'Ancho',
 	imageHeightOption: 'Alto',
-	backgroundColor: 'Color de fondo: '
+	enableAutoresizeOption: 'Redimensionar automático',
+	toggleOverflow: 'Más',
+	about: 'Acerca de',
+	touchPanning: 'Mover la pantalla con un dedo',
+	roundedTipPen: 'Lapiz Redondeado',
+	arrowPen: 'Flecha',
+	linePen: 'Línea',
+	outlinedRectanglePen: 'Rectángulo delineado',
+	filledRectanglePen: 'Rectángulo sin borde',
+	lockRotation: 'Bloquea rotación',
+	paste: 'Pegar',
+	closeSidebar: (toolName) => `Close sidebar for ${toolName}`,
+	dropdownShown: (toolName) => `Menú por ${toolName} es visible`,
+	dropdownHidden: (toolName) => { return `Menú por ${toolName} fue ocultado`; },
+	zoomLevel: (zoomPercent) => `Zoom: ${zoomPercent}%`,
+	colorChangedAnnouncement: (color) => { return `Color fue cambiado a ${color}`; },
+	imageSize: (size, units) => `Tamaño del imagen: ${size} ${units}`,
+	imageLoadError: (message) => `Error cargando imagen: ${message}`,
+	penTool: (penId) => `Lapiz ${penId}`,
+	selectionTool: 'Selecciona',
+	eraserTool: 'Borrador',
+	touchPanTool: 'Instrumento de mover la pantalla con un dedo',
+	undoRedoTool: 'Deshace/rehace',
+	pipetteTool: 'Seleccione un color de la pantalla',
+	keyboardPanZoom: 'Mover la pantalla con el teclado',
+	textTool: 'Texto',
+	enterTextToInsert: 'Entra texto',
+	findLabel: 'Buscar',
+	toNextMatch: 'Próxima',
+	closeDialog: 'Cerrar',
+	anyDevicePanning: 'Mover la pantalla con todo dispotivo',
+	copied: (count, description) => `Copied ${count} ${description}`,
+	pasted: (count, description) => `Pasted ${count} ${description}`,
+	toolEnabledAnnouncement: (toolName) => `${toolName} fue activado`,
+	toolDisabledAnnouncement: (toolName) => `${toolName} fue desactivado`,
+	resizeOutputCommand: (newSize) => `Tamaño de imagen fue cambiado a ${newSize.w}x${newSize.h}`,
+	eraseAction: (componentDescription, numElems) => `Borrado: ${numElems} ${componentDescription}`,
+	rerenderAsText: 'Redibuja la pantalla al texto',
+	loading: (percentage) => `Cargando: ${percentage}%...`,
+	imageEditor: 'Editor de dibujos',
+	doneLoading: 'El cargado terminó',
+	undoAnnouncement: (commandDescription) => `${commandDescription} fue deshecho`,
+	redoAnnouncement: (commandDescription) => `${commandDescription} fue rehecho`,
 };
 
 export default localization;

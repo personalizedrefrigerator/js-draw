@@ -1,16 +1,23 @@
-# js-draw
+
+
+<div align="center">
+    <img height="190" src="docs/img/readme-images/logo.svg" alt="js-draw logo"/>
+</div>
+
+<h1 align="center">js-draw</h1>
+<div align="center">
 
 [NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/js_draw.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
 
-![](docs/img/readme-images/js-draw.jpg)
+</div>
 
-For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/lib.html).
+![](docs/img/readme-images/js-draw.png)
+
+For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/).
 
 If you're coming from version 0.25, [read the migration guide!](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html)
 
 # API
-
-To use `js-draw`,
 
 ## Creating an `Editor`
 
@@ -41,7 +48,7 @@ const editor = new Editor(document.body);
 
 If you're not using a bundler, consider using the pre-bundled editor:
 ```html
-<!-- Replace 0.20.0 with the latest version of js-draw -->
+<!-- Replace 1.0.0 with the latest version of js-draw -->
 <script src="https://cdn.jsdelivr.net/npm/js-draw@1.0.0/dist/bundle.js"></script>
 <script>
     const editor = new jsdraw.Editor(document.body);

@@ -6,10 +6,16 @@ import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/Renderi
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
-import RenderablePathSpec, { pathFromRenderable, pathToRenderable } from '../rendering/RenderablePathSpec';
+import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
+}
+
+interface SimplificationRecord {
+	forVisibleRect: Rect2;
+	parts: StrokePart[];
+	occludes: boolean;
 }
 
 /**
@@ -27,6 +33,9 @@ interface StrokePart extends RenderablePathSpec {
  * ```ts
  * editor.dispatch(stroke.transformBy(Mat33.translation(Vec2.of(10, 0))));
  * ```
+ *
+ * **Adding**:
+ * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
  */
 export default class Stroke extends AbstractComponent implements RestyleableComponent {
 	private parts: StrokePart[];
@@ -51,7 +60,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	 *
 	 * const stroke = new Stroke([
 	 *     // Fill with red
-	 *     path.toRenderable({ fill: Color4.red })
+	 *     pathToRenderable(path, { fill: Color4.red })
 	 * ]);
 	 * ```
 	 */
@@ -156,9 +165,125 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return false;
 	}
 
+	public override intersectsRect(rect: Rect2): boolean {
+		// AbstractComponent::intersectsRect can be inexact for strokes with non-zero
+		// stroke radius (has many false negatives). As such, additional checks are
+		// done here, before passing to the superclass.
+
+		if (!rect.intersects(this.getBBox())) {
+			return false;
+		}
+
+		// The following check only checks for the positive case:
+		// Sample a set of points that are known to be within each part of this
+		// stroke. For example, the points marked with an "x" below:
+		//   ___________________
+		//  /                   \
+		//  | x              x  |
+		//  \_____________      |
+		//                |  x  |
+		//                \_____/
+		//
+		// Because we don't want the following case to result in selection,
+		//   __________________
+		//  /.___.             \
+		//  || x |          x  |    <-  /* The
+		//  |·---·             |            .___.
+		//  \____________      |            |   |
+		//               |  x  |            ·---·
+		//               \_____/           denotes the input rectangle */
+		//
+		// we need to ensure that the rectangle intersects each point **and** the
+		// edge of the rectangle.
+		for (const part of this.parts) {
+			// As such, we need to shrink the input rectangle to verify that the original,
+			// unshrunken rectangle would have intersected the edge of the stroke if it
+			// intersects a point within the stroke.
+			const interiorRect = rect.grownBy(-(part.style.stroke?.width ?? 0));
+			if (interiorRect.area === 0) {
+				continue;
+			}
+
+			for (const point of part.path.startEndPoints()) {
+				if (interiorRect.containsPoint(point)) {
+					return true;
+				}
+			}
+		}
+
+		return super.intersectsRect(rect);
+	}
+
+	// A simplification of the path for a given visibleRect. Intended
+	// to help check for occlusion.
+	private simplifiedPath: SimplificationRecord|null = null;
+	private computeSimplifiedPathFor(visibleRect: Rect2): SimplificationRecord {
+		const simplifiedParts: StrokePart[] = [];
+		let occludes = false;
+		let skipSimplification = false;
+
+		for (const part of this.parts) {
+			if (
+				skipSimplification
+
+				// Simplification currently only works for stroked paths
+				|| !part.style.stroke
+
+				// One of the main purposes of this is to check for occlusion.
+				// We can't occlude things if the stroke is partially transparent.
+				|| part.style.stroke.color.a < 0.99
+			) {
+				simplifiedParts.push(part);
+				continue;
+			}
+
+			const mapping = simplifyPathToFullScreenOrEmpty(part, visibleRect);
+
+			if (mapping) {
+				simplifiedParts.push(mapping.path);
+
+				if (mapping.fullScreen) {
+					occludes = true;
+					skipSimplification = true;
+				}
+			} else {
+				simplifiedParts.push(part);
+			}
+		}
+
+		return {
+			forVisibleRect: visibleRect,
+			parts: simplifiedParts,
+			occludes,
+		};
+	}
+
+	public override occludesEverythingBelowWhenRenderedInRect(rect: Rect2) {
+		// Can't occlude if doesn't contain.
+		if (!this.getBBox().containsRect(rect)) {
+			return false;
+		}
+
+		if (!this.simplifiedPath || !this.simplifiedPath.forVisibleRect.eq(rect)) {
+			this.simplifiedPath = this.computeSimplifiedPathFor(rect);
+		}
+
+		return this.simplifiedPath.occludes;
+	}
+
 	public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 		canvas.startObject(this.getBBox());
-		for (const part of this.parts) {
+
+		// Can we use a cached simplified path for faster rendering?
+		let parts = this.parts;
+		if (visibleRect && this.simplifiedPath?.forVisibleRect?.containsRect(visibleRect)) {
+			parts = this.simplifiedPath.parts;
+		} else {
+			// Save memory
+			this.simplifiedPath = null;
+		}
+
+		for (const part of parts) {
 			const bbox = this.bboxForPart(part.path.bbox, part.style);
 			if (visibleRect) {
 				if (!bbox.intersects(visibleRect)) {
@@ -242,6 +367,20 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	}
 
 	/**
+	 * @returns A list of the parts that make up this path. Many paths only have one part.
+	 *
+	 * Each part (a {@link RenderablePathSpec}) contains information about the style and geometry
+	 * of that part of the stroke. Use the `.path` property to do collision detection and other
+	 * operations involving the stroke's geometry.
+	 *
+	 * Note that many of {@link Path}'s methods (e.g. {@link Path.intersection}) take a
+	 * `strokeWidth` parameter that can be gotten from {@link RenderablePathSpec.style} `.stroke.width`.
+	 */
+	public getParts(): Readonly<RenderablePathSpecWithPath>[] {
+		return [...this.parts];
+	}
+
+	/**
 	 * @returns the {@link Path.union} of all paths that make up this stroke.
 	 */
 	public getPath() {
@@ -274,7 +413,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	}
 
 	/** @internal */
-	public static deserializeFromJSON(json: any): Stroke {
+	public static deserializeFromJSON(this: void, json: any): Stroke {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}

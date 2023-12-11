@@ -1,14 +1,13 @@
-import EditorImage from './EditorImage';
+import EditorImage from './image/EditorImage';
 import ToolController from './tools/ToolController';
 import { EditorNotifier, EditorEventType, ImageLoader } from './types';
-import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent, KeyPressEvent } from './inputEvents';
+import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent } from './inputEvents';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
-import { Point2, Vec2, Vec3, Color4, Mat33, Rect2, toRoundedString } from '@js-draw/math';
+import { Point2, Vec2, Vec3, Color4, Mat33, Rect2 } from '@js-draw/math';
 import Display, { RenderingMode } from './rendering/Display';
-import SVGRenderer from './rendering/renderers/SVGRenderer';
 import SVGLoader from './SVGLoader';
 import Pointer from './Pointer';
 import { EditorLocalization } from './localization';
@@ -16,7 +15,7 @@ import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 import untilNextAnimationFrame from './util/untilNextAnimationFrame';
-import fileToBase64 from './util/fileToBase64';
+import fileToBase64Url from './util/fileToBase64Url';
 import uniteCommands from './commands/uniteCommands';
 import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
@@ -32,6 +31,10 @@ import guessKeyCodeFromKey from './util/guessKeyCodeFromKey';
 import RenderablePathSpec from './rendering/RenderablePathSpec';
 import makeAboutDialog, { AboutDialogEntry } from './dialogs/makeAboutDialog';
 import version from './version';
+import { editorImageToSVGSync, editorImageToSVGAsync } from './image/export/editorImageToSVG';
+import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
+import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
+import mitLicenseAttribution from './util/mitLicenseAttribution';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -87,25 +90,41 @@ export interface EditorSettings {
 	 * Additional messages to show in the "about" dialog.
 	 */
 	notices: AboutDialogEntry[],
+
+	/**
+	 * Information about the app/website js-draw is running within
+	 * to show at the beginning of the about dialog.
+	 */
+	appInfo: {
+		name: string,
+
+		// (Optional) A brief description of the app
+		description?: string;
+
+		// (Optional) The app version
+		version?: string,
+	}|null,
 }
 
 /**
  * The main entrypoint for the full editor.
  *
- * @example
+ * ## Example
  * To create an editor with a toolbar,
- * ```
+ * ```ts,runnable
+ * import { Editor } from 'js-draw';
+ *
  * const editor = new Editor(document.body);
  *
  * const toolbar = editor.addToolbar();
- * toolbar.addActionButton('Save', () => {
+ * toolbar.addSaveButton(() => {
  *   const saveData = editor.toSVG().outerHTML;
  *   // Do something with saveData...
  * });
  * ```
  *
  * See also
- * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts#L15).
+ * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts).
  */
 export class Editor {
 	// Wrapper around the viewport and toolbar
@@ -135,12 +154,13 @@ export class Editor {
 	 * Data structure for adding/removing/querying objects in the image.
 	 *
 	 * @example
-	 * ```
+	 * ```ts,runnable
+	 * import { Editor, Stroke, Path, Color4, pathToRenderable } from 'js-draw';
 	 * const editor = new Editor(document.body);
 	 *
 	 * // Create a path.
 	 * const stroke = new Stroke([
-	 *   Path.fromString('M0,0 L30,30 z').toRenderable({ fill: Color4.black }),
+	 *   pathToRenderable(Path.fromString('M0,0 L100,100 L300,30 z'), { fill: Color4.red }),
 	 * ]);
 	 * const addElementCommand = editor.image.addElement(stroke);
 	 *
@@ -178,6 +198,38 @@ export class Editor {
 
 	/**
 	 * Global event dispatcher/subscriber.
+	 *
+	 * @example
+	 *
+	 * ```ts,runnable
+	 * import { Editor, EditorEventType, SerializableCommand } from 'js-draw';
+	 *
+	 * // Create a minimal editor
+	 * const editor = new Editor(document.body);
+	 * editor.addToolbar();
+	 *
+	 * // Create a place to show text output
+	 * const log = document.createElement('textarea');
+	 * document.body.appendChild(log);
+	 * log.style.width = '100%';
+	 * log.style.height = '200px';
+	 *
+	 * // Listen for CommandDone events (there's also a CommandUndone)
+	 * editor.notifier.on(EditorEventType.CommandDone, event => {
+	 *   // Type narrowing for TypeScript -- event will always be of kind CommandDone,
+	 *   // but TypeScript doesn't know this.
+	 *   if (event.kind !== EditorEventType.CommandDone) return;
+	 *
+	 *   log.value = `Command done ${event.command.description(editor, editor.localization)}\n`;
+	 *
+	 *   if (event.command instanceof SerializableCommand) {
+	 *     log.value += `serializes to: ${JSON.stringify(event.command.serialize())}`;
+	 *   }
+	 * });
+	 *
+	 * // Dispatch an initial command to trigger the event listener for the first time
+	 * editor.dispatch(editor.image.setAutoresizeEnabled(true));
+	 * ```
 	 */
 	public readonly notifier: EditorNotifier;
 
@@ -185,12 +237,15 @@ export class Editor {
 	private accessibilityAnnounceArea: HTMLElement;
 	private accessibilityControlArea: HTMLTextAreaElement;
 	private eventListenerTargets: HTMLElement[] = [];
+	private readOnly: MutableReactiveValue<boolean>;
 
 	private settings: EditorSettings;
 
 	/**
 	 * @example
-	 * ```
+	 * ```ts,runnable
+	 * import { Editor } from 'js-draw';
+	 *
 	 * const container = document.body;
 	 *
 	 * // Create an editor
@@ -203,13 +258,16 @@ export class Editor {
 	 * // Add the default toolbar
 	 * const toolbar = editor.addToolbar();
 	 *
-	 * // Add a save button
+	 * const createCustomIcon = () => {
+	 *   // Create/return an icon here.
+	 * };
+	 *
+	 * // Add a custom button
 	 * toolbar.addActionButton({
-	 *   label: 'Save'
-	 *   icon: createSaveIcon(),
+	 *   label: 'Custom Button'
+	 *   icon: createCustomIcon(),
 	 * }, () => {
-	 *   const saveData = editor.toSVG().outerHTML;
-	 *   // Do something with saveData
+	 *   // Do something here
 	 * });
 	 * ```
 	 */
@@ -232,12 +290,15 @@ export class Editor {
 			keyboardShortcutOverrides: settings.keyboardShortcutOverrides ?? {},
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 			notices: [],
+			appInfo: settings.appInfo ? { ...settings.appInfo } : null,
 		};
 
 		// Validate settings
 		if (this.settings.minZoom > this.settings.maxZoom) {
 			throw new Error('Minimum zoom must be lesser than maximum zoom!');
 		}
+
+		this.readOnly = MutableReactiveValue.fromInitialValue(false);
 
 		this.icons = this.settings.iconProvider;
 
@@ -300,22 +361,35 @@ export class Editor {
 
 		// Enforce zoom limits.
 		this.notifier.on(EditorEventType.ViewportChanged, evt => {
-			if (evt.kind === EditorEventType.ViewportChanged) {
-				const zoom = evt.newTransform.transformVec3(Vec2.unitX).length();
-				if (zoom > this.settings.maxZoom || zoom < this.settings.minZoom) {
-					const oldZoom = evt.oldTransform.transformVec3(Vec2.unitX).length();
-					let resetTransform = Mat33.identity;
+			if (evt.kind !== EditorEventType.ViewportChanged) return;
 
-					if (oldZoom <= this.settings.maxZoom && oldZoom >= this.settings.minZoom) {
-						resetTransform = evt.oldTransform;
-					} else {
-						// If 1x zoom isn't acceptable, try a zoom between the minimum and maximum.
-						resetTransform = Mat33.scaling2D(
-							(this.settings.minZoom + this.settings.maxZoom) / 2
-						);
-					}
+			const getZoom = (mat: Mat33) => mat.transformVec3(Vec2.unitX).length();
 
-					this.viewport.resetTransform(resetTransform);
+			const zoom = getZoom(evt.newTransform);
+			if (zoom > this.settings.maxZoom || zoom < this.settings.minZoom) {
+				const oldZoom = getZoom(evt.oldTransform);
+				let resetTransform = Mat33.identity;
+
+				if (oldZoom <= this.settings.maxZoom && oldZoom >= this.settings.minZoom) {
+					resetTransform = evt.oldTransform;
+				} else {
+					// If 1x zoom isn't acceptable, try a zoom between the minimum and maximum.
+					resetTransform = Mat33.scaling2D(
+						(this.settings.minZoom + this.settings.maxZoom) / 2
+					);
+				}
+
+				this.viewport.resetTransform(resetTransform);
+			}
+			else if (!isFinite(zoom)) {
+				// Recover from possible division-by-zero
+				console.warn(
+					`Non-finite zoom (${zoom}) detected. Resetting the viewport. This was likely caused by division by zero.`
+				);
+				if (isFinite(getZoom(evt.oldTransform))) {
+					this.viewport.resetTransform(evt.oldTransform);
+				} else {
+					this.viewport.resetTransform();
 				}
 			}
 		});
@@ -379,47 +453,10 @@ export class Editor {
 	private registerListeners() {
 		this.handlePointerEventsFrom(this.renderingRegion);
 		this.handleKeyEventsFrom(this.renderingRegion);
+		this.handlePointerEventsFrom(this.accessibilityAnnounceArea);
 
 		this.container.addEventListener('wheel', evt => {
-			let delta = Vec3.of(evt.deltaX, evt.deltaY, evt.deltaZ);
-
-			// Process wheel events if the ctrl key is down, even if disabled -- we do want to handle
-			// pinch-zooming.
-			if (!evt.ctrlKey && !evt.metaKey) {
-				if (!this.settings.wheelEventsEnabled) {
-					return;
-				} else if (this.settings.wheelEventsEnabled === 'only-if-focused') {
-					const focusedChild = this.container.querySelector(':focus');
-
-					if (!focusedChild) {
-						return;
-					}
-				}
-			}
-
-			if (evt.deltaMode === WheelEvent.DOM_DELTA_LINE) {
-				delta = delta.times(15);
-			} else if (evt.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
-				delta = delta.times(100);
-			}
-
-			if (evt.ctrlKey || evt.metaKey) {
-				delta = Vec3.of(0, 0, evt.deltaY);
-			}
-
-			// Ensure that `pos` is relative to `this.renderingRegion`
-			const bbox = this.renderingRegion.getBoundingClientRect();
-			const pos = Vec2.of(evt.clientX, evt.clientY).minus(Vec2.of(bbox.left, bbox.top));
-
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.WheelEvt,
-				delta,
-				screenPos: pos,
-			})) {
-				evt.preventDefault();
-				return true;
-			}
-			return false;
+			this.handleHTMLWheelEvent(evt);
 		});
 
 		const handleResize = () => {
@@ -473,6 +510,55 @@ export class Editor {
 		this.container.style.setProperty(
 			'--editor-current-height-px', `${this.container.clientHeight}px`
 		);
+		this.container.style.setProperty(
+			'--editor-current-display-width-px', `${this.renderingRegion.clientWidth}px`
+		);
+		this.container.style.setProperty(
+			'--editor-current-display-height-px', `${this.renderingRegion.clientHeight}px`
+		);
+	}
+
+	/** @internal */
+	protected handleHTMLWheelEvent(event: WheelEvent) {
+		let delta = Vec3.of(event.deltaX, event.deltaY, event.deltaZ);
+
+		// Process wheel events if the ctrl key is down, even if disabled -- we do want to handle
+		// pinch-zooming.
+		if (!event.ctrlKey && !event.metaKey) {
+			if (!this.settings.wheelEventsEnabled) {
+				return;
+			} else if (this.settings.wheelEventsEnabled === 'only-if-focused') {
+				const focusedChild = this.container.querySelector(':focus');
+
+				if (!focusedChild) {
+					return;
+				}
+			}
+		}
+
+		if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+			delta = delta.times(15);
+		} else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+			delta = delta.times(100);
+		}
+
+		if (event.ctrlKey || event.metaKey) {
+			delta = Vec3.of(0, 0, event.deltaY);
+		}
+
+		// Ensure that `pos` is relative to `this.renderingRegion`
+		const bbox = this.renderingRegion.getBoundingClientRect();
+		const pos = Vec2.of(event.clientX, event.clientY).minus(Vec2.of(bbox.left, bbox.top));
+
+		if (this.toolController.dispatchInputEvent({
+			kind: InputEvtType.WheelEvt,
+			delta,
+			screenPos: pos,
+		})) {
+			event.preventDefault();
+			return true;
+		}
+		return false;
 	}
 
 	private pointers: Record<number, Pointer> = {};
@@ -490,6 +576,19 @@ export class Editor {
 	}
 
 	/**
+	 * A protected method that can override setPointerCapture in environments where it may fail
+	 * (e.g. with synthetic events). @internal
+	 */
+	protected setPointerCapture(target: HTMLElement, pointerId: number) {
+		target.setPointerCapture(pointerId);
+	}
+
+	/** Can be overridden in a testing environment to handle synthetic events. @internal */
+	protected releasePointerCapture(target: HTMLElement, pointerId: number) {
+		target.releasePointerCapture(pointerId);
+	}
+
+	/**
 	 * Dispatches a `PointerEvent` to the editor. The target element for `evt` must have the same top left
 	 * as the content of the editor.
 	 */
@@ -501,7 +600,7 @@ export class Editor {
 			const pointer = Pointer.ofEvent(evt, true, this.viewport, eventsRelativeTo);
 			this.pointers[pointer.id] = pointer;
 
-			eventTarget.setPointerCapture(pointer.id);
+			this.setPointerCapture(eventTarget, pointer.id);
 			const event: PointerEvt = {
 				kind: InputEvtType.PointerDownEvt,
 				current: pointer,
@@ -545,7 +644,7 @@ export class Editor {
 			}
 
 			this.pointers[pointer.id] = pointer;
-			eventTarget.releasePointerCapture(pointer.id);
+			this.releasePointerCapture(eventTarget, pointer.id);
 			if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.PointerUpEvt,
 				current: pointer,
@@ -569,7 +668,7 @@ export class Editor {
 				}
 			}
 
-			currentElem = (currentElem as Element).parentElement;
+			currentElem = currentElem.parentElement;
 		}
 		return false;
 	}
@@ -610,7 +709,7 @@ export class Editor {
 				};
 
 				try {
-					const data = await fileToBase64(file, onprogress);
+					const data = await fileToBase64Url(file, { onprogress });
 
 					if (data && this.toolController.dispatchInputEvent({
 						kind: InputEvtType.PasteEvent,
@@ -748,6 +847,7 @@ export class Editor {
 			// Buffer events: Send events to the editor only if the pointer has moved enough to
 			// suggest that the user is attempting to draw, rather than click to close the color picker.
 			eventBuffer: [ HTMLPointerEventName, PointerEvent ][];
+			hasMovedSignificantly: boolean;
 			startPoint: Point2;
 		};
 
@@ -760,7 +860,10 @@ export class Editor {
 			}
 
 			// Position of the current event.
-			const currentPos = Vec2.of(event.pageX, event.pageY);
+			// jsdom doesn't seem to support pageX/pageY -- use clientX/clientY if unavailable
+			const currentPos = Vec2.of(
+				event.pageX ?? event.clientX, event.pageY ?? event.clientY
+			);
 
 			const pointerId = event.pointerId ?? 0;
 
@@ -773,10 +876,11 @@ export class Editor {
 				gestureData[pointerId] = {
 					eventBuffer: [ [eventName, event] ],
 					startPoint: currentPos,
+					hasMovedSignificantly: false,
 				};
 
 				// Capture the pointer so we receive future events even if the overlay is hidden.
-				elem.setPointerCapture(event.pointerId);
+				this.setPointerCapture(elem, event.pointerId);
 
 				// Don't send to the editor.
 				sendToEditor = false;
@@ -788,7 +892,7 @@ export class Editor {
 				// Skip if the pointer hasn't moved enough to not be a "click".
 				const strokeStartThreshold = 10;
 				const isWithinClickThreshold = gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold;
-				if (isWithinClickThreshold) {
+				if (isWithinClickThreshold && !gestureData[pointerId].hasMovedSignificantly) {
 					eventBuffer.push([ eventName, event ]);
 					sendToEditor = false;
 				} else {
@@ -798,6 +902,7 @@ export class Editor {
 					}
 
 					gestureData[pointerId].eventBuffer = [];
+					gestureData[pointerId].hasMovedSignificantly = true;
 					sendToEditor = true;
 				}
 			}
@@ -812,7 +917,7 @@ export class Editor {
 				(eventName === 'pointerup' || eventName === 'pointercancel')
 				&& gestureData[pointerId] && gestureData[pointerId].eventBuffer.length > 0
 			) {
-				elem.releasePointerCapture(event.pointerId);
+				this.releasePointerCapture(elem, event.pointerId);
 
 				// Don't send to the editor.
 				sendToEditor = false;
@@ -823,6 +928,44 @@ export class Editor {
 			// Forward all other events to the editor.
 			return sendToEditor;
 		}, otherEventsFilter);
+	}
+
+	/** @internal */
+	protected handleHTMLKeyDownEvent(htmlEvent: KeyboardEvent) {
+		console.assert(
+			htmlEvent.type === 'keydown',
+			`handling a keydown event with type ${htmlEvent.type}`
+		);
+
+		const event = keyPressEventFromHTMLEvent(htmlEvent);
+		if (this.toolController.dispatchInputEvent(event)) {
+			htmlEvent.preventDefault();
+			return true;
+		} else if (event.key === 't' || event.key === 'T') {
+			htmlEvent.preventDefault();
+			this.display.rerenderAsText();
+			return true;
+		} else if (event.key === 'Escape') {
+			this.renderingRegion.blur();
+			return true;
+		}
+
+		return false;
+	}
+
+	/** @internal */
+	protected handleHTMLKeyUpEvent(htmlEvent: KeyboardEvent) {
+		console.assert(
+			htmlEvent.type === 'keyup',
+			`Handling a keyup event with type ${htmlEvent.type}`,
+		);
+
+		const event = keyUpEventFromHTMLEvent(htmlEvent);
+		if (this.toolController.dispatchInputEvent(event)) {
+			htmlEvent.preventDefault();
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -836,67 +979,17 @@ export class Editor {
 		elem: HTMLElement,
 		filter: (event: KeyboardEvent)=>boolean = ()=>true
 	) {
-		// Track which keys are down so we can release them when the element
-		// loses focus. This is particularly important for keys like Control
-		// that can trigger shortcuts that cause the editor to lose focus before
-		// the keyup event is triggered.
-		let keysDown: KeyPressEvent[] = [];
-
-		type KeyEventLike = { key: string; code: string };
-
-		// Return whether two objects that are similar to keyboard events represent the
-		// same key.
-		const keyEventsMatch = (a: KeyEventLike, b: KeyEventLike) => {
-			return a.key === b.key && a.code === b.code;
-		};
-
-		elem.addEventListener('keydown', htmlEvent => {
-			if (!filter(htmlEvent)) {
-				return;
-			}
-
-			const event = keyPressEventFromHTMLEvent(htmlEvent);
-
-			// Add event to the list of keys that are down (so long as it
-			// isn't a duplicate).
-			if (!keysDown.some(other => keyEventsMatch(other, event))) {
-				keysDown.push(event);
-			}
-
-			if (event.key === 't' || event.key === 'T') {
-				htmlEvent.preventDefault();
-				this.display.rerenderAsText();
-			} else if (this.toolController.dispatchInputEvent(event)) {
-				htmlEvent.preventDefault();
-			} else if (event.key === 'Escape') {
-				this.renderingRegion.blur();
-			}
-		});
-
-		elem.addEventListener('keyup', htmlEvent => {
-			// Remove the key from keysDown -- it's no longer down.
-			keysDown = keysDown.filter(event => {
-				const matches = keyEventsMatch(event, htmlEvent);
-				return !matches;
-			});
-
-			if (!filter(htmlEvent)) {
-				return;
-			}
-
-			const event = keyUpEventFromHTMLEvent(htmlEvent);
-			if (this.toolController.dispatchInputEvent(event)) {
-				htmlEvent.preventDefault();
-			}
-		});
-
-		elem.addEventListener('blur', () => {
-			for (const event of keysDown) {
-				this.toolController.dispatchInputEvent({
-					...event,
-					kind: InputEvtType.KeyUpEvent,
-				});
-			}
+		listenForKeyboardEventsFrom(elem, {
+			filter,
+			handleKeyDown: (htmlEvent) => {
+				this.handleHTMLKeyDownEvent(htmlEvent);
+			},
+			handleKeyUp: (htmlEvent) => {
+				this.handleHTMLKeyUpEvent(htmlEvent);
+			},
+			getHandlesKeyEventsFrom: (element) => {
+				return this.eventListenerTargets.includes(element as HTMLElement);
+			},
 		});
 
 		// Allow drop.
@@ -910,6 +1003,30 @@ export class Editor {
 		};
 
 		this.eventListenerTargets.push(elem);
+	}
+
+	/**
+	 * Attempts to prevent **user-triggered** events from modifying
+	 * the content of the image.
+	 */
+	public setReadOnly(readOnly: boolean) {
+		if (readOnly !== this.readOnly.get()) {
+			this.readOnly.set(readOnly);
+
+			this.notifier.dispatch(EditorEventType.ReadOnlyModeToggled, {
+				kind: EditorEventType.ReadOnlyModeToggled,
+				editorIsReadOnly: readOnly,
+			});
+		}
+	}
+
+	// @internal
+	public isReadOnlyReactiveValue(): ReactiveValue<boolean> {
+		return this.readOnly;
+	}
+
+	public isReadOnly() {
+		return this.readOnly;
 	}
 
 	/** `apply` a command. `command` will be announced for accessibility. */
@@ -982,13 +1099,13 @@ export class Editor {
 		this.hideLoadingWarning();
 	}
 
-	// @see {@link #asyncApplyOrUnapplyCommands }
+	// @see {@link asyncApplyOrUnapplyCommands }
 	public asyncApplyCommands(commands: Command[], chunkSize: number) {
 		return this.asyncApplyOrUnapplyCommands(commands, true, chunkSize);
 	}
 
 	// If `unapplyInReverseOrder`, commands are reversed before unapplying.
-	// @see {@link #asyncApplyOrUnapplyCommands }
+	// @see {@link asyncApplyOrUnapplyCommands }
 	public asyncUnapplyCommands(commands: Command[], chunkSize: number, unapplyInReverseOrder: boolean = false) {
 		if (unapplyInReverseOrder) {
 			commands = [ ...commands ]; // copy
@@ -1056,8 +1173,8 @@ export class Editor {
 
 		this.image.renderWithCache(renderer, this.display.getCache(), this.viewport);
 
-		if (showImageBounds) {
-			// Draw a rectangle around the region that will be visible on save
+		// Draw a rectangle around the region that will be visible on save
+		if (showImageBounds && !this.image.getAutoresizeEnabled()) {
 			const exportRectFill = { fill: Color4.fromHex('#44444455') };
 			const exportRectStrokeWidth = 5 * this.viewport.getSizeOfPixelOnCanvas();
 			renderer.drawRect(
@@ -1087,6 +1204,9 @@ export class Editor {
 	/**
 	 * Clears the wet ink display.
 	 *
+	 * The wet ink display can be used by the currently active tool to display a preview
+	 * of an in-progress action.
+	 *
 	 * @see {@link Display.getWetInkRenderer}
 	 */
 	public clearWetInk() {
@@ -1104,11 +1224,14 @@ export class Editor {
 	 * Creates an element that will be positioned on top of the dry/wet ink
 	 * renderers.
 	 *
+	 * So as not to change the position of other overlays, `overlay` should either
+	 * be styled to have 0 height or have `position: absolute`.
+	 *
 	 * This is useful for displaying content on top of the rendered content
 	 * (e.g. a selection box).
 	 */
 	public createHTMLOverlay(overlay: HTMLElement) {
-		overlay.classList.add('overlay');
+		overlay.classList.add('overlay', 'js-draw-editor-overlay');
 		this.container.appendChild(overlay);
 
 		return {
@@ -1116,6 +1239,10 @@ export class Editor {
 		};
 	}
 
+	/**
+	 * Creates a CSS stylesheet with `content` and applies it to the document
+	 * (and thus, to this editor).
+	 */
 	public addStyleSheet(content: string): HTMLStyleElement {
 		const styleSheet = document.createElement('style');
 		styleSheet.innerText = content;
@@ -1172,6 +1299,12 @@ export class Editor {
 		sendPenEvent(this, eventType, point, allPointers);
 	}
 
+	/**
+	 * Adds all components in `components` such that they are in the center of the screen.
+	 * This is a convenience method that creates **and applies** a single command.
+	 *
+	 * If `selectComponents` is true (the default), the components are selected.
+	 */
 	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true) {
 		let bbox: Rect2|null = null;
 		for (const component of components) {
@@ -1223,11 +1356,17 @@ export class Editor {
 		}
 	}
 
-	// Get a data URL (e.g. as produced by `HTMLCanvasElement::toDataURL`).
-	// If `format` is not `image/png`, a PNG image URL may still be returned (as in the
-	// case of `HTMLCanvasElement::toDataURL`).
-	//
-	// The export resolution is the same as the size of the drawing canvas.
+	/**
+	 * Get a data URL (e.g. as produced by `HTMLCanvasElement::toDataURL`).
+	 * If `format` is not `image/png`, a PNG image URL may still be returned (as in the
+	 * case of `HTMLCanvasElement::toDataURL`).
+	 *
+	 * The export resolution is the same as the size of the drawing canvas, unless `outputSize`
+	 * is given.
+	 *
+	 * **Example**:
+	 * [[include:doc-pages/inline-examples/adding-an-image-and-data-urls.md]]
+	 */
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png', outputSize?: Vec2): string {
 		const canvas = document.createElement('canvas');
 
@@ -1252,29 +1391,61 @@ export class Editor {
 		return dataURL;
 	}
 
-	public toSVG(): SVGElement {
-		const importExportViewport = this.image.getImportExportViewport().getTemporaryClone();
+	/**
+	 * Converts the editor's content into an SVG image.
+	 *
+	 * If the output SVG has width or height less than `options.minDimension`, its size
+	 * will be increased.
+	 *
+	 * @see
+	 * {@link SVGRenderer}
+	 */
+	public toSVG(options?: { minDimension?: number }): SVGElement {
+		return editorImageToSVGSync(this.image, options ?? {});
+	}
 
-		const sanitize = false;
-		const { element: result, renderer } = SVGRenderer.fromViewport(importExportViewport, sanitize);
+	/**
+	 * Converts the editor's content into an SVG image in an asynchronous,
+	 * but **potentially lossy** way.
+	 *
+	 * **Warning**: If the image is being edited during an async rendering, edited components
+	 * may not be rendered.
+	 *
+	 * Like {@link toSVG}, but can be configured to briefly pause after processing every
+	 * `pauseAfterCount` items. This can prevent the editor from becoming unresponsive
+	 * when saving very large images.
+	 */
+	public async toSVGAsync(
+		options: {
+			minDimension?: number,
 
-		const origTransform = importExportViewport.canvasToScreenTransform;
-		// Render with (0,0) at (0,0) — we'll handle translation with
-		// the viewBox property.
-		importExportViewport.resetTransform(Mat33.identity);
+			// Number of components to process before pausing
+			pauseAfterCount?: number,
 
-		this.image.renderAll(renderer);
+			// Returns false to cancel the render.
+			// Note that totalToProcess is the total for the currently-being-processed layer.
+			onProgress?: (processedCountInLayer: number, totalToProcessInLayer: number)=>Promise<void|boolean>,
+		} = {},
+	): Promise<SVGElement> {
+		const pauseAfterCount = options.pauseAfterCount ?? 100;
 
-		importExportViewport.resetTransform(origTransform);
+		return await editorImageToSVGAsync(this.image, async (_component, processedCount, totalComponents) => {
+			if (options.onProgress) {
+				const shouldContinue = await options.onProgress(processedCount, totalComponents);
 
+				if (shouldContinue === false) {
+					return false;
+				}
+			}
 
-		// Just show the main region
-		const rect = importExportViewport.visibleRect;
-		result.setAttribute('viewBox', [rect.x, rect.y, rect.w, rect.h].map(part => toRoundedString(part)).join(' '));
-		result.setAttribute('width', toRoundedString(rect.w));
-		result.setAttribute('height', toRoundedString(rect.h));
+			if (processedCount % pauseAfterCount === 0) {
+				await untilNextAnimationFrame();
+			}
 
-		return result;
+			return true;
+		}, {
+			minDimension: options.minDimension,
+		});
 	}
 
 	/**
@@ -1299,9 +1470,16 @@ export class Editor {
 			}
 
 			return null;
-		}, (importExportRect: Rect2) => {
+		}, (importExportRect, options) => {
 			this.dispatchNoAnnounce(this.setImportExportRect(importExportRect), false);
 			this.dispatchNoAnnounce(this.viewport.zoomTo(importExportRect), false);
+
+			if (options) {
+				this.dispatchNoAnnounce(
+					this.image.setAutoresizeEnabled(options.autoresize),
+					false,
+				);
+			}
 		});
 
 		// Ensure that we don't have multiple overlapping BackgroundComponents. Remove
@@ -1376,8 +1554,23 @@ export class Editor {
 	/**
 	 * Alias for `loadFrom(SVGLoader.fromString)`.
 	 *
-	 * This is particularly useful when accessing a bundled version of the editor,
-	 * where `SVGLoader.fromString` is unavailable.
+	 * @example
+	 * ```ts,runnable
+	 * import {Editor} from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 *
+	 * ---visible---
+	 * await editor.loadFromSVG(`
+	 *   <svg viewBox="5 23 52 30" width="52" height="16" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+	 *     <text style="
+	 *       transform: matrix(0.181846, 0.1, 0, 0.181846, 11.4, 33.2);
+	 *       font-family: serif;
+	 *       font-size: 32px;
+	 *       fill: rgb(100, 140, 61);
+	 *     ">An SVG image!</text>
+	 *   </svg>
+	 * `);
+	 * ```
 	 */
 	public async loadFromSVG(svgData: string, sanitize: boolean = false) {
 		const loader = SVGLoader.fromString(svgData, sanitize);
@@ -1393,24 +1586,74 @@ export class Editor {
 		const iconLicenseText = this.icons.licenseInfo();
 
 		const notices: AboutDialogEntry[] = [];
+
+		if (this.settings.appInfo) {
+			const descriptionLines = [];
+			if (this.settings.appInfo.version) {
+				descriptionLines.push(`v${this.settings.appInfo.version}`, '');
+			}
+
+			if (this.settings.appInfo.description) {
+				descriptionLines.push(this.settings.appInfo.description + '\n');
+			} else {
+				descriptionLines.push(`js-draw v${version.number}`);
+			}
+
+			notices.push({
+				heading: `${this.settings.appInfo.name}`,
+				text: descriptionLines.join('\n'),
+			});
+		} else {
+			notices.push({
+				heading: 'js-draw',
+				text: `v${version.number}`,
+			});
+		}
+
+		const screenSize = this.viewport.getScreenRectSize();
 		notices.push({
-			heading: 'js-draw',
+			heading: this.localization.developerInformation,
 			text: [
-				`v${version.number}`,
-				'',
 				'Image debug information (from when this dialog was opened):',
-				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()} rotation`,
+				`    ${this.viewport.getScaleFactor()}x zoom, ${180/Math.PI * this.viewport.getRotationAngle()}° rotation`,
 				`    ${this.image.estimateNumElements()} components`,
-				`    ${this.getImportExportRect().w}x${this.getImportExportRect().h} size`,
+				`    auto-resize: ${this.image.getAutoresizeEnabled() ? 'enabled' : 'disabled'}`,
+				`    image size: ${this.getImportExportRect().w}x${this.getImportExportRect().h}`,
+				`    screen size: ${screenSize.x}x${screenSize.y}`,
+				`    device pixel ratio: ${this.display.getDevicePixelRatio()}`,
+				'    cache:',
+				`        ${
+					this.display.getCache().getDebugInfo()
+						// Indent
+						.replace(/([\n])/g, '\n        ')
+				}`,
 			].join('\n'),
+			minimized: true,
 		});
 
 		notices.push({
-			heading: 'Libraries',
+			heading: this.localization.softwareLibraries,
 			text: [
-				'js-draw uses several libraries at runtime. Particularly noteworthy are:',
+				`This image editor is powered by js-draw v${version.number}.`,
+				'',
+				'At runtime, js-draw uses',
 				' - The Coloris color picker: https://github.com/mdbassit/Coloris',
-				' - The bezier.js Bézier curve library: https://github.com/Pomax/bezierjs'
+				' - The bezier.js Bézier curve library: https://github.com/Pomax/bezierjs',
+				'',
+				'Both are licensed under the MIT license:',
+				'',
+				'',
+				'== Coloris ==',
+				mitLicenseAttribution('2021 Mohammed Bassit'),
+				'',
+				'',
+				'== Bezier.js ==',
+				mitLicenseAttribution('2023 Mike "Pomax" Kamermans'),
+				'',
+				'',
+				'== js-draw ==',
+				mitLicenseAttribution('2023 Henry Heino'),
+				'',
 			].join('\n'),
 			minimized: true,
 		});
@@ -1430,11 +1673,15 @@ export class Editor {
 		this.closeAboutDialog = makeAboutDialog(this, notices).close;
 	}
 
-	/** Removes and destroys the editor */
+	/**
+	 * Removes and **destroys** the editor. The editor cannot be added to a parent
+	 * again after calling this method.
+	 */
 	public remove() {
 		this.container.remove();
 
 		// TODO: Is additional cleanup necessary here?
+		this.toolController.onEditorDestroyed();
 	}
 }
 

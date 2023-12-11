@@ -10,6 +10,7 @@ export abstract class Command {
 
 	public abstract description(editor: Editor, localizationTable: EditorLocalization): string;
 
+	/** @deprecated Use {@link uniteCommands} */
 	public static union(a: Command, b: Command): Command {
 		return new class extends Command {
 			public apply(editor: Editor) {

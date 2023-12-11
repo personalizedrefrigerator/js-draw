@@ -1,25 +1,57 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-        <title>Debugging | js-draw examples</title>
-        <style>
-            .js-draw.imageEditorContainer {
-                width: 100vw;
-                height: 80vh;
-            }
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+		<title>Debugging | js-draw examples</title>
+		<style>
+			body {
+				margin: 0;
+				font-family: sans-serif;
+			}
 
-            #log {
-                width: 90vw;
-                height: 100px;
-            }
-        </style>
-    </head>
-    <body>
-        <label for="log">Log:</label>
-        <textarea id="log">Loading...</textarea>
+			.js-draw.imageEditorContainer {
+				width: 100vw;
+				height: max(70vh, calc(100vh - 100px));
+			}
 
-    </body>
-    <script src="./index.bundle.js"></script>
+			#log {
+				width: 85vw;
+				height: 100%;
+				flex-grow: 1;
+				flex-shrink: 1;
+				box-sizing: border-box;
+			}
+
+			.log-container {
+				height: 100px;
+				display: flex;
+				flex-direction: row;
+				box-sizing: border-box;
+			}
+
+			.controls {
+				display: flex;
+				flex-direction: column;
+				overflow-y: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="log-container">
+			<label for="log">Log:</label>
+			<textarea id="log">Loading...</textarea>
+			<div class="controls">
+				<button id="update-btn">Update now</button>
+				<button id="clear-btn">Clear</button>
+				<span>
+					<label for="live-update">Live update:</label>
+					<input type="checkbox" id="live-update"/>
+				</span>
+				<button id="playback-btn">Play back log</button>
+			</div>
+		</div>
+
+	</body>
+	<script src="./index.bundle.js"></script>
 </html>

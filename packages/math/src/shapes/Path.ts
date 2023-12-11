@@ -1,4 +1,3 @@
-import { toRoundedString, toStringOfSamePrecision } from '../rounding';
 import LineSegment2 from './LineSegment2';
 import Mat33 from '../Mat33';
 import Rect2 from './Rect2';
@@ -7,6 +6,8 @@ import Abstract2DShape from './Abstract2DShape';
 import CubicBezier from './CubicBezier';
 import QuadraticBezier from './QuadraticBezier';
 import PointShape2D from './PointShape2D';
+import toRoundedString from '../rounding/toRoundedString';
+import toStringOfSamePrecision from '../rounding/toStringOfSamePrecision';
 
 export enum PathCommandType {
 	LineTo,
@@ -51,9 +52,6 @@ interface IntersectionResult {
 	point: Point2;
 }
 
-type GeometryType = Abstract2DShape;
-type GeometryArrayType = Array<GeometryType>;
-
 /**
  * Represents a union of lines and curves.
  */
@@ -65,13 +63,27 @@ export class Path {
 	 */
 	public readonly bbox: Rect2;
 
-	public constructor(public readonly startPoint: Point2, public readonly parts: PathCommand[]) {
+	/** The individual shapes that make up this path. */
+	public readonly parts: Readonly<PathCommand>[];
+
+	/**
+	 * Creates a new `Path` that starts at `startPoint` and is made up of the path commands,
+	 * `parts`.
+	 *
+	 * See also {@link fromString}
+	 */
+	public constructor(
+		public readonly startPoint: Point2,
+		parts: Readonly<PathCommand>[],
+	) {
+		this.parts = parts;
+
 		// Initial bounding box contains one point: the start point.
 		this.bbox = Rect2.bboxOf([startPoint]);
 
 		// Convert into a representation of the geometry (cache for faster intersection
 		// calculation)
-		for (const part of parts) {
+		for (const part of this.parts) {
 			this.bbox = this.bbox.union(Path.computeBBoxForSegment(startPoint, part));
 		}
 	}
@@ -85,18 +97,20 @@ export class Path {
 		return Rect2.union(...bboxes);
 	}
 
-	private cachedGeometry: GeometryArrayType|null = null;
+	private cachedGeometry: Abstract2DShape[]|null = null;
 
 	// Lazy-loads and returns this path's geometry
-	public get geometry(): GeometryArrayType {
+	public get geometry(): Abstract2DShape[] {
 		if (this.cachedGeometry) {
 			return this.cachedGeometry;
 		}
 
 		let startPoint = this.startPoint;
-		const geometry: GeometryArrayType = [];
+		const geometry: Abstract2DShape[] = [];
 
 		for (const part of this.parts) {
+			let exhaustivenessCheck: never;
+
 			switch (part.kind) {
 			case PathCommandType.CubicBezierTo:
 				geometry.push(
@@ -124,11 +138,46 @@ export class Path {
 				geometry.push(new PointShape2D(part.point));
 				startPoint = part.point;
 				break;
+			default:
+				exhaustivenessCheck = part;
+				return exhaustivenessCheck;
 			}
 		}
 
 		this.cachedGeometry = geometry;
 		return this.cachedGeometry;
+	}
+
+	/**
+	 * Iterates through the start/end points of each component in this path.
+	 *
+	 * If a start point is equivalent to the end point of the previous segment,
+	 * the point is **not** emitted twice.
+	 */
+	public *startEndPoints() {
+		yield this.startPoint;
+
+		for (const part of this.parts) {
+			let exhaustivenessCheck: never;
+
+			switch (part.kind) {
+			case PathCommandType.CubicBezierTo:
+				yield part.endPoint;
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				yield part.endPoint;
+				break;
+			case PathCommandType.LineTo:
+				yield part.point;
+				break;
+			case PathCommandType.MoveTo:
+				yield part.point;
+				break;
+			default:
+				exhaustivenessCheck = part;
+				return exhaustivenessCheck;
+			}
+		}
 	}
 
 	private cachedPolylineApproximation: LineSegment2[]|null = null;
@@ -188,6 +237,20 @@ export class Path {
 		return Rect2.bboxOf(points);
 	}
 
+	/** **Note**: `strokeRadius = strokeWidth / 2` */
+	public signedDistance(point: Point2, strokeRadius: number) {
+		let minDist = Infinity;
+
+		for (const part of this.geometry) {
+			const currentDist = part.signedDistance(point) - strokeRadius;
+			if (currentDist < minDist) {
+				minDist = currentDist;
+			}
+		}
+
+		return minDist;
+	}
+
 	/**
 	 * Let `S` be a closed path a distance `strokeRadius` from this path.
 	 *
@@ -207,7 +270,7 @@ export class Path {
 
 		type DistanceFunction = (point: Point2) => number;
 		type DistanceFunctionRecord = {
-			part: GeometryType,
+			part: Abstract2DShape,
 			bbox: Rect2,
 			distFn: DistanceFunction,
 		};
@@ -246,7 +309,7 @@ export class Path {
 
 		// Returns the minimum distance to a part in this stroke, where only parts that the given
 		// line could intersect are considered.
-		const sdf = (point: Point2): [GeometryType|null, number] => {
+		const sdf = (point: Point2): [Abstract2DShape|null, number] => {
 			let minDist = Infinity;
 			let minDistPart: Abstract2DShape|null = null;
 
@@ -415,6 +478,8 @@ export class Path {
 	 * intersections are approximated with the surface `strokeRadius` away from this.
 	 *
 	 * If `strokeRadius > 0`, the resultant `parameterValue` has no defined value.
+	 *
+	 * **Note**: `strokeRadius` is half of a stroke's width.
 	 */
 	public intersection(line: LineSegment2, strokeRadius?: number): IntersectionResult[] {
 		let result: IntersectionResult[] = [];
@@ -525,6 +590,16 @@ export class Path {
 		}
 	}
 
+	/**
+	 * Like {@link closedRoughlyIntersects} except takes stroke width into account.
+	 *
+	 * This is intended to be a very fast and rough approximation. Use {@link intersection}
+	 * and {@link signedDistance} for more accurate (but much slower) intersection calculations.
+	 *
+	 * **Note**: Unlike other methods, this accepts `strokeWidth` (and not `strokeRadius`).
+	 *
+	 * `strokeRadius` is half of `strokeWidth`.
+	 */
 	public roughlyIntersects(rect: Rect2, strokeWidth: number = 0) {
 		if (this.parts.length === 0) {
 			return rect.containsPoint(this.startPoint);
@@ -558,7 +633,7 @@ export class Path {
 		return false;
 	}
 
-	// Treats this as a closed path and returns true if part of `rect` is roughly within
+	// Treats this as a closed path and returns true if part of `rect` is *roughly* within
 	// this path's interior.
 	//
 	// Note: Assumes that this is a closed, non-self-intersecting path.
@@ -607,9 +682,13 @@ export class Path {
 		return false;
 	}
 
-	// Returns a path that outlines [rect]. If [lineWidth] is not given, the resultant path is
-	// the outline of [rect]. Otherwise, the resultant path represents a line of width [lineWidth]
-	// that traces [rect].
+	/**
+	 * Returns a path that outlines `rect`.
+	 *
+	 * If `lineWidth` is given, the resultant path traces a `lineWidth` thick
+	 * border around `rect`. Otherwise, the resultant path is just the border
+	 * of `rect`.
+	 */
 	public static fromRect(rect: Rect2, lineWidth: number|null = null): Path {
 		const commands: PathCommand[] = [];
 
@@ -658,8 +737,16 @@ export class Path {
 
 	private cachedStringVersion: string|null = null;
 
-	public toString(useNonAbsCommands?: boolean): string {
-		if (this.cachedStringVersion) {
+	/**
+	 * Convert to an [SVG path representation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths).
+	 *
+	 * If `useNonAbsCommands` is given, relative path commands (e.g. `l10,0`) are to be used instead of
+	 * absolute commands (e.g. `L10,0`).
+	 *
+	 * See also {@link fromString}.
+	 */
+	public toString(useNonAbsCommands?: boolean, ignoreCache: boolean = false): string {
+		if (this.cachedStringVersion && !ignoreCache) {
 			return this.cachedStringVersion;
 		}
 
@@ -762,12 +849,20 @@ export class Path {
 	}
 
 	/**
-	 * Create a Path from a SVG path specification.
+	 * Create a `Path` from a subset of the SVG path specification.
 	 *
 	 * ## To-do
 	 * - TODO: Support a larger subset of SVG paths
 	 *   - Elliptical arcs are currently unsupported.
 	 * - TODO: Support `s`,`t` commands shorthands.
+	 *
+	 * @example
+	 * ```ts,runnable,console
+	 * import { Path } from '@js-draw/math';
+	 *
+	 * const path = Path.fromString('m0,0l100,100');
+	 * console.log(path.toString(true)); // true: Prefer relative to absolute path commands
+	 * ```
 	 */
 	public static fromString(pathString: string): Path {
 		// See the MDN reference:

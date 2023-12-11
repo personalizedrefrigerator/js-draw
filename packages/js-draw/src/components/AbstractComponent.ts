@@ -1,6 +1,6 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { LineSegment2, Mat33, Mat33Array, Rect2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
@@ -12,6 +12,27 @@ export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
 export type DeserializeCallback = (data: string)=>AbstractComponent;
 type ComponentId = string;
 
+export enum ComponentSizingMode {
+	/** The default. The compnent gets its size from its bounding box. */
+	BoundingBox,
+
+	/** Causes the component to fill the entire visible region of the screen */
+	FillScreen,
+
+	/**
+	 * Displays the component anywhere (arbitrary location) on the
+	 * canvas. (Ignoring the bounding box).
+	 *
+	 * These components may be ignored unless a full render is done.
+	 *
+	 * Intended for compnents that need to be rendered on a full export,
+	 * but won't be visible to the user.
+	 *
+	 * For example, a metadata component.
+	 */
+	Anywhere,
+}
+
 /**
  * A base class for everything that can be added to an {@link EditorImage}.
  */
@@ -21,15 +42,24 @@ export default abstract class AbstractComponent {
 	// @deprecated
 	protected lastChangedTime: number;
 
-	// The bounding box of this component.
-	// {@link getBBox}, by default, returns `contentBBox`.
-	// This must be set by components.
+	/**
+	 * The bounding box of this component.
+	 * {@link getBBox}, by default, returns `contentBBox`.
+	 * This must be set by components.
+	 *
+	 * If this changes, {@link EditorImage.queueRerenderOf} should be called for
+	 * this object (provided that this object has been added to the editor.)
+	 *
+	 * **Note**: This value is ignored if {@link getSizingMode} returns `FillScreen`
+	 * or `FillImage`.
+	 */
 	protected abstract contentBBox: Rect2;
 
 	private zIndex: number;
 	private id: string;
 
 	// Topmost z-index
+	// TODO: Should be a property of the EditorImage.
 	private static zIndexCounter: number = 0;
 
 	protected constructor(
@@ -110,6 +140,30 @@ export default abstract class AbstractComponent {
 		return this.getBBox();
 	}
 
+	/**
+	 * Returns information about how this component should be displayed
+	 * (e.g. fill the screen or get its size from {@link getBBox}).
+	 *
+	 * {@link EditorImage.queueRerenderOf} must be called to apply changes to
+	 * the output of this method if this component has already been added to an
+	 * {@link EditorImage}.
+	 */
+	public getSizingMode(): ComponentSizingMode {
+		return ComponentSizingMode.BoundingBox;
+	}
+
+	/**
+	 * **Optimization**
+	 *
+	 * Should return `true` if this component covers the entire `visibleRect`
+	 * and would prevent anything below this component from being visible.
+	 *
+	 * Should return `false` otherwise.
+	 */
+	public occludesEverythingBelowWhenRenderedInRect(_visibleRect: Rect2) {
+		return false;
+	}
+
 	/** Called when this component is added to the given image. */
 	public onAddToImage(_image: EditorImage): void { }
 	public onRemoveFromImage(): void { }
@@ -158,16 +212,35 @@ export default abstract class AbstractComponent {
 	// Private helper for transformBy: Apply the given transformation to all points of this.
 	protected abstract applyTransformation(affineTransfm: Mat33): void;
 
-	// Returns a command that, when applied, transforms this by [affineTransfm] and
-	// updates the editor.
-	// This also increases the element's z-index so that it is on top.
+	/**
+	 * Returns a command that, when applied, transforms this by [affineTransfm] and
+	 * updates the editor.
+	 *
+	 * The transformed component is also moved to the top (use
+	 * {@link AbstractComponent.setZIndexAndTransformBy} to avoid this behavior).
+	 */
 	public transformBy(affineTransfm: Mat33): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);
 	}
 
 	// Returns a command that updates this component's z-index.
 	public setZIndex(newZIndex: number): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex, this.getZIndex());
+		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex);
+	}
+
+	/**
+	 * Combines {@link transformBy} and {@link setZIndex} into a single command.
+	 *
+	 * @param newZIndex - The z-index this component should have after applying this command.
+	 * @param originalZIndex - @internal The z-index the component should revert to after unapplying
+	 *                         this command.
+	 */
+	public setZIndexAndTransformBy(
+		affineTransfm: Mat33, newZIndex: number, originalZIndex?: number
+	): SerializableCommand {
+		return new AbstractComponent.TransformElementCommand(
+			affineTransfm, this.getId(), this, newZIndex, originalZIndex,
+		);
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
@@ -225,7 +298,7 @@ export default abstract class AbstractComponent {
 			this.origZIndex ??= this.component!.getZIndex();
 		}
 
-		private updateTransform(editor: Editor, newTransfm: Mat33) {
+		private updateTransform(editor: Editor, newTransfm: Mat33, targetZIndex: number) {
 			if (!this.component) {
 				throw new Error('this.component is undefined or null!');
 			}
@@ -239,7 +312,13 @@ export default abstract class AbstractComponent {
 			}
 
 			this.component.applyTransformation(newTransfm);
+			this.component.zIndex = targetZIndex;
 			this.component.lastChangedTime = (new Date()).getTime();
+
+			// Ensure that new components are automatically drawn above the current component.
+			if (targetZIndex >= AbstractComponent.zIndexCounter) {
+				AbstractComponent.zIndexCounter = targetZIndex + 1;
+			}
 
 			// Add the element back to the document.
 			if (hadParent) {
@@ -250,16 +329,14 @@ export default abstract class AbstractComponent {
 		public apply(editor: Editor) {
 			this.resolveComponent(editor.image);
 
-			this.component!.zIndex = this.targetZIndex;
-			this.updateTransform(editor, this.affineTransfm);
+			this.updateTransform(editor, this.affineTransfm, this.targetZIndex);
 			editor.queueRerender();
 		}
 
 		public unapply(editor: Editor) {
 			this.resolveComponent(editor.image);
 
-			this.component!.zIndex = this.origZIndex!;
-			this.updateTransform(editor, this.affineTransfm.inverse());
+			this.updateTransform(editor, this.affineTransfm.inverse(), this.origZIndex!);
 			editor.queueRerender();
 		}
 
@@ -370,8 +447,16 @@ export default abstract class AbstractComponent {
 		}
 
 		const instance = this.deserializationCallbacks[json.name]!(json.data);
-		instance.zIndex = json.zIndex;
 		instance.id = json.id;
+
+		if (isFinite(json.zIndex)) {
+			instance.zIndex = json.zIndex;
+
+			// Ensure that new components will be added on top.
+			AbstractComponent.zIndexCounter = Math.max(
+				AbstractComponent.zIndexCounter, instance.zIndex + 1
+			);
+		}
 
 		// TODO: What should we do with json.loadSaveData?
 		//       If we attach it to [instance], we create a potential security risk — loadSaveData

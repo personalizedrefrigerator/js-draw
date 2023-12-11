@@ -1,4 +1,184 @@
 
+# 1.16.0
+ * Features
+    * Snap zoom to powers of 10 when zooming with touch. This should make it easier to maintain a consistent zoom in some cases.
+ * Bug fixes
+    * Collaborative editing: Fix exception thrown when undoing selection transforms that have been partially erased by another user.
+    * Selection: Prevent the selection handles from being briefly visible at the top left corner of the screen when starting a new selection.
+    * Viewing: Fix large strokes flicker while rotating the screen.
+
+# 1.15.0
+ * Features
+    * Added a "help" feature to the pen, select, and page tools.
+    * Find tool: Search in image alt text, in addition to text boxes.
+ * Changes
+    * Re-enable changes to stroke smoothing, with some adjustements to improve drawing many fast, small lines.
+ * Bug fixes
+    * Fix animation for showing the help dialog has motion even when [`reduce-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion) is enabled.
+
+# 1.14.0
+ * Changes
+    * Reverts recent changes to stroke smoothing. (Caused possible regressions while drawing fast, small lines.)
+
+# 1.13.2
+ * Bug fixes
+    * Fix "insert image" tool doesn't work in iOS lockdown mode.
+
+# 1.13.1
+ * Changes
+    * Slight stroke smoothing adjustment
+
+# 1.13.0
+ * Bug fixes
+    * Fix keyboard shortcuts don't work after closing tool menus by clicking away.
+    * Fix tooltips don't disappear when triggered by touchscreens on some devices.
+    * Fix main window scrolls when opening the toolbar (editor embedded in a page).
+ * Other changes & improvements
+    * Further adjustments to stroke smoothing (fix regression: strokes not smoothed when input rate is very low).
+    * Include device-pixel-ratio in debug information screen.
+
+# 1.12.0
+ * Improvements
+    * Stroke smoothing/curve fitting: Make it less likely for strokes to have large spikes when drawing very fast.
+    * About dialog: Include full text of the MIT license for dependencies bundled with the app.
+
+# 1.11.2
+ * Bug fixes
+    * Fix drawing circles when a menu is open. Drawing while a menu is open should close the menu and allow the user to continue drawing. In this case, circles (and other shapes with start points roughly equivalent to their end points) were recognized as clicks.
+
+# 1.11.1
+ * Bug fixes and improvements
+    * Fix pressing <kbd>shift</kbd> not immediately allowing selections to snap to the x/y axes on drag.
+    * Decrease blurriness on high resolution displays at some zoom levels.
+    * Slightly increase the maximum motion required to trigger autocorrect. It was previously difficult to trigger autocorrect on some devices.
+    * Fix color picker toggle button's clickable region was smaller than the visible button.
+    * Update Coloris.
+    * Fix icons not fading correctly when disabled on some devices.
+
+# 1.11.0
+ * Features
+    * Associate a keyboard shortcut with "Exit" (<kbd>Alt</kbd>-<kbd>Q</kbd>) and allow re-assigning it.
+    * Adds a keyboard shortcut for "send selection to back"
+ * Changes
+    * Fixed `AbstractToolbar.addDefaultToolWidgets` not always adding tool widgets in the correct order.
+       - To be consistent with keyboard shortcuts, tools should be added in the same order that they appear in the
+         list of primary tools.
+ * Bug fixes
+    * Fixed selection z-index not reset when undoing a deserialized selection transform command.
+
+# 1.10.0
+ * Features
+    * Added autocorrect for strokes &mdash; holding the pen stationary after drawing replaces near-rectangles and lines with lines and rectangles.
+    * Added a "decrease image size" button to the image dialog to decrease the size of large images.
+ * Bug fixes
+    * Fixed: some tools unusable were unusable in right-to-left layout mode
+
+# 1.9.1
+ * Bug fixes
+    * Fix color selector tool broken on displays with `window.devicePixelRatio` not equal to 1.
+ * Improvements
+    * Work around possible division-by-zero errors in setting transforms by resetting the transform and logging a warning. Previously, this was unrecoverable.
+
+# 1.9.0
+ * Performance improvements
+    * Don't render components that will be completely covered by other (opaque) components in more cases.
+    * Fix some browsers unable to garbage collect the SVG DOM element that an `EditorImage` was loaded from (when garbage collection should be okay).
+ * Improvements
+    * Support high resolution displays
+
+# 1.8.0
+ * Features and improvements
+    * Increased the minimum pinch rotation required to start rotation.
+    * Performance improvement when zooming in to large strokes (particularly when these strokes are opaque).
+ * Bug fixes
+    * Fixed some rendering-cache-related display issues.
+
+# 1.7.2
+ * Changes
+    * Hide `(js-draw v{{version}})` in about dialog if the application provides a custom description.
+
+# 1.7.1
+ * Bug fixes
+    * Selection: Make it more difficult to accidentally trigger the "rotate 90 degrees counter-clockwise feature" when dragging the rotate handle.
+
+# 1.7.0
+ * Features and improvements
+    * Selection tool
+      * Improved autoscroll while dragging/transforming large selections
+      * Decreased visible size of most selection handles ([see discussion](https://github.com/personalizedrefrigerator/js-draw/discussions/38))
+      * Mapped clicking the rotate handle to a counter-clockwise rotation of 90 degrees (matching the icon).
+    * Show more information in the about dialog.
+    * Performance improvement when zooming in near the endpoints of a large, stroked (and not filled) stroke.
+ * Bug fixes
+    * Fix inability to select immediately after touchscreen pinch zooming with an existing selection.
+    * Fix selection boundary visible outside of the editor on pages where the editor isn't fullscreen.
+    * Fix close/exit icon in the material icon pack's size in the dropdown toolbar.
+    * Fix modifier keys (`shift`, `ctrl`, etc.) not registered as pressed if first pressed before focusing the editor.
+
+# 1.6.1
+ * Bug fixes
+    * Fix selected items not moved to the top of an image on click.
+ * Changes
+    * Dependency upgrades ([929349a9cde63a8d286bd3a3467cce9a8ba5476e](https://github.com/personalizedrefrigerator/js-draw/commit/929349a9cde63a8d286bd3a3467cce9a8ba5476e) and [ae6b04f53dcddce86fce6c1554f35f3eaa99899f](https://github.com/personalizedrefrigerator/js-draw/commit/ae6b04f53dcddce86fce6c1554f35f3eaa99899f))
+
+# 1.6.0
+ * Features
+    * Allow specifying a custom app name and version in `EditorSettings` for the about dialog.
+    * Improve the `ToolController` API for adding/removing tools
+ * Bug fixes
+    * Keyboard shortcut handling: Fix keyup events potentially triggered more times each time the editor loses focus.
+    * Toolbar: Fix pressing space not toggling dropdowns after switching toolbars.
+    * Toolbar: Fix tool widgets not set to selected when first added to the toolbar when enabled.
+    * Toolbar: Fix small (1px) space between the toolbar and rendered content
+    * Material icon integration: Fix rounded pen icon has flat stroke edges.
+    * SVGLoader: Support loading SVGs within sandboxed `iframes`.
+    * Collaborative editing: Fix inverted `Erase` commands having no effect after serialized then deserialized.
+
+# 1.5.0
+ * Bug fixes
+    * Make tooltips less likely to appear when scrolling the toolbar with touch.
+    * Fix empty selection transformations added to the undo stack.
+    * Fix diagonal resize cursors appearing as "shrink diagonally" on MacOS and possibly other systems.
+ * Other improvements
+    * Allow changing the icon/label of "Save" and "Exit" buttons
+    * Move "Exit" to the left of "Save" by default
+    * Make the "Save"/"Exit" icons closer to the text size
+
+# 1.4.1
+ * Bug fixes
+    * Fix `minDimension` argument not resizing the background when `toSVG` was called on an empty, auto-resizing image.
+
+# 1.4.0
+ * Featrues
+    * `Editor::toSVG` now allows specifying a minimum output dimension.
+    * Added `Editor::toSVGAsync`.
+    * Added support for read-only editors (see `Editor::setReadOnly`). Note that this feature only attempts to prevent a user from editing the image (and doesn't protect from edits via the API).
+    * Change the cursor to a resize icon when hovering over selection resize boxes.
+ * Localization
+    * Improved Spanish localization.
+ * Bug fixes
+    * Navigation: Prevent app from entering an invalid state (and thus breaking navigation) when scrolling very far away from (0,0) then zooming in.
+    * Edge toolbar
+        * Fix: Save/close buttons were extra wide on some screen sizes in Safari.
+        * Fix: Padding not adjusted for scroll when icons are all on one line. When working properly, the rightmost icon should be roughly half visible to indicate scroll.
+
+# 1.3.1
+ * Bug fixes
+    * Fix grid lines disappearing when zooming and autoresize enabled
+    * Fix very small image/text elements moving on save/reload
+
+# 1.3.0
+ * Features
+   * Adds support for images with full-screen backgrounds and no border (see `EditorImage.setAutoresizeEnabled`). These drawings automatically resize to fit what has been drawn when saved.
+   * Scrollbars within the editor. These scrollbars are currently read-only.
+ * Bug fixes
+   * Fix ctrl+scroll zoom rate is significantly faster than pinch zooming.
+   * Fix zoom level jumping when attempting to zoom outside of zoom limits with a touchscreen.
+   * Fix elements intersecting the selection rectangle not recognized as selected in some cases.
+   * Fix context menu sometimes shown when long-pressing toplevel buttons in the sidebar toolbar (rather than showing the button's tooltip).
+ * Other changes
+   * Slightly faster loading of large SVGs.
+
 # 1.2.2
  * API fixes
    * Exports `pathToRenderable`, `pathFromRenderable`, and `pathVisualEquivalent`. These functions were renamed in version 1.0.0 and the new versions were not exported.

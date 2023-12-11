@@ -7,17 +7,20 @@ import { StrokeDataPoint } from '../../types';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import RenderingStyle from '../../rendering/RenderingStyle';
 import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
+import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
-export const makeFreehandLineBuilder: ComponentBuilderFactory = (initialPoint: StrokeDataPoint, viewport: Viewport) => {
-	// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
-	// less than ±1 px from the curve.
-	const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
-	const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
+export const makeFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
+	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+		// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
+		// less than ±1 px from the curve.
+		const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
+		const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
 
-	return new FreehandLineBuilder(
-		initialPoint, minSmoothingDist, maxSmoothingDist, viewport
-	);
-};
+		return new FreehandLineBuilder(
+			initialPoint, minSmoothingDist, maxSmoothingDist, viewport
+		);
+	}
+);
 
 // Handles stroke smoothing and creates Strokes from user/stylus input.
 export default class FreehandLineBuilder implements ComponentBuilder {

@@ -7,6 +7,10 @@ textarea.runnable-code {
 .code-run-frame {
 	width: 100%;
 	display: block;
+
+	border-radius: 15px;
+	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+	border: none;
 }
 
 :root {
@@ -27,7 +31,6 @@ textarea.runnable-code {
 
 	--cm-caret-color: var(--color-text);
 	--cm-selection-background: #0af;
-
 
 	--cm-shadow-color: rgba(0, 0, 0, 0.5);
 }

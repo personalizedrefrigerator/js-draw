@@ -7,7 +7,7 @@
 import { LineSegment2, Mat33, Rect2 } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import SVGRenderer from '../rendering/renderers/SVGRenderer';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
 const componentId = 'unknown-svg-object';
@@ -39,6 +39,13 @@ export default class UnknownSVGObject extends AbstractComponent {
 
 	public override isSelectable() {
 		return false;
+	}
+
+	public override getSizingMode() {
+		// This component can be shown anywhere (it won't be
+		// visible to the user, it just needs to be saved with
+		// the image).
+		return ComponentSizingMode.Anywhere;
 	}
 
 	protected createClone(): AbstractComponent {

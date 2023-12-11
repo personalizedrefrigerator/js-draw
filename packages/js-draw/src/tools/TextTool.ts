@@ -1,6 +1,6 @@
 import TextComponent from '../components/TextComponent';
 import Editor from '../Editor';
-import EditorImage from '../EditorImage';
+import EditorImage from '../image/EditorImage';
 import { Rect2, Mat33, Vec2, Color4 } from '@js-draw/math';
 import { PointerDevice } from '../Pointer';
 import { EditorEventType } from '../types';
@@ -53,6 +53,10 @@ export default class TextTool extends BaseTool {
 			.${overlayCSSClass} {
 				height: 0;
 				overflow: visible;
+
+				/* Allows absolutely-positioned textareas to scroll with
+				   the containing overlay. */
+				position: relative;
 			}
 
 			.${overlayCSSClass} textarea {
@@ -157,7 +161,7 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.fontSize = `${this.textStyle.size}px`;
 		this.textInputElem.style.color = this.textStyle.renderingStyle.fill.toHexString();
 
-		this.textInputElem.style.position = 'relative';
+		this.textInputElem.style.position = 'absolute';
 		this.textInputElem.style.left = `${textScreenPos.x}px`;
 		this.textInputElem.style.top = `${textScreenPos.y}px`;
 		this.textInputElem.style.margin = '0';
@@ -236,7 +240,7 @@ export default class TextTool extends BaseTool {
 	public override setEnabled(enabled: boolean) {
 		super.setEnabled(enabled);
 
-		if (!enabled) {
+		if (!this.isEnabled()) {
 			this.flushInput();
 		}
 

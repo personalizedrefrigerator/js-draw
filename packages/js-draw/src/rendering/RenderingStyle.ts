@@ -4,6 +4,8 @@ interface RenderingStyle {
 	readonly fill: Color4;
 	readonly stroke?: {
 		readonly color: Color4;
+
+		/** Note: The stroke `width` is twice the stroke radius. */
 		readonly width: number;
 	};
 }

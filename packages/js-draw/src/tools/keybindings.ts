@@ -82,4 +82,8 @@ export const duplicateSelectionShortcut = 'jsdraw.tools.SelectionTool.duplicateS
 KeyboardShortcutManager.registerDefaultKeyboardShortcut(
 	duplicateSelectionShortcut, [ 'CtrlOrMeta+KeyD' ], 'Duplicate selection'
 );
+export const sendToBackSelectionShortcut = 'jsdraw.tools.SelectionTool.sendToBack';
+KeyboardShortcutManager.registerDefaultKeyboardShortcut(
+	sendToBackSelectionShortcut, [ 'End' ], 'Send to back'
+);
 

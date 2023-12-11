@@ -175,6 +175,53 @@ export default class IconProvider {
 		return icon;
 	}
 
+	public makeRotateIcon(): IconElemType {
+		const icon = document.createElementNS(svgNamespace, 'svg');
+
+		icon.innerHTML = `
+			<defs>
+				<marker
+					id="arrow-marker"
+					viewBox="0 0 10 10"
+					refX="3" refY="5"
+					markerWidth="3" markerHeight="3"
+					orient="auto-start-reverse"
+				>
+					<path
+						d="M0,0 L8,5 L0,10z"
+						fill="var(--icon-color)"
+					/>
+				</marker>
+			</defs>
+
+			<path
+				marker-start="url(#arrow-marker)"
+				d="
+					M20,20
+					A30,30 0 1 1 80 80
+				"
+				fill="none"
+				stroke="var(--icon-color)"
+				stroke-width="12"
+			/>
+			<path
+				d="
+					M80,80
+					A30,30 0 1 1 20 20
+				"
+				fill="none"
+				stroke="var(--icon-color)"
+				stroke-width="12"
+				stroke-dasharray="30 10 20 10 20 10 10"
+				style="stroke-linecap: butt;"
+			/>
+		`;
+
+		icon.setAttribute('viewBox', '-5 -5 110 110');
+
+		return icon;
+	}
+
 	public makeHandToolIcon(): IconElemType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
@@ -679,6 +726,25 @@ export default class IconProvider {
 		return icon;
 	}
 
+	public makeShapeAutocorrectIcon(): IconElemType {
+		const fill = 'none';
+		const strokeColor = 'var(--icon-color)';
+		return this.makeIconFromPath(`
+			m 79.129476,33.847107 9.967823,-0.03218 v 55 h -55 l 0.03218,-9.96782
+			M 71.1,40.8 a 30,30 0 0 1 -30,30 30,30 0 0 1 -30,-30 30,30 0 0 1 30,-30 30,30 0 0 1 30,30 L 71.1,40.8
+			M 34.1,58.8 v -25 h 25 v 0
+		`, fill, strokeColor, '7px');
+	}
+
+	public makeStrokeSmoothingIcon(): IconElemType {
+		const fill = 'none';
+		const strokeColor = 'var(--icon-color)';
+		return this.makeIconFromPath(`
+			m 31,83.2 c -50,0 30,-65 -20,-65
+			M 75,17.3 40,59.7 38.2,77.6 55.5,72.4 90.5,30 Z
+		`, fill, strokeColor, '7px');
+	}
+
 	/** Unused. @deprecated */
 	public makeFormatSelectionIcon(): IconElemType {
 		return this.makeIconFromPath(`
@@ -816,6 +882,34 @@ export default class IconProvider {
 			A 12.5 12.5 0 0 0 85 40
 			z
 		`);
+	}
+
+	public makeHelpIcon(): IconElemType {
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.innerHTML = `
+			<circle
+				style="stroke-width:1.587; stroke: var(--icon-color);"
+				fill="none"
+				cx="13.23"
+				cy="13.23"
+				r="11.9"
+			/>
+			<path
+				style="stroke-width: 3; stroke-linecap: butt; stroke: var(--icon-color);"
+				fill="none"
+				d="M 9.26,6.61 C 18.7,3.25 19.95,10.4 14.3,13.4 c -1.15,0.61 -1.32,1.32 -1.32,2.65 v 2.12"
+			/>
+			<circle
+				style="fill: var(--icon-color);"
+				cx="13"
+				cy="21.32"
+				r="1.9"
+			/>
+		`;
+		svg.setAttribute('viewBox', '0 0 26.46 26.46');
+		svg.setAttribute('width', '100');
+		svg.setAttribute('height', '100');
+		return svg;
 	}
 
 	/**

@@ -60,11 +60,11 @@ class UndoRedoHistory {
 	}
 
 	// Remove the last command from this' undo stack and apply it.
-	public undo() {
+	public undo(): void|Promise<void> {
 		const command = this.#undoStack.pop();
 		if (command) {
 			this.#redoStack.push(command);
-			command.unapply(this.editor);
+			const result = command.unapply(this.editor);
 			this.announceUndoCallback(command);
 
 			this.fireUpdateEvent(UndoEventType.CommandUndone, command);
@@ -72,14 +72,16 @@ class UndoRedoHistory {
 				kind: EditorEventType.CommandUndone,
 				command,
 			});
+
+			return result;
 		}
 	}
 
-	public redo() {
+	public redo(): void|Promise<void> {
 		const command = this.#redoStack.pop();
 		if (command) {
 			this.#undoStack.push(command);
-			command.apply(this.editor);
+			const result = command.apply(this.editor);
 			this.announceRedoCallback(command);
 
 			this.fireUpdateEvent(UndoEventType.CommandRedone, command);
@@ -87,6 +89,8 @@ class UndoRedoHistory {
 				kind: EditorEventType.CommandDone,
 				command,
 			});
+
+			return result;
 		}
 	}
 

@@ -22,6 +22,8 @@ import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
 import { InputEvt, InputEvtType } from '../inputEvents';
 import InputPipeline from './InputFilter/InputPipeline';
 import InputStabilizer from './InputFilter/InputStabilizer';
+import ScrollbarTool from './ScrollbarTool';
+import ReactiveValue from '../util/ReactiveValue';
 
 export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
@@ -30,9 +32,12 @@ export default class ToolController implements InputEventListener {
 
 	// Form a pipeline that allows filtering/mapping input events.
 	private inputPipeline: InputPipeline;
+	private isEditorReadOnly: ReactiveValue<boolean>;
 
 	/** @internal */
 	public constructor(editor: Editor, localization: ToolLocalization) {
+		this.isEditorReadOnly = editor.isReadOnlyReactiveValue();
+
 		this.inputPipeline = new InputPipeline();
 		this.inputPipeline.setEmitListener(event => this.onEventInternal(event));
 
@@ -74,6 +79,7 @@ export default class ToolController implements InputEventListener {
 		soundExplorer.setEnabled(false);
 
 		this.tools = [
+			new ScrollbarTool(editor),
 			new PipetteTool(editor, localization.pipetteTool),
 			soundExplorer,
 			panZoomTool,
@@ -111,15 +117,22 @@ export default class ToolController implements InputEventListener {
 		this.primaryToolGroup = primaryToolGroup ?? new ToolEnabledGroup();
 	}
 
-	// Add a tool that acts like one of the primary tools (only one primary tool can be enabled at a time).
-	// This should be called before creating the app's toolbar.
+	/**
+	 * Add a tool that acts like one of the primary tools (only one primary tool can be enabled at a time).
+	 *
+	 * If the tool is already added to this, the tool is converted to a primary tool.
+	 *
+	 * This should be called before creating the app's toolbar.
+	 */
 	public addPrimaryTool(tool: BaseTool) {
 		tool.setToolGroup(this.primaryToolGroup);
 		if (tool.isEnabled()) {
 			this.primaryToolGroup.notifyEnabled(tool);
 		}
 
-		this.addTool(tool);
+		if (!this.tools.includes(tool)) {
+			this.addTool(tool);
+		}
 	}
 
 	public getPrimaryTools(): BaseTool[] {
@@ -130,12 +143,80 @@ export default class ToolController implements InputEventListener {
 
 	// Add a tool to the end of this' tool list (the added tool receives events after tools already added to this).
 	// This should be called before creating the app's toolbar.
+	//
+	// A tool should only be added once.
 	public addTool(tool: BaseTool) {
-		this.tools.push(tool);
+		// Only add if not already present.
+		if (!this.tools.includes(tool)) {
+			this.tools.push(tool);
+		}
+	}
+
+	/**
+	 * Removes **and destroys** all tools in `tools` from this.
+	 */
+	public removeAndDestroyTools(tools: BaseTool[]) {
+		const newTools = [];
+
+		for (const tool of this.tools) {
+			if (tools.includes(tool)) {
+				if (this.activeTool === tool) {
+					this.activeTool = null;
+				}
+				tool.onDestroy();
+			} else {
+				newTools.push(tool);
+			}
+		}
+
+		this.tools = newTools;
+	}
+
+	private insertTools(insertNear: BaseTool, toolsToInsert: BaseTool[], mode: 'before'|'after') {
+		this.tools = this.tools.filter(tool => !toolsToInsert.includes(tool));
+
+		const newTools = [];
+		for (const tool of this.tools) {
+			if (mode === 'after') {
+				newTools.push(tool);
+			}
+
+			if (tool === insertNear) {
+				newTools.push(...toolsToInsert);
+			}
+
+			if (mode === 'before') {
+				newTools.push(tool);
+			}
+		}
+
+		this.tools = newTools;
+	}
+
+	/**
+	 * Removes a tool from this' tool list and replaces it with `replaceWith`.
+	 *
+	 * If any of `toolsToInsert` have already been added to this, the tools are
+	 * moved.
+	 *
+	 * This should be called before creating the editor's toolbar.
+	 */
+	public insertToolsAfter(insertAfter: BaseTool, toolsToInsert: BaseTool[]) {
+		this.insertTools(insertAfter, toolsToInsert, 'after');
+	}
+
+	/** @see {@link insertToolsAfter} */
+	public insertToolsBefore(insertBefore: BaseTool, toolsToInsert: BaseTool[]) {
+		this.insertTools(insertBefore, toolsToInsert, 'before');
 	}
 
 	// @internal use `dispatchEvent` rather than calling `onEvent` directly.
 	private onEventInternal(event: InputEvt): boolean {
+		const isEditorReadOnly = this.isEditorReadOnly.get();
+		const canToolReceiveInput = (tool: BaseTool) => {
+			return tool.isEnabled() && (!isEditorReadOnly || tool.canReceiveInputInReadOnlyEditor());
+		};
+
 		let handled = false;
 		if (event.kind === InputEvtType.PointerDownEvt) {
 			let canOnlySendToActiveTool = false;
@@ -148,7 +229,7 @@ export default class ToolController implements InputEventListener {
 					continue;
 				}
 
-				if (tool.isEnabled() && tool.onEvent(event)) {
+				if (canToolReceiveInput(tool) && tool.onEvent(event)) {
 					if (this.activeTool !== tool) {
 						this.activeTool?.onEvent({ kind: InputEvtType.GestureCancelEvt });
 					}
@@ -180,7 +261,7 @@ export default class ToolController implements InputEventListener {
 			}
 		} else {
 			for (const tool of this.tools) {
-				if (!tool.isEnabled()) {
+				if (!canToolReceiveInput(tool)) {
 					continue;
 				}
 
@@ -219,6 +300,13 @@ export default class ToolController implements InputEventListener {
 
 	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
 		return this.tools.filter(tool => tool instanceof type) as Type[];
+	}
+
+	// @internal
+	public onEditorDestroyed() {
+		for (const tool of this.tools) {
+			tool.onDestroy();
+		}
 	}
 }
 

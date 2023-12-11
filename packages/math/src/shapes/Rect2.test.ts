@@ -111,6 +111,27 @@ describe('Rect2', () => {
 		expect(new Rect2(-100, -1, 200, 2).intersects(new Rect2(-5, 50, 10, 30))).toBe(false);
 	});
 
+	it('should correctly compute the intersection of one rectangle and several others', () => {
+		const mainRect = new Rect2(334,156,333,179);
+		const shouldIntersect = [
+			new Rect2(400.8, 134.8, 8.4, 161.4),
+			new Rect2(324.8,93,164.4,75.2),
+			new Rect2(435.8,146.8,213.2,192.6),
+			new Rect2(550.8,211.8,3.4,3.4),
+			new Rect2(478.8,93.8,212.4,95.4),
+		];
+		const shouldNotIntersect = [
+			new Rect2(200, 200, 1, 1),
+		];
+
+		for (const rect of shouldIntersect) {
+			expect(mainRect.intersects(rect)).toBe(true);
+		}
+		for (const rect of shouldNotIntersect) {
+			expect(mainRect.intersects(rect)).toBe(false);
+		}
+	});
+
 	it('intersecting rectangles should have their intersections correctly computed', () => {
 		expect(new Rect2(-1, -1, 2, 2).intersection(Rect2.empty)).objEq(Rect2.empty);
 		expect(new Rect2(-1, -1, 2, 2).intersection(new Rect2(0, 0, 3, 3))).objEq(
@@ -128,6 +149,19 @@ describe('Rect2', () => {
 		const transformedBBox = rect.transformedBoundingBox(rotationMat);
 		expect(transformedBBox.containsPoint(Vec2.of(0.5, 0.5)));
 		expect(transformedBBox.containsRect(rect)).toBe(true);
+	});
+
+	it('.grownBy should expand a rectangle by the given margin', () => {
+		expect(Rect2.empty.grownBy(0)).toBe(Rect2.empty);
+
+		// Should add padding to all sides.
+		expect(new Rect2(1, 2, 3, 4).grownBy(1)).objEq(new Rect2(0, 1, 5, 6));
+
+		// Shrinking should not result in negative widths/heights and
+		// should adjust x/y appropriately
+		expect(new Rect2(1, 2, 1, 2).grownBy(-1)).objEq(new Rect2(1.5, 3, 0, 0));
+		expect(new Rect2(1, 2, 4, 4).grownBy(-1)).objEq(new Rect2(2, 3, 2, 2));
+		expect(new Rect2(1, 2, 2, 8).grownBy(-2)).objEq(new Rect2(2, 4, 0, 4));
 	});
 
 	describe('should correctly expand to include a given point', () => {

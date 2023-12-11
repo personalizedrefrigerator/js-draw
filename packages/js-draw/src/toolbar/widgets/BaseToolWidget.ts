@@ -1,6 +1,5 @@
 import Editor from '../../Editor';
 import BaseTool from '../../tools/BaseTool';
-import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
@@ -20,12 +19,8 @@ export default abstract class BaseToolWidget extends BaseWidget {
 	) {
 		super(editor, id, localizationTable);
 
-		editor.notifier.on(EditorEventType.ToolEnabled, toolEvt => {
-			if (toolEvt.kind !== EditorEventType.ToolEnabled) {
-				throw new Error('Incorrect event type! (Expected ToolEnabled)');
-			}
-
-			if (toolEvt.tool === targetTool) {
+		this.targetTool.enabledValue().onUpdateAndNow(enabled => {
+			if (enabled) {
 				this.setSelected(true);
 
 				// Transfer focus to the current button, only if another toolbar button is
@@ -35,19 +30,15 @@ export default abstract class BaseToolWidget extends BaseWidget {
 				if (isToolWidgetFocused()) {
 					this.focus();
 				}
-			}
-		});
-
-		editor.notifier.on(EditorEventType.ToolDisabled, toolEvt => {
-			if (toolEvt.kind !== EditorEventType.ToolDisabled) {
-				throw new Error('Incorrect event type! (Expected ToolDisabled)');
-			}
-
-			if (toolEvt.tool === targetTool) {
+			} else {
 				this.setSelected(false);
 				this.setDropdownVisible(false);
 			}
 		});
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor() {
+		return !this.targetTool.canReceiveInputInReadOnlyEditor();
 	}
 
 	protected handleClick() {
@@ -64,7 +55,7 @@ export default abstract class BaseToolWidget extends BaseWidget {
 	}
 
 	protected override onKeyPress(event: KeyPressEvent): boolean {
-		if (this.isSelected() && event.key === ' ' && this.hasDropdown) {
+		if (this.isSelected() && event.code === 'Space' && this.hasDropdown) {
 			this.handleClick();
 			return true;
 		}

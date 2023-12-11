@@ -54,6 +54,14 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		}
 	}
 
+	// Allow only part of the runnable content to be shown in the editor --
+	// the part after a ---visible--- line.
+	// The /s modifier allows . to match newlines. See https://stackoverflow.com/a/8303552
+	const hiddenContentMatch = /^(.*)[\n]---visible---[\n](.*)$/sg.exec(initialEditorValue);
+
+	// invisibleContent won't be shown in the editor
+	const invisibleContent = hiddenContentMatch	? hiddenContentMatch[1] : '';
+	initialEditorValue = hiddenContentMatch ? hiddenContentMatch[2] : initialEditorValue;
 
 	const editor = addCodeMirrorEditor(
 		initialEditorValue,
@@ -69,7 +77,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	controlsArea.replaceChildren(runButton, hideButton);
 
 	const getContentToRun = () => {
-		const editorText = editor.getText();
+		const editorText = invisibleContent + '\n' + editor.getText();
 		let js = '';
 		let css = '';
 
@@ -92,8 +100,11 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	};
 
 
+	let removeMessageListener: (()=>void)|null = null;
 	let previewFrame: HTMLIFrameElement|null = null;
+
 	const closeFrame = () => {
+		removeMessageListener?.();
 		previewFrame?.remove();
 		previewFrame = null;
 	};
@@ -117,16 +128,13 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		previewFrame.classList.add('code-run-frame');
 
 		// Sandboxing:
-		previewFrame.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-modals');
-		previewFrame.setAttribute('csp', 'default-src \'about:blank\'');
+		previewFrame.setAttribute('sandbox', 'allow-scripts allow-modals');
 
-		controlsArea.insertAdjacentElement('afterend', previewFrame);
+		// This *should* allow including </script> tags in strings in most cases.
+		// TODO: Find another way to do this.
+		const escapedJs = js.replace(/<[/]script>/ig, '<\\/script>');
 
-
-		const doc = previewFrame.contentDocument!;
-
-		doc.open();
-		doc.write(`
+		previewFrame.srcdoc = `
 			<!DOCTYPE html>
 			<html>
 				<head>
@@ -142,31 +150,36 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					${bodyHTML}
 				</body>
 				<script>
-					${js}
+					"use strict";
+					(async () => {
+						${escapedJs}
+					})();
 				</script>
 			</html>
-		`);
-		doc.close();
+		`;
 
+		const messageListener = (event: MessageEvent) => {
+			// Iframes with content set by srcdoc= have origin set to null.
+			if (event.origin !== 'null') {
+				console.log('ignoring event with origin', event.origin);
+				return;
+			}
 
-		const updateHeight = () => {
-			const elem = doc.scrollingElement ?? doc.body;
-			if (previewFrame && elem) {
-				previewFrame.style.height = `${Math.max(100, elem.scrollHeight)}px`;
+			if (!previewFrame) {
+				return;
+			}
+
+			if (event.data?.message === 'updateHeight' && event.data?.height) {
+				previewFrame.style.height = `${event.data.height}px`;
 			}
 		};
+		window.addEventListener('message', messageListener);
 
-		// The load event doesn't seem to fire in some browsers (Safari/iOS).
-		// Also update the height immediately.
-		updateHeight();
+		removeMessageListener = () => {
+			window.removeEventListener('message', messageListener);
+		};
 
-		// After loading, ensure that the preview window is large enough for its content.
-		previewFrame.contentWindow?.addEventListener('load', () => {
-			// Additional time for any async code to run
-			setTimeout(() => {
-				updateHeight();
-			}, 0);
-		});
+		controlsArea.insertAdjacentElement('afterend', previewFrame);
 	};
 
 	editorContainer.appendChild(controlsArea);

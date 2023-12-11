@@ -31,4 +31,7 @@ export interface CacheState {
 	currentRenderingCycle: number;
 	props: CacheProps;
 	recordManager: CacheRecordManager;
+
+	// @internal
+	debugMode: boolean;
 }
