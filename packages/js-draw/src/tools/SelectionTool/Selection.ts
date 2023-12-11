@@ -315,7 +315,11 @@ export default class Selection {
 				const elem = editor.image.lookupElement(id);
 
 				if (!elem) {
-					throw new Error(`Unable to find element with ID, ${id}.`);
+					// There may be valid reasons for an element lookup to fail:
+					// For example, if the element was deleted remotely and the remote deletion
+					// hasn't been undone.
+					console.warn(`Unable to find element with ID, ${id}.`);
+					return null;
 				}
 
 				let originalZIndex = elem.getZIndex();
@@ -331,7 +335,9 @@ export default class Selection {
 				return elem.setZIndexAndTransformBy(
 					this.fullTransform, targetZIndex, originalZIndex,
 				);
-			});
+			}).filter( // Remove all null commands
+				command => command !== null,
+			) as SerializableCommand[];
 		}
 
 		public async apply(editor: Editor) {
