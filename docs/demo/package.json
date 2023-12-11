@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/demo",
-	"version": "1.15.0",
+	"version": "1.16.0",
 	"description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
 	"author": "Henry Heino",
 	"license": "MIT",
@@ -11,8 +11,8 @@
 	},
 	"dependencies": {
 		"@js-draw/debugging": "^1.11.1",
-		"@js-draw/material-icons": "^1.15.0",
-		"js-draw": "^1.15.0"
+		"@js-draw/material-icons": "^1.16.0",
+		"js-draw": "^1.16.0"
 	},
 	"devDependencies": {
 		"@js-draw/build-tool": "^1.11.1"
