@@ -301,7 +301,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	// @internal
 	public isTooSmallToRender(rect: Rect2): boolean {
 		// Should we ignore all objects within this object's bbox?
-		const diagonal = this.getCanvasToScreenTransform().transformVec3(rect.size);
+		const diagonal = rect.size.times(this.getCanvasToScreenTransform().getScaleFactor());
 
 		const bothDimenMinSize = this.minRenderSizeBothDimens;
 		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;
