@@ -118,6 +118,10 @@
 	max-width: inherit;
 	min-height: 0px;
 	max-height: inherit;
+
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .imageEditorContainer .loadingMessage {
@@ -137,6 +141,10 @@
 	width: 0;
 	height: 0;
 	overflow: hidden;
+
+	// Move just offscreen
+	margin-left: -1px;
+
 	pointer-events: none;
 	user-select: none;
 	-webkit-user-select: none;

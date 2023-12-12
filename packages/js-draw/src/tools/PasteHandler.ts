@@ -81,6 +81,11 @@ export default class PasteHandler extends BaseTool {
 		const defaultTextStyle: TextRenderingStyle = { size: 12, fontFamily: 'sans', renderingStyle: { fill: Color4.red } };
 		const pastedTextStyle: TextRenderingStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
 
+		// Don't paste text that would be invisible.
+		if (text.trim() === '') {
+			return;
+		}
+
 		const lines = text.split('\n');
 		await this.addComponentsFromPaste([ TextComponent.fromLines(lines, Mat33.identity, pastedTextStyle) ]);
 	}

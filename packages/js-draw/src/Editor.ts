@@ -321,11 +321,6 @@ export class Editor {
 		this.accessibilityControlArea.style.height = '0';
 		this.accessibilityControlArea.style.position = 'absolute';
 
-		// Prevent the control area from being selected.
-		// See https://github.com/personalizedrefrigerator/joplin-plugin-freehand-drawing/issues/8
-		this.accessibilityControlArea.style.userSelect = 'none';
-		this.accessibilityControlArea.style.webkitUserSelect = 'none';
-
 		this.accessibilityAnnounceArea = document.createElement('div');
 		this.accessibilityAnnounceArea.setAttribute('aria-live', 'assertive');
 		this.accessibilityAnnounceArea.className = 'accessibilityAnnouncement';
@@ -459,6 +454,23 @@ export class Editor {
 		this.handlePointerEventsFrom(this.renderingRegion);
 		this.handleKeyEventsFrom(this.renderingRegion);
 		this.handlePointerEventsFrom(this.accessibilityAnnounceArea);
+
+		// Prevent selected text from control areas from being dragged.
+		// See https://github.com/personalizedrefrigerator/joplin-plugin-freehand-drawing/issues/8
+		const preventSelectionOf = [
+			this.renderingRegion,
+			this.accessibilityAnnounceArea,
+			this.accessibilityControlArea,
+		];
+		for (const element of preventSelectionOf) {
+			element.addEventListener('drag', event => {
+				event.preventDefault();
+			});
+
+			element.addEventListener('dragstart', event => {
+				event.preventDefault();
+			});
+		}
 
 		this.container.addEventListener('wheel', evt => {
 			this.handleHTMLWheelEvent(evt);
