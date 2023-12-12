@@ -54,6 +54,17 @@ class LoggingEditor extends jsdraw.Editor {
 		return result;
 	}
 
+	protected override handlePaste(event: ClipboardEvent|DragEvent) {
+		const result = super.handlePaste(event);
+		addToLog({
+			eventType: event.type,
+			currentTime: Date.now(),
+			timeStamp: event.timeStamp,
+		});
+
+		return result;
+	}
+
 	protected override setPointerCapture(target: HTMLElement, pointer: number) {
 		try {
 			target.setPointerCapture(pointer);

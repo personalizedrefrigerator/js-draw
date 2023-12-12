@@ -673,7 +673,14 @@ export class Editor {
 		return false;
 	}
 
-	private async handlePaste(evt: DragEvent|ClipboardEvent) {
+	/** @internal */
+	protected async handleDrop(evt: DragEvent|ClipboardEvent) {
+		evt.preventDefault();
+		this.handlePaste(evt);
+	}
+
+	/** @internal */
+	protected async handlePaste(evt: DragEvent|ClipboardEvent) {
 		const target = document.querySelector(':focus') ?? evt.target;
 		if (!this.isEventSink(target)) {
 			return;
@@ -998,8 +1005,7 @@ export class Editor {
 		};
 
 		elem.ondrop = evt => {
-			evt.preventDefault();
-			this.handlePaste(evt);
+			this.handleDrop(evt);
 		};
 
 		this.eventListenerTargets.push(elem);
