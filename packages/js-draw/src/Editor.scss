@@ -142,9 +142,6 @@
 	height: 0;
 	overflow: hidden;
 
-	// Move just offscreen
-	margin-left: -1px;
-
 	pointer-events: none;
 	user-select: none;
 	-webkit-user-select: none;
@@ -156,6 +153,9 @@
 	width: 0.001px;
 	height: 0.001px;
 	overflow: hidden;
+
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 .imageEditorContainer .textRendererOutputContainer:focus-within {

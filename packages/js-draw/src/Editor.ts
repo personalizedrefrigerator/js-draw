@@ -466,10 +466,12 @@ export class Editor {
 		for (const element of preventSelectionOf) {
 			element.addEventListener('drag', event => {
 				event.preventDefault();
+				return false;
 			});
 
 			element.addEventListener('dragstart', event => {
 				event.preventDefault();
+				return false;
 			});
 		}
 

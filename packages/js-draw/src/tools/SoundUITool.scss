@@ -2,7 +2,10 @@
 .js-draw-sound-ui-toggle {
 	width: 0px;
 	height: 0px;
-	overflow: hidden;    
+	overflow: hidden;  
+
+	user-select: none;
+	-webkit-user-select: none;  
 }
 
 .js-draw-sound-ui-toggle button {
