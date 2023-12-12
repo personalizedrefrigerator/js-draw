@@ -461,6 +461,7 @@ export class Editor {
 			this.renderingRegion,
 			this.accessibilityAnnounceArea,
 			this.accessibilityControlArea,
+			this.loadingWarning,
 		];
 		for (const element of preventSelectionOf) {
 			element.addEventListener('drag', event => {
