@@ -1,4 +1,8 @@
 
+# 1.16.1
+ * Bug fixes
+    * Fixes accessibility text possible to accidentally drag and drop into the editor. (https://github.com/personalizedrefrigerator/joplin-plugin-freehand-drawing/issues/8)
+
 # 1.16.0
  * Features
     * Snap zoom to powers of 10 when zooming with touch. This should make it easier to maintain a consistent zoom in some cases.
