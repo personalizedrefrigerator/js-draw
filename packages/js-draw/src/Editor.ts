@@ -321,6 +321,11 @@ export class Editor {
 		this.accessibilityControlArea.style.height = '0';
 		this.accessibilityControlArea.style.position = 'absolute';
 
+		// Prevent the control area from being selected.
+		// See https://github.com/personalizedrefrigerator/joplin-plugin-freehand-drawing/issues/8
+		this.accessibilityControlArea.style.userSelect = 'none';
+		this.accessibilityControlArea.style.webkitUserSelect = 'none';
+
 		this.accessibilityAnnounceArea = document.createElement('div');
 		this.accessibilityAnnounceArea.setAttribute('aria-live', 'assertive');
 		this.accessibilityAnnounceArea.className = 'accessibilityAnnouncement';
