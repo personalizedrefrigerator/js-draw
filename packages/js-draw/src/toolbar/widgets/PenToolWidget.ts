@@ -38,7 +38,7 @@ export interface PenTypeRecord {
 
 export default class PenToolWidget extends BaseToolWidget {
 	private updateInputs: ()=> void = () => {};
-	protected penTypes: PenTypeRecord[];
+	protected penTypes: Readonly<PenTypeRecord>[];
 	protected shapelikeIDs: string[];
 
 	// A counter variable that ensures different HTML elements are given unique names/ids.
@@ -52,8 +52,12 @@ export default class PenToolWidget extends BaseToolWidget {
 		// Pen types that correspond to
 		this.shapelikeIDs = [ 'pressure-sensitive-pen', 'freehand-pen' ];
 
+		// Additional client-specified pens.
+		const additionalPens = editor.getCurrentSettings().pens?.additionalPenTypes ?? [];
+
 		// Default pen types
 		this.penTypes = [
+			// Non-shape pens
 			{
 				name: this.localizationTable.flatTipPen,
 				id: 'pressure-sensitive-pen',
@@ -66,6 +70,9 @@ export default class PenToolWidget extends BaseToolWidget {
 
 				factory: makeFreehandLineBuilder,
 			},
+			...(additionalPens.filter(pen => !pen.isShapeBuilder)),
+
+			// Shape pens
 			{
 				name: this.localizationTable.arrowPen,
 				id: 'arrow',
@@ -100,7 +107,8 @@ export default class PenToolWidget extends BaseToolWidget {
 
 				isShapeBuilder: true,
 				factory: makeOutlinedCircleBuilder,
-			}
+			},
+			...(additionalPens.filter(pen => pen.isShapeBuilder)),
 		];
 
 		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {

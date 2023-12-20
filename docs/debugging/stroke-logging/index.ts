@@ -139,6 +139,15 @@ class LoggingEditor extends jsdraw.Editor {
 
 const editor = new LoggingEditor(document.body, {
 	iconProvider: new MaterialIconProvider(),
+	pens: {
+		additionalPenTypes: [
+			{
+				name: 'Polyline',
+				id: 'polyline',
+				factory: jsdraw.makePolylineBuilder,
+			},
+		],
+	}
 });
 const toolbar = editor.addToolbar();
 toolbar.addWidget(new DebugToolbarWidget(editor));

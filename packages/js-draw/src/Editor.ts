@@ -35,6 +35,7 @@ import { editorImageToSVGSync, editorImageToSVGAsync } from './image/export/edit
 import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
 import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
 import mitLicenseAttribution from './util/mitLicenseAttribution';
+import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -103,6 +104,36 @@ export interface EditorSettings {
 
 		// (Optional) The app version
 		version?: string,
+	}|null,
+
+	/**
+	 * Configures the default pen tools.
+	 *
+	 * **Example**:
+	 * ```ts,runnable
+	 * import { Editor, makePolylineBuilder } from 'js-draw';
+	 *
+	 * const editor = new Editor(document.body, {
+	 *     pens: {
+	 *         additionalPenTypes: [{
+	 *             name: 'Polyline (For debugging)',
+	 *             id: 'custom-polyline',
+	 *             factory: makePolylineBuilder,
+	 *
+	 *             // The pen doesn't create fixed shapes (e.g. squares, rectangles, etc)
+	 *             // and so should go under the "pens" section.
+	 *             isShapeBuilder: false,
+	 *         }],
+	 *     },
+	 * });
+	 * editor.addToolbar();
+	 * ```
+	 */
+	pens: {
+		/**
+		 * Additional pen types that can be selected in a toolbar.
+		 */
+		additionalPenTypes: readonly Readonly<PenTypeRecord>[],
 	}|null,
 }
 
@@ -239,7 +270,7 @@ export class Editor {
 	private eventListenerTargets: HTMLElement[] = [];
 	private readOnly: MutableReactiveValue<boolean>;
 
-	private settings: EditorSettings;
+	private readonly settings: Readonly<EditorSettings>;
 
 	/**
 	 * @example
@@ -291,6 +322,7 @@ export class Editor {
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 			notices: [],
 			appInfo: settings.appInfo ? { ...settings.appInfo } : null,
+			pens: { additionalPenTypes: settings.pens?.additionalPenTypes ?? [], },
 		};
 
 		// Validate settings
@@ -393,6 +425,17 @@ export class Editor {
 				}
 			}
 		});
+	}
+
+	/**
+	 * @returns a shallow copy of the current settings of the editor.
+	 *
+	 * Do not modify.
+	 */
+	public getCurrentSettings(): Readonly<EditorSettings> {
+		return {
+			...this.settings,
+		};
 	}
 
 	/**
