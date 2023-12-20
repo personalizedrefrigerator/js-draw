@@ -32,7 +32,7 @@ const replaceInternalPackageToPackageLinks = () => {
 	];
 
 	for (const link of linksToReplace) {
-		const hrefRegex = /data:text\/plain;utf-8,corrected-link=([^,]+),([^,]+)$/;
+		const hrefRegex = /^data:text\/plain;utf-8,corrected-link=([^,]+),([^,]+)$/;
 		const hrefMatch = (link.getAttribute('href') ?? '').match(hrefRegex);
 
 		if (hrefMatch) {
