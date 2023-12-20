@@ -25,10 +25,9 @@ export const load = (app: Application) => {
 				const moduleValue = toTypeDocName(moduleSource);
 				const nameValue = toTypeDocName(name);
 
-				// TODO: This is extremely fragile. Relies on "s not being properly escaped by
-				//       TypeDoc.
+				// TODO: This is extremely fragile.
 				return {
-					target: `#" data--module=${moduleValue} data--name=${nameValue} id="`,
+					target: `data:text/plain;utf-8,corrected-link=${moduleValue},${nameValue}`,
 					name,
 				};
 			}

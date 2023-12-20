@@ -27,13 +27,18 @@ const fixImageURLs = () => {
 
 // Works around a TypeDoc bug where cross-module links don't work.
 const replaceInternalPackageToPackageLinks = () => {
-	const linksToReplace = document.querySelectorAll('a[data--module]');
+	const linksToReplace = [
+		...document.querySelectorAll('a[href^="data:text/plain;utf-8,corrected-link="]'),
+	];
 
 	for (const link of linksToReplace) {
-		const moduleTarget = link.getAttribute('data--module');
-		const propertyName = link.getAttribute('data--name');
+		const hrefRegex = /data:text\/plain;utf-8,corrected-link=([^,]+),([^,]+)$/;
+		const hrefMatch = (link.getAttribute('href') ?? '').match(hrefRegex);
 
-		if (moduleTarget) {
+		if (hrefMatch) {
+			const moduleTarget = hrefMatch[1];
+			const propertyName = hrefMatch[2];
+
 			const href = join(basePath, 'modules', moduleTarget + '.html') + `?find-name=${propertyName}`;
 
 			link.setAttribute('target', '');
