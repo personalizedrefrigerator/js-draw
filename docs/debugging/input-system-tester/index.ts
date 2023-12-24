@@ -156,8 +156,9 @@ const makeEditor = (label: string) => {
 	};
 };
 
+const editorContainer = document.getElementById('editor-container')!;
 for (const sampleName in handwritingSamples) {
 	const editorControl = makeEditor(sampleName);
-	document.body.appendChild(editorControl.container);
+	editorContainer.appendChild(editorControl.container);
 	editorControl.playLog(handwritingSamples[sampleName as keyof typeof handwritingSamples]);
 }
