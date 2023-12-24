@@ -90,7 +90,7 @@ Here's one possible workflow for making and testing changes:
 
 **Setup**:
 1. Run `npm install` in the project's root directory (if you haven't already)
-2. Start the compiler in `watch` mode in both `packages/js-draw/` and `docs/debugging/stroke-logging`:
+2. Start the compiler in `watch` mode in both `packages/js-draw/` and `docs/debugging/input-system-tester`:
 ```bash
 # Shell #1
 $ cd packages/js-draw
