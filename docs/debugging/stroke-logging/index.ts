@@ -1,6 +1,6 @@
 import * as jsdraw from 'js-draw';
 import MaterialIconProvider from '@js-draw/material-icons';
-import { DebugToolbarWidget } from '@js-draw/debugging';
+import { DebugToolbarWidget, playInputLog } from '@js-draw/debugging';
 import 'js-draw/styles';
 
 const log = document.querySelector('#log') as HTMLTextAreaElement;
@@ -214,77 +214,7 @@ const playBackLog = async (rate: number) => {
 	const data = JSON.parse('[' + log.value + ']');
 	data.reverse();
 
-	let lastEventTimestamp: number|null = null;
-	let encounteredSignificantEvent = false;
-
-	for (const event of data) {
-		if (!event.timeStamp) continue;
-
-		lastEventTimestamp ??= event.timeStamp;
-		const deltaTime = event.timeStamp - lastEventTimestamp!;
-
-		// Ignore any mouse movement/extraneous events that the
-		// user probably doesn't care about.
-		if (encounteredSignificantEvent) {
-			await new Promise<void>((resolve) => {
-				setTimeout(() => resolve(), deltaTime / rate);
-			});
-		}
-
-		lastEventTimestamp = event.timeStamp;
-
-		if (['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].includes(event.eventType)) {
-
-			const ptrEvent = new PointerEvent(event.eventType, {
-				clientX: event.x,
-				clientY: event.y,
-				x: event.x,
-				y: event.y,
-				isPrimary: event.isPrimary,
-				pointerType: event.pointerType,
-				pointerId: event.pointerId,
-				buttons: event.buttons,
-				pressure: event.pressure,
-			} as any);
-
-			editor.handleHTMLPointerEvent(event.eventType, ptrEvent);
-		} else if (event.eventType === 'keydown' || event.eventType === 'keyup') {
-			lastEventTimestamp ??= event.timeStamp;
-			const keyEvent = new KeyboardEvent(event.eventType, {
-				key: event.key,
-				code: event.code,
-
-				ctrlKey: event.ctrlKey,
-				altKey: event.altKey,
-				metaKey: event.metaKey,
-				shiftKey: event.shiftKey,
-			});
-
-			if (event.eventType === 'keydown') {
-				editor.handleHTMLKeyDownEvent(keyEvent);
-			} else {
-				editor.handleHTMLKeyUpEvent(keyEvent);
-			}
-		} else if (event.eventType === 'wheel') {
-			lastEventTimestamp ??= event.timeStamp;
-			const wheelEvent = new WheelEvent(event.eventType, {
-				clientX: event.clientX,
-				clientY: event.clientY,
-				deltaX: event.deltaX,
-				deltaY: event.deltaY,
-				deltaZ: event.deltaZ,
-				deltaMode: event.deltaMode,
-				ctrlKey: event.ctrlKey,
-				metaKey: event.metaKey,
-			});
-
-			editor.handleHTMLWheelEvent(wheelEvent);
-		}
-
-		if (['wheel', 'keydown', 'pointerdown'].includes(event.eventType)) {
-			encounteredSignificantEvent = true;
-		}
-	}
+	playInputLog(editor, data, rate);
 };
 playbackButton.onclick = () => playBackLog(1);
 

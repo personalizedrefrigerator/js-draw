@@ -582,7 +582,7 @@ export class Editor {
 	}
 
 	/** @internal */
-	protected handleHTMLWheelEvent(event: WheelEvent) {
+	public handleHTMLWheelEvent(event: WheelEvent) {
 		let delta = Vec3.of(event.deltaX, event.deltaY, event.deltaZ);
 
 		// Process wheel events if the ctrl key is down, even if disabled -- we do want to handle
@@ -643,12 +643,20 @@ export class Editor {
 	 * (e.g. with synthetic events). @internal
 	 */
 	protected setPointerCapture(target: HTMLElement, pointerId: number) {
-		target.setPointerCapture(pointerId);
+		try {
+			target.setPointerCapture(pointerId);
+		} catch (error) {
+			console.warn('Failed to setPointerCapture', error);
+		}
 	}
 
 	/** Can be overridden in a testing environment to handle synthetic events. @internal */
 	protected releasePointerCapture(target: HTMLElement, pointerId: number) {
-		target.releasePointerCapture(pointerId);
+		try {
+			target.releasePointerCapture(pointerId);
+		} catch (error) {
+			console.warn('Failed to releasePointerCapture', error);
+		}
 	}
 
 	/**
@@ -1001,7 +1009,7 @@ export class Editor {
 	}
 
 	/** @internal */
-	protected handleHTMLKeyDownEvent(htmlEvent: KeyboardEvent) {
+	public handleHTMLKeyDownEvent(htmlEvent: KeyboardEvent) {
 		console.assert(
 			htmlEvent.type === 'keydown',
 			`handling a keydown event with type ${htmlEvent.type}`
@@ -1024,7 +1032,7 @@ export class Editor {
 	}
 
 	/** @internal */
-	protected handleHTMLKeyUpEvent(htmlEvent: KeyboardEvent) {
+	public handleHTMLKeyUpEvent(htmlEvent: KeyboardEvent) {
 		console.assert(
 			htmlEvent.type === 'keyup',
 			`Handling a keyup event with type ${htmlEvent.type}`,

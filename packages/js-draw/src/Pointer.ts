@@ -164,10 +164,38 @@ export default class Pointer {
 		id: number = 0,
 		device: PointerDevice = PointerDevice.Pen,
 		isPrimary: boolean = true,
-		pressure: number|null = null
+		pressure: number|null = null,
+		timeStamp: number|null = null,
 	): Pointer {
 		const screenPos = viewport.canvasToScreen(canvasPos);
-		const timeStamp = performance.now();
+		timeStamp ??= performance.now();
+
+		return new Pointer(
+			screenPos,
+			canvasPos,
+			pressure,
+			isPrimary,
+			isDown,
+			device,
+			id,
+			timeStamp
+		);
+	}
+
+	// Create a new Pointer from a point on the screen.
+	// Intended for unit tests.
+	public static ofScreenPoint(
+		screenPos: Point2,
+		isDown: boolean,
+		viewport: Viewport,
+		id: number = 0,
+		device: PointerDevice = PointerDevice.Pen,
+		isPrimary: boolean = true,
+		pressure: number|null = null,
+		timeStamp: number|null = null,
+	): Pointer {
+		const canvasPos = viewport.screenToCanvas(screenPos);
+		timeStamp ??= performance.now();
 
 		return new Pointer(
 			screenPos,

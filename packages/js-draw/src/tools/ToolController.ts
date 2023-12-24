@@ -110,8 +110,12 @@ export default class ToolController implements InputEventListener {
 		this.activeTool = null;
 	}
 
-	// Replaces the current set of tools with `tools`. This should only be done before
-	// the creation of the app's toolbar (if using `AbstractToolbar`).
+	/**
+	 * Replaces the current set of tools with `tools`. This should only be done before
+	 * the creation of the app's toolbar (if using `AbstractToolbar`).
+	 *
+	 * If no `primaryToolGroup` is given, an empty one will be created.
+	 */
 	public setTools(tools: BaseTool[], primaryToolGroup?: ToolEnabledGroup) {
 		this.tools = tools;
 		this.primaryToolGroup = primaryToolGroup ?? new ToolEnabledGroup();
