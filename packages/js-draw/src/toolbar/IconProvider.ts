@@ -95,7 +95,6 @@ export default class IconProvider {
 		return makeRedoIcon(true);
 	}
 
-	// @param mirror - reflect across the x-axis. This parameter is internal.
 	// @returns a redo icon.
 	public makeRedoIcon(): IconElemType {
 		return makeRedoIcon(false);

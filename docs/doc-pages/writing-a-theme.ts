@@ -7,6 +7,6 @@
  * [[include:doc-pages/writing-a-theme.md]]
  *
  * See also
- * - {@link adjustEditorThemeForContrast}
+ * - {@link js-draw.adjustEditorThemeForContrast}
  */
 export namespace WritingATheme__ {}
