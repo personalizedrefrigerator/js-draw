@@ -27,7 +27,7 @@
 	"devDependencies": {
 		"@codemirror/lang-css": "6.2.1",
 		"@codemirror/lang-javascript": "6.2.1",
-		"@codemirror/language": "6.9.1",
+		"@codemirror/language": "6.10.1",
 		"@js-draw/build-tool": "^1.11.1",
 		"@js-draw/material-icons": "^1.16.1",
 		"@js-draw/math": "^1.16.0",
