@@ -13,6 +13,8 @@ import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
 import { toolbarCSSPrefix } from '../constants';
 import HelpDisplay from '../utils/HelpDisplay';
+import ClipboardHandler from '../../util/ClipboardHandler';
+import BaseWidget from './BaseWidget';
 
 const makeFormatMenu = (
 	editor: Editor,
@@ -129,14 +131,34 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		duplicateButton.setHelpText(this.localizationTable.selectionDropdown__duplicateHelpText);
 
+		let copyPasteWidget: BaseWidget|null = null;
+
+		const clipboardHandler = new ClipboardHandler(this.editor);
+		if (clipboardHandler.canCopyPasteWithoutEvent()) {
+			copyPasteWidget = new ActionButtonWidget(
+				editor, 'copy-paste-btn',
+				() => editor.icons.makePasteIcon(),
+				this.localizationTable.paste,
+				() => {
+					clipboardHandler.paste();
+				},
+				localization,
+			);
+		}
+
 		this.addSubWidget(resizeButton);
 		this.addSubWidget(deleteButton);
 		this.addSubWidget(duplicateButton);
 
-		const updateDisabled = (disabled: boolean) => {
-			resizeButton.setDisabled(disabled);
-			deleteButton.setDisabled(disabled);
-			duplicateButton.setDisabled(disabled);
+		if (copyPasteWidget) {
+			this.addSubWidget(copyPasteWidget);
+		}
+
+		const updateDisabled = (missingSelection: boolean) => {
+			resizeButton.setDisabled(missingSelection);
+			deleteButton.setDisabled(missingSelection);
+			duplicateButton.setDisabled(missingSelection);
+			copyPasteWidget?.setDisabled(!missingSelection);
 		};
 		updateDisabled(true);
 

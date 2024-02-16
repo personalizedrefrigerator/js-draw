@@ -17,6 +17,18 @@ export default class ClipboardHandler {
 	public constructor(private editor: Editor) {
 	}
 
+	private supportsClipboardApi() {
+		return (
+			typeof ClipboardItem !== 'undefined'
+			&& typeof navigator?.clipboard?.write !== 'undefined'
+		);
+	}
+
+	/** @returns true iff both copy and paste can be used without an `event` argument. */
+	public canCopyPasteWithoutEvent() {
+		return this.supportsClipboardApi();
+	}
+
 	/**
 	 * Pastes data from the clipboard into the editor associated with
 	 * this handler.
@@ -179,11 +191,7 @@ export default class ClipboardHandler {
 			return navigator.clipboard.write([ new ClipboardItem(mappedMimeToData) ]);
 		};
 
-		const supportsClipboardApi = (
-			typeof ClipboardItem !== 'undefined'
-			&& typeof navigator?.clipboard?.write !== 'undefined'
-		);
-		if (!this.#preferClipboardEvents && supportsClipboardApi && (hasNonTextMimeTypes || !event)) {
+		if (!this.#preferClipboardEvents && this.supportsClipboardApi() && (hasNonTextMimeTypes || !event)) {
 			let clipboardApiPromise: Promise<void>|null = null;
 
 			const fallBackToCopyEvent = (reason: any) => {
