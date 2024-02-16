@@ -494,9 +494,8 @@ export default class SelectionTool extends BaseTool {
 				.rightMul(Mat33.translation(bbox.topLeft.times(-1)))
 		);
 
-		const sanitize = true;
-		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, sanitize);
-		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(exportViewport, { maxCanvasDimen: 2048 });
+		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, { sanitize: true, useViewBoxForPositioning: true });
+		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(exportViewport, { maxCanvasDimen: 4096 });
 
 		const text: string[] = [];
 		for (const elem of selectedElems) {
