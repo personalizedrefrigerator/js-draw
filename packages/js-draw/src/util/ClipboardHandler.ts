@@ -133,7 +133,7 @@ export default class ClipboardHandler {
 	 * is to be copied. This is done because `ClipboardEvent`s seem to not support attaching
 	 * images.
 	 */
-	public async copy(event?: ClipboardEvent) {
+	public copy(event?: ClipboardEvent) {
 		const mimeToData: Record<string, Promise<Blob>|string> = Object.create(null);
 
 		if (this.editor.toolController.dispatchInputEvent({
@@ -161,8 +161,8 @@ export default class ClipboardHandler {
 			}
 		};
 
-		const copyToClipboardApi = async () => {
-			const mappedMimeToData: Record<string, Blob> = Object.create(null);
+		const copyToClipboardApi = () => {
+			const mappedMimeToData: Record<string, Blob|Promise<Blob>> = Object.create(null);
 			const mimeMapping: Record<string, string> = {
 				// image/svg+xml is unsupported in Chrome.
 				'image/svg+xml': 'text/html',
@@ -173,28 +173,42 @@ export default class ClipboardHandler {
 				if (typeof data === 'string') {
 					mappedMimeToData[mappedKey] = new Blob([new TextEncoder().encode(data)], { type: mappedKey });
 				} else {
-					mappedMimeToData[mappedKey] = await data;
+					mappedMimeToData[mappedKey] = data;
 				}
 			}
-			await navigator.clipboard.write([ new ClipboardItem(mappedMimeToData) ]);
+			return navigator.clipboard.write([ new ClipboardItem(mappedMimeToData) ]);
 		};
 
-		const supportsClipboardApi = typeof ClipboardItem !== 'undefined';
+		const supportsClipboardApi = (
+			typeof ClipboardItem !== 'undefined'
+			&& typeof navigator?.clipboard?.write !== 'undefined'
+		);
 		if (!this.#preferClipboardEvents && supportsClipboardApi && (hasNonTextMimeTypes || !event)) {
-			try {
-				await copyToClipboardApi();
-			} catch(error) {
+			let clipboardApiPromise: Promise<void>|null = null;
+
+			const fallBackToCopyEvent = (reason: any) => {
 				console.warn(
 					'Unable to copy to the clipboard API. Future calls to .copy will use ClipboardEvents if possible.',
-					error
+					reason
 				);
 				this.#preferClipboardEvents = true;
 
-				// May not work in some browsers (can't copy to an event after running async code)
 				copyToEvent();
+			};
+
+			try {
+				clipboardApiPromise = copyToClipboardApi();
+			} catch(error) {
+				fallBackToCopyEvent(error);
+			}
+
+			if (clipboardApiPromise) {
+				return clipboardApiPromise.catch(fallBackToCopyEvent);
 			}
 		} else {
 			copyToEvent();
 		}
+
+		return Promise.resolve();
 	}
 }
