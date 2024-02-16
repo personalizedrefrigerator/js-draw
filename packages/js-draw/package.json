@@ -57,8 +57,8 @@
   "scripts": {
     "dist-test": "cd dist-test/test_imports && npm install && npm run test",
     "dist": "npm run build && npm run dist-test",
-    "build": "rm -rf ./dist/* && mkdir -p dist && build-tool build",
-    "watch": "rm -rf ./dist/* && mkdir -p dist && build-tool watch",
+    "build": "rm -rf ./dist/* && build-tool build",
+    "watch": "build-tool watch",
     "build-translation-templates": "build-tool build-translation-templates",
     "prepack": "npm run dist && cd ../../ && npm run test && cd packages/js-draw && ts-node tools/copyREADME.ts copy",
     "postpack": "ts-node tools/copyREADME.ts revert"
