@@ -3,6 +3,10 @@ import { Editor } from '../Editor';
 import { InputEvtType } from '../inputEvents';
 import fileToBase64Url from './fileToBase64Url';
 
+const isTextMimeType = (mime: string) =>
+	// +xml: Handles image/svg+xml
+	mime.endsWith('+xml') || mime.startsWith('text/');
+
 export default class ClipboardHandler {
 	#preferClipboardEvents = false;
 
@@ -64,7 +68,7 @@ export default class ClipboardHandler {
 
 		// Returns true if handled
 		const handleMIME = async (mime: string) => {
-			const isTextFormat = mime.endsWith('+xml') || mime.startsWith('text/');
+			const isTextFormat = isTextMimeType(mime);
 			if (isTextFormat) {
 				const data = textData.get(mime)!;
 
@@ -138,7 +142,7 @@ export default class ClipboardHandler {
 		}
 
 		const mimeTypes = Object.keys(mimeToData);
-		const hasNonTextMimeTypes = mimeTypes.some(mime => !mime.startsWith('text/'));
+		const hasNonTextMimeTypes = mimeTypes.some(mime => !isTextMimeType(mime));
 
 		const copyToEvent = () => {
 			if (!event) {
@@ -156,6 +160,7 @@ export default class ClipboardHandler {
 		const copyToClipboardApi = async () => {
 			const mappedMimeToData: Record<string, Blob> = Object.create(null);
 			const mimeMapping: Record<string, string> = {
+				// image/svg+xml is unsupported in Chrome.
 				'image/svg+xml': 'text/html',
 			};
 			for (const key in mimeToData) {
@@ -175,7 +180,10 @@ export default class ClipboardHandler {
 			try {
 				await copyToClipboardApi();
 			} catch(error) {
-				console.warn('Unable to copy to the clipboard API. Future calls to .copy will use ClipboardEvents if possible');
+				console.warn(
+					'Unable to copy to the clipboard API. Future calls to .copy will use ClipboardEvents if possible.',
+					error
+				);
 				this.#preferClipboardEvents = true;
 
 				// May not work in some browsers (can't copy to an event after running async code)
