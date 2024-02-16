@@ -136,7 +136,7 @@ export default class SVGRenderer extends AbstractRenderer {
 
 		if (style.stroke) {
 			pathElem.setAttribute('stroke', style.stroke.color.toHexString());
-			pathElem.setAttribute('stroke-width', toRoundedString(style.stroke.width));
+			pathElem.setAttribute('stroke-width', toRoundedString(style.stroke.width * this.getSizeOfCanvasPixelOnScreen()));
 		}
 
 		this.elem.appendChild(pathElem);
