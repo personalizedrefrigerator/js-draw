@@ -7,6 +7,10 @@ const isTextMimeType = (mime: string) =>
 	// +xml: Handles image/svg+xml
 	mime.endsWith('+xml') || mime.startsWith('text/');
 
+/**
+ * Handles conversion between the browser clipboard APIs and internal
+ * js-draw clipboard events.
+ */
 export default class ClipboardHandler {
 	#preferClipboardEvents = false;
 

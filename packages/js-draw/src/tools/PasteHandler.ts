@@ -50,16 +50,20 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	private async doSVGPaste(data: string) {
-		const loader = SVGLoader.fromString(data, true);
+		this.editor.showLoadingWarning(0);
+		try {
+			const loader = SVGLoader.fromString(data, true);
 
-		const components: AbstractComponent[] = [];
+			const components: AbstractComponent[] = [];
+			await loader.start((component) => {
+				components.push(component);
+			},
+			(_countProcessed: number, _totalToProcess: number) => null);
 
-		await loader.start((component) => {
-			components.push(component);
-		},
-		(_countProcessed: number, _totalToProcess: number) => null);
-
-		await this.addComponentsFromPaste(components);
+			await this.addComponentsFromPaste(components);
+		} finally {
+			this.editor.hideLoadingWarning();
+		}
 	}
 
 	private async doTextPaste(text: string) {

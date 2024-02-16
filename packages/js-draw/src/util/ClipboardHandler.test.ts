@@ -1,13 +1,13 @@
 import BaseTool from '../tools/BaseTool';
 import createEditor from '../testing/createEditor';
 import ClipboardHandler from './ClipboardHandler';
-import { CopyEvent } from '../inputEvents';
+import { CopyEvent, PasteEvent } from '../inputEvents';
 import Editor from '../Editor';
 
 type ClipboardTestData = Record<string, string|Blob>;
 
 // A tool that handles all copy events
-class TestCopyTool extends BaseTool {
+class TestCopyPasteTool extends BaseTool {
 	public constructor(editor: Editor, private data: ClipboardTestData) {
 		super(editor.notifier, 'copy tool');
 	}
@@ -24,11 +24,17 @@ class TestCopyTool extends BaseTool {
 
 		return true;
 	}
+
+	public lastPasteData: PasteEvent;
+	public override onPaste(event: PasteEvent): boolean {
+		this.lastPasteData = { ...event };
+		return false;
+	}
 }
 
-const setUpCopyTool = (editor: Editor, clipboardData: ClipboardTestData) => {
-	const copyTool = new TestCopyTool(editor, clipboardData);
-	editor.toolController.addTool(copyTool);
+const setUpCopyPasteTool = (editor: Editor, dataToCopy: ClipboardTestData) => {
+	const copyTool = new TestCopyPasteTool(editor, dataToCopy);
+	editor.toolController.addTool(copyTool, { addToFront: true });
 	return copyTool;
 };
 
@@ -50,7 +56,7 @@ describe('ClipboardHandler', () => {
 	describe('copy', () => {
 		it('should copy to the clipboard API when no event is given', async () => {
 			const editor = createEditor();
-			setUpCopyTool(editor, {
+			setUpCopyPasteTool(editor, {
 				'text/plain': 'Test.',
 			});
 
@@ -63,7 +69,7 @@ describe('ClipboardHandler', () => {
 
 		it('should copy to the clipboard API when images are to be copied', async () => {
 			const editor = createEditor();
-			setUpCopyTool(editor, {
+			setUpCopyPasteTool(editor, {
 				'text/plain': 'Testing!',
 				'text/html': '<i>Testing!</i>',
 				'image/png': 'Fake image.',
@@ -99,7 +105,7 @@ describe('ClipboardHandler', () => {
 			}]
 		])('should use event.dataTransfer when no images are to be copied (case %#)', async (data) => {
 			const editor = createEditor();
-			setUpCopyTool(editor, data);
+			setUpCopyPasteTool(editor, data);
 			const clipboardHandler = new ClipboardHandler(editor);
 
 			const event = new ClipboardEvent('copy', { clipboardData: new DataTransfer() });
@@ -113,7 +119,7 @@ describe('ClipboardHandler', () => {
 			setClipboardApiSupported(false);
 
 			const editor = createEditor();
-			setUpCopyTool(editor, {
+			setUpCopyPasteTool(editor, {
 				'text/plain': 'This should be copied.',
 				'image/png': 'Fake image.',
 			});
@@ -130,7 +136,7 @@ describe('ClipboardHandler', () => {
 		// image/svg+xml is unsupported in Chrome as of early 2024.
 		it('should copy text/html instead of image/svg+xml when copying to the Clipboard API', async () => {
 			const editor = createEditor();
-			setUpCopyTool(editor, {
+			setUpCopyPasteTool(editor, {
 				'image/svg+xml': '<svg>This should be copied.</svg>',
 			});
 
@@ -141,6 +147,26 @@ describe('ClipboardHandler', () => {
 			const clipboardItems = await navigator.clipboard.read();
 			expect(clipboardItems).toHaveLength(1);
 			expect(await (await clipboardItems[0].getType('text/html')).text()).toBe('<svg>This should be copied.</svg>');
+		});
+	});
+
+	describe('paste', () => {
+		it('should support pasting from the clipboard API', async () => {
+			const editor = createEditor();
+			const clipboardHandler = new ClipboardHandler(editor);
+
+			const testData = '<svg><text>Testing...</text></svg>';
+			const copyPasteTool = setUpCopyPasteTool(editor, {
+				'image/svg+xml': testData,
+			});
+			await clipboardHandler.copy();
+			await clipboardHandler.paste();
+
+			// Should have pasted
+			expect(copyPasteTool.lastPasteData).toMatchObject({
+				mime: 'text/html',
+				data: testData,
+			});
 		});
 	});
 });
