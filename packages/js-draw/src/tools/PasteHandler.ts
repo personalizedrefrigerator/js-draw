@@ -40,7 +40,8 @@ export default class PasteHandler extends BaseTool {
 
 			// text/html is sometimes handlable SVG data. Use a hueristic
 			// to determine if this is the case:
-			return event.data.match(/^.{0,200}<svg/i); // .{0,200} <- Allow for metadata near start
+			// We use [^] and not . so that newlines are included.
+			return event.data.match(/^[^]{0,200}<svg/i); // [^]{0,200} <- Allow for metadata near start
 		})();
 
 		if (isSvgData) {
