@@ -29,7 +29,21 @@ export default class PasteHandler extends BaseTool {
 	public override onPaste(event: PasteEvent): boolean {
 		const mime = event.mime.toLowerCase();
 
-		if (mime === 'image/svg+xml' || mime === 'text/html') {
+		const isSvgData = (() => {
+			if (mime === 'image/svg+xml') {
+				return true;
+			}
+
+			if (mime !== 'text/html') {
+				return false;
+			}
+
+			// text/html is sometimes handlable SVG data. Use a hueristic
+			// to determine if this is the case:
+			return event.data.match(/^\s*<svg/i);
+		})();
+
+		if (isSvgData) {
 			void this.doSVGPaste(event.data);
 			return true;
 		}
