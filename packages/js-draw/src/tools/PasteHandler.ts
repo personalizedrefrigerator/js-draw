@@ -29,7 +29,7 @@ export default class PasteHandler extends BaseTool {
 	public override onPaste(event: PasteEvent): boolean {
 		const mime = event.mime.toLowerCase();
 
-		if (mime === 'image/svg+xml') {
+		if (mime === 'image/svg+xml' || mime === 'text/html') {
 			void this.doSVGPaste(event.data);
 			return true;
 		}
@@ -50,17 +50,20 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	private async doSVGPaste(data: string) {
-		const sanitize = true;
-		const loader = SVGLoader.fromString(data, sanitize);
+		this.editor.showLoadingWarning(0);
+		try {
+			const loader = SVGLoader.fromString(data, true);
 
-		const components: AbstractComponent[] = [];
+			const components: AbstractComponent[] = [];
+			await loader.start((component) => {
+				components.push(component);
+			},
+			(_countProcessed: number, _totalToProcess: number) => null);
 
-		await loader.start((component) => {
-			components.push(component);
-		},
-		(_countProcessed: number, _totalToProcess: number) => null);
-
-		await this.addComponentsFromPaste(components);
+			await this.addComponentsFromPaste(components);
+		} finally {
+			this.editor.hideLoadingWarning();
+		}
 	}
 
 	private async doTextPaste(text: string) {

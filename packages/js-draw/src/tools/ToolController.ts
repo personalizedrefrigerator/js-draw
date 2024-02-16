@@ -145,14 +145,22 @@ export default class ToolController implements InputEventListener {
 		});
 	}
 
-	// Add a tool to the end of this' tool list (the added tool receives events after tools already added to this).
-	// This should be called before creating the app's toolbar.
-	//
-	// A tool should only be added once.
-	public addTool(tool: BaseTool) {
+	/**
+	 * Add a tool to the end of this' tool list (the added tool receives events after tools already added to this).
+	 * This should be called before creating the app's toolbar.
+	 *
+	 * If `options.addToFront`, the tool is added to the beginning of this' tool list.
+	 *
+	 * Does nothing if the tool is already present.
+	 */
+	public addTool(tool: BaseTool, options?: { addToFront: boolean }) {
 		// Only add if not already present.
 		if (!this.tools.includes(tool)) {
-			this.tools.push(tool);
+			if (options?.addToFront) {
+				this.tools.splice(0, 0, tool);
+			} else {
+				this.tools.push(tool);
+			}
 		}
 	}
 

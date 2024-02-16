@@ -310,4 +310,26 @@ export default class CanvasRenderer extends AbstractRenderer {
 
 		return bothTooSmall || anyTooSmall;
 	}
+
+	// @internal
+	public static fromViewport(exportViewport: Viewport, options: { canvasSize?: Vec2, maxCanvasDimen?: number } = {}) {
+		const canvas = document.createElement('canvas');
+
+		const exportRectSize = exportViewport.getScreenRectSize();
+		let canvasSize = options.canvasSize ?? exportRectSize;
+		if (options.maxCanvasDimen && canvasSize.maximumEntryMagnitude() > options.maxCanvasDimen) {
+			canvasSize = canvasSize.times(options.maxCanvasDimen / canvasSize.maximumEntryMagnitude());
+		}
+
+		canvas.width = canvasSize.x;
+		canvas.height = canvasSize.y;
+
+		const ctx = canvas.getContext('2d')!;
+
+		// Scale to ensure that the entire output is visible.
+		const scaleFactor = Math.min(canvasSize.x / exportRectSize.x, canvasSize.y / exportRectSize.y);
+		ctx.scale(scaleFactor, scaleFactor);
+
+		return { renderer: new CanvasRenderer(ctx, exportViewport), element: canvas };
+	}
 }

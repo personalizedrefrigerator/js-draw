@@ -15,7 +15,6 @@ import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 import untilNextAnimationFrame from './util/untilNextAnimationFrame';
-import fileToBase64Url from './util/fileToBase64Url';
 import uniteCommands from './commands/uniteCommands';
 import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
@@ -36,6 +35,7 @@ import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
 import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
 import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
+import ClipboardHandler from './util/ClipboardHandler';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -542,21 +542,14 @@ export class Editor {
 			this.accessibilityControlArea.value = '';
 		});
 
-		document.addEventListener('copy', evt => {
+		const copyHandler = new ClipboardHandler(this);
+
+		document.addEventListener('copy', async evt => {
 			if (!this.isEventSink(document.querySelector(':focus'))) {
 				return;
 			}
 
-			const clipboardData = evt.clipboardData;
-
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.CopyEvent,
-				setData: (mime, data) => {
-					clipboardData?.setData(mime, data);
-				},
-			})) {
-				evt.preventDefault();
-			}
+			copyHandler.copy(evt);
 		});
 
 		document.addEventListener('paste', evt => {
@@ -757,72 +750,7 @@ export class Editor {
 			return;
 		}
 
-		const clipboardData: DataTransfer = (evt as any).dataTransfer ?? (evt as any).clipboardData;
-		if (!clipboardData) {
-			return;
-		}
-
-		// Handle SVG files (prefer to PNG/JPEG)
-		for (const file of clipboardData.files) {
-			if (file.type.toLowerCase() === 'image/svg+xml') {
-				const text = await file.text();
-				if (this.toolController.dispatchInputEvent({
-					kind: InputEvtType.PasteEvent,
-					mime: file.type,
-					data: text,
-				})) {
-					evt.preventDefault();
-					return;
-				}
-			}
-		}
-
-		// Handle image files.
-		for (const file of clipboardData.files) {
-			const fileType = file.type.toLowerCase();
-			if (fileType === 'image/png' || fileType === 'image/jpg') {
-				this.showLoadingWarning(0);
-				const onprogress = (evt: ProgressEvent<FileReader>) => {
-					this.showLoadingWarning(evt.loaded / evt.total);
-				};
-
-				try {
-					const data = await fileToBase64Url(file, { onprogress });
-
-					if (data && this.toolController.dispatchInputEvent({
-						kind: InputEvtType.PasteEvent,
-						mime: fileType,
-						data: data,
-					})) {
-						evt.preventDefault();
-						this.hideLoadingWarning();
-						return;
-					}
-				} catch (e) {
-					console.error('Error reading image:', e);
-				}
-				this.hideLoadingWarning();
-			}
-		}
-
-		// Supported MIMEs for text data, in order of preference
-		const supportedMIMEs = [
-			'image/svg+xml',
-			'text/plain',
-		];
-
-		for (const mime of supportedMIMEs) {
-			const data = clipboardData.getData(mime);
-
-			if (data && this.toolController.dispatchInputEvent({
-				kind: InputEvtType.PasteEvent,
-				mime,
-				data,
-			})) {
-				evt.preventDefault();
-				return;
-			}
-		}
+		return await new ClipboardHandler(this).paste(evt);
 	}
 
 	/**
@@ -1445,22 +1373,7 @@ export class Editor {
 	 * [[include:doc-pages/inline-examples/adding-an-image-and-data-urls.md]]
 	 */
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png', outputSize?: Vec2): string {
-		const canvas = document.createElement('canvas');
-
-		const importExportViewport = this.image.getImportExportViewport();
-		const exportRectSize = importExportViewport.getScreenRectSize();
-		const resolution = outputSize ?? exportRectSize;
-
-		canvas.width = resolution.x;
-		canvas.height = resolution.y;
-
-		const ctx = canvas.getContext('2d')!;
-
-		// Scale to ensure that the entire output is visible.
-		const scaleFactor = Math.min(resolution.x / exportRectSize.x, resolution.y / exportRectSize.y);
-		ctx.scale(scaleFactor, scaleFactor);
-
-		const renderer = new CanvasRenderer(ctx, importExportViewport);
+		const { element: canvas, renderer } = CanvasRenderer.fromViewport(this.image.getImportExportViewport(), { canvasSize: outputSize });
 
 		this.image.renderAll(renderer);
 

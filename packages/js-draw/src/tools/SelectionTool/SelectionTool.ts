@@ -5,6 +5,7 @@ import { EditorEventType } from '../../types';
 import { CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
 import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
+import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
@@ -483,10 +484,18 @@ export default class SelectionTool extends BaseTool {
 
 		const sanitize = true;
 		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, sanitize);
+		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(
+			exportViewport,
+			{
+				canvasSize: this.selectionBox.getScreenRegion().size,
+				maxCanvasDimen: 2048,
+			},
+		);
 
 		const text: string[] = [];
 		for (const elem of selectedElems) {
 			elem.render(svgRenderer);
+			elem.render(canvasRenderer);
 
 			if (elem instanceof TextComponent) {
 				text.push(elem.getText());
@@ -495,6 +504,15 @@ export default class SelectionTool extends BaseTool {
 
 		event.setData('image/svg+xml', svgExportElem.outerHTML);
 		event.setData('text/html', svgExportElem.outerHTML);
+		event.setData('image/png', new Promise<Blob>((resolve, reject) => {
+			canvas.toBlob((blob) => {
+				if (blob) {
+					resolve(blob);
+				} else {
+					reject('Failed to convert canvas to blob.');
+				}
+			}, 'image/png');
+		}));
 		if (text.length > 0) {
 			event.setData('text/plain', text.join('\n'));
 		}

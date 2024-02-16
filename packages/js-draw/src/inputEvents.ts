@@ -80,7 +80,7 @@ export interface KeyUpEvent extends BaseKeyEvent {
 
 export interface CopyEvent {
 	readonly kind: InputEvtType.CopyEvent;
-	setData(mime: string, data: string): void;
+	setData(mime: string, data: string|Promise<Blob>): void;
 }
 
 export interface PasteEvent {
