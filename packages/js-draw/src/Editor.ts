@@ -542,20 +542,47 @@ export class Editor {
 			this.accessibilityControlArea.value = '';
 		});
 
-		document.addEventListener('copy', evt => {
+		document.addEventListener('copy', async evt => {
 			if (!this.isEventSink(document.querySelector(':focus'))) {
 				return;
 			}
 
-			const clipboardData = evt.clipboardData;
+			const mimeToData: Record<string, Promise<Blob>|string> = Object.create(null);
 
 			if (this.toolController.dispatchInputEvent({
 				kind: InputEvtType.CopyEvent,
 				setData: (mime, data) => {
-					clipboardData?.setData(mime, data);
+					mimeToData[mime] = data;
 				},
 			})) {
 				evt.preventDefault();
+			}
+
+			const mimeTypes = Object.keys(mimeToData);
+			const hasNonTextMimeTypes = mimeTypes.some(mime => !mime.startsWith('text/'));
+
+			if (typeof ClipboardItem !== 'undefined' && hasNonTextMimeTypes) {
+				const mappedMimeToData: Record<string, Blob> = Object.create(null);
+				const mimeMapping: Record<string, string> = {
+					'image/svg+xml': 'text/html',
+				};
+				for (const key in mimeToData) {
+					const data = mimeToData[key];
+					const mappedKey = mimeMapping[key] || key;
+					if (typeof data === 'string') {
+						mappedMimeToData[mappedKey] = new Blob([new TextEncoder().encode(data)], { type: mappedKey });
+					} else {
+						mappedMimeToData[mappedKey] = await data;
+					}
+				}
+				await navigator.clipboard.write([ new ClipboardItem(mappedMimeToData) ]);
+			} else {
+				for (const key in mimeToData) {
+					const value = mimeToData[key];
+					if (typeof value === 'string') {
+						evt.clipboardData?.setData(key, value);
+					}
+				}
 			}
 		});
 
@@ -762,67 +789,87 @@ export class Editor {
 			return;
 		}
 
-		// Handle SVG files (prefer to PNG/JPEG)
-		for (const file of clipboardData.files) {
-			if (file.type.toLowerCase() === 'image/svg+xml') {
-				const text = await file.text();
-				if (this.toolController.dispatchInputEvent({
-					kind: InputEvtType.PasteEvent,
-					mime: file.type,
-					data: text,
-				})) {
-					evt.preventDefault();
-					return;
-				}
-			}
-		}
-
-		// Handle image files.
-		for (const file of clipboardData.files) {
-			const fileType = file.type.toLowerCase();
-			if (fileType === 'image/png' || fileType === 'image/jpg') {
-				this.showLoadingWarning(0);
-				const onprogress = (evt: ProgressEvent<FileReader>) => {
-					this.showLoadingWarning(evt.loaded / evt.total);
-				};
-
-				try {
-					const data = await fileToBase64Url(file, { onprogress });
-
-					if (data && this.toolController.dispatchInputEvent({
-						kind: InputEvtType.PasteEvent,
-						mime: fileType,
-						data: data,
-					})) {
-						evt.preventDefault();
-						this.hideLoadingWarning();
-						return;
-					}
-				} catch (e) {
-					console.error('Error reading image:', e);
-				}
-				this.hideLoadingWarning();
-			}
-		}
-
-		// Supported MIMEs for text data, in order of preference
-		const supportedMIMEs = [
-			'image/svg+xml',
-			'text/plain',
-		];
-
-		for (const mime of supportedMIMEs) {
-			const data = clipboardData.getData(mime);
-
-			if (data && this.toolController.dispatchInputEvent({
+		const sendPasteEvent = (mime: string, data: string|null) => {
+			return data && this.toolController.dispatchInputEvent({
 				kind: InputEvtType.PasteEvent,
 				mime,
 				data,
-			})) {
-				evt.preventDefault();
-				return;
+			});
+		};
+
+		// Listed in order of precedence
+		const supportedMIMEs = [
+			'image/svg+xml',
+			'text/html',
+			'image/png',
+			'image/jpeg',
+			'text/plain',
+		];
+
+		// On some browsers, .getData and .files must be used before any async operations.
+		const files = [...clipboardData.files];
+		const textData = new Map<string, string>();
+		for (const mime of supportedMIMEs) {
+			const data = clipboardData.getData(mime);
+			if (data) {
+				textData.set(mime, data);
 			}
 		}
+
+		// Returns true if handled
+		const handleMIME = async (mime: string) => {
+			const isTextFormat = mime.endsWith('+xml') || mime.startsWith('text/');
+			if (isTextFormat) {
+				const data = textData.get(mime)!;
+
+				if (sendPasteEvent(mime, data)) {
+					evt.preventDefault();
+					return true;
+				}
+			}
+
+			for (const file of files) {
+				const fileType = file.type.toLowerCase();
+				if (fileType !== mime) {
+					continue;
+				}
+
+				if (isTextFormat) {
+					const text = await file.text();
+					if (sendPasteEvent(mime, text)) {
+						evt.preventDefault();
+						return true;
+					}
+				} else {
+					this.showLoadingWarning(0);
+					const onprogress = (evt: ProgressEvent<FileReader>) => {
+						this.showLoadingWarning(evt.loaded / evt.total);
+					};
+
+					try {
+						const data = await fileToBase64Url(file, { onprogress });
+
+						if (sendPasteEvent(mime, data)) {
+							evt.preventDefault();
+							this.hideLoadingWarning();
+							return true;
+						}
+					} catch (e) {
+						console.error('Error reading image:', e);
+					}
+					this.hideLoadingWarning();
+				}
+			}
+			return false;
+		};
+
+		for (const mime of supportedMIMEs) {
+			if (await handleMIME(mime)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1445,22 +1492,7 @@ export class Editor {
 	 * [[include:doc-pages/inline-examples/adding-an-image-and-data-urls.md]]
 	 */
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png', outputSize?: Vec2): string {
-		const canvas = document.createElement('canvas');
-
-		const importExportViewport = this.image.getImportExportViewport();
-		const exportRectSize = importExportViewport.getScreenRectSize();
-		const resolution = outputSize ?? exportRectSize;
-
-		canvas.width = resolution.x;
-		canvas.height = resolution.y;
-
-		const ctx = canvas.getContext('2d')!;
-
-		// Scale to ensure that the entire output is visible.
-		const scaleFactor = Math.min(resolution.x / exportRectSize.x, resolution.y / exportRectSize.y);
-		ctx.scale(scaleFactor, scaleFactor);
-
-		const renderer = new CanvasRenderer(ctx, importExportViewport);
+		const { element: canvas, renderer } = CanvasRenderer.fromViewport(this.image.getImportExportViewport(), { canvasSize: outputSize });
 
 		this.image.renderAll(renderer);
 
