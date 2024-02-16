@@ -15,7 +15,6 @@ import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 import untilNextAnimationFrame from './util/untilNextAnimationFrame';
-import fileToBase64Url from './util/fileToBase64Url';
 import uniteCommands from './commands/uniteCommands';
 import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
@@ -36,6 +35,7 @@ import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
 import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
 import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
+import ClipboardHandler from './util/ClipboardHandler';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -542,48 +542,14 @@ export class Editor {
 			this.accessibilityControlArea.value = '';
 		});
 
+		const copyHandler = new ClipboardHandler(this);
+
 		document.addEventListener('copy', async evt => {
 			if (!this.isEventSink(document.querySelector(':focus'))) {
 				return;
 			}
 
-			const mimeToData: Record<string, Promise<Blob>|string> = Object.create(null);
-
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.CopyEvent,
-				setData: (mime, data) => {
-					mimeToData[mime] = data;
-				},
-			})) {
-				evt.preventDefault();
-			}
-
-			const mimeTypes = Object.keys(mimeToData);
-			const hasNonTextMimeTypes = mimeTypes.some(mime => !mime.startsWith('text/'));
-
-			if (typeof ClipboardItem !== 'undefined' && hasNonTextMimeTypes) {
-				const mappedMimeToData: Record<string, Blob> = Object.create(null);
-				const mimeMapping: Record<string, string> = {
-					'image/svg+xml': 'text/html',
-				};
-				for (const key in mimeToData) {
-					const data = mimeToData[key];
-					const mappedKey = mimeMapping[key] || key;
-					if (typeof data === 'string') {
-						mappedMimeToData[mappedKey] = new Blob([new TextEncoder().encode(data)], { type: mappedKey });
-					} else {
-						mappedMimeToData[mappedKey] = await data;
-					}
-				}
-				await navigator.clipboard.write([ new ClipboardItem(mappedMimeToData) ]);
-			} else {
-				for (const key in mimeToData) {
-					const value = mimeToData[key];
-					if (typeof value === 'string') {
-						evt.clipboardData?.setData(key, value);
-					}
-				}
-			}
+			copyHandler.copy(evt);
 		});
 
 		document.addEventListener('paste', evt => {
@@ -784,92 +750,7 @@ export class Editor {
 			return;
 		}
 
-		const clipboardData: DataTransfer = (evt as any).dataTransfer ?? (evt as any).clipboardData;
-		if (!clipboardData) {
-			return;
-		}
-
-		const sendPasteEvent = (mime: string, data: string|null) => {
-			return data && this.toolController.dispatchInputEvent({
-				kind: InputEvtType.PasteEvent,
-				mime,
-				data,
-			});
-		};
-
-		// Listed in order of precedence
-		const supportedMIMEs = [
-			'image/svg+xml',
-			'text/html',
-			'image/png',
-			'image/jpeg',
-			'text/plain',
-		];
-
-		// On some browsers, .getData and .files must be used before any async operations.
-		const files = [...clipboardData.files];
-		const textData = new Map<string, string>();
-		for (const mime of supportedMIMEs) {
-			const data = clipboardData.getData(mime);
-			if (data) {
-				textData.set(mime, data);
-			}
-		}
-
-		// Returns true if handled
-		const handleMIME = async (mime: string) => {
-			const isTextFormat = mime.endsWith('+xml') || mime.startsWith('text/');
-			if (isTextFormat) {
-				const data = textData.get(mime)!;
-
-				if (sendPasteEvent(mime, data)) {
-					evt.preventDefault();
-					return true;
-				}
-			}
-
-			for (const file of files) {
-				const fileType = file.type.toLowerCase();
-				if (fileType !== mime) {
-					continue;
-				}
-
-				if (isTextFormat) {
-					const text = await file.text();
-					if (sendPasteEvent(mime, text)) {
-						evt.preventDefault();
-						return true;
-					}
-				} else {
-					this.showLoadingWarning(0);
-					const onprogress = (evt: ProgressEvent<FileReader>) => {
-						this.showLoadingWarning(evt.loaded / evt.total);
-					};
-
-					try {
-						const data = await fileToBase64Url(file, { onprogress });
-
-						if (sendPasteEvent(mime, data)) {
-							evt.preventDefault();
-							this.hideLoadingWarning();
-							return true;
-						}
-					} catch (e) {
-						console.error('Error reading image:', e);
-					}
-					this.hideLoadingWarning();
-				}
-			}
-			return false;
-		};
-
-		for (const mime of supportedMIMEs) {
-			if (await handleMIME(mime)) {
-				return true;
-			}
-		}
-
-		return false;
+		return await new ClipboardHandler(this).paste(evt);
 	}
 
 	/**
