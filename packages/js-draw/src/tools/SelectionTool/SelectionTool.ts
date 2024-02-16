@@ -488,7 +488,7 @@ export default class SelectionTool extends BaseTool {
 			exportViewport,
 			{
 				canvasSize: this.selectionBox.getScreenRegion().size,
-				maximumCanvasDimen: 2048,
+				maxCanvasDimen: 2048,
 			},
 		);
 

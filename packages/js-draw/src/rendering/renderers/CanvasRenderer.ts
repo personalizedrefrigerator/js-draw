@@ -312,13 +312,13 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	// @internal
-	public static fromViewport(exportViewport: Viewport, options: { canvasSize?: Vec2, maximumCanvasDimen?: number } = {}) {
+	public static fromViewport(exportViewport: Viewport, options: { canvasSize?: Vec2, maxCanvasDimen?: number } = {}) {
 		const canvas = document.createElement('canvas');
 
 		const exportRectSize = exportViewport.getScreenRectSize();
 		let canvasSize = options.canvasSize ?? exportRectSize;
-		if (options.maximumCanvasDimen && canvasSize.maximumEntryMagnitude() > options.maximumCanvasDimen) {
-			canvasSize = canvasSize.times(options.maximumCanvasDimen / canvasSize.maximumEntryMagnitude());
+		if (options.maxCanvasDimen && canvasSize.maximumEntryMagnitude() > options.maxCanvasDimen) {
+			canvasSize = canvasSize.times(options.maxCanvasDimen / canvasSize.maximumEntryMagnitude());
 		}
 
 		canvas.width = canvasSize.x;
