@@ -45,7 +45,9 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	resetView: string;
 	reformatSelection: string;
 	selectionToolKeyboardShortcuts: string;
-	paste: string;
+	copyButton__paste: string;
+	copyButton__copy: string;
+	copyButton__copied: string;
 	documentProperties: string;
 	backgroundColor: string;
 	imageWidthOption: string;
@@ -158,7 +160,9 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	outlinedCirclePen: 'Outlined circle',
 	lockRotation: 'Lock rotation',
 
-	paste: 'Paste',
+	copyButton__paste: 'Paste',
+	copyButton__copy: 'Copy',
+	copyButton__copied: 'Copied',
 
 	errorImageHasZeroSize: 'Error: Image has zero size',
 	describeTheImage: 'Image description',

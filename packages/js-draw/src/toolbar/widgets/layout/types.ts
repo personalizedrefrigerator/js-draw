@@ -71,4 +71,12 @@ export interface WidgetContentLayoutManager {
 	 * element could be added.
 	 */
 	createToolMenu(parent: ToolMenuParent): ToolMenu;
+
+	/**
+	 * Called when the title of the tool widget changes.
+	 *
+	 * For now, this is @internal, as its structure may change in a future
+	 * minor release.
+	 */
+	onTitleChange?: (newTitle: string)=>void;
 }

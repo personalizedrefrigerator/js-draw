@@ -18,7 +18,9 @@ const convertIcons = async () => {
 
 			const iconName = basename(fileName).replace(/\.svg$/, '').replace(/[^a-zA-Z0-9]/, '_');
 			const icon = await fs.readFile(filePath, 'utf-8');
-			const updatedIcon = icon.replace(/([<]path)(.)/ig, '$1 style="fill: var(--icon-color);"$2');
+			const updatedIcon = icon
+				.replace(/[<]path.*fill="none"\/>/, '') // Don't change the fill of fill: none icons
+				.replace(/([<]path)(.)/ig, '$1 style="fill: var(--icon-color);"$2');
 
 			await fs.writeFile(filePath + '.ts', `
 				// The following icon is part of the Material Icon pack and is licensed under
