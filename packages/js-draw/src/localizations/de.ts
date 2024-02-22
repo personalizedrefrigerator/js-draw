@@ -46,7 +46,7 @@ const localization: EditorLocalization = {
 	filledRectanglePen: 'Ausgefülltes Rechteck',
 
 	lockRotation: 'Sperre Rotation',
-	paste: 'Einfügen',
+	copyButton__paste: 'Einfügen',
 
 	dropdownShown: (toolName) =>`Dropdown-Menü für ${toolName} angezeigt`,
 	dropdownHidden: (toolName) =>`Dropdown-Menü für ${toolName} versteckt`,

@@ -784,7 +784,19 @@ export default class IconProvider {
 		`);
 	}
 
-	/** Unused. @deprecated */
+	public makeCheckIcon(): IconElemType {
+		return this.makeIconFromPath(`
+			M 14.8,55.25 43.9,86.2 85.12,13.8 71,14.5 43.8,72 27.3,55.2 Z
+		`);
+	}
+
+	public makeCopyIcon(): IconElemType {
+		return this.makeIconFromPath(`
+			M 45,10 45,55 90,55 90,10 45,10 z
+			M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z 
+		`);
+	}
+
 	public makePasteIcon(): IconElemType {
 		const icon = this.makeIconFromPath(`
 			M 50 0 L 50 5 L 35 5 L 40 24.75 L 20 25 L 20 100 L 85 100 L 100 90 L 100 24 L 75.1 24.3 L 80 5 L 65 5 L 65 0 L 50 0 z

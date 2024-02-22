@@ -41,7 +41,7 @@ const localization: EditorLocalization = {
 	outlinedRectanglePen: 'Rectángulo delineado',
 	filledRectanglePen: 'Rectángulo sin borde',
 	lockRotation: 'Bloquea rotación',
-	paste: 'Pegar',
+	copyButton__paste: 'Pegar',
 	closeSidebar: (toolName) => `Close sidebar for ${toolName}`,
 	dropdownShown: (toolName) => `Menú por ${toolName} es visible`,
 	dropdownHidden: (toolName) => { return `Menú por ${toolName} fue ocultado`; },
