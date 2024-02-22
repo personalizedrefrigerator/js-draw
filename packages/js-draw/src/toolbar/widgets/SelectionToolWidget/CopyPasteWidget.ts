@@ -42,16 +42,24 @@ export default class CopyPasteWidget extends BaseWidget {
 	}
 
 	async #permissionsSetup() {
-		this.#pastePermissionStatus = await navigator.permissions.query({
+		const queryPermissions = (options: PermissionDescriptor) => {
+			if (navigator.permissions && navigator.permissions.query) {
+				return navigator.permissions.query(options);
+			} else {
+				return undefined;
+			}
+		};
+		this.#pastePermissionStatus = await queryPermissions({
 			name: 'clipboard-read',
 			allowWithoutGesture: false,
 		} as any);
-		this.#copyPermissionStatus = await navigator.permissions.query({
+		this.#copyPermissionStatus = await queryPermissions({
 			name: 'clipboard-write',
 			allowWithoutGesture: false,
 		} as any);
 		this.#onPermissionStatusChanged();
-		this.#pastePermissionStatus.addEventListener('change', this.#onPermissionStatusChanged);
+		this.#pastePermissionStatus?.addEventListener('change', this.#onPermissionStatusChanged);
+		this.#copyPermissionStatus?.addEventListener('change', this.#onPermissionStatusChanged);
 	}
 
 	#updateDisabled() {
