@@ -206,8 +206,23 @@ export default abstract class AbstractComponent {
 		return testLines.some(edge => this.intersects(edge));
 	}
 
-	// Return null iff this object cannot be safely serialized/deserialized.
-	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
+	// @returns true iff this component can be selected (e.g. by the selection tool.)
+	public isSelectable(): boolean {
+		return true;
+	}
+
+	// @returns true iff this component should be added to the background, rather than the
+	// foreground of the image.
+	public isBackground(): boolean {
+		return false;
+	}
+
+	// @returns an approximation of the proportional time it takes to render this component.
+	// This is intended to be a rough estimate, but, for example, a stroke with two points sould have
+	// a renderingWeight approximately twice that of a stroke with one point.
+	public getProportionalRenderingTime(): number {
+		return 1;
+	}
 
 	// Private helper for transformBy: Apply the given transformation to all points of this.
 	protected abstract applyTransformation(affineTransfm: Mat33): void;
@@ -241,24 +256,6 @@ export default abstract class AbstractComponent {
 		return new AbstractComponent.TransformElementCommand(
 			affineTransfm, this.getId(), this, newZIndex, originalZIndex,
 		);
-	}
-
-	// @returns true iff this component can be selected (e.g. by the selection tool.)
-	public isSelectable(): boolean {
-		return true;
-	}
-
-	// @returns true iff this component should be added to the background, rather than the
-	// foreground of the image.
-	public isBackground(): boolean {
-		return false;
-	}
-
-	// @returns an approximation of the proportional time it takes to render this component.
-	// This is intended to be a rough estimate, but, for example, a stroke with two points sould have
-	// a renderingWeight approximately twice that of a stroke with one point.
-	public getProportionalRenderingTime(): number {
-		return 1;
 	}
 
 	private static transformElementCommandId = 'transform-element';
@@ -392,6 +389,9 @@ export default abstract class AbstractComponent {
 
 		return clone;
 	}
+
+	// Return null iff this object cannot be safely serialized/deserialized.
+	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
 
 	// Convert the component to an object that can be passed to
 	// `JSON.stringify`.
