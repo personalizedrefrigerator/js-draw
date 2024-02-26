@@ -8,6 +8,7 @@ import QuadraticBezier from './QuadraticBezier';
 import PointShape2D from './PointShape2D';
 import toRoundedString from '../rounding/toRoundedString';
 import toStringOfSamePrecision from '../rounding/toStringOfSamePrecision';
+import Parameterized2DShape from './Parameterized2DShape';
 
 export enum PathCommandType {
 	LineTo,
@@ -97,16 +98,16 @@ export class Path {
 		return Rect2.union(...bboxes);
 	}
 
-	private cachedGeometry: Abstract2DShape[]|null = null;
+	private cachedGeometry: Parameterized2DShape[]|null = null;
 
 	// Lazy-loads and returns this path's geometry
-	public get geometry(): Abstract2DShape[] {
+	public get geometry(): Parameterized2DShape[] {
 		if (this.cachedGeometry) {
 			return this.cachedGeometry;
 		}
 
 		let startPoint = this.startPoint;
-		const geometry: Abstract2DShape[] = [];
+		const geometry: Parameterized2DShape[] = [];
 
 		for (const part of this.parts) {
 			let exhaustivenessCheck: never;
@@ -270,7 +271,7 @@ export class Path {
 
 		type DistanceFunction = (point: Point2) => number;
 		type DistanceFunctionRecord = {
-			part: Abstract2DShape,
+			part: Parameterized2DShape,
 			bbox: Rect2,
 			distFn: DistanceFunction,
 		};
@@ -309,9 +310,9 @@ export class Path {
 
 		// Returns the minimum distance to a part in this stroke, where only parts that the given
 		// line could intersect are considered.
-		const sdf = (point: Point2): [Abstract2DShape|null, number] => {
+		const sdf = (point: Point2): [Parameterized2DShape|null, number] => {
 			let minDist = Infinity;
-			let minDistPart: Abstract2DShape|null = null;
+			let minDistPart: Parameterized2DShape|null = null;
 
 			const uncheckedDistFunctions: DistanceFunctionRecord[] = [];
 
@@ -446,7 +447,7 @@ export class Path {
 			if (lastPart && isOnLineSegment && Math.abs(lastDist) < stoppingThreshold) {
 				result.push({
 					point: currentPoint,
-					parameterValue: NaN,
+					parameterValue: lastPart.nearestPointTo(currentPoint).parameterValue,
 					curve: lastPart,
 				});
 			}
