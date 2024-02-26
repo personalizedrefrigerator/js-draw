@@ -306,4 +306,38 @@ describe('Path', () => {
 			expect(strokedRect.startPoint).objEq(lastSegment.point);
 		});
 	});
+
+	describe('splitNear', () => {
+		it('should divide a line in half', () => {
+			const path = Path.fromString('m0,0l8,0');
+			const split = path.splitNear(Vec2.of(4, 0));
+			expect(split).toHaveLength(2);
+			expect(split[0].toString()).toBe('M0,0L4,0');
+			expect(split[1].toString()).toBe('M4,0L8,0');
+		});
+
+		it('should divide a polyline into parts', () => {
+			const path = Path.fromString('m0,0L8,0L8,8');
+			const split = path.splitNear(Vec2.of(8, 4));
+			expect(split).toHaveLength(2);
+			expect(split[0].toString()).toBe('M0,0L8,0L8,4');
+			expect(split[1].toString()).toBe('M8,4L8,8');
+		});
+
+		it('should divide a quadratic Bézier in half', () => {
+			const path = Path.fromString('m0,0 Q4,0 8,0');
+			const split = path.splitNear(Vec2.of(4, 0));
+			expect(split).toHaveLength(2);
+			expect(split[0].toString()).toBe('M0,0Q2,0 4,0');
+			expect(split[1].toString()).toBe('M4,0Q6,0 8,0');
+		});
+
+		it('should divide two quadratic Béziers half', () => {
+			const path = Path.fromString('m0,0 Q4,0 8,0 Q8,4 8,8');
+			const split = path.splitNear(Vec2.of(8, 4));
+			expect(split).toHaveLength(2);
+			expect(split[0].toString()).toBe('M0,0Q4,0 8,0Q8,2 8,4');
+			expect(split[1].toString()).toBe('M8,4Q8,6 8,8');
+		});
+	});
 });

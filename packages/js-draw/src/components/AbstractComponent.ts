@@ -390,6 +390,15 @@ export default abstract class AbstractComponent {
 		return clone;
 	}
 
+	/**
+	 * **Optional method**: Divides this component into sections roughly along the given path.
+	 *
+	 * **Notes**:
+	 * - A default implementation may be provided for this method in the future. Until then,
+	 *   this method is `undefined` if unsupported.
+	 */
+	public dividedByLine?(line: LineSegment2): AbstractComponent[];
+
 	// Return null iff this object cannot be safely serialized/deserialized.
 	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
 

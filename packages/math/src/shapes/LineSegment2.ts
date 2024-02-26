@@ -59,6 +59,10 @@ export class LineSegment2 extends Parameterized2DShape {
 		return this.point2;
 	}
 
+	public get center(): Point2 {
+		return this.point1.lerp(this.point2, 0.5);
+	}
+
 	/**
 	 * Gets a point a **distance** `t` along this line.
 	 *

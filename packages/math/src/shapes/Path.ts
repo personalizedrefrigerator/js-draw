@@ -9,6 +9,7 @@ import PointShape2D from './PointShape2D';
 import toRoundedString from '../rounding/toRoundedString';
 import toStringOfSamePrecision from '../rounding/toStringOfSamePrecision';
 import Parameterized2DShape from './Parameterized2DShape';
+import BezierJSWrapper from './BezierJSWrapper';
 
 export enum PathCommandType {
 	LineTo,
@@ -46,7 +47,7 @@ interface IntersectionResult {
 	// @internal
 	curve: Abstract2DShape;
 
-	/** @internal @deprecated */
+	/** Parameter value for the closest point **on** the path to the intersection. @internal */
 	parameterValue?: number;
 
 	// Point at which the intersection occured.
@@ -356,7 +357,7 @@ export class Path {
 
 
 		// Raymarch:
-		const maxRaymarchSteps = 7;
+		const maxRaymarchSteps = 8;
 
 		// Start raymarching from each of these points. This allows detection of multiple
 		// intersections.
@@ -491,12 +492,12 @@ export class Path {
 		}
 
 		for (const part of this.geometry) {
-			const intersection = part.intersectsLineSegment(line);
+			const intersections = part.intersectsLineSegment(line);
 
-			if (intersection.length > 0) {
+			for (const intersection of intersections) {
 				result.push({
 					curve: part,
-					point: intersection[0],
+					point: intersection,
 				});
 			}
 		}
@@ -510,6 +511,119 @@ export class Path {
 			const startPoints = result.map(intersection => intersection.point);
 			result = this.raymarchIntersectionWith(line, strokeRadius, startPoints);
 		}
+
+		return result;
+	}
+
+	// @internal
+	public splitNear(target: Point2): Path[] {
+		if (this.geometry.length === 0) {
+			return [this];
+		}
+
+		// Find the closest point on this
+		let closestDist = Infinity;
+		let closestPartIndex = -1;
+		let closestParameterValue = -1;
+		for (let i = 0; i < this.geometry.length; i++) {
+			const current = this.geometry[i];
+			const nearestPoint = current.nearestPointTo(target);
+			const distance = nearestPoint.point.minus(target).length();
+			if (i === 0 || distance < closestDist) {
+				closestPartIndex = i;
+				closestDist = distance;
+				closestParameterValue = nearestPoint.parameterValue;
+			}
+		}
+
+		const result: Path[] = [];
+		let currentStartPoint = this.startPoint;
+		let currentPath: PathCommand[] = [];
+
+		// Split in two
+		for (let i = 0; i < this.parts.length; i ++) {
+			if (i === closestPartIndex) {
+				const part = this.parts[i];
+				const geom = this.geometry[i];
+				let newPathStart: Point2;
+				const newPath: PathCommand[] = [];
+
+				switch (part.kind) {
+				case PathCommandType.MoveTo:
+					currentPath.push({
+						kind: part.kind,
+						point: part.point,
+					});
+					newPathStart = part.point;
+					break;
+				case PathCommandType.LineTo:
+					{
+						const split = (geom as LineSegment2).splitAt(closestParameterValue);
+						currentPath.push({
+							kind: part.kind,
+							point: split[0].p2,
+						});
+						newPathStart = split[0].p2;
+						if (split.length > 1) {
+							console.assert(split.length === 2);
+							newPath.push({
+								kind: part.kind,
+								point: split[1]!.p2,
+							});
+						}
+					}
+					break;
+				case PathCommandType.QuadraticBezierTo:
+				case PathCommandType.CubicBezierTo:
+					{
+						const split = (geom as BezierJSWrapper).splitAt(closestParameterValue);
+						let isFirstPart = true;
+						for (const segment of split) {
+							const targetArray = isFirstPart ? currentPath : newPath;
+							const controlPoints = segment.getPoints();
+							if (part.kind === PathCommandType.CubicBezierTo) {
+								targetArray.push({
+									kind: part.kind,
+									controlPoint1: controlPoints[1],
+									controlPoint2: controlPoints[2],
+									endPoint: controlPoints[3],
+								});
+							} else {
+								targetArray.push({
+									kind: part.kind,
+									controlPoint: controlPoints[1],
+									endPoint: controlPoints[2],
+								});
+							}
+
+							if (!isFirstPart || split.length === 1) {
+								// We want the start of the new path to match the start of the
+								// FIRST Bézier in the new path.
+								//
+								// Thus, we use the "??=" operator.
+								newPathStart ??= controlPoints[0];
+							}
+							isFirstPart = false;
+						}
+					}
+					break;
+				default:
+				{
+					const exhaustivenessCheck: never = part;
+					return exhaustivenessCheck;
+				}
+				}
+
+				result.push(new Path(currentStartPoint, [...currentPath]));
+				currentStartPoint = newPathStart!;
+				console.assert(!!currentStartPoint, 'should have a start point');
+				currentPath = newPath;
+			} else {
+				currentPath.push(this.parts[i]);
+			}
+		}
+
+		result.push(new Path(currentStartPoint, currentPath));
 
 		return result;
 	}

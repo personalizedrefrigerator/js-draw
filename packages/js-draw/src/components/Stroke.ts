@@ -153,6 +153,27 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		}
 	}
 
+	public override dividedByLine(line: LineSegment2) {
+		const newStrokes: Stroke[] = [];
+		for (const part of this.parts) {
+			const path = part.path;
+
+			const intersection = path.intersection(line);
+			if (intersection.length > 0) {
+				const split = path.splitNear(intersection[0].point);
+				newStrokes.push(
+					...split.map(s => new Stroke([ pathToRenderable(s, part.style) ]))
+				);
+			} else {
+				newStrokes.push(new Stroke([ part ]));
+			}
+		}
+
+		console.log('divinto', newStrokes);
+
+		return newStrokes;
+	}
+
 	public override intersects(line: LineSegment2): boolean {
 		for (const part of this.parts) {
 			const strokeWidth = part.style.stroke?.width;
