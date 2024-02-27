@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2 } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -153,23 +153,54 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		}
 	}
 
-	public override dividedByLine(line: LineSegment2) {
+	public override dividedBy(path: Path) {
+		const polyline = path.polylineApproximation();
+
 		const newStrokes: Stroke[] = [];
 		for (const part of this.parts) {
-			const path = part.path;
+			let path = part.path;
 
-			const intersection = path.intersection(line);
-			if (intersection.length > 0) {
-				const split = path.splitNear(intersection[0].point);
-				newStrokes.push(
-					...split.map(s => new Stroke([ pathToRenderable(s, part.style) ]))
-				);
-			} else {
-				newStrokes.push(new Stroke([ part ]));
+			const makeStroke = (path: Path) => {
+				if (part.style.fill.a > 0) {
+					// Remove visually empty paths.
+					if (path.parts.length < 1 || (path.parts.length === 1 && path.parts[0].kind === PathCommandType.LineTo)) {
+						// TODO: If this isn't present, a very large number of strokes are created while erasing.
+						// TODO: Debug this.
+						return [];
+					} else {
+						// Filled paths must be closed (allows for optimizations elsewhere)
+						path = path.asClosed();
+					}
+				}
+				return [new Stroke([ pathToRenderable(path, part.style) ])];
+			};
+
+			const intersectionPoints = [];
+			for (const segment of polyline) {
+				intersectionPoints.push(...path.intersection(segment));
 			}
-		}
 
-		console.log('divinto', newStrokes);
+			// Sort first by curve index, then by parameter value
+			intersectionPoints.sort((a, b) => {
+				const indexCompare = a.curveIndex - b.curveIndex;
+				if (indexCompare === 0) {
+					return a.parameterValue - b.parameterValue;
+				} else {
+					return indexCompare;
+				}
+			});
+
+			for (const intersection of intersectionPoints) {
+				const split = path.splitNear(intersection.point);
+				newStrokes.push(...makeStroke(split[0]));
+
+				if (split.length === 2) {
+					path = split[1];
+				}
+			}
+
+			newStrokes.push(...makeStroke(path));
+		}
 
 		return newStrokes;
 	}

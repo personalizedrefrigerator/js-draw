@@ -2,7 +2,6 @@ import LineSegment2 from './LineSegment2';
 import Mat33 from '../Mat33';
 import Rect2 from './Rect2';
 import { Point2, Vec2 } from '../Vec2';
-import Abstract2DShape from './Abstract2DShape';
 import CubicBezier from './CubicBezier';
 import QuadraticBezier from './QuadraticBezier';
 import PointShape2D from './PointShape2D';
@@ -43,12 +42,14 @@ export interface MoveToPathCommand {
 
 export type PathCommand = CubicBezierPathCommand | QuadraticBezierPathCommand | MoveToPathCommand | LinePathCommand;
 
-interface IntersectionResult {
+export interface IntersectionResult {
 	// @internal
-	curve: Abstract2DShape;
+	curve: Parameterized2DShape;
+	// @internal
+	curveIndex: number;
 
 	/** Parameter value for the closest point **on** the path to the intersection. @internal */
-	parameterValue?: number;
+	parameterValue: number;
 
 	// Point at which the intersection occured.
 	point: Point2;
@@ -450,6 +451,7 @@ export class Path {
 					point: currentPoint,
 					parameterValue: lastPart.nearestPointTo(currentPoint).parameterValue,
 					curve: lastPart,
+					curveIndex: this.geometry.indexOf(lastPart),
 				});
 			}
 
@@ -491,15 +493,20 @@ export class Path {
 			return [];
 		}
 
+		let index = 0;
 		for (const part of this.geometry) {
-			const intersections = part.intersectsLineSegment(line);
+			const intersections = part.argIntersectsLineSegment(line);
 
 			for (const intersection of intersections) {
 				result.push({
 					curve: part,
-					point: intersection,
+					curveIndex: index,
+					point: part.at(intersection),
+					parameterValue: intersection,
 				});
 			}
+
+			index ++;
 		}
 
 		// If given a non-zero strokeWidth, attempt to raymarch.
@@ -516,24 +523,43 @@ export class Path {
 	}
 
 	// @internal
-	public splitNear(target: Point2): Path[] {
-		if (this.geometry.length === 0) {
-			return [this];
-		}
-
+	public nearestPointTo(point: Point2): IntersectionResult {
 		// Find the closest point on this
-		let closestDist = Infinity;
-		let closestPartIndex = -1;
-		let closestParameterValue = -1;
+		let closestSquareDist = Infinity;
+		let closestPartIndex = 0;
+		let closestParameterValue = 0;
+		let closestPoint: Point2 = this.startPoint;
+
 		for (let i = 0; i < this.geometry.length; i++) {
 			const current = this.geometry[i];
-			const nearestPoint = current.nearestPointTo(target);
-			const distance = nearestPoint.point.minus(target).length();
-			if (i === 0 || distance < closestDist) {
+			const nearestPoint = current.nearestPointTo(point);
+			const sqareDist = nearestPoint.point.squareDistanceTo(point);
+			if (i === 0 || sqareDist < closestSquareDist) {
 				closestPartIndex = i;
-				closestDist = distance;
+				closestSquareDist = sqareDist;
 				closestParameterValue = nearestPoint.parameterValue;
+				closestPoint = nearestPoint.point;
 			}
+		}
+
+		return {
+			curve: this.geometry[closestPartIndex],
+			curveIndex: closestPartIndex,
+			parameterValue: closestParameterValue,
+			point: closestPoint,
+		};
+	}
+
+	// @internal
+	public splitNear(point: Point2) {
+		const nearest = this.nearestPointTo(point);
+		return this.splitAt(nearest.curveIndex, nearest.parameterValue);
+	}
+
+	// @internal
+	public splitAt(curveIndex: number, parameterValue: number): [Path]|[Path,Path] {
+		if (this.geometry.length === 0) {
+			return [this];
 		}
 
 		const result: Path[] = [];
@@ -542,7 +568,7 @@ export class Path {
 
 		// Split in two
 		for (let i = 0; i < this.parts.length; i ++) {
-			if (i === closestPartIndex) {
+			if (i === curveIndex) {
 				const part = this.parts[i];
 				const geom = this.geometry[i];
 				let newPathStart: Point2;
@@ -558,7 +584,7 @@ export class Path {
 					break;
 				case PathCommandType.LineTo:
 					{
-						const split = (geom as LineSegment2).splitAt(closestParameterValue);
+						const split = (geom as LineSegment2).splitAt(parameterValue);
 						currentPath.push({
 							kind: part.kind,
 							point: split[0].p2,
@@ -576,8 +602,8 @@ export class Path {
 				case PathCommandType.QuadraticBezierTo:
 				case PathCommandType.CubicBezierTo:
 					{
-						const split = (geom as BezierJSWrapper).splitAt(closestParameterValue);
-						let isFirstPart = true;
+						const split = (geom as BezierJSWrapper).splitAt(parameterValue);
+						let isFirstPart = split.length === 2;
 						for (const segment of split) {
 							const targetArray = isFirstPart ? currentPath : newPath;
 							const controlPoints = segment.getPoints();
@@ -596,12 +622,10 @@ export class Path {
 								});
 							}
 
-							if (!isFirstPart || split.length === 1) {
-								// We want the start of the new path to match the start of the
-								// FIRST Bézier in the new path.
-								//
-								// Thus, we use the "??=" operator.
-								newPathStart ??= controlPoints[0];
+							// We want the start of the new path to match the start of the
+							// FIRST Bézier in the NEW path.
+							if (!isFirstPart) {
+								newPathStart = controlPoints[0];
 							}
 							isFirstPart = false;
 						}
@@ -625,6 +649,22 @@ export class Path {
 
 		result.push(new Path(currentStartPoint, currentPath));
 
+		console.assert(result.length === 2, 'should split in two');
+		return result as [Path,Path];
+	}
+
+	// @internal
+	public asClosed() {
+		if (this.getEndPoint().eq(this.startPoint)) {
+			return this;
+		}
+
+		const lineToStart: PathCommand = {
+			kind: PathCommandType.LineTo,
+			point: this.startPoint,
+		};
+		const result = new Path(this.startPoint, [...this.parts, lineToStart]);
+		console.assert(result.getEndPoint().eq(result.startPoint));
 		return result;
 	}
 

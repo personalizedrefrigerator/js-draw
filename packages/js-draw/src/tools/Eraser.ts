@@ -2,7 +2,7 @@ import { EditorEventType } from '../types';
 import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
-import { Point2, Vec2, LineSegment2, Color4, Rect2, Mat33 } from '@js-draw/math';
+import { Point2, Vec2, LineSegment2, Color4, Rect2, Path } from '@js-draw/math';
 import Erase from '../commands/Erase';
 import AbstractComponent from '../components/AbstractComponent';
 import { PointerDevice } from '../Pointer';
@@ -12,6 +12,7 @@ import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 import Command from '../commands/Command';
 import EditorImage from '../image/EditorImage';
 import uniteCommands from '../commands/uniteCommands';
+import Stroke from '../components/Stroke';
 
 export enum EraserMode {
 	PartialStroke = 'partial-stroke',
@@ -120,50 +121,21 @@ export default class Eraser extends BaseTool {
 			const toErase: AbstractComponent[] = [];
 			const toAdd: AbstractComponent[] = [];
 			for (const targetElem of eraseableElems) {
-				console.log('=');
 				toErase.push(targetElem);
-				if (!targetElem.dividedByLine || eraserRect.containsRect(targetElem.getExactBBox())) {
-					console.log('ndv');
+				if (!targetElem.dividedBy || eraserRect.containsRect(targetElem.getExactBBox())) {
 					continue;
 				}
 
-				const canvasThickness = this.getSizeOnCanvas();
-				const direction = line.direction;
-				const sourceLine = line.length > canvasThickness ? line : new LineSegment2(line.center.minus(direction.times(canvasThickness/2)), line.center.plus(direction.times(canvasThickness/2)));
+				let minArea = eraserRect.area * 1.4;
+				if (targetElem instanceof Stroke) {
+					const strokeWidth = targetElem.getParts()[0]?.style.stroke?.width ?? 0;
+					minArea = Math.max(minArea, strokeWidth * strokeWidth * 1.5);
+				}
+				const split = targetElem.dividedBy(Path.fromRect(eraserRect));
 
-				const translateVec = line.direction.orthog().scale(canvasThickness / 2);
-				const translateMat1 = Mat33.translation(translateVec);
-				const line1 = sourceLine.transformedBy(translateMat1);
-
-				const split1 = targetElem.dividedByLine(line1);
-
-				if (split1.length === 1) {
-					toAdd.push(split1[0]);
-				} else {
-					let [part0, part1] = split1;
-
-					const translateMat2 = Mat33.translation(translateVec.scale(-1));
-					const l = sourceLine.transformedBy(translateMat2);
-					const line2 = l.transformedBy(Mat33.scaling2D(2, l.center));
-
-					const renderer = this.editor.display.getWetInkRenderer();
-					renderer.drawPoints(line1.p1, line1.p2, line2.p1, line2.p2);
-
-					if (!part1.intersects(line2)) {
-						const temp = part0;
-						part0 = part1;
-						part1 = temp;
-					}
-					toAdd.push(part0);
-
-					const split2 = part1.dividedByLine!(line2);
-					if (split2.length === 1) {
-						toAdd.push(split2[0]);
-					} else {
-						if (split2[1].intersects(line)) {
-							toAdd.push(split2[0]);
-						} else
-							toAdd.push(split2[1]);
+				for (let i = 0; i < split.length; i++) {
+					if (split[i].getExactBBox().area > minArea || !split[i].intersectsRect(eraserRect)) {
+						toAdd.push(split[i]);
 					}
 				}
 			}
@@ -189,7 +161,7 @@ export default class Eraser extends BaseTool {
 			this.addCommands.push(...newAddCommands);
 		}
 
-		//this.drawPreviewAt(currentPoint);
+		this.drawPreviewAt(currentPoint);
 		this.lastPoint = currentPoint;
 	}
 

@@ -1,5 +1,6 @@
 import { Point2 } from '../Vec2';
 import Abstract2DShape from './Abstract2DShape';
+import LineSegment2 from './LineSegment2';
 
 /** A 2-dimensional path with parameter interval $t \in [0, 1]$. */
 export abstract class Parameterized2DShape extends Abstract2DShape {
@@ -16,6 +17,18 @@ export abstract class Parameterized2DShape extends Abstract2DShape {
 	 * that point occurs.
 	 */
 	abstract nearestPointTo(point: Point2): { point: Point2, parameterValue: number };
+
+	/**
+	 * Returns the **parameter values** at which `lineSegment` intersects this shape.
+	 *
+	 * See also {@link intersectsLineSegment}
+	 */
+	public abstract argIntersectsLineSegment(lineSegment: LineSegment2): number[];
+
+
+	public override intersectsLineSegment(line: LineSegment2): Point2[] {
+		return this.argIntersectsLineSegment(line).map(t => this.at(t));
+	}
 }
 
 export default Parameterized2DShape;

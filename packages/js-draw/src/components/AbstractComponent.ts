@@ -1,7 +1,7 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import EditorImage from '../image/EditorImage';
-import { LineSegment2, Mat33, Mat33Array, Rect2 } from '@js-draw/math';
+import { LineSegment2, Mat33, Mat33Array, Path, Rect2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
@@ -396,8 +396,9 @@ export default abstract class AbstractComponent {
 	 * **Notes**:
 	 * - A default implementation may be provided for this method in the future. Until then,
 	 *   this method is `undefined` if unsupported.
+	 * - Components inside `shape` should be at even indicies, components outside should be at odd.
 	 */
-	public dividedByLine?(line: LineSegment2): AbstractComponent[];
+	public dividedBy?(shape: Path): AbstractComponent[];
 
 	// Return null iff this object cannot be safely serialized/deserialized.
 	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;

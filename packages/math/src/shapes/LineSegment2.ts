@@ -94,7 +94,17 @@ export class LineSegment2 extends Parameterized2DShape {
 		];
 	}
 
+	/**
+	 * Returns the intersection of this with another line segment.
+	 *
+	 * **WARNING**: The parameter value returned by this method does not range from 0 to 1 and
+	 *              is currently a length.
+	 *              This will change in a future release.
+	 * @deprecated
+	 */
 	public intersection(other: LineSegment2): IntersectionResult|null {
+		// FIXME(v2.0.0): Make this return a `t` value from `0` to `1`.
+
 		// We want x₁(t) = x₂(t) and y₁(t) = y₂(t)
 		// Observe that
 		// x = this.point1.x + this.direction.x · t₁
@@ -181,6 +191,15 @@ export class LineSegment2 extends Parameterized2DShape {
 
 	public intersects(other: LineSegment2) {
 		return this.intersection(other) !== null;
+	}
+
+	public override argIntersectsLineSegment(lineSegment: LineSegment2) {
+		const intersection = this.intersection(lineSegment);
+
+		if (intersection) {
+			return [ intersection.t / this.length ];
+		}
+		return [];
 	}
 
 	/**

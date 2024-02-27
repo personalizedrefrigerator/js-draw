@@ -28,7 +28,7 @@ describe('Line2', () => {
 
 		expect(line1.intersection(line2)?.point).objEq(Vec2.of(0, 10));
 
-		// t=10 implies 10 units along he line from (10, 10) to (-10, 10)
+		// t=10 implies 10 units along the line from (10, 10) to (-10, 10)
 		expect(line1.intersection(line2)?.t).toBe(10);
 
 		// Similarly, t = 12 implies 12 units above (0, -2) in the direction of (0, 200)

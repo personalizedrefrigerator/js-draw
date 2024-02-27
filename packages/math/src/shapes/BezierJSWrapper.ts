@@ -78,10 +78,10 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 		return new Rect2(bbox.x.min, bbox.y.min, width, height);
 	}
 
-	public override intersectsLineSegment(line: LineSegment2): Point2[] {
+	public override argIntersectsLineSegment(line: LineSegment2): number[] {
 		const bezier = this.getBezier();
 
-		const intersectionPoints = bezier.intersects(line).map(t => {
+		return bezier.intersects(line).map(t => {
 			// We're using the .intersects(line) function, which is documented
 			// to always return numbers. However, to satisfy the type checker (and
 			// possibly improperly-defined types),
@@ -89,7 +89,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 				t = parseFloat(t);
 			}
 
-			const point = Vec2.ofXY(bezier.get(t));
+			const point = Vec2.ofXY(this.at(t));
 
 			// Ensure that the intersection is on the line segment
 			if (point.minus(line.p1).magnitude() > line.length
@@ -97,10 +97,8 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 				return null;
 			}
 
-			return point;
-		}).filter(entry => entry !== null) as Point2[];
-
-		return intersectionPoints;
+			return t;
+		}).filter(entry => entry !== null) as number[];
 	}
 
 	public override splitAt(t: number): [BezierJSWrapper] | [BezierJSWrapper, BezierJSWrapper] {

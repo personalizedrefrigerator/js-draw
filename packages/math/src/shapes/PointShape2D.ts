@@ -18,9 +18,9 @@ class PointShape2D extends Parameterized2DShape {
 		return this.p.minus(point).magnitude();
 	}
 
-	public override intersectsLineSegment(lineSegment: LineSegment2, epsilon?: number): Vec3[] {
+	public override argIntersectsLineSegment(lineSegment: LineSegment2, epsilon?: number): number[] {
 		if (lineSegment.containsPoint(this.p, epsilon)) {
-			return [ this.p ];
+			return [ 0 ];
 		}
 		return [ ];
 	}
