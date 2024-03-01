@@ -9,6 +9,7 @@ import toRoundedString from '../rounding/toRoundedString';
 import toStringOfSamePrecision from '../rounding/toStringOfSamePrecision';
 import Parameterized2DShape from './Parameterized2DShape';
 import BezierJSWrapper from './BezierJSWrapper';
+import convexHull2Of from '../utils/convexHull2Of';
 
 export enum PathCommandType {
 	LineTo,
@@ -1219,6 +1220,26 @@ export class Path {
 		const result = new Path(startPos ?? Vec2.zero, commands);
 		result.cachedStringVersion = pathString;
 		return result;
+	}
+
+	public static fromConvexHullOf(points: Point2[]) {
+		if (points.length === 0) {
+			return Path.empty;
+		}
+
+		const hull = convexHull2Of(points);
+
+		const commands = hull.slice(1).map((p): LinePathCommand => ({
+			kind: PathCommandType.LineTo,
+			point: p,
+		}));
+		// Close -- connect back to the start
+		commands.push({
+			kind: PathCommandType.LineTo,
+			point: hull[0],
+		});
+
+		return new Path(hull[0], commands);
 	}
 
 	// @internal TODO: At present, this isn't really an empty path.

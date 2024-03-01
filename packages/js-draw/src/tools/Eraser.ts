@@ -13,6 +13,7 @@ import Command from '../commands/Command';
 import EditorImage from '../image/EditorImage';
 import uniteCommands from '../commands/uniteCommands';
 import Stroke from '../components/Stroke';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 export enum EraserMode {
 	PartialStroke = 'partial-stroke',
@@ -77,10 +78,12 @@ export default class Eraser extends BaseTool {
 
 		const renderer = this.editor.display.getWetInkRenderer();
 		const rect = this.getEraserRect(point);
+		const rect2 = this.getEraserRect(this.lastPoint ?? point);
 		const fill: RenderingStyle = {
-			fill: Color4.gray,
+			fill: Color4.transparent,
+			stroke: { width: size / 10, color: Color4.gray },
 		};
-		renderer.drawRect(rect, size / 4, fill);
+		renderer.drawPath(pathToRenderable(Path.fromConvexHullOf([...rect.corners, ...rect2.corners]), fill));
 	}
 
 	/**
@@ -138,7 +141,8 @@ export default class Eraser extends BaseTool {
 					const strokeWidth = targetElem.getParts()[0]?.style.stroke?.width ?? 0;
 					minArea = Math.max(minArea, strokeWidth * strokeWidth * 1.5);
 				}
-				const split = targetElem.dividedBy(Path.fromRect(eraserRect), this.editor.viewport);
+				const erasePath = Path.fromConvexHullOf([...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners]);
+				const split = targetElem.dividedBy(erasePath, this.editor.viewport);
 
 				for (let i = 0; i < split.length; i++) {
 					if (split[i].getExactBBox().area > minArea || !split[i].intersectsRect(eraserRect)) {
