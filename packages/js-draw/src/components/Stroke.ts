@@ -7,6 +7,7 @@ import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
+import Viewport from '../Viewport';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -153,7 +154,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		}
 	}
 
-	public override dividedBy(path: Path) {
+	public override dividedBy(path: Path, viewport: Viewport) {
 		const polyline = path.polylineApproximation();
 
 		const newStrokes: Stroke[] = [];
@@ -191,7 +192,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			});
 
 			for (const intersection of intersectionPoints) {
-				const split = path.splitNear(intersection.point);
+				const split = path.splitNear(intersection.point, { mapNewPoint: p => viewport.roundPoint(p), });
 				newStrokes.push(...makeStroke(split[0]));
 
 				if (split.length === 2) {

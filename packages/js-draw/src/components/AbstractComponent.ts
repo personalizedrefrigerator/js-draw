@@ -6,6 +6,7 @@ import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
+import Viewport from '../Viewport';
 
 export type LoadSaveData = (string[]|Record<symbol, string|number>);
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
@@ -397,8 +398,10 @@ export default abstract class AbstractComponent {
 	 * - A default implementation may be provided for this method in the future. Until then,
 	 *   this method is `undefined` if unsupported.
 	 * - Components inside `shape` should be at even indicies, components outside should be at odd.
+	 *
+	 * `viewport` should be provided to determine how newly-added points should be rounded.
 	 */
-	public dividedBy?(shape: Path): AbstractComponent[];
+	public dividedBy?(shape: Path, viewport: Viewport): AbstractComponent[];
 
 	// Return null iff this object cannot be safely serialized/deserialized.
 	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;

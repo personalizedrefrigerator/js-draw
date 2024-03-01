@@ -131,7 +131,7 @@ export default class Eraser extends BaseTool {
 					const strokeWidth = targetElem.getParts()[0]?.style.stroke?.width ?? 0;
 					minArea = Math.max(minArea, strokeWidth * strokeWidth * 1.5);
 				}
-				const split = targetElem.dividedBy(Path.fromRect(eraserRect));
+				const split = targetElem.dividedBy(Path.fromRect(eraserRect), this.editor.viewport);
 
 				for (let i = 0; i < split.length; i++) {
 					if (split[i].getExactBBox().area > minArea || !split[i].intersectsRect(eraserRect)) {

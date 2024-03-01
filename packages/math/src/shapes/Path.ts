@@ -55,6 +55,15 @@ export interface IntersectionResult {
 	point: Point2;
 }
 
+/** Options for {@link Path.splitNear} and {@link Path.splitAt} */
+export interface PathSplitOptions {
+	/**
+	 * Allows mapping points on newly added segments. This is useful, for example,
+	 * to round points to prevent long decimals when later saving.
+	 */
+	mapNewPoint?: (point: Point2)=>Point2;
+}
+
 /**
  * Represents a union of lines and curves.
  */
@@ -550,14 +559,14 @@ export class Path {
 		};
 	}
 
-	// @internal
-	public splitNear(point: Point2) {
+	/** Splits this path in two near the given `point`. */
+	public splitNear(point: Point2, options?: PathSplitOptions) {
 		const nearest = this.nearestPointTo(point);
-		return this.splitAt(nearest.curveIndex, nearest.parameterValue);
+		return this.splitAt(nearest.curveIndex, nearest.parameterValue, options);
 	}
 
 	// @internal
-	public splitAt(curveIndex: number, parameterValue: number): [Path]|[Path,Path] {
+	public splitAt(curveIndex: number, parameterValue: number, options?: PathSplitOptions): [Path]|[Path,Path] {
 		if (this.geometry.length === 0) {
 			return [this];
 		}
@@ -565,6 +574,8 @@ export class Path {
 		const result: Path[] = [];
 		let currentStartPoint = this.startPoint;
 		let currentPath: PathCommand[] = [];
+
+		const mapNewPoint = options?.mapNewPoint ?? ((p: Point2)=>p);
 
 		// Split in two
 		for (let i = 0; i < this.parts.length; i ++) {
@@ -587,13 +598,16 @@ export class Path {
 						const split = (geom as LineSegment2).splitAt(parameterValue);
 						currentPath.push({
 							kind: part.kind,
-							point: split[0].p2,
+							point: mapNewPoint(split[0].p2),
 						});
 						newPathStart = split[0].p2;
 						if (split.length > 1) {
 							console.assert(split.length === 2);
 							newPath.push({
 								kind: part.kind,
+
+								// Don't map: For lines, the end point of the split is
+								// the same as the end point of the original:
 								point: split[1]!.p2,
 							});
 						}
@@ -610,15 +624,15 @@ export class Path {
 							if (part.kind === PathCommandType.CubicBezierTo) {
 								targetArray.push({
 									kind: part.kind,
-									controlPoint1: controlPoints[1],
-									controlPoint2: controlPoints[2],
-									endPoint: controlPoints[3],
+									controlPoint1: mapNewPoint(controlPoints[1]),
+									controlPoint2: mapNewPoint(controlPoints[2]),
+									endPoint: mapNewPoint(controlPoints[3]),
 								});
 							} else {
 								targetArray.push({
 									kind: part.kind,
-									controlPoint: controlPoints[1],
-									endPoint: controlPoints[2],
+									controlPoint: mapNewPoint(controlPoints[1]),
+									endPoint: mapNewPoint(controlPoints[2]),
 								});
 							}
 
@@ -639,7 +653,7 @@ export class Path {
 				}
 
 				result.push(new Path(currentStartPoint, [...currentPath]));
-				currentStartPoint = newPathStart!;
+				currentStartPoint = mapNewPoint(newPathStart!);
 				console.assert(!!currentStartPoint, 'should have a start point');
 				currentPath = newPath;
 			} else {

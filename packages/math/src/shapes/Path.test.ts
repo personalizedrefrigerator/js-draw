@@ -1,7 +1,7 @@
 import LineSegment2 from './LineSegment2';
 import Path, { PathCommandType } from './Path';
 import Rect2 from './Rect2';
-import { Vec2 } from '../Vec2';
+import { Point2, Vec2 } from '../Vec2';
 import CubicBezier from './CubicBezier';
 import QuadraticBezier from './QuadraticBezier';
 
@@ -338,6 +338,35 @@ describe('Path', () => {
 			expect(split).toHaveLength(2);
 			expect(split[0].toString()).toBe('M0,0Q4,0 8,0Q8,2 8,4');
 			expect(split[1]!.toString()).toBe('M8,4Q8,6 8,8');
+		});
+
+		it.each([
+			{
+				original: 'm0,0 Q4,0 8,0 Q8,4 8,8',
+				near: Vec2.of(8, 4),
+				map: (p: Point2) => p.plus(Vec2.of(1, 1)),
+				expected: [ 'M0,0Q4,0 8,0Q9,3 9,5', 'M9,5Q9,7 9,9' ],
+			},
+			{
+				original: 'm0,0 L0,10',
+				near: Vec2.of(0, 5),
+				map: (p: Point2) => p.plus(Vec2.of(100, 0)),
+				expected: [ 'M0,0L100,5', 'M100,5L0,10' ],
+			},
+			{
+				// Tested using SVG data similar to:
+				//   <path d="m1,1 C1,2 2,10 4,4 C5,0 9,3 7,7" fill="none" stroke="#ff0000"/>
+				//   <path d="M2,6C3,6 3,6 4,4C5,0 9,3 7,7" fill="none" stroke="#00ff0080"/>
+				// Because of the rounding, the fit path should be slightly off.
+				original: 'm1,1 C1,2 2,10 4,4 C5,0 9,3 7,7',
+				near: Vec2.of(3, 5),
+				map: (p: Point2) => Vec2.of(Math.round(p.x), Math.round(p.y)),
+				expected: [ 'M1,1C1,2 1,6 2,6', 'M2,6C3,6 3,6 4,4C5,0 9,3 7,7' ],
+			},
+		])('should support mapping newly-added points while splitting (case %j)', ({ original, near, map, expected }) => {
+			const path = Path.fromString(original);
+			const split = path.splitNear(near, { mapNewPoint: map });
+			expect(split.map(p => p.toString(false))).toMatchObject(expected);
 		});
 	});
 });
