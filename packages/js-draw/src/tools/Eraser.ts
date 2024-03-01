@@ -19,10 +19,15 @@ export enum EraserMode {
 	FullStroke = 'full-stroke',
 }
 
+export interface InitialEraserOptions {
+	thickness?: number;
+	mode?: EraserMode;
+}
+
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2|null = null;
 	private isFirstEraseEvt: boolean = true;
-	private thickness: number = 10;
+	private thickness: number;
 	private thicknessValue: MutableReactiveValue<number>;
 	private modeValue: MutableReactiveValue<EraserMode>;
 
@@ -34,8 +39,10 @@ export default class Eraser extends BaseTool {
 	private eraseCommands: Erase[] = [];
 	private addCommands: Command[] = [];
 
-	public constructor(private editor: Editor, description: string) {
+	public constructor(private editor: Editor, description: string, options?: InitialEraserOptions) {
 		super(editor.notifier, description);
+
+		this.thickness = options?.thickness ?? 10;
 
 		this.thicknessValue = ReactiveValue.fromInitialValue(this.thickness);
 		this.thicknessValue.onUpdate(value => {
@@ -46,7 +53,7 @@ export default class Eraser extends BaseTool {
 				tool: this,
 			});
 		});
-		this.modeValue = ReactiveValue.fromInitialValue(EraserMode.PartialStroke);
+		this.modeValue = ReactiveValue.fromInitialValue(options?.mode ?? EraserMode.FullStroke);
 		this.modeValue.onUpdate(_value => {
 			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
 				kind: EditorEventType.ToolUpdated,
@@ -258,5 +265,9 @@ export default class Eraser extends BaseTool {
 	 */
 	public getThicknessValue() {
 		return this.thicknessValue;
+	}
+
+	public getModeValue() {
+		return this.modeValue;
 	}
 }
