@@ -266,4 +266,8 @@ export default class Eraser extends BaseTool {
 	public getThicknessValue() {
 		return this.thicknessValue;
 	}
+
+	public getModeValue() {
+		return this.modeValue;
+	}
 }
