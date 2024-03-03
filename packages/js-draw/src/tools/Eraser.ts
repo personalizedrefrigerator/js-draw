@@ -132,16 +132,25 @@ export default class Eraser extends BaseTool {
 			const toAdd: AbstractComponent[] = [];
 			for (const targetElem of eraseableElems) {
 				toErase.push(targetElem);
-				if (!targetElem.dividedBy || eraserRect.containsRect(targetElem.getExactBBox())) {
+
+				// Completely delete items that can't be divided.
+				if (!targetElem.dividedBy) {
 					continue;
 				}
 
-				let mustKeepIfLargerAreaThan = eraserRect.area * 1.3;
-				let mustDeleteIfSmallerSideThan = eraserRect.maxDimension;
+				// Completely delete items that are completely or almost completely
+				// contained within the eraser.
+				const grownRect = eraserRect.grownBy(eraserRect.maxDimension / 3);
+				if (grownRect.containsRect(targetElem.getExactBBox())) {
+					continue;
+				}
+
+				// We keep divided chunks that are significantly larger than the eraser head (and are
+				// thus unlikely to have been within the eraser).
+				let mustKeepIfLargerAreaThan = eraserRect.area * 2;
 				if (targetElem instanceof Stroke) {
 					const strokeWidth = targetElem.getParts()[0]?.style.stroke?.width ?? 0;
-					mustKeepIfLargerAreaThan = Math.max(mustKeepIfLargerAreaThan, strokeWidth * strokeWidth * 1.5);
-					mustDeleteIfSmallerSideThan = Math.max(mustDeleteIfSmallerSideThan, strokeWidth * 1.2);
+					mustKeepIfLargerAreaThan = Math.max(mustKeepIfLargerAreaThan, strokeWidth * strokeWidth * 2);
 				}
 
 				// Join the current and previous rectangles so that points between events are also
@@ -149,9 +158,8 @@ export default class Eraser extends BaseTool {
 				const erasePath = Path.fromConvexHullOf([...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners]);
 
 				const filterNewComponent = (component: AbstractComponent, isInside: boolean) => {
-					//const tooLarge = component.getExactBBox().area > mustKeepIfLargerAreaThan;
-					//const tooSmall = component.getExactBBox().maxDimension < mustDeleteIfSmallerSideThan;
-					return !isInside;//(!isInside || tooLarge) && !tooSmall;
+					const tooLarge = component.getExactBBox().area > mustKeepIfLargerAreaThan;
+					return !isInside || tooLarge;
 				};
 
 				toAdd.push(
