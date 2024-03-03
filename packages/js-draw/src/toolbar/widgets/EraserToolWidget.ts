@@ -100,6 +100,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 			...super.serializeState(),
 
 			thickness: this.tool.getThickness(),
+			mode: this.tool.getModeValue().get(),
 		};
 	}
 
@@ -116,6 +117,13 @@ export default class EraserToolWidget extends BaseToolWidget {
 			}
 
 			this.tool.setThickness(parsedThickness);
+		}
+
+		if (state.mode) {
+			const mode = state.mode;
+			if (Object.values(EraserMode).includes(mode)) {
+				this.tool.getModeValue().set(mode);
+			}
 		}
 	}
 }
