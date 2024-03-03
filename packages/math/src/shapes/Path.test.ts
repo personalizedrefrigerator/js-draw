@@ -179,7 +179,7 @@ describe('Path', () => {
 			});
 		});
 
-		it('should give all intersections for a Bézier stroked path', () => {
+		it('should correctly report intersections for a simple Bézier curve path', () => {
 			const lineStart = Vec2.zero;
 			const path = new Path(lineStart, [
 				{
@@ -196,13 +196,36 @@ describe('Path', () => {
 			let intersections = path.intersection(
 				new LineSegment2(Vec2.of(-1, 0.5), Vec2.of(2, 0.5)), strokeWidth,
 			);
-			expect(intersections.length).toBe(0);
+			expect(intersections).toHaveLength(0);
 
 			// Should be an intersection when exiting/entering the edge of the stroke
 			intersections = path.intersection(
 				new LineSegment2(Vec2.of(0, 0.5), Vec2.of(8, 0.5)), strokeWidth,
 			);
-			expect(intersections.length).toBe(1);
+			expect(intersections).toHaveLength(1);
+		});
+
+		it('should correctly report intersections near the cap of a line-like Bézier', () => {
+			const path = Path.fromString('M0,0Q14,0 27,0');
+			expect(
+				path.intersection(
+					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
+					10,
+				),
+
+				// Should have intersections, despite being at the cap of the Bézier
+				// curve.
+			).toHaveLength(2);
+		});
+
+		it.each([
+			[new LineSegment2(Vec2.of(43.5,-12.5), Vec2.of(40.5,24.5)), 0],
+			// TODO: The below case is failing. It seems to be a Bezier-js bug though...
+			// (The Bézier.js method returns an empty array).
+			//[new LineSegment2(Vec2.of(35.5,19.5), Vec2.of(38.5,-17.5)), 0],
+		])('should correctly report positive intersections with a line-like Bézier', (line, strokeRadius) => {
+			const bezier = Path.fromString('M0,0 Q50,0 100,0');
+			expect(bezier.intersection(line, strokeRadius).length).toBeGreaterThan(0);
 		});
 	});
 

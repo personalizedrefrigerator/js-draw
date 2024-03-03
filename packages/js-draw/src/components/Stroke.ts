@@ -1,9 +1,9 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Vec2, Point2 } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent, { ComponentDividedByOptions } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
@@ -154,26 +154,27 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		}
 	}
 
-	public override dividedBy(path: Path, viewport: Viewport) {
+	public override dividedBy(path: Path, viewport: Viewport, options?: ComponentDividedByOptions) {
 		const polyline = path.polylineApproximation();
+		const originalPath = path;
 
 		const newStrokes: Stroke[] = [];
 		for (const part of this.parts) {
 			let path = part.path;
 
-			const makeStroke = (path: Path) => {
+			const makeStroke = (path: Path): Stroke|null => {
 				if (part.style.fill.a > 0) {
 					// Remove visually empty paths.
 					if (path.parts.length < 1 || (path.parts.length === 1 && path.parts[0].kind === PathCommandType.LineTo)) {
 						// TODO: If this isn't present, a very large number of strokes are created while erasing.
 						// TODO: Debug this.
-						return [];
+						return null;
 					} else {
 						// Filled paths must be closed (allows for optimizations elsewhere)
 						path = path.asClosed();
 					}
 				}
-				return [new Stroke([ pathToRenderable(path, part.style) ])];
+				return new Stroke([ pathToRenderable(path, part.style) ]);
 			};
 
 			const intersectionPoints = [];
@@ -191,16 +192,52 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				}
 			});
 
+			const isPointInsideOriginalPath = (point: Point2) => {
+				const pointOutside = originalPath.bbox.topRight.plus(Vec2.of(100, 0));
+				const lineToFirstIntersection = new LineSegment2(pointOutside, point);
+				return originalPath.asClosed().intersection(lineToFirstIntersection).length % 2 === 1;
+			};
+
+			const isFirstPointInside = !!intersectionPoints.length && isPointInsideOriginalPath(intersectionPoints[0].point);
+
+			let intersectionCount = isFirstPointInside ? 1 : 0;
+			const addNewPath = (path: Path) => {
+				const component = makeStroke(path);
+
+				let isInside = intersectionCount % 2 === 1;
+				intersectionCount ++;
+
+				// Here, we work around bugs in the underlying Bezier curve library
+				// (including https://github.com/Pomax/bezierjs/issues/179).
+				// Even if not all intersections are returned correctly, we still want
+				// isInside to be roughly correct.
+				if (isPointInsideOriginalPath(path.getExactBBox().center) !== isInside) {
+					isInside = !isInside;
+					intersectionCount ++;
+				}
+
+				if (!component) {
+					return;
+				}
+
+				if (options?.filterNewComponent && !options.filterNewComponent(component, isInside)) {
+					return;
+				}
+
+
+				newStrokes.push(component);
+			};
+
 			for (const intersection of intersectionPoints) {
 				const split = path.splitNear(intersection.point, { mapNewPoint: p => viewport.roundPoint(p), });
-				newStrokes.push(...makeStroke(split[0]));
+				addNewPath(split[0]);
 
 				if (split.length === 2) {
 					path = split[1];
 				}
 			}
 
-			newStrokes.push(...makeStroke(path));
+			addNewPath(path);
 		}
 
 		return newStrokes;

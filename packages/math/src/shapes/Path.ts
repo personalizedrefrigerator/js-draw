@@ -351,7 +351,7 @@ export class Path {
 			for (const { part, distFn, bbox } of uncheckedDistFunctions) {
 				// Skip if impossible for the distance to the target to be lesser than
 				// the current minimum.
-				if (!bbox.grownBy(minDist).containsPoint(point)) {
+				if (isFinite(minDist) && !bbox.grownBy(minDist).containsPoint(point)) {
 					continue;
 				}
 
@@ -401,7 +401,7 @@ export class Path {
 
 		const stoppingThreshold = strokeRadius / 1000;
 
-		// Returns the maximum x value explored
+		// Returns the maximum parameter value explored
 		const raymarchFrom = (
 			startPoint: Point2,
 
@@ -463,6 +463,11 @@ export class Path {
 					curve: lastPart,
 					curveIndex: this.geometry.indexOf(lastPart),
 				});
+
+				// Slightly increase the parameter value to prevent the same point from being
+				// added to the results twice.
+				const parameterIncrease = strokeRadius / 20 / line.length;
+				lastParameter += isFinite(parameterIncrease) ? parameterIncrease : 0;
 			}
 
 			return lastParameter;

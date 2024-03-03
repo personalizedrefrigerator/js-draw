@@ -34,6 +34,15 @@ export enum ComponentSizingMode {
 	Anywhere,
 }
 
+export interface ComponentDividedByOptions {
+	/**
+	 * Returns `true` iff the new component should not be added to the list of divisions.
+	 * @param isInside is `true` if the new `component` is inside the path used to divide
+	 *                 the component.
+	 */
+	filterNewComponent?(component: AbstractComponent, isInside: boolean): boolean;
+}
+
 /**
  * A base class for everything that can be added to an {@link EditorImage}.
  */

@@ -67,6 +67,9 @@ export class Rect2 extends Abstract2DShape {
 				&& this.y + this.h >= other.y + other.h;
 	}
 
+	/**
+	 * @returns true iff this and `other` overlap
+	 */
 	public intersects(other: Rect2): boolean {
 		// Project along x/y axes.
 		const thisMinX = this.x;

@@ -136,19 +136,34 @@ export default class Eraser extends BaseTool {
 					continue;
 				}
 
-				let minArea = eraserRect.area * 1.4;
+				let mustKeepIfLargerAreaThan = eraserRect.area * 1.3;
+				let mustDeleteIfSmallerSideThan = eraserRect.maxDimension;
 				if (targetElem instanceof Stroke) {
 					const strokeWidth = targetElem.getParts()[0]?.style.stroke?.width ?? 0;
-					minArea = Math.max(minArea, strokeWidth * strokeWidth * 1.5);
+					mustKeepIfLargerAreaThan = Math.max(mustKeepIfLargerAreaThan, strokeWidth * strokeWidth * 1.5);
+					mustDeleteIfSmallerSideThan = Math.max(mustDeleteIfSmallerSideThan, strokeWidth * 1.2);
 				}
-				const erasePath = Path.fromConvexHullOf([...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners]);
-				const split = targetElem.dividedBy(erasePath, this.editor.viewport);
 
-				for (let i = 0; i < split.length; i++) {
-					if (split[i].getExactBBox().area > minArea || !split[i].intersectsRect(eraserRect)) {
-						toAdd.push(split[i]);
-					}
-				}
+				// Join the current and previous rectangles so that points between events are also
+				// erased.
+				const erasePath = Path.fromConvexHullOf([...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners]);
+
+				const filterNewComponent = (component: AbstractComponent, isInside: boolean) => {
+					//const tooLarge = component.getExactBBox().area > mustKeepIfLargerAreaThan;
+					//const tooSmall = component.getExactBBox().maxDimension < mustDeleteIfSmallerSideThan;
+					return !isInside;//(!isInside || tooLarge) && !tooSmall;
+				};
+
+				toAdd.push(
+					...targetElem.dividedBy(
+						erasePath,
+						this.editor.viewport,
+
+						// We only want to preserve the parts of the stroke **outside**
+						// the eraser, so filter the others out:
+						{ filterNewComponent }
+					)
+				);
 			}
 
 			const eraseCommand = new Erase(toErase);
