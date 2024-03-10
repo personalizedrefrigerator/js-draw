@@ -133,8 +133,6 @@ const localization: EditorLocalization = {
 	soundExplorer: 'Klangbasierte Bilderkundung',
 	disableAccessibilityExploreTool: 'Deaktiviere klangbasierte Erkundung',
 	enableAccessibilityExploreTool: 'Aktiviere klangbasierte Erkundung',
-	copied: (count, description) => `${count} ${description} kopiert`,
-	pasted: (count, description) => `${count} ${description} eingefügt`,
 	unionOf: (actionDescription, actionCount) => `Vereinigung: ${actionCount} ${actionDescription}`,
 	emptyBackground: 'Leerer Hintergrund',
 	filledBackgroundWithColor: (color) => `Gefüllter Hintergrund (${color})`,

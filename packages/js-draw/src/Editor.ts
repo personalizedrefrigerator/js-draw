@@ -460,7 +460,6 @@ export class Editor {
 
 	public hideLoadingWarning() {
 		this.loadingWarning.style.display = 'none';
-
 		this.announceForAccessibility(this.localization.doneLoading);
 	}
 
@@ -1037,7 +1036,8 @@ export class Editor {
 	/** `apply` a command. `command` will be announced for accessibility. */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		const dispatchResult = this.dispatchNoAnnounce(command, addToHistory);
-		this.announceForAccessibility(command.description(this, this.localization));
+		const commandDescription = command.description(this, this.localization);
+		this.announceForAccessibility(commandDescription);
 
 		return dispatchResult;
 	}
@@ -1309,8 +1309,11 @@ export class Editor {
 	 * This is a convenience method that creates **and applies** a single command.
 	 *
 	 * If `selectComponents` is true (the default), the components are selected.
+	 *
+	 * `actionDescription`, if given, should be a screenreader-friendly description of the
+	 * reason components were added (e.g. "pasted").
 	 */
-	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true) {
+	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true, actionDescription?: string) {
 		let bbox: Rect2|null = null;
 		for (const component of components) {
 			if (bbox) {
@@ -1351,7 +1354,10 @@ export class Editor {
 		}
 
 		const applyChunkSize = 100;
-		await this.dispatch(uniteCommands(commands, applyChunkSize), true);
+		await this.dispatch(
+			uniteCommands(commands, { applyChunkSize, description: actionDescription }),
+			true,
+		);
 
 		if (selectComponents) {
 			for (const selectionTool of this.toolController.getMatchingTools(SelectionTool)) {
