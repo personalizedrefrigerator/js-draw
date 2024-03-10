@@ -1,6 +1,6 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
-import { Vec2, LineSegment2, Rect2, Mat33, Mat33Array } from '@js-draw/math';
+import { Vec2, LineSegment2, Rect2, Mat33, Mat33Array, Color4 } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { cloneTextStyle, TextRenderingStyle, textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
 import AbstractComponent from './AbstractComponent';
@@ -25,8 +25,47 @@ export enum TextTransformMode {
 
 type TextElement = TextComponent|string;
 
+const defaultTextStyle: TextRenderingStyle = {
+	fontFamily: 'sans', size: 12, renderingStyle: { fill: Color4.purple },
+};
+
 /**
  * Displays text.
+ *
+ * A `TextComponent` is a collection of `TextElement`s (`string`s or {@link TextComponent}s).
+ *
+ * **Example**:
+ *
+ * ```ts,runnable
+ * import { Editor, TextComponent, Mat33, Vec2, Color4, TextRenderingStyle } from 'js-draw';
+ * const editor = new Editor(document.body);
+ * editor.dispatch(editor.setBackgroundStyle({ color: Color4.black, autoresize: true ));
+ * ---visible---
+ * /// Adding a simple TextComponent
+ * ///------------------------------
+ *
+ * const positioning1 = Mat33.translation(Vec2.of(10, 10));
+ * const style: TextRenderingStyle = {
+ *     fontFamily: 'sans', size: 12, renderingStyle: { fill: Color4.green },
+ * };
+ *
+ * editor.dispatch(
+ *     editor.image.addElement(new TextComponent(['Hello, world'], positioning1, style)),
+ * );
+ *
+ *
+ * /// Adding nested TextComponents
+ * ///-----------------------------
+ *
+ * // Add another TextComponent that contains text and a TextComponent. Observe that '[Test]'
+ * // is placed directly after 'Test'.
+ * const positioning2 = Mat33.translation(Vec2.of(10, 50));
+ * editor.dispatch(
+ *     editor.image.addElement(
+ *         new TextComponent([ new TextComponent(['Test'], positioning1, style), '[Test]' ], positioning2, style)
+ *     ),
+ * );
+ * ```
  */
 export default class TextComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
@@ -44,7 +83,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 		// Transformation relative to this component's parent element.
 		private transform: Mat33,
-		private style: TextRenderingStyle,
+		private style: TextRenderingStyle = defaultTextStyle,
 
 		// @internal
 		private transformMode: TextTransformMode = TextTransformMode.ABSOLUTE_XY,
