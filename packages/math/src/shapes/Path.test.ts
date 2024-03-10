@@ -60,6 +60,24 @@ describe('Path', () => {
 		);
 	});
 
+	it.each([
+		[ 'm0,0 L1,1', 'M0,0 L1,1', true ],
+		[ 'm0,0 L1,1', 'M1,1 L0,0', false ],
+		[ 'm0,0 L1,1 Q2,3 4,5', 'M1,1 L0,0', false ],
+		[ 'm0,0 L1,1 Q2,3 4,5', 'M1,1 L0,0 Q2,3 4,5', false ],
+		[ 'm0,0 L1,1 Q2,3 4,5', 'M0,0 L1,1 Q2,3 4,5', true ],
+		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', true ],
+		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9Z', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', false ],
+		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9Z', false ],
+		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9.01', false ],
+		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7.01 8,9', false ],
+		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5.01 6,7 8,9', false ],
+	])('.eq should check equality', (path1Str, path2Str, shouldEqual) => {
+		expect(Path.fromString(path1Str)).objEq(Path.fromString(path1Str));
+		expect(Path.fromString(path2Str)).objEq(Path.fromString(path2Str));
+		expect(Path.fromString(path1Str).eq(Path.fromString(path2Str))).toBe(shouldEqual);
+	});
+
 	describe('intersection', () => {
 		it('should give all intersections for a path made up of lines', () => {
 			const lineStart = Vec2.of(100, 100);
@@ -391,5 +409,56 @@ describe('Path', () => {
 			const split = path.splitNear(near, { mapNewPoint: map });
 			expect(split.map(p => p.toString(false))).toMatchObject(expected);
 		});
+	});
+
+	describe('spliced', () => {
+		it.each([
+			// should support insertion splicing
+			{
+				curve: 'm0,0 l2,0',
+				from: { i: 0, t: 0.5 },
+				to: { i: 0, t: 0.5 },
+				insert: 'm1,0 l0,10 z',
+				expected: 'M0,0 L1,0 L1,10 L1,0 L2,0',
+			},
+
+			// should support removing a segment when splicing
+			{
+				curve: 'm0,0 l4,0',
+				from: { i: 0, t: 0.25 },
+				to: { i: 0, t: 0.75 },
+				insert: 'M1,0 L1,1 L3,1 L3,0',
+				expected: 'M0,0 L1,0 L1,1 L3,1 L3,0 L4,0',
+			},
+
+			// should support reverse splicing and reverse `insert` as necessary
+			{
+				curve: 'M0,0 l4,0',
+				from: { i: 0, t: 0.75 },
+				to: { i: 0, t: 0.25 },
+				insert: 'M1,0 L1,1 L3,1 L3,0',
+				expected: 'M1,0 L3,0 L3,1 L1,1 L1,0',
+			},
+		])('.spliced should support inserting paths inbetween other paths (case %#)', ({ curve, from, to, insert, expected }) => {
+			const originalCurve = Path.fromString(curve);
+			expect(
+				originalCurve.spliced(
+					{ curveIndex: from.i, parameterValue: from.t },
+					{ curveIndex: to.i, parameterValue: to.t },
+					Path.fromString(insert),
+				)
+			).objEq(Path.fromString(expected));
+		});
+	});
+
+	it.each([
+		[ 'm0,0 L1,1', 'M1,1 L0,0' ],
+		[ 'm0,0 L1,1', 'M1,1 L0,0' ],
+		[ 'M0,0 L1,1 Q2,2 3,3', 'M3,3 Q2,2 1,1 L0,0' ],
+		[ 'M0,0 L1,1 Q4,2 5,3 C12,13 10,9 8,7', 'M8,7 C 10,9 12,13 5,3 Q 4,2 1,1 L 0,0' ],
+	])('.reversed should reverse paths', (original, expected) => {
+		expect(Path.fromString(original).reversed()).objEq(Path.fromString(expected));
+		expect(Path.fromString(expected).reversed()).objEq(Path.fromString(original));
+		expect(Path.fromString(original).reversed().reversed()).objEq(Path.fromString(original));
 	});
 });

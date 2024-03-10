@@ -1,4 +1,4 @@
-import { Point2 } from '../Vec2';
+import { Point2, Vec2 } from '../Vec2';
 import Vec3 from '../Vec3';
 import LineSegment2 from './LineSegment2';
 import Parameterized2DShape from './Parameterized2DShape';
@@ -31,6 +31,15 @@ class PointShape2D extends Parameterized2DShape {
 
 	public override at(_t: number) {
 		return this.p;
+	}
+
+	public override normalAt(_t: number) {
+		// Return a vector that makes sense.
+		return Vec2.unitY;
+	}
+
+	public override tangentAt(_t: number): Vec3 {
+		return Vec2.unitX;
 	}
 
 	public override splitAt(_t: number): [PointShape2D] {

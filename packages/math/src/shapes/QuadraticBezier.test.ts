@@ -42,4 +42,26 @@ describe('QuadraticBezier', () => {
 		expect(nearest.parameterValue).toBeCloseTo(expectedParameter, 0.0001);
 		expect(nearest.point).objEq(bezier.at(nearest.parameterValue));
 	});
+
+	test('.normalAt should return a unit normal vector at the given parameter value', () => {
+		const curves = [
+			new QuadraticBezier(Vec2.zero, Vec2.unitY, Vec2.unitY.times(2)),
+			new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY),
+			new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY.times(-2)),
+			new QuadraticBezier(Vec2.of(2, 3), Vec2.of(4, 5.1), Vec2.of(6, 7)),
+			new QuadraticBezier(Vec2.of(2, 3), Vec2.of(100, 1000), Vec2.unitY.times(-2)),
+		];
+
+		for (const curve of curves) {
+			for (let t = 0; t < 1; t += 0.1) {
+				const normal = curve.normalAt(t);
+				expect(normal.length()).toBe(1);
+
+				const tangentApprox = curve.at(t + 0.001).minus(curve.at(t - 0.001));
+
+				// The tangent vector should be perpindicular to the normal
+				expect(tangentApprox.dot(normal)).toBeCloseTo(0);
+			}
+		}
+	});
 });

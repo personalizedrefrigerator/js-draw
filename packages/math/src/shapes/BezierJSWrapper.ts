@@ -70,6 +70,14 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 		return Vec2.ofXY(this.getBezier().normal(t));
 	}
 
+	public override normalAt(t: number): Vec2 {
+		return this.normal(t);
+	}
+
+	public override tangentAt(t: number): Vec2 {
+		return this.derivativeAt(t).normalized();
+	}
+
 	public override getTightBoundingBox(): Rect2 {
 		const bbox = this.getBezier().bbox();
 		const width = bbox.x.max - bbox.x.min;

@@ -65,6 +65,11 @@ export interface PathSplitOptions {
 	mapNewPoint?: (point: Point2)=>Point2;
 }
 
+export interface CurveIndexRecord {
+	curveIndex: number;
+	parameterValue: number;
+}
+
 /**
  * Represents a union of lines and curves.
  */
@@ -565,14 +570,62 @@ export class Path {
 		};
 	}
 
+	public at(index: CurveIndexRecord) {
+		return this.geometry[index.curveIndex].at(index.parameterValue);
+	}
+
+	public tangentAt(index: CurveIndexRecord) {
+		return this.geometry[index.curveIndex].tangentAt(index.parameterValue);
+	}
+
 	/** Splits this path in two near the given `point`. */
 	public splitNear(point: Point2, options?: PathSplitOptions) {
 		const nearest = this.nearestPointTo(point);
-		return this.splitAt(nearest.curveIndex, nearest.parameterValue, options);
+		return this.splitAt(nearest, options);
+	}
+
+	/**
+	 * Returns a copy of this path with `deleteFrom` until `deleteUntil` replaced with `insert`.
+	 *
+	 * This method is analogous to {@link Array.toSpliced}.
+	 */
+	public spliced(deleteFrom: CurveIndexRecord, deleteTo: CurveIndexRecord, insert: Path|undefined, options?: PathSplitOptions): Path {
+		const isBeforeOrEqual = (a: CurveIndexRecord, b: CurveIndexRecord) => {
+			return a.curveIndex < b.curveIndex || (a.curveIndex === b.curveIndex && a.parameterValue <= b.parameterValue);
+		};
+
+		if (isBeforeOrEqual(deleteFrom, deleteTo)) {
+			//          deleteFrom        deleteTo
+			//      <---------|             |-------------->
+			//      x                                      x
+			//  startPoint                             endPoint
+			const firstSplit = this.splitAt(deleteFrom, options);
+			const secondSplit = this.splitAt(deleteTo, options);
+			const before = firstSplit[0];
+			const after = secondSplit[secondSplit.length - 1];
+			return insert ? before.union(insert).union(after) : before.union(after);
+		} else {
+			// In this case, we need to handle wrapping at the start/end.
+			//          deleteTo        deleteFrom
+			//      <---------|    keep     |-------------->
+			//      x                                      x
+			//  startPoint                             endPoint
+			const splitAtFrom = this.splitAt(deleteFrom, options);
+			const beforeFrom = splitAtFrom[0];
+
+			// We need splitNear, rather than splitAt, because beforeFrom does not have
+			// the same indexing as this.
+			const splitAtTo = beforeFrom.splitNear(this.at(deleteTo), options);
+
+			const betweenBoth = splitAtTo[splitAtTo.length - 1];
+			return insert ? betweenBoth.union(insert) : betweenBoth;
+		}
 	}
 
 	// @internal
-	public splitAt(curveIndex: number, parameterValue: number, options?: PathSplitOptions): [Path]|[Path,Path] {
+	public splitAt(splitAt: CurveIndexRecord, options?: PathSplitOptions): [Path]|[Path,Path] {
+		const { curveIndex, parameterValue } = splitAt;
+
 		if (this.geometry.length === 0) {
 			return [this];
 		}
@@ -737,20 +790,109 @@ export class Path {
 		return this.mapPoints(point => affineTransfm.transformVec2(point));
 	}
 
+	/**
+	 * Does not work in all cases (e.g. with moveTo commands).
+	 * @internal
+	 */
+	public closedContainsPoint(point: Point2) {
+		const pointOutside1 = this.bbox.topRight.plus(Vec2.of(1, 1));
+		const pointOutside2 = this.bbox.bottomLeft.plus(Vec2.of(-1, -1));
+		const asClosed = this.asClosed();
+
+		// Test multiple points --- Bezier-js-based line-curve intersections can have false
+		// negatives.
+		for (const target of [pointOutside1, pointOutside2]) {
+			const lineToInternal = new LineSegment2(target, point);
+			if (asClosed.intersection(lineToInternal).length % 2 === 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// Creates a new path by joining [other] to the end of this path
-	public union(other: Path|null): Path {
+	public union(
+		other: Path|null,
+
+		// allowReverse: true iff reversing other or this is permitted if it means
+		//               no moveTo command is necessary when unioning the paths.
+		options: { allowReverse?: boolean } = { allowReverse: true },
+	): Path {
 		if (!other) {
 			return this;
 		}
 
-		return new Path(this.startPoint, [
-			...this.parts,
+		const thisEnd = this.getEndPoint();
+
+		let newParts: Readonly<PathCommand>[] = [];
+		if (thisEnd.eq(other.startPoint)) {
+			newParts = this.parts.concat(other.parts);
+		} else if (options.allowReverse && this.startPoint.eq(other.getEndPoint())) {
+			return other.union(this, { allowReverse: false });
+		} else if (options.allowReverse && this.startPoint.eq(other.startPoint)) {
+			return this.union(other.reversed(), { allowReverse: false });
+		} else {
+			newParts = [
+				...this.parts,
+				{
+					kind: PathCommandType.MoveTo,
+					point: other.startPoint,
+				},
+				...other.parts,
+			];
+		}
+		return new Path(this.startPoint, newParts);
+	}
+
+	/**
+	 * @returns a version of this path with the direction reversed.
+	 *
+	 * Example:
+	 * ```ts,runnable,console
+	 * import {Path} from '@js-draw/math';
+	 * console.log(Path.fromString('m0,0l1,1').reversed()); // -> M1,1 L0,0
+	 * ```
+	 */
+	public reversed() {
+		const newStart = this.getEndPoint();
+		const newParts: Readonly<PathCommand>[] = [];
+		let lastPoint: Point2 = this.startPoint;
+		for (const part of this.parts) {
+			switch (part.kind) {
+			case PathCommandType.LineTo:
+			case PathCommandType.MoveTo:
+				newParts.push({
+					kind: part.kind,
+					point: lastPoint,
+				});
+				lastPoint = part.point;
+				break;
+			case PathCommandType.CubicBezierTo:
+				newParts.push({
+					kind: part.kind,
+					controlPoint1: part.controlPoint2,
+					controlPoint2: part.controlPoint1,
+					endPoint: lastPoint,
+				});
+				lastPoint = part.endPoint;
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				newParts.push({
+					kind: part.kind,
+					controlPoint: part.controlPoint,
+					endPoint: lastPoint,
+				});
+				lastPoint = part.endPoint;
+				break;
+			default:
 			{
-				kind: PathCommandType.MoveTo,
-				point: other.startPoint,
-			},
-			...other.parts,
-		]);
+				const exhaustivenessCheck: never = part;
+				return exhaustivenessCheck;
+			}
+			}
+		}
+		newParts.reverse();
+		return new Path(newStart, newParts);
 	}
 
 	private getEndPoint() {
@@ -855,6 +997,57 @@ export class Path {
 
 		// Even? Probably no intersection.
 		return false;
+	}
+
+	/** @returns true if all points on this are equivalent to the points on `other` */
+	public eq(other: Path, tolerance?: number) {
+		if (other.parts.length !== this.parts.length) {
+			return false;
+		}
+
+		for (let i = 0; i < this.parts.length; i++) {
+			const part1 = this.parts[i];
+			const part2 = other.parts[i];
+
+			switch (part1.kind) {
+			case PathCommandType.LineTo:
+			case PathCommandType.MoveTo:
+				if (part1.kind !== part2.kind) {
+					return false;
+				} else if(!part1.point.eq(part2.point, tolerance)) {
+					return false;
+				}
+				break;
+			case PathCommandType.CubicBezierTo:
+				if (part1.kind !== part2.kind) {
+					return false;
+				} else if (
+					!part1.controlPoint1.eq(part2.controlPoint1, tolerance)
+						|| !part1.controlPoint2.eq(part2.controlPoint2, tolerance)
+						|| !part1.endPoint.eq(part2.endPoint, tolerance)
+				) {
+					return false;
+				}
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				if (part1.kind !== part2.kind) {
+					return false;
+				} else if (
+					!part1.controlPoint.eq(part2.controlPoint, tolerance)
+						|| !part1.endPoint.eq(part2.endPoint, tolerance)
+				) {
+					return false;
+				}
+				break;
+			default:
+			{
+				const exhaustivenessCheck: never = part1;
+				return exhaustivenessCheck;
+			}
+			}
+		}
+
+		return true;
 	}
 
 	/**

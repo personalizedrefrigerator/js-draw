@@ -1,4 +1,4 @@
-import { Point2 } from '../Vec2';
+import { Point2, Vec2 } from '../Vec2';
 import Abstract2DShape from './Abstract2DShape';
 import LineSegment2 from './LineSegment2';
 
@@ -6,6 +6,11 @@ import LineSegment2 from './LineSegment2';
 export abstract class Parameterized2DShape extends Abstract2DShape {
 	/** Returns this at a given parameter. $t \in [0, 1]$ */
 	abstract at(t: number): Point2;
+
+	/** Computes the unit normal vector at $t$. */
+	abstract normalAt(t: number): Vec2;
+
+	abstract tangentAt(t: number): Vec2;
 
 	/**
 	 * Divides this shape into two separate shapes at parameter value $t$.

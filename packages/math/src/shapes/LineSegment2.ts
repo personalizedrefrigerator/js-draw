@@ -79,8 +79,16 @@ export class LineSegment2 extends Parameterized2DShape {
 	 *
 	 * `t` should be in `[0, 1]`.
 	 */
-	public at(t: number): Point2 {
+	public override at(t: number): Point2 {
 		return this.get(t * this.length);
+	}
+
+	public override normalAt(_t: number): Vec2 {
+		return this.direction.orthog();
+	}
+
+	public override tangentAt(_t: number): Vec3 {
+		return this.direction;
 	}
 
 	public splitAt(t: number): [LineSegment2]|[LineSegment2,LineSegment2] {

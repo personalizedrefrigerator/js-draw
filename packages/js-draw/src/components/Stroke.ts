@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Vec2, Point2 } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2 } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -8,6 +8,7 @@ import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
 import Viewport from '../Viewport';
+import { IntersectionResult } from 'math/dist/mjs/shapes/Path';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -156,7 +157,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 	public override dividedBy(path: Path, viewport: Viewport, options?: ComponentDividedByOptions) {
 		const polyline = path.polylineApproximation();
-		const originalPath = path;
+		const originalDivPath = path;
+
+		const isPointInsideOriginalPath = (point: Point2) => {
+			return originalDivPath.closedContainsPoint(point);
+		};
 
 		const newStrokes: Stroke[] = [];
 		for (const part of this.parts) {
@@ -177,7 +182,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				return new Stroke([ pathToRenderable(path, part.style) ]);
 			};
 
-			const intersectionPoints = [];
+			const intersectionPoints: IntersectionResult[] = [];
 			for (const segment of polyline) {
 				intersectionPoints.push(...path.intersection(segment));
 			}
@@ -192,26 +197,24 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				}
 			});
 
-			const isPointInsideOriginalPath = (point: Point2) => {
-				const pointOutside = originalPath.bbox.topRight.plus(Vec2.of(100, 0));
-				const lineToFirstIntersection = new LineSegment2(pointOutside, point);
-				return originalPath.asClosed().intersection(lineToFirstIntersection).length % 2 === 1;
-			};
-
 			const isFirstPointInside = !!intersectionPoints.length && isPointInsideOriginalPath(intersectionPoints[0].point);
 
 			let intersectionCount = isFirstPointInside ? 1 : 0;
-			const addNewPath = (path: Path) => {
+			const addNewPath = (path: Path, knownToBeInside?: boolean) => {
 				const component = makeStroke(path);
 
 				let isInside = intersectionCount % 2 === 1;
 				intersectionCount ++;
 
+				if (knownToBeInside !== undefined) {
+					isInside = knownToBeInside;
+				}
+
 				// Here, we work around bugs in the underlying Bezier curve library
 				// (including https://github.com/Pomax/bezierjs/issues/179).
 				// Even if not all intersections are returned correctly, we still want
 				// isInside to be roughly correct.
-				if (isPointInsideOriginalPath(path.getExactBBox().center) !== isInside) {
+				if (knownToBeInside === undefined && isPointInsideOriginalPath(path.getExactBBox().center) !== isInside) {
 					isInside = !isInside;
 					intersectionCount ++;
 				}
@@ -228,16 +231,43 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				newStrokes.push(component);
 			};
 
-			for (const intersection of intersectionPoints) {
-				const split = path.splitNear(intersection.point, { mapNewPoint: p => viewport.roundPoint(p), });
-				addNewPath(split[0]);
+			if (part.style.stroke) {
+				for (const intersection of intersectionPoints) {
+					const splitPoint = intersection.point;
+					const split = path.splitNear(splitPoint, { mapNewPoint: p => viewport.roundPoint(p), });
 
-				if (split.length === 2) {
-					path = split[1];
+					addNewPath(split[0]);
+
+					if (split.length === 2) {
+						path = split[1];
+					}
 				}
-			}
 
-			addNewPath(path);
+				addNewPath(path);
+			} else if (intersectionPoints.length === 2) {
+				const createCutOut = (reverse: boolean) => {
+					const fullDivPath = reverse ? originalDivPath.reversed() : originalDivPath;
+
+					const p0 = fullDivPath.nearestPointTo(intersectionPoints[0].point);
+					const p1 = fullDivPath.nearestPointTo(intersectionPoints[1].point);
+					const cutOut = fullDivPath.spliced(p0, p1, undefined, { mapNewPoint: p => viewport.roundPoint(p), });
+
+					return cutOut;
+				};
+
+				const p0 = originalDivPath.nearestPointTo(intersectionPoints[0].point);
+				const reverse = path.closedContainsPoint(originalDivPath.tangentAt(p0).times(1e-12).plus(intersectionPoints[0].point));
+				const cutOut = createCutOut(reverse);
+
+				const pa = path.nearestPointTo(intersectionPoints[0].point);
+				const pb = path.nearestPointTo(intersectionPoints[1].point);
+				path = path.spliced(pa, pb, cutOut.reversed(), { mapNewPoint: p => viewport.roundPoint(p), });
+
+				addNewPath(cutOut, true);
+				addNewPath(path, false);
+			} else {
+				addNewPath(path, false);
+			}
 		}
 
 		return newStrokes;
