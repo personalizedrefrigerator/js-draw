@@ -682,7 +682,7 @@ export class Editor {
 				const prevData = this.pointers[pointer.id];
 
 				if (prevData) {
-					const distanceMoved = pointer.screenPos.minus(prevData.screenPos).magnitude();
+					const distanceMoved = pointer.screenPos.distanceTo(prevData.screenPos);
 
 					// If the pointer moved less than two pixels, don't send a new event.
 					if (distanceMoved < 2) {
@@ -897,7 +897,7 @@ export class Editor {
 
 				// Skip if the pointer hasn't moved enough to not be a "click".
 				const strokeStartThreshold = 10;
-				const isWithinClickThreshold = gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold;
+				const isWithinClickThreshold = gestureStartPos && currentPos.distanceTo(gestureStartPos) < strokeStartThreshold;
 				if (isWithinClickThreshold && !gestureData[pointerId].hasMovedSignificantly) {
 					eventBuffer.push([ eventName, event ]);
 					sendToEditor = false;

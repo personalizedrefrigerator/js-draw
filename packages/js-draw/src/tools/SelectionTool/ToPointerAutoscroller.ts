@@ -30,7 +30,7 @@ export default class ToPointerAutoscroller {
 		}
 
 		const closestEdgePoint = autoscrollBoundary.getClosestPointOnBoundaryTo(screenPoint);
-		const distToEdge = closestEdgePoint.minus(screenPoint).magnitude();
+		const distToEdge = closestEdgePoint.distanceTo(screenPoint);
 
 		const toEdge = closestEdgePoint.minus(screenPoint);
 

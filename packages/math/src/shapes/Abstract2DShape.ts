@@ -49,6 +49,9 @@ export abstract class Abstract2DShape {
 
 	/**
 	 * Returns a bounding box that precisely fits the content of this shape.
+	 *
+	 * **Note**: This bounding box should aligned with the x/y axes. (Thus, it may be
+	 * possible to find a tighter bounding box not axes-aligned).
 	 */
 	public abstract getTightBoundingBox(): Rect2;
 

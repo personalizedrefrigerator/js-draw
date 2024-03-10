@@ -62,7 +62,7 @@ export default class Eraser extends BaseTool {
 	}
 
 	private eraseTo(currentPoint: Point2) {
-		if (!this.isFirstEraseEvt && currentPoint.minus(this.lastPoint!).magnitude() === 0) {
+		if (!this.isFirstEraseEvt && currentPoint.distanceTo(this.lastPoint!) === 0) {
 			return;
 		}
 		this.isFirstEraseEvt = false;

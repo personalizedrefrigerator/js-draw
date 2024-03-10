@@ -125,7 +125,7 @@ class ShapeFitBuilder implements ComponentBuilder {
 				// Find the closest point to the startPoint
 				for (let i = 0; i < templatePoints.length; i++) {
 					const current = templatePoints[i];
-					const currentSqrDist = current.minus(startPoint).magnitudeSquared();
+					const currentSqrDist = current.squareDistanceTo(startPoint);
 					if (!closestToFirst || currentSqrDist < closestToFirstSqrDist) {
 						closestToFirstSqrDist = currentSqrDist;
 						closestToFirst = current;
