@@ -1501,7 +1501,66 @@ export class Editor {
 	}
 
 	/**
+	 * This is a convenience method for adding or updating the {@link BackgroundComponent}
+	 * and {@link EditorImage.setAutoresizeEnabled} for the current image.
+	 *
+	 * If there are multiple {@link BackgroundComponent}s in the image, this only modifies
+	 * the topmost such element.
+	 *
+	 * **Example**:
+	 * ```ts,runnable
+	 * import { Editor, Color4, BackgroundComponentBackgroundType } from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 * editor.dispatch(editor.setBackgroundStyle({
+	 *     color: Color4.orange,
+	 *     type: BackgroundComponentBackgroundType.Grid,
+	 *     autoresize: true,
+	 * }));
+	 * ```
+	 *
+	 * To change the background size, see {@link EditorImage.setImportExportRect}.
+	 */
+	public setBackgroundStyle(style: { color?: Color4, type?: BackgroundType, autoresize?: boolean }) {
+		const originalBackground = this.getTopmostBackgroundComponent();
+		const commands: Command[] = [];
+		if (originalBackground) {
+			commands.push(new Erase([ originalBackground ]));
+		}
+		const originalType = originalBackground?.getBackgroundType?.() ?? BackgroundType.None;
+		const originalColor = originalBackground?.getStyle?.().color ?? Color4.transparent;
+		const originalFillsScreen = this.image.getAutoresizeEnabled();
+
+		const defaultType = (style.color && originalType === BackgroundType.None ? BackgroundType.SolidColor : originalType);
+		const backgroundType = style.type ?? defaultType;
+		const backgroundColor = style.color ?? originalColor;
+		const fillsScreen = style.autoresize ?? originalFillsScreen;
+
+		if (backgroundType !== BackgroundType.None) {
+			const newBackground = new BackgroundComponent(backgroundType, backgroundColor);
+			commands.push(EditorImage.addElement(newBackground));
+		}
+		if (fillsScreen !== originalFillsScreen) {
+			commands.push(this.image.setAutoresizeEnabled(fillsScreen));
+
+			// Avoid 0x0 backgrounds
+			if (!fillsScreen && this.image.getImportExportRect().maxDimension === 0) {
+				commands.push(
+					this.image.setImportExportRect(
+						this.image.getImportExportRect().resizedTo(Vec2.of(500, 500))
+					),
+				);
+			}
+		}
+		return uniteCommands(commands);
+	}
+
+	/**
 	 * Set the background color of the image.
+	 *
+	 * This is a convenience method for adding or updating the {@link BackgroundComponent}
+	 * for the current image.
+	 *
+	 * @see {@link setBackgroundStyle}
 	 */
 	public setBackgroundColor(color: Color4): Command {
 		let background = this.getTopmostBackgroundComponent();
