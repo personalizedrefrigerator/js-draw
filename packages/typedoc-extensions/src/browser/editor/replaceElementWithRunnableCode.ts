@@ -115,6 +115,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	};
 	hideButton.style.display = 'none';
 
+	const isDoctest = elementToReplace.getAttribute('data--doctest') === 'true';
 	runButton.onclick = async () => {
 		closeFrame();
 		hideButton.style.display = '';
@@ -143,6 +144,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					</style>
 					<script>
 						window.mode = ${JSON.stringify(elementToReplace.getAttribute('data--mode'))};
+						window.isDoctest = ${isDoctest ? 'true' : 'false'};
 						${iframePreviewSetup}
 					</script>
 				</head>
@@ -181,6 +183,11 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		controlsArea.insertAdjacentElement('afterend', previewFrame);
 	};
+
+	// Run doctests automatically
+	if (isDoctest) {
+		runButton.click();
+	}
 
 	editorContainer.appendChild(controlsArea);
 	elementToReplace.replaceWith(editorContainer);

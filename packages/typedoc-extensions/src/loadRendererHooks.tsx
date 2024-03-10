@@ -2,14 +2,23 @@ import { Renderer, JSX, MarkdownEvent, RendererEvent } from 'typedoc';
 import { readdirSync, copyFileSync } from 'node:fs';
 import * as path from 'node:path';
 import transformMarkdown from './transformMarkdown';
+import DoctestHandler from './DoctestHandler';
 
 const loadRendererHooks = (renderer: Renderer) => {
 	const distDir = path.dirname(__dirname);
 
+	const doctestHandler = new DoctestHandler();
 	renderer.on(
 		MarkdownEvent.PARSE,
 		(event: MarkdownEvent) => {
-			event.parsedText = transformMarkdown(event.parsedText);
+			event.parsedText = transformMarkdown(
+				event.parsedText,
+				{
+					addDoctest: (doctestHtml) => {
+						doctestHandler.addDoctestFromEvent(doctestHtml, event);
+					},
+				}
+			);
 		},
 		null,
 
@@ -47,9 +56,13 @@ const loadRendererHooks = (renderer: Renderer) => {
 	});
 
 	renderer.on(RendererEvent.END, (event: RendererEvent) => {
+		const doctestFilename = 'doctest.html';
+		doctestHandler.render(path.join(distDir, doctestFilename));
+
 		const filesToCopy = [
 			'js-draw-typedoc-extension--browser.js',
 			'js-draw-typedoc-extension--iframe.js',
+			doctestFilename,
 			'licenses.txt',
 		].map(fileName => path.resolve(distDir, fileName));
 

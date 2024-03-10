@@ -15,15 +15,15 @@ textarea.runnable-code {
 
 :root {
 	/* Inherit some styles from TypeDoc */
-	--cm-primary-text-color: var(--color-text);
-	--cm-primary-background-color: var(--code-background);
+	--cm-primary-text-color: var(--color-text, black);
+	--cm-primary-background-color: var(--code-background, white);
 
-	--cm-keyword-color: var(--hl-4);
-	--cm-comment-color: var(--hl-7);
-	--cm-string-color: var(--hl-3);
-	--cm-paren-color: var(--hl-1);
-	--cm-varname-color: var(--hl-2);
-	--cm-number-color: var(--hl-16);
+	--cm-keyword-color: var(--hl-4, blue);
+	--cm-comment-color: var(--hl-7, green);
+	--cm-string-color: var(--hl-3, brown);
+	--cm-paren-color: var(--hl-1, gray);
+	--cm-varname-color: var(--hl-2, black);
+	--cm-number-color: var(--hl-16, black);
 
 
 	--cm-secondary-background-color: #ddd;
