@@ -1,7 +1,8 @@
 import Mat33 from '../Mat33';
 import Rect2 from './Rect2';
 import { Vec2, Point2 } from '../Vec2';
-import Abstract2DShape from './Abstract2DShape';
+import Parameterized2DShape from './Parameterized2DShape';
+import Vec3 from '../Vec3';
 
 interface IntersectionResult {
 	point: Point2;
@@ -9,7 +10,7 @@ interface IntersectionResult {
 }
 
 /** Represents a line segment. A `LineSegment2` is immutable. */
-export class LineSegment2 extends Abstract2DShape {
+export class LineSegment2 extends Parameterized2DShape {
 	// invariant: ||direction|| = 1
 
 	/**
@@ -58,8 +59,12 @@ export class LineSegment2 extends Abstract2DShape {
 		return this.point2;
 	}
 
+	public get center(): Point2 {
+		return this.point1.lerp(this.point2, 0.5);
+	}
+
 	/**
-	 * Gets a point a distance `t` along this line.
+	 * Gets a point a **distance** `t` along this line.
 	 *
 	 * @deprecated
 	 */
@@ -74,11 +79,40 @@ export class LineSegment2 extends Abstract2DShape {
 	 *
 	 * `t` should be in `[0, 1]`.
 	 */
-	public at(t: number): Point2 {
+	public override at(t: number): Point2 {
 		return this.get(t * this.length);
 	}
 
+	public override normalAt(_t: number): Vec2 {
+		return this.direction.orthog();
+	}
+
+	public override tangentAt(_t: number): Vec3 {
+		return this.direction;
+	}
+
+	public splitAt(t: number): [LineSegment2]|[LineSegment2,LineSegment2] {
+		if (t <= 0 || t >= 1) {
+			return [this];
+		}
+
+		return [
+			new LineSegment2(this.point1, this.at(t)),
+			new LineSegment2(this.at(t), this.point2),
+		];
+	}
+
+	/**
+	 * Returns the intersection of this with another line segment.
+	 *
+	 * **WARNING**: The parameter value returned by this method does not range from 0 to 1 and
+	 *              is currently a length.
+	 *              This will change in a future release.
+	 * @deprecated
+	 */
 	public intersection(other: LineSegment2): IntersectionResult|null {
+		// TODO(v2.0.0): Make this return a `t` value from `0` to `1`.
+
 		// We want x₁(t) = x₂(t) and y₁(t) = y₂(t)
 		// Observe that
 		// x = this.point1.x + this.direction.x · t₁
@@ -146,10 +180,10 @@ export class LineSegment2 extends Abstract2DShape {
 		}
 
 		// Ensure the result is in this/the other segment.
-		const resultToP1 = resultPoint.minus(this.point1).magnitude();
-		const resultToP2 = resultPoint.minus(this.point2).magnitude();
-		const resultToP3 = resultPoint.minus(other.point1).magnitude();
-		const resultToP4 = resultPoint.minus(other.point2).magnitude();
+		const resultToP1 = resultPoint.distanceTo(this.point1);
+		const resultToP2 = resultPoint.distanceTo(this.point2);
+		const resultToP3 = resultPoint.distanceTo(other.point1);
+		const resultToP4 = resultPoint.distanceTo(other.point2);
 		if (resultToP1 > this.length
 			|| resultToP2 > this.length
 			|| resultToP3 > other.length
@@ -165,6 +199,15 @@ export class LineSegment2 extends Abstract2DShape {
 
 	public intersects(other: LineSegment2) {
 		return this.intersection(other) !== null;
+	}
+
+	public override argIntersectsLineSegment(lineSegment: LineSegment2) {
+		const intersection = this.intersection(lineSegment);
+
+		if (intersection) {
+			return [ intersection.t / this.length ];
+		}
+		return [];
 	}
 
 	/**
@@ -186,6 +229,10 @@ export class LineSegment2 extends Abstract2DShape {
 
 	// Returns the closest point on this to [target]
 	public closestPointTo(target: Point2) {
+		return this.nearestPointTo(target).point;
+	}
+
+	public override nearestPointTo(target: Vec3): { point: Vec3; parameterValue: number; } {
 		// Distance from P1 along this' direction.
 		const projectedDistFromP1 = target.minus(this.p1).dot(this.direction);
 		const projectedDistFromP2 = this.length - projectedDistFromP1;
@@ -193,13 +240,13 @@ export class LineSegment2 extends Abstract2DShape {
 		const projection = this.p1.plus(this.direction.times(projectedDistFromP1));
 
 		if (projectedDistFromP1 > 0 && projectedDistFromP1 < this.length) {
-			return projection;
+			return { point: projection, parameterValue: projectedDistFromP1 / this.length };
 		}
 
 		if (Math.abs(projectedDistFromP2) < Math.abs(projectedDistFromP1)) {
-			return this.p2;
+			return { point: this.p2, parameterValue: 1 };
 		} else {
-			return this.p1;
+			return { point: this.p1, parameterValue: 0 };
 		}
 	}
 
@@ -227,6 +274,27 @@ export class LineSegment2 extends Abstract2DShape {
 
 	public override toString() {
 		return `LineSegment(${this.p1.toString()}, ${this.p2.toString()})`;
+	}
+
+	/**
+	 * Returns `true` iff this is equivalent to `other`.
+	 *
+	 * **Options**:
+	 * - `tolerance`: The maximum difference between endpoints. (Default: 0)
+	 * - `ignoreDirection`: Allow matching a version of `this` with opposite direction. (Default: `true`)
+	 */
+	public eq(other: LineSegment2, options?: { tolerance?: number, ignoreDirection?: boolean }) {
+		if (!(other instanceof LineSegment2)) {
+			return false;
+		}
+
+		const tolerance = options?.tolerance;
+		const ignoreDirection = options?.ignoreDirection ?? true;
+
+		return (
+			(other.p1.eq(this.p1, tolerance) && other.p2.eq(this.p2, tolerance))
+			|| (ignoreDirection && other.p1.eq(this.p2, tolerance) && other.p2.eq(this.p1, tolerance))
+		);
 	}
 }
 export default LineSegment2;

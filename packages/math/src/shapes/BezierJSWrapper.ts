@@ -1,8 +1,8 @@
 import { Bezier } from 'bezier-js';
 import { Point2, Vec2 } from '../Vec2';
-import Abstract2DShape from './Abstract2DShape';
 import LineSegment2 from './LineSegment2';
 import Rect2 from './Rect2';
+import Parameterized2DShape from './Parameterized2DShape';
 
 /**
  * A lazy-initializing wrapper around Bezier-js.
@@ -10,14 +10,24 @@ import Rect2 from './Rect2';
  * Subclasses may override `at`, `derivativeAt`, and `normal` with functions
  * that do not initialize a `bezier-js` `Bezier`.
  *
- * Do not use this class directly. It may be removed/replaced in a future release.
+ * **Do not use this class directly.** It may be removed/replaced in a future release.
  * @internal
  */
-abstract class BezierJSWrapper extends Abstract2DShape {
+export abstract class BezierJSWrapper extends Parameterized2DShape {
 	#bezierJs: Bezier|null = null;
 
+	protected constructor(
+		bezierJsBezier?: Bezier
+	) {
+		super();
+
+		if (bezierJsBezier) {
+			this.#bezierJs = bezierJsBezier;
+		}
+	}
+
 	/** Returns the start, control points, and end point of this Bézier. */
-	public abstract getPoints(): Point2[];
+	public abstract getPoints(): readonly Point2[];
 
 	protected getBezier() {
 		if (!this.#bezierJs) {
@@ -28,7 +38,7 @@ abstract class BezierJSWrapper extends Abstract2DShape {
 
 	public override signedDistance(point: Point2): number {
 		// .d: Distance
-		return this.getBezier().project(point.xy).d!;
+		return this.nearestPointTo(point).point.distanceTo(point);
 	}
 
 	/**
@@ -44,7 +54,7 @@ abstract class BezierJSWrapper extends Abstract2DShape {
 	/**
 	 * @returns the curve evaluated at `t`.
 	 */
-	public at(t: number): Point2 {
+	public override at(t: number): Point2 {
 		return Vec2.ofXY(this.getBezier().get(t));
 	}
 
@@ -52,8 +62,20 @@ abstract class BezierJSWrapper extends Abstract2DShape {
 		return Vec2.ofXY(this.getBezier().derivative(t));
 	}
 
+	public secondDerivativeAt(t: number): Point2 {
+		return Vec2.ofXY((this.getBezier() as any).dderivative(t));
+	}
+
 	public normal(t: number): Vec2 {
 		return Vec2.ofXY(this.getBezier().normal(t));
+	}
+
+	public override normalAt(t: number): Vec2 {
+		return this.normal(t);
+	}
+
+	public override tangentAt(t: number): Vec2 {
+		return this.derivativeAt(t).normalized();
 	}
 
 	public override getTightBoundingBox(): Rect2 {
@@ -64,10 +86,10 @@ abstract class BezierJSWrapper extends Abstract2DShape {
 		return new Rect2(bbox.x.min, bbox.y.min, width, height);
 	}
 
-	public override intersectsLineSegment(line: LineSegment2): Point2[] {
+	public override argIntersectsLineSegment(line: LineSegment2): number[] {
 		const bezier = this.getBezier();
 
-		const intersectionPoints = bezier.intersects(line).map(t => {
+		return bezier.intersects(line).map(t => {
 			// We're using the .intersects(line) function, which is documented
 			// to always return numbers. However, to satisfy the type checker (and
 			// possibly improperly-defined types),
@@ -75,18 +97,136 @@ abstract class BezierJSWrapper extends Abstract2DShape {
 				t = parseFloat(t);
 			}
 
-			const point = Vec2.ofXY(bezier.get(t));
+			const point = Vec2.ofXY(this.at(t));
 
 			// Ensure that the intersection is on the line segment
-			if (point.minus(line.p1).magnitude() > line.length
-					|| point.minus(line.p2).magnitude() > line.length) {
+			if (point.distanceTo(line.p1) > line.length
+					|| point.distanceTo(line.p2) > line.length) {
 				return null;
 			}
 
-			return point;
-		}).filter(entry => entry !== null) as Point2[];
+			return t;
+		}).filter(entry => entry !== null) as number[];
+	}
 
-		return intersectionPoints;
+	public override splitAt(t: number): [BezierJSWrapper] | [BezierJSWrapper, BezierJSWrapper] {
+		if (t <= 0 || t >= 1) {
+			return [ this ];
+		}
+
+		const bezier = this.getBezier();
+		const split = bezier.split(t);
+		return [
+			new BezierJSWrapperImpl(split.left.points.map(point => Vec2.ofXY(point)), split.left),
+			new BezierJSWrapperImpl(split.right.points.map(point => Vec2.ofXY(point)), split.right),
+		];
+	}
+
+	public override nearestPointTo(point: Point2) {
+		// One implementation could be similar to this:
+		//   const projection = this.getBezier().project(point);
+		//   return {
+		//    point: Vec2.ofXY(projection),
+		//    parameterValue: projection.t!,
+		//   };
+		// However, Bezier-js is rather impercise (and relies on a lookup table).
+		// Thus, we instead use Newton's Method:
+
+		// We want to find t such that f(t) = |B(t) - p|² is minimized.
+		// Expanding,
+		//   f(t)  = (Bₓ(t) - pₓ)² + (Bᵧ(t) - pᵧ)²
+		// ⇒ f'(t) = Dₜ(Bₓ(t) - pₓ)² + Dₜ(Bᵧ(t) - pᵧ)²
+		// ⇒ f'(t) = 2(Bₓ(t) - pₓ)(Bₓ'(t)) + 2(Bᵧ(t) - pᵧ)(Bᵧ'(t))
+		//         = 2Bₓ(t)Bₓ'(t) - 2pₓBₓ'(t) + 2Bᵧ(t)Bᵧ'(t) - 2pᵧBᵧ'(t)
+		// ⇒ f''(t)= 2Bₓ'(t)Bₓ'(t) + 2Bₓ(t)Bₓ''(t) - 2pₓBₓ''(t) + 2Bᵧ'(t)Bᵧ'(t)
+		//         + 2Bᵧ(t)Bᵧ''(t) - 2pᵧBᵧ''(t)
+		// Because f'(t) = 0 at relative extrema, we can use Newton's Method
+		// to improve on an initial guess.
+
+		const sqrDistAt = (t: number) => point.squareDistanceTo(this.at(t));
+		const yIntercept = sqrDistAt(0);
+		let t = 0;
+		let minSqrDist = yIntercept;
+
+		// Start by testing a few points:
+		const pointsToTest = 4;
+		for (let i = 0; i < pointsToTest; i ++) {
+			const testT = i / (pointsToTest - 1);
+			const testMinSqrDist = sqrDistAt(testT);
+
+			if (testMinSqrDist < minSqrDist) {
+				t = testT;
+				minSqrDist = testMinSqrDist;
+			}
+		}
+
+		// To use Newton's Method, we need to evaluate the second derivative of the distance
+		// function:
+		const secondDerivativeAt = (t: number) => {
+			// f''(t) = 2Bₓ'(t)Bₓ'(t) + 2Bₓ(t)Bₓ''(t) - 2pₓBₓ''(t)
+			//        + 2Bᵧ'(t)Bᵧ'(t) + 2Bᵧ(t)Bᵧ''(t) - 2pᵧBᵧ''(t)
+			const b = this.at(t);
+			const bPrime = this.derivativeAt(t);
+			const bPrimePrime = this.secondDerivativeAt(t);
+			return (
+				2 * bPrime.x * bPrime.x  +  2 * b.x * bPrimePrime.x  -  2 * point.x * bPrimePrime.x
+				+ 2 * bPrime.y * bPrime.y  +  2 * b.y * bPrimePrime.y  -  2 * point.y * bPrimePrime.y
+			);
+		};
+		// Because we're zeroing f'(t), we also need to be able to compute it:
+		const derivativeAt = (t: number) => {
+			// f'(t) = 2Bₓ(t)Bₓ'(t) - 2pₓBₓ'(t) + 2Bᵧ(t)Bᵧ'(t) - 2pᵧBᵧ'(t)
+			const b = this.at(t);
+			const bPrime = this.derivativeAt(t);
+			return (
+				2 * b.x * bPrime.x - 2 * point.x * bPrime.x
+				+ 2 * b.y * bPrime.y - 2 * point.y * bPrime.y
+			);
+		};
+
+		const iterate = () => {
+			const slope = secondDerivativeAt(t);
+			// We intersect a line through the point on f'(t) at t with the x-axis:
+			//    y = m(x - x₀) + y₀
+			// ⇒  x - x₀ = (y - y₀) / m
+			// ⇒  x = (y - y₀) / m + x₀
+			//
+			// Thus, when zeroed,
+			//   tN = (0 - f'(t)) / m + t
+			const newT = (0 - derivativeAt(t)) / slope + t;
+			//const distDiff = sqrDistAt(newT) - sqrDistAt(t);
+			//console.assert(distDiff <= 0, `${-distDiff} >= 0`);
+			t = newT;
+			if (t > 1) {
+				t = 1;
+			} else if (t < 0) {
+				t = 0;
+			}
+		};
+
+		for (let i = 0; i < 12; i++) {
+			iterate();
+		}
+
+		return { parameterValue: t, point: this.at(t) };
+	}
+
+	public override toString() {
+		return `Bézier(${this.getPoints().map(point => point.toString()).join(', ')})`;
+	}
+}
+
+/**
+ * Private concrete implementation of `BezierJSWrapper`, used by methods above that need to return a wrapper
+ * around a `Bezier`.
+ */
+class BezierJSWrapperImpl extends BezierJSWrapper {
+	public constructor(private controlPoints: readonly Point2[], curve?: Bezier) {
+		super(curve);
+	}
+
+	public override getPoints() {
+		return this.controlPoints;
 	}
 }
 

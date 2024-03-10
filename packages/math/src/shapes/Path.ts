@@ -2,12 +2,12 @@ import LineSegment2 from './LineSegment2';
 import Mat33 from '../Mat33';
 import Rect2 from './Rect2';
 import { Point2, Vec2 } from '../Vec2';
-import Abstract2DShape from './Abstract2DShape';
 import CubicBezier from './CubicBezier';
 import QuadraticBezier from './QuadraticBezier';
 import PointShape2D from './PointShape2D';
 import toRoundedString from '../rounding/toRoundedString';
 import toStringOfSamePrecision from '../rounding/toStringOfSamePrecision';
+import Parameterized2DShape from './Parameterized2DShape';
 
 export enum PathCommandType {
 	LineTo,
@@ -41,15 +41,27 @@ export interface MoveToPathCommand {
 
 export type PathCommand = CubicBezierPathCommand | QuadraticBezierPathCommand | MoveToPathCommand | LinePathCommand;
 
-interface IntersectionResult {
+export interface IntersectionResult {
 	// @internal
-	curve: Abstract2DShape;
+	curve: Parameterized2DShape;
+	// @internal
+	curveIndex: number;
 
-	/** @internal @deprecated */
+	/** Parameter value for the closest point **on** the path to the intersection. @internal @deprecated */
 	parameterValue?: number;
 
-	// Point at which the intersection occured.
+	/** Point at which the intersection occured. */
 	point: Point2;
+}
+
+/**
+ * Allows indexing a particular part of a path.
+ *
+ * @see {@link Path.at} {@link Path.tangentAt}
+ */
+export interface CurveIndexRecord {
+	curveIndex: number;
+	parameterValue: number;
 }
 
 /**
@@ -97,16 +109,16 @@ export class Path {
 		return Rect2.union(...bboxes);
 	}
 
-	private cachedGeometry: Abstract2DShape[]|null = null;
+	private cachedGeometry: Parameterized2DShape[]|null = null;
 
 	// Lazy-loads and returns this path's geometry
-	public get geometry(): Abstract2DShape[] {
+	public get geometry(): Parameterized2DShape[] {
 		if (this.cachedGeometry) {
 			return this.cachedGeometry;
 		}
 
 		let startPoint = this.startPoint;
-		const geometry: Abstract2DShape[] = [];
+		const geometry: Parameterized2DShape[] = [];
 
 		for (const part of this.parts) {
 			let exhaustivenessCheck: never;
@@ -270,7 +282,7 @@ export class Path {
 
 		type DistanceFunction = (point: Point2) => number;
 		type DistanceFunctionRecord = {
-			part: Abstract2DShape,
+			part: Parameterized2DShape,
 			bbox: Rect2,
 			distFn: DistanceFunction,
 		};
@@ -309,9 +321,9 @@ export class Path {
 
 		// Returns the minimum distance to a part in this stroke, where only parts that the given
 		// line could intersect are considered.
-		const sdf = (point: Point2): [Abstract2DShape|null, number] => {
+		const sdf = (point: Point2): [Parameterized2DShape|null, number] => {
 			let minDist = Infinity;
-			let minDistPart: Abstract2DShape|null = null;
+			let minDistPart: Parameterized2DShape|null = null;
 
 			const uncheckedDistFunctions: DistanceFunctionRecord[] = [];
 
@@ -338,7 +350,7 @@ export class Path {
 			for (const { part, distFn, bbox } of uncheckedDistFunctions) {
 				// Skip if impossible for the distance to the target to be lesser than
 				// the current minimum.
-				if (!bbox.grownBy(minDist).containsPoint(point)) {
+				if (isFinite(minDist) && !bbox.grownBy(minDist).containsPoint(point)) {
 					continue;
 				}
 
@@ -388,7 +400,7 @@ export class Path {
 
 		const stoppingThreshold = strokeRadius / 1000;
 
-		// Returns the maximum x value explored
+		// Returns the maximum parameter value explored
 		const raymarchFrom = (
 			startPoint: Point2,
 
@@ -446,9 +458,15 @@ export class Path {
 			if (lastPart && isOnLineSegment && Math.abs(lastDist) < stoppingThreshold) {
 				result.push({
 					point: currentPoint,
-					parameterValue: NaN,
+					parameterValue: NaN,// lastPart.nearestPointTo(currentPoint).parameterValue,
 					curve: lastPart,
+					curveIndex: this.geometry.indexOf(lastPart),
 				});
+
+				// Slightly increase the parameter value to prevent the same point from being
+				// added to the results twice.
+				const parameterIncrease = strokeRadius / 20 / line.length;
+				lastParameter += isFinite(parameterIncrease) ? parameterIncrease : 0;
 			}
 
 			return lastParameter;
@@ -489,15 +507,20 @@ export class Path {
 			return [];
 		}
 
+		let index = 0;
 		for (const part of this.geometry) {
-			const intersection = part.intersectsLineSegment(line);
+			const intersections = part.argIntersectsLineSegment(line);
 
-			if (intersection.length > 0) {
+			for (const intersection of intersections) {
 				result.push({
 					curve: part,
-					point: intersection[0],
+					curveIndex: index,
+					point: part.at(intersection),
+					parameterValue: intersection,
 				});
 			}
+
+			index ++;
 		}
 
 		// If given a non-zero strokeWidth, attempt to raymarch.
@@ -511,6 +534,47 @@ export class Path {
 		}
 
 		return result;
+	}
+
+	/**
+	 * @returns the nearest point on this path to the given `point`.
+	 *
+	 * @internal
+	 * @beta
+	 */
+	public nearestPointTo(point: Point2): IntersectionResult {
+		// Find the closest point on this
+		let closestSquareDist = Infinity;
+		let closestPartIndex = 0;
+		let closestParameterValue = 0;
+		let closestPoint: Point2 = this.startPoint;
+
+		for (let i = 0; i < this.geometry.length; i++) {
+			const current = this.geometry[i];
+			const nearestPoint = current.nearestPointTo(point);
+			const sqareDist = nearestPoint.point.squareDistanceTo(point);
+			if (i === 0 || sqareDist < closestSquareDist) {
+				closestPartIndex = i;
+				closestSquareDist = sqareDist;
+				closestParameterValue = nearestPoint.parameterValue;
+				closestPoint = nearestPoint.point;
+			}
+		}
+
+		return {
+			curve: this.geometry[closestPartIndex],
+			curveIndex: closestPartIndex,
+			parameterValue: closestParameterValue,
+			point: closestPoint,
+		};
+	}
+
+	public at(index: CurveIndexRecord) {
+		return this.geometry[index.curveIndex].at(index.parameterValue);
+	}
+
+	public tangentAt(index: CurveIndexRecord) {
+		return this.geometry[index.curveIndex].tangentAt(index.parameterValue);
 	}
 
 	private static mapPathCommand(part: PathCommand, mapping: (point: Point2)=> Point2): PathCommand {
@@ -563,19 +627,88 @@ export class Path {
 	}
 
 	// Creates a new path by joining [other] to the end of this path
-	public union(other: Path|null): Path {
+	public union(
+		other: Path|null,
+
+		// allowReverse: true iff reversing other or this is permitted if it means
+		//               no moveTo command is necessary when unioning the paths.
+		options: { allowReverse?: boolean } = { allowReverse: true },
+	): Path {
 		if (!other) {
 			return this;
 		}
 
-		return new Path(this.startPoint, [
-			...this.parts,
+		const thisEnd = this.getEndPoint();
+
+		let newParts: Readonly<PathCommand>[] = [];
+		if (thisEnd.eq(other.startPoint)) {
+			newParts = this.parts.concat(other.parts);
+		} else if (options.allowReverse && this.startPoint.eq(other.getEndPoint())) {
+			return other.union(this, { allowReverse: false });
+		} else if (options.allowReverse && this.startPoint.eq(other.startPoint)) {
+			return this.union(other.reversed(), { allowReverse: false });
+		} else {
+			newParts = [
+				...this.parts,
+				{
+					kind: PathCommandType.MoveTo,
+					point: other.startPoint,
+				},
+				...other.parts,
+			];
+		}
+		return new Path(this.startPoint, newParts);
+	}
+
+	/**
+	 * @returns a version of this path with the direction reversed.
+	 *
+	 * Example:
+	 * ```ts,runnable,console
+	 * import {Path} from '@js-draw/math';
+	 * console.log(Path.fromString('m0,0l1,1').reversed()); // -> M1,1 L0,0
+	 * ```
+	 */
+	public reversed() {
+		const newStart = this.getEndPoint();
+		const newParts: Readonly<PathCommand>[] = [];
+		let lastPoint: Point2 = this.startPoint;
+		for (const part of this.parts) {
+			switch (part.kind) {
+			case PathCommandType.LineTo:
+			case PathCommandType.MoveTo:
+				newParts.push({
+					kind: part.kind,
+					point: lastPoint,
+				});
+				lastPoint = part.point;
+				break;
+			case PathCommandType.CubicBezierTo:
+				newParts.push({
+					kind: part.kind,
+					controlPoint1: part.controlPoint2,
+					controlPoint2: part.controlPoint1,
+					endPoint: lastPoint,
+				});
+				lastPoint = part.endPoint;
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				newParts.push({
+					kind: part.kind,
+					controlPoint: part.controlPoint,
+					endPoint: lastPoint,
+				});
+				lastPoint = part.endPoint;
+				break;
+			default:
 			{
-				kind: PathCommandType.MoveTo,
-				point: other.startPoint,
-			},
-			...other.parts,
-		]);
+				const exhaustivenessCheck: never = part;
+				return exhaustivenessCheck;
+			}
+			}
+		}
+		newParts.reverse();
+		return new Path(newStart, newParts);
 	}
 
 	private getEndPoint() {
@@ -680,6 +813,57 @@ export class Path {
 
 		// Even? Probably no intersection.
 		return false;
+	}
+
+	/** @returns true if all points on this are equivalent to the points on `other` */
+	public eq(other: Path, tolerance?: number) {
+		if (other.parts.length !== this.parts.length) {
+			return false;
+		}
+
+		for (let i = 0; i < this.parts.length; i++) {
+			const part1 = this.parts[i];
+			const part2 = other.parts[i];
+
+			switch (part1.kind) {
+			case PathCommandType.LineTo:
+			case PathCommandType.MoveTo:
+				if (part1.kind !== part2.kind) {
+					return false;
+				} else if(!part1.point.eq(part2.point, tolerance)) {
+					return false;
+				}
+				break;
+			case PathCommandType.CubicBezierTo:
+				if (part1.kind !== part2.kind) {
+					return false;
+				} else if (
+					!part1.controlPoint1.eq(part2.controlPoint1, tolerance)
+						|| !part1.controlPoint2.eq(part2.controlPoint2, tolerance)
+						|| !part1.endPoint.eq(part2.endPoint, tolerance)
+				) {
+					return false;
+				}
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				if (part1.kind !== part2.kind) {
+					return false;
+				} else if (
+					!part1.controlPoint.eq(part2.controlPoint, tolerance)
+						|| !part1.endPoint.eq(part2.endPoint, tolerance)
+				) {
+					return false;
+				}
+				break;
+			default:
+			{
+				const exhaustivenessCheck: never = part1;
+				return exhaustivenessCheck;
+			}
+			}
+		}
+
+		return true;
 	}
 
 	/**

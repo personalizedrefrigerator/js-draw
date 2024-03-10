@@ -21,6 +21,8 @@ export { LineSegment2 } from './shapes/LineSegment2';
 export {
 	Path,
 
+	IntersectionResult as PathIntersectionResult,
+	CurveIndexRecord as PathCurveIndex,
 	PathCommandType,
 	PathCommand,
 	LinePathCommand,
