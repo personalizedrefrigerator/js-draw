@@ -20,6 +20,8 @@ window.addEventListener('load', () => {
 	/** Creates an HTML element that contains the content of `message`. */
 	const createLogElementFor = (message: any[]) => {
 		const container = document.createElement('div');
+		container.classList.add('log-item');
+
 		for (const part of message) {
 			const wrapper = document.createElement('span');
 
@@ -27,7 +29,7 @@ window.addEventListener('load', () => {
 				wrapper.classList.add('text');
 				wrapper.innerText = part;
 			}
-			else if (typeof part !== 'object') {
+			else if (typeof part !== 'object' || part === null) {
 				wrapper.innerText = JSON.stringify(part);
 				wrapper.classList.add(typeof part);
 			}
@@ -41,15 +43,30 @@ window.addEventListener('load', () => {
 			}
 			else {
 				const details = document.createElement('details');
+				details.style.display = 'inline-block';
+
 				const summary = document.createElement('summary');
 				summary.innerText = `${part}`;
+				summary.style.cursor = 'pointer';
 
 				const propertyList = document.createElement('ul');
 
-				for (const key in part) {
+				const addProperty = (key: string) => {
 					const item = document.createElement('li');
 					item.innerText = `${JSON.stringify(key)}: ${part[key]}`;
 					propertyList.appendChild(item);
+				};
+
+				for (const key in part) {
+					addProperty(key);
+				}
+
+				if (part instanceof Error) {
+					try {
+						addProperty('stack');
+					} catch (_err) {
+						// May fail
+					}
 				}
 
 				details.replaceChildren(summary, propertyList);
@@ -97,6 +114,8 @@ window.addEventListener('load', () => {
 			container.classList.add('error');
 			addLogElement(container);
 		};
+	} else {
+		document.documentElement.classList.add('html-view');
 	}
 
 	// Allows libraries included after this to require/include content.
@@ -117,17 +136,17 @@ window.addEventListener('load', () => {
 	(window as any).module = { exports: {} };
 	(window as any).exports = { };
 
-	const onError = (event: Event|string) => {
+	const onError = (event: Event|Error|string) => {
 		const errorElement = createLogElementFor(['Error: ', event]);
 		errorElement.classList.add('error');
 		addLogElement(errorElement);
 	};
 
-	window.onerror = (event) => {
-		onError(event);
-	};
+	window.addEventListener('error', event => {
+		onError(event.error ?? event.message);
+	});
 
-	window.onunhandledrejection = (event) => {
+	window.addEventListener('unhandledrejection', event => {
 		onError(event.reason ?? event);
-	};
+	});
 })();

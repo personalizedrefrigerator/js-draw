@@ -48,3 +48,9 @@
 	}
 }
 
+:root.html-view {
+	.log-item.error {
+		font-family: monospace;
+		color: red;
+	}
+}
