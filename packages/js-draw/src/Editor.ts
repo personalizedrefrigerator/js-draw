@@ -155,7 +155,7 @@ export interface EditorSettings {
  * ```
  *
  * See also
- * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts).
+ * * [`examples.md`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md).
  */
 export class Editor {
 	// Wrapper around the viewport and toolbar
