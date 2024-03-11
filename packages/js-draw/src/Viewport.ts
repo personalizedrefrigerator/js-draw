@@ -124,7 +124,7 @@ export class Viewport {
 	}
 
 	/**
-	 * Updates the transformation directly. Using `transformBy` is preferred.
+	 * Updates the canvas-to-screen transformation directly. Using `transformBy` is preferred.
 	 * @param newTransform - should map from canvas coordinates to screen coordinates.
 	 */
 	public resetTransform(newTransform: Mat33 = Mat33.identity) {

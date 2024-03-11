@@ -8,6 +8,9 @@ const defaultSettings: Partial<jsdraw.EditorSettings> = {
 
 	// Only scroll the editor if it's focused.
 	wheelEventsEnabled: 'only-if-focused',
+
+	// Stop scrolling if the image isn't visible.
+	allowOverscroll: false,
 };
 
 
