@@ -135,6 +135,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		// TODO: Find another way to do this.
 		const escapedJs = js.replace(/<[/]script>/ig, '<\\/script>');
 
+		const frameId = `frame-${Math.random()}`;
 		previewFrame.srcdoc = `
 			<!DOCTYPE html>
 			<html>
@@ -145,6 +146,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					<script>
 						window.mode = ${JSON.stringify(elementToReplace.getAttribute('data--mode'))};
 						window.isDoctest = ${isDoctest ? 'true' : 'false'};
+						window.frameId = ${JSON.stringify(frameId)};
 						${iframePreviewSetup}
 					</script>
 				</head>
@@ -168,6 +170,11 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 			}
 
 			if (!previewFrame) {
+				return;
+			}
+
+			// Skip events from other frames
+			if (event.data?.frameId !== frameId) {
 				return;
 			}
 

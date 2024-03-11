@@ -12,6 +12,7 @@ window.addEventListener('load', () => {
 		parent.postMessage({
 			message: 'updateHeight',
 			height,
+			frameId: (window as any).frameId,
 		}, '*');
 	}, 0);
 });
