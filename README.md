@@ -243,8 +243,7 @@ const editor = new Editor(document.body, {
 
 ### Setting the minimum and maximum zoom
 
-By default, the editor's minimum and maximum zoom are very large (2·10<sup>-10</sup>x and 10<sup>12</sup>x,
-respectively). These are configurable by the `minZoom` and `maxZoom` settings. For example,
+By default, the editor's minimum and maximum zoom are very large (2·10<sup>-10</sup>x and 10<sup>12</sup>x, respectively). These are configurable by the `minZoom` and `maxZoom` settings. For example,
 ```ts
 const editor = new Editor(document.body, {
     minZoom: 0.5,
