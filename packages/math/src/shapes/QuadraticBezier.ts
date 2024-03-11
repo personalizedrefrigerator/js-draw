@@ -4,10 +4,9 @@ import BezierJSWrapper from './BezierJSWrapper';
 import Rect2 from './Rect2';
 
 /**
- * A wrapper around `bezier-js`'s quadratic Bézier.
+ * Represents a 2D Bézier curve.
  *
- * This wrappper lazy-loads `bezier-js`'s Bézier and can perform some operations
- * without loading it at all (e.g. `normal`, `at`, and `approximateDistance`).
+ * **Note**: Many Bézier operations use `bezier-js`'s.
  */
 export class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
