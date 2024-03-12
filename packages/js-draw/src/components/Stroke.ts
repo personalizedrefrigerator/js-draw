@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2 } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -8,7 +8,6 @@ import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
 import Viewport from '../Viewport';
-import { IntersectionResult } from 'math/dist/mjs/shapes/Path';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -182,7 +181,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				return new Stroke([ pathToRenderable(path, part.style) ]);
 			};
 
-			const intersectionPoints: IntersectionResult[] = [];
+			const intersectionPoints: PathIntersectionResult[] = [];
 			for (const segment of polyline) {
 				intersectionPoints.push(...path.intersection(segment));
 			}

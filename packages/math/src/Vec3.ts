@@ -63,14 +63,6 @@ export class Vec3 {
 		return this.dot(this);
 	}
 
-	/** Equivalent to `.minus(p).magnitudeSquared()`. */
-	public squareDistanceTo(p: Vec3) {
-		const dx = this.x - p.x;
-		const dy = this.y - p.y;
-		const dz = this.z - p.z;
-		return dx * dx + dy * dy + dz * dz;
-	}
-
 	/**
 	 * Interpreting this vector as a point in ℝ^3, computes the square distance
 	 * to another point, `p`.
