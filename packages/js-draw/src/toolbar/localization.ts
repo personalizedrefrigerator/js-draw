@@ -19,6 +19,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	cancel: string;
 	submit: string;
 	roundedTipPen: string;
+	roundedTipPen2: string;
 	flatTipPen: string;
 	selectPenTip: string;
 	selectShape: string;
@@ -150,6 +151,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	touchPanning: 'Touchscreen panning',
 
 	roundedTipPen: 'Round',
+	roundedTipPen2: 'Round (2)',
 	flatTipPen: 'Flat',
 	arrowPen: 'Arrow',
 	linePen: 'Line',

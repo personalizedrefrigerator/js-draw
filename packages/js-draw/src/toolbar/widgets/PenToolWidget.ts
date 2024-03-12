@@ -20,6 +20,7 @@ import makeThicknessSlider from './components/makeThicknessSlider';
 import makeGridSelector from './components/makeGridSelector';
 import { IconElemType } from '../IconProvider';
 import HelpDisplay from '../utils/HelpDisplay';
+import { makePolylineBuilder } from '../../components/builders/PolylineBuilder';
 
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
@@ -69,6 +70,12 @@ export default class PenToolWidget extends BaseToolWidget {
 				id: 'freehand-pen',
 
 				factory: makeFreehandLineBuilder,
+			},
+			{
+				name: this.localizationTable.roundedTipPen2,
+				id: 'polyline-pen',
+
+				factory: makePolylineBuilder,
 			},
 			...(additionalPens.filter(pen => !pen.isShapeBuilder)),
 
@@ -162,7 +169,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		}
 
 		const strokeFactory = record?.factory;
-		if (!strokeFactory || strokeFactory === makeFreehandLineBuilder || strokeFactory === makePressureSensitiveFreehandLineBuilder) {
+		if (!strokeFactory || strokeFactory === makeFreehandLineBuilder || strokeFactory === makePressureSensitiveFreehandLineBuilder || strokeFactory === makePolylineBuilder) {
 			return this.editor.icons.makePenIcon(style);
 		} else {
 			return this.editor.icons.makeIconFromFactory(style);

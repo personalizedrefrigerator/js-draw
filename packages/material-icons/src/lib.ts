@@ -57,6 +57,7 @@ import Select from './icons/Select.svg';
 import Close from './icons/Close.svg';
 import Shapes from './icons/Shapes.svg';
 import Draw from './icons/Draw.svg';
+import InkPen from './icons/InkPen.svg';
 
 const icon = (data: string) => {
 	const icon = document.createElement('div');
@@ -107,7 +108,11 @@ class MaterialIconProvider extends IconProvider {
 		return icon(Title);
 	}
 	public override makePenIcon(style: PenStyle): IconElemType {
-		const svg = icon(this.isRoundedTipPen(style) ? Edit : InkHighlighter);
+		let baseIcon = this.isRoundedTipPen(style) ? Edit : InkHighlighter;
+		if (this.isPolylinePen(style)) {
+			baseIcon = InkPen;
+		}
+		const svg = icon(baseIcon);
 
 		svg.setAttribute('viewBox', '0 -880 960 1000');
 
