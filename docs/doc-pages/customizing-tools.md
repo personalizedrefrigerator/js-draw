@@ -101,7 +101,7 @@ const editor = new Editor(document.body, {
 editor.addToolbar();
 ```
 
-We could then make it the default pen style:
+We could then make it the default pen style for the first pen:
 ```ts,runnable
 ---use-previous---
 ---visible---
@@ -111,7 +111,9 @@ const firstPen = editor.toolController.getMatchingTools(PenTool)[0];
 firstPen.setStrokeFactory(makePolylineBuilder);
 ```
 
-Custom pens can also be created.
+### Custom pens
+
+It's also possible to create custom pens.
 
 To create a custom pen type, create a class that implements `ComponentBuilder`. For example, to create a pen that draws wavy lines,
 ```ts,runnable
@@ -222,6 +224,37 @@ export const makeCustomBuilder: ComponentBuilderFactory =
 		const sizeOfScreenPixelOnCanvas = viewport.getSizeOfPixelOnCanvas();
 		return new CustomBuilder(initialPoint, sizeOfScreenPixelOnCanvas);
 	};
+
+
+///
+/// The editor
+///
+
+import { Editor } from 'js-draw';
+
+const editor = new Editor(document.body, {
+	pens: {
+		additionalPenTypes: [{
+			name: 'Wavy pen',
+			id: 'wavy-lines',
+			factory: makeCustomBuilder,
+
+			// Put under the "pens" section.
+			isShapeBuilder: false,
+		}],
+	},
+});
+
+editor.addToolbar();
+
+/// 
+/// Select our custom pen by default.
+///
+
+import { PenTool } from 'js-draw';
+
+const firstPen = editor.toolController.getMatchingTools(PenTool)[0];
+firstPen.setStrokeFactory(makeCustomBuilder);
 
 ```
 
