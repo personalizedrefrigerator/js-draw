@@ -3,6 +3,8 @@ import addCodeMirrorEditor, { EditorLanguage } from './addCodeMirrorEditor';
 import typeScriptToJS from '../../typeScriptToJS';
 import loadIframePreviewScript from './loadIframePreviewScript';
 
+const editorContents: (()=>string)[] = [];
+
 /** Replaces the given `elementToReplace` with a runnable code area. */
 const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	// Replace the textarea with a CodeMirror editor
@@ -60,7 +62,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	const hiddenContentMatch = /^(.*)[\n]---visible---[\n](.*)$/sg.exec(initialEditorValue);
 
 	// invisibleContent won't be shown in the editor
-	const invisibleContent = hiddenContentMatch	? hiddenContentMatch[1] : '';
+	const invisibleContent = hiddenContentMatch ? hiddenContentMatch[1] : '';
 	initialEditorValue = hiddenContentMatch ? hiddenContentMatch[2] : initialEditorValue;
 
 	const editor = addCodeMirrorEditor(
@@ -76,8 +78,22 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	hideButton.innerText = 'Hide';
 	controlsArea.replaceChildren(runButton, hideButton);
 
+	const editorIndex = editorContents.length;
+	const getPreprocessedEditorText = () => {
+		const preamble = (
+			// Support including the content of the previous editor (must be in the hidden editor
+			// content).
+			invisibleContent.includes('---use-previous---')
+				? invisibleContent.replace(/(?:[\n]|^)---use-previous---(?:[\n]|$)/g, editorContents[editorIndex - 1]())
+				: invisibleContent
+		);
+		return preamble + '\n' + editor.getText();
+	};
+	editorContents.push(getPreprocessedEditorText);
+
 	const getContentToRun = () => {
-		const editorText = invisibleContent + '\n' + editor.getText();
+		const editorText = getPreprocessedEditorText();
+
 		let js = '';
 		let css = '';
 
