@@ -461,4 +461,12 @@ describe('Path', () => {
 		expect(Path.fromString(expected).reversed()).objEq(Path.fromString(original));
 		expect(Path.fromString(original).reversed().reversed()).objEq(Path.fromString(original));
 	});
+
+	it.each([
+		[ 'm0,0 l1,0', Vec2.of(0, 0), Vec2.of(0, 0) ],
+		[ 'm0,0 l1,0', Vec2.of(0.5, 0), Vec2.of(0.5, 0) ],
+		[ 'm0,0 Q1,0 1,2', Vec2.of(1, 0), Vec2.of(0.6236, 0.299) ],
+	])('.nearestPointTo should return the closest point on a path to the given parameter (case %#)', (path, point, expectedClosest) => {
+		expect(Path.fromString(path).nearestPointTo(point).point).objEq(expectedClosest, 0.002);
+	});
 });

@@ -395,7 +395,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		// Approximate the normal at the location of the control point
 		let projectionT = bezier.project(controlPoint.xy).t;
 		if (!projectionT) {
-			if (startPt.minus(controlPoint).magnitudeSquared() < endPt.minus(controlPoint).magnitudeSquared()) {
+			if (startPt.squareDistanceTo(controlPoint) < endPt.squareDistanceTo(controlPoint)) {
 				projectionT = 0.1;
 			} else {
 				projectionT = 0.9;

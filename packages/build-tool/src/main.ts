@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 import { argv, exit } from 'node:process';
 import path from 'node:path';
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import CompiledTypeScriptDirectory from './CompiledTypeScriptDirectory';
 import BundledFile from './BundledFile';
 import buildTranslationTemplates from './buildTranslationTemplates';
@@ -221,6 +221,11 @@ const main = async () => {
 		console.log('Building translation templates...');
 		buildTranslationTemplates(config);
 	} else {
+		if (config.outDirectory && !existsSync(config.outDirectory)) {
+			console.log('Creating output directory...');
+			mkdirSync(config.outDirectory, { recursive: true });
+		}
+
 		void bundleFiles(config, buildMode);
 
 		void compileSCSS(config, buildMode);

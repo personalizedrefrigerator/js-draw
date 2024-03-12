@@ -1,6 +1,6 @@
 
 # example
 
-[example.html](./example.html) | [example.ts](./example.ts)
+[index.html](./index.html) | [index.ts](./index.ts)
 
-This example shows how to use `js-draw`'s TypeScript API. It uses Webpack to create a custom bundle, `example.bundle.js`.
+This example shows how to use `js-draw`'s TypeScript API. It uses Webpack to create a custom bundle, `index.bundle.js`.

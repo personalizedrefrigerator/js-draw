@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/build-tool",
-	"version": "1.11.1",
+	"version": "1.17.0",
 	"description": "Tool to facilitate building and bundling TypeScript for js-draw.",
 	"license": "MIT",
 	"private": true,
@@ -9,16 +9,16 @@
 		"build-tool": "./src/main.ts"
 	},
 	"dependencies": {
-		"css-loader": "6.8.1",
+		"css-loader": "6.10.0",
 		"path-browserify": "1.0.1",
-		"sass": "1.69.3",
-		"sass-loader": "13.3.2",
-		"style-loader": "3.3.3",
+		"sass": "1.70.0",
+		"sass-loader": "14.1.0",
+		"style-loader": "3.3.4",
 		"terser-webpack-plugin": "5.3.9",
-		"ts-loader": "9.5.0",
-		"ts-node": "10.9.1",
+		"ts-loader": "9.5.1",
+		"ts-node": "10.9.2",
 		"typescript": "5.3.3",
-		"webpack": "5.89.0"
+		"webpack": "5.90.1"
 	},
 	"devDependencies": {
 		"@types/node": "20.8.6"

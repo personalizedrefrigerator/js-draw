@@ -2,7 +2,12 @@ import { Point2, Vec2 } from '../Vec2';
 import Abstract2DShape from './Abstract2DShape';
 import LineSegment2 from './LineSegment2';
 
-/** A 2-dimensional path with parameter interval $t \in [0, 1]$. */
+/**
+ * A 2-dimensional path with parameter interval $t \in [0, 1]$.
+ *
+ * **Note:** Avoid extending this class outside of `js-draw` --- new abstract methods
+ * may be added between minor versions.
+ */
 export abstract class Parameterized2DShape extends Abstract2DShape {
 	/** Returns this at a given parameter. $t \in [0, 1]$ */
 	abstract at(t: number): Point2;

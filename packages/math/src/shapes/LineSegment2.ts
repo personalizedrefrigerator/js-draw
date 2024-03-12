@@ -111,7 +111,7 @@ export class LineSegment2 extends Parameterized2DShape {
 	 * @deprecated
 	 */
 	public intersection(other: LineSegment2): IntersectionResult|null {
-		// FIXME(v2.0.0): Make this return a `t` value from `0` to `1`.
+		// TODO(v2.0.0): Make this return a `t` value from `0` to `1`.
 
 		// We want x₁(t) = x₂(t) and y₁(t) = y₂(t)
 		// Observe that
@@ -180,10 +180,10 @@ export class LineSegment2 extends Parameterized2DShape {
 		}
 
 		// Ensure the result is in this/the other segment.
-		const resultToP1 = resultPoint.minus(this.point1).magnitude();
-		const resultToP2 = resultPoint.minus(this.point2).magnitude();
-		const resultToP3 = resultPoint.minus(other.point1).magnitude();
-		const resultToP4 = resultPoint.minus(other.point2).magnitude();
+		const resultToP1 = resultPoint.distanceTo(this.point1);
+		const resultToP2 = resultPoint.distanceTo(this.point2);
+		const resultToP3 = resultPoint.distanceTo(other.point1);
+		const resultToP4 = resultPoint.distanceTo(other.point2);
 		if (resultToP1 > this.length
 			|| resultToP2 > this.length
 			|| resultToP3 > other.length

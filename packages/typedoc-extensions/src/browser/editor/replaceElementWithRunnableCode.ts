@@ -3,6 +3,8 @@ import addCodeMirrorEditor, { EditorLanguage } from './addCodeMirrorEditor';
 import typeScriptToJS from '../../typeScriptToJS';
 import loadIframePreviewScript from './loadIframePreviewScript';
 
+const editorContents: (()=>string)[] = [];
+
 /** Replaces the given `elementToReplace` with a runnable code area. */
 const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	// Replace the textarea with a CodeMirror editor
@@ -60,7 +62,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	const hiddenContentMatch = /^(.*)[\n]---visible---[\n](.*)$/sg.exec(initialEditorValue);
 
 	// invisibleContent won't be shown in the editor
-	const invisibleContent = hiddenContentMatch	? hiddenContentMatch[1] : '';
+	const invisibleContent = hiddenContentMatch ? hiddenContentMatch[1] : '';
 	initialEditorValue = hiddenContentMatch ? hiddenContentMatch[2] : initialEditorValue;
 
 	const editor = addCodeMirrorEditor(
@@ -76,8 +78,22 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	hideButton.innerText = 'Hide';
 	controlsArea.replaceChildren(runButton, hideButton);
 
+	const editorIndex = editorContents.length;
+	const getPreprocessedEditorText = () => {
+		const preamble = (
+			// Support including the content of the previous editor (must be in the hidden editor
+			// content).
+			invisibleContent.includes('---use-previous---')
+				? invisibleContent.replace(/(?:[\n]|^)---use-previous---(?:[\n]|$)/g, editorContents[editorIndex - 1]())
+				: invisibleContent
+		);
+		return preamble + '\n' + editor.getText();
+	};
+	editorContents.push(getPreprocessedEditorText);
+
 	const getContentToRun = () => {
-		const editorText = invisibleContent + '\n' + editor.getText();
+		const editorText = getPreprocessedEditorText();
+
 		let js = '';
 		let css = '';
 
@@ -115,6 +131,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	};
 	hideButton.style.display = 'none';
 
+	const isDoctest = elementToReplace.getAttribute('data--doctest') === 'true';
 	runButton.onclick = async () => {
 		closeFrame();
 		hideButton.style.display = '';
@@ -134,6 +151,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		// TODO: Find another way to do this.
 		const escapedJs = js.replace(/<[/]script>/ig, '<\\/script>');
 
+		const frameId = `frame-${Math.random()}`;
 		previewFrame.srcdoc = `
 			<!DOCTYPE html>
 			<html>
@@ -143,6 +161,8 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					</style>
 					<script>
 						window.mode = ${JSON.stringify(elementToReplace.getAttribute('data--mode'))};
+						window.isDoctest = ${isDoctest ? 'true' : 'false'};
+						window.frameId = ${JSON.stringify(frameId)};
 						${iframePreviewSetup}
 					</script>
 				</head>
@@ -169,6 +189,11 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 				return;
 			}
 
+			// Skip events from other frames
+			if (event.data?.frameId !== frameId) {
+				return;
+			}
+
 			if (event.data?.message === 'updateHeight' && event.data?.height) {
 				previewFrame.style.height = `${event.data.height}px`;
 			}
@@ -181,6 +206,11 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		controlsArea.insertAdjacentElement('afterend', previewFrame);
 	};
+
+	// Run doctests automatically
+	if (isDoctest) {
+		runButton.click();
+	}
 
 	editorContainer.appendChild(controlsArea);
 	elementToReplace.replaceWith(editorContainer);

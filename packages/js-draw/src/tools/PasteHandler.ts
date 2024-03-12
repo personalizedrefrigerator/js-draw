@@ -29,8 +29,32 @@ export default class PasteHandler extends BaseTool {
 	public override onPaste(event: PasteEvent): boolean {
 		const mime = event.mime.toLowerCase();
 
-		if (mime === 'image/svg+xml') {
-			void this.doSVGPaste(event.data);
+		const svgData = (() => {
+			if (mime === 'image/svg+xml') {
+				return event.data;
+			}
+
+			if (mime !== 'text/html') {
+				return false;
+			}
+
+			// text/html is sometimes handlable SVG data. Use a hueristic
+			// to determine if this is the case:
+			// We use [^] and not . so that newlines are included.
+			const match = event.data.match(/^[^]{0,200}<svg.*/i); // [^]{0,200} <- Allow for metadata near start
+			if (!match) {
+				return false;
+			}
+
+			// Extract the SVG element from the pasted data
+			let svgEnd = event.data.toLowerCase().lastIndexOf('</svg>');
+			if (svgEnd === -1) svgEnd = event.data.length;
+			return event.data.substring(event.data.search(/<svg/i), svgEnd);
+		})();
+
+		if (svgData) {
+			console.log('svgpaste', svgData);
+			void this.doSVGPaste(svgData);
 			return true;
 		}
 		else if (mime === 'text/plain') {
@@ -46,21 +70,26 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	private async addComponentsFromPaste(components: AbstractComponent[]) {
-		await this.editor.addAndCenterComponents(components);
+		await this.editor.addAndCenterComponents(
+			components, true, this.editor.localization.pasted(components.length),
+		);
 	}
 
 	private async doSVGPaste(data: string) {
-		const sanitize = true;
-		const loader = SVGLoader.fromString(data, sanitize);
+		this.editor.showLoadingWarning(0);
+		try {
+			const loader = SVGLoader.fromString(data, true);
 
-		const components: AbstractComponent[] = [];
+			const components: AbstractComponent[] = [];
+			await loader.start((component) => {
+				components.push(component);
+			},
+			(_countProcessed: number, _totalToProcess: number) => null);
 
-		await loader.start((component) => {
-			components.push(component);
-		},
-		(_countProcessed: number, _totalToProcess: number) => null);
-
-		await this.addComponentsFromPaste(components);
+			await this.addComponentsFromPaste(components);
+		} finally {
+			this.editor.hideLoadingWarning();
+		}
 	}
 
 	private async doTextPaste(text: string) {

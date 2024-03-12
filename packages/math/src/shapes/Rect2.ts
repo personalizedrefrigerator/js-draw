@@ -4,7 +4,7 @@ import { Point2, Vec2 } from '../Vec2';
 import Abstract2DShape from './Abstract2DShape';
 import Vec3 from '../Vec3';
 
-/** An object that can be converted to a Rect2. */
+/** An object that can be converted to a {@link Rect2}. */
 export interface RectTemplate {
 	x: number;
 	y: number;
@@ -14,7 +14,11 @@ export interface RectTemplate {
 	height?: number;
 }
 
-// invariant: w ≥ 0, h ≥ 0, immutable
+/**
+ * Represents a rectangle in 2D space, parallel to the XY axes.
+ *
+ * `invariant: w ≥ 0, h ≥ 0, immutable`
+ */
 export class Rect2 extends Abstract2DShape {
 	// Derived state:
 
@@ -184,7 +188,7 @@ export class Rect2 extends Abstract2DShape {
 		let closest: Point2|null = null;
 		let closestDist: number|null = null;
 		for (const point of closestEdgePoints) {
-			const dist = point.minus(target).length();
+			const dist = point.distanceTo(target);
 			if (closestDist === null || dist < closestDist) {
 				closest = point;
 				closestDist = dist;

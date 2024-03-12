@@ -38,7 +38,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 
 	public override signedDistance(point: Point2): number {
 		// .d: Distance
-		return Math.sqrt(this.nearestPointTo(point).point.squareDistanceTo(point));
+		return this.nearestPointTo(point).point.distanceTo(point);
 	}
 
 	/**
@@ -100,8 +100,8 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 			const point = Vec2.ofXY(this.at(t));
 
 			// Ensure that the intersection is on the line segment
-			if (point.minus(line.p1).magnitude() > line.length
-					|| point.minus(line.p2).magnitude() > line.length) {
+			if (point.distanceTo(line.p1) > line.length
+					|| point.distanceTo(line.p2) > line.length) {
 				return null;
 			}
 
@@ -194,7 +194,6 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 			// Thus, when zeroed,
 			//   tN = (0 - f'(t)) / m + t
 			const newT = (0 - derivativeAt(t)) / slope + t;
-			//console.log(t - newT);
 			//const distDiff = sqrDistAt(newT) - sqrDistAt(t);
 			//console.assert(distDiff <= 0, `${-distDiff} >= 0`);
 			t = newT;

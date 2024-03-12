@@ -1,7 +1,8 @@
-import { BaseTool, InputEvtType, RenderingMode, SelectionTool, sendPenEvent } from './lib';
-import { Point2, Vec2 } from '@js-draw/math';
+import { BackgroundComponent, BaseTool, InputEvtType, RenderingMode, SelectionTool, sendPenEvent } from './lib';
+import { Color4, Point2, Vec2 } from '@js-draw/math';
 import Editor from './Editor';
 import createEditor from './testing/createEditor';
+import { BackgroundType } from './components/BackgroundComponent';
 
 describe('Editor', () => {
 	it('should fire keyup events when the editor loses focus', () => {
@@ -269,5 +270,63 @@ describe('Editor', () => {
 		expect(editor.image.getAllElements()).toHaveLength(1);
 
 		eventHandler.remove();
+	});
+
+	describe('.setBackgroundStyle', () => {
+		it.each([
+			{
+				style: { color: Color4.red },
+				expectedStyle: { color: Color4.red, type: BackgroundType.SolidColor, autoresize: false },
+				expectedBackgroundCount: 1,
+			},
+			{
+				style: { type: BackgroundType.None },
+				expectedStyle: { autoresize: false },
+				expectedBackgroundCount: 0,
+			},
+			{
+				style: { type: BackgroundType.None, autoresize: true },
+				expectedStyle: { autoresize: true },
+				expectedBackgroundCount: 0,
+			},
+			{
+				style: { type: BackgroundType.Grid, autoresize: true },
+				expectedStyle: { color: Color4.transparent, type: BackgroundType.Grid, autoresize: true },
+				expectedBackgroundCount: 1,
+			},
+		])('should support setting the background style of an image with no default background (style: %j)',
+			async ({ style, expectedBackgroundCount, expectedStyle }) => {
+				const editor = createEditor();
+				expect(editor.estimateBackgroundColor()).objEq(Color4.transparent);
+
+				editor.dispatch(editor.setBackgroundStyle(style));
+
+				expect(editor.image.getAutoresizeEnabled()).toBe(expectedStyle.autoresize);
+
+				expect(editor.image.getBackgroundComponents()).toHaveLength(expectedBackgroundCount);
+				if (expectedBackgroundCount > 0) {
+					const background = editor.image.getBackgroundComponents()[0] as BackgroundComponent;
+					expect(background.getStyle().color).objEq(expectedStyle.color ?? Color4.transparent);
+					expect(background.getBackgroundType()).toBe(expectedStyle.type);
+				}
+
+				// Should also be possible to remove a background with .setBackgroundStyle
+				editor.dispatch(editor.setBackgroundStyle({ type: BackgroundType.None }));
+				expect(editor.image.getBackgroundComponents()).toHaveLength(0);
+			}
+		);
+
+		it('setting autoresize: false on an empty image should not result in a 0x0 background', async () => {
+			const editor = createEditor();
+			expect(editor.estimateBackgroundColor()).objEq(Color4.transparent);
+
+			editor.dispatch(editor.setBackgroundStyle({ autoresize: true }));
+			expect(editor.image.getAutoresizeEnabled()).toBe(true);
+			editor.dispatch(editor.setBackgroundStyle({ autoresize: false }));
+
+			expect(editor.image.getAutoresizeEnabled()).toBe(false);
+			expect(editor.image.getImportExportRect().minDimension).toBeGreaterThan(10);
+			expect(editor.image.getImportExportRect().minDimension).toBeLessThan(1000);
+		});
 	});
 });

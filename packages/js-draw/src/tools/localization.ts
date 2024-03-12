@@ -33,8 +33,8 @@ export interface ToolLocalization {
 
 	anyDevicePanning: string;
 
-	copied: (count: number, description: string) => string;
-	pasted: (count: number, description: string) => string;
+	copied: (count: number) => string;
+	pasted: (count: number) => string;
 
 	toolEnabledAnnouncement: (toolName: string) => string;
 	toolDisabledAnnouncement: (toolName: string) => string;
@@ -74,8 +74,8 @@ export const defaultToolLocalization: ToolLocalization = {
 
 	anyDevicePanning: 'Any device panning',
 
-	copied: (count: number, description: string) => `Copied ${count} ${description}`,
-	pasted: (count: number, description: string) => `Pasted ${count} ${description}`,
+	copied: (count: number) => `Copied ${count} item(s)`,
+	pasted: (count: number) => `Pasted ${count} item(s)`,
 
 	toolEnabledAnnouncement: (toolName) => `${toolName} enabled`,
 	toolDisabledAnnouncement: (toolName) => `${toolName} disabled`,

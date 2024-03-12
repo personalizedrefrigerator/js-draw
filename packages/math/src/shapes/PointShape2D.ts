@@ -15,7 +15,7 @@ class PointShape2D extends Parameterized2DShape {
 	}
 
 	public override signedDistance(point: Vec3): number {
-		return this.p.minus(point).magnitude();
+		return this.p.distanceTo(point);
 	}
 
 	public override argIntersectsLineSegment(lineSegment: LineSegment2, epsilon?: number): number[] {
@@ -33,6 +33,9 @@ class PointShape2D extends Parameterized2DShape {
 		return this.p;
 	}
 
+	/**
+	 * Returns an arbitrary unit-length vector.
+	 */
 	public override normalAt(_t: number) {
 		// Return a vector that makes sense.
 		return Vec2.unitY;

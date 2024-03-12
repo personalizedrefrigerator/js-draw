@@ -15,15 +15,13 @@
 
 For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/).
 
-If you're coming from version 0.25, [read the migration guide!](https://js-draw.web.app/typedoc/modules/Additional_Documentation.MigratingToVersion1__.html)
-
 # API
 
 ## Creating an `Editor`
 
 ### With a bundler that supports importing `.css` files
 
-To create a new `Editor` and add it as a child of `document.body`,
+To create a new `Editor` and add it as a child of `document.body`, use the [Editor](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#constructor) constructor:
 ```ts
 import Editor from 'js-draw';
 import 'js-draw/styles';
@@ -62,12 +60,12 @@ If you're not using a bundler, consider using the pre-bundled editor:
 
 ## Adding a toolbar
 
-To create a toolbar with the default tools:
+To create a toolbar with buttons for the default tools:
 ```ts
 const toolbar = editor.addToolbar();
 ```
 
-Save and exit buttons can be added with the `.addSaveButton` and `.addExitButton` methods: 
+Save and exit buttons can be added with the [`.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addSaveButton) and [`.addExitButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addExitButton) methods: 
 ```ts
 toolbar.addSaveButton(() => {
     const svgElem = editor.toSVG();
@@ -98,7 +96,7 @@ toolbar.addActionButton({
 });
 ```
 
-## Loading from an SVG
+## Loading from SVG
 
 ```ts
 editor.loadFromSVG(`
@@ -111,7 +109,7 @@ editor.loadFromSVG(`
 `);
 ```
 
-**Note**: While `js-draw` supports a small subset of the SVG markup language, it tries to preserve unrecognised SVG elements.
+**Note**: While `js-draw` supports only a small subset of the SVG markup language, it tries to preserve unrecognised SVG elements.
 
 For example, although `js-draw` doesn't support `<circle/>` elements,
 ```xml
@@ -134,6 +132,51 @@ but exports to
 
 which **does** contain the `<circle/>` element.
 
+## Customizing the background
+
+The background color and style can be customized with [editor.setBackgroundStyle](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#setBackgroundStyle). For example,
+```ts
+import { Editor, Color4, BackgroundComponentBackgroundType } from 'js-draw';
+const editor = new Editor(document.body);
+
+editor.dispatch(editor.setBackgroundStyle({
+    color: Color4.orange,
+    type: BackgroundComponentBackgroundType.Grid,
+}));
+```
+
+Above, we use `editor.dispatch` because `setBackgroundStyle` returns a [`Command`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Command.html), rather than changing the background style directly. `js-draw` uses `Command`s to track actions that can be undone and redone.
+
+By default, `.dispatch` adds `Command`s to the undo stack. To avoid this, pass `false` for the second parameter to [`.dispatch`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#dispatch):
+```ts
+const addToHistory = false;
+editor.dispatch(editor.setBackgroundStyle({
+    color: Color4.orange,
+    type: BackgroundComponentBackgroundType.Grid,
+}), addToHistory);
+```
+
+### Making the background fill the screen
+
+By default, the background has a fixed size and marks the region that will be saved by [`.toSVG`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toSVG) or [`.toDataURL`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toDataURL). It's possible to make the background auto-resize to the content of the image with [`editor.image.setAutoresizeEnabled(true)`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.EditorImage.html#setAutoresizeEnabled):
+```ts
+const editor = new Editor(document.body);
+
+const addToHistory = false;
+editor.dispatch(editor.image.setAutoresizeEnabled(true), addToHistory);
+
+// Alternatively, using .setBackgroundStyle:
+editor.dispatch(editor.setBackgroundStyle({ autoresize: true }), addToHistory);
+```
+
+## Saving
+
+To save as an SVG, use [`editor.toSVG()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toSVG), which returns an `HTMLSVGElement`. Alternatively, if working with very large images that need to be saved in the background, consider using [`editor.toSVGAsync()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toSVG).
+
+It's also possible to render the editor to a PNG or JPEG data URL. This can be done with [`editor.toDataURL()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toDataURL).
+
+The region of the image that will be saved can be changed by calling [`editor.image.setImportExportRect`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#setImportExportRect) or 
+
 ## Settings/configuration
 ### Disabling touchpad panning
 
@@ -153,7 +196,7 @@ const editor = new Editor(document.body, {
 
 ### Localization
 
-If a user's language is available in [src/localizations/](src/localizations/) (as determined by `navigator.languages`), that localization will be used.
+If a user's language is available in [src/localizations/](packages/js-draw/src/localizations) (as determined by `navigator.languages`), that localization will be used.
 
 To override the default language, use `getLocalizationTable([ 'custom locale here' ])`. For example,
 ```ts
@@ -165,7 +208,7 @@ const editor = new Editor(document.body, {
 
 <details><summary>Creating a custom localization</summary>
 
-See [src/localization.ts](src/localization.ts) for a list of strings that can be translated.
+See [src/localization.ts](packages/js-draw/src/localization.ts) for a list of strings that can be translated.
 
 Many of the default strings in the editor might be overridden like this:
 ```ts
@@ -176,7 +219,7 @@ const editor = new Editor(document.body, {
         // the English (default) localization will be used
 
         // Strings for the main editor interface
-        // (see src/localization.ts)
+        // (see packages/js-draw/src/localization.ts)
         loading: (percentage: number) => `Cargando: ${percentage}%...`,
         imageEditor: 'Editor de dibujos',
 
@@ -197,6 +240,16 @@ const editor = new Editor(document.body, {
 ```
 
 </details>
+
+### Setting the minimum and maximum zoom
+
+By default, the editor's minimum and maximum zoom are very large (2·10<sup>-10</sup>x and 10<sup>12</sup>x, respectively). These are configurable by the `minZoom` and `maxZoom` settings. For example,
+```ts
+const editor = new Editor(document.body, {
+    minZoom: 0.5,
+    maxZoom: 2,
+});
+```
 
 ## Changing the editor's color theme
 
@@ -275,4 +328,9 @@ body .imageEditorContainer {
 }
 ```
 disables the dark theme and creates a theme that primarily uses yellow/green colors.
+
+# Examples and resources
+
+- [Examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md).
+- [Additional documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/Additional_Documentation.html)
 

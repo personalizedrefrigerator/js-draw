@@ -56,11 +56,14 @@ describe('Vec3', () => {
 		{ from: Vec3.of(1, 1, 1), to: Vec3.of(0, 1, 1), expected: 1 },
 		{ from: Vec3.of(1, 1, 1), to: Vec3.of(0, 1, 0), expected: 2 },
 		{ from: Vec3.of(1, 1, 1), to: Vec3.of(0, 0, 0), expected: 3 },
+		{ from: Vec3.of(-1, -10, 0), to: Vec3.of(1, 2, 0), expected: 148 },
+		{ from: Vec3.of(-1, -10, 0), to: Vec3.of(1, 2, 0), expected: 148 },
 	])(
-		'.squareDistanceTo should return square distance and be equivalent to .minus().magnutideSquared() (%j)',
+		'.squareDistanceTo and .distanceTo should return correct square and euclidean distances (%j)',
 		({ from , to, expected }) => {
 			expect(from.squareDistanceTo(to)).toBe(expected);
 			expect(to.squareDistanceTo(from)).toBe(expected);
+			expect(to.distanceTo(from)).toBeCloseTo(Math.sqrt(expected));
 			expect(to.minus(from).magnitudeSquared()).toBe(expected);
 			expect(from.minus(to).magnitudeSquared()).toBe(expected);
 		},

@@ -100,8 +100,9 @@ const makeNewImageDialog = (
 		fromTemplateArea.appendChild(templateButton);
 	};
 
-	addTemplateOption(localization.templateLightGrid, templates.lightGrid);
-	addTemplateOption(localization.templateDarkGrid, templates.darkGrid);
+	for (const template of Object.values(templates)) {
+		addTemplateOption(template.name(localization), template.data());
+	}
 
 	const advancedArea = document.createElement('details');
 	const advancedAreaSummary = document.createElement('summary');

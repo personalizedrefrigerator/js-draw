@@ -5,6 +5,7 @@ import { EditorEventType } from '../../types';
 import { CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
 import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
+import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
@@ -478,15 +479,28 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		const exportViewport = new Viewport(() => { });
-		exportViewport.updateScreenSize(Vec2.of(bbox.w, bbox.h));
-		exportViewport.resetTransform(Mat33.translation(bbox.topLeft.times(-1)));
+		const selectionScreenSize = this.selectionBox.getScreenRegion().size.times(this.editor.display.getDevicePixelRatio());
 
-		const sanitize = true;
-		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, sanitize);
+		// Update the viewport to have screen size roughly equal to the size of the selection box
+		let scaleFactor = selectionScreenSize.maximumEntryMagnitude() / (bbox.size.maximumEntryMagnitude() || 1);
+
+		// Round to a nearby power of two
+		scaleFactor = Math.pow(2, Math.ceil(Math.log2(scaleFactor)));
+
+		exportViewport.updateScreenSize(bbox.size.times(scaleFactor));
+		exportViewport.resetTransform(
+			Mat33.scaling2D(scaleFactor)
+				// Move the selection onto the screen
+				.rightMul(Mat33.translation(bbox.topLeft.times(-1)))
+		);
+
+		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, { sanitize: true, useViewBoxForPositioning: true });
+		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(exportViewport, { maxCanvasDimen: 4096 });
 
 		const text: string[] = [];
 		for (const elem of selectedElems) {
 			elem.render(svgRenderer);
+			elem.render(canvasRenderer);
 
 			if (elem instanceof TextComponent) {
 				text.push(elem.getText());
@@ -495,6 +509,15 @@ export default class SelectionTool extends BaseTool {
 
 		event.setData('image/svg+xml', svgExportElem.outerHTML);
 		event.setData('text/html', svgExportElem.outerHTML);
+		event.setData('image/png', new Promise<Blob>((resolve, reject) => {
+			canvas.toBlob((blob) => {
+				if (blob) {
+					resolve(blob);
+				} else {
+					reject('Failed to convert canvas to blob.');
+				}
+			}, 'image/png');
+		}));
 		if (text.length > 0) {
 			event.setData('text/plain', text.join('\n'));
 		}

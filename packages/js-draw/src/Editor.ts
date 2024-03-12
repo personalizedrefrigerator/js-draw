@@ -15,7 +15,6 @@ import getLocalizationTable from './localizations/getLocalizationTable';
 import IconProvider from './toolbar/IconProvider';
 import CanvasRenderer from './rendering/renderers/CanvasRenderer';
 import untilNextAnimationFrame from './util/untilNextAnimationFrame';
-import fileToBase64Url from './util/fileToBase64Url';
 import uniteCommands from './commands/uniteCommands';
 import SelectionTool from './tools/SelectionTool/SelectionTool';
 import AbstractComponent from './components/AbstractComponent';
@@ -36,6 +35,7 @@ import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
 import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
 import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
+import ClipboardHandler from './util/ClipboardHandler';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -110,24 +110,7 @@ export interface EditorSettings {
 	 * Configures the default pen tools.
 	 *
 	 * **Example**:
-	 * ```ts,runnable
-	 * import { Editor, makePolylineBuilder } from 'js-draw';
-	 *
-	 * const editor = new Editor(document.body, {
-	 *     pens: {
-	 *         additionalPenTypes: [{
-	 *             name: 'Polyline (For debugging)',
-	 *             id: 'custom-polyline',
-	 *             factory: makePolylineBuilder,
-	 *
-	 *             // The pen doesn't create fixed shapes (e.g. squares, rectangles, etc)
-	 *             // and so should go under the "pens" section.
-	 *             isShapeBuilder: false,
-	 *         }],
-	 *     },
-	 * });
-	 * editor.addToolbar();
-	 * ```
+	 * [[include:doc-pages/inline-examples/editor-settings-polyline-pen.md]]
 	 */
 	pens: {
 		/**
@@ -155,7 +138,7 @@ export interface EditorSettings {
  * ```
  *
  * See also
- * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts).
+ * * [`examples.md`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md).
  */
 export class Editor {
 	// Wrapper around the viewport and toolbar
@@ -460,7 +443,6 @@ export class Editor {
 
 	public hideLoadingWarning() {
 		this.loadingWarning.style.display = 'none';
-
 		this.announceForAccessibility(this.localization.doneLoading);
 	}
 
@@ -542,21 +524,14 @@ export class Editor {
 			this.accessibilityControlArea.value = '';
 		});
 
-		document.addEventListener('copy', evt => {
+		const copyHandler = new ClipboardHandler(this);
+
+		document.addEventListener('copy', async evt => {
 			if (!this.isEventSink(document.querySelector(':focus'))) {
 				return;
 			}
 
-			const clipboardData = evt.clipboardData;
-
-			if (this.toolController.dispatchInputEvent({
-				kind: InputEvtType.CopyEvent,
-				setData: (mime, data) => {
-					clipboardData?.setData(mime, data);
-				},
-			})) {
-				evt.preventDefault();
-			}
+			copyHandler.copy(evt);
 		});
 
 		document.addEventListener('paste', evt => {
@@ -689,7 +664,7 @@ export class Editor {
 				const prevData = this.pointers[pointer.id];
 
 				if (prevData) {
-					const distanceMoved = pointer.screenPos.minus(prevData.screenPos).magnitude();
+					const distanceMoved = pointer.screenPos.distanceTo(prevData.screenPos);
 
 					// If the pointer moved less than two pixels, don't send a new event.
 					if (distanceMoved < 2) {
@@ -757,72 +732,7 @@ export class Editor {
 			return;
 		}
 
-		const clipboardData: DataTransfer = (evt as any).dataTransfer ?? (evt as any).clipboardData;
-		if (!clipboardData) {
-			return;
-		}
-
-		// Handle SVG files (prefer to PNG/JPEG)
-		for (const file of clipboardData.files) {
-			if (file.type.toLowerCase() === 'image/svg+xml') {
-				const text = await file.text();
-				if (this.toolController.dispatchInputEvent({
-					kind: InputEvtType.PasteEvent,
-					mime: file.type,
-					data: text,
-				})) {
-					evt.preventDefault();
-					return;
-				}
-			}
-		}
-
-		// Handle image files.
-		for (const file of clipboardData.files) {
-			const fileType = file.type.toLowerCase();
-			if (fileType === 'image/png' || fileType === 'image/jpg') {
-				this.showLoadingWarning(0);
-				const onprogress = (evt: ProgressEvent<FileReader>) => {
-					this.showLoadingWarning(evt.loaded / evt.total);
-				};
-
-				try {
-					const data = await fileToBase64Url(file, { onprogress });
-
-					if (data && this.toolController.dispatchInputEvent({
-						kind: InputEvtType.PasteEvent,
-						mime: fileType,
-						data: data,
-					})) {
-						evt.preventDefault();
-						this.hideLoadingWarning();
-						return;
-					}
-				} catch (e) {
-					console.error('Error reading image:', e);
-				}
-				this.hideLoadingWarning();
-			}
-		}
-
-		// Supported MIMEs for text data, in order of preference
-		const supportedMIMEs = [
-			'image/svg+xml',
-			'text/plain',
-		];
-
-		for (const mime of supportedMIMEs) {
-			const data = clipboardData.getData(mime);
-
-			if (data && this.toolController.dispatchInputEvent({
-				kind: InputEvtType.PasteEvent,
-				mime,
-				data,
-			})) {
-				evt.preventDefault();
-				return;
-			}
-		}
+		return await new ClipboardHandler(this).paste(evt);
 	}
 
 	/**
@@ -969,7 +879,7 @@ export class Editor {
 
 				// Skip if the pointer hasn't moved enough to not be a "click".
 				const strokeStartThreshold = 10;
-				const isWithinClickThreshold = gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold;
+				const isWithinClickThreshold = gestureStartPos && currentPos.distanceTo(gestureStartPos) < strokeStartThreshold;
 				if (isWithinClickThreshold && !gestureData[pointerId].hasMovedSignificantly) {
 					eventBuffer.push([ eventName, event ]);
 					sendToEditor = false;
@@ -1109,7 +1019,8 @@ export class Editor {
 	/** `apply` a command. `command` will be announced for accessibility. */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		const dispatchResult = this.dispatchNoAnnounce(command, addToHistory);
-		this.announceForAccessibility(command.description(this, this.localization));
+		const commandDescription = command.description(this, this.localization);
+		this.announceForAccessibility(commandDescription);
 
 		return dispatchResult;
 	}
@@ -1381,8 +1292,11 @@ export class Editor {
 	 * This is a convenience method that creates **and applies** a single command.
 	 *
 	 * If `selectComponents` is true (the default), the components are selected.
+	 *
+	 * `actionDescription`, if given, should be a screenreader-friendly description of the
+	 * reason components were added (e.g. "pasted").
 	 */
-	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true) {
+	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true, actionDescription?: string) {
 		let bbox: Rect2|null = null;
 		for (const component of components) {
 			if (bbox) {
@@ -1423,7 +1337,10 @@ export class Editor {
 		}
 
 		const applyChunkSize = 100;
-		await this.dispatch(uniteCommands(commands, applyChunkSize), true);
+		await this.dispatch(
+			uniteCommands(commands, { applyChunkSize, description: actionDescription }),
+			true,
+		);
 
 		if (selectComponents) {
 			for (const selectionTool of this.toolController.getMatchingTools(SelectionTool)) {
@@ -1445,22 +1362,7 @@ export class Editor {
 	 * [[include:doc-pages/inline-examples/adding-an-image-and-data-urls.md]]
 	 */
 	public toDataURL(format: 'image/png'|'image/jpeg'|'image/webp' = 'image/png', outputSize?: Vec2): string {
-		const canvas = document.createElement('canvas');
-
-		const importExportViewport = this.image.getImportExportViewport();
-		const exportRectSize = importExportViewport.getScreenRectSize();
-		const resolution = outputSize ?? exportRectSize;
-
-		canvas.width = resolution.x;
-		canvas.height = resolution.y;
-
-		const ctx = canvas.getContext('2d')!;
-
-		// Scale to ensure that the entire output is visible.
-		const scaleFactor = Math.min(resolution.x / exportRectSize.x, resolution.y / exportRectSize.y);
-		ctx.scale(scaleFactor, scaleFactor);
-
-		const renderer = new CanvasRenderer(ctx, importExportViewport);
+		const { element: canvas, renderer } = CanvasRenderer.fromViewport(this.image.getImportExportViewport(), { canvasSize: outputSize });
 
 		this.image.renderAll(renderer);
 
@@ -1588,7 +1490,66 @@ export class Editor {
 	}
 
 	/**
+	 * This is a convenience method for adding or updating the {@link BackgroundComponent}
+	 * and {@link EditorImage.setAutoresizeEnabled} for the current image.
+	 *
+	 * If there are multiple {@link BackgroundComponent}s in the image, this only modifies
+	 * the topmost such element.
+	 *
+	 * **Example**:
+	 * ```ts,runnable
+	 * import { Editor, Color4, BackgroundComponentBackgroundType } from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 * editor.dispatch(editor.setBackgroundStyle({
+	 *     color: Color4.orange,
+	 *     type: BackgroundComponentBackgroundType.Grid,
+	 *     autoresize: true,
+	 * }));
+	 * ```
+	 *
+	 * To change the background size, see {@link EditorImage.setImportExportRect}.
+	 */
+	public setBackgroundStyle(style: { color?: Color4, type?: BackgroundType, autoresize?: boolean }) {
+		const originalBackground = this.getTopmostBackgroundComponent();
+		const commands: Command[] = [];
+		if (originalBackground) {
+			commands.push(new Erase([ originalBackground ]));
+		}
+		const originalType = originalBackground?.getBackgroundType?.() ?? BackgroundType.None;
+		const originalColor = originalBackground?.getStyle?.().color ?? Color4.transparent;
+		const originalFillsScreen = this.image.getAutoresizeEnabled();
+
+		const defaultType = (style.color && originalType === BackgroundType.None ? BackgroundType.SolidColor : originalType);
+		const backgroundType = style.type ?? defaultType;
+		const backgroundColor = style.color ?? originalColor;
+		const fillsScreen = style.autoresize ?? originalFillsScreen;
+
+		if (backgroundType !== BackgroundType.None) {
+			const newBackground = new BackgroundComponent(backgroundType, backgroundColor);
+			commands.push(EditorImage.addElement(newBackground));
+		}
+		if (fillsScreen !== originalFillsScreen) {
+			commands.push(this.image.setAutoresizeEnabled(fillsScreen));
+
+			// Avoid 0x0 backgrounds
+			if (!fillsScreen && this.image.getImportExportRect().maxDimension === 0) {
+				commands.push(
+					this.image.setImportExportRect(
+						this.image.getImportExportRect().resizedTo(Vec2.of(500, 500))
+					),
+				);
+			}
+		}
+		return uniteCommands(commands);
+	}
+
+	/**
 	 * Set the background color of the image.
+	 *
+	 * This is a convenience method for adding or updating the {@link BackgroundComponent}
+	 * for the current image.
+	 *
+	 * @see {@link setBackgroundStyle}
 	 */
 	public setBackgroundColor(color: Color4): Command {
 		let background = this.getTopmostBackgroundComponent();

@@ -52,7 +52,7 @@ export interface IntersectionResult {
 	/** Parameter value for the closest point **on** the path to the intersection. @internal */
 	parameterValue: number;
 
-	// Point at which the intersection occured.
+	/** Point at which the intersection occured. */
 	point: Point2;
 }
 
@@ -71,7 +71,45 @@ export interface CurveIndexRecord {
 }
 
 /**
+ * Allows indexing a particular part of a path.
+ *
+ * @see {@link Path.at} {@link Path.tangentAt}
+ */
+export interface CurveIndexRecord {
+	curveIndex: number;
+	parameterValue: number;
+}
+
+/**
  * Represents a union of lines and curves.
+ *
+ * To create a path from a string, see {@link fromString}.
+ *
+ * @example
+ * ```ts,runnable,console
+ * import {Path, Mat33, Vec2, LineSegment2} from '@js-draw/math';
+ *
+ * // Creates a path from an SVG path string.
+ * // In this case,
+ * // 1. Move to (0,0)
+ * // 2. Line to (100,0)
+ * const path = Path.fromString('M0,0 L100,0');
+ *
+ * // Logs the distance from (10,0) to the curve 1 unit
+ * // away from path. This curve forms a stroke with the path at
+ * // its center.
+ * const strokeRadius = 1;
+ * console.log(path.signedDistance(Vec2.of(10,0), strokeRadius));
+ *
+ * // Log a version of the path that's scaled by a factor of 4.
+ * console.log(path.transformedBy(Mat33.scaling2D(4)).toString());
+ *
+ * // Log all intersections of a stroked version of the path with
+ * // a vertical line segment.
+ * // (Try removing the `strokeRadius` parameter).
+ * const segment = new LineSegment2(Vec2.of(5, -100), Vec2.of(5, 100));
+ * console.log(path.intersection(segment, strokeRadius).map(i => i.point));
+ * ```
  */
 export class Path {
 	/**
@@ -106,6 +144,12 @@ export class Path {
 		}
 	}
 
+	/**
+	 * Computes and returns the full bounding box for this path.
+	 *
+	 * If a slight over-estimate of a path's bounding box is sufficient, use
+	 * {@link bbox} instead.
+	 */
 	public getExactBBox(): Rect2 {
 		const bboxes: Rect2[] = [];
 		for (const part of this.geometry) {
@@ -255,7 +299,20 @@ export class Path {
 		return Rect2.bboxOf(points);
 	}
 
-	/** **Note**: `strokeRadius = strokeWidth / 2` */
+	/**
+	 * Returns the signed distance between `point` and a curve `strokeRadius` units
+	 * away from this path.
+	 *
+	 * This returns the **signed distance**, which means that points inside this shape
+	 * have their distance negated. For example,
+	 * ```ts,runnable,console
+	 * import {Path, Vec2} from '@js-draw/math';
+	 * console.log(Path.fromString('m0,0 L100,0').signedDistance(Vec2.zero, 1));
+	 * ```
+	 * would print `-1` because (0,0) is on `m0,0 L100,0` and thus one unit away from its boundary.
+	 *
+	 * **Note**: `strokeRadius = strokeWidth / 2`
+	 */
 	public signedDistance(point: Point2, strokeRadius: number) {
 		let minDist = Infinity;
 
@@ -542,7 +599,9 @@ export class Path {
 		return result;
 	}
 
-	// @internal
+	/**
+	 * @returns the nearest point on this path to the given `point`.
+	 */
 	public nearestPointTo(point: Point2): IntersectionResult {
 		// Find the closest point on this
 		let closestSquareDist = Infinity;
@@ -950,10 +1009,12 @@ export class Path {
 		return false;
 	}
 
-	// Treats this as a closed path and returns true if part of `rect` is *roughly* within
-	// this path's interior.
-	//
-	// Note: Assumes that this is a closed, non-self-intersecting path.
+	/**
+	 * Treats this as a closed path and returns true if part of `rect` is *roughly* within
+	 * this path's interior.
+	 *
+	 * **Note**: Assumes that this is a closed, non-self-intersecting path.
+	 */
 	public closedRoughlyIntersects(rect: Rect2): boolean {
 		if (rect.containsRect(this.bbox)) {
 			return true;
@@ -1219,10 +1280,8 @@ export class Path {
 	/**
 	 * Create a `Path` from a subset of the SVG path specification.
 	 *
-	 * ## To-do
-	 * - TODO: Support a larger subset of SVG paths
-	 *   - Elliptical arcs are currently unsupported.
-	 * - TODO: Support `s`,`t` commands shorthands.
+	 * Currently, this does not support elliptical arcs or `s` and `t` command
+	 * shorthands. See https://github.com/personalizedrefrigerator/js-draw/pull/19.
 	 *
 	 * @example
 	 * ```ts,runnable,console
@@ -1233,6 +1292,8 @@ export class Path {
 	 * ```
 	 */
 	public static fromString(pathString: string): Path {
+		// TODO: Support elliptical arcs, and the `s`, `t` command shorthands.
+		//
 		// See the MDN reference:
 		// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
 		// and

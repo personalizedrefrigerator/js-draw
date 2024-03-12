@@ -10,6 +10,8 @@ export interface Localization {
 
 	templateLightGrid: string;
 	templateDarkGrid: string;
+	templateEmptyPageLight: string;
+	templateEmptyPageDark: string;
 
 	warningSaveTargetOnlySupportsOneImage: string;
 
@@ -56,6 +58,8 @@ localizationTables.en = {
 
 	templateLightGrid: 'Light Grid',
 	templateDarkGrid: 'Dark Grid',
+	templateEmptyPageLight: 'Empty Page (Light)',
+	templateEmptyPageDark: 'Empty Page (Dark)',
 
 	warningSaveTargetOnlySupportsOneImage: 'Warning: On this system, js-draw only supports saving one image. While this image will still be downloadable, you won\'t be able to save it to this website.',
 

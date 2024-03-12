@@ -1,3 +1,13 @@
+# 1.17.0
+ * Features
+    * Attach rendered versions of the selection to the clipboard on copy: Support pasting into more applications.
+ * Bug fixes
+    * Deleting the first character in the background size dialog no longer resets the background size to 100.
+    * Fix stroke width not set correctly by `SVGRenderer` when export zoom is not 100%.
+    * Fixed copy/paste between Chrome and Firefox
+ * API
+    * Simplify API for finding distance between points. (Add `.distanceTo` method).
+    * Simplify API for changing the background of an image (`Editor.setBackgroundStyle`).
 
 # 1.16.1
  * Bug fixes
