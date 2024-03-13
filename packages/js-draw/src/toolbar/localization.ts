@@ -21,7 +21,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	roundedTipPen: string;
 	roundedTipPen2: string;
 	flatTipPen: string;
-	selectPenTip: string;
+	selectPenType: string;
 	selectShape: string;
 	colorLabel: string;
 	pen: string;
@@ -131,7 +131,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	undo: 'Undo',
 	redo: 'Redo',
 
-	selectPenTip: 'Pen tip',
+	selectPenType: 'Pen type',
 	selectShape: 'Shape',
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
@@ -151,7 +151,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	touchPanning: 'Touchscreen panning',
 
 	roundedTipPen: 'Round',
-	roundedTipPen2: 'Round (2)',
+	roundedTipPen2: 'Polyline',
 	flatTipPen: 'Flat',
 	arrowPen: 'Arrow',
 	linePen: 'Line',
@@ -170,7 +170,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	penDropdown__colorHelpText: 'Changes the pen\'s color',
 	penDropdown__thicknessHelpText:
 		'Changes the thickness of strokes drawn by the pen.',
-	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.',
+	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.',
 	penDropdown__autocorrectHelpText:
 		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
 	penDropdown__stabilizationHelpText:

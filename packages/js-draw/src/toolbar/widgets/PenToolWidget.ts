@@ -193,7 +193,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		});
 
 		const penSelector = makeGridSelector(
-			this.localizationTable.selectPenTip,
+			this.localizationTable.selectPenType,
 			this.getCurrentPenTypeIdx(),
 			allChoices.filter(choice => !choice.isShapeBuilder),
 		);
