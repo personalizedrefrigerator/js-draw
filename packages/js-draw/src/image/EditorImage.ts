@@ -788,7 +788,7 @@ export class ImageNode {
 		}
 
 		if (bubbleUp && !oldBBox.eq(this.bbox)) {
-			if (!this.bbox.containsRect(oldBBox)) {
+			if (this.bbox.containsRect(oldBBox)) {
 				this.parent?.unionBBoxWith(this.bbox);
 			} else {
 				this.parent?.recomputeBBox(true);
