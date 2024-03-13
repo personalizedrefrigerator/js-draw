@@ -55,6 +55,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		// Additional client-specified pens.
 		const additionalPens = editor.getCurrentSettings().pens?.additionalPenTypes ?? [];
+		const filterPens = editor.getCurrentSettings().pens?.filterPenTypes ?? (()=>true);
 
 		// Default pen types
 		this.penTypes = [
@@ -116,7 +117,7 @@ export default class PenToolWidget extends BaseToolWidget {
 				factory: makeOutlinedCircleBuilder,
 			},
 			...(additionalPens.filter(pen => pen.isShapeBuilder)),
-		];
+		].filter(filterPens);
 
 		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
 			if (toolEvt.kind !== EditorEventType.ToolUpdated) {
