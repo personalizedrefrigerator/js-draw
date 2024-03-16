@@ -116,7 +116,23 @@ export interface EditorSettings {
 		/**
 		 * Additional pen types that can be selected in a toolbar.
 		 */
-		additionalPenTypes: readonly Readonly<PenTypeRecord>[],
+		additionalPenTypes?: readonly Readonly<PenTypeRecord>[],
+
+		/**
+		 * Should return `true` if a pen type should be shown in the toolbar.
+		 *
+		 * @example
+		 * ```ts,runnable
+		 * import {Editor} from 'js-draw';
+		 * const editor = new Editor(document.body, {
+		 *   // Only allow selecting the polyline pen from the toolbar.
+		 *   pens: { filterPenTypes: p => p.id === 'polyline-pen' },
+		 * });
+		 * editor.addToolbar();
+		 * ```
+		 * Notice that this setting only affects the toolbar GUI.
+		 */
+		filterPenTypes?: (penType: PenTypeRecord)=>boolean,
 	}|null,
 }
 
@@ -305,7 +321,10 @@ export class Editor {
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 			notices: [],
 			appInfo: settings.appInfo ? { ...settings.appInfo } : null,
-			pens: { additionalPenTypes: settings.pens?.additionalPenTypes ?? [], },
+			pens: {
+				additionalPenTypes: settings.pens?.additionalPenTypes ?? [],
+				filterPenTypes: settings.pens?.filterPenTypes ?? (()=>true)
+			},
 		};
 
 		// Validate settings

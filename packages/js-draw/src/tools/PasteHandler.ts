@@ -53,7 +53,6 @@ export default class PasteHandler extends BaseTool {
 		})();
 
 		if (svgData) {
-			console.log('svgpaste', svgData);
 			void this.doSVGPaste(svgData);
 			return true;
 		}

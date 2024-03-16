@@ -23,7 +23,7 @@ const localization: EditorLocalization = {
 	save: 'Guardar',
 	undo: 'Deshace',
 	redo: 'Rehace',
-	selectPenTip: 'Punta',
+	selectPenType: 'Punta',
 	selectShape: 'Forma',
 	pickColorFromScreen: 'Selecciona un color de la pantalla',
 	clickToPickColorAnnouncement: 'Haga un clic en la pantalla para seleccionar un color',

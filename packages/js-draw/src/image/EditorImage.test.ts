@@ -199,6 +199,40 @@ describe('EditorImage', () => {
 		expect(getScreenRect()).objEq(
 			testStroke2.getBBox()
 		);
+
+		//
+		// Regression test:
+		// In the past, js-draw had a bug where the top-left of the root bounding box
+		// would be incorrect after:
+		// 1. Creating a node
+		// 2. Creating a node within the node created in (1)
+		// 3. Adding many strokes within node (2)
+		// 4. Deleting node (2)
+		// 5. Deleting node (1)
+		//
+
+		const stroke3 = new Stroke([ pathToRenderable(Path.fromRect(new Rect2(5, -11, 53, 53)), { fill: Color4.red })]);
+		await editor.dispatch(EditorImage.addElement(stroke3));
+
+		// After adding multiple new strokes, should have correct top-left corner
+		// (tests non-zero case).
+		for (let x = 10; x <= 60; x += 1) {
+			for (let y = -10; y <= 40; y += 1) {
+				const stroke = new Stroke([ pathToRenderable(Path.fromString(`m${x},${y} l1,0 l0,1`), { fill: Color4.red })]);
+				await editor.dispatch(EditorImage.addElement(stroke));
+			}
+		}
+
+		expect(getScreenRect()).objEq(stroke3.getBBox().union(testStroke2.getBBox()));
+
+		await editor.dispatch(new Erase([
+			stroke3,
+		]));
+		await editor.dispatch(new Erase([
+			testStroke2,
+		]));
+
+		expect(getScreenRect()).objEq(new Rect2(10, -10, 51, 51));
 	});
 
 	it('setAutoresizeEnabled should return a serializable command', async () => {

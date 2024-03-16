@@ -1,6 +1,6 @@
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import RenderablePathSpec from '../../rendering/RenderablePathSpec';
-import { Point2, Rect2, Color4, PathCommand, PathCommandType } from '@js-draw/math';
+import { Point2, Rect2, Color4, PathCommand, PathCommandType, Vec2, LineSegment2 } from '@js-draw/math';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';
@@ -11,7 +11,6 @@ import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 /**
  * Creates strokes from line segments rather than Bézier curves.
  *
- * @beta Output behavior may change significantly between versions. For now, intended for debugging.
  */
 export const makePolylineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
@@ -29,6 +28,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 
 	private lastPoint: Point2;
 	private startPoint: StrokeDataPoint;
+	private lastLineSegment: LineSegment2|null = null;
 
 	public constructor(
 		startPoint: StrokeDataPoint,
@@ -73,7 +73,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 		if (commands.length <= 1) {
 			commands.push({
 				kind: PathCommandType.LineTo,
-				point: startPoint,
+				point: startPoint.plus(Vec2.of(this.averageWidth / 4, 0)),
 			});
 		}
 
@@ -135,12 +135,20 @@ export default class PolylineBuilder implements ComponentBuilder {
 		const roundedPoint = this.roundPoint(newPoint.pos);
 
 		if (!roundedPoint.eq(this.lastPoint)) {
+			// If almost exactly in the same line as the previous
+			if (this.lastLineSegment && this.lastLineSegment.direction.dot(roundedPoint.minus(this.lastPoint).normalized()) > 0.997) {
+				this.parts.pop();
+				this.lastPoint = this.lastLineSegment.p1;
+			}
+
 			this.parts.push({
 				kind: PathCommandType.LineTo,
 				point: this.roundPoint(newPoint.pos),
 			});
 
 			this.bbox = this.bbox.grownToPoint(roundedPoint);
+			this.lastLineSegment = new LineSegment2(this.lastPoint, roundedPoint);
+			this.lastPoint = roundedPoint;
 		}
 	}
 }
