@@ -23,6 +23,7 @@ export {
 
 	IntersectionResult as PathIntersectionResult,
 	CurveIndexRecord as PathCurveIndex,
+	compareCurveIndices as comparePathIndices,
 	PathCommandType,
 	PathCommand,
 	LinePathCommand,

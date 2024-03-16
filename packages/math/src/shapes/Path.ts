@@ -70,6 +70,16 @@ export interface CurveIndexRecord {
 	parameterValue: number;
 }
 
+/** Returns a positive number if `a` comes after `b`, 0 if equal, and negative otherwise. */
+export const compareCurveIndices = (a: CurveIndexRecord, b: CurveIndexRecord) => {
+	const indexCompare = a.curveIndex - b.curveIndex;
+	if (indexCompare === 0) {
+		return a.parameterValue - b.parameterValue;
+	} else {
+		return indexCompare;
+	}
+};
+
 /**
  * Allows indexing a particular part of a path.
  *

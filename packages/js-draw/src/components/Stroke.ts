@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -187,14 +187,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			}
 
 			// Sort first by curve index, then by parameter value
-			intersectionPoints.sort((a, b) => {
-				const indexCompare = a.curveIndex - b.curveIndex;
-				if (indexCompare === 0) {
-					return a.parameterValue - b.parameterValue;
-				} else {
-					return indexCompare;
-				}
-			});
+			intersectionPoints.sort(comparePathIndices);
 
 			const isFirstPointInside = !!intersectionPoints.length && isPointInsideOriginalPath(intersectionPoints[0].point);
 
@@ -255,7 +248,10 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				};
 
 				const p0 = originalDivPath.nearestPointTo(intersectionPoints[0].point);
-				const reverse = path.closedContainsPoint(originalDivPath.tangentAt(p0).times(1e-12).plus(intersectionPoints[0].point));
+				const p1 = originalDivPath.nearestPointTo(intersectionPoints[1].point);
+				const reverse =
+					path.closedContainsPoint(originalDivPath.tangentAt(p0).times(1e-12).plus(intersectionPoints[0].point))
+					|| !path.closedContainsPoint(originalDivPath.tangentAt(p1).times(1e-12).plus(intersectionPoints[1].point));
 				const cutOut = createCutOut(reverse);
 
 				const pa = path.nearestPointTo(intersectionPoints[0].point);
