@@ -65,8 +65,8 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	 * ]);
 	 * ```
 	 */
-	public constructor(parts: RenderablePathSpec[]) {
-		super('stroke');
+	public constructor(parts: RenderablePathSpec[], initialZIndex?: number) {
+		super('stroke', initialZIndex);
 
 		this.approximateRenderingTime = 0;
 		this.parts = [];
@@ -178,7 +178,8 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 						path = path.asClosed();
 					}
 				}
-				return new Stroke([ pathToRenderable(path, part.style) ]);
+				console.assert(!isNaN(path.getExactBBox().area), 'Creating a stroke with NaN area');
+				return new Stroke([ pathToRenderable(path, part.style) ], this.getZIndex());
 			};
 
 			const intersectionPoints: PathIntersectionResult[] = [];
