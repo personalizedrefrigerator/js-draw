@@ -233,8 +233,10 @@ export default class Eraser extends BaseTool {
 	}
 
 	public override onGestureCancel(): void {
+		this.addCommands.forEach(cmd => cmd.unapply(this.editor));
 		this.eraseCommands.forEach(cmd => cmd.unapply(this.editor));
 		this.eraseCommands = [];
+		this.addCommands = [];
 		this.clearPreview();
 	}
 
