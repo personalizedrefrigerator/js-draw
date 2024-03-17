@@ -123,9 +123,6 @@ export default class CanvasRenderer extends AbstractRenderer {
 		if (style.fill.a > 0) {
 			this.ctx.fillStyle = style.fill.toHexString();
 			this.ctx.fill();
-			this.ctx.strokeStyle = 'red';
-			this.ctx.lineWidth = 0.5;
-			this.ctx.stroke();
 		}
 
 		if (style.stroke) {
