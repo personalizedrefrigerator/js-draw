@@ -87,6 +87,18 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 	}
 
 	public override argIntersectsLineSegment(line: LineSegment2): number[] {
+		// Bezier-js has a bug when all control points of a Bezier curve lie on
+		// a line. Our solution involves converting the Bezier into a line, then
+		// finding the parameter value that produced the intersection.
+		//
+		// TODO: This is unnecessarily slow. A better solution would be to fix
+		// the bug upstream.
+		const asLine = LineSegment2.ofSmallestContainingPoints(this.getPoints());
+		if (asLine) {
+			const intersection = asLine.intersectsLineSegment(line);
+			return intersection.map(p => this.nearestPointTo(p).parameterValue);
+		}
+
 		const bezier = this.getBezier();
 
 		return bezier.intersects(line).map(t => {

@@ -238,12 +238,15 @@ describe('Path', () => {
 
 		it.each([
 			[new LineSegment2(Vec2.of(43.5,-12.5), Vec2.of(40.5,24.5)), 0],
-			// TODO: The below case is failing. It seems to be a Bezier-js bug though...
-			// (The Bézier.js method returns an empty array).
-			//[new LineSegment2(Vec2.of(35.5,19.5), Vec2.of(38.5,-17.5)), 0],
+			[new LineSegment2(Vec2.of(35.5,19.5), Vec2.of(38.5,-17.5)), 0],
 		])('should correctly report positive intersections with a line-like Bézier', (line, strokeRadius) => {
 			const bezier = Path.fromString('M0,0 Q50,0 100,0');
 			expect(bezier.intersection(line, strokeRadius).length).toBeGreaterThan(0);
+		});
+
+		test('should handle near-vertical lines', () => {
+			const intersections = Path.fromString('M0,0 Q50,0 100,0').intersection(new LineSegment2(Vec2.of(44, -12), Vec2.of(39, 25)));
+			expect(intersections).toHaveLength(1);
 		});
 	});
 

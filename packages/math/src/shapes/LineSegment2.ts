@@ -46,6 +46,31 @@ export class LineSegment2 extends Parameterized2DShape {
 		}
 	}
 
+	/**
+	 * Returns the smallest line segment that contains all points in `points`, or `null`
+	 * if no such line segment exists.
+	 *
+	 * @example
+	 * ```ts,runnable
+	 * import {LineSegment2, Vec2} from '@js-draw/math';
+	 * console.log(LineSegment2.ofSmallestContainingPoints([Vec2.of(1, 0), Vec2.of(0, 1)]));
+	 * ```
+	 */
+	public static ofSmallestContainingPoints(points: readonly Point2[]) {
+		if (points.length <= 1) return null;
+
+		const sorted = [...points].sort((a, b) => a.x !== b.x ? a.x - b.x : a.y - b.y);
+		const line = new LineSegment2(sorted[0], sorted[sorted.length - 1]);
+
+		for (const point of sorted) {
+			if (!line.containsPoint(point)) {
+				return null;
+			}
+		}
+
+		return line;
+	}
+
 	// Accessors to make LineSegment2 compatible with bezier-js's
 	// interface
 
