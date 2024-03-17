@@ -34,15 +34,6 @@ export enum ComponentSizingMode {
 	Anywhere,
 }
 
-export interface ComponentDividedByOptions {
-	/**
-	 * Returns `true` iff the new component should not be added to the list of divisions.
-	 * @param isInside is `true` if the new `component` is inside the path used to divide
-	 *                 the component.
-	 */
-	filterNewComponent?(component: AbstractComponent, isInside: boolean): boolean;
-}
-
 /**
  * A base class for everything that can be added to an {@link EditorImage}.
  */
@@ -401,16 +392,16 @@ export default abstract class AbstractComponent {
 	}
 
 	/**
-	 * **Optional method**: Divides this component into sections roughly along the given path.
+	 * **Optional method**: Divides this component into sections roughly along the given path,
+	 * removing parts that are roughly within `shape`.
 	 *
 	 * **Notes**:
 	 * - A default implementation may be provided for this method in the future. Until then,
 	 *   this method is `undefined` if unsupported.
-	 * - Components inside `shape` should be at even indicies, components outside should be at odd.
 	 *
 	 * `viewport` should be provided to determine how newly-added points should be rounded.
 	 */
-	public dividedBy?(shape: Path, viewport: Viewport): AbstractComponent[];
+	public withRegionErased?(shape: Path, viewport: Viewport): AbstractComponent[];
 
 	// Return null iff this object cannot be safely serialized/deserialized.
 	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;

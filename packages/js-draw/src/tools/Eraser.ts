@@ -12,7 +12,6 @@ import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 import Command from '../commands/Command';
 import EditorImage from '../image/EditorImage';
 import uniteCommands from '../commands/uniteCommands';
-import Stroke from '../components/Stroke';
 import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 export enum EraserMode {
@@ -134,7 +133,7 @@ export default class Eraser extends BaseTool {
 				toErase.push(targetElem);
 
 				// Completely delete items that can't be divided.
-				if (!targetElem.dividedBy) {
+				if (!targetElem.withRegionErased) {
 					continue;
 				}
 
@@ -145,31 +144,14 @@ export default class Eraser extends BaseTool {
 					continue;
 				}
 
-				// We keep divided chunks that are significantly larger than the eraser head (and are
-				// thus unlikely to have been within the eraser).
-				let mustKeepIfLargerAreaThan = eraserRect.area * 2;
-				if (targetElem instanceof Stroke) {
-					const strokeWidth = targetElem.getParts()[0]?.style.stroke?.width ?? 0;
-					mustKeepIfLargerAreaThan = Math.max(mustKeepIfLargerAreaThan, strokeWidth * strokeWidth * 2);
-				}
-
 				// Join the current and previous rectangles so that points between events are also
 				// erased.
 				const erasePath = Path.fromConvexHullOf([...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners]);
 
-				const filterNewComponent = (component: AbstractComponent, isInside: boolean) => {
-					const tooLarge = component.getExactBBox().area > mustKeepIfLargerAreaThan;
-					return !isInside || tooLarge;
-				};
-
 				toAdd.push(
-					...targetElem.dividedBy(
+					...targetElem.withRegionErased(
 						erasePath,
 						this.editor.viewport,
-
-						// We only want to preserve the parts of the stroke **outside**
-						// the eraser, so filter the others out:
-						{ filterNewComponent }
 					)
 				);
 			}

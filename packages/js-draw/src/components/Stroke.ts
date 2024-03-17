@@ -3,7 +3,7 @@ import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersec
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
-import AbstractComponent, { ComponentDividedByOptions } from './AbstractComponent';
+import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
@@ -154,7 +154,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		}
 	}
 
-	public override dividedBy(path: Path, viewport: Viewport, options?: ComponentDividedByOptions) {
+	public override withRegionErased(path: Path, viewport: Viewport) {
 		const polyline = path.polylineApproximation();
 		const originalDivPath = path;
 
@@ -216,7 +216,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 					return;
 				}
 
-				if (options?.filterNewComponent && !options.filterNewComponent(component, isInside)) {
+				if (isInside) {
 					return;
 				}
 
