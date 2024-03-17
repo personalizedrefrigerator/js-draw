@@ -679,7 +679,7 @@ export class Path {
 			//      <---------|    keep     |-------------->
 			//      x                                      x
 			//  startPoint                             endPoint
-			const splitAtFrom = this.splitAt(deleteFrom, options);
+			const splitAtFrom = this.splitAt([deleteFrom], options);
 			const beforeFrom = splitAtFrom[0];
 
 			// We need splitNear, rather than splitAt, because beforeFrom does not have
@@ -691,108 +691,165 @@ export class Path {
 		}
 	}
 
-	// @internal
-	public splitAt(splitAt: CurveIndexRecord, options?: PathSplitOptions): [Path]|[Path,Path] {
-		const { curveIndex, parameterValue } = splitAt;
+	public splitAt(at: CurveIndexRecord, options?: PathSplitOptions): [Path]|[Path, Path];
+	public splitAt(at: CurveIndexRecord[], options?: PathSplitOptions): Path[];
 
-		if (this.geometry.length === 0) {
+	// @internal
+	public splitAt(splitAt: CurveIndexRecord[]|CurveIndexRecord, options?: PathSplitOptions): Path[] {
+		if (!Array.isArray(splitAt)) {
+			splitAt = [splitAt];
+		}
+
+		const expectedSplitCount = splitAt.length + 1;
+		splitAt = [...splitAt];
+		splitAt.sort(compareCurveIndices);
+
+		//
+		// Bounds checking & reversal.
+		//
+
+		while (
+			splitAt.length > 0
+			&& splitAt[splitAt.length - 1].curveIndex >= this.parts.length - 1
+			&& splitAt[splitAt.length - 1].parameterValue >= 1
+		) {
+			splitAt.pop();
+		}
+
+		splitAt.reverse(); // .reverse() <-- We're `.pop`ing from the end
+
+		while (
+			splitAt.length > 0
+			&& splitAt[splitAt.length - 1].curveIndex <= 0
+			&& splitAt[splitAt.length - 1].parameterValue <= 0
+		) {
+			splitAt.pop();
+		}
+
+		if (splitAt.length === 0 || this.parts.length === 0) {
 			return [this];
 		}
+
+		const mapNewPoint = options?.mapNewPoint ?? ((p: Point2)=>p);
 
 		const result: Path[] = [];
 		let currentStartPoint = this.startPoint;
 		let currentPath: PathCommand[] = [];
 
-		const mapNewPoint = options?.mapNewPoint ?? ((p: Point2)=>p);
+		//
+		// Splitting
+		//
 
-		// Split in two
+		let { curveIndex, parameterValue } = splitAt.pop()!;
+
 		for (let i = 0; i < this.parts.length; i ++) {
-			if (i === curveIndex) {
-				const part = this.parts[i];
-				const geom = this.geometry[i];
-				let newPathStart: Point2;
-				const newPath: PathCommand[] = [];
+			if (i !== curveIndex) {
+				currentPath.push(this.parts[i]);
+			} else {
+				let part = this.parts[i];
+				let geom = this.geometry[i];
+				while (i === curveIndex) {
+					let newPathStart: Point2;
+					const newPath: PathCommand[] = [];
 
-				switch (part.kind) {
-				case PathCommandType.MoveTo:
-					currentPath.push({
-						kind: part.kind,
-						point: part.point,
-					});
-					newPathStart = part.point;
-					break;
-				case PathCommandType.LineTo:
-					{
-						const split = (geom as LineSegment2).splitAt(parameterValue);
+					switch (part.kind) {
+					case PathCommandType.MoveTo:
 						currentPath.push({
 							kind: part.kind,
-							point: mapNewPoint(split[0].p2),
+							point: part.point,
 						});
-						newPathStart = split[0].p2;
-						if (split.length > 1) {
-							console.assert(split.length === 2);
-							newPath.push({
+						newPathStart = part.point;
+						break;
+					case PathCommandType.LineTo:
+						{
+							const split = (geom as LineSegment2).splitAt(parameterValue);
+							currentPath.push({
 								kind: part.kind,
-
-								// Don't map: For lines, the end point of the split is
-								// the same as the end point of the original:
-								point: split[1]!.p2,
+								point: mapNewPoint(split[0].p2),
 							});
+							newPathStart = split[0].p2;
+							if (split.length > 1) {
+								console.assert(split.length === 2);
+								newPath.push({
+									kind: part.kind,
+
+									// Don't map: For lines, the end point of the split is
+									// the same as the end point of the original:
+									point: split[1]!.p2,
+								});
+								geom = split[1]!;
+							}
+						}
+						break;
+					case PathCommandType.QuadraticBezierTo:
+					case PathCommandType.CubicBezierTo:
+						{
+							const split = (geom as BezierJSWrapper).splitAt(parameterValue);
+							let isFirstPart = split.length === 2;
+							for (const segment of split) {
+								geom = segment;
+								const targetArray = isFirstPart ? currentPath : newPath;
+								const controlPoints = segment.getPoints();
+								if (part.kind === PathCommandType.CubicBezierTo) {
+									targetArray.push({
+										kind: part.kind,
+										controlPoint1: mapNewPoint(controlPoints[1]),
+										controlPoint2: mapNewPoint(controlPoints[2]),
+										endPoint: mapNewPoint(controlPoints[3]),
+									});
+								} else {
+									targetArray.push({
+										kind: part.kind,
+										controlPoint: mapNewPoint(controlPoints[1]),
+										endPoint: mapNewPoint(controlPoints[2]),
+									});
+								}
+
+								// We want the start of the new path to match the start of the
+								// FIRST Bézier in the NEW path.
+								if (!isFirstPart) {
+									newPathStart = controlPoints[0];
+								}
+								isFirstPart = false;
+							}
+						}
+						break;
+					default: {
+						const exhaustivenessCheck: never = part;
+						return exhaustivenessCheck;
+					}
+					}
+
+					result.push(new Path(currentStartPoint, [...currentPath]));
+					currentStartPoint = mapNewPoint(newPathStart!);
+					console.assert(!!currentStartPoint, 'should have a start point');
+					currentPath = newPath;
+					part = newPath[newPath.length - 1] ?? part;
+
+					const nextSplit = splitAt.pop();
+					if (!nextSplit) {
+						break;
+					} else {
+						curveIndex = nextSplit.curveIndex;
+						if (i === curveIndex) {
+							const originalPoint = this.at(nextSplit);
+							parameterValue = geom.nearestPointTo(originalPoint).parameterValue;
+							currentPath = [];
+						} else {
+							parameterValue = nextSplit.parameterValue;
 						}
 					}
-					break;
-				case PathCommandType.QuadraticBezierTo:
-				case PathCommandType.CubicBezierTo:
-					{
-						const split = (geom as BezierJSWrapper).splitAt(parameterValue);
-						let isFirstPart = split.length === 2;
-						for (const segment of split) {
-							const targetArray = isFirstPart ? currentPath : newPath;
-							const controlPoints = segment.getPoints();
-							if (part.kind === PathCommandType.CubicBezierTo) {
-								targetArray.push({
-									kind: part.kind,
-									controlPoint1: mapNewPoint(controlPoints[1]),
-									controlPoint2: mapNewPoint(controlPoints[2]),
-									endPoint: mapNewPoint(controlPoints[3]),
-								});
-							} else {
-								targetArray.push({
-									kind: part.kind,
-									controlPoint: mapNewPoint(controlPoints[1]),
-									endPoint: mapNewPoint(controlPoints[2]),
-								});
-							}
-
-							// We want the start of the new path to match the start of the
-							// FIRST Bézier in the NEW path.
-							if (!isFirstPart) {
-								newPathStart = controlPoints[0];
-							}
-							isFirstPart = false;
-						}
-					}
-					break;
-				default:
-				{
-					const exhaustivenessCheck: never = part;
-					return exhaustivenessCheck;
 				}
-				}
-
-				result.push(new Path(currentStartPoint, [...currentPath]));
-				currentStartPoint = mapNewPoint(newPathStart!);
-				console.assert(!!currentStartPoint, 'should have a start point');
-				currentPath = newPath;
-			} else {
-				currentPath.push(this.parts[i]);
 			}
 		}
 
 		result.push(new Path(currentStartPoint, currentPath));
 
-		console.assert(result.length === 2, 'should split in two');
-		return result as [Path,Path];
+		console.assert(
+			result.length === expectedSplitCount,
+			`should split into splitAt.length + 1 splits (was ${result.length}, expected ${expectedSplitCount})`
+		);
+		return result;
 	}
 
 	// @internal
@@ -964,7 +1021,8 @@ export class Path {
 		return new Path(newStart, newParts);
 	}
 
-	private getEndPoint() {
+	/** Computes and returns the end point of this path */
+	public getEndPoint() {
 		if (this.parts.length === 0) {
 			return this.startPoint;
 		}

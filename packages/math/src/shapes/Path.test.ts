@@ -1,5 +1,5 @@
 import LineSegment2 from './LineSegment2';
-import Path, { PathCommandType } from './Path';
+import Path, { CurveIndexRecord, PathCommandType } from './Path';
 import Rect2 from './Rect2';
 import { Point2, Vec2 } from '../Vec2';
 import CubicBezier from './CubicBezier';
@@ -345,6 +345,43 @@ describe('Path', () => {
 			}
 
 			expect(strokedRect.startPoint).objEq(lastSegment.point);
+		});
+	});
+
+	describe('splitAt', () => {
+		it.each([
+			2, 3, 4, 5,
+		])('should split a line into %d sections', (numSections) => {
+			const path = Path.fromString('m0,0 l1,0');
+
+			const splitIndices: CurveIndexRecord[] = [];
+			for (let i = 0; i < numSections; i++) {
+				splitIndices.push({ curveIndex: 0, parameterValue: (i + 1) / (numSections + 1) });
+			}
+			const split = path.splitAt(splitIndices);
+
+			expect(split).toHaveLength(numSections + 1);
+			expect(split[numSections].getEndPoint()).objEq(Vec2.unitX);
+			for (let i = 0; i < numSections; i ++) {
+				expect(split[i].geometry).toHaveLength(1);
+				const geom = split[i].geometry[0] as LineSegment2;
+				expect(geom.p1.y).toBeCloseTo(0);
+				expect(geom.p1.x).toBeCloseTo(i / (numSections + 1));
+				expect(geom.p2.y).toBeCloseTo(0);
+				expect(geom.p2.x).toBeCloseTo((i + 1) / (numSections + 1));
+			}
+		});
+
+		it('should handle the case where the first division is at the beginning of the path', () => {
+			const path = Path.fromString('m0,0 l1,0');
+			const beginningSplit = path.splitAt({ curveIndex: 0, parameterValue: 0 });
+			expect(beginningSplit).toHaveLength(1);
+
+			const endSplit = path.splitAt({ curveIndex: 0, parameterValue: 1 });
+			expect(endSplit).toHaveLength(1);
+
+			expect(beginningSplit[0]).objEq(path);
+			expect(beginningSplit[0]).objEq(endSplit[0]);
 		});
 	});
 
