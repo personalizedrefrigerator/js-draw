@@ -159,7 +159,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		const polyline = path.polylineApproximation();
 		const originalDivPath = path;
 
-		const isPointInsideOriginalPath = (point: Point2) => {
+		const isPointInsideEraser = (point: Point2) => {
 			return originalDivPath.closedContainsPoint(point);
 		};
 
@@ -192,9 +192,10 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			// Sort first by curve index, then by parameter value
 			intersectionPoints.sort(comparePathIndices);
 
-			const isFirstPointInside = !!intersectionPoints.length && isPointInsideOriginalPath(intersectionPoints[0].point);
+			const isInsideJustBeforeFirst =
+				!!intersectionPoints.length && isPointInsideEraser(path.at({ curveIndex: intersectionPoints[0].curveIndex, parameterValue: 0 }));
 
-			let intersectionCount = isFirstPointInside ? 1 : 0;
+			let intersectionCount = isInsideJustBeforeFirst ? 1 : 0;
 			const addNewPath = (path: Path, knownToBeInside?: boolean) => {
 				const component = makeStroke(path);
 
@@ -209,7 +210,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				// (including https://github.com/Pomax/bezierjs/issues/179).
 				// Even if not all intersections are returned correctly, we still want
 				// isInside to be roughly correct.
-				if (knownToBeInside === undefined && !isInside && isPointInsideOriginalPath(path.getExactBBox().center)) {
+				if (knownToBeInside === undefined && !isInside && isPointInsideEraser(path.getExactBBox().center)) {
 					isInside = !isInside;
 				}
 
