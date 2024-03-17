@@ -154,6 +154,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		}
 	}
 
+	/** @beta -- May fail for concave `path`s */
 	public override withRegionErased(path: Path, viewport: Viewport) {
 		const polyline = path.polylineApproximation();
 		const originalDivPath = path;
@@ -163,6 +164,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		};
 
 		const newStrokes: Stroke[] = [];
+		let failedAssertions = false;
 		for (const part of this.parts) {
 			const path = part.path;
 
@@ -207,34 +209,77 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				// (including https://github.com/Pomax/bezierjs/issues/179).
 				// Even if not all intersections are returned correctly, we still want
 				// isInside to be roughly correct.
-				if (knownToBeInside === undefined && isPointInsideOriginalPath(path.getExactBBox().center) !== isInside) {
+				if (knownToBeInside === undefined && !isInside && isPointInsideOriginalPath(path.getExactBBox().center)) {
 					isInside = !isInside;
-					intersectionCount ++;
 				}
 
 				if (!component) {
 					return;
 				}
 
-				if (isInside) {
-					return;
+				// Assertion: Avoid deleting sections that are much larger than the eraser.
+				failedAssertions ||= isInside && path.getExactBBox().maxDimension > originalDivPath.getExactBBox().maxDimension * 2;
+
+				if (!isInside) {
+					newStrokes.push(component);
 				}
-
-
-				newStrokes.push(component);
 			};
 
-			if (part.style.stroke) {
+			if (part.style.fill.a === 0) {
 				const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
 				for (const splitPart of split) {
 					addNewPath(splitPart);
 				}
-			} else if (intersectionPoints.length >= 2 && intersectionPoints.length % 2 === 0) {
-				const intersectionsOnEraser = intersectionPoints.map(p => {
-					return originalDivPath.nearestPointTo(p.point);
-				});
-				intersectionsOnEraser.sort(comparePathIndices);
+			} else if (intersectionPoints.length === 2) {
+				const createCutOut = (reverse: boolean): Path => {
+					const fullDivPath = reverse ? originalDivPath.reversed() : originalDivPath;
 
+					const p0 = fullDivPath.nearestPointTo(intersectionPoints[0].point);
+					const p1 = fullDivPath.nearestPointTo(intersectionPoints[1].point);
+
+					const cutOut = fullDivPath.spliced(p0, p1, undefined, { mapNewPoint: p => viewport.roundPoint(p), });
+					return cutOut;
+				};
+
+				const tangentPointsInwardAt = (p: Point2) => {
+					const pointOnEraser = originalDivPath.nearestPointTo(p);
+					const checkLength = viewport.getSizeOfPixelOnCanvas() / 2;
+					return path.closedContainsPoint(
+						originalDivPath.tangentAt(pointOnEraser).times(checkLength).plus(p)
+					);
+				};
+
+				const reverse = tangentPointsInwardAt(intersectionPoints[0].point);
+				if (reverse === tangentPointsInwardAt(intersectionPoints[1].point)) {
+					addNewPath(path, false);
+					failedAssertions = true;
+				} else {
+					const cutOut = createCutOut(reverse);
+
+					let pa = path.nearestPointTo(intersectionPoints[0].point);
+					let pb = path.nearestPointTo(intersectionPoints[1].point);
+
+					// Handle the case where the start point is in the eraser, and we
+					// need to splice in the opposite direction:
+					//
+					//  |  STROKE   |
+					//  |           |
+					//  \ %%%%%%%   |
+					//   \%    /%---|
+					//    %--./ % <-- start
+					//    %%%%%%%
+					//
+					if (originalDivPath.closedContainsPoint(part.startPoint)) {
+						const temp = pa;
+						pa = pb;
+						pb = temp;
+					}
+					const remainder = path.spliced(pa, pb, cutOut.reversed(), { mapNewPoint: p => viewport.roundPoint(p) });
+
+					addNewPath(remainder, false);
+					addNewPath(cutOut);
+				}
+			} else if (intersectionPoints.length > 2) {
 				// We currently assume that a 4-point intersection means that the intersection
 				// looks similar to this:
 				//   -----------
@@ -267,7 +312,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				//
 				// The difficulty here is correctly pairing edges to create the the output
 				// strokes, particularly because we don't know the order of intersection points.
-				const parts = path.splitAt(intersectionPoints);
+				const parts = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
 				for (let i = 0; i < Math.floor(parts.length / 2); i++) {
 					addNewPath(parts[i].union(parts[parts.length - i - 1]).asClosed());
 				}
@@ -277,6 +322,10 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			} else {
 				addNewPath(path, false);
 			}
+		}
+
+		if (failedAssertions) {
+			return [this];
 		}
 
 		return newStrokes;

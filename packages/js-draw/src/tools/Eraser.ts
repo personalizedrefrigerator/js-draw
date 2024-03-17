@@ -146,7 +146,9 @@ export default class Eraser extends BaseTool {
 
 				// Join the current and previous rectangles so that points between events are also
 				// erased.
-				const erasePath = Path.fromConvexHullOf([...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners]);
+				const erasePath = Path.fromConvexHullOf([
+					...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners
+				].map(p => this.editor.viewport.roundPoint(p)));
 
 				toAdd.push(
 					...targetElem.withRegionErased(

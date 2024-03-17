@@ -506,4 +506,23 @@ describe('Path', () => {
 	])('.nearestPointTo should return the closest point on a path to the given parameter (case %#)', (path, point, expectedClosest) => {
 		expect(Path.fromString(path).nearestPointTo(point).point).objEq(expectedClosest, 0.002);
 	});
+
+	it.each([
+		// Polyline
+		[ 'm0,0 l1,0 l0,1', [ 0, 0.5 ], Vec2.of(1, 0) ],
+		[ 'm0,0 l1,0 l0,1', [ 0, 0.99 ], Vec2.of(1, 0) ],
+		[ 'm0,0 l1,0 l0,1', [ 1, 0 ], Vec2.of(0, 1) ],
+		[ 'm0,0 l1,0 l0,1', [ 1, 0.5 ], Vec2.of(0, 1) ],
+		[ 'm0,0 l1,0 l0,1', [ 1, 1 ], Vec2.of(0, 1) ],
+
+		// Shape with quadratic Bézier curves
+		[ 'M0,0 Q1,0 0,1', [ 0, 0 ], Vec2.of(1, 0) ],
+		[ 'M0,0 Q1,1 0,1', [ 0, 1 ], Vec2.of(-1, 0) ],
+		[ 'M0,0 Q1,0 1,1 Q0,1 0,2', [ 0, 1 ], Vec2.of(0, 1) ],
+		[ 'M0,0 Q1,0 1,1 Q0,1 0,2', [ 1, 1 ], Vec2.of(0, 1) ],
+	])('.tangentAt should point in the direction of increasing parameter values, for curve %s at %j', (pathString, evalAt, expected) => {
+		const at: CurveIndexRecord = { curveIndex: evalAt[0], parameterValue: evalAt[1] };
+		const path = Path.fromString(pathString);
+		expect(path.tangentAt(at)).objEq(expected);
+	});
 });

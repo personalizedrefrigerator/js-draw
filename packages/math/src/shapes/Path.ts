@@ -934,23 +934,25 @@ export class Path {
 	}
 
 	/**
-	 * Does not work in all cases (e.g. with moveTo commands).
 	 * @internal
 	 */
 	public closedContainsPoint(point: Point2) {
-		const pointOutside1 = this.bbox.topRight.plus(Vec2.of(1, 1));
-		const pointOutside2 = this.bbox.bottomLeft.plus(Vec2.of(-1, -1));
+		const pointOutside1 = this.bbox.topRight.plus(Vec2.of(1, -1));
+		const pointOutside2 = this.bbox.bottomLeft.plus(Vec2.of(-1, 1));
+		const pointOutside3 = this.bbox.topLeft.plus(Vec2.of(-1, -1));
+		const pointOutside4 = this.bbox.bottomRight.plus(Vec2.of(1, 1));
 		const asClosed = this.asClosed();
 
 		// Test multiple points --- Bezier-js-based line-curve intersections can have false
 		// negatives.
-		for (const target of [pointOutside1, pointOutside2]) {
+		let positivesCount = 0;
+		for (const target of [pointOutside1, pointOutside2, pointOutside3, pointOutside4]) {
 			const lineToInternal = new LineSegment2(target, point);
 			if (asClosed.intersection(lineToInternal).length % 2 === 1) {
-				return true;
+				positivesCount ++;
 			}
 		}
-		return false;
+		return positivesCount > 2;
 	}
 
 	// Creates a new path by joining [other] to the end of this path
