@@ -31,14 +31,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 	}
 
 	private makeIconForType(mode: EraserMode) {
-		if (mode === EraserMode.FullStroke) {
-			return this.editor.icons.makeEraserIcon(this.tool.getThickness());
-		} else if (mode === EraserMode.PartialStroke) {
-			return this.editor.icons.makeCloseIcon();//this.tool.getThickness());
-		} else {
-			const exhaustivenessCheck: never = mode;
-			return exhaustivenessCheck;
-		}
+		return this.editor.icons.makeEraserIcon(this.tool.getThickness(), mode);
 	}
 
 	protected createIcon(): Element {

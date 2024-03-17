@@ -6,6 +6,7 @@ import { StrokeDataPoint } from '../types';
 import Viewport from '../Viewport';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import { makePolylineBuilder } from '../components/builders/PolylineBuilder';
+import { EraserMode } from '../tools/Eraser';
 
 export type IconElemType = HTMLImageElement|SVGElement;
 
@@ -118,7 +119,7 @@ export default class IconProvider {
 		return icon;
 	}
 
-	public makeEraserIcon(eraserSize?: number): IconElemType {
+	public makeEraserIcon(eraserSize?: number, mode?: EraserMode): IconElemType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		eraserSize ??= 10;
 
@@ -127,9 +128,16 @@ export default class IconProvider {
 
 		// Draw an eraser-like shape. Created with Inkscape
 		icon.innerHTML = `
+		<defs>
+			<linearGradient id="dash-pattern">
+				<stop offset="80%" stop-color="${eraserColor}"/>
+				<stop offset="85%" stop-color="white"/>
+				<stop offset="90%" stop-color="${eraserColor}"/>
+			</linearGradient>
+		</defs>
 		<g>
 			<path
-				style="fill:${eraserColor}"
+				style="fill:${mode === EraserMode.PartialStroke ? 'url(#dash-pattern)' : eraserColor}"
 				stroke="black"
 				transform="rotate(41.35)"
 				d="M 52.5 27
