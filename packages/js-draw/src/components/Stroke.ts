@@ -180,7 +180,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 						path = path.asClosed();
 					}
 				}
-				console.assert(!isNaN(path.getExactBBox().area), 'Creating a stroke with NaN area');
+				if (isNaN(path.getExactBBox().area)) {
+					console.warn('Prevented creating a stroke with NaN area');
+					failedAssertions = true;
+					return null;
+				}
 				return new Stroke([ pathToRenderable(path, part.style) ], this.getZIndex());
 			};
 
@@ -226,7 +230,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				}
 			};
 
-			if (part.style.fill.a === 0) {
+			if (part.style.fill.a === 0) { // Not filled?
 				const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
 				for (const splitPart of split) {
 					addNewPath(splitPart);
