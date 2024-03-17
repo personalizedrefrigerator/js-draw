@@ -164,7 +164,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 		const newStrokes: Stroke[] = [];
 		for (const part of this.parts) {
-			let path = part.path;
+			const path = part.path;
 
 			const makeStroke = (path: Path): Stroke|null => {
 				if (part.style.fill.a > 0) {
@@ -225,42 +225,55 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			};
 
 			if (part.style.stroke) {
-				for (const intersection of intersectionPoints) {
-					const splitPoint = intersection.point;
-					const split = path.splitNear(splitPoint, { mapNewPoint: p => viewport.roundPoint(p), });
-
-					addNewPath(split[0]);
-
-					if (split.length === 2) {
-						path = split[1];
-					}
+				const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+				for (const splitPart of split) {
+					addNewPath(splitPart);
 				}
+			} else if (intersectionPoints.length >= 2 && intersectionPoints.length % 2 === 0) {
+				const intersectionsOnEraser = intersectionPoints.map(p => {
+					return originalDivPath.nearestPointTo(p.point);
+				});
+				intersectionsOnEraser.sort(comparePathIndices);
 
-				addNewPath(path);
-			} else if (intersectionPoints.length === 2) {
-				const createCutOut = (reverse: boolean) => {
-					const fullDivPath = reverse ? originalDivPath.reversed() : originalDivPath;
-
-					const p0 = fullDivPath.nearestPointTo(intersectionPoints[0].point);
-					const p1 = fullDivPath.nearestPointTo(intersectionPoints[1].point);
-					const cutOut = fullDivPath.spliced(p0, p1, undefined, { mapNewPoint: p => viewport.roundPoint(p), });
-
-					return cutOut;
-				};
-
-				const p0 = originalDivPath.nearestPointTo(intersectionPoints[0].point);
-				const p1 = originalDivPath.nearestPointTo(intersectionPoints[1].point);
-				const reverse =
-					path.closedContainsPoint(originalDivPath.tangentAt(p0).times(1e-12).plus(intersectionPoints[0].point))
-					|| !path.closedContainsPoint(originalDivPath.tangentAt(p1).times(1e-12).plus(intersectionPoints[1].point));
-				const cutOut = createCutOut(reverse);
-
-				const pa = path.nearestPointTo(intersectionPoints[0].point);
-				const pb = path.nearestPointTo(intersectionPoints[1].point);
-				path = path.spliced(pa, pb, cutOut.reversed(), { mapNewPoint: p => viewport.roundPoint(p), });
-
-				addNewPath(cutOut, true);
-				addNewPath(path, false);
+				// We currently assume that a 4-point intersection means that the intersection
+				// looks similar to this:
+				//   -----------
+				//  |   STROKE  |
+				//  |           |
+				//%%x-----------x%%%%%%%
+				//%                    %
+				//%      ERASER        %
+				//%                    %
+				//%%x-----------x%%%%%%%
+				//  |   STROKE  |
+				//   -----------
+				//
+				// Our goal is to separate STROKE into the contiguous parts outside
+				// of the eraser (as shown above).
+				//
+				// To do this, we split STROKE at each intersection:
+				//   3 3 3 3 3 3
+				//  3   STROKE  3
+				//  3           3
+				//  x           x
+				//  2           4
+				//  2   STROKE  4
+				//  2           4
+				//  x           x
+				//  1   STROKE  5
+				//   . 5 5 5 5 5
+				//   ^
+				// Start
+				//
+				// The difficulty here is correctly pairing edges to create the the output
+				// strokes, particularly because we don't know the order of intersection points.
+				const parts = path.splitAt(intersectionPoints);
+				for (let i = 0; i < Math.floor(parts.length / 2); i++) {
+					addNewPath(parts[i].union(parts[parts.length - i - 1]).asClosed());
+				}
+				if (parts.length % 2 !== 0) {
+					addNewPath(parts[Math.floor(parts.length / 2)].asClosed());
+				}
 			} else {
 				addNewPath(path, false);
 			}

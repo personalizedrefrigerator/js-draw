@@ -700,7 +700,6 @@ export class Path {
 			splitAt = [splitAt];
 		}
 
-		const expectedSplitCount = splitAt.length + 1;
 		splitAt = [...splitAt];
 		splitAt.sort(compareCurveIndices);
 
@@ -730,6 +729,7 @@ export class Path {
 			return [this];
 		}
 
+		const expectedSplitCount = splitAt.length + 1;
 		const mapNewPoint = options?.mapNewPoint ?? ((p: Point2)=>p);
 
 		const result: Path[] = [];
@@ -854,15 +854,32 @@ export class Path {
 
 	// @internal
 	public asClosed() {
-		if (this.getEndPoint().eq(this.startPoint)) {
+		const newParts: PathCommand[] = [];
+		let hasChanges = false;
+		for (const part of this.parts) {
+			if (part.kind === PathCommandType.MoveTo) {
+				newParts.push({
+					kind: PathCommandType.LineTo,
+					point: part.point,
+				});
+				hasChanges = true;
+			} else {
+				newParts.push(part);
+			}
+		}
+		if (!this.getEndPoint().eq(this.startPoint)) {
+			newParts.push({
+				kind: PathCommandType.LineTo,
+				point: this.startPoint,
+			});
+			hasChanges = true;
+		}
+
+		if (!hasChanges) {
 			return this;
 		}
 
-		const lineToStart: PathCommand = {
-			kind: PathCommandType.LineTo,
-			point: this.startPoint,
-		};
-		const result = new Path(this.startPoint, [...this.parts, lineToStart]);
+		const result = new Path(this.startPoint, newParts);
 		console.assert(result.getEndPoint().eq(result.startPoint));
 		return result;
 	}
