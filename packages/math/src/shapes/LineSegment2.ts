@@ -164,7 +164,11 @@ export class LineSegment2 extends Parameterized2DShape {
 		//     = ((o₁ᵧ - o₂ᵧ)((d₁ₓd₂ₓ)) + (d₂ᵧd₁ₓ)(o₂ₓ) - (d₁ᵧd₂ₓ)(o₁ₓ))/(d₂ᵧd₁ₓ - d₁ᵧd₂ₓ)
 		// ⇒ y = o₁ᵧ + d₁ᵧ · (x - o₁ₓ) / d₁ₓ = ...
 		let resultPoint, resultT;
-		if (this.direction.x === 0) {
+
+		// Consider very-near-vertical lines to be vertical --- not doing so can lead to
+		// precision error when dividing by this.direction.x.
+		const small = 4e-13;
+		if (Math.abs(this.direction.x) < small) {
 			// Vertical line: Where does the other have x = this.point1.x?
 			// x = o₁ₓ = o₂ₓ + d₂ₓ · (y - o₂ᵧ) / d₂ᵧ
 			// ⇒ (o₁ₓ - o₂ₓ)(d₂ᵧ/d₂ₓ) + o₂ᵧ = y
@@ -209,6 +213,7 @@ export class LineSegment2 extends Parameterized2DShape {
 		const resultToP2 = resultPoint.distanceTo(this.point2);
 		const resultToP3 = resultPoint.distanceTo(other.point1);
 		const resultToP4 = resultPoint.distanceTo(other.point2);
+
 		if (resultToP1 > this.length
 			|| resultToP2 > this.length
 			|| resultToP3 > other.length
