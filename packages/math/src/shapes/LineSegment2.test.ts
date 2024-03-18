@@ -74,6 +74,14 @@ describe('Line2', () => {
 		expect(line2.intersection(line1)).toBeNull();
 	});
 
+	it('(9.559000000000001, 11.687)->(9.559, 11.67673) should intersect (9.56069, 11.68077)->(9.55719, 11.68077)', () => {
+		// Points taken from an issue observed in the editor.
+		const l1 = new LineSegment2(Vec2.of(9.559000000000001, 11.687), Vec2.of(9.559, 11.67673));
+		const l2 = new LineSegment2(Vec2.of(9.56069, 11.68077), Vec2.of(9.55719, 11.68077));
+		expect(l2.intersects(l1)).toBe(true);
+		expect(l1.intersects(l2)).toBe(true);
+	});
+
 	it('Closest point to (0,0) on the line x = 1 should be (1,0)', () => {
 		const line = new LineSegment2(Vec2.of(1, 100), Vec2.of(1, -100));
 		expect(line.closestPointTo(Vec2.zero)).objEq(Vec2.of(1, 0));
