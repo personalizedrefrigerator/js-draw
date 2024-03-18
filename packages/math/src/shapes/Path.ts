@@ -65,6 +65,11 @@ export interface PathSplitOptions {
 	mapNewPoint?: (point: Point2)=>Point2;
 }
 
+/**
+ * Allows indexing a particular part of a path.
+ *
+ * @see {@link Path.at} {@link Path.tangentAt}
+ */
 export interface CurveIndexRecord {
 	curveIndex: number;
 	parameterValue: number;
@@ -81,14 +86,18 @@ export const compareCurveIndices = (a: CurveIndexRecord, b: CurveIndexRecord) =>
 };
 
 /**
- * Allows indexing a particular part of a path.
- *
- * @see {@link Path.at} {@link Path.tangentAt}
+ * Returns a version of `index` with its parameter value incremented by `stepBy`
+ * (which must be a positive step).
  */
-export interface CurveIndexRecord {
-	curveIndex: number;
-	parameterValue: number;
-}
+export const stepCurveIndexBy = (index: CurveIndexRecord, stepBy: number): CurveIndexRecord => {
+	console.assert(stepBy > 0, 'Cannot step curve indices by negative values.');
+
+	if (index.parameterValue + stepBy > 1) {
+		return { curveIndex: index.curveIndex + 1, parameterValue: index.parameterValue + stepBy - 1 };
+	}
+
+	return { curveIndex: index.curveIndex, parameterValue: index.parameterValue + stepBy };
+};
 
 /**
  * Represents a union of lines and curves.
@@ -937,27 +946,21 @@ export class Path {
 	 * @internal
 	 */
 	public closedContainsPoint(point: Point2) {
-		const pointOutside1 = this.bbox.topRight.plus(Vec2.of(1, -1));
-		const pointOutside2 = this.bbox.bottomLeft.plus(Vec2.of(-1, 1));
-		const pointOutside3 = this.bbox.topLeft.plus(Vec2.of(-1, -1));
-		const pointOutside4 = this.bbox.bottomRight.plus(Vec2.of(1, 1));
+		const bbox = this.getExactBBox();
+		if (!bbox.containsPoint(point)) {
+			return false;
+		}
+
+		const pointOutside = point.plus(Vec2.of(bbox.width, 0));
 		const asClosed = this.asClosed();
 
-		// Test multiple points --- Bezier-js-based line-curve intersections can have false
-		// negatives.
-		let positivesCount = 0;
-		for (const target of [pointOutside1, pointOutside2, pointOutside3, pointOutside4]) {
-			const lineToInternal = new LineSegment2(target, point);
-			if (asClosed.intersection(lineToInternal).length % 2 === 1) {
-				positivesCount ++;
-			}
-		}
-		return positivesCount > 2;
+		const lineToOutside = new LineSegment2(point, pointOutside);
+		return asClosed.intersection(lineToOutside).length % 2 === 1;
 	}
 
 	// Creates a new path by joining [other] to the end of this path
 	public union(
-		other: Path|null,
+		other: Path|PathCommand[]|null,
 
 		// allowReverse: true iff reversing other or this is permitted if it means
 		//               no moveTo command is necessary when unioning the paths.
@@ -965,6 +968,9 @@ export class Path {
 	): Path {
 		if (!other) {
 			return this;
+		}
+		if (Array.isArray(other)) {
+			return new Path(this.startPoint, [...this.parts, ...other]);
 		}
 
 		const thisEnd = this.getEndPoint();

@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices, stepPathIndexBy } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -155,12 +155,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	}
 
 	/** @beta -- May fail for concave `path`s */
-	public override withRegionErased(path: Path, viewport: Viewport) {
-		const polyline = path.polylineApproximation();
-		const originalDivPath = path;
+	public override withRegionErased(eraserPath: Path, viewport: Viewport) {
+		const polyline = eraserPath.polylineApproximation();
 
 		const isPointInsideEraser = (point: Point2) => {
-			return originalDivPath.closedContainsPoint(point);
+			return eraserPath.closedContainsPoint(point);
 		};
 
 		const newStrokes: Stroke[] = [];
@@ -214,7 +213,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				// (including https://github.com/Pomax/bezierjs/issues/179).
 				// Even if not all intersections are returned correctly, we still want
 				// isInside to be roughly correct.
-				if (knownToBeInside === undefined && !isInside && isPointInsideEraser(path.getExactBBox().center)) {
+				if (knownToBeInside === undefined && !isInside && eraserPath.closedContainsPoint(path.getExactBBox().center)) {
 					isInside = !isInside;
 				}
 
@@ -223,11 +222,19 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				}
 
 				// Assertion: Avoid deleting sections that are much larger than the eraser.
-				failedAssertions ||= isInside && path.getExactBBox().maxDimension > originalDivPath.getExactBBox().maxDimension * 2;
+				failedAssertions ||= isInside && path.getExactBBox().maxDimension > eraserPath.getExactBBox().maxDimension * 2;
 
 				if (!isInside) {
 					newStrokes.push(component);
 				}
+			};
+
+			const eraserTangentPointsInwardAt = (p: Point2) => {
+				const pointOnEraser = eraserPath.nearestPointTo(p);
+				const checkLength = viewport.getSizeOfPixelOnCanvas() / 3;
+				return path.closedContainsPoint(
+					eraserPath.tangentAt(pointOnEraser).times(checkLength).plus(p)
+				);
 			};
 
 			if (part.style.fill.a === 0) { // Not filled?
@@ -235,56 +242,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				for (const splitPart of split) {
 					addNewPath(splitPart);
 				}
-			} else if (intersectionPoints.length === 2) {
-				const createCutOut = (reverse: boolean): Path => {
-					const fullDivPath = reverse ? originalDivPath.reversed() : originalDivPath;
-
-					const p0 = fullDivPath.nearestPointTo(intersectionPoints[0].point);
-					const p1 = fullDivPath.nearestPointTo(intersectionPoints[1].point);
-
-					const cutOut = fullDivPath.spliced(p0, p1, undefined, { mapNewPoint: p => viewport.roundPoint(p), });
-					return cutOut;
-				};
-
-				const tangentPointsInwardAt = (p: Point2) => {
-					const pointOnEraser = originalDivPath.nearestPointTo(p);
-					const checkLength = viewport.getSizeOfPixelOnCanvas() / 2;
-					return path.closedContainsPoint(
-						originalDivPath.tangentAt(pointOnEraser).times(checkLength).plus(p)
-					);
-				};
-
-				const reverse = tangentPointsInwardAt(intersectionPoints[0].point);
-				if (reverse === tangentPointsInwardAt(intersectionPoints[1].point)) {
-					addNewPath(path, false);
-					failedAssertions = true;
-				} else {
-					const cutOut = createCutOut(reverse);
-
-					let pa = path.nearestPointTo(intersectionPoints[0].point);
-					let pb = path.nearestPointTo(intersectionPoints[1].point);
-
-					// Handle the case where the start point is in the eraser, and we
-					// need to splice in the opposite direction:
-					//
-					//  |  STROKE   |
-					//  |           |
-					//  \ %%%%%%%   |
-					//   \%    /%---|
-					//    %--./ % <-- start
-					//    %%%%%%%
-					//
-					if (originalDivPath.closedContainsPoint(part.startPoint)) {
-						const temp = pa;
-						pa = pb;
-						pb = temp;
-					}
-					const remainder = path.spliced(pa, pb, cutOut.reversed(), { mapNewPoint: p => viewport.roundPoint(p) });
-
-					addNewPath(remainder, false);
-					addNewPath(cutOut);
-				}
-			} else if (intersectionPoints.length > 2) {
+			} else if (intersectionPoints.length >= 2) {
 				// We currently assume that a 4-point intersection means that the intersection
 				// looks similar to this:
 				//   -----------
@@ -317,12 +275,55 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				//
 				// The difficulty here is correctly pairing edges to create the the output
 				// strokes, particularly because we don't know the order of intersection points.
-				const parts = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+
+				const createCutOut = (a: Point2, b: Point2): Path => {
+					const tangentInA = eraserTangentPointsInwardAt(a);
+
+					// We want to remove the area between b--->a and not a--->b, so if the tangent
+					// at point A is pointing inwards, we need to reverse the eraser to remove the
+					// correct part.
+					let reverseFirst = tangentInA;
+
+					const tangentInB = eraserTangentPointsInwardAt(b);
+					if (tangentInA === tangentInB) {
+						const containsPointJustAfter = (p: Point2) => {
+							const index = stepPathIndexBy(eraserPath.nearestPointTo(p), 0.01);
+							index.curveIndex %= eraserPath.parts.length;
+							return path.closedContainsPoint(eraserPath.at(index));
+						};
+						const containsJustAfterA = containsPointJustAfter(a);
+						const containsJustAfterB = containsPointJustAfter(b);
+						if (containsJustAfterA === containsJustAfterB) {
+							failedAssertions = true;
+						}
+						reverseFirst = containsJustAfterA;
+					}
+
+					const fullDivPath = reverseFirst ? eraserPath.reversed() : eraserPath;
+
+					const p0 = fullDivPath.nearestPointTo(a);
+					const p1 = fullDivPath.nearestPointTo(b);
+
+					const cutOut = fullDivPath.spliced(p0, p1, undefined, { mapNewPoint: p => viewport.roundPoint(p), });
+					return reverseFirst ? cutOut : cutOut.reversed();
+				};
+
+				const parts = path
+					.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+					//.filter(p => !eraserPath.closedContainsPoint(p.at({ curveIndex: 0, parameterValue: 0.001 })));
 				for (let i = 0; i < Math.floor(parts.length / 2); i++) {
-					addNewPath(parts[i].union(parts[parts.length - i - 1]).asClosed());
+					const part1 = parts[i];
+					const part2 = parts[parts.length - i - 1];
+					const cutOut = createCutOut(part1.getEndPoint(), part2.startPoint);
+					addNewPath(
+						part1
+							.union(cutOut)
+							.union(part2)
+					);
 				}
 				if (parts.length % 2 !== 0) {
-					addNewPath(parts[Math.floor(parts.length / 2)].asClosed());
+					const midPart = parts[Math.floor(parts.length / 2)];
+					addNewPath(midPart.union(createCutOut(midPart.getEndPoint(), midPart.startPoint)));
 				}
 			} else {
 				addNewPath(path, false);
