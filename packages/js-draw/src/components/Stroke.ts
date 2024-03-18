@@ -308,22 +308,22 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 					return reverseFirst ? cutOut : cutOut.reversed();
 				};
 
-				const parts = path
-					.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
-					//.filter(p => !eraserPath.closedContainsPoint(p.at({ curveIndex: 0, parameterValue: 0.001 })));
-				for (let i = 0; i < Math.floor(parts.length / 2); i++) {
-					const part1 = parts[i];
-					const part2 = parts[parts.length - i - 1];
-					const cutOut = createCutOut(part1.getEndPoint(), part2.startPoint);
-					addNewPath(
-						part1
-							.union(cutOut)
-							.union(part2)
-					);
+				// Parts outside of the eraser
+				let segments = path
+					.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) })
+					.filter(p => p.parts.length > 0 && !eraserPath.closedContainsPoint(p.at({ curveIndex: 0, parameterValue: 0.5 })));
+				if (segments.length >= 2 && segments[segments.length - 1].getEndPoint().eq(segments[0].startPoint)) {
+					const start = segments[0];
+					const end = segments[segments.length - 1];
+					segments = segments.slice(1, segments.length - 1);
+					segments.push(end.union(start));
 				}
-				if (parts.length % 2 !== 0) {
-					const midPart = parts[Math.floor(parts.length / 2)];
-					addNewPath(midPart.union(createCutOut(midPart.getEndPoint(), midPart.startPoint)));
+				for (const part of segments) {
+					const cutOut = createCutOut(part.getEndPoint(), part.startPoint);
+					addNewPath(
+						part.union(cutOut),
+						false,
+					);
 				}
 			} else {
 				addNewPath(path, false);
