@@ -86,20 +86,6 @@ export const compareCurveIndices = (a: CurveIndexRecord, b: CurveIndexRecord) =>
 };
 
 /**
- * Returns a version of `index` with its parameter value incremented by `stepBy`
- * (which must be a positive step).
- */
-export const stepCurveIndexBy = (index: CurveIndexRecord, stepBy: number): CurveIndexRecord => {
-	console.assert(stepBy > 0, 'Cannot step curve indices by negative values.');
-
-	if (index.parameterValue + stepBy > 1) {
-		return { curveIndex: index.curveIndex + 1, parameterValue: index.parameterValue + stepBy - 1 };
-	}
-
-	return { curveIndex: index.curveIndex, parameterValue: index.parameterValue + stepBy };
-};
-
-/**
  * Represents a union of lines and curves.
  *
  * To create a path from a string, see {@link fromString}.

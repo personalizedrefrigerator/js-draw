@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices, stepPathIndexBy } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -229,20 +229,15 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				}
 			};
 
-			const eraserTangentPointsInwardAt = (p: Point2) => {
-				const pointOnEraser = eraserPath.nearestPointTo(p);
-				const checkLength = viewport.getSizeOfPixelOnCanvas() / 3;
-				return path.closedContainsPoint(
-					eraserPath.tangentAt(pointOnEraser).times(checkLength).plus(p)
-				);
-			};
-
 			if (part.style.fill.a === 0) { // Not filled?
 				const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
 				for (const splitPart of split) {
 					addNewPath(splitPart);
 				}
-			} else if (intersectionPoints.length >= 2) {
+			} else if (intersectionPoints.length >= 2 && intersectionPoints.length % 2 === 0) {
+				// TODO: Support subtractive erasing on small scales -- see https://github.com/personalizedrefrigerator/js-draw/pull/63/commits/568686e2384219ad0bb07617ea4efff1540aed00
+				//       for a broken implementation.
+				//
 				// We currently assume that a 4-point intersection means that the intersection
 				// looks similar to this:
 				//   -----------
@@ -275,55 +270,12 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				//
 				// The difficulty here is correctly pairing edges to create the the output
 				// strokes, particularly because we don't know the order of intersection points.
-
-				const createCutOut = (a: Point2, b: Point2): Path => {
-					const tangentInA = eraserTangentPointsInwardAt(a);
-
-					// We want to remove the area between b--->a and not a--->b, so if the tangent
-					// at point A is pointing inwards, we need to reverse the eraser to remove the
-					// correct part.
-					let reverseFirst = tangentInA;
-
-					const tangentInB = eraserTangentPointsInwardAt(b);
-					if (tangentInA === tangentInB) {
-						const containsPointJustAfter = (p: Point2) => {
-							const index = stepPathIndexBy(eraserPath.nearestPointTo(p), 0.01);
-							index.curveIndex %= eraserPath.parts.length;
-							return path.closedContainsPoint(eraserPath.at(index));
-						};
-						const containsJustAfterA = containsPointJustAfter(a);
-						const containsJustAfterB = containsPointJustAfter(b);
-						if (containsJustAfterA === containsJustAfterB) {
-							failedAssertions = true;
-						}
-						reverseFirst = containsJustAfterA;
-					}
-
-					const fullDivPath = reverseFirst ? eraserPath.reversed() : eraserPath;
-
-					const p0 = fullDivPath.nearestPointTo(a);
-					const p1 = fullDivPath.nearestPointTo(b);
-
-					const cutOut = fullDivPath.spliced(p0, p1, undefined, { mapNewPoint: p => viewport.roundPoint(p), });
-					return reverseFirst ? cutOut : cutOut.reversed();
-				};
-
-				// Parts outside of the eraser
-				let segments = path
-					.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) })
-					.filter(p => p.parts.length > 0 && !eraserPath.closedContainsPoint(p.at({ curveIndex: 0, parameterValue: 0.5 })));
-				if (segments.length >= 2 && segments[segments.length - 1].getEndPoint().eq(segments[0].startPoint)) {
-					const start = segments[0];
-					const end = segments[segments.length - 1];
-					segments = segments.slice(1, segments.length - 1);
-					segments.push(end.union(start));
+				const parts = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+				for (let i = 0; i < Math.floor(parts.length / 2); i++) {
+					addNewPath(parts[i].union(parts[parts.length - i - 1]).asClosed());
 				}
-				for (const part of segments) {
-					const cutOut = createCutOut(part.getEndPoint(), part.startPoint);
-					addNewPath(
-						part.union(cutOut),
-						false,
-					);
+				if (parts.length % 2 !== 0) {
+					addNewPath(parts[Math.floor(parts.length / 2)].asClosed());
 				}
 			} else {
 				addNewPath(path, false);
