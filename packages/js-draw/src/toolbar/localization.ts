@@ -32,9 +32,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	resizeImageToSelection: string;
 	deleteSelection: string;
 	duplicateSelection: string;
-	eraserType: string;
 	fullStrokeEraser: string;
-	partialStrokeEraser: string;
 
 	pickColorFromScreen: string;
 	clickToPickColorAnnouncement: string;
@@ -134,9 +132,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	undo: 'Undo',
 	redo: 'Redo',
 
-	eraserType: 'Eraser type',
 	fullStrokeEraser: 'Full stroke eraser',
-	partialStrokeEraser: 'Partial stroke eraser',
 	selectPenType: 'Pen type',
 	selectShape: 'Shape',
 	pickColorFromScreen: 'Pick color from screen',

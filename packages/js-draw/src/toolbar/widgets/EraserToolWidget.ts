@@ -5,7 +5,6 @@ import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import BaseToolWidget from './BaseToolWidget';
 import { SavedToolbuttonState } from './BaseWidget';
-import makeGridSelector from './components/makeGridSelector';
 import makeThicknessSlider from './components/makeThicknessSlider';
 
 export default class EraserToolWidget extends BaseToolWidget {
@@ -38,28 +37,31 @@ export default class EraserToolWidget extends BaseToolWidget {
 		return this.makeIconForType(this.tool.getModeValue().get());
 	}
 
+	private static idCounter = 0;
 	private makeEraserTypeSelector() {
-		const eraserTypeChoices = [ EraserMode.FullStroke, EraserMode.PartialStroke ].map(mode => ({
-			id: mode,
-			makeIcon: () => this.makeIconForType(mode),
-			title: mode === EraserMode.FullStroke ? this.localizationTable.fullStrokeEraser : this.localizationTable.partialStrokeEraser,
-		}));
-		const selector = makeGridSelector(
-			this.localizationTable.eraserType,
-			this.tool.getModeValue().get(),
-			eraserTypeChoices,
-		);
-		selector.value.onUpdate(value => {
-			this.tool.getModeValue().set(value);
-		});
+		const container = document.createElement('div');
+		const labelElement = document.createElement('label');
+		const checkboxElement = document.createElement('input');
+
+		checkboxElement.id = `${toolbarCSSPrefix}eraserToolWidget-${EraserToolWidget.idCounter++}`;
+		labelElement.innerText = this.localizationTable.fullStrokeEraser;
+
+		checkboxElement.type = 'checkbox';
+
+		checkboxElement.oninput = () => {
+			this.tool.getModeValue().set(checkboxElement.checked ? EraserMode.FullStroke : EraserMode.PartialStroke);
+		};
+		const updateValue = () => {
+			checkboxElement.checked = this.tool.getModeValue().get() === EraserMode.FullStroke;
+		};
+
+		container.replaceChildren(labelElement, checkboxElement);
 
 		return {
 			addTo: (parent: HTMLElement) => {
-				selector.addTo(parent);
+				parent.appendChild(container);
 			},
-			setValue: (value: EraserMode) => {
-				selector.value.set(value);
-			},
+			updateValue,
 		};
 	}
 
@@ -77,7 +79,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 
 		this.updateInputs = () => {
 			thicknessSlider.setValue(this.tool.getThickness());
-			modeSelector.setValue(this.tool.getModeValue().get());
+			modeSelector.updateValue();
 		};
 		this.updateInputs();
 
