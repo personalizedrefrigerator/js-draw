@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2 } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices, stepPathIndexBy } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -7,6 +7,7 @@ import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
 import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
+import Viewport from '../Viewport';
 
 interface StrokePart extends RenderablePathSpec {
 	path: Path;
@@ -64,8 +65,8 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	 * ]);
 	 * ```
 	 */
-	public constructor(parts: RenderablePathSpec[]) {
-		super('stroke');
+	public constructor(parts: RenderablePathSpec[], initialZIndex?: number) {
+		super('stroke', initialZIndex);
 
 		this.approximateRenderingTime = 0;
 		this.parts = [];
@@ -151,6 +152,147 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			editor.image.queueRerenderOf(this);
 			editor.queueRerender();
 		}
+	}
+
+	/** @beta -- May fail for concave `path`s */
+	public override withRegionErased(eraserPath: Path, viewport: Viewport) {
+		const polyline = eraserPath.polylineApproximation();
+
+		const isPointInsideEraser = (point: Point2) => {
+			return eraserPath.closedContainsPoint(point);
+		};
+
+		const newStrokes: Stroke[] = [];
+		let failedAssertions = false;
+		for (const part of this.parts) {
+			const path = part.path;
+
+			const makeStroke = (path: Path): Stroke|null => {
+				if (part.style.fill.a > 0) {
+					// Remove visually empty paths.
+					if (path.parts.length < 1 || (path.parts.length === 1 && path.parts[0].kind === PathCommandType.LineTo)) {
+						// TODO: If this isn't present, a very large number of strokes are created while erasing.
+						// TODO: Debug this.
+						return null;
+					} else {
+						// Filled paths must be closed (allows for optimizations elsewhere)
+						path = path.asClosed();
+					}
+				}
+				if (isNaN(path.getExactBBox().area)) {
+					console.warn('Prevented creating a stroke with NaN area');
+					failedAssertions = true;
+					return null;
+				}
+				return new Stroke([ pathToRenderable(path, part.style) ], this.getZIndex());
+			};
+
+			const intersectionPoints: PathIntersectionResult[] = [];
+			for (const segment of polyline) {
+				intersectionPoints.push(...path.intersection(segment));
+			}
+
+			// Sort first by curve index, then by parameter value
+			intersectionPoints.sort(comparePathIndices);
+
+			const isInsideJustBeforeFirst = (() => {
+				if (intersectionPoints.length === 0) {
+					return false;
+				}
+
+				const justBeforeFirstIntersection = stepPathIndexBy(intersectionPoints[0], -1e-10);
+				return isPointInsideEraser(path.at(justBeforeFirstIntersection));
+			})();
+
+			let intersectionCount = isInsideJustBeforeFirst ? 1 : 0;
+			const addNewPath = (path: Path, knownToBeInside?: boolean) => {
+				const component = makeStroke(path);
+
+				let isInside = intersectionCount % 2 === 1;
+				intersectionCount ++;
+
+				if (knownToBeInside !== undefined) {
+					isInside = knownToBeInside;
+				}
+
+				// Here, we work around bugs in the underlying Bezier curve library
+				// (including https://github.com/Pomax/bezierjs/issues/179).
+				// Even if not all intersections are returned correctly, we still want
+				// isInside to be roughly correct.
+				if (knownToBeInside === undefined && !isInside && eraserPath.closedContainsPoint(path.getExactBBox().center)) {
+					isInside = !isInside;
+				}
+
+				if (!component) {
+					return;
+				}
+
+				// Assertion: Avoid deleting sections that are much larger than the eraser.
+				failedAssertions ||= isInside && path.getExactBBox().maxDimension > eraserPath.getExactBBox().maxDimension * 2;
+
+				if (!isInside) {
+					newStrokes.push(component);
+				}
+			};
+
+			if (part.style.fill.a === 0) { // Not filled?
+				const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+				for (const splitPart of split) {
+					addNewPath(splitPart);
+				}
+			} else if (intersectionPoints.length >= 2 && intersectionPoints.length % 2 === 0) {
+				// TODO: Support subtractive erasing on small scales -- see https://github.com/personalizedrefrigerator/js-draw/pull/63/commits/568686e2384219ad0bb07617ea4efff1540aed00
+				//       for a broken implementation.
+				//
+				// We currently assume that a 4-point intersection means that the intersection
+				// looks similar to this:
+				//   -----------
+				//  |   STROKE  |
+				//  |           |
+				//%%x-----------x%%%%%%%
+				//%                    %
+				//%      ERASER        %
+				//%                    %
+				//%%x-----------x%%%%%%%
+				//  |   STROKE  |
+				//   -----------
+				//
+				// Our goal is to separate STROKE into the contiguous parts outside
+				// of the eraser (as shown above).
+				//
+				// To do this, we split STROKE at each intersection:
+				//   3 3 3 3 3 3
+				//  3   STROKE  3
+				//  3           3
+				//  x           x
+				//  2           4
+				//  2   STROKE  4
+				//  2           4
+				//  x           x
+				//  1   STROKE  5
+				//   . 5 5 5 5 5
+				//   ^
+				// Start
+				//
+				// The difficulty here is correctly pairing edges to create the the output
+				// strokes, particularly because we don't know the order of intersection points.
+				const parts = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+				for (let i = 0; i < Math.floor(parts.length / 2); i++) {
+					addNewPath(parts[i].union(parts[parts.length - i - 1]).asClosed());
+				}
+				if (parts.length % 2 !== 0) {
+					addNewPath(parts[Math.floor(parts.length / 2)].asClosed());
+				}
+			} else {
+				addNewPath(path, false);
+			}
+		}
+
+		if (failedAssertions) {
+			return [this];
+		}
+
+		return newStrokes;
 	}
 
 	public override intersects(line: LineSegment2): boolean {

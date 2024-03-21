@@ -64,4 +64,16 @@ describe('QuadraticBezier', () => {
 			}
 		}
 	});
+
+	test.each([
+		new QuadraticBezier(Vec2.zero, Vec2.unitY, Vec2.unitY.times(2)),
+		new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY),
+		new QuadraticBezier(Vec2.zero, Vec2.unitY, Vec2.unitX),
+	])('.derivativeAt should return a derivative vector with the correct direction (curve: %s)', (curve) => {
+		for (let t = 0; t < 1; t += 0.1) {
+			const derivative = curve.derivativeAt(t);
+			const derivativeApprox = curve.at(t + 0.001).minus(curve.at(t - 0.001));
+			expect(derivativeApprox.normalized()).objEq(derivative.normalized(), 0.01);
+		}
+	});
 });

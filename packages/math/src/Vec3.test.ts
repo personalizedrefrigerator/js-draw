@@ -57,6 +57,7 @@ describe('Vec3', () => {
 		{ from: Vec3.of(1, 1, 1), to: Vec3.of(0, 1, 0), expected: 2 },
 		{ from: Vec3.of(1, 1, 1), to: Vec3.of(0, 0, 0), expected: 3 },
 		{ from: Vec3.of(-1, -10, 0), to: Vec3.of(1, 2, 0), expected: 148 },
+		{ from: Vec3.of(-1, -10, 0), to: Vec3.of(1, 2, 0), expected: 148 },
 	])(
 		'.squareDistanceTo and .distanceTo should return correct square and euclidean distances (%j)',
 		({ from , to, expected }) => {

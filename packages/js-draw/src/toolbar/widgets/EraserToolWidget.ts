@@ -1,5 +1,5 @@
 import Editor from '../../Editor';
-import Eraser from '../../tools/Eraser';
+import Eraser, { EraserMode } from '../../tools/Eraser';
 import { EditorEventType } from '../../types';
 import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
@@ -29,8 +29,40 @@ export default class EraserToolWidget extends BaseToolWidget {
 		return this.localizationTable.eraser;
 	}
 
+	private makeIconForType(mode: EraserMode) {
+		return this.editor.icons.makeEraserIcon(this.tool.getThickness(), mode);
+	}
+
 	protected createIcon(): Element {
-		return this.editor.icons.makeEraserIcon(this.tool.getThickness());
+		return this.makeIconForType(this.tool.getModeValue().get());
+	}
+
+	private static idCounter = 0;
+	private makeEraserTypeSelector() {
+		const container = document.createElement('div');
+		const labelElement = document.createElement('label');
+		const checkboxElement = document.createElement('input');
+
+		checkboxElement.id = `${toolbarCSSPrefix}eraserToolWidget-${EraserToolWidget.idCounter++}`;
+		labelElement.innerText = this.localizationTable.fullStrokeEraser;
+
+		checkboxElement.type = 'checkbox';
+
+		checkboxElement.oninput = () => {
+			this.tool.getModeValue().set(checkboxElement.checked ? EraserMode.FullStroke : EraserMode.PartialStroke);
+		};
+		const updateValue = () => {
+			checkboxElement.checked = this.tool.getModeValue().get() === EraserMode.FullStroke;
+		};
+
+		container.replaceChildren(labelElement, checkboxElement);
+
+		return {
+			addTo: (parent: HTMLElement) => {
+				parent.appendChild(container);
+			},
+			updateValue,
+		};
 	}
 
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
@@ -43,16 +75,16 @@ export default class EraserToolWidget extends BaseToolWidget {
 		});
 		thicknessSlider.setBounds(10, 55);
 
+		const modeSelector = this.makeEraserTypeSelector();
+
 		this.updateInputs = () => {
 			thicknessSlider.setValue(this.tool.getThickness());
+			modeSelector.updateValue();
 		};
-
 		this.updateInputs();
 
-		const spacer = document.createElement('div');
-		spacer.style.height = '5px';
-
-		container.replaceChildren(thicknessSlider.container, spacer);
+		container.replaceChildren(thicknessSlider.container);
+		modeSelector.addTo(container);
 
 		dropdown.replaceChildren(container);
 		return true;
@@ -63,6 +95,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 			...super.serializeState(),
 
 			thickness: this.tool.getThickness(),
+			mode: this.tool.getModeValue().get(),
 		};
 	}
 
@@ -79,6 +112,13 @@ export default class EraserToolWidget extends BaseToolWidget {
 			}
 
 			this.tool.setThickness(parsedThickness);
+		}
+
+		if (state.mode) {
+			const mode = state.mode;
+			if (Object.values(EraserMode).includes(mode)) {
+				this.tool.getModeValue().set(mode);
+			}
 		}
 	}
 }

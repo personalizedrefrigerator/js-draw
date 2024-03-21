@@ -138,4 +138,22 @@ describe('Line2', () => {
 		expect(new LineSegment2(Vec2.zero, Vec2.unitX)).objEq(new LineSegment2(Vec2.unitX, Vec2.zero));
 		expect(new LineSegment2(Vec2.zero, Vec2.unitX)).not.objEq(new LineSegment2(Vec2.unitX, Vec2.zero), { ignoreDirection: false });
 	});
+
+	it('should support creating from a collection of points', () => {
+		expect(LineSegment2.ofSmallestContainingPoints([])).toBeNull();
+		expect(LineSegment2.ofSmallestContainingPoints([Vec2.of(1, 1)])).toBeNull();
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(1, 1), Vec2.of(1, 2), Vec2.of(3, 3)]
+		)).toBeNull();
+
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(1, 1), Vec2.of(1, 2)]
+		)).objEq(new LineSegment2(Vec2.of(1, 1), Vec2.of(1, 2)));
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(1, 1), Vec2.of(2, 2), Vec2.of(3, 3)]
+		)).objEq(new LineSegment2(Vec2.of(1, 1), Vec2.of(3, 3)));
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(3, 3), Vec2.of(2, 2), Vec2.of(2.4, 2.4), Vec2.of(3, 3)]
+		)).objEq(new LineSegment2(Vec2.of(2, 2), Vec2.of(3, 3)));
+	});
 });

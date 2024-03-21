@@ -8,6 +8,8 @@ import PointShape2D from './PointShape2D';
 import toRoundedString from '../rounding/toRoundedString';
 import toStringOfSamePrecision from '../rounding/toStringOfSamePrecision';
 import Parameterized2DShape from './Parameterized2DShape';
+import BezierJSWrapper from './BezierJSWrapper';
+import convexHull2Of from '../utils/convexHull2Of';
 
 export enum PathCommandType {
 	LineTo,
@@ -47,11 +49,20 @@ export interface IntersectionResult {
 	// @internal
 	curveIndex: number;
 
-	/** Parameter value for the closest point **on** the path to the intersection. @internal @deprecated */
-	parameterValue?: number;
+	/** Parameter value for the closest point **on** the path to the intersection. @internal */
+	parameterValue: number;
 
 	/** Point at which the intersection occured. */
 	point: Point2;
+}
+
+/** Options for {@link Path.splitNear} and {@link Path.splitAt} */
+export interface PathSplitOptions {
+	/**
+	 * Allows mapping points on newly added segments. This is useful, for example,
+	 * to round points to prevent long decimals when later saving.
+	 */
+	mapNewPoint?: (point: Point2)=>Point2;
 }
 
 /**
@@ -63,6 +74,34 @@ export interface CurveIndexRecord {
 	curveIndex: number;
 	parameterValue: number;
 }
+
+/** Returns a positive number if `a` comes after `b`, 0 if equal, and negative otherwise. */
+export const compareCurveIndices = (a: CurveIndexRecord, b: CurveIndexRecord) => {
+	const indexCompare = a.curveIndex - b.curveIndex;
+	if (indexCompare === 0) {
+		return a.parameterValue - b.parameterValue;
+	} else {
+		return indexCompare;
+	}
+};
+
+/**
+ * Returns a version of `index` with its parameter value incremented by `stepBy`
+ * (which can be either positive or negative).
+ */
+export const stepCurveIndexBy = (index: CurveIndexRecord, stepBy: number): CurveIndexRecord => {
+	if (index.parameterValue + stepBy > 1) {
+		return { curveIndex: index.curveIndex + 1, parameterValue: index.parameterValue + stepBy - 1 };
+	}
+	if (index.parameterValue + stepBy < 0) {
+		if (index.curveIndex === 0) {
+			return { curveIndex: 0, parameterValue: 0 };
+		}
+		return { curveIndex: index.curveIndex - 1, parameterValue: index.parameterValue + stepBy + 1 };
+	}
+
+	return { curveIndex: index.curveIndex, parameterValue: index.parameterValue + stepBy };
+};
 
 /**
  * Represents a union of lines and curves.
@@ -414,7 +453,7 @@ export class Path {
 
 
 		// Raymarch:
-		const maxRaymarchSteps = 7;
+		const maxRaymarchSteps = 8;
 
 		// Start raymarching from each of these points. This allows detection of multiple
 		// intersections.
@@ -505,7 +544,7 @@ export class Path {
 			if (lastPart && isOnLineSegment && Math.abs(lastDist) < stoppingThreshold) {
 				result.push({
 					point: currentPoint,
-					parameterValue: NaN,// lastPart.nearestPointTo(currentPoint).parameterValue,
+					parameterValue: lastPart.nearestPointTo(currentPoint).parameterValue,
 					curve: lastPart,
 					curveIndex: this.geometry.indexOf(lastPart),
 				});
@@ -585,9 +624,6 @@ export class Path {
 
 	/**
 	 * @returns the nearest point on this path to the given `point`.
-	 *
-	 * @internal
-	 * @beta
 	 */
 	public nearestPointTo(point: Point2): IntersectionResult {
 		// Find the closest point on this
@@ -622,6 +658,243 @@ export class Path {
 
 	public tangentAt(index: CurveIndexRecord) {
 		return this.geometry[index.curveIndex].tangentAt(index.parameterValue);
+	}
+
+	/** Splits this path in two near the given `point`. */
+	public splitNear(point: Point2, options?: PathSplitOptions) {
+		const nearest = this.nearestPointTo(point);
+		return this.splitAt(nearest, options);
+	}
+
+	/**
+	 * Returns a copy of this path with `deleteFrom` until `deleteUntil` replaced with `insert`.
+	 *
+	 * This method is analogous to {@link Array.toSpliced}.
+	 */
+	public spliced(deleteFrom: CurveIndexRecord, deleteTo: CurveIndexRecord, insert: Path|undefined, options?: PathSplitOptions): Path {
+		const isBeforeOrEqual = (a: CurveIndexRecord, b: CurveIndexRecord) => {
+			return a.curveIndex < b.curveIndex || (a.curveIndex === b.curveIndex && a.parameterValue <= b.parameterValue);
+		};
+
+		if (isBeforeOrEqual(deleteFrom, deleteTo)) {
+			//          deleteFrom        deleteTo
+			//      <---------|             |-------------->
+			//      x                                      x
+			//  startPoint                             endPoint
+			const firstSplit = this.splitAt(deleteFrom, options);
+			const secondSplit = this.splitAt(deleteTo, options);
+			const before = firstSplit[0];
+			const after = secondSplit[secondSplit.length - 1];
+			return insert ? before.union(insert).union(after) : before.union(after);
+		} else {
+			// In this case, we need to handle wrapping at the start/end.
+			//          deleteTo        deleteFrom
+			//      <---------|    keep     |-------------->
+			//      x                                      x
+			//  startPoint                             endPoint
+			const splitAtFrom = this.splitAt([deleteFrom], options);
+			const beforeFrom = splitAtFrom[0];
+
+			// We need splitNear, rather than splitAt, because beforeFrom does not have
+			// the same indexing as this.
+			const splitAtTo = beforeFrom.splitNear(this.at(deleteTo), options);
+
+			const betweenBoth = splitAtTo[splitAtTo.length - 1];
+			return insert ? betweenBoth.union(insert) : betweenBoth;
+		}
+	}
+
+	public splitAt(at: CurveIndexRecord, options?: PathSplitOptions): [Path]|[Path, Path];
+	public splitAt(at: CurveIndexRecord[], options?: PathSplitOptions): Path[];
+
+	// @internal
+	public splitAt(splitAt: CurveIndexRecord[]|CurveIndexRecord, options?: PathSplitOptions): Path[] {
+		if (!Array.isArray(splitAt)) {
+			splitAt = [splitAt];
+		}
+
+		splitAt = [...splitAt];
+		splitAt.sort(compareCurveIndices);
+
+		//
+		// Bounds checking & reversal.
+		//
+
+		while (
+			splitAt.length > 0
+			&& splitAt[splitAt.length - 1].curveIndex >= this.parts.length - 1
+			&& splitAt[splitAt.length - 1].parameterValue >= 1
+		) {
+			splitAt.pop();
+		}
+
+		splitAt.reverse(); // .reverse() <-- We're `.pop`ing from the end
+
+		while (
+			splitAt.length > 0
+			&& splitAt[splitAt.length - 1].curveIndex <= 0
+			&& splitAt[splitAt.length - 1].parameterValue <= 0
+		) {
+			splitAt.pop();
+		}
+
+		if (splitAt.length === 0 || this.parts.length === 0) {
+			return [this];
+		}
+
+		const expectedSplitCount = splitAt.length + 1;
+		const mapNewPoint = options?.mapNewPoint ?? ((p: Point2)=>p);
+
+		const result: Path[] = [];
+		let currentStartPoint = this.startPoint;
+		let currentPath: PathCommand[] = [];
+
+		//
+		// Splitting
+		//
+
+		let { curveIndex, parameterValue } = splitAt.pop()!;
+
+		for (let i = 0; i < this.parts.length; i ++) {
+			if (i !== curveIndex) {
+				currentPath.push(this.parts[i]);
+			} else {
+				let part = this.parts[i];
+				let geom = this.geometry[i];
+				while (i === curveIndex) {
+					let newPathStart: Point2;
+					const newPath: PathCommand[] = [];
+
+					switch (part.kind) {
+					case PathCommandType.MoveTo:
+						currentPath.push({
+							kind: part.kind,
+							point: part.point,
+						});
+						newPathStart = part.point;
+						break;
+					case PathCommandType.LineTo:
+						{
+							const split = (geom as LineSegment2).splitAt(parameterValue);
+							currentPath.push({
+								kind: part.kind,
+								point: mapNewPoint(split[0].p2),
+							});
+							newPathStart = split[0].p2;
+							if (split.length > 1) {
+								console.assert(split.length === 2);
+								newPath.push({
+									kind: part.kind,
+
+									// Don't map: For lines, the end point of the split is
+									// the same as the end point of the original:
+									point: split[1]!.p2,
+								});
+								geom = split[1]!;
+							}
+						}
+						break;
+					case PathCommandType.QuadraticBezierTo:
+					case PathCommandType.CubicBezierTo:
+						{
+							const split = (geom as BezierJSWrapper).splitAt(parameterValue);
+							let isFirstPart = split.length === 2;
+							for (const segment of split) {
+								geom = segment;
+								const targetArray = isFirstPart ? currentPath : newPath;
+								const controlPoints = segment.getPoints();
+								if (part.kind === PathCommandType.CubicBezierTo) {
+									targetArray.push({
+										kind: part.kind,
+										controlPoint1: mapNewPoint(controlPoints[1]),
+										controlPoint2: mapNewPoint(controlPoints[2]),
+										endPoint: mapNewPoint(controlPoints[3]),
+									});
+								} else {
+									targetArray.push({
+										kind: part.kind,
+										controlPoint: mapNewPoint(controlPoints[1]),
+										endPoint: mapNewPoint(controlPoints[2]),
+									});
+								}
+
+								// We want the start of the new path to match the start of the
+								// FIRST Bézier in the NEW path.
+								if (!isFirstPart) {
+									newPathStart = controlPoints[0];
+								}
+								isFirstPart = false;
+							}
+						}
+						break;
+					default: {
+						const exhaustivenessCheck: never = part;
+						return exhaustivenessCheck;
+					}
+					}
+
+					result.push(new Path(currentStartPoint, [...currentPath]));
+					currentStartPoint = mapNewPoint(newPathStart!);
+					console.assert(!!currentStartPoint, 'should have a start point');
+					currentPath = newPath;
+					part = newPath[newPath.length - 1] ?? part;
+
+					const nextSplit = splitAt.pop();
+					if (!nextSplit) {
+						break;
+					} else {
+						curveIndex = nextSplit.curveIndex;
+						if (i === curveIndex) {
+							const originalPoint = this.at(nextSplit);
+							parameterValue = geom.nearestPointTo(originalPoint).parameterValue;
+							currentPath = [];
+						} else {
+							parameterValue = nextSplit.parameterValue;
+						}
+					}
+				}
+			}
+		}
+
+		result.push(new Path(currentStartPoint, currentPath));
+
+		console.assert(
+			result.length === expectedSplitCount,
+			`should split into splitAt.length + 1 splits (was ${result.length}, expected ${expectedSplitCount})`
+		);
+		return result;
+	}
+
+	// @internal
+	public asClosed() {
+		const newParts: PathCommand[] = [];
+		let hasChanges = false;
+		for (const part of this.parts) {
+			if (part.kind === PathCommandType.MoveTo) {
+				newParts.push({
+					kind: PathCommandType.LineTo,
+					point: part.point,
+				});
+				hasChanges = true;
+			} else {
+				newParts.push(part);
+			}
+		}
+		if (!this.getEndPoint().eq(this.startPoint)) {
+			newParts.push({
+				kind: PathCommandType.LineTo,
+				point: this.startPoint,
+			});
+			hasChanges = true;
+		}
+
+		if (!hasChanges) {
+			return this;
+		}
+
+		const result = new Path(this.startPoint, newParts);
+		console.assert(result.getEndPoint().eq(result.startPoint));
+		return result;
 	}
 
 	private static mapPathCommand(part: PathCommand, mapping: (point: Point2)=> Point2): PathCommand {
@@ -673,9 +946,25 @@ export class Path {
 		return this.mapPoints(point => affineTransfm.transformVec2(point));
 	}
 
+	/**
+	 * @internal
+	 */
+	public closedContainsPoint(point: Point2) {
+		const bbox = this.getExactBBox();
+		if (!bbox.containsPoint(point)) {
+			return false;
+		}
+
+		const pointOutside = point.plus(Vec2.of(bbox.width, 0));
+		const asClosed = this.asClosed();
+
+		const lineToOutside = new LineSegment2(point, pointOutside);
+		return asClosed.intersection(lineToOutside).length % 2 === 1;
+	}
+
 	// Creates a new path by joining [other] to the end of this path
 	public union(
-		other: Path|null,
+		other: Path|PathCommand[]|null,
 
 		// allowReverse: true iff reversing other or this is permitted if it means
 		//               no moveTo command is necessary when unioning the paths.
@@ -683,6 +972,9 @@ export class Path {
 	): Path {
 		if (!other) {
 			return this;
+		}
+		if (Array.isArray(other)) {
+			return new Path(this.startPoint, [...this.parts, ...other]);
 		}
 
 		const thisEnd = this.getEndPoint();
@@ -758,7 +1050,8 @@ export class Path {
 		return new Path(newStart, newParts);
 	}
 
-	private getEndPoint() {
+	/** Computes and returns the end point of this path */
+	public getEndPoint() {
 		if (this.parts.length === 0) {
 			return this.startPoint;
 		}
@@ -1283,6 +1576,26 @@ export class Path {
 		const result = new Path(startPos ?? Vec2.zero, commands);
 		result.cachedStringVersion = pathString;
 		return result;
+	}
+
+	public static fromConvexHullOf(points: Point2[]) {
+		if (points.length === 0) {
+			return Path.empty;
+		}
+
+		const hull = convexHull2Of(points);
+
+		const commands = hull.slice(1).map((p): LinePathCommand => ({
+			kind: PathCommandType.LineTo,
+			point: p,
+		}));
+		// Close -- connect back to the start
+		commands.push({
+			kind: PathCommandType.LineTo,
+			point: hull[0],
+		});
+
+		return new Path(hull[0], commands);
 	}
 
 	// @internal TODO: At present, this isn't really an empty path.

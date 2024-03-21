@@ -32,13 +32,14 @@
  * @packageDocumentation
  */
 
-import { IconProvider, IconElemType, TextRenderingStyle, PenStyle } from 'js-draw';
+import { IconProvider, IconElemType, TextRenderingStyle, PenStyle, EraserMode } from 'js-draw';
 
 import README from './icons/README.md';
 import ExpandMore from './icons/ExpandMore.svg';
 import Undo from './icons/Undo.svg';
 import Redo from './icons/Redo.svg';
 import InkEraser from './icons/InkEraser.svg';
+import InkEraserOff from './icons/InkEraserOff.svg';
 import PanTool from './icons/PanTool.svg';
 import TouchApp from './icons/TouchApp.svg';
 import ScreenLockRotation from './icons/ScreenLockRotation.svg';
@@ -78,8 +79,8 @@ class MaterialIconProvider extends IconProvider {
 	public override makeDropdownIcon(): IconElemType {
 		return icon(ExpandMore);
 	}
-	public override makeEraserIcon(_eraserSize?: number): IconElemType {
-		return icon(InkEraser);
+	public override makeEraserIcon(_eraserSize?: number, mode?: EraserMode): IconElemType {
+		return icon(mode === EraserMode.PartialStroke ? InkEraserOff : InkEraser);
 	}
 	public override makeSelectionIcon(): IconElemType {
 		return icon(Select);
