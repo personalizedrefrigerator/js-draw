@@ -1,5 +1,5 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices } from '@js-draw/math';
+import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices, stepPathIndexBy } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
@@ -195,8 +195,14 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			// Sort first by curve index, then by parameter value
 			intersectionPoints.sort(comparePathIndices);
 
-			const isInsideJustBeforeFirst =
-				!!intersectionPoints.length && isPointInsideEraser(path.at({ curveIndex: intersectionPoints[0].curveIndex, parameterValue: 0 }));
+			const isInsideJustBeforeFirst = (() => {
+				if (intersectionPoints.length === 0) {
+					return false;
+				}
+
+				const justBeforeFirstIntersection = stepPathIndexBy(intersectionPoints[0], -1e-10);
+				return isPointInsideEraser(path.at(justBeforeFirstIntersection));
+			})();
 
 			let intersectionCount = isInsideJustBeforeFirst ? 1 : 0;
 			const addNewPath = (path: Path, knownToBeInside?: boolean) => {

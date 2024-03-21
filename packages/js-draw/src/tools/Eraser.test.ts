@@ -102,33 +102,36 @@ describe('Eraser', () => {
 	});
 
 	it.each([
-		// A single line
+		// A single line, much larger than the eraser to prevent
+		// it from being erased completely.
 		{
-			path: 'M0,0 L100,0',
+			path: 'M0,0 L200,0',
 			strokeWidth: 20,
 			eraserSize: 25,
 			erasePoints: [ Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22) ],
 			expected: {
-				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 120, h: 20 }),
+				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
 				finalStrokeCount: 2,
 				finalStrokesIntersect: [
 					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
 					new LineSegment2(Vec2.of(90, -100), Vec2.of(90, 100)),
+					new LineSegment2(Vec2.of(190, -100), Vec2.of(190, 100)),
 				],
 			},
 		},
 		// A line-shaped Bezier-curve
 		{
-			path: 'M0,0 Q50,0 100,0',
+			path: 'M0,0 Q50,0 200,0',
 			strokeWidth: 20,
 			eraserSize: 25,
 			erasePoints: [ Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22) ],
 			expected: {
-				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 120, h: 20 }),
+				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
 				finalStrokeCount: 2,
 				finalStrokesIntersect: [
 					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
 					new LineSegment2(Vec2.of(90, -100), Vec2.of(90, 100)),
+					new LineSegment2(Vec2.of(90, -100), Vec2.of(190, 100)),
 				],
 			},
 		},
