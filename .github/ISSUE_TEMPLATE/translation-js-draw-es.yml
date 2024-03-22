@@ -345,11 +345,20 @@ or
     validations:
       required: false
   - type: textarea
-    id: translation-selectPenTip
+    id: translation-fullStrokeEraser
     attributes:
-      label: "selectPenTip"
-      description: "Translate `Pen tip`."
-      placeholder: "Pen tip"
+      label: "fullStrokeEraser"
+      description: "Translate `Full stroke eraser`."
+      placeholder: "Full stroke eraser"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectPenType
+    attributes:
+      label: "selectPenType"
+      description: "Translate `Pen type`."
+      placeholder: "Pen type"
       value: "Punta"
       render: "shell"
     validations:
@@ -520,6 +529,15 @@ or
     validations:
       required: false
   - type: textarea
+    id: translation-roundedTipPen2
+    attributes:
+      label: "roundedTipPen2"
+      description: "Translate `Polyline`."
+      placeholder: "Polyline"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-flatTipPen
     attributes:
       label: "flatTipPen"
@@ -607,6 +625,15 @@ or
     validations:
       required: false
   - type: textarea
+    id: translation-describeTheImage
+    attributes:
+      label: "describeTheImage"
+      description: "Translate `Image description`."
+      placeholder: "Image description"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-penDropdown__baseHelpText
     attributes:
       label: "penDropdown__baseHelpText"
@@ -639,10 +666,10 @@ or
       label: "penDropdown__penTypeHelpText"
       description: "Translate `Changes the pen style.
 
-Either a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.`."
+Either a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.`."
       placeholder: "Changes the pen style.
 
-Either a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes."
+Either a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes."
       render: "shell"
     validations:
       required: false
@@ -736,6 +763,37 @@ This also adds a short delay between the mouse/stylus and the stroke."
     validations:
       required: false
   - type: textarea
+    id: translation-eraserDropdown__baseHelpText
+    attributes:
+      label: "eraserDropdown__baseHelpText"
+      description: "Translate `This tool removes strokes, images, and text under the cursor.`."
+      placeholder: "This tool removes strokes, images, and text under the cursor."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-eraserDropdown__thicknessHelpText
+    attributes:
+      label: "eraserDropdown__thicknessHelpText"
+      description: "Translate `Changes the size of the eraser.`."
+      placeholder: "Changes the size of the eraser."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-eraserDropdown__fullStrokeEraserHelpText
+    attributes:
+      label: "eraserDropdown__fullStrokeEraserHelpText"
+      description: "Translate `When in full-stroke mode, entire shapes are erased.
+
+When not in full-stroke mode, shapes can be partially erased.`."
+      placeholder: "When in full-stroke mode, entire shapes are erased.
+
+When not in full-stroke mode, shapes can be partially erased."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-selectionDropdown__baseHelpText
     attributes:
       label: "selectionDropdown__baseHelpText"
@@ -806,8 +864,8 @@ If auto-resize is enabled, it will be disabled."
     id: translation-pageDropdown__gridCheckboxHelpText
     attributes:
       label: "pageDropdown__gridCheckboxHelpText"
-      description: "Translate `Controls whether the drawing canvas has a background grid pattern.`."
-      placeholder: "Controls whether the drawing canvas has a background grid pattern."
+      description: "Translate `Enables/disables a background grid pattern.`."
+      placeholder: "Enables/disables a background grid pattern."
       render: "shell"
     validations:
       required: false
@@ -1186,9 +1244,9 @@ When unchecked, the page is visible and its size can be set manually."
     id: translation-copied
     attributes:
       label: "copied"
-      description: "Translate ``(count, description) => `Copied ${count} ${description}` ``."
-      placeholder: "(count, description) => `Copied ${count} ${description}`"
-      value: "(count, description) => `Copied ${count} ${description}`"
+      description: "Translate ``(count) => `Copied ${count} item(s)` ``."
+      placeholder: "(count) => `Copied ${count} item(s)`"
+      value: "(count) => `${count} cosas fueron copiados`"
       render: "shell"
     validations:
       required: false
@@ -1196,9 +1254,9 @@ When unchecked, the page is visible and its size can be set manually."
     id: translation-pasted
     attributes:
       label: "pasted"
-      description: "Translate ``(count, description) => `Pasted ${count} ${description}` ``."
-      placeholder: "(count, description) => `Pasted ${count} ${description}`"
-      value: "(count, description) => `Pasted ${count} ${description}`"
+      description: "Translate ``(count) => `Pasted ${count} item(s)` ``."
+      placeholder: "(count) => `Pasted ${count} item(s)`"
+      value: "(count) => count === 1 ? 'Pegado' : `${count} cosas fueron pegados`"
       render: "shell"
     validations:
       required: false
@@ -1407,6 +1465,16 @@ When unchecked, the page is visible and its size can be set manually."
       label: "zoomedIn"
       description: "Translate `Zoomed in`."
       placeholder: "Zoomed in"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-andNMoreCommands
+    attributes:
+      label: "andNMoreCommands"
+      description: "Translate ``(count) => `And ${count} more commands.` ``."
+      placeholder: "(count) => `And ${count} more commands.`"
+      value: "(count) => `And ${count} more commands.`"
       render: "shell"
     validations:
       required: false
