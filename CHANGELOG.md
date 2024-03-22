@@ -1,3 +1,15 @@
+# 1.18.0
+ * Features
+    * Partial stroke eraser.
+    * Improve on and make the polyline pen one of the defaults.
+    * Add an API to allow removing pen types from the toolbar.
+ * Bug fixes
+    * Fix LineSegment2.intersects can return an incorrect value for very-near vertical lines
+    * Fix `Vec3.eq` always returned `true` when comparing with `NaN` (e.g. `Vec3(NaN, NaN, NaN).eq(Vec3(1, 2, 3))` was `true`).
+    * Fix autoresized images could incorrectly calculate the top-left corner of the full image in some cases.
+ * Improvements
+    * Fix highlighter pen could include near-duplicate, overlapping copies of curves in its output.
+
 # 1.17.0
  * Features
     * Attach rendered versions of the selection to the clipboard on copy: Support pasting into more applications.
