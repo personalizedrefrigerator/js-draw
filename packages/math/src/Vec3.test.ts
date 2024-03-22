@@ -68,4 +68,19 @@ describe('Vec3', () => {
 			expect(from.minus(to).magnitudeSquared()).toBe(expected);
 		},
 	);
+
+	test.each([
+		{ a: Vec3.of(1, 2, 3), b: Vec3.of(4, 5, 6), tolerance: 0.1, eq: false },
+		{ a: Vec3.of(1, 2, 3), b: Vec3.of(4, 5, 6), tolerance: 10, eq: true },
+		{ a: Vec3.of(1, 2, 3), b: Vec3.of(1, 2, 3), tolerance: 0, eq: true },
+		{ a: Vec3.of(1, 2, 3), b: Vec3.of(1, 2, 4), tolerance: 0, eq: false },
+		{ a: Vec3.of(1, 2, 3), b: Vec3.of(1, 4, 3), tolerance: 0, eq: false },
+		{ a: Vec3.of(1, 2, 3), b: Vec3.of(4, 2, 3), tolerance: 0, eq: false },
+		{ a: Vec3.of(1, 2, 3.0001), b: Vec3.of(1, 2, 3), tolerance: 1e-12, eq: false },
+		{ a: Vec3.of(1, 2, 3.0001), b: Vec3.of(1, 2, 3), tolerance: 1e-3, eq: true },
+		{ a: Vec3.of(1, 2.00001, 3.0001), b: Vec3.of(1.00001, 2, 3), tolerance: 1e-3, eq: true },
+	])('.eq should support tolerance (case %#)', ({ a, b, tolerance, eq }) => {
+		expect(a.eq(b, tolerance)).toBe(eq);
+		expect(b.eq(a, tolerance)).toBe(eq);
+	});
 });
