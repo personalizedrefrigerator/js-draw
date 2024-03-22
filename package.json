@@ -15,7 +15,8 @@
     "build-translation-templates": "lerna run build-translation-templates",
     "translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
     "preinstall": "git config core.hookspath .githooks",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "publish-ci": "lerna publish from-package --yes"
   },
   "workspaces": [
     "packages/*",
