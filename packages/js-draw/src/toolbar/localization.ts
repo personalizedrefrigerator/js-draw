@@ -76,7 +76,10 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	handDropdown__zoomOutHelpText: string;
 	handDropdown__resetViewHelpText: string;
 	handDropdown__touchPanningHelpText: string;
+	eraserDropdown__baseHelpText: string;
+	eraserDropdown__fullStrokeEraserHelpText: string;
 	handDropdown__lockRotationHelpText: string;
+	eraserDropdown__thicknessHelpText: string;
 	selectionDropdown__baseHelpText: string;
 	selectionDropdown__resizeToHelpText: string;
 	selectionDropdown__deleteHelpText: string;
@@ -189,6 +192,10 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'When enabled, touch gestures move the image rather than select or draw.',
 	handDropdown__lockRotationHelpText:
 		'When enabled, prevents touch gestures from rotating the screen.',
+	eraserDropdown__baseHelpText: 'This tool removes strokes, images, and text under the cursor.',
+	eraserDropdown__thicknessHelpText: 'Changes the size of the eraser.',
+	eraserDropdown__fullStrokeEraserHelpText:
+		'When in full-stroke mode, entire shapes are erased.\n\nWhen not in full-stroke mode, shapes can be partially erased.',
 	selectionDropdown__baseHelpText: 'Selects content and manipulates the selection',
 	selectionDropdown__resizeToHelpText: 'Crops the drawing to the size of what\'s currently selected.\n\nIf auto-resize is enabled, it will be disabled.',
 	selectionDropdown__deleteHelpText: 'Erases selected items.',
