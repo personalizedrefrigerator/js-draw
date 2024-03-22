@@ -204,6 +204,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			//    non-stroked paths.
 			// 2. If zoomed in significantly, it's unlikely that the user wants to erase a large
 			//    part of the stroke.
+			let isErasingFromEdge = false;
 			if (
 				intersectionPoints.length === 0
 				&& part.style.stroke
@@ -213,6 +214,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				for (const segment of polyline) {
 					intersectionPoints.push(...path.intersection(segment, part.style.stroke.width / 2));
 				}
+				isErasingFromEdge = true;
 			}
 
 			// Sort first by curve index, then by parameter value
@@ -221,6 +223,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			const isInsideJustBeforeFirst = (() => {
 				if (intersectionPoints.length === 0) {
 					return false;
+				}
+
+				// The eraser may not be near the center of the curve -- approximate.
+				if (isErasingFromEdge) {
+					return intersectionPoints[0].curveIndex === 0 && intersectionPoints[0].parameterValue <= 0;
 				}
 
 				const justBeforeFirstIntersection = stepPathIndexBy(intersectionPoints[0], -1e-10);

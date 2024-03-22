@@ -119,6 +119,24 @@ describe('Eraser', () => {
 				],
 			},
 		},
+		// Should allow erasing from the left edge (large eraser).
+		{
+			path: 'M0,0 L200,0',
+			strokeWidth: 20,
+			eraserSize: 15,
+			erasePoints: [ Vec2.of(-20, 1), Vec2.of(-10, 1), Vec2.of(-5, 1), Vec2.of(5, 1) ],
+			expected: {
+				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
+				finalStrokeCount: 1,
+				finalStrokesIntersect: [
+					new LineSegment2(Vec2.of(10, -100), Vec2.of(10, 100)),
+					new LineSegment2(Vec2.of(200, -100), Vec2.of(200, 100)),
+				],
+				finalStrokesNoIntersect: [
+					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
+				],
+			},
+		},
 		// A line-shaped Bezier-curve
 		{
 			path: 'M0,0 Q50,0 200,0',
@@ -203,6 +221,10 @@ describe('Eraser', () => {
 		for (const line of testData.expected.finalStrokesIntersect) {
 			intersectionResults.push(getAllStrokes(editor).some(s => !!s.intersects(line)));
 			expectedResults.push(true);
+		}
+		for (const line of (testData.expected.finalStrokesNoIntersect ?? [])) {
+			intersectionResults.push(getAllStrokes(editor).some(s => !!s.intersects(line)));
+			expectedResults.push(false);
 		}
 		expect(intersectionResults).toMatchObject(expectedResults);
 	});
