@@ -168,7 +168,6 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			const path = part.path;
 
 			const makeStroke = (path: Path): Stroke|null => {
-				path = path.simplified();
 				if (part.style.fill.a > 0) {
 					// Remove visually empty paths.
 					if (path.parts.length < 1 || (path.parts.length === 1 && path.parts[0].kind === PathCommandType.LineTo)) {

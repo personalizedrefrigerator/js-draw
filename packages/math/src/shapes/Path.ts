@@ -907,51 +907,6 @@ export class Path {
 		return result;
 	}
 
-	/**
-	 * Removes path commands with no effect (e.g. `l0,0`).
-	 *
-	 * The behavior of this function may change in the future to do further
-	 * simplification (e.g. simplify Bezier curves that are actually lines).
-	 * As such, it is currently @internal
-	 */
-	public simplified() {
-		const newParts: PathCommand[] = [];
-		let hasChanges = false;
-		let lastPoint = this.startPoint;
-		for (const part of this.parts) {
-			if (part.kind === PathCommandType.MoveTo || part.kind === PathCommandType.LineTo) {
-				if (part.point.eq(lastPoint)) {
-					hasChanges = true;
-				} else {
-					newParts.push(part);
-				}
-				lastPoint = part.point;
-			} else if (part.kind === PathCommandType.QuadraticBezierTo) {
-				if (part.controlPoint.eq(part.endPoint) && part.endPoint.eq(lastPoint)) {
-					hasChanges = true;
-				} else {
-					newParts.push(part);
-				}
-				lastPoint = part.endPoint;
-			} else if (part.kind === PathCommandType.CubicBezierTo) {
-				if (part.controlPoint1.eq(part.controlPoint2) && part.endPoint.eq(part.controlPoint2) && part.endPoint.eq(lastPoint)) {
-					hasChanges = true;
-				} else {
-					newParts.push(part);
-				}
-				lastPoint = part.endPoint;
-			} else {
-				const exhaustivenessCheck: never = part;
-				return exhaustivenessCheck;
-			}
-		}
-
-		if (!hasChanges) {
-			return this;
-		}
-		return new Path(this.startPoint, newParts);
-	}
-
 	private static mapPathCommand(part: PathCommand, mapping: (point: Point2)=> Point2): PathCommand {
 		switch (part.kind) {
 		case PathCommandType.MoveTo:

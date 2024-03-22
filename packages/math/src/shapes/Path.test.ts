@@ -534,21 +534,4 @@ describe('Path', () => {
 		const path = Path.fromString(pathString);
 		expect(path.tangentAt(at)).objEq(expected);
 	});
-
-	describe('.simplified', () => {
-		it.each([
-			[ 'm0,0m0,0', 'm0,0' ],
-			[ 'm0,0 l1,1 l0,0 l2,3', 'm0,0 l1,1 l2,3' ],
-		])('should remove no-op lineTos and moveTos (%s -> %s)', (original, simplifiesTo) => {
-			expect(Path.fromString(original).simplified()).objEq(Path.fromString(simplifiesTo));
-		});
-		it.each([
-			[ 'm0,0q0,0 0,0', 'm0,0' ],
-			[ 'm0,0q0,0 0,0 c0,0 0,0 0,0', 'm0,0' ],
-			[ 'M1,4 Q1,4 1,4 Q2,3 2,3.1', 'M1,4 Q2,3 2,3.1' ],
-			[ 'M1,4 Q1,4 1,4 C2,3 2,3 3,4', 'M1,4 C2,3 2,3 3,4' ],
-		])('should remove no-op quadratic and cubic Bezier commands (%s -> %s)', (original, simplifiesTo) => {
-			expect(Path.fromString(original).simplified()).objEq(Path.fromString(simplifiesTo));
-		});
-	});
 });
