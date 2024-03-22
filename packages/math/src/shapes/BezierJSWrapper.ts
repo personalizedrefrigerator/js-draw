@@ -225,6 +225,33 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 		return { parameterValue: t, point: this.at(t) };
 	}
 
+	public intersectsBezier(other: BezierJSWrapper) {
+		const intersections = this.getBezier().intersects(other.getBezier()) as (string[] | null | undefined);
+		if (!intersections || intersections.length === 0) {
+			return [];
+		}
+
+		const result = [];
+		for (const intersection of intersections) {
+			// From http://pomax.github.io/bezierjs/#intersect-curve,
+			// .intersects returns an array of 't1/t2' pairs, where curve1.at(t1) gives the point.
+			const match = /^([-0-9.eE]+)\/([-0-9.eE]+)$/.exec(intersection);
+
+			if (!match) {
+				throw new Error(
+					`Incorrect format returned by .intersects: ${intersections} should be array of "number/number"!`
+				);
+			}
+
+			const t = parseFloat(match[1]);
+			result.push({
+				parameterValue: t,
+				point: this.at(t),
+			});
+		}
+		return result;
+	}
+
 	public override toString() {
 		return `Bézier(${this.getPoints().map(point => point.toString()).join(', ')})`;
 	}

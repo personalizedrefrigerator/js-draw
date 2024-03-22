@@ -79,4 +79,10 @@ describe('QuadraticBezier', () => {
 			expect(derivativeApprox.normalized()).objEq(derivative.normalized(), 0.01);
 		}
 	});
+
+	test('should support Bezier-Bezier intersections', () => {
+		const b1 = new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY);
+		const b2 = new QuadraticBezier(Vec2.of(-1, 0.5), Vec2.of(0, 0.6), Vec2.of(1, 0.4));
+		expect(b1.intersectsBezier(b2)).toHaveLength(1);
+	});
 });
