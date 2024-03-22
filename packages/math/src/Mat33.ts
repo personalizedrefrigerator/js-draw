@@ -444,8 +444,13 @@ export class Mat33 {
 			return Mat33.identity;
 		}
 
-		const parseArguments = (argumentString: string) => {
-			return argumentString.split(/[, \t\n]+/g).map(argString => {
+		const parseArguments = (argumentString: string): number[] => {
+			const parsed = argumentString.split(/[, \t\n]+/g).map(argString => {
+				// Handle trailing spaces/commands
+				if (argString.trim() === '') {
+					return null;
+				}
+
 				let isPercentage = false;
 				if (argString.endsWith('%')) {
 					isPercentage = true;
@@ -476,6 +481,7 @@ export class Mat33 {
 
 				return argNumber;
 			});
+			return parsed.filter(n => n !== null) as number[];
 		};
 
 
