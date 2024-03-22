@@ -31,13 +31,16 @@ type CurrentSegmentToPathResult = {
 
 	upperCurve: Bezier,
 	lowerCurve: Bezier,
+
+	nextCurveStartConnector: PathCommand[],
 };
 
 // Handles stroke smoothing and creates Strokes from user/stylus input.
 export default class PressureSensitiveFreehandLineBuilder implements ComponentBuilder {
 	private isFirstSegment: boolean = true;
-	private pathStartConnector: PathCommand|null = null;
+	private pathStartConnector: PathCommand[]|null = null;
 	private mostRecentConnector: PathCommand|null = null;
+	private nextCurveStartConnector: PathCommand[]|null = null;
 
 	//    Beginning of the list of lower parts
 	//        ↓
@@ -94,14 +97,14 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		};
 	}
 
-	private previewCurrentPath(): RenderablePathSpec|null {
+	private previewCurrentPath(extendWithLatest: boolean = true): RenderablePathSpec|null {
 		const upperPath = this.upperSegments.slice();
 		const lowerPath = this.lowerSegments.slice();
 		let lowerToUpperCap: PathCommand;
-		let pathStartConnector: PathCommand;
+		let pathStartConnector: PathCommand[];
 
 		const currentCurve = this.curveFitter.preview();
-		if (currentCurve) {
+		if (currentCurve && extendWithLatest) {
 			const {
 				upperCurveCommand, lowerToUpperConnector, upperToLowerConnector, lowerCurveCommand
 			} = this.segmentToPath(currentCurve);
@@ -110,7 +113,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 			lowerPath.push(lowerCurveCommand);
 
 			lowerToUpperCap = lowerToUpperConnector;
-			pathStartConnector = this.pathStartConnector ?? upperToLowerConnector;
+			pathStartConnector = this.pathStartConnector ?? [upperToLowerConnector];
 		} else {
 			if (this.mostRecentConnector === null || this.pathStartConnector === null) {
 				return null;
@@ -155,7 +158,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 				//  __/  __/
 				// /___ /
 				// •
-				pathStartConnector,
+				...pathStartConnector,
 
 				// Move back to the start point:
 				//     •
@@ -171,15 +174,6 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		const preview = this.previewCurrentPath();
 		if (preview) {
 			return [ ...this.parts, preview ];
-		}
-		return null;
-	}
-
-	private previewStroke(): Stroke|null {
-		const pathPreview = this.previewFullPath();
-
-		if (pathPreview) {
-			return new Stroke(pathPreview);
 		}
 		return null;
 	}
@@ -203,7 +197,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 			this.addCurve(null);
 		}
 
-		return this.previewStroke()!;
+		return new Stroke(this.previewFullPath()!);
 	}
 
 	private roundPoint(point: Point2): Point2 {
@@ -330,11 +324,12 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 					endPoint: center.plus(Vec2.of(width, 0)),
 				}
 			);
-			this.pathStartConnector = {
+			const connector: PathCommand = {
 				kind: PathCommandType.LineTo,
 				point: startPoint,
 			};
-			this.mostRecentConnector = this.pathStartConnector;
+			this.pathStartConnector = [connector];
+			this.mostRecentConnector = connector;
 
 			return;
 		}
@@ -342,29 +337,33 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		const {
 			upperCurveCommand, lowerToUpperConnector, upperToLowerConnector, lowerCurveCommand,
 			lowerCurve, upperCurve,
+			nextCurveStartConnector,
 		} = this.segmentToPath(curve);
 
-		const shouldStartNew = this.shouldStartNewSegment(lowerCurve, upperCurve);
+		let shouldStartNew = this.shouldStartNewSegment(lowerCurve, upperCurve);
 
 		if (shouldStartNew) {
-			const part = this.previewCurrentPath();
+			const part = this.previewCurrentPath(false);
 
 			if (part) {
 				this.parts.push(part);
 				this.upperSegments = [];
 				this.lowerSegments = [];
+			} else {
+				shouldStartNew = false;
 			}
 		}
 
 		if (this.isFirstSegment || shouldStartNew) {
 			// We draw the upper path (reversed), then the lower path, so we need the
 			// upperToLowerConnector to join the two paths.
-			this.pathStartConnector = upperToLowerConnector;
+			this.pathStartConnector = this.nextCurveStartConnector ?? [upperToLowerConnector];
 			this.isFirstSegment = false;
 		}
 		// With the most recent connector, we're joining the end of the lowerPath to the most recent
 		// upperPath:
 		this.mostRecentConnector = lowerToUpperConnector;
+		this.nextCurveStartConnector = nextCurveStartConnector;
 
 		this.lowerSegments.push(lowerCurveCommand);
 		this.upperSegments.push(upperCurveCommand);
@@ -435,6 +434,19 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 			point: upperCurveStartPoint,
 		};
 
+		// The segment to be used to start the next path (to insert to connect the start of its
+		// lower and the end of its upper).
+		const nextCurveStartConnector: LinePathCommand[] = [
+			{
+				kind: PathCommandType.LineTo,
+				point: upperCurveStartPoint,
+			},
+			{
+				kind: PathCommandType.LineTo,
+				point: lowerCurveEndPoint,
+			},
+		];
+
 		const upperCurveCommand: QuadraticBezierPathCommand = {
 			kind: PathCommandType.QuadraticBezierTo,
 			controlPoint: upperCurveControlPoint,
@@ -447,6 +459,8 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		return {
 			upperCurveCommand, upperToLowerConnector, lowerToUpperConnector, lowerCurveCommand,
 			upperCurve, lowerCurve,
+
+			nextCurveStartConnector,
 		};
 	}
 
