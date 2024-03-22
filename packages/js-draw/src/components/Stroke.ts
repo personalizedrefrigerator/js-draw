@@ -168,11 +168,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			const path = part.path;
 
 			const makeStroke = (path: Path): Stroke|null => {
+				path = path.simplified();
 				if (part.style.fill.a > 0) {
 					// Remove visually empty paths.
 					if (path.parts.length < 1 || (path.parts.length === 1 && path.parts[0].kind === PathCommandType.LineTo)) {
 						// TODO: If this isn't present, a very large number of strokes are created while erasing.
-						// TODO: Debug this.
 						return null;
 					} else {
 						// Filled paths must be closed (allows for optimizations elsewhere)
@@ -188,8 +188,32 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			};
 
 			const intersectionPoints: PathIntersectionResult[] = [];
+
+			// If stroked, finds intersections with the middle of the stroke.
+			// If filled, finds intersections with the edge of the stroke.
 			for (const segment of polyline) {
 				intersectionPoints.push(...path.intersection(segment));
+			}
+
+			// When stroked, if the stroke width is significantly larger than the eraser,
+			// it can't intersect both the edge of the stroke and its middle at the same time
+			// (generally, erasing is triggered by the eraser touching the edge of this stroke).
+			//
+			// As such, we also look for intersections along the edge of this, if none with the
+			// center were found, but only within a certain range of sizes because:
+			// 1. Intersection testing with stroked paths is generally much slower than with
+			//    non-stroked paths.
+			// 2. If zoomed in significantly, it's unlikely that the user wants to erase a large
+			//    part of the stroke.
+			if (
+				intersectionPoints.length === 0
+				&& part.style.stroke
+				&& part.style.stroke.width > eraserPath.bbox.minDimension * 0.3
+				&& part.style.stroke.width < eraserPath.bbox.maxDimension * 30
+			) {
+				for (const segment of polyline) {
+					intersectionPoints.push(...path.intersection(segment, part.style.stroke.width / 2));
+				}
 			}
 
 			// Sort first by curve index, then by parameter value
@@ -236,9 +260,14 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			};
 
 			if (part.style.fill.a === 0) { // Not filled?
-				const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
-				for (const splitPart of split) {
-					addNewPath(splitPart);
+				// An additional case where we erase completely -- without the padding of the stroke,
+				// the path is smaller than the eraser (allows us to erase dots completely).
+				const shouldEraseCompletely = eraserPath.getExactBBox().maxDimension / 10 > path.getExactBBox().maxDimension;
+				if (!shouldEraseCompletely) {
+					const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+					for (const splitPart of split) {
+						addNewPath(splitPart);
+					}
 				}
 			} else if (intersectionPoints.length >= 2 && intersectionPoints.length % 2 === 0) {
 				// TODO: Support subtractive erasing on small scales -- see https://github.com/personalizedrefrigerator/js-draw/pull/63/commits/568686e2384219ad0bb07617ea4efff1540aed00

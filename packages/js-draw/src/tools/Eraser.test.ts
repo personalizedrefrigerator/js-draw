@@ -156,6 +156,19 @@ describe('Eraser', () => {
 				],
 			},
 		},
+		// Edge case: Should delete partial strokes that are larger than the cursor
+		// if the actual path can't be shrunk any further.
+		{
+			path: 'M0,0q0,0 0,0',
+			strokeWidth: 120,
+			eraserSize: 40,
+			erasePoints: [ Vec2.of(60, 0), Vec2.of(58, 1), Vec2.of(50, 1) ],
+			expected: {
+				initialStrokeBBox: Rect2.of({ x: -60, y: -60, w: 120, h: 120 }),
+				finalStrokeCount: 0,
+				finalStrokesIntersect: [ ],
+			},
+		},
 	])('should support erasing partial strokes (case %#)', async (testData) => {
 		const editor = createEditor();
 

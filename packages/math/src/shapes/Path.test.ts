@@ -244,9 +244,15 @@ describe('Path', () => {
 			expect(bezier.intersection(line, strokeRadius).length).toBeGreaterThan(0);
 		});
 
-		test('should handle near-vertical lines', () => {
+		it('should handle near-vertical lines', () => {
 			const intersections = Path.fromString('M0,0 Q50,0 100,0').intersection(new LineSegment2(Vec2.of(44, -12), Vec2.of(39, 25)));
 			expect(intersections).toHaveLength(1);
+		});
+
+		it('should handle single-point strokes', () => {
+			const stroke = new Path(Vec2.zero, []);
+			expect(stroke.intersection(new LineSegment2(Vec2.of(-2, -20), Vec2.of(-2, -1)), 1)).toHaveLength(0);
+			expect(stroke.intersection(new LineSegment2(Vec2.of(-2, -2), Vec2.of(2, 2)), 1)).toHaveLength(2);
 		});
 	});
 
@@ -527,5 +533,22 @@ describe('Path', () => {
 		const at: CurveIndexRecord = { curveIndex: evalAt[0], parameterValue: evalAt[1] };
 		const path = Path.fromString(pathString);
 		expect(path.tangentAt(at)).objEq(expected);
+	});
+
+	describe('.simplified', () => {
+		it.each([
+			[ 'm0,0m0,0', 'm0,0' ],
+			[ 'm0,0 l1,1 l0,0 l2,3', 'm0,0 l1,1 l2,3' ],
+		])('should remove no-op lineTos and moveTos (%s -> %s)', (original, simplifiesTo) => {
+			expect(Path.fromString(original).simplified()).objEq(Path.fromString(simplifiesTo));
+		});
+		it.each([
+			[ 'm0,0q0,0 0,0', 'm0,0' ],
+			[ 'm0,0q0,0 0,0 c0,0 0,0 0,0', 'm0,0' ],
+			[ 'M1,4 Q1,4 1,4 Q2,3 2,3.1', 'M1,4 Q2,3 2,3.1' ],
+			[ 'M1,4 Q1,4 1,4 C2,3 2,3 3,4', 'M1,4 C2,3 2,3 3,4' ],
+		])('should remove no-op quadratic and cubic Bezier commands (%s -> %s)', (original, simplifiesTo) => {
+			expect(Path.fromString(original).simplified()).objEq(Path.fromString(simplifiesTo));
+		});
 	});
 });

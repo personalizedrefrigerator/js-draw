@@ -37,6 +37,9 @@ describe('QuadraticBezier', () => {
 		// Should not return an out-of-range parameter
 		[ new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.unitY), Vec2.of(0, -1000), 0 ],
 		[ new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.unitY), Vec2.of(0, 1000), 1 ],
+
+		// Edge case -- just a point
+		[ new QuadraticBezier(Vec2.zero, Vec2.zero, Vec2.zero), Vec2.of(0, 1000), 0 ],
 	])('nearestPointTo should return the nearest point and parameter value on %s to %s', (bezier, point, expectedParameter) => {
 		const nearest = bezier.nearestPointTo(point);
 		expect(nearest.parameterValue).toBeCloseTo(expectedParameter, 0.0001);

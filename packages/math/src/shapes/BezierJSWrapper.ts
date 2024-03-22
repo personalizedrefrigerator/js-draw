@@ -198,6 +198,8 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 
 		const iterate = () => {
 			const slope = secondDerivativeAt(t);
+			if (slope === 0) return;
+
 			// We intersect a line through the point on f'(t) at t with the x-axis:
 			//    y = m(x - x₀) + y₀
 			// ⇒  x - x₀ = (y - y₀) / m
