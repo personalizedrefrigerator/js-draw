@@ -245,7 +245,32 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 			return {
 				setValue: (value: number) => {
-					input.value = value.toString();
+					// Slightly improve the case where the user tries to change the
+					// first digit of a dimension like 600.
+					//
+					// As changing the value also gives the image zero size (which is unsupported,
+					// .setValue is called immediately). We work around this by trying to select
+					// the added/changed digits.
+					//
+					// See https://github.com/personalizedrefrigerator/js-draw/issues/58.
+					if (document.activeElement === input && input.value.match(/^0*$/)) {
+						// We need to switch to type="text" and back to type="number" because
+						// number inputs don't support selection.
+						//
+						// See https://stackoverflow.com/q/22381837
+						const originalValue = input.value;
+
+						input.type = 'text';
+						input.value = value.toString();
+
+						// Select the added digits
+						const lengthToSelect = Math.max(1, input.value.length - originalValue.length);
+						input.setSelectionRange(0, lengthToSelect);
+
+						input.type = 'number';
+					} else {
+						input.value = value.toString();
+					}
 				},
 				setIsAutomaticSize: (automatic: boolean) => {
 					input.disabled = automatic;

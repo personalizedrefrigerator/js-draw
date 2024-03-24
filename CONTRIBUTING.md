@@ -90,14 +90,14 @@ Here's one possible workflow for making and testing changes:
 
 **Setup**:
 1. Run `npm install` in the project's root directory (if you haven't already)
-2. Start the compiler in `watch` mode in both `packages/js-draw/` and `docs/debugging/stroke-logging`:
+2. Start the compiler in `watch` mode in both `packages/js-draw/` and `docs/debugging/input-system-tester`:
 ```bash
 # Shell #1
 $ cd packages/js-draw
 $ npm run watch
 
 # Shell #2
-$ cd docs/debugging/stroke-logging
+$ cd docs/debugging/input-system-tester
 $ npm run watch
 ```
 3. Start a development server in the `docs` directory
@@ -108,8 +108,9 @@ $ python3 -m http.server
 # Should serve to http://localhost:8000/ by default
 ```
 
-4. Open http://localhost:8000/debugging/stroke-logging/ in a web browser
-5. Open https://js-draw.web.app/debugging/stroke-logging/ in a web browser
+4. Open http://localhost:8000/debugging/input-system-tester/ in a web browser
+5. Open https://js-draw.web.app/debugging/input-system-tester/ in a web browser
 
-The stroke-logging debug utility allows pasting an input log into a textbox and playing back the input events. This can be used to see how changes to `StrokeSmoother.ts` change the rendered output, for the same input.
+Additional notes:
+- The `debugging/stroke-logging` utility allows pasting an input log into a textbox and playing back the input events, which may also be helpful here. This can be used to see how changes to `StrokeSmoother.ts` change the rendered output, for the same input.
 

@@ -1,4 +1,4 @@
-import { Path, Vec2, Mat33, Color4, PathCommandType } from '@js-draw/math';
+import { Path, Vec2, Mat33, Color4, PathCommandType, Rect2 } from '@js-draw/math';
 import Stroke from './Stroke';
 import createEditor from '../testing/createEditor';
 import EditorImage from '../image/EditorImage';
@@ -166,5 +166,11 @@ describe('Stroke', () => {
 
 		expect(stroke.getParts()).toMatchObject(originalParts);
 		expect(stroke.getParts()).not.toBe(originalParts);
+	});
+
+	it('should correctly calculate the bounding box of a stroke with a single point', () => {
+		const stroke = new Stroke([ { startPoint: Vec2.zero, commands: [], style: { fill: Color4.transparent, stroke: { width: 2, color: Color4.red } } } ]);
+		expect(stroke.getExactBBox()).objEq(new Rect2(-1, -1, 2, 2));
+		expect(stroke.getBBox()).objEq(new Rect2(-1, -1, 2, 2));
 	});
 });

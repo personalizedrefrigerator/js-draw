@@ -1,3 +1,29 @@
+# 1.18.0
+ * Features
+    * Partial stroke eraser.
+    * Improve on and make the polyline pen one of the defaults.
+    * Add an API to allow removing pen types from the toolbar.
+ * Bug fixes
+    * Fix LineSegment2.intersects can return an incorrect value for very-near vertical lines
+    * Fix `Vec3.eq` always returned `true` when comparing with `NaN` (e.g. `Vec3(NaN, NaN, NaN).eq(Vec3(1, 2, 3))` was `true`).
+    * Fix autoresized images could incorrectly calculate the top-left corner of the full image in some cases.
+ * Improvements
+    * Fix highlighter pen could include near-duplicate, overlapping copies of curves in its output.
+
+# 1.17.0
+ * Features
+    * Attach rendered versions of the selection to the clipboard on copy: Support pasting into more applications.
+ * Bug fixes
+    * Deleting the first character in the background size dialog no longer resets the background size to 100.
+    * Fix stroke width not set correctly by `SVGRenderer` when export zoom is not 100%.
+    * Fixed copy/paste between Chrome and Firefox
+ * API
+    * Simplify API for finding distance between points. (Add `.distanceTo` method).
+    * Simplify API for changing the background of an image (`Editor.setBackgroundStyle`).
+
+# 1.16.1
+ * Bug fixes
+    * Fixes accessibility text possible to accidentally drag and drop into the editor. (https://github.com/personalizedrefrigerator/joplin-plugin-freehand-drawing/issues/8)
 
 # 1.16.0
  * Features

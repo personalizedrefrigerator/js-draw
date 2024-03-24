@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/debugging",
-	"version": "1.11.1",
+	"version": "1.17.0",
 	"description": "A debugging/development library for js-draw.",
 	"types": "./dist/mjs/lib.d.ts",
 	"main": "./dist/cjs/lib.js",
@@ -20,11 +20,11 @@
 	"private": true,
 	"scripts": {
 		"dist": "npm run build",
-		"build": "rm -rf ./dist && mkdir dist && build-tool build",
-		"watch": "rm -rf ./dist/* && mkdir -p dist && build-tool watch"
+		"build": "rm -rf ./dist && build-tool build",
+		"watch": "build-tool watch"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.11.1"
+		"@js-draw/build-tool": "^1.17.0"
 	},
 	"peerDependencies": {
 		"js-draw": "^1.8.0"

@@ -5,6 +5,8 @@ import { PenStyle } from '../tools/Pen';
 import { StrokeDataPoint } from '../types';
 import Viewport from '../Viewport';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
+import { makePolylineBuilder } from '../components/builders/PolylineBuilder';
+import { EraserMode } from '../tools/Eraser';
 
 export type IconElemType = HTMLImageElement|SVGElement;
 
@@ -62,8 +64,9 @@ const makeRedoIcon = (mirror: boolean) => {
 
 
 /**
- * Provides icons that can be used in the toolbar, etc.
- * Extend this class and override methods to customize icons.
+ * Provides icons that can be used in the toolbar and other locations.
+ *
+ * To customize the icons used by the editor, extend this class and override methods.
  *
  * @example
  * ```ts,runnable
@@ -71,7 +74,7 @@ const makeRedoIcon = (mirror: boolean) => {
  *
  * class CustomIconProvider extends jsdraw.IconProvider {
  *     // Use '☺' instead of the default dropdown symbol.
- *     public makeDropdownIcon() {
+ *     public override makeDropdownIcon() {
  *         const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
  *         icon.innerHTML = `
  *             <text x='5' y='55' style='fill: var(--icon-color); font-size: 50pt;'>☺</text>
@@ -83,6 +86,8 @@ const makeRedoIcon = (mirror: boolean) => {
  *
  * const icons = new CustomIconProvider();
  * const editor = new jsdraw.Editor(document.body, {
+ *     // The icon pack to use is specified through the editor's initial
+ *     // configuration object:
  *     iconProvider: icons,
  * });
  *
@@ -95,7 +100,6 @@ export default class IconProvider {
 		return makeRedoIcon(true);
 	}
 
-	// @param mirror - reflect across the x-axis. This parameter is internal.
 	// @returns a redo icon.
 	public makeRedoIcon(): IconElemType {
 		return makeRedoIcon(false);
@@ -115,7 +119,7 @@ export default class IconProvider {
 		return icon;
 	}
 
-	public makeEraserIcon(eraserSize?: number): IconElemType {
+	public makeEraserIcon(eraserSize?: number, mode?: EraserMode): IconElemType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 		eraserSize ??= 10;
 
@@ -124,9 +128,16 @@ export default class IconProvider {
 
 		// Draw an eraser-like shape. Created with Inkscape
 		icon.innerHTML = `
+		<defs>
+			<linearGradient id="dash-pattern">
+				<stop offset="80%" stop-color="${eraserColor}"/>
+				<stop offset="85%" stop-color="white"/>
+				<stop offset="90%" stop-color="${eraserColor}"/>
+			</linearGradient>
+		</defs>
 		<g>
 			<path
-				style="fill:${eraserColor}"
+				style="fill:${mode === EraserMode.PartialStroke ? 'url(#dash-pattern)' : eraserColor}"
 				stroke="black"
 				transform="rotate(41.35)"
 				d="M 52.5 27
@@ -947,7 +958,11 @@ export default class IconProvider {
 	 * @returns true if the given `penStyle` is known to match a rounded tip type of pen.
 	 */
 	protected isRoundedTipPen(penStyle: PenStyle) {
-		return penStyle.factory === makeFreehandLineBuilder;
+		return penStyle.factory === makeFreehandLineBuilder || penStyle.factory === makePolylineBuilder;
+	}
+
+	protected isPolylinePen(penStyle: PenStyle) {
+		return penStyle.factory === makePolylineBuilder;
 	}
 
 	/** Must be overridden by icon packs that need attribution. */

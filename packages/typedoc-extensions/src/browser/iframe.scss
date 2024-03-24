@@ -34,5 +34,23 @@
 			border: 1px solid white;
 		}
 	}
+
+	details {
+		& > summary {
+			cursor: pointer;
+		}
+
+		&[open] {
+			padding: 2px;
+		}
+
+		transition: 0.2s ease padding;
+	}
 }
 
+:root.html-view {
+	.log-item.error {
+		font-family: monospace;
+		color: red;
+	}
+}

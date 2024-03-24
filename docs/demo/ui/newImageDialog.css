@@ -21,6 +21,11 @@
 	background-color: #ddd;
 }
 
+.from-template-container {
+	max-height: 400px;
+	overflow-y: auto;
+}
+
 @media (prefers-color-scheme: dark) {
 	.new-image-template-button {
 		background-color: #222;

@@ -80,7 +80,7 @@ export interface KeyUpEvent extends BaseKeyEvent {
 
 export interface CopyEvent {
 	readonly kind: InputEvtType.CopyEvent;
-	setData(mime: string, data: string): void;
+	setData(mime: string, data: string|Promise<Blob>): void;
 }
 
 export interface PasteEvent {
@@ -111,7 +111,18 @@ export interface PointerUpEvt extends PointerEvtBase {
 	readonly kind: InputEvtType.PointerUpEvt;
 }
 
+/**
+ * An internal `js-draw` pointer event type.
+ *
+ * This **is not** the same as a DOM pointer event.
+ */
 export type PointerEvt = PointerDownEvt | PointerMoveEvt | PointerUpEvt;
+
+/**
+ * An internal `js-draw` input event type.
+ *
+ * These are not DOM events.
+ */
 export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt | CopyEvent | PasteEvent;
 
 type KeyEventType = InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent;

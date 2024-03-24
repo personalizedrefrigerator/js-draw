@@ -64,10 +64,39 @@ export class Vec3 {
 	}
 
 	/**
+	 * Interpreting this vector as a point in ℝ^3, computes the square distance
+	 * to another point, `p`.
+	 *
+	 * Equivalent to `.minus(p).magnitudeSquared()`.
+	 */
+	public squareDistanceTo(p: Vec3) {
+		const dx = this.x - p.x;
+		const dy = this.y - p.y;
+		const dz = this.z - p.z;
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	/**
+	 * Interpreting this vector as a point in ℝ³, returns the distance to the point
+	 * `p`.
+	 *
+	 * Equivalent to `.minus(p).magnitude()`.
+	 */
+	public distanceTo(p: Vec3) {
+		return Math.sqrt(this.squareDistanceTo(p));
+	}
+
+	/**
 	 * Returns the entry of this with the greatest magnitude.
 	 *
 	 * In other words, returns $\max \{ |x| : x \in {\bf v} \}$, where ${\bf v}$ is the set of
 	 * all entries of this vector.
+	 *
+	 * **Example**:
+	 * ```ts,runnable,console
+	 * import { Vec3 } from '@js-draw/math';
+	 * console.log(Vec3.of(-1, -10, 8).maximumEntryMagnitude()); // -> 10
+	 * ```
 	 */
 	public maximumEntryMagnitude(): number {
 		return Math.max(Math.abs(this.x), Math.max(Math.abs(this.y), Math.abs(this.z)));
@@ -81,6 +110,7 @@ export class Vec3 {
 	 * As such, observing that `Math.atan2(-0, -1)` $\approx -\pi$ and `Math.atan2(0, -1)`$\approx \pi$
 	 * the resultant angle is in the range $[-\pi, pi]$.
 	 *
+	 * **Example**:
 	 * ```ts,runnable,console
 	 * import { Vec2 } from '@js-draw/math';
 	 * console.log(Vec2.of(-1, -0).angle()); // atan2(-0, -1)
@@ -214,7 +244,8 @@ export class Vec3 {
 	 * Returns a vector with each component acted on by `fn`.
 	 *
 	 * @example
-	 * ```
+	 * ```ts,runnable,console
+	 * import { Vec3 } from '@js-draw/math';
 	 * console.log(Vec3.of(1, 2, 3).map(val => val + 1)); // → Vec(2, 3, 4)
 	 * ```
 	 */
@@ -242,13 +273,11 @@ export class Vec3 {
 	 * ```
 	 */
 	public eq(other: Vec3, fuzz: number = 1e-10): boolean {
-		for (let i = 0; i < 3; i++) {
-			if (Math.abs(other.at(i) - this.at(i)) > fuzz) {
-				return false;
-			}
-		}
-
-		return true;
+		return (
+			Math.abs(other.x - this.x) <= fuzz
+			&& Math.abs(other.y - this.y) <= fuzz
+			&& Math.abs(other.z - this.z) <= fuzz
+		);
 	}
 
 	public toString(): string {

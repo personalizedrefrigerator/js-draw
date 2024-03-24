@@ -33,7 +33,7 @@ export default class ArrowBuilder implements ComponentBuilder {
 		const lineStartPoint = this.startPoint.pos;
 		const endPoint = this.endPoint.pos;
 		const toEnd = endPoint.minus(lineStartPoint).normalized();
-		const arrowLength = endPoint.minus(lineStartPoint).length();
+		const arrowLength = endPoint.distanceTo(lineStartPoint);
 
 		// Ensure that the arrow tip is smaller than the arrow.
 		const arrowTipSize = Math.min(this.getLineWidth(), arrowLength / 2);

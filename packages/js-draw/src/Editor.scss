@@ -118,6 +118,10 @@
 	max-width: inherit;
 	min-height: 0px;
 	max-height: inherit;
+
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .imageEditorContainer .loadingMessage {
@@ -137,7 +141,10 @@
 	width: 0;
 	height: 0;
 	overflow: hidden;
+
 	pointer-events: none;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .imageEditorContainer .textRendererOutputContainer {
@@ -146,6 +153,9 @@
 	width: 0.001px;
 	height: 0.001px;
 	overflow: hidden;
+
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 .imageEditorContainer .textRendererOutputContainer:focus-within {

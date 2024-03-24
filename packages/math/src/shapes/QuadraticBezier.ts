@@ -4,10 +4,9 @@ import BezierJSWrapper from './BezierJSWrapper';
 import Rect2 from './Rect2';
 
 /**
- * A wrapper around `bezier-js`'s quadratic Bézier.
+ * Represents a 2D Bézier curve.
  *
- * This wrappper lazy-loads `bezier-js`'s Bézier and can perform some operations
- * without loading it at all (e.g. `normal`, `at`, and `approximateDistance`).
+ * **Note**: Many Bézier operations use `bezier-js`'s.
  */
 export class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
@@ -30,10 +29,19 @@ export class QuadraticBezier extends BezierJSWrapper {
 		return -2 * p0 + 2 * p1 + 2 * t * (p0 - 2 * p1 + p2);
 	}
 
+	private static secondDerivativeComponentAt(t: number, p0: number, p1: number, p2: number) {
+		return 2 * (p0 - 2 * p1 + p2);
+	}
+
 	/**
 	 * @returns the curve evaluated at `t`.
+	 *
+	 * `t` should be a number in `[0, 1]`.
 	 */
 	public override at(t: number): Point2 {
+		if (t === 0) return this.p0;
+		if (t === 1) return this.p2;
+
 		const p0 = this.p0;
 		const p1 = this.p1;
 		const p2 = this.p2;
@@ -50,6 +58,16 @@ export class QuadraticBezier extends BezierJSWrapper {
 		return Vec2.of(
 			QuadraticBezier.derivativeComponentAt(t, p0.x, p1.x, p2.x),
 			QuadraticBezier.derivativeComponentAt(t, p0.y, p1.y, p2.y),
+		);
+	}
+
+	public override secondDerivativeAt(t: number): Point2 {
+		const p0 = this.p0;
+		const p1 = this.p1;
+		const p2 = this.p2;
+		return Vec2.of(
+			QuadraticBezier.secondDerivativeComponentAt(t, p0.x, p1.x, p2.x),
+			QuadraticBezier.secondDerivativeComponentAt(t, p0.y, p1.y, p2.y),
 		);
 	}
 
@@ -126,11 +144,10 @@ export class QuadraticBezier extends BezierJSWrapper {
 
 		const at1 = this.at(min1);
 		const at2 = this.at(min2);
-		const sqrDist1 = at1.minus(point).magnitudeSquared();
-		const sqrDist2 = at2.minus(point).magnitudeSquared();
-		const sqrDist3 = this.at(0).minus(point).magnitudeSquared();
-		const sqrDist4 = this.at(1).minus(point).magnitudeSquared();
-
+		const sqrDist1 = at1.squareDistanceTo(point);
+		const sqrDist2 = at2.squareDistanceTo(point);
+		const sqrDist3 = this.at(0).squareDistanceTo(point);
+		const sqrDist4 = this.at(1).squareDistanceTo(point);
 
 		return Math.sqrt(Math.min(sqrDist1, sqrDist2, sqrDist3, sqrDist4));
 	}

@@ -34,8 +34,8 @@ describe('PanZoom', () => {
 		sendTouchEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 0));
 
 		const updatedTranslation = editor.viewport.canvasToScreen(Vec2.zero);
-		expect(updatedTranslation.minus(origTranslation).magnitude()).toBeGreaterThanOrEqual(100);
-		expect(updatedTranslation.minus(origTranslation).magnitude()).toBeLessThan(110);
+		expect(updatedTranslation.distanceTo(origTranslation)).toBeGreaterThanOrEqual(100);
+		expect(updatedTranslation.distanceTo(origTranslation)).toBeLessThan(110);
 
 		await waitForTimeout(600); // ms
 		jest.useFakeTimers();

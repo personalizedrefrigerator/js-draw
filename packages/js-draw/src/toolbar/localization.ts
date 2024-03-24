@@ -19,8 +19,9 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	cancel: string;
 	submit: string;
 	roundedTipPen: string;
+	roundedTipPen2: string;
 	flatTipPen: string;
-	selectPenTip: string;
+	selectPenType: string;
 	selectShape: string;
 	colorLabel: string;
 	pen: string;
@@ -31,6 +32,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	resizeImageToSelection: string;
 	deleteSelection: string;
 	duplicateSelection: string;
+	fullStrokeEraser: string;
 
 	pickColorFromScreen: string;
 	clickToPickColorAnnouncement: string;
@@ -74,7 +76,10 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	handDropdown__zoomOutHelpText: string;
 	handDropdown__resetViewHelpText: string;
 	handDropdown__touchPanningHelpText: string;
+	eraserDropdown__baseHelpText: string;
+	eraserDropdown__fullStrokeEraserHelpText: string;
 	handDropdown__lockRotationHelpText: string;
+	eraserDropdown__thicknessHelpText: string;
 	selectionDropdown__baseHelpText: string;
 	selectionDropdown__resizeToHelpText: string;
 	selectionDropdown__deleteHelpText: string;
@@ -130,7 +135,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	undo: 'Undo',
 	redo: 'Redo',
 
-	selectPenTip: 'Pen tip',
+	fullStrokeEraser: 'Full stroke eraser',
+	selectPenType: 'Pen type',
 	selectShape: 'Shape',
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
@@ -150,6 +156,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	touchPanning: 'Touchscreen panning',
 
 	roundedTipPen: 'Round',
+	roundedTipPen2: 'Polyline',
 	flatTipPen: 'Flat',
 	arrowPen: 'Arrow',
 	linePen: 'Line',
@@ -168,7 +175,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	penDropdown__colorHelpText: 'Changes the pen\'s color',
 	penDropdown__thicknessHelpText:
 		'Changes the thickness of strokes drawn by the pen.',
-	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen tip” style or “shape” can be chosen. Choosing a “pen tip” style draws freehand lines. Choosing a “shape” draws shapes.',
+	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.',
 	penDropdown__autocorrectHelpText:
 		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
 	penDropdown__stabilizationHelpText:
@@ -185,6 +192,10 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'When enabled, touch gestures move the image rather than select or draw.',
 	handDropdown__lockRotationHelpText:
 		'When enabled, prevents touch gestures from rotating the screen.',
+	eraserDropdown__baseHelpText: 'This tool removes strokes, images, and text under the cursor.',
+	eraserDropdown__thicknessHelpText: 'Changes the size of the eraser.',
+	eraserDropdown__fullStrokeEraserHelpText:
+		'When in full-stroke mode, entire shapes are erased.\n\nWhen not in full-stroke mode, shapes can be partially erased.',
 	selectionDropdown__baseHelpText: 'Selects content and manipulates the selection',
 	selectionDropdown__resizeToHelpText: 'Crops the drawing to the size of what\'s currently selected.\n\nIf auto-resize is enabled, it will be disabled.',
 	selectionDropdown__deleteHelpText: 'Erases selected items.',

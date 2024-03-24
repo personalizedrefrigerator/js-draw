@@ -9,7 +9,7 @@ KeyboardShortcutManager.registerDefaultKeyboardShortcut(
 
 // Pen tool
 export const selectStrokeTypeKeyboardShortcutIds: string[] =
-		[1, 2, 3, 4, 5, 6, 7].map(id => `jsdraw.toolbar.PenTool.select-pen-${id}`);
+		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(id => `jsdraw.toolbar.PenTool.select-pen-${id}`);
 
 for (let i = 0; i < selectStrokeTypeKeyboardShortcutIds.length; i++) {
 	const id = selectStrokeTypeKeyboardShortcutIds[i];
