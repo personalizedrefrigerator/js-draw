@@ -179,7 +179,7 @@ class PDFDocumentWrapper {
 			},
 
 			getAnnotations: async (): Promise<AbstractComponent[]> => {
-				const pdfjsAnnotations = await pdfPage.getAnnotations({ intent: 'display' });
+				const pdfjsAnnotations = await pdfPage.getAnnotations({ intent: 'print' });
 
 				// TODO: REMOVE!!! DEBUGGING!!!!!!
 				const w = (window as any);
@@ -222,28 +222,12 @@ class PDFDocumentWrapper {
 							const pathCommands: PathCommand[] = [];
 
 							let i = 0;
-							for (i = 1; i < points.length; i += 2) {
-								pathCommands.push({
-									kind: PathCommandType.QuadraticBezierTo,
-									//controlPoint1: points[i - 2],
-									controlPoint: points[i - 1],
-									endPoint: points[i],
-								});
-							}
-
-							if (i < points.length - 2) {
-								pathCommands.push({
-									kind: PathCommandType.QuadraticBezierTo,
-									controlPoint: points[points.length - 2],
-									endPoint: points[points.length - 1],
-								});
-							} else if (i < points.length - 1) {
+							for (i = 1; i < points.length; i ++) {
 								pathCommands.push({
 									kind: PathCommandType.LineTo,
-									point: points[points.length - 1],
+									point: points[i],
 								});
 							}
-
 
 							const path = new Path(points[0], pathCommands).transformedBy(transform);
 							const strokePart = pathToRenderable(path, renderStyle);
