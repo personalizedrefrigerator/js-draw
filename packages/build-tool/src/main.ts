@@ -60,7 +60,9 @@ const readConfig = (): BuildConfig => {
 			if ('outPath' in filePair) {
 				assertPropertyHasType(filePair, 'outPath', 'string', errorContext);
 			}
-			assertPropertyHasType(filePair, 'name', 'string', errorContext);
+			if ('name' in filePair) {
+				assertPropertyHasType(filePair, 'name', 'string', errorContext);
+			}
 
 			bundledFiles.push({
 				inPath: path.resolve(filePair.inPath),

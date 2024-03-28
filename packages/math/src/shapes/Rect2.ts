@@ -255,6 +255,10 @@ export class Rect2 extends Abstract2DShape {
 		return Vec2.of(this.x + this.w / 2, this.y + this.h / 2);
 	}
 
+	public xywh() {
+		return { x: this.x, y: this.y, w: this.w, h: this.h };
+	}
+
 	// Returns edges in the order
 	// [ rightEdge, topEdge, leftEdge, bottomEdge ]
 	public getEdges(): LineSegment2[] {

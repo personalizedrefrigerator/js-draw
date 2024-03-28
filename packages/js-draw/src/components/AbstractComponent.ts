@@ -8,7 +8,7 @@ import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Viewport from '../Viewport';
 
-export type LoadSaveData = (string[]|Record<symbol, string|number>);
+export type LoadSaveData = (string[]|Record<symbol|string, string|number>);
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
 export type DeserializeCallback = (data: string)=>AbstractComponent;
 type ComponentId = string;

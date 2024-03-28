@@ -300,6 +300,29 @@ export class Path {
 		return result;
 	}
 
+	/**
+	 * `step` is used to approximate curved segments with points, lines are
+	 * represented with just start and end points.
+	 */
+	public approximateWithPoints(step: number): Point2[] {
+		const points: Point2[] = [];
+
+		points.push(this.startPoint);
+
+		for (let i = 0; i < this.parts.length; i++) {
+			const part = this.parts[i];
+			if (part.kind === PathCommandType.LineTo || part.kind === PathCommandType.MoveTo) {
+				points.push(part.point);
+			} else {
+				for (let t = step; t <= 1; t += step) {
+					points.push(this.at({ curveIndex: i, parameterValue: t }));
+				}
+			}
+		}
+
+		return points;
+	}
+
 	public static computeBBoxForSegment(startPoint: Point2, part: PathCommand): Rect2 {
 		const points = [startPoint];
 		let exhaustivenessCheck: never;
