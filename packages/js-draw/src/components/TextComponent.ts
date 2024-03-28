@@ -140,7 +140,8 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	}
 
 	// Returns the bounding box of `text`. This is approximate if no Canvas is available.
-	private static getTextDimens(text: string, style: TextRenderingStyle): Rect2 {
+	// @internal
+	public static getTextDimens(text: string, style: TextRenderingStyle): Rect2 {
 		const metrics = this.getTextMetrics(text, style);
 
 		if (!metrics) {

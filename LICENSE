@@ -1,3 +1,9 @@
+The majority of this project is licensed under the MIT. However, packages/material-icons
+and docs/examples/example-pdf may have different licesnes. See the relevant subdirectories
+for details.
+
+----
+
 MIT License
 
 Copyright (c) 2023-2024 Henry Heino

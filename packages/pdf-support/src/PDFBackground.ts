@@ -42,7 +42,6 @@ class PDFBackground extends AbstractComponent {
 	}
 
 	public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined) {
-		console.log('render');
 		for (let i = 0; i < this.pdf.numPages; i ++) {
 			const page = this.pdf.getPage(i);
 
@@ -51,11 +50,12 @@ class PDFBackground extends AbstractComponent {
 
 				// TODO: page.bbox is an approximation.
 				const renderRect = visibleRect ?? page.bbox;
+				const scale = canvas.getSizeOfCanvasPixelOnScreen() * window.devicePixelRatio;
 
 				const rendered = page.render(canvas, renderRect);
 
 				if (!rendered) {
-					page.awaitRenderable(renderRect).then(() => {
+					page.awaitRenderable(renderRect, scale).then(() => {
 						this.containerImage?.queueRerenderOf(this);
 					});
 				}

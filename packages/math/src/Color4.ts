@@ -47,18 +47,22 @@ export class Color4 {
 		return new Color4(red, green, blue, alpha);
 	}
 
-	/** Creates a color from an RGBA (or RGB) array where each value ranges from 0-255. */
-	public static fromArray(array: Uint8Array|Uint8ClampedArray) {
+	/**
+	 * Creates a color from an RGBA (or RGB) array where each value ranges from 0-255.
+	 *
+	 * If the array values instead range from 0-1, pass `maxValue` as `1`.
+	 */
+	public static fromArray(array: Uint8Array|Uint8ClampedArray|number[], maxValue: number = 255) {
 		const red = array[0];
-		const green = array[1];
-		const blue = array[2];
+		const green = array[1] ?? red;
+		const blue = array[2] ?? red;
 
 		let alpha = 255;
 		if (3 < array.length) {
 			alpha = array[3];
 		}
 
-		return Color4.ofRGBA(red / 255, green / 255, blue / 255, alpha / 255);
+		return Color4.ofRGBA(red / maxValue, green / maxValue, blue / maxValue, alpha / maxValue);
 	}
 
 	public static fromHex(hexString: string): Color4 {
@@ -202,6 +206,15 @@ export class Color4 {
 	 */
 	public get rgb() {
 		return Vec3.of(this.r, this.g, this.b);
+	}
+
+	/**
+	 * Returns an array with four components, each from 0 to 1.
+	 *
+	 * The return value will be in $[0,1]^4$
+	 */
+	public asRGBAArray(): [number, number, number, number] {
+		return [ this.r, this.g, this.b, this.a ];
 	}
 
 	/**
