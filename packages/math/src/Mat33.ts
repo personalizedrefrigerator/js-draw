@@ -42,15 +42,15 @@ export class Mat33 {
 		if (row === 0) {
 			if (column === 0) return this.a1;
 			if (column === 1) return this.a2;
-			if (column === 2) this.a3;
+			if (column === 2) return this.a3;
 		} else if (row === 1) {
 			if (column === 0) return this.b1;
 			if (column === 1) return this.b2;
-			if (column === 2) this.b3;
-		} else {
+			if (column === 2) return this.b3;
+		} else if (row === 2) {
 			if (column === 0) return this.c1;
 			if (column === 1) return this.c2;
-			if (column === 2) this.c3;
+			if (column === 2) return this.c3;
 		}
 		throw new Error(`Invalid matrix index: (row,col)=(${row}, ${column})`);
 	}
