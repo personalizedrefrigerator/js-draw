@@ -298,9 +298,9 @@ export class Rect2 extends Abstract2DShape {
 		return Rect2.bboxOf(this.corners.map(corner => affineTransform.transformVec2(corner)));
 	}
 
-	/** @return true iff this is equal to [other] ± fuzz */
-	public eq(other: Rect2, fuzz: number = 0): boolean {
-		return this.topLeft.eq(other.topLeft, fuzz) && this.size.eq(other.size, fuzz);
+	/** @return true iff this is equal to `other ± tolerance` */
+	public eq(other: Rect2, tolerance: number = 0): boolean {
+		return this.topLeft.eq(other.topLeft, tolerance) && this.size.eq(other.size, tolerance);
 	}
 
 	public override toString(): string {

@@ -10,6 +10,9 @@ export interface RenderableImage {
 
 	// An Image or HTMLCanvasElement. If an Image, it must be loaded from the same origin as this
 	// (and should have `src=this.base64Url`).
+	//
+	// **Note:** In the future, `image` may also have type `ImageBitmap`, which **does not** support
+	// `.getAttribute` as it is not an `HTMLElement`.
 	image: HTMLImageElement|HTMLCanvasElement;
 
 	// All images that can be drawn **must** have a base64 URL in the form
