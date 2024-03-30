@@ -42,15 +42,15 @@ export class Mat33 {
 		if (row === 0) {
 			if (column === 0) return this.a1;
 			if (column === 1) return this.a2;
-			else return this.a3;
+			if (column === 2) this.a3;
 		} else if (row === 1) {
 			if (column === 0) return this.b1;
 			if (column === 1) return this.b2;
-			else return this.b3;
+			if (column === 2) this.b3;
 		} else {
 			if (column === 0) return this.c1;
 			if (column === 1) return this.c2;
-			else return this.c3;
+			if (column === 2) this.c3;
 		}
 		throw new Error(`Invalid matrix index: (row,col)=(${row}, ${column})`);
 	}
@@ -69,14 +69,14 @@ export class Mat33 {
 		return new Mat33(
 			r1.x, r1.y, r1.z,
 			r2.x, r2.y, r2.z,
-			r3.x, r3.y, r3.z
+			r3.x, r3.y, r3.z,
 		);
 	}
 
 	public static identity = new Mat33(
 		1, 0, 0,
 		0, 1, 0,
-		0, 0, 1
+		0, 0, 1,
 	);
 
 	/**

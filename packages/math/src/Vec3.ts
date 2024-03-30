@@ -284,7 +284,7 @@ class Vec3Impl implements Vec3 {
 		return Vec3.of(
 			this.y * other.z - other.y * this.z,
 			other.x * this.z - this.x * other.z,
-			this.x * other.y - other.x * this.y
+			this.x * other.y - other.x * this.y,
 		);
 	}
 
@@ -328,9 +328,7 @@ class Vec3Impl implements Vec3 {
 	}
 
 	public map(fn: (component: number, index: number)=> number): Vec3 {
-		return Vec3.of(
-			fn(this.x, 0), fn(this.y, 1), fn(this.z, 2)
-		);
+		return Vec3.of(fn(this.x, 0), fn(this.y, 1), fn(this.z, 2));
 	}
 
 	public asArray(): [ number, number, number ] {
@@ -506,23 +504,63 @@ class Vec2Impl implements Vec3 {
 	}
 }
 
-/** A `Vec2` is a `Vec3` optimized for working in a plane. */
+/**
+ * A `Vec2` is a `Vec3` optimized for working in a plane. As such, they have an
+ * always-zero `z` component.
+ *
+ * ```ts,runnable,console
+ * import { Vec2 } from '@js-draw/math';
+ * console.log(Vec2.of(1, 2));
+ * ```
+ */
 export namespace Vec2 {
+	/**
+	 * Creates a `Vec2` from an x and y coordinate.
+	 *
+	 * @example
+	 * ```ts,runnable,console
+	 * import { Vec2 } from '@js-draw/math';
+	 * const v = Vec2.of(3, 4); // x=3, y=4.
+	 * ```
+	 */
 	export const of = (x: number, y: number) => {
 		return new Vec2Impl(x, y);
 	};
 
+	/**
+	 * Creates a `Vec2` from an object containing `x` and `y` coordinates.
+	 *
+	 * @example
+	 * ```ts,runnable,console
+	 * import { Vec2 } from '@js-draw/math';
+	 * const v1 = Vec2.ofXY({ x: 3, y: 4.5 });
+	 * const v2 = Vec2.ofXY({ x: -123.4, y: 1 });
+	 * ```
+	 */
 	export const ofXY = ({x, y}: {x: number, y: number}) => {
 		return Vec2.of(x, y);
 	};
 
+	/** A vector of length 1 in the X direction (→). */
 	export const unitX = Vec2.of(1, 0);
+
+	/** A vector of length 1 in the Y direction (↑). */
 	export const unitY = Vec2.of(0, 1);
+
+	/** The zero vector: A vector with x=0, y=0. */
 	export const zero = Vec2.of(0, 0);
 }
 
 export namespace Vec3 {
-	/** Construct a vector from three components. */
+	/**
+	 * Construct a vector from three components.
+	 *
+	 * @example
+	 * ```ts,runnable,console
+	 * import { Vec3 } from '@js-draw/math';
+	 * const v1 = Vec3.of(1, 2, 3);
+	 * ```
+	 */
 	export const of = (x: number, y: number, z: number): Vec3 => {
 		if (z === 0) {
 			return Vec2.of(x, y);
@@ -534,6 +572,8 @@ export namespace Vec3 {
 	export const unitX = Vec2.unitX;
 	export const unitY = Vec2.unitY;
 	export const zero = Vec2.zero;
+
+	/** A vector of length 1 in the z direction. */
 	export const unitZ = Vec3.of(0, 0, 1);
 }
 
