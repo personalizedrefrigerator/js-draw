@@ -13,6 +13,8 @@ export type Mat33Array = [
  * **and** translates while a linear transformation just scales/rotates/shears).
  */
 export class Mat33 {
+	private readonly rows: Vec3[];
+
 	/**
 	 * Creates a matrix from inputs in the form,
 	 * $$
@@ -36,23 +38,11 @@ export class Mat33 {
 		public readonly c2: number,
 		public readonly c3: number
 	) {
-	}
-
-	public at(row: number, column: number) {
-		if (row === 0) {
-			if (column === 0) return this.a1;
-			if (column === 1) return this.a2;
-			if (column === 2) return this.a3;
-		} else if (row === 1) {
-			if (column === 0) return this.b1;
-			if (column === 1) return this.b2;
-			if (column === 2) return this.b3;
-		} else if (row === 2) {
-			if (column === 0) return this.c1;
-			if (column === 1) return this.c2;
-			if (column === 2) return this.c3;
-		}
-		throw new Error(`Invalid matrix index: (row,col)=(${row}, ${column})`);
+		this.rows = [
+			Vec3.of(a1, a2, a3),
+			Vec3.of(b1, b2, b3),
+			Vec3.of(c1, c2, c3),
+		];
 	}
 
 	/**
@@ -69,14 +59,14 @@ export class Mat33 {
 		return new Mat33(
 			r1.x, r1.y, r1.z,
 			r2.x, r2.y, r2.z,
-			r3.x, r3.y, r3.z,
+			r3.x, r3.y, r3.z
 		);
 	}
 
 	public static identity = new Mat33(
 		1, 0, 0,
 		0, 1, 0,
-		0, 0, 1,
+		0, 0, 1
 	);
 
 	/**
@@ -101,9 +91,9 @@ export class Mat33 {
 		}
 
 		const toIdentity = [
-			Vec3.of(this.a1, this.a2, this.a3),
-			Vec3.of(this.b1, this.b2, this.b3),
-			Vec3.of(this.c1, this.c2, this.c3),
+			this.rows[0],
+			this.rows[1],
+			this.rows[2],
 		];
 
 		const toResult = [
@@ -189,14 +179,16 @@ export class Mat33 {
 	}
 
 	public rightMul(other: Mat33): Mat33 {
-		// [ a1 a2 a3 ]   [ A1 A2 A3 ]
-		// [ b1 b2 b3 ] * [ B1 B2 B3 ]
-		// [ c1 c2 c3 ]   [ C1 C2 C3 ]
+		other = other.transposed();
+
+		const at = (row: number, col: number): number => {
+			return this.rows[row].dot(other.rows[col]);
+		};
 
 		return new Mat33(
-			this.a1*other.a1 + this.a2*other.b1 + this.a3*other.c1, this.a1*other.a2 + this.a2*other.b2 + this.a3*other.c2, this.a1*other.a3 + this.a2*other.b3 + this.a3*other.c3,
-			this.b1*other.a1 + this.b2*other.b1 + this.b3*other.c1, this.b1*other.a2 + this.b2*other.b2 + this.b3*other.c2, this.b1*other.a3 + this.b2*other.b3 + this.b3*other.c3,
-			this.c1*other.a1 + this.c2*other.b1 + this.c3*other.c1, this.c1*other.a2 + this.c2*other.b2 + this.c3*other.c2, this.c1*other.a3 + this.c2*other.b3 + this.c3*other.c3,
+			at(0, 0), at(0, 1), at(0, 2),
+			at(1, 0), at(1, 1), at(1, 2),
+			at(2, 0), at(2, 1), at(2, 2)
 		);
 	}
 
@@ -226,14 +218,10 @@ export class Mat33 {
 	 * This is the standard way of transforming vectors in ℝ³.
 	 */
 	public transformVec3(other: Vec3): Vec3 {
-		const x = other.x;
-		const y = other.y;
-		const z = other.z;
-
 		return Vec3.of(
-			this.a1 * x + this.a2 * y + this.a3 * z,
-			this.b1 * x + this.b2 * y + this.b3 * z,
-			this.c1 * x + this.c2 * y + this.c3 * z,
+			this.rows[0].dot(other),
+			this.rows[1].dot(other),
+			this.rows[2].dot(other)
 		);
 	}
 
@@ -248,17 +236,9 @@ export class Mat33 {
 
 	/** Returns true iff this = other ± fuzz */
 	public eq(other: Mat33, fuzz: number = 0): boolean {
-		if (this === other) return true;
-
 		for (let i = 0; i < 3; i++) {
-			for (let j = 0; j < 3; j++) {
-				const a = this.at(i, j);
-				const b = other.at(i, j);
-
-				// We use a !( <= ) to handle the case where a - b is NaN.
-				if (!(Math.abs(a - b) <= fuzz)) {
-					return false;
-				}
+			if (!this.rows[i].eq(other.rows[i], fuzz)) {
+				return false;
 			}
 		}
 
@@ -271,9 +251,9 @@ export class Mat33 {
 
 		// Determine the longest item in each column so we can pad the others to that
 		// length.
-		for (let i = 0; i < 3; i++) {
-			for (let j = 0; j < 3; j++) {
-				maxColumnLens[i] = Math.max(maxColumnLens[0], `${this.at(j, i)}`.length);
+		for (const row of this.rows) {
+			for (let i = 0; i < 3; i++) {
+				maxColumnLens[i] = Math.max(maxColumnLens[0], `${row.at(i)}`.length);
 			}
 		}
 
@@ -288,7 +268,7 @@ export class Mat33 {
 
 			// Add each component of the ith row (after padding it)
 			for (let j = 0; j < 3; j++) {
-				const val = this.at(i, j).toString();
+				const val = this.rows[i].at(j).toString();
 
 				let padding = '';
 				for (let i = val.length; i < maxColumnLens[j]; i++) {
@@ -357,15 +337,11 @@ export class Mat33 {
 
 	/** Returns the `idx`-th column (`idx` is 0-indexed). */
 	public getColumn(idx: number) {
-		if (idx === 0) {
-			return Vec3.of(this.a1, this.b1, this.c1);
-		} else if (idx === 1) {
-			return Vec3.of(this.a2, this.b2, this.c2);
-		} else if (idx === 2) {
-			return Vec3.of(this.a3, this.b3, this.c3);
-		}
-
-		throw new Error(`Index ${idx} is out-of-bounds (Mat33.getColumn)`);
+		return Vec3.of(
+			this.rows[0].at(idx),
+			this.rows[1].at(idx),
+			this.rows[2].at(idx),
+		);
 	}
 
 	/** Returns the magnitude of the entry with the largest entry */
