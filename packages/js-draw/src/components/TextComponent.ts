@@ -101,9 +101,11 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 	public static applyTextStyles(ctx: CanvasRenderingContext2D, style: TextRenderingStyle) {
 		// Quote the font family if necessary.
-		const fontFamily = style.fontFamily.match(/\s/) ? style.fontFamily.replace(/["]/g, '\\"') : style.fontFamily;
+		const hasSpaces = style.fontFamily.match(/\s/);
+		const isQuoted = style.fontFamily.match(/^".*"$/);
+		const fontFamily = hasSpaces && !isQuoted ? `"${style.fontFamily.replace(/["]/g, '\\"')}"` : style.fontFamily;
 
-		ctx.font =	[
+		ctx.font =[
 			style.fontStyle ?? '',
 			style.fontWeight ?? '',
 			(style.size ?? 12) + 'px',
