@@ -46,6 +46,10 @@ const createEditor = async (
 			name: 'js-draw demo',
 			description: 'An app demonstrating the js-draw library\'s functionality.',
 		},
+
+		text: {
+			fonts: [ 'serif', 'sans-serif', 'monospace' ],
+		},
 	});
 
 	const { hasChanges } = watchForChanges(editor, appNotifier);

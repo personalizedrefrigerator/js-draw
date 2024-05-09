@@ -76,9 +76,12 @@ export default class TextToolWidget extends BaseToolWidget {
 		sizeInput.id = `${toolbarCSSPrefix}-text-size-input-${TextToolWidget.idCounter++}`;
 		sizeLabel.setAttribute('for', sizeInput.id);
 
-		addFontToInput('monospace');
-		addFontToInput('serif');
-		addFontToInput('sans-serif');
+		const defaultFonts = this.editor.getCurrentSettings().text?.fonts ?? [];
+		for (const font of defaultFonts) {
+			addFontToInput(font);
+		}
+
+		fontInput.classList.add('font-selector');
 		fontInput.id = `${toolbarCSSPrefix}-text-font-input-${TextToolWidget.idCounter++}`;
 		fontLabel.setAttribute('for', fontInput.id);
 

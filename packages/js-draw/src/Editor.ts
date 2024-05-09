@@ -134,6 +134,12 @@ export interface EditorSettings {
 		 */
 		filterPenTypes?: (penType: PenTypeRecord)=>boolean,
 	}|null,
+
+	/** Configures the default {@link TextTool} control. */
+	text: {
+		/** Fonts to show in the text UI. */
+		fonts?: string[],
+	}|null,
 }
 
 /**
@@ -324,6 +330,9 @@ export class Editor {
 			pens: {
 				additionalPenTypes: settings.pens?.additionalPenTypes ?? [],
 				filterPenTypes: settings.pens?.filterPenTypes ?? (()=>true)
+			},
+			text: {
+				fonts: settings.text?.fonts ?? [ 'sans-serif', 'serif', 'monospace' ],
 			},
 		};
 
