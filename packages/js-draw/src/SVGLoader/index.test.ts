@@ -1,6 +1,6 @@
-import { Rect2, TextComponent, Vec2 } from './lib';
-import SVGLoader, { SVGLoaderLoadMethod } from './SVGLoader';
-import createEditor from './testing/createEditor';
+import { Rect2, TextComponent, Vec2 } from '../lib';
+import SVGLoader, { SVGLoaderLoadMethod } from '.';
+import createEditor from '../testing/createEditor';
 
 describe('SVGLoader', () => {
 	// Run all tests with both load methods

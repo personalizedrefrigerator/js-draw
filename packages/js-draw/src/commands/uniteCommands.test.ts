@@ -20,4 +20,35 @@ describe('uniteCommands', () => {
 		expect(lookupResult?.getBBox().topLeft).toMatchObject(Vec2.of(1, 10));
 		expect(lookupResult?.getBBox().bottomRight).toMatchObject(Vec2.of(11, 20));
 	});
+
+	it('should limit the maximum description length', () => {
+		const editor = createEditor();
+
+		const commands = [];
+		for (let i = 0; i < 1000; i++) {
+			commands.push(editor.image.addElement(new StrokeComponent([ ])));
+		}
+
+		// Should generate a short description
+		expect(uniteCommands(commands).description(editor, editor.localization).length).toBeLessThan(1000);
+	});
+
+	it('should be possible to override the default uniteCommands description', () => {
+		const editor = createEditor();
+		const command = uniteCommands([ EditorImage.addElement(new StrokeComponent([ ])) ], { description: 'Foo' });
+		expect(command.description(editor, editor.localization)).toBe('Foo');
+	});
+
+	it('should serialize and deserialize command descriptions', () => {
+		const editor = createEditor();
+		const command = uniteCommands([
+			EditorImage.addElement(new StrokeComponent([ ])),
+			editor.setBackgroundColor(Color4.red),
+		], { description: 'Bar' });
+
+		if (!(command instanceof SerializableCommand)) throw new Error('Expected command to be serializable');
+
+		const deserialized = SerializableCommand.deserialize(command.serialize(), editor);
+		expect(deserialized.description(editor, editor.localization)).toBe('Bar');
+	});
 });

@@ -16,7 +16,7 @@ import Erase from '../../commands/Erase';
 import Duplicate from '../../commands/Duplicate';
 import Command from '../../commands/Command';
 import { DragTransformer, ResizeTransformer, RotateTransformer } from './TransformMode';
-import { ResizeMode } from './types';
+import { ResizeMode, SelectionBoxChild } from './types';
 import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
 
@@ -25,7 +25,8 @@ const maxPreviewElemCount = 500;
 
 // @internal
 export default class Selection {
-	private handles: SelectionHandle[];
+	// Child items (menus and selection handles)
+	private childwidgets: SelectionBoxChild[];
 	private originalRegion: Rect2;
 
 	// The last-computed bounding box of selected content
@@ -108,15 +109,15 @@ export default class Selection {
 			() => this.transformers.rotate.onDragEnd(),
 		);
 
-		this.handles = [
+		this.childwidgets = [
 			resizeBothHandle,
 			...resizeHorizontalHandles,
 			resizeVerticalHandle,
 			rotationHandle,
 		];
 
-		for (const handle of this.handles) {
-			handle.addTo(this.backgroundElem);
+		for (const widget of this.childwidgets) {
+			widget.addTo(this.backgroundElem);
 		}
 
 		this.updateUI();
@@ -518,8 +519,8 @@ export default class Selection {
 			this.innerContainer.classList.remove('-empty');
 		}
 
-		for (const handle of this.handles) {
-			handle.updatePosition();
+		for (const widget of this.childwidgets) {
+			widget.updatePosition(this.getScreenRegion());
 		}
 	}
 
@@ -581,13 +582,13 @@ export default class Selection {
 		});
 	}
 
-	private targetHandle: SelectionHandle|null = null;
+	private activeHandle: SelectionBoxChild|null = null;
 	private backgroundDragging: boolean = false;
 	public onDragStart(pointer: Pointer): boolean {
 		// Clear the HTML selection (prevent HTML drag and drop being triggered by this drag)
 		document.getSelection()?.removeAllRanges();
 
-		this.targetHandle = null;
+		this.activeHandle = null;
 
 		let result = false;
 
@@ -597,9 +598,9 @@ export default class Selection {
 			result = true;
 		}
 
-		for (const handle of this.handles) {
-			if (handle.containsPoint(pointer.canvasPos)) {
-				this.targetHandle = handle;
+		for (const widget of this.childwidgets) {
+			if (widget.containsPoint(pointer.canvasPos)) {
+				this.activeHandle = widget;
 				this.backgroundDragging = false;
 				result = true;
 			}
@@ -611,8 +612,8 @@ export default class Selection {
 			this.addRemoveSelectionFromImage(false);
 		}
 
-		if (this.targetHandle) {
-			this.targetHandle.handleDragStart(pointer);
+		if (this.activeHandle) {
+			this.activeHandle.handleDragStart(pointer);
 		}
 
 		if (this.backgroundDragging) {
@@ -627,8 +628,8 @@ export default class Selection {
 			this.transformers.drag.onDragUpdate(pointer.canvasPos);
 		}
 
-		if (this.targetHandle) {
-			this.targetHandle.handleDragUpdate(pointer);
+		if (this.activeHandle) {
+			this.activeHandle.handleDragUpdate(pointer);
 		}
 	}
 
@@ -636,20 +637,20 @@ export default class Selection {
 		if (this.backgroundDragging) {
 			this.transformers.drag.onDragEnd();
 		}
-		else if (this.targetHandle) {
-			this.targetHandle.handleDragEnd();
+		else if (this.activeHandle) {
+			this.activeHandle.handleDragEnd();
 		}
 
 		this.addRemoveSelectionFromImage(true);
 
 		this.backgroundDragging = false;
-		this.targetHandle = null;
+		this.activeHandle = null;
 		this.updateUI();
 	}
 
 	public onDragCancel() {
 		this.backgroundDragging = false;
-		this.targetHandle = null;
+		this.activeHandle = null;
 		this.setTransform(Mat33.identity);
 
 		this.addRemoveSelectionFromImage(true);
@@ -690,7 +691,7 @@ export default class Selection {
 	}
 
 	public deleteSelectedObjects(): Command {
-		if (this.backgroundDragging || this.targetHandle) {
+		if (this.backgroundDragging || this.activeHandle) {
 			this.onDragEnd();
 		}
 
@@ -713,7 +714,7 @@ export default class Selection {
 	}
 
 	public async duplicateSelectedObjects(): Promise<Command> {
-		const wasTransforming = this.backgroundDragging || this.targetHandle;
+		const wasTransforming = this.backgroundDragging || this.activeHandle;
 		let tmpApplyCommand: Command|null = null;
 
 		if (!wasTransforming) {

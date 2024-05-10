@@ -479,18 +479,23 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		const exportViewport = new Viewport(() => { });
-		exportViewport.updateScreenSize(Vec2.of(bbox.w, bbox.h));
-		exportViewport.resetTransform(Mat33.translation(bbox.topLeft.times(-1)));
+		const selectionScreenSize = this.selectionBox.getScreenRegion().size.times(this.editor.display.getDevicePixelRatio());
 
-		const sanitize = true;
-		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, sanitize);
-		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(
-			exportViewport,
-			{
-				canvasSize: this.selectionBox.getScreenRegion().size,
-				maxCanvasDimen: 2048,
-			},
+		// Update the viewport to have screen size roughly equal to the size of the selection box
+		let scaleFactor = selectionScreenSize.maximumEntryMagnitude() / (bbox.size.maximumEntryMagnitude() || 1);
+
+		// Round to a nearby power of two
+		scaleFactor = Math.pow(2, Math.ceil(Math.log2(scaleFactor)));
+
+		exportViewport.updateScreenSize(bbox.size.times(scaleFactor));
+		exportViewport.resetTransform(
+			Mat33.scaling2D(scaleFactor)
+				// Move the selection onto the screen
+				.rightMul(Mat33.translation(bbox.topLeft.times(-1)))
 		);
+
+		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, { sanitize: true, useViewBoxForPositioning: true });
+		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(exportViewport, { maxCanvasDimen: 4096 });
 
 		const text: string[] = [];
 		for (const elem of selectedElems) {
@@ -509,7 +514,7 @@ export default class SelectionTool extends BaseTool {
 				if (blob) {
 					resolve(blob);
 				} else {
-					reject('Failed to convert canvas to blob.');
+					reject(new Error('Failed to convert canvas to blob.'));
 				}
 			}, 'image/png');
 		}));

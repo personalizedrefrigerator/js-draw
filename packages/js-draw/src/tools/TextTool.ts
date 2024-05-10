@@ -30,9 +30,10 @@ export default class TextTool extends BaseTool {
 
 	public constructor(private editor: Editor, description: string, private localizationTable: ToolLocalization) {
 		super(editor.notifier, description);
+		const editorFonts = editor.getCurrentSettings().text?.fonts ?? [];
 		this.textStyleValue = ReactiveValue.fromInitialValue({
 			size: 32,
-			fontFamily: 'sans-serif',
+			fontFamily: editorFonts.length > 0 ? editorFonts[0] : 'sans-serif',
 			renderingStyle: {
 				fill: Color4.purple,
 			},

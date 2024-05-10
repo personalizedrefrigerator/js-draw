@@ -5,6 +5,8 @@ interface CustomMatchers<R = unknown> {
 	objEq(expected: {
 		eq: (other: any, ...args: any)=> boolean;
 	}, ...opts: any): R;
+
+	toHaveEntriesCloseTo(expected: number[], tolerance?: number): R;
 }
 
 declare namespace jest {

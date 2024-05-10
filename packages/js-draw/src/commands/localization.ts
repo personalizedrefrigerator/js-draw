@@ -21,6 +21,7 @@ export interface CommandLocalization {
 	duplicateAction: (elemDescription: string, count: number)=> string;
 	inverseOf: (actionDescription: string)=> string;
 	unionOf: (actionDescription: string, actionCount: number)=> string;
+	andNMoreCommands: (count: number)=>string;
 
 	selectedElements: (count: number)=>string;
 }
@@ -47,5 +48,6 @@ export const defaultCommandLocalization: CommandLocalization = {
 	movedRight: 'Moved right',
 	zoomedOut: 'Zoomed out',
 	zoomedIn: 'Zoomed in',
+	andNMoreCommands: (count) => `And ${count} more commands.`,
 	selectedElements: (count) => `Selected ${count} element${count === 1 ? '' : 's'}`,
 };

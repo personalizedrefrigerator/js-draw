@@ -110,30 +110,35 @@ export interface EditorSettings {
 	 * Configures the default pen tools.
 	 *
 	 * **Example**:
-	 * ```ts,runnable
-	 * import { Editor, makePolylineBuilder } from 'js-draw';
-	 *
-	 * const editor = new Editor(document.body, {
-	 *     pens: {
-	 *         additionalPenTypes: [{
-	 *             name: 'Polyline (For debugging)',
-	 *             id: 'custom-polyline',
-	 *             factory: makePolylineBuilder,
-	 *
-	 *             // The pen doesn't create fixed shapes (e.g. squares, rectangles, etc)
-	 *             // and so should go under the "pens" section.
-	 *             isShapeBuilder: false,
-	 *         }],
-	 *     },
-	 * });
-	 * editor.addToolbar();
-	 * ```
+	 * [[include:doc-pages/inline-examples/editor-settings-polyline-pen.md]]
 	 */
 	pens: {
 		/**
 		 * Additional pen types that can be selected in a toolbar.
 		 */
-		additionalPenTypes: readonly Readonly<PenTypeRecord>[],
+		additionalPenTypes?: readonly Readonly<PenTypeRecord>[],
+
+		/**
+		 * Should return `true` if a pen type should be shown in the toolbar.
+		 *
+		 * @example
+		 * ```ts,runnable
+		 * import {Editor} from 'js-draw';
+		 * const editor = new Editor(document.body, {
+		 *   // Only allow selecting the polyline pen from the toolbar.
+		 *   pens: { filterPenTypes: p => p.id === 'polyline-pen' },
+		 * });
+		 * editor.addToolbar();
+		 * ```
+		 * Notice that this setting only affects the toolbar GUI.
+		 */
+		filterPenTypes?: (penType: PenTypeRecord)=>boolean,
+	}|null,
+
+	/** Configures the default {@link TextTool} control. */
+	text: {
+		/** Fonts to show in the text UI. */
+		fonts?: string[],
 	}|null,
 }
 
@@ -155,7 +160,7 @@ export interface EditorSettings {
  * ```
  *
  * See also
- * [`docs/example/example.ts`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/demo/example.ts).
+ * * [`examples.md`](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md).
  */
 export class Editor {
 	// Wrapper around the viewport and toolbar
@@ -322,7 +327,13 @@ export class Editor {
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 			notices: [],
 			appInfo: settings.appInfo ? { ...settings.appInfo } : null,
-			pens: { additionalPenTypes: settings.pens?.additionalPenTypes ?? [], },
+			pens: {
+				additionalPenTypes: settings.pens?.additionalPenTypes ?? [],
+				filterPenTypes: settings.pens?.filterPenTypes ?? (()=>true)
+			},
+			text: {
+				fonts: settings.text?.fonts ?? [ 'sans-serif', 'serif', 'monospace' ],
+			},
 		};
 
 		// Validate settings
@@ -460,7 +471,6 @@ export class Editor {
 
 	public hideLoadingWarning() {
 		this.loadingWarning.style.display = 'none';
-
 		this.announceForAccessibility(this.localization.doneLoading);
 	}
 
@@ -682,7 +692,7 @@ export class Editor {
 				const prevData = this.pointers[pointer.id];
 
 				if (prevData) {
-					const distanceMoved = pointer.screenPos.minus(prevData.screenPos).magnitude();
+					const distanceMoved = pointer.screenPos.distanceTo(prevData.screenPos);
 
 					// If the pointer moved less than two pixels, don't send a new event.
 					if (distanceMoved < 2) {
@@ -897,7 +907,7 @@ export class Editor {
 
 				// Skip if the pointer hasn't moved enough to not be a "click".
 				const strokeStartThreshold = 10;
-				const isWithinClickThreshold = gestureStartPos && currentPos.minus(gestureStartPos).magnitude() < strokeStartThreshold;
+				const isWithinClickThreshold = gestureStartPos && currentPos.distanceTo(gestureStartPos) < strokeStartThreshold;
 				if (isWithinClickThreshold && !gestureData[pointerId].hasMovedSignificantly) {
 					eventBuffer.push([ eventName, event ]);
 					sendToEditor = false;
@@ -1037,7 +1047,8 @@ export class Editor {
 	/** `apply` a command. `command` will be announced for accessibility. */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		const dispatchResult = this.dispatchNoAnnounce(command, addToHistory);
-		this.announceForAccessibility(command.description(this, this.localization));
+		const commandDescription = command.description(this, this.localization);
+		this.announceForAccessibility(commandDescription);
 
 		return dispatchResult;
 	}
@@ -1309,8 +1320,11 @@ export class Editor {
 	 * This is a convenience method that creates **and applies** a single command.
 	 *
 	 * If `selectComponents` is true (the default), the components are selected.
+	 *
+	 * `actionDescription`, if given, should be a screenreader-friendly description of the
+	 * reason components were added (e.g. "pasted").
 	 */
-	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true) {
+	public async addAndCenterComponents(components: AbstractComponent[], selectComponents: boolean = true, actionDescription?: string) {
 		let bbox: Rect2|null = null;
 		for (const component of components) {
 			if (bbox) {
@@ -1351,7 +1365,10 @@ export class Editor {
 		}
 
 		const applyChunkSize = 100;
-		await this.dispatch(uniteCommands(commands, applyChunkSize), true);
+		await this.dispatch(
+			uniteCommands(commands, { applyChunkSize, description: actionDescription }),
+			true,
+		);
 
 		if (selectComponents) {
 			for (const selectionTool of this.toolController.getMatchingTools(SelectionTool)) {
@@ -1501,7 +1518,66 @@ export class Editor {
 	}
 
 	/**
+	 * This is a convenience method for adding or updating the {@link BackgroundComponent}
+	 * and {@link EditorImage.setAutoresizeEnabled} for the current image.
+	 *
+	 * If there are multiple {@link BackgroundComponent}s in the image, this only modifies
+	 * the topmost such element.
+	 *
+	 * **Example**:
+	 * ```ts,runnable
+	 * import { Editor, Color4, BackgroundComponentBackgroundType } from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 * editor.dispatch(editor.setBackgroundStyle({
+	 *     color: Color4.orange,
+	 *     type: BackgroundComponentBackgroundType.Grid,
+	 *     autoresize: true,
+	 * }));
+	 * ```
+	 *
+	 * To change the background size, see {@link EditorImage.setImportExportRect}.
+	 */
+	public setBackgroundStyle(style: { color?: Color4, type?: BackgroundType, autoresize?: boolean }) {
+		const originalBackground = this.getTopmostBackgroundComponent();
+		const commands: Command[] = [];
+		if (originalBackground) {
+			commands.push(new Erase([ originalBackground ]));
+		}
+		const originalType = originalBackground?.getBackgroundType?.() ?? BackgroundType.None;
+		const originalColor = originalBackground?.getStyle?.().color ?? Color4.transparent;
+		const originalFillsScreen = this.image.getAutoresizeEnabled();
+
+		const defaultType = (style.color && originalType === BackgroundType.None ? BackgroundType.SolidColor : originalType);
+		const backgroundType = style.type ?? defaultType;
+		const backgroundColor = style.color ?? originalColor;
+		const fillsScreen = style.autoresize ?? originalFillsScreen;
+
+		if (backgroundType !== BackgroundType.None) {
+			const newBackground = new BackgroundComponent(backgroundType, backgroundColor);
+			commands.push(EditorImage.addElement(newBackground));
+		}
+		if (fillsScreen !== originalFillsScreen) {
+			commands.push(this.image.setAutoresizeEnabled(fillsScreen));
+
+			// Avoid 0x0 backgrounds
+			if (!fillsScreen && this.image.getImportExportRect().maxDimension === 0) {
+				commands.push(
+					this.image.setImportExportRect(
+						this.image.getImportExportRect().resizedTo(Vec2.of(500, 500))
+					),
+				);
+			}
+		}
+		return uniteCommands(commands);
+	}
+
+	/**
 	 * Set the background color of the image.
+	 *
+	 * This is a convenience method for adding or updating the {@link BackgroundComponent}
+	 * for the current image.
+	 *
+	 * @see {@link setBackgroundStyle}
 	 */
 	public setBackgroundColor(color: Color4): Command {
 		let background = this.getTopmostBackgroundComponent();

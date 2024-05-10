@@ -1,11 +1,11 @@
 import UnknownSVGObject from '../components/UnknownSVGObject';
 import Editor from '../Editor';
 import { EditorImage, Rect2, StrokeComponent } from '../lib';
-import { Vec2 } from '@js-draw/math';
+import { LineSegment2, Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import sendPenEvent from '../testing/sendPenEvent';
 import { InputEvtType } from '../inputEvents';
-import Eraser from './Eraser';
+import Eraser, { EraserMode } from './Eraser';
 
 const selectEraser = (editor: Editor) => {
 	const tools = editor.toolController;
@@ -99,5 +99,133 @@ describe('Eraser', () => {
 
 		// Should not have been erased
 		expect(editor.image.getAllElements()).toHaveLength(1);
+	});
+
+	it.each([
+		// A single line, much larger than the eraser to prevent
+		// it from being erased completely.
+		{
+			path: 'M0,0 L200,0',
+			strokeWidth: 20,
+			eraserSize: 25,
+			erasePoints: [ Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22) ],
+			expected: {
+				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
+				finalStrokeCount: 2,
+				finalStrokesIntersect: [
+					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
+					new LineSegment2(Vec2.of(90, -100), Vec2.of(90, 100)),
+					new LineSegment2(Vec2.of(190, -100), Vec2.of(190, 100)),
+				],
+			},
+		},
+		// Should allow erasing from the left edge (large eraser).
+		{
+			path: 'M0,0 L200,0',
+			strokeWidth: 20,
+			eraserSize: 15,
+			erasePoints: [ Vec2.of(-20, 1), Vec2.of(-10, 1), Vec2.of(-5, 1), Vec2.of(5, 1) ],
+			expected: {
+				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
+				finalStrokeCount: 1,
+				finalStrokesIntersect: [
+					new LineSegment2(Vec2.of(10, -100), Vec2.of(10, 100)),
+					new LineSegment2(Vec2.of(200, -100), Vec2.of(200, 100)),
+				],
+				finalStrokesNoIntersect: [
+					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
+				],
+			},
+		},
+		// A line-shaped Bezier-curve
+		{
+			path: 'M0,0 Q50,0 200,0',
+			strokeWidth: 20,
+			eraserSize: 25,
+			erasePoints: [ Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22) ],
+			expected: {
+				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
+				finalStrokeCount: 2,
+				finalStrokesIntersect: [
+					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
+					new LineSegment2(Vec2.of(90, -100), Vec2.of(90, 100)),
+					new LineSegment2(Vec2.of(90, -100), Vec2.of(190, 100)),
+				],
+			},
+		},
+		// Another line-shaped Bezier-curve. In the past, this
+		// particular test case failed with much the entire left half of the
+		// stroke being deleted, when a section should have been removed from the
+		// middle.
+		{
+			path: 'M0,0 Q50,0 100,0',
+			strokeWidth: 20,
+			eraserSize: 5,
+			erasePoints: [
+				Vec2.of(41, -15),
+				Vec2.of(38, 22),
+			],
+			expected: {
+				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 120, h: 20 }),
+				finalStrokeCount: 2,
+				finalStrokesIntersect: [
+					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
+					new LineSegment2(Vec2.of(90, -100), Vec2.of(90, 100)),
+				],
+			},
+		},
+		// Edge case: Should delete partial strokes that are larger than the cursor
+		// if the actual path can't be shrunk any further.
+		{
+			path: 'M0,0q0,0 0,0',
+			strokeWidth: 120,
+			eraserSize: 40,
+			erasePoints: [ Vec2.of(60, 0), Vec2.of(58, 1), Vec2.of(50, 1) ],
+			expected: {
+				initialStrokeBBox: Rect2.of({ x: -60, y: -60, w: 120, h: 120 }),
+				finalStrokeCount: 0,
+				finalStrokesIntersect: [ ],
+			},
+		},
+	])('should support erasing partial strokes (case %#)', async (testData) => {
+		const editor = createEditor();
+
+		await editor.loadFromSVG(`
+			<svg>
+				<path d=${JSON.stringify(testData.path)} fill="none" stroke-width="${+testData.strokeWidth}" stroke="red"/>
+			</svg>
+		`, true);
+
+		editor.viewport.resetTransform();
+
+		const allStrokes = getAllStrokes(editor);
+		expect(allStrokes).toHaveLength(1);
+		expect(allStrokes[0].getExactBBox()).objEq(testData.expected.initialStrokeBBox);
+
+		const eraser = selectEraser(editor);
+		eraser.getModeValue().set(EraserMode.PartialStroke);
+		eraser.getThicknessValue().set(testData.eraserSize);
+
+		for (let i = 0; i < testData.erasePoints.length; i++) {
+			const point = testData.erasePoints[i];
+			const eventType = i === 0 ? InputEvtType.PointerDownEvt : InputEvtType.PointerMoveEvt;
+			sendPenEvent(editor, eventType, point);
+			jest.advanceTimersByTime(100);
+		}
+		const lastErasePoint = testData.erasePoints[testData.erasePoints.length - 1];
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, lastErasePoint);
+
+		expect(getAllStrokes(editor)).toHaveLength(testData.expected.finalStrokeCount);
+		const intersectionResults = [];
+		const expectedResults = [];
+		for (const line of testData.expected.finalStrokesIntersect) {
+			intersectionResults.push(getAllStrokes(editor).some(s => !!s.intersects(line)));
+			expectedResults.push(true);
+		}
+		for (const line of (testData.expected.finalStrokesNoIntersect ?? [])) {
+			intersectionResults.push(getAllStrokes(editor).some(s => !!s.intersects(line)));
+			expectedResults.push(false);
+		}
+		expect(intersectionResults).toMatchObject(expectedResults);
 	});
 });

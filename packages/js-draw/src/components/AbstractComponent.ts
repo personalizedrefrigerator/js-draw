@@ -1,11 +1,12 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import EditorImage from '../image/EditorImage';
-import { LineSegment2, Mat33, Mat33Array, Rect2 } from '@js-draw/math';
+import { LineSegment2, Mat33, Mat33Array, Path, Rect2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
+import Viewport from '../Viewport';
 
 export type LoadSaveData = (string[]|Record<symbol, string|number>);
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
@@ -206,8 +207,23 @@ export default abstract class AbstractComponent {
 		return testLines.some(edge => this.intersects(edge));
 	}
 
-	// Return null iff this object cannot be safely serialized/deserialized.
-	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
+	// @returns true iff this component can be selected (e.g. by the selection tool.)
+	public isSelectable(): boolean {
+		return true;
+	}
+
+	// @returns true iff this component should be added to the background, rather than the
+	// foreground of the image.
+	public isBackground(): boolean {
+		return false;
+	}
+
+	// @returns an approximation of the proportional time it takes to render this component.
+	// This is intended to be a rough estimate, but, for example, a stroke with two points sould have
+	// a renderingWeight approximately twice that of a stroke with one point.
+	public getProportionalRenderingTime(): number {
+		return 1;
+	}
 
 	// Private helper for transformBy: Apply the given transformation to all points of this.
 	protected abstract applyTransformation(affineTransfm: Mat33): void;
@@ -241,24 +257,6 @@ export default abstract class AbstractComponent {
 		return new AbstractComponent.TransformElementCommand(
 			affineTransfm, this.getId(), this, newZIndex, originalZIndex,
 		);
-	}
-
-	// @returns true iff this component can be selected (e.g. by the selection tool.)
-	public isSelectable(): boolean {
-		return true;
-	}
-
-	// @returns true iff this component should be added to the background, rather than the
-	// foreground of the image.
-	public isBackground(): boolean {
-		return false;
-	}
-
-	// @returns an approximation of the proportional time it takes to render this component.
-	// This is intended to be a rough estimate, but, for example, a stroke with two points sould have
-	// a renderingWeight approximately twice that of a stroke with one point.
-	public getProportionalRenderingTime(): number {
-		return 1;
 	}
 
 	private static transformElementCommandId = 'transform-element';
@@ -392,6 +390,21 @@ export default abstract class AbstractComponent {
 
 		return clone;
 	}
+
+	/**
+	 * **Optional method**: Divides this component into sections roughly along the given path,
+	 * removing parts that are roughly within `shape`.
+	 *
+	 * **Notes**:
+	 * - A default implementation may be provided for this method in the future. Until then,
+	 *   this method is `undefined` if unsupported.
+	 *
+	 * `viewport` should be provided to determine how newly-added points should be rounded.
+	 */
+	public withRegionErased?(shape: Path, viewport: Viewport): AbstractComponent[];
+
+	// Return null iff this object cannot be safely serialized/deserialized.
+	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
 
 	// Convert the component to an object that can be passed to
 	// `JSON.stringify`.

@@ -157,7 +157,8 @@ export default class BundledFile {
 						console.log('☑ Done building! ☑');
 						resolve();
 					} else {
-						reject();
+						// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+						reject(error);
 					}
 				});
 			});

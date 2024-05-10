@@ -6,7 +6,11 @@ import SerializableCommand from './SerializableCommand';
 
 
 class NonSerializableUnion extends Command {
-	public constructor(private commands: Command[], private applyChunkSize: number|undefined) {
+	public constructor(
+		private commands: Command[],
+		private applyChunkSize: number|undefined,
+		private descriptionOverride: string|undefined,
+	) {
 		super();
 	}
 
@@ -36,10 +40,15 @@ class NonSerializableUnion extends Command {
 	}
 
 	public description(editor: Editor, localizationTable: EditorLocalization) {
+		if (this.descriptionOverride) {
+			return this.descriptionOverride;
+		}
+
 		const descriptions: string[] = [];
 
 		let lastDescription: string|null = null;
 		let duplicateDescriptionCount: number = 0;
+		let handledCommandCount: number = 0;
 		for (const part of this.commands) {
 			const description = part.description(editor, localizationTable);
 			if (description !== lastDescription && lastDescription !== null) {
@@ -49,13 +58,24 @@ class NonSerializableUnion extends Command {
 			}
 
 			duplicateDescriptionCount ++;
+			handledCommandCount ++;
 			lastDescription ??= description;
+
+			// Long descriptions aren't very useful to the user.
+			const maxDescriptionLength = 12;
+			if (descriptions.length > maxDescriptionLength) {
+				break;
+			}
 		}
 
 		if (duplicateDescriptionCount > 1) {
 			descriptions.push(localizationTable.unionOf(lastDescription!, duplicateDescriptionCount));
 		} else if (duplicateDescriptionCount === 1) {
 			descriptions.push(lastDescription!);
+		}
+
+		if (handledCommandCount < this.commands.length) {
+			descriptions.push(localizationTable.andNMoreCommands(this.commands.length - handledCommandCount));
 		}
 
 		return descriptions.join(', ');
@@ -66,9 +86,13 @@ class SerializableUnion extends SerializableCommand {
 	private nonserializableCommand: NonSerializableUnion;
 	private serializedData: any;
 
-	public constructor(private commands: SerializableCommand[], private applyChunkSize: number|undefined) {
+	public constructor(
+		private commands: SerializableCommand[],
+		private applyChunkSize: number|undefined,
+		private descriptionOverride: string|undefined,
+	) {
 		super('union');
-		this.nonserializableCommand = new NonSerializableUnion(commands, applyChunkSize);
+		this.nonserializableCommand = new NonSerializableUnion(commands, applyChunkSize, descriptionOverride);
 	}
 
 	protected serializeToJSON() {
@@ -79,6 +103,7 @@ class SerializableUnion extends SerializableCommand {
 		return {
 			applyChunkSize: this.applyChunkSize,
 			data: this.commands.map(command => command.serialize()),
+			description: this.descriptionOverride,
 		};
 	}
 
@@ -100,6 +125,11 @@ class SerializableUnion extends SerializableCommand {
 	public description(editor: Editor, localizationTable: EditorLocalization): string {
 		return this.nonserializableCommand.description(editor, localizationTable);
 	}
+}
+
+export interface UniteCommandsOptions {
+	applyChunkSize?: number;
+	description?: string;
 }
 
 /**
@@ -138,7 +168,7 @@ class SerializableUnion extends SerializableCommand {
  * // applying them shouldn't be done all at once (which would block the UI).
  * ```
  */
-const uniteCommands = <T extends Command> (commands: T[], applyChunkSize?: number): T extends SerializableCommand ? SerializableCommand : Command => {
+const uniteCommands = <T extends Command> (commands: T[], options?: UniteCommandsOptions|number): T extends SerializableCommand ? SerializableCommand : Command => {
 	let allSerializable = true;
 	for (const command of commands) {
 		if (!(command instanceof SerializableCommand)) {
@@ -147,11 +177,20 @@ const uniteCommands = <T extends Command> (commands: T[], applyChunkSize?: numbe
 		}
 	}
 
+	let applyChunkSize;
+	let description;
+	if (typeof options === 'number') {
+		applyChunkSize = options;
+	} else {
+		applyChunkSize = options?.applyChunkSize;
+		description = options?.description;
+	}
+
 	if (!allSerializable) {
-		return new NonSerializableUnion(commands, applyChunkSize) as any;
+		return new NonSerializableUnion(commands, applyChunkSize, description) as any;
 	} else {
 		const castedCommands = commands as any[] as SerializableCommand[];
-		return new SerializableUnion(castedCommands, applyChunkSize);
+		return new SerializableUnion(castedCommands, applyChunkSize, description);
 	}
 };
 
@@ -163,13 +202,15 @@ SerializableCommand.register('union', (data: any, editor) => {
 	if (typeof applyChunkSize !== 'number' && applyChunkSize !== undefined) {
 		throw new Error('serialized applyChunkSize is neither undefined nor a number.');
 	}
+	const description = typeof data.description === 'string' ? data.description : undefined;
+
 
 	const commands: SerializableCommand[] = [];
 	for (const part of data.data as any[]) {
 		commands.push(SerializableCommand.deserialize(part, editor));
 	}
 
-	return uniteCommands(commands, applyChunkSize);
+	return uniteCommands(commands, { applyChunkSize, description });
 });
 
 

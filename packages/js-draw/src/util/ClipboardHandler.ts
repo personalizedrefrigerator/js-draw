@@ -194,7 +194,7 @@ export default class ClipboardHandler {
 		if (!this.#preferClipboardEvents && this.supportsClipboardApi() && (hasNonTextMimeTypes || !event)) {
 			let clipboardApiPromise: Promise<void>|null = null;
 
-			const fallBackToCopyEvent = (reason: any) => {
+			const fallBackToCopyEvent = (reason: unknown) => {
 				console.warn(
 					'Unable to copy to the clipboard API. Future calls to .copy will use ClipboardEvents if possible.',
 					reason

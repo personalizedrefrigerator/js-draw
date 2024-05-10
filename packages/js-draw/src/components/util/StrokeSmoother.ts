@@ -70,8 +70,8 @@ export class StrokeSmoother {
 		const startPt = this.currentCurve.p0;
 		const controlPt = this.currentCurve.p1;
 		const endPt = this.currentCurve.p2;
-		const toControlDist = startPt.minus(controlPt).length();
-		const toEndDist = endPt.minus(controlPt).length();
+		const toControlDist = startPt.distanceTo(controlPt);
+		const toEndDist = endPt.distanceTo(controlPt);
 		return toControlDist + toEndDist;
 	}
 
@@ -140,7 +140,7 @@ export class StrokeSmoother {
 			}
 
 			const threshold = Math.min(this.lastPoint.width, newPoint.width) / 3;
-			const shouldSnapToInitial = this.startPoint.pos.minus(newPoint.pos).magnitude() < threshold
+			const shouldSnapToInitial = this.startPoint.pos.distanceTo(newPoint.pos) < threshold
 				&& this.isFirstSegment;
 
 			// Snap to the starting point if the stroke is contained within a small ball centered
@@ -204,7 +204,7 @@ export class StrokeSmoother {
 		const maxRelativeLength = 1.7;
 		const segmentStart = this.buffer[0];
 		const segmentEnd = newPoint.pos;
-		const startEndDist = segmentEnd.minus(segmentStart).magnitude();
+		const startEndDist = segmentEnd.distanceTo(segmentStart);
 		const maxControlPointDist = maxRelativeLength * startEndDist;
 
 		// Exit in cases where we would divide by zero

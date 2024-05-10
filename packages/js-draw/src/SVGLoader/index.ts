@@ -1,16 +1,17 @@
 import { Color4, Mat33, Path, Rect2, Vec2 } from '@js-draw/math';
-import AbstractComponent from './components/AbstractComponent';
-import BackgroundComponent, { BackgroundType, backgroundTypeToClassNameMap, imageBackgroundCSSClassName, imageBackgroundGridSizeCSSPrefix, imageBackgroundNonAutomaticSecondaryColorCSSClassName } from './components/BackgroundComponent';
-import ImageComponent from './components/ImageComponent';
-import Stroke from './components/Stroke';
-import SVGGlobalAttributesObject from './components/SVGGlobalAttributesObject';
-import TextComponent, { TextTransformMode } from './components/TextComponent';
-import UnknownSVGObject from './components/UnknownSVGObject';
-import RenderingStyle from './rendering/RenderingStyle';
-import TextRenderingStyle from './rendering/TextRenderingStyle';
-import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from './types';
-import RenderablePathSpec, { pathToRenderable } from './rendering/RenderablePathSpec';
-import { renderedStylesheetId } from './rendering/renderers/SVGRenderer';
+import AbstractComponent from '../components/AbstractComponent';
+import BackgroundComponent, { BackgroundType, backgroundTypeToClassNameMap, imageBackgroundCSSClassName, imageBackgroundGridSizeCSSPrefix, imageBackgroundNonAutomaticSecondaryColorCSSClassName } from '../components/BackgroundComponent';
+import ImageComponent from '../components/ImageComponent';
+import Stroke from '../components/Stroke';
+import SVGGlobalAttributesObject from '../components/SVGGlobalAttributesObject';
+import TextComponent, { TextTransformMode } from '../components/TextComponent';
+import UnknownSVGObject from '../components/UnknownSVGObject';
+import RenderingStyle from '../rendering/RenderingStyle';
+import TextRenderingStyle from '../rendering/TextRenderingStyle';
+import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from '../types';
+import RenderablePathSpec, { pathToRenderable } from '../rendering/RenderablePathSpec';
+import { renderedStylesheetId } from '../rendering/renderers/SVGRenderer';
+import determineFontSize from './utils/determineFontSize';
 
 type OnFinishListener = ()=> void;
 
@@ -382,34 +383,15 @@ export default class SVGLoader implements ImageLoader {
 
 		// Compute styles.
 		const computedStyles = this.getComputedStyle(elem);
-		const fontSizeExp = /^([-0-9.e]+)px/i;
 
-		// In some environments, computedStyles.fontSize can be increased by the system.
-		// Thus, to prevent text from growing on load/save, prefer .style.fontSize.
-		let fontSizeMatch = fontSizeExp.exec(elem.style?.fontSize ?? '');
-		if (!fontSizeMatch && elem.tagName.toLowerCase() === 'tspan' && elem.parentElement) {
-			// Try to inherit the font size of the parent text element.
-			fontSizeMatch = fontSizeExp.exec(elem.parentElement.style?.fontSize ?? '');
-		}
-
-		// If we still couldn't find a font size, try to use computedStyles (which can be
-		// wrong).
-		if (!fontSizeMatch && computedStyles) {
-			fontSizeMatch = fontSizeExp.exec(computedStyles.fontSize);
-		}
-
-		const supportedStyleAttrs = [
+		const supportedStyleAttrs = new Set([
 			'fontFamily',
 			'transform',
 			...supportedStrokeFillStyleAttrs,
-		];
-		let fontSize = 12;
-		if (fontSizeMatch) {
-			supportedStyleAttrs.push('fontSize');
-			fontSize = parseFloat(fontSizeMatch[1]);
-		}
+		]);
+
 		const style: TextRenderingStyle = {
-			size: fontSize,
+			size: determineFontSize(elem, computedStyles, supportedStyleAttrs),
 			fontFamily: computedStyles?.fontFamily || elem.style?.fontFamily || 'sans-serif',
 			fontWeight: computedStyles?.fontWeight || elem.style?.fontWeight || undefined,
 			fontStyle: computedStyles?.fontStyle || elem.style?.fontStyle || undefined,
@@ -444,7 +426,7 @@ export default class SVGLoader implements ImageLoader {
 			result,
 			elem,
 			new Set(supportedAttrs),
-			new Set(supportedStyleAttrs)
+			new Set(supportedStyleAttrs),
 		);
 
 		return result;

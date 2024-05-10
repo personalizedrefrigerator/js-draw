@@ -21,6 +21,10 @@ export { LineSegment2 } from './shapes/LineSegment2';
 export {
 	Path,
 
+	IntersectionResult as PathIntersectionResult,
+	CurveIndexRecord as PathCurveIndex,
+	stepCurveIndexBy as stepPathIndexBy,
+	compareCurveIndices as comparePathIndices,
 	PathCommandType,
 	PathCommand,
 	LinePathCommand,
@@ -29,6 +33,7 @@ export {
 	CubicBezierPathCommand,
 } from './shapes/Path';
 export { Rect2 } from './shapes/Rect2';
+export { Parameterized2DShape } from './shapes/Parameterized2DShape';
 export { QuadraticBezier } from './shapes/QuadraticBezier';
 export { Abstract2DShape } from './shapes/Abstract2DShape';
 

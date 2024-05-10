@@ -2,7 +2,7 @@
     "bundledFiles": [
         {
             "name": "jsdraw",
-            "inPath": "./example.ts"
+            "inPath": "./index.ts"
         }
     ]
 }

@@ -3,7 +3,11 @@ import katex from 'katex';
 import parseMarkdown, { RegionType } from './markdown/parseMarkdown';
 import htmlEscape from './markdown/htmlEscape';
 
-const transformMarkdown = (markdown: string) => {
+interface Callbacks {
+	addDoctest(testData: string): void;
+}
+
+const transformMarkdown = (markdown: string, callbacks: Callbacks) => {
 	// No need for a tree -- a flat list is sufficient.
 	const nodes = parseMarkdown(markdown);
 	const transformedMarkdown = [];
@@ -24,16 +28,18 @@ const transformMarkdown = (markdown: string) => {
 
 			const mode = (runnableMatch[2] ?? ',html').substring(1);
 
-			transformedMarkdown.push(
-				`<pre 
-					class="runnable-code"
-					data--lang="${htmlEscape(runnableMatch[1] ?? '')}"
-					data--mode="${htmlEscape(mode)}"
-					spellcheck="false"
-				>${
+			const makeRunnableContainer = (doctest: boolean) => `<pre 
+				class="runnable-code"
+				data--lang="${htmlEscape(runnableMatch[1] ?? '')}"
+				data--mode="${htmlEscape(mode)}"
+				data--doctest="${doctest ? 'true' : 'false'}"
+				spellcheck="false"
+			>${
 	htmlEscape(content)
-}</pre>`
-			);
+}</pre>`;
+
+			transformedMarkdown.push(makeRunnableContainer(false));
+			callbacks.addDoctest(makeRunnableContainer(true));
 		} else {
 			transformedMarkdown.push(node.fullText);
 		}

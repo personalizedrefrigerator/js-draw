@@ -332,7 +332,10 @@ export default class EditorImage {
 
 	/**
 	 * Sets the import/export rectangle to the given `imageRect`. Disables
-	 * autoresize (if it was previously enabled).
+	 * autoresize if it was previously enabled.
+	 *
+	 * **Note**: The import/export rectangle is the same as the size of any
+	 * {@link BackgroundComponent}s (and other components that auto-resize).
 	 */
 	public setImportExportRect(imageRect: Rect2): SerializableCommand {
 		return EditorImage.SetImportExportRectCommand.of(
@@ -785,7 +788,7 @@ export class ImageNode {
 		}
 
 		if (bubbleUp && !oldBBox.eq(this.bbox)) {
-			if (!this.bbox.containsRect(oldBBox)) {
+			if (this.bbox.containsRect(oldBBox)) {
 				this.parent?.unionBBoxWith(this.bbox);
 			} else {
 				this.parent?.recomputeBBox(true);

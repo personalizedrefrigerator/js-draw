@@ -28,7 +28,7 @@ describe('Line2', () => {
 
 		expect(line1.intersection(line2)?.point).objEq(Vec2.of(0, 10));
 
-		// t=10 implies 10 units along he line from (10, 10) to (-10, 10)
+		// t=10 implies 10 units along the line from (10, 10) to (-10, 10)
 		expect(line1.intersection(line2)?.t).toBe(10);
 
 		// Similarly, t = 12 implies 12 units above (0, -2) in the direction of (0, 200)
@@ -74,6 +74,14 @@ describe('Line2', () => {
 		expect(line2.intersection(line1)).toBeNull();
 	});
 
+	it('(9.559000000000001, 11.687)->(9.559, 11.67673) should intersect (9.56069, 11.68077)->(9.55719, 11.68077)', () => {
+		// Points taken from an issue observed in the editor.
+		const l1 = new LineSegment2(Vec2.of(9.559000000000001, 11.687), Vec2.of(9.559, 11.67673));
+		const l2 = new LineSegment2(Vec2.of(9.56069, 11.68077), Vec2.of(9.55719, 11.68077));
+		expect(l2.intersects(l1)).toBe(true);
+		expect(l1.intersects(l2)).toBe(true);
+	});
+
 	it('Closest point to (0,0) on the line x = 1 should be (1,0)', () => {
 		const line = new LineSegment2(Vec2.of(1, 100), Vec2.of(1, -100));
 		expect(line.closestPointTo(Vec2.zero)).objEq(Vec2.of(1, 0));
@@ -95,5 +103,57 @@ describe('Line2', () => {
 			p1: Vec2.of(0, -1),
 			p2: Vec2.of(3, 98),
 		});
+	});
+
+	it.each([
+		{ from: Vec2.of(0, 0), to: Vec2.of(2, 2) },
+		{ from: Vec2.of(100, 0), to: Vec2.of(2, 2) },
+	])('should be able to split a line segment between %j', ({ from, to }) => {
+		const midpoint = from.lerp(to, 0.5);
+		const lineSegment = new LineSegment2(from, to);
+
+		// Halving
+		//
+		expect(lineSegment.at(0.5)).objEq(midpoint);
+		const [ firstHalf, secondHalf ] = lineSegment.splitAt(0.5);
+
+		if (!secondHalf) {
+			throw new Error('Splitting a line segment in half should yield two line segments.');
+		}
+
+		expect(firstHalf.p2).objEq(midpoint);
+		expect(firstHalf.p1).objEq(from);
+		expect(secondHalf.p2).objEq(to);
+		expect(secondHalf.p1).objEq(midpoint);
+
+		// Before start/end
+		expect(lineSegment.splitAt(0)[0]).objEq(lineSegment);
+		expect(lineSegment.splitAt(0)).toHaveLength(1);
+		expect(lineSegment.splitAt(1)).toHaveLength(1);
+		expect(lineSegment.splitAt(2)).toHaveLength(1);
+	});
+
+	it('equivalence check should allow ignoring direction', () => {
+		expect(new LineSegment2(Vec2.zero, Vec2.unitX)).objEq(new LineSegment2(Vec2.zero, Vec2.unitX));
+		expect(new LineSegment2(Vec2.zero, Vec2.unitX)).objEq(new LineSegment2(Vec2.unitX, Vec2.zero));
+		expect(new LineSegment2(Vec2.zero, Vec2.unitX)).not.objEq(new LineSegment2(Vec2.unitX, Vec2.zero), { ignoreDirection: false });
+	});
+
+	it('should support creating from a collection of points', () => {
+		expect(LineSegment2.ofSmallestContainingPoints([])).toBeNull();
+		expect(LineSegment2.ofSmallestContainingPoints([Vec2.of(1, 1)])).toBeNull();
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(1, 1), Vec2.of(1, 2), Vec2.of(3, 3)]
+		)).toBeNull();
+
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(1, 1), Vec2.of(1, 2)]
+		)).objEq(new LineSegment2(Vec2.of(1, 1), Vec2.of(1, 2)));
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(1, 1), Vec2.of(2, 2), Vec2.of(3, 3)]
+		)).objEq(new LineSegment2(Vec2.of(1, 1), Vec2.of(3, 3)));
+		expect(LineSegment2.ofSmallestContainingPoints(
+			[Vec2.of(3, 3), Vec2.of(2, 2), Vec2.of(2.4, 2.4), Vec2.of(3, 3)]
+		)).objEq(new LineSegment2(Vec2.of(2, 2), Vec2.of(3, 3)));
 	});
 });
