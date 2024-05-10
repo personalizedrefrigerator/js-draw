@@ -2,12 +2,15 @@ import loadExpectExtensions from './loadExpectExtensions';
 loadExpectExtensions();
 jest.useFakeTimers();
 
+// This file contains polyfills and must assume that built-in types are incorrect.
+// eslint-disable @typescript-eslint/no-unnecessary-condition
+
 // jsdom hides several node APIs that should be present in the browser.
 import { TextEncoder, TextDecoder } from 'node:util';
 import { Blob as NodeBlob } from 'node:buffer';
 window.TextEncoder = TextEncoder;
-window.TextDecoder = TextDecoder as any;
-window.Blob = NodeBlob as any;
+window.TextDecoder = TextDecoder as typeof window.TextDecoder;
+window.Blob = NodeBlob as typeof Blob;
 
 // jsdom doesn't support HTMLCanvasElement#getContext — it logs an error
 // to the console. Make it return null so we can handle a non-existent Canvas

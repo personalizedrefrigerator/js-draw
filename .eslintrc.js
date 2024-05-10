@@ -7,7 +7,7 @@ module.exports = {
 	'extends': [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/eslint-recommended',
-		'plugin:@typescript-eslint/recommended'
+		'plugin:@typescript-eslint/recommended',
 	],
 	// See https://typescript-eslint.io/linting/troubleshooting/#i-get-errors-telling-me-eslint-was-configured-to-run--however-that-tsconfig-does-not--none-of-those-tsconfigs-include-this-file
 	'overrides': [
@@ -55,6 +55,15 @@ module.exports = {
 		'@typescript-eslint/no-empty-interface': 'off',
 		'@typescript-eslint/no-inferrable-types': 'off',
 		'@typescript-eslint/no-non-null-assertion': 'off',
+		'@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+
+		// Disable: editor.dispatch code can return either void or Promise<void>, depending on the command.
+		// TODO: Refactor.
+		// '@typescript-eslint/no-floating-promises': 'error',
+
+		// Disable: In many cases, the built-in DOM types are incorrect in insecure contexts and older
+		// browsers.
+		// '@typescript-eslint/no-unnecessary-condition': 'error',
 
 		// Ideally, this should be closer to 20. However, several blocks of old
 		// code prevent this.

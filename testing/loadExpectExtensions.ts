@@ -1,12 +1,15 @@
+
+type Equalable = { eq: (other: unknown, ...args: any[])=>boolean };
+
 export const loadExpectExtensions = () => {
 	// Custom matchers. See
 	// https://jestjs.io/docs/expect#expectextendmatchers
 	expect.extend({
 		// Determine whether expected = actual based on the objects'
 		// .eq methods
-		objEq(actual: any, expected: any, ...eqArgs: any) {
+		objEq(actual: Equalable, expected: Equalable|undefined|null, ...eqArgs: any[]) {
 			let pass = false;
-			if ((expected ?? null) === null) {
+			if (!expected) {
 				pass = actual.eq(expected, ...eqArgs);
 			} else {
 				pass = expected.eq(actual, ...eqArgs);
