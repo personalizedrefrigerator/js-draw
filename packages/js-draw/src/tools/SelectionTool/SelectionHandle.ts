@@ -4,6 +4,7 @@ import { cssPrefix } from './SelectionTool';
 import Selection from './Selection';
 import Pointer from '../../Pointer';
 import Viewport from '../../Viewport';
+import { SelectionBoxChild } from './types';
 
 enum HandleShape {
 	Circle,
@@ -37,7 +38,7 @@ export type DragStartCallback = (startPoint: Point2)=>void;
 export type DragUpdateCallback = (canvasPoint: Point2)=> void;
 export type DragEndCallback = ()=> Promise<void>|void;
 
-export default class SelectionHandle {
+export default class SelectionHandle implements SelectionBoxChild {
 	private element: HTMLElement;
 	private snapToGrid: boolean;
 	private shape: HandleShape;
@@ -100,6 +101,12 @@ export default class SelectionHandle {
 	}
 
 	/**
+	 * Removes this element from its container. Should only be called
+	 * after {@link addTo}.
+	 */
+	public remove() { this.element.remove(); }
+
+	/**
 	 * Returns this handle's bounding box relative to the top left of the
 	 * selection box.
 	 */
@@ -158,6 +165,7 @@ export default class SelectionHandle {
 	public handleDragStart(pointer: Pointer) {
 		this.onDragStart(pointer.canvasPos);
 		this.dragLastPos = pointer.canvasPos;
+		return true;
 	}
 
 	public handleDragUpdate(pointer: Pointer) {
