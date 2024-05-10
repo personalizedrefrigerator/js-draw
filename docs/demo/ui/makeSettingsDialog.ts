@@ -189,9 +189,10 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 				saveResults();
 				container.remove();
 				resolve();
-			} catch(e) {
+			} catch (error) {
 				container.remove();
-				reject(e);
+				// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+				reject(error);
 			}
 		};
 

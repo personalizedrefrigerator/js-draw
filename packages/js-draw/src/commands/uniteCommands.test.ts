@@ -46,7 +46,7 @@ describe('uniteCommands', () => {
 			editor.setBackgroundColor(Color4.red),
 		], { description: 'Bar' });
 
-		if (!(command instanceof SerializableCommand)) throw 'Expected command to be serializable';
+		if (!(command instanceof SerializableCommand)) throw new Error('Expected command to be serializable');
 
 		const deserialized = SerializableCommand.deserialize(command.serialize(), editor);
 		expect(deserialized.description(editor, editor.localization)).toBe('Bar');

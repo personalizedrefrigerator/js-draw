@@ -56,6 +56,8 @@ module.exports = {
 		'@typescript-eslint/no-inferrable-types': 'off',
 		'@typescript-eslint/no-non-null-assertion': 'off',
 		'@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+		'@typescript-eslint/only-throw-error': 'error',
+		'@typescript-eslint/prefer-promise-reject-errors': 'error',
 
 		// Disable: editor.dispatch code can return either void or Promise<void>, depending on the command.
 		// TODO: Refactor.

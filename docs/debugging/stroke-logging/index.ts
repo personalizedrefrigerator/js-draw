@@ -153,7 +153,7 @@ const toolbar = editor.addToolbar();
 toolbar.addWidget(new DebugToolbarWidget(editor));
 
 editor.notifier.on(jsdraw.EditorEventType.CommandDone, event => {
-	if (event.kind !== jsdraw.EditorEventType.CommandDone) throw '';
+	if (event.kind !== jsdraw.EditorEventType.CommandDone) throw new Error('Bad event type.');
 
 	const description = event.command.description(editor, editor.localization).replace(/\t/g, ' ');
 	let serialized = undefined;
@@ -170,7 +170,7 @@ editor.notifier.on(jsdraw.EditorEventType.CommandDone, event => {
 });
 
 editor.notifier.on(jsdraw.EditorEventType.ToolEnabled, event => {
-	if (event.kind !== jsdraw.EditorEventType.ToolEnabled) throw '';
+	if (event.kind !== jsdraw.EditorEventType.ToolEnabled) throw new Error('Wrong event type');
 
 	addToLog({
 		eventType: 'toolEnabled',
@@ -179,7 +179,7 @@ editor.notifier.on(jsdraw.EditorEventType.ToolEnabled, event => {
 });
 
 editor.notifier.on(jsdraw.EditorEventType.ToolDisabled, event => {
-	if (event.kind !== jsdraw.EditorEventType.ToolDisabled) throw '';
+	if (event.kind !== jsdraw.EditorEventType.ToolDisabled) throw new Error('Wrong event type');
 
 	addToLog({
 		eventType: 'toolDisabled',
@@ -188,7 +188,7 @@ editor.notifier.on(jsdraw.EditorEventType.ToolDisabled, event => {
 });
 
 editor.notifier.on(jsdraw.EditorEventType.ToolUpdated, event => {
-	if (event.kind !== jsdraw.EditorEventType.ToolUpdated) throw '';
+	if (event.kind !== jsdraw.EditorEventType.ToolUpdated) throw new Error('Wrong event type');
 
 	addToLog({
 		eventType: 'toolUpdated',

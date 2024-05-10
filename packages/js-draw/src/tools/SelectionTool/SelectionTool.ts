@@ -514,7 +514,7 @@ export default class SelectionTool extends BaseTool {
 				if (blob) {
 					resolve(blob);
 				} else {
-					reject('Failed to convert canvas to blob.');
+					reject(new Error('Failed to convert canvas to blob.'));
 				}
 			}, 'image/png');
 		}));

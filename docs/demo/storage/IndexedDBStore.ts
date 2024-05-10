@@ -63,7 +63,7 @@ export class IndexedDBStore implements AbstractStore {
 				console.log('reject: ' + dbFactory.error);
 
 				// TODO: Use dbFactory.errorCode to provide a better error message.
-				reject(localization.databaseLoadError);
+				reject(new Error(localization.databaseLoadError));
 			};
 
 			dbFactory.onupgradeneeded = (event: any) => {
@@ -96,8 +96,8 @@ export class IndexedDBStore implements AbstractStore {
 				.objectStore('imageMetadata')
 				.delete(id);
 
-			deleteDataRequest.onerror = () => reject('Error deleting image data: ' + deleteDataRequest.error);
-			deleteMetadataRequest.onerror = () => reject('Error deleting image metadata: ' + deleteMetadataRequest.error);
+			deleteDataRequest.onerror = () => reject(new Error('Error deleting image data: ' + deleteDataRequest.error));
+			deleteMetadataRequest.onerror = () => reject(new Error('Error deleting image metadata: ' + deleteMetadataRequest.error));
 
 			let nextSuccessCallback = () => {
 				nextSuccessCallback = resolve;
@@ -123,7 +123,7 @@ export class IndexedDBStore implements AbstractStore {
 				if (data) {
 					const error = validateImageMetadataRecord(data);
 					if (error) {
-						reject('Reading image metadata: ' + error);
+						reject(new Error('Reading image metadata: ' + error));
 						return;
 					}
 				}
@@ -131,7 +131,7 @@ export class IndexedDBStore implements AbstractStore {
 				resolve(data ?? null);
 			};
 
-			readRequest.onerror = () => reject('Error reading image: ' + readRequest.error);
+			readRequest.onerror = () => reject(new Error('Error reading image: ' + readRequest.error));
 		});
 	}
 
@@ -146,7 +146,7 @@ export class IndexedDBStore implements AbstractStore {
 				.put(metadata);
 
 			writeDataRequest.onsuccess = () => resolve();
-			writeDataRequest.onerror = () => reject('Error saving metadata: ' + writeDataRequest.error);
+			writeDataRequest.onerror = () => reject(new Error('Error saving metadata: ' + writeDataRequest.error));
 		});
 	}
 
@@ -194,7 +194,7 @@ export class IndexedDBStore implements AbstractStore {
 				.put({ id, data: svgData });
 
 			writeDataRequest.onsuccess = () => resolve();
-			writeDataRequest.onerror = () => reject('Error saving data: ' + writeDataRequest.error);
+			writeDataRequest.onerror = () => reject(new Error('Error saving data: ' + writeDataRequest.error));
 		}));
 
 		await this.updateStoreEntryModifyTime(id);
@@ -212,14 +212,14 @@ export class IndexedDBStore implements AbstractStore {
 				const data = event.target.result.data as string;
 
 				if (typeof (data) !== 'string') {
-					reject('Reading image: Type of image data is not string');
+					reject(new Error('Reading image: Type of image data is not string'));
 					return;
 				}
 
 				resolve(data);
 			};
 
-			readDataRequest.onerror = () => reject('Error reading image: ' + readDataRequest.error);
+			readDataRequest.onerror = () => reject(new Error('Error reading image: ' + readDataRequest.error));
 		});
 	}
 
@@ -287,6 +287,7 @@ export class IndexedDBStore implements AbstractStore {
 			};
 
 			keyRequest.onerror = (event) => {
+				// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- Forwarding an error-like object.
 				reject(event);
 			};
 		});
@@ -304,8 +305,8 @@ export class IndexedDBStore implements AbstractStore {
 			const addMetadataRequest = transaction.objectStore(imageMetadataStoreName).add(metadata);
 			const addImageRequest = transaction.objectStore(imageDataStoreName).add({ data: '' });
 
-			addMetadataRequest.onerror = () => reject('Error adding image metadata: ' + addMetadataRequest.error);
-			addImageRequest.onerror = () => reject('Error adding image data: ' + addImageRequest.error);
+			addMetadataRequest.onerror = () => reject(new Error('Error adding image metadata: ' + addMetadataRequest.error));
+			addImageRequest.onerror = () => reject(new Error('Error adding image data: ' + addImageRequest.error));
 
 			const eventToId = (event: any) => parseInt(event.target.result);
 
@@ -317,8 +318,8 @@ export class IndexedDBStore implements AbstractStore {
 					const otherId = eventToId(event);
 
 					if (eventToId(event) !== id) {
-						reject(`Error creating new image:
-								IDs assigned to image and metadata don't match (${id}, ${otherId})`);
+						reject(new Error(`Error creating new image:
+								IDs assigned to image and metadata don't match (${id}, ${otherId})`));
 						return;
 					}
 
