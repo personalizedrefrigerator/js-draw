@@ -185,25 +185,30 @@ export default class RenderingCacheNode {
 			return;
 		}
 
-		const newItems = [];
-		// Divide [items] until nodes are leaves or smaller than this
-		for (const item of items) {
-			const bbox = item.getBBox();
-			if (!bbox.intersects(this.region)) {
-				continue;
-			}
+		// Divide [items] until nodes are smaller than this, or are leaves.
+		const divideUntilSmallerThanThis = (itemsToDivide: ImageNode[]) => {
+			const newItems = [];
+			for (const item of itemsToDivide) {
+				const bbox = item.getBBox();
+				if (!bbox.intersects(this.region)) {
+					continue;
+				}
 
-			if (bbox.maxDimension >= this.region.maxDimension) {
-				newItems.push(...item.getChildrenOrSelfIntersectingRegion(this.region));
-			} else {
-				newItems.push(item);
+				if (bbox.maxDimension >= this.region.maxDimension) {
+					newItems.push(...item.getChildrenOrSelfIntersectingRegion(this.region));
+				} else {
+					newItems.push(item);
+				}
 			}
-		}
-		items = newItems;
+			return newItems;
+		};
+		items = divideUntilSmallerThanThis(items);
 
 		// Can we cache at all?
 		if (!this.cacheState.props.isOfCorrectType(screenRenderer)) {
-			items.forEach(item => item.render(screenRenderer, viewport.visibleRect));
+			for (const item of items) {
+				item.render(screenRenderer, viewport.visibleRect);
+			}
 			return;
 		}
 

@@ -56,6 +56,10 @@ module.exports = {
 		'@typescript-eslint/no-inferrable-types': 'off',
 		'@typescript-eslint/no-non-null-assertion': 'off',
 
+		// Ideally, this should be closer to 20. However, several blocks of old
+		// code prevent this.
+		'complexity': ['error', 40],
+
 		// A subset of the default recommended-type-checked rules.
 		// See https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/configs/recommended-type-checked.ts
 		// for the full list.
@@ -63,12 +67,15 @@ module.exports = {
 		'@typescript-eslint/ban-ts-comment': 'error',
 		// Bans types like Function and Object that should be more specific
 		'@typescript-eslint/ban-types': 'error',
-		'no-array-constructor': 'off',
-		'no-implied-eval': 'off',
-		'@typescript-eslint/no-implied-eval': 'error',
-		'no-loss-of-precision': 'off',
-		'@typescript-eslint/no-loss-of-precision': 'error',
+
+		// Replace several ESLint defaults with the TypeScript equivalents
 		'@typescript-eslint/no-array-constructor': 'error',
+		'no-array-constructor': 'off',
+		'@typescript-eslint/no-loss-of-precision': 'error',
+		'no-loss-of-precision': 'off',
+		'@typescript-eslint/no-implied-eval': 'error',
+		'no-implied-eval': 'off',
+
 		'@typescript-eslint/no-duplicate-enum-values': 'error',
 		'@typescript-eslint/no-duplicate-type-constituents': 'error',
 		'@typescript-eslint/no-extra-non-null-assertion': 'error',
