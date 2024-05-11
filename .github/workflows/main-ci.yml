@@ -41,6 +41,8 @@ jobs:
         run: npm run test
       - name: Lint
         run: npm run lint-ci
+      - name: Check formatting
+        run: npm run format-ci
       - name: Build pages
         run: bash scripts/build-website.sh
       - name: Setup Pages
