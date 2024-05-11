@@ -1,4 +1,3 @@
-
 $image-widget-selector: '.insert-image-widget-dropdown-content';
 // Repeat the selector for additional specificity.
 :root #{$image-widget-selector}#{$image-widget-selector}#{$image-widget-selector} {
@@ -13,7 +12,7 @@ $image-widget-selector: '.insert-image-widget-dropdown-content';
 	img {
 		max-width: min(50vw, 75%);
 		max-height: min(300px, 50vh);
-	
+
 		/* Center */
 		display: block;
 		margin-left: auto;

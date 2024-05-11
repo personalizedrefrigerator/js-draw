@@ -1,4 +1,3 @@
-
 .about-dialog-container dialog {
 	display: flex;
 	flex-direction: column;
@@ -23,7 +22,8 @@
 		white-space: pre-wrap;
 		font-family: monospace;
 
-		& > h2, & > details > summary {
+		& > h2,
+		& > details > summary {
 			cursor: pointer;
 			margin-top: 15px;
 
@@ -36,6 +36,4 @@
 			}
 		}
 	}
-
-
 }

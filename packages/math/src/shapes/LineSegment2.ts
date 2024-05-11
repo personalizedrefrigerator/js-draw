@@ -31,7 +31,7 @@ export class LineSegment2 extends Parameterized2DShape {
 	/** Creates a new `LineSegment2` from its endpoints. */
 	public constructor(
 		private readonly point1: Point2,
-		private readonly point2: Point2
+		private readonly point2: Point2,
 	) {
 		super();
 
@@ -59,7 +59,7 @@ export class LineSegment2 extends Parameterized2DShape {
 	public static ofSmallestContainingPoints(points: readonly Point2[]) {
 		if (points.length <= 1) return null;
 
-		const sorted = [...points].sort((a, b) => a.x !== b.x ? a.x - b.x : a.y - b.y);
+		const sorted = [...points].sort((a, b) => (a.x !== b.x ? a.x - b.x : a.y - b.y));
 		const line = new LineSegment2(sorted[0], sorted[sorted.length - 1]);
 
 		for (const point of sorted) {
@@ -116,15 +116,12 @@ export class LineSegment2 extends Parameterized2DShape {
 		return this.direction;
 	}
 
-	public splitAt(t: number): [LineSegment2]|[LineSegment2,LineSegment2] {
+	public splitAt(t: number): [LineSegment2] | [LineSegment2, LineSegment2] {
 		if (t <= 0 || t >= 1) {
 			return [this];
 		}
 
-		return [
-			new LineSegment2(this.point1, this.at(t)),
-			new LineSegment2(this.at(t), this.point2),
-		];
+		return [new LineSegment2(this.point1, this.at(t)), new LineSegment2(this.at(t), this.point2)];
 	}
 
 	/**
@@ -135,7 +132,7 @@ export class LineSegment2 extends Parameterized2DShape {
 	 *              This will change in a future release.
 	 * @deprecated
 	 */
-	public intersection(other: LineSegment2): IntersectionResult|null {
+	public intersection(other: LineSegment2): IntersectionResult | null {
 		// TODO(v2.0.0): Make this return a `t` value from `0` to `1`.
 
 		// We want x₁(t) = x₂(t) and y₁(t) = y₂(t)
@@ -180,21 +177,18 @@ export class LineSegment2 extends Parameterized2DShape {
 
 			const xIntersect = this.point1.x;
 			const yIntersect =
-				(this.point1.x - other.point1.x) * other.direction.y / other.direction.x + other.point1.y;
+				((this.point1.x - other.point1.x) * other.direction.y) / other.direction.x + other.point1.y;
 			resultPoint = Vec2.of(xIntersect, yIntersect);
 			resultT = (yIntersect - this.point1.y) / this.direction.y;
 		} else {
 			// From above,
 			// x = ((o₁ᵧ - o₂ᵧ)(d₁ₓd₂ₓ) + (d₂ᵧd₁ₓ)(o₂ₓ) - (d₁ᵧd₂ₓ)(o₁ₓ))/(d₂ᵧd₁ₓ - d₁ᵧd₂ₓ)
-			const numerator = (
-				(this.point1.y - other.point1.y) * this.direction.x * other.direction.x
-				+ this.direction.x * other.direction.y * other.point1.x
-				- this.direction.y * other.direction.x * this.point1.x
-			);
-			const denominator = (
-				other.direction.y * this.direction.x
-				- this.direction.y * other.direction.x
-			);
+			const numerator =
+				(this.point1.y - other.point1.y) * this.direction.x * other.direction.x +
+				this.direction.x * other.direction.y * other.point1.x -
+				this.direction.y * other.direction.x * this.point1.x;
+			const denominator =
+				other.direction.y * this.direction.x - this.direction.y * other.direction.x;
 
 			// Avoid dividing by zero. It means there is no intersection
 			if (denominator === 0) {
@@ -214,10 +208,12 @@ export class LineSegment2 extends Parameterized2DShape {
 		const resultToP3 = resultPoint.distanceTo(other.point1);
 		const resultToP4 = resultPoint.distanceTo(other.point2);
 
-		if (resultToP1 > this.length
-			|| resultToP2 > this.length
-			|| resultToP3 > other.length
-			|| resultToP4 > other.length) {
+		if (
+			resultToP1 > this.length ||
+			resultToP2 > this.length ||
+			resultToP3 > other.length ||
+			resultToP4 > other.length
+		) {
 			return null;
 		}
 
@@ -235,7 +231,7 @@ export class LineSegment2 extends Parameterized2DShape {
 		const intersection = this.intersection(lineSegment);
 
 		if (intersection) {
-			return [ intersection.t / this.length ];
+			return [intersection.t / this.length];
 		}
 		return [];
 	}
@@ -252,7 +248,7 @@ export class LineSegment2 extends Parameterized2DShape {
 		const intersection = this.intersection(lineSegment);
 
 		if (intersection) {
-			return [ intersection.point ];
+			return [intersection.point];
 		}
 		return [];
 	}
@@ -262,7 +258,7 @@ export class LineSegment2 extends Parameterized2DShape {
 		return this.nearestPointTo(target).point;
 	}
 
-	public override nearestPointTo(target: Vec3): { point: Vec3; parameterValue: number; } {
+	public override nearestPointTo(target: Vec3): { point: Vec3; parameterValue: number } {
 		// Distance from P1 along this' direction.
 		const projectedDistFromP1 = target.minus(this.p1).dot(this.direction);
 		const projectedDistFromP2 = this.length - projectedDistFromP1;
@@ -293,7 +289,8 @@ export class LineSegment2 extends Parameterized2DShape {
 	/** Returns a copy of this line segment transformed by the given `affineTransfm`. */
 	public transformedBy(affineTransfm: Mat33): LineSegment2 {
 		return new LineSegment2(
-			affineTransfm.transformVec2(this.p1), affineTransfm.transformVec2(this.p2)
+			affineTransfm.transformVec2(this.p1),
+			affineTransfm.transformVec2(this.p2),
 		);
 	}
 
@@ -313,7 +310,7 @@ export class LineSegment2 extends Parameterized2DShape {
 	 * - `tolerance`: The maximum difference between endpoints. (Default: 0)
 	 * - `ignoreDirection`: Allow matching a version of `this` with opposite direction. (Default: `true`)
 	 */
-	public eq(other: LineSegment2, options?: { tolerance?: number, ignoreDirection?: boolean }) {
+	public eq(other: LineSegment2, options?: { tolerance?: number; ignoreDirection?: boolean }) {
 		if (!(other instanceof LineSegment2)) {
 			return false;
 		}
@@ -322,8 +319,8 @@ export class LineSegment2 extends Parameterized2DShape {
 		const ignoreDirection = options?.ignoreDirection ?? true;
 
 		return (
-			(other.p1.eq(this.p1, tolerance) && other.p2.eq(this.p2, tolerance))
-			|| (ignoreDirection && other.p1.eq(this.p2, tolerance) && other.p2.eq(this.p1, tolerance))
+			(other.p1.eq(this.p1, tolerance) && other.p2.eq(this.p2, tolerance)) ||
+			(ignoreDirection && other.p1.eq(this.p2, tolerance) && other.p2.eq(this.p1, tolerance))
 		);
 	}
 }

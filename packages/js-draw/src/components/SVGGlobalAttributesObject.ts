@@ -11,7 +11,7 @@ import SVGRenderer from '../rendering/renderers/SVGRenderer';
 import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 
-type GlobalAttrsList = Array<[string, string|null]>;
+type GlobalAttrsList = Array<[string, string | null]>;
 
 const componentKind = 'svg-global-attributes';
 
@@ -26,7 +26,7 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 		this.contentBBox = Rect2.empty;
 
 		// Already stored/managed in `editor.image`.
-		const attrsManagedByRenderer = [ 'viewBox', 'width', 'height' ];
+		const attrsManagedByRenderer = ['viewBox', 'width', 'height'];
 
 		// Only store attributes that aren't managed by other parts of the app.
 		this.attrs = attrs.filter(([attr, _value]) => {
@@ -40,8 +40,7 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 			return;
 		}
 
-
-		for (const [ attr, value ] of this.attrs) {
+		for (const [attr, value] of this.attrs) {
 			canvas.setRootSVGAttribute(attr, value);
 		}
 	}
@@ -50,8 +49,7 @@ export default class SVGGlobalAttributesObject extends AbstractComponent {
 		return false;
 	}
 
-	protected applyTransformation(_affineTransfm: Mat33): void {
-	}
+	protected applyTransformation(_affineTransfm: Mat33): void {}
 
 	public override isSelectable() {
 		return false;

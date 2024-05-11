@@ -1,29 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
-		<meta charset="utf-8"/>
-		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 		<title>js-draw</title>
-		<link rel="manifest" href="./manifest.json"/>
-		<link rel="icon" href="./icons/js-draw-icon-vector-medium.svg"/>
-		<link rel="apple-touch-icon" href="./icons/js-draw-icon-medium.png"/>
-		<link rel="stylesheet" href="style.css"/>
-		<meta name="description" content="An interactive demo of the js-draw drawing library."/>
+		<link rel="manifest" href="./manifest.json" />
+		<link rel="icon" href="./icons/js-draw-icon-vector-medium.svg" />
+		<link rel="apple-touch-icon" href="./icons/js-draw-icon-medium.png" />
+		<link rel="stylesheet" href="style.css" />
+		<meta name="description" content="An interactive demo of the js-draw drawing library." />
 	</head>
 	<body>
 		<div id="launchOptions">
 			<h1 class="main-header">
 				<a href="https://github.com/personalizedrefrigerator/js-draw"><code>js-draw</code></a>
-				<div style="flex-grow: 1;"></div>
+				<div style="flex-grow: 1"></div>
 
-				<a href="https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/js_draw.html">API</a>
+				<a href="https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/js_draw.html"
+					>API</a
+				>
 			</h1>
 			<div id="actions-container"></div>
 		</div>
 	</body>
-	<script src='index.bundle.js'></script>
+	<script src="index.bundle.js"></script>
 	<script>
-		navigator.serviceWorker?.register('./sw.js')?.catch(err => {
+		navigator.serviceWorker?.register('./sw.js')?.catch((err) => {
 			console.warn('Error registering service worker,', err);
 		});
 	</script>

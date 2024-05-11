@@ -42,9 +42,9 @@ import getUniquePointerId from './getUniquePointerId';
  */
 const sendTouchEvent = (
 	editor: Editor,
-	eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+	eventType: InputEvtType.PointerDownEvt | InputEvtType.PointerMoveEvt | InputEvtType.PointerUpEvt,
 	screenPos: Vec2,
-	allOtherPointers?: Pointer[]
+	allOtherPointers?: Pointer[],
 ) => {
 	const canvasPos = editor.viewport.screenToCanvas(screenPos);
 
@@ -53,15 +53,16 @@ const sendTouchEvent = (
 	const ptrId = getUniquePointerId(allOtherPointers ?? []);
 
 	const mainPointer = Pointer.ofCanvasPoint(
-		canvasPos, eventType !== InputEvtType.PointerUpEvt, editor.viewport, ptrId, PointerDevice.Touch
+		canvasPos,
+		eventType !== InputEvtType.PointerUpEvt,
+		editor.viewport,
+		ptrId,
+		PointerDevice.Touch,
 	);
 
 	editor.toolController.dispatchInputEvent({
 		kind: eventType,
-		allPointers: [
-			...(allOtherPointers ?? []),
-			mainPointer,
-		],
+		allPointers: [...(allOtherPointers ?? []), mainPointer],
 		current: mainPointer,
 	});
 

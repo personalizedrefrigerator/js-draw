@@ -12,10 +12,9 @@ type ShortcutDescriptionDictionary = Record<string, string>;
  */
 export default class KeyboardShortcutManager {
 	private static shortcuts: ShortcutDictionary = Object.create(null);
-	private static shortcutDefaultDescriptions: ShortcutDescriptionDictionary
-		= Object.create(null);
-	private static shortcutLocalizedDescriptions: Record<string, ShortcutDescriptionDictionary>
-		= Object.create(null);
+	private static shortcutDefaultDescriptions: ShortcutDescriptionDictionary = Object.create(null);
+	private static shortcutLocalizedDescriptions: Record<string, ShortcutDescriptionDictionary> =
+		Object.create(null);
 
 	private shortcutOverrides: ShortcutDictionary = Object.create(null);
 
@@ -35,7 +34,7 @@ export default class KeyboardShortcutManager {
 	 * @internal
 	 */
 	public overrideShortcut(shortcutId: string, overrideWith: KeyBinding[]) {
-		this.shortcutOverrides[shortcutId] = [ ...overrideWith ];
+		this.shortcutOverrides[shortcutId] = [...overrideWith];
 	}
 
 	/** Returns true if `keyEvent` matches the shortcut with `shortcutId`. @internal */
@@ -92,7 +91,7 @@ export default class KeyboardShortcutManager {
 	 */
 	public static registerDefaultKeyboardShortcut(
 		id: string,
-		shortcuts: (KeyBinding|string)[],
+		shortcuts: (KeyBinding | string)[],
 		defaultDescription: string,
 	): boolean {
 		if (id in KeyboardShortcutManager.shortcuts) {
@@ -100,14 +99,14 @@ export default class KeyboardShortcutManager {
 		}
 
 		// Convert the strings to shortcut maps.
-		const shortcutsAsShortcuts = shortcuts.map(shortcut => {
-			if (typeof (shortcut) === 'string') {
+		const shortcutsAsShortcuts = shortcuts.map((shortcut) => {
+			if (typeof shortcut === 'string') {
 				return KeyBinding.fromString(shortcut);
 			}
 			return shortcut;
 		});
 
-		KeyboardShortcutManager.shortcuts[id] = [ ...shortcutsAsShortcuts ];
+		KeyboardShortcutManager.shortcuts[id] = [...shortcutsAsShortcuts];
 		KeyboardShortcutManager.shortcutDefaultDescriptions[id] = defaultDescription;
 		return true;
 	}
@@ -153,9 +152,11 @@ export default class KeyboardShortcutManager {
 	 *
 	 * `localeList`, if given, attempts to
 	 */
-	public static getShortcutDescription(id: string, localeList?: readonly string[]): string|null {
+	public static getShortcutDescription(id: string, localeList?: readonly string[]): string | null {
 		const localizationTable = matchingLocalizationTable(
-			localeList ?? [], this.shortcutLocalizedDescriptions, this.shortcutDefaultDescriptions
+			localeList ?? [],
+			this.shortcutLocalizedDescriptions,
+			this.shortcutDefaultDescriptions,
 		);
 
 		return localizationTable[id] ?? this.shortcutDefaultDescriptions[id] ?? null;

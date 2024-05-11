@@ -1,4 +1,3 @@
-
 // Copies this repository's root README and its resources to the js-draw folder
 // prior to bundling. This allows the README to be shown on NPM.
 import * as fs from 'node:fs';
@@ -25,7 +24,9 @@ if (lastArg === 'copy') {
 	console.log('Copying README.md and its dependencies to the js-draw package...');
 	if (fs.existsSync(targetReadmePath)) {
 		console.error('ERROR: README already exists in target location. Exiting.');
-		console.error('Be careful running postpack: It will DELETE this README and associated resources');
+		console.error(
+			'Be careful running postpack: It will DELETE this README and associated resources',
+		);
 		process.exit(1);
 	}
 
@@ -51,12 +52,12 @@ if (lastArg === 'copy') {
 	}
 
 	if (!fs.existsSync(targetReadmeResourcesPath)) {
-		console.error('ERROR: README resources directory does not exist in the target location. Exiting.');
+		console.error(
+			'ERROR: README resources directory does not exist in the target location. Exiting.',
+		);
 		process.exit(1);
 	}
 
 	fs.unlinkSync(targetReadmePath);
 	fs.rmSync(targetReadmeResourcesPath, { recursive: true });
 }
-
-

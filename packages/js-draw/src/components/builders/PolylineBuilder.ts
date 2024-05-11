@@ -1,6 +1,14 @@
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import RenderablePathSpec from '../../rendering/RenderablePathSpec';
-import { Point2, Rect2, Color4, PathCommand, PathCommandType, Vec2, LineSegment2 } from '@js-draw/math';
+import {
+	Point2,
+	Rect2,
+	Color4,
+	PathCommand,
+	PathCommandType,
+	Vec2,
+	LineSegment2,
+} from '@js-draw/math';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';
@@ -16,7 +24,7 @@ export const makePolylineBuilder: ComponentBuilderFactory = makeShapeFitAutocorr
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		const minFit = viewport.getSizeOfPixelOnCanvas();
 		return new PolylineBuilder(initialPoint, minFit, viewport);
-	}
+	},
 );
 
 export default class PolylineBuilder implements ComponentBuilder {
@@ -28,7 +36,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 
 	private lastPoint: Point2;
 	private startPoint: StrokeDataPoint;
-	private lastLineSegment: LineSegment2|null = null;
+	private lastLineSegment: LineSegment2 | null = null;
 
 	public constructor(
 		startPoint: StrokeDataPoint,
@@ -61,13 +69,13 @@ export default class PolylineBuilder implements ComponentBuilder {
 			stroke: {
 				color: this.startPoint.color,
 				width: this.roundDistance(this.averageWidth),
-			}
+			},
 		};
 	}
 
 	protected previewCurrentPath(): RenderablePathSpec {
 		const startPoint = this.startPoint.pos;
-		const commands = [ ...this.parts ];
+		const commands = [...this.parts];
 
 		// TODO: For now, this is necesary for the path to be visible.
 		if (commands.length <= 1) {
@@ -86,7 +94,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 	}
 
 	protected previewFullPath(): RenderablePathSpec[] {
-		return [ this.previewCurrentPath() ];
+		return [this.previewCurrentPath()];
 	}
 
 	public preview(renderer: AbstractRenderer) {
@@ -126,17 +134,19 @@ export default class PolylineBuilder implements ComponentBuilder {
 	}
 
 	public addPoint(newPoint: StrokeDataPoint) {
-		this.widthAverageNumSamples ++;
+		this.widthAverageNumSamples++;
 		this.averageWidth =
-			this.averageWidth * (this.widthAverageNumSamples - 1) / this.widthAverageNumSamples
-				+ newPoint.width / this.widthAverageNumSamples;
-
+			(this.averageWidth * (this.widthAverageNumSamples - 1)) / this.widthAverageNumSamples +
+			newPoint.width / this.widthAverageNumSamples;
 
 		const roundedPoint = this.roundPoint(newPoint.pos);
 
 		if (!roundedPoint.eq(this.lastPoint)) {
 			// If almost exactly in the same line as the previous
-			if (this.lastLineSegment && this.lastLineSegment.direction.dot(roundedPoint.minus(this.lastPoint).normalized()) > 0.997) {
+			if (
+				this.lastLineSegment &&
+				this.lastLineSegment.direction.dot(roundedPoint.minus(this.lastPoint).normalized()) > 0.997
+			) {
 				this.parts.pop();
 				this.lastPoint = this.lastLineSegment.p1;
 			}

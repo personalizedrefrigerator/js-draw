@@ -1,9 +1,9 @@
 import tokenizeMarkdown, { MarkdownToken, MarkdownTokenType } from './tokenizeMarkdown';
 
 export enum RegionType {
-	Text='text',
-	Code='code',
-	Math='math',
+	Text = 'text',
+	Code = 'code',
+	Math = 'math',
 }
 
 interface LabeledRegion {
@@ -43,8 +43,10 @@ const parseMarkdown = (markdown: string) => {
 		const nextIsNewline = i === tokens.length - 1 || tokens[i + 1].text.startsWith('\n');
 
 		return {
-			prevIsSpace, prevIsNewline,
-			nextIsSpace, nextIsNewline,
+			prevIsSpace,
+			prevIsNewline,
+			nextIsSpace,
+			nextIsNewline,
 		};
 	};
 
@@ -57,7 +59,7 @@ const parseMarkdown = (markdown: string) => {
 	let currentInformation = getSpaceInformationAt(0);
 
 	const bufferText = () => {
-		return buffer.map(token => token.text).join('');
+		return buffer.map((token) => token.text).join('');
 	};
 
 	const finalizeRegion = () => {
@@ -80,8 +82,7 @@ const parseMarkdown = (markdown: string) => {
 				start,
 				stop: start + text.length,
 			});
-		}
-		else if (currentRegionType === RegionType.Code || currentRegionType === RegionType.Math) {
+		} else if (currentRegionType === RegionType.Code || currentRegionType === RegionType.Math) {
 			const surroundedByNewlines =
 				currentInformation.nextIsNewline && currentStartInformation.prevIsNewline;
 
@@ -94,13 +95,15 @@ const parseMarkdown = (markdown: string) => {
 				type: currentRegionType,
 				block: surroundedByNewlines && hasBlockDelimiters,
 				fullText: text,
-				content: buffer.slice(1, buffer.length - 1).map(token => token.text).join(''),
+				content: buffer
+					.slice(1, buffer.length - 1)
+					.map((token) => token.text)
+					.join(''),
 
 				start,
 				stop: start + text.length,
 			});
-		}
-		else {
+		} else {
 			const exhaustivenessCheck: never = currentRegionType;
 			return exhaustivenessCheck;
 		}
@@ -113,7 +116,7 @@ const parseMarkdown = (markdown: string) => {
 
 		currentStartInformation = startInformation;
 		currentRegionType = type;
-		buffer = [ ];
+		buffer = [];
 	};
 
 	for (let i = 0; i < tokens.length; i++) {
@@ -145,16 +148,13 @@ const parseMarkdown = (markdown: string) => {
 			}
 			// Text -> math
 			else if (
-				current.type === MarkdownTokenType.MathDelim
-				&& (
-					(prevIsSpace && !nextIsSpace && current.text === '$')
-					|| (prevIsNewline && current.text === '$$')
-				)
+				current.type === MarkdownTokenType.MathDelim &&
+				((prevIsSpace && !nextIsSpace && current.text === '$') ||
+					(prevIsNewline && current.text === '$$'))
 			) {
 				startNewRegion(RegionType.Math, startInformation);
 			}
-		}
-		else {
+		} else {
 			const startInformation: StartInformation = {
 				...currentInformation,
 				startToken: nextToken ?? current,
@@ -168,31 +168,27 @@ const parseMarkdown = (markdown: string) => {
 			const inlineDelim = enterDelim.length === 1;
 
 			if (
-				inlineDelim
-
-				&& (
-					// if we're at the end of the line
-					(current.type === MarkdownTokenType.Space && current.text.includes('\n'))
-
+				inlineDelim &&
+				// if we're at the end of the line
+				((current.type === MarkdownTokenType.Space && current.text.includes('\n')) ||
 					// or there was a space just before the delimiter and it's math
-					|| (prevIsSpace && current.type === MarkdownTokenType.MathDelim)
-				)
+					(prevIsSpace && current.type === MarkdownTokenType.MathDelim))
 			) {
 				// Switch the region to text and backtrack to the
 				// token just after the start of the region.
 				currentRegionType = RegionType.Text;
-				for (; i > startInformation.startToken.position; i --) {
+				for (; i > startInformation.startToken.position; i--) {
 					buffer.pop();
 				}
-			}
-			else if (currentRegionType === RegionType.Code) {
-
+			} else if (currentRegionType === RegionType.Code) {
 				// Code -> text
-				if (current.type === MarkdownTokenType.CodeDelim && current.text.length >= enterDelim.length) {
+				if (
+					current.type === MarkdownTokenType.CodeDelim &&
+					current.text.length >= enterDelim.length
+				) {
 					startNewRegion(RegionType.Text, startInformation);
 				}
-			}
-			else if (currentRegionType === RegionType.Math) {
+			} else if (currentRegionType === RegionType.Math) {
 				const enterDelim = currentStartInformation.startToken.text;
 
 				// Math -> text
@@ -216,14 +212,15 @@ const parseMarkdown = (markdown: string) => {
 	// where appliccable.
 	const coalescedRegions: LabeledRegion[] = [];
 
-	for (let i = 0; i < labeledRegions.length; i ++) {
+	for (let i = 0; i < labeledRegions.length; i++) {
 		const current = labeledRegions[i];
 		const previous = i > 0 ? coalescedRegions[i - 1] : null;
 
 		// Join neighboring blocks of text.
 		if (
-			current.type === RegionType.Text && previous?.type === RegionType.Text
-			&& current.block === previous.block
+			current.type === RegionType.Text &&
+			previous?.type === RegionType.Text &&
+			current.block === previous.block
 		) {
 			const text = previous.fullText + current.fullText;
 
@@ -236,8 +233,7 @@ const parseMarkdown = (markdown: string) => {
 				fullText: text,
 				content: text,
 			});
-		}
-		else {
+		} else {
 			coalescedRegions.push(current);
 		}
 	}

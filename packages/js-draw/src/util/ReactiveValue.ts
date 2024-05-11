@@ -1,9 +1,8 @@
-
-type ListenerResult = { remove(): void; };
-type UpdateCallback<T> = (value: T)=>void;
+type ListenerResult = { remove(): void };
+type UpdateCallback<T> = (value: T) => void;
 
 const noOpUpdateListenerResult = {
-	remove() { }
+	remove() {},
 };
 
 /**
@@ -49,20 +48,16 @@ export abstract class ReactiveValue<T> {
 	public abstract onUpdateAndNow(callback: UpdateCallback<T>): ListenerResult;
 
 	/** Creates a `ReactiveValue` with an initial value, `initialValue`. */
-	public static fromInitialValue<T> (
-		initialValue: T
-	): MutableReactiveValue<T>{
+	public static fromInitialValue<T>(initialValue: T): MutableReactiveValue<T> {
 		return new ReactiveValueImpl(initialValue);
 	}
 
 	/** Returns a `ReactiveValue` that is **known** will never change. */
-	public static fromImmutable<T> (
-		value: T
-	): ReactiveValue<T>{
+	public static fromImmutable<T>(value: T): ReactiveValue<T> {
 		return {
 			get: () => value,
 			onUpdate: noOpSetUpdateListener,
-			onUpdateAndNow: callback => {
+			onUpdateAndNow: (callback) => {
 				callback(value);
 				return noOpUpdateListenerResult;
 			},
@@ -75,11 +70,14 @@ export abstract class ReactiveValue<T> {
 	 * `callback` is called whenever any of `sourceValues` are updated and initially to
 	 * set the initial value of the result.
 	 */
-	public static fromCallback<T> (
-		callback: ()=>T, sourceValues: ReactiveValue<any>[]
-	): ReactiveValue<T>{
+	public static fromCallback<T>(
+		callback: () => T,
+		sourceValues: ReactiveValue<any>[],
+	): ReactiveValue<T> {
 		const result = new ReactiveValueImpl(callback());
-		const resultRef = (window as any).WeakRef ? new (window as any).WeakRef(result) : { deref: () => result };
+		const resultRef = (window as any).WeakRef
+			? new (window as any).WeakRef(result)
+			: { deref: () => result };
 
 		for (const value of sourceValues) {
 			const listener = value.onUpdate(() => {
@@ -102,38 +100,36 @@ export abstract class ReactiveValue<T> {
 	 *
 	 * If `inverseMap` is `undefined`, the result is a read-only view.
 	 */
-	public static map<A, B> (
+	public static map<A, B>(
 		source: ReactiveValue<A>,
-		map: (a: A)=>B,
+		map: (a: A) => B,
 		inverseMap?: undefined,
 	): ReactiveValue<B>;
-
 
 	/**
 	 * Returns a reactive value derived from a single `source`.
 	 */
-	public static map<A, B> (
+	public static map<A, B>(
 		source: ReactiveValue<A>,
-		map: (a: A)=>B,
-		inverseMap: (b: B)=>A,
+		map: (a: A) => B,
+		inverseMap: (b: B) => A,
 	): MutableReactiveValue<B>;
 
-
-	public static map<A, B> (
+	public static map<A, B>(
 		source: MutableReactiveValue<A>,
-		map: (a: A)=>B,
-		inverseMap: ((b: B)=>A)|undefined,
-	): ReactiveValue<B>|MutableReactiveValue<B>{
+		map: (a: A) => B,
+		inverseMap: ((b: B) => A) | undefined,
+	): ReactiveValue<B> | MutableReactiveValue<B> {
 		const result = ReactiveValue.fromInitialValue(map(source.get()));
 
 		let expectedResultValue = result.get();
-		source.onUpdate(newValue => {
+		source.onUpdate((newValue) => {
 			expectedResultValue = map(newValue);
 			result.set(expectedResultValue);
 		});
 
 		if (inverseMap) {
-			result.onUpdate(newValue => {
+			result.onUpdate((newValue) => {
 				// Prevent infinite loops if inverseMap is not a true
 				// inverse.
 				if (newValue !== expectedResultValue) {
@@ -154,17 +150,17 @@ export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 	 */
 	public abstract set(newValue: T): void;
 
-	public static fromProperty<SourceType extends object, Name extends keyof SourceType> (
+	public static fromProperty<SourceType extends object, Name extends keyof SourceType>(
 		sourceValue: MutableReactiveValue<SourceType>,
 		propertyName: Name,
-	): MutableReactiveValue<SourceType[Name]>{
-		const child = ReactiveValue.fromInitialValue(
-			sourceValue.get()[propertyName]
-		);
-		const childRef = (window as any).WeakRef ? new (window as any).WeakRef(child) : { deref: () => child };
+	): MutableReactiveValue<SourceType[Name]> {
+		const child = ReactiveValue.fromInitialValue(sourceValue.get()[propertyName]);
+		const childRef = (window as any).WeakRef
+			? new (window as any).WeakRef(child)
+			: { deref: () => child };
 
 		// When the source is updated...
-		const sourceListener = sourceValue.onUpdate(newValue => {
+		const sourceListener = sourceValue.onUpdate((newValue) => {
 			const childValue = childRef.deref();
 
 			if (childValue) {
@@ -178,7 +174,7 @@ export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 
 		// When the child is updated, also apply the update to the
 		// parent.
-		child.onUpdate(newValue => {
+		child.onUpdate((newValue) => {
 			sourceValue.set({
 				...sourceValue.get(),
 				[propertyName]: newValue,
@@ -192,7 +188,7 @@ export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 // @internal
 class ReactiveValueImpl<T> extends MutableReactiveValue<T> {
 	#value: T;
-	#onUpdateListeners: Array<(value: T)=>void>;
+	#onUpdateListeners: Array<(value: T) => void>;
 
 	public constructor(initialValue: T) {
 		super();
@@ -217,7 +213,7 @@ class ReactiveValueImpl<T> extends MutableReactiveValue<T> {
 		return this.#value;
 	}
 
-	public onUpdate(listener: (value: T)=>void) {
+	public onUpdate(listener: (value: T) => void) {
 		// **Note**: If memory is a concern, listeners should avoid referencing this
 		// reactive value directly. Doing so allows the value to be garbage collected when
 		// no longer referenced.
@@ -226,18 +222,17 @@ class ReactiveValueImpl<T> extends MutableReactiveValue<T> {
 
 		return {
 			remove: () => {
-				this.#onUpdateListeners = this.#onUpdateListeners.filter(otherListener => {
+				this.#onUpdateListeners = this.#onUpdateListeners.filter((otherListener) => {
 					return otherListener !== listener;
 				});
 			},
 		};
 	}
 
-	public onUpdateAndNow(callback: (value: T)=>void) {
+	public onUpdateAndNow(callback: (value: T) => void) {
 		callback(this.get());
 		return this.onUpdate(callback);
 	}
 }
-
 
 export default ReactiveValue;

@@ -1,4 +1,3 @@
-
 ```ts,runnable
 import { Editor, ImageComponent, Mat33 } from 'js-draw';
 const editor = new Editor(document.body);

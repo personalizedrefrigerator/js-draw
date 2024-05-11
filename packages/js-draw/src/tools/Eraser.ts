@@ -25,12 +25,11 @@ export interface InitialEraserOptions {
 }
 
 export default class Eraser extends BaseTool {
-	private lastPoint: Point2|null = null;
+	private lastPoint: Point2 | null = null;
 	private isFirstEraseEvt: boolean = true;
 	private thickness: number;
 	private thicknessValue: MutableReactiveValue<number>;
 	private modeValue: MutableReactiveValue<EraserMode>;
-
 
 	private toRemove: AbstractComponent[];
 	private toAdd: AbstractComponent[];
@@ -39,13 +38,17 @@ export default class Eraser extends BaseTool {
 	private eraseCommands: Erase[] = [];
 	private addCommands: Command[] = [];
 
-	public constructor(private editor: Editor, description: string, options?: InitialEraserOptions) {
+	public constructor(
+		private editor: Editor,
+		description: string,
+		options?: InitialEraserOptions,
+	) {
 		super(editor.notifier, description);
 
 		this.thickness = options?.thickness ?? 10;
 
 		this.thicknessValue = ReactiveValue.fromInitialValue(this.thickness);
-		this.thicknessValue.onUpdate(value => {
+		this.thicknessValue.onUpdate((value) => {
 			this.thickness = value;
 
 			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
@@ -54,7 +57,7 @@ export default class Eraser extends BaseTool {
 			});
 		});
 		this.modeValue = ReactiveValue.fromInitialValue(options?.mode ?? EraserMode.FullStroke);
-		this.modeValue.onUpdate(_value => {
+		this.modeValue.onUpdate((_value) => {
 			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
 				kind: EditorEventType.ToolUpdated,
 				tool: this,
@@ -82,7 +85,9 @@ export default class Eraser extends BaseTool {
 			fill: Color4.transparent,
 			stroke: { width: size / 10, color: Color4.gray },
 		};
-		renderer.drawPath(pathToRenderable(Path.fromConvexHullOf([...rect.corners, ...rect2.corners]), fill));
+		renderer.drawPath(
+			pathToRenderable(Path.fromConvexHullOf([...rect.corners, ...rect2.corners]), fill),
+		);
 	}
 
 	/**
@@ -110,21 +115,23 @@ export default class Eraser extends BaseTool {
 		const line = new LineSegment2(this.lastPoint!, currentPoint);
 		const region = Rect2.union(line.bbox, eraserRect);
 
-		const intersectingElems = this.editor.image.getElementsIntersectingRegion(region).filter(component => {
-			return component.intersects(line) || component.intersectsRect(eraserRect);
-		});
+		const intersectingElems = this.editor.image
+			.getElementsIntersectingRegion(region)
+			.filter((component) => {
+				return component.intersects(line) || component.intersectsRect(eraserRect);
+			});
 
 		// Only erase components that could be selected (and thus interacted with)
 		// by the user.
-		const eraseableElems = intersectingElems.filter(elem => elem.isSelectable());
+		const eraseableElems = intersectingElems.filter((elem) => elem.isSelectable());
 
 		if (this.modeValue.get() === EraserMode.FullStroke) {
 			// Remove any intersecting elements.
 			this.toRemove.push(...eraseableElems);
 
 			// Create new Erase commands for the now-to-be-erased elements and apply them.
-			const newPartialCommands = eraseableElems.map(elem => new Erase([ elem ]));
-			newPartialCommands.forEach(cmd => cmd.apply(this.editor));
+			const newPartialCommands = eraseableElems.map((elem) => new Erase([elem]));
+			newPartialCommands.forEach((cmd) => cmd.apply(this.editor));
 			this.eraseCommands.push(...newPartialCommands);
 		} else {
 			const toErase: AbstractComponent[] = [];
@@ -146,28 +153,26 @@ export default class Eraser extends BaseTool {
 
 				// Join the current and previous rectangles so that points between events are also
 				// erased.
-				const erasePath = Path.fromConvexHullOf([
-					...eraserRect.corners, ...this.getEraserRect(this.lastPoint ?? currentPoint).corners
-				].map(p => this.editor.viewport.roundPoint(p)));
-
-				toAdd.push(
-					...targetElem.withRegionErased(
-						erasePath,
-						this.editor.viewport,
-					)
+				const erasePath = Path.fromConvexHullOf(
+					[
+						...eraserRect.corners,
+						...this.getEraserRect(this.lastPoint ?? currentPoint).corners,
+					].map((p) => this.editor.viewport.roundPoint(p)),
 				);
+
+				toAdd.push(...targetElem.withRegionErased(erasePath, this.editor.viewport));
 			}
 
 			const eraseCommand = new Erase(toErase);
-			const newAddCommands = toAdd.map(elem => EditorImage.addElement(elem));
+			const newAddCommands = toAdd.map((elem) => EditorImage.addElement(elem));
 
 			eraseCommand.apply(this.editor);
-			newAddCommands.forEach(command => command.apply(this.editor));
+			newAddCommands.forEach((command) => command.apply(this.editor));
 
 			const finalToErase = [];
 			for (const item of toErase) {
 				if (this.toAdd.includes(item)) {
-					this.toAdd = this.toAdd.filter(i => i !== item);
+					this.toAdd = this.toAdd.filter((i) => i !== item);
 				} else {
 					finalToErase.push(item);
 				}
@@ -209,16 +214,16 @@ export default class Eraser extends BaseTool {
 		const commands: Command[] = [];
 
 		if (this.addCommands.length > 0) {
-			this.addCommands.forEach(cmd => cmd.unapply(this.editor));
+			this.addCommands.forEach((cmd) => cmd.unapply(this.editor));
 
-			commands.push(...this.toAdd.map(a => EditorImage.addElement(a)));
+			commands.push(...this.toAdd.map((a) => EditorImage.addElement(a)));
 
 			this.addCommands = [];
 		}
 
 		if (this.eraseCommands.length > 0) {
 			// Undo commands for each individual component and unite into a single command.
-			this.eraseCommands.forEach(cmd => cmd.unapply(this.editor));
+			this.eraseCommands.forEach((cmd) => cmd.unapply(this.editor));
 			this.eraseCommands = [];
 
 			const command = new Erase(this.toRemove);
@@ -235,22 +240,21 @@ export default class Eraser extends BaseTool {
 	}
 
 	public override onGestureCancel(): void {
-		this.addCommands.forEach(cmd => cmd.unapply(this.editor));
-		this.eraseCommands.forEach(cmd => cmd.unapply(this.editor));
+		this.addCommands.forEach((cmd) => cmd.unapply(this.editor));
+		this.eraseCommands.forEach((cmd) => cmd.unapply(this.editor));
 		this.eraseCommands = [];
 		this.addCommands = [];
 		this.clearPreview();
 	}
 
-
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		const shortcuts = this.editor.shortcuts;
 
-		let newThickness: number|undefined;
+		let newThickness: number | undefined;
 		if (shortcuts.matchesShortcut(decreaseSizeKeyboardShortcutId, event)) {
-			newThickness = this.getThickness() * 2/3;
+			newThickness = (this.getThickness() * 2) / 3;
 		} else if (shortcuts.matchesShortcut(increaseSizeKeyboardShortcutId, event)) {
-			newThickness = this.getThickness() * 3/2;
+			newThickness = (this.getThickness() * 3) / 2;
 		}
 
 		if (newThickness !== undefined) {

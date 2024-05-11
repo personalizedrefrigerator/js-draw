@@ -1,11 +1,12 @@
-
-
 import {
-	ScriptTarget, ModuleKind, CompilerOptions, LanguageServiceHost, createLanguageService, ScriptSnapshot
+	ScriptTarget,
+	ModuleKind,
+	CompilerOptions,
+	LanguageServiceHost,
+	createLanguageService,
+	ScriptSnapshot,
 } from 'typescript';
 import { resolve } from 'path';
-
-
 
 const compilerOptions: CompilerOptions = {
 	noEmitOnError: false,
@@ -34,8 +35,8 @@ const typeScriptToJS = (source: string) => {
 	// See https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API
 	const servicesHost: LanguageServiceHost = {
 		getScriptFileNames: () => ['./index.ts'],
-		getScriptVersion: _script => '1',
-		getScriptSnapshot: fileName => {
+		getScriptVersion: (_script) => '1',
+		getScriptSnapshot: (fileName) => {
 			if (!fileExists(fileName)) return undefined;
 
 			return ScriptSnapshot.fromString(files[resolve(cwd, fileName)]);
@@ -44,16 +45,15 @@ const typeScriptToJS = (source: string) => {
 			return compilerOptions;
 		},
 
-
 		fileExists,
-		readFile: fileName => {
+		readFile: (fileName) => {
 			if (fileExists(fileName)) {
 				return files[resolve(cwd, fileName)];
 			}
 			return undefined;
 		},
 		getCurrentDirectory: () => cwd,
-		readDirectory: dirPath => directoryExists(dirPath) ? Object.values(files) : [],
+		readDirectory: (dirPath) => (directoryExists(dirPath) ? Object.values(files) : []),
 		directoryExists,
 		getDefaultLibFileName: () => './index.ts',
 	};
@@ -63,8 +63,8 @@ const typeScriptToJS = (source: string) => {
 
 	// Return the first JavaScript file
 	const outputJS = output.outputFiles
-		.filter(file => file.name.endsWith('.js'))
-		.map(file => file.text);
+		.filter((file) => file.name.endsWith('.js'))
+		.map((file) => file.text);
 	return outputJS[0];
 };
 

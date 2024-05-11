@@ -12,7 +12,7 @@ export class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
 		public readonly p0: Point2,
 		public readonly p1: Point2,
-		public readonly p2: Point2
+		public readonly p2: Point2,
 	) {
 		super();
 	}
@@ -78,7 +78,7 @@ export class QuadraticBezier extends BezierJSWrapper {
 
 	/** @returns an overestimate of this shape's bounding box. */
 	public override getLooseBoundingBox(): Rect2 {
-		return Rect2.bboxOf([ this.p0, this.p1, this.p2 ]);
+		return Rect2.bboxOf([this.p0, this.p1, this.p2]);
 	}
 
 	/**
@@ -124,14 +124,9 @@ export class QuadraticBezier extends BezierJSWrapper {
 		const f2ndDerivAtZero = b;
 		const f3rdDerivAtZero = 2 * c;
 
-
 		// Using the first few terms of a Maclaurin series to approximate f'(t),
 		// f'(t) ≈ f'(0) + t f''(0) + t² f'''(0) / 2
-		let [ min1, min2 ] = solveQuadratic(
-			f3rdDerivAtZero / 2,
-			f2ndDerivAtZero,
-			fDerivAtZero,
-		);
+		let [min1, min2] = solveQuadratic(f3rdDerivAtZero / 2, f2ndDerivAtZero, fDerivAtZero);
 
 		// If the quadratic has no solutions, approximate.
 		if (isNaN(min1)) {
@@ -153,7 +148,7 @@ export class QuadraticBezier extends BezierJSWrapper {
 	}
 
 	public override getPoints() {
-		return [ this.p0, this.p1, this.p2 ];
+		return [this.p0, this.p1, this.p2];
 	}
 }
 export default QuadraticBezier;

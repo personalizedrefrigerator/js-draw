@@ -32,7 +32,7 @@ export const textStyleFromJSON = (json: any) => {
 		json = JSON.parse(json);
 	}
 
-	if (typeof(json.fontFamily) !== 'string') {
+	if (typeof json.fontFamily !== 'string') {
 		throw new Error('Serialized textStyle missing string fontFamily attribute!');
 	}
 

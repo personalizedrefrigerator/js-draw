@@ -5,13 +5,13 @@
 	"printWidth": 100,
 	"useTabs": true,
 	"bracketSameLine": true,
-  "bracketSpacing": true,
-  "overrides": [
-    {
-      "files": "README.md",
-      "options": {
-        "useTabs": false
-      }
-    }
-  ]
+	"bracketSpacing": true,
+	"overrides": [
+		{
+			"files": "README.md",
+			"options": {
+				"useTabs": false
+			}
+		}
+	]
 }

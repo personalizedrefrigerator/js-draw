@@ -1,5 +1,3 @@
-
-
 export enum MarkdownTokenType {
 	CodeDelim,
 	MathDelim,
@@ -54,8 +52,7 @@ const tokenizeMarkdown = (markdown: string) => {
 				extendToken(MarkdownTokenType.CodeDelim, char);
 
 				handled = true;
-			}
-			else if (char === '$') {
+			} else if (char === '$') {
 				// math
 				extendToken(MarkdownTokenType.MathDelim, char);
 
@@ -64,8 +61,7 @@ const tokenizeMarkdown = (markdown: string) => {
 				}
 
 				handled = true;
-			}
-			else if (char === '\\') {
+			} else if (char === '\\') {
 				// escape
 				escaped = true;
 

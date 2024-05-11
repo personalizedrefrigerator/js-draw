@@ -5,10 +5,13 @@ import AbstractRenderer from '../renderers/AbstractRenderer';
 import RenderingCache from './RenderingCache';
 import { CacheProps } from './types';
 
-type RenderAllocCallback = (renderer: DummyRenderer)=> void;
+type RenderAllocCallback = (renderer: DummyRenderer) => void;
 
 // Override any default test options with [cacheOptions]
-export const createCache = (onRenderAlloc?: RenderAllocCallback, cacheOptions?: Partial<CacheProps>) => {
+export const createCache = (
+	onRenderAlloc?: RenderAllocCallback,
+	cacheOptions?: Partial<CacheProps>,
+) => {
 	const editor = createEditor();
 
 	const cache = new RenderingCache({
@@ -25,11 +28,11 @@ export const createCache = (onRenderAlloc?: RenderAllocCallback, cacheOptions?: 
 		maxScale: 2,
 		minProportionalRenderTimePerCache: 0,
 		minProportionalRenderTimeToUseCache: 0,
-		...cacheOptions
+		...cacheOptions,
 	});
 
 	return {
 		cache,
-		editor
+		editor,
 	};
 };

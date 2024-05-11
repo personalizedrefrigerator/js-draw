@@ -19,7 +19,7 @@ class ImageWrapper {
 	private constructor(
 		private imageBase64Url: string,
 		private preview: HTMLImageElement,
-		private onUrlUpdate: ()=>void,
+		private onUrlUpdate: () => void,
 	) {
 		this.originalSrc = imageBase64Url;
 		preview.src = imageBase64Url;
@@ -31,7 +31,7 @@ class ImageWrapper {
 		this.onUrlUpdate();
 	}
 
-	public decreaseSize(resizeFactor: number = 3/4) {
+	public decreaseSize(resizeFactor: number = 3 / 4) {
 		const canvas = document.createElement('canvas');
 
 		canvas.width = this.preview.naturalWidth * resizeFactor;
@@ -42,8 +42,7 @@ class ImageWrapper {
 
 		// JPEG can be much smaller than PNG for the same image size. Prefer it if
 		// the image is already a JPEG.
-		const format =
-			this.originalSrc?.startsWith('data:image/jpeg;') ? 'image/jpeg' : 'image/png';
+		const format = this.originalSrc?.startsWith('data:image/jpeg;') ? 'image/jpeg' : 'image/png';
 		this.updateImageData(canvas.toDataURL(format));
 	}
 
@@ -62,7 +61,7 @@ class ImageWrapper {
 	public static fromSrcAndPreview(
 		initialBase64Src: string,
 		preview: HTMLImageElement,
-		onUrlUpdate: ()=>void,
+		onUrlUpdate: () => void,
 	) {
 		return new ImageWrapper(initialBase64Src, preview, onUrlUpdate);
 	}
@@ -70,9 +69,9 @@ class ImageWrapper {
 
 export default class InsertImageWidget extends BaseWidget {
 	private imagePreview: HTMLImageElement;
-	private image: ImageWrapper|null = null;
+	private image: ImageWrapper | null = null;
 
-	private selectedFiles: MutableReactiveValue<File[]>|null;
+	private selectedFiles: MutableReactiveValue<File[]> | null;
 	private imageAltTextInput: HTMLInputElement;
 	private statusView: HTMLElement;
 	private submitButton: HTMLButtonElement;
@@ -85,7 +84,7 @@ export default class InsertImageWidget extends BaseWidget {
 		// Make the dropdown showable
 		this.container.classList.add('dropdownShowable');
 
-		editor.notifier.on(EditorEventType.SelectionUpdated, event => {
+		editor.notifier.on(EditorEventType.SelectionUpdated, (event) => {
 			if (event.kind === EditorEventType.SelectionUpdated && this.isDropdownVisible()) {
 				this.updateInputs();
 			}
@@ -123,10 +122,7 @@ export default class InsertImageWidget extends BaseWidget {
 			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
 		);
 
-		const {
-			container: chooseImageRow,
-			selectedFiles,
-		} = makeFileInput(
+		const { container: chooseImageRow, selectedFiles } = makeFileInput(
 			this.localizationTable.chooseFile,
 			this.editor,
 			'image/*',
@@ -159,7 +155,7 @@ export default class InsertImageWidget extends BaseWidget {
 
 		this.submitButton.innerText = this.localizationTable.submit;
 
-		this.selectedFiles.onUpdateAndNow(async files => {
+		this.selectedFiles.onUpdateAndNow(async (files) => {
 			if (files.length === 0) {
 				this.image = null;
 				this.onImageDataUpdate();
@@ -170,8 +166,8 @@ export default class InsertImageWidget extends BaseWidget {
 
 			const image = files[0];
 
-			let data: string|null = null;
-			let errorMessage: string|null = null;
+			let data: string | null = null;
+			let errorMessage: string | null = null;
 
 			try {
 				data = await fileToBase64Url(image);
@@ -181,8 +177,8 @@ export default class InsertImageWidget extends BaseWidget {
 			}
 
 			if (data) {
-				this.image = ImageWrapper.fromSrcAndPreview(
-					data, this.imagePreview, () => this.onImageDataUpdate(),
+				this.image = ImageWrapper.fromSrcAndPreview(data, this.imagePreview, () =>
+					this.onImageDataUpdate(),
 				);
 			} else {
 				this.image = null;
@@ -201,7 +197,11 @@ export default class InsertImageWidget extends BaseWidget {
 		actionButtonRow.replaceChildren(this.submitButton);
 
 		container.replaceChildren(
-			chooseImageRow, altTextRow, this.imagePreview, this.statusView, actionButtonRow
+			chooseImageRow,
+			altTextRow,
+			this.imagePreview,
+			this.statusView,
+			actionButtonRow,
 		);
 
 		dropdown.replaceChildren(container);
@@ -244,9 +244,7 @@ export default class InsertImageWidget extends BaseWidget {
 		}
 
 		const sizeText = document.createElement('span');
-		sizeText.innerText = this.localizationTable.imageSize(
-			Math.round(size), units
-		);
+		sizeText.innerText = this.localizationTable.imageSize(Math.round(size), units);
 
 		// Add a button to allow decreasing the size of large images.
 		const decreaseSizeButton = document.createElement('button');
@@ -286,24 +284,22 @@ export default class InsertImageWidget extends BaseWidget {
 		resetInputs();
 
 		const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
-		const selectedObjects = selectionTools.map(tool => tool.getSelectedObjects()).flat();
+		const selectedObjects = selectionTools.map((tool) => tool.getSelectedObjects()).flat();
 
 		// Check: Is there a selected image that can be edited?
-		let editingImage: ImageComponent|null = null;
+		let editingImage: ImageComponent | null = null;
 		if (selectedObjects.length === 1 && selectedObjects[0] instanceof ImageComponent) {
 			editingImage = selectedObjects[0];
 
 			this.imageAltTextInput.value = editingImage.getAltText() ?? '';
-			this.image = ImageWrapper.fromSrcAndPreview(
-				editingImage.getURL(),
-				this.imagePreview,
-				() => this.onImageDataUpdate(),
+			this.image = ImageWrapper.fromSrcAndPreview(editingImage.getURL(), this.imagePreview, () =>
+				this.onImageDataUpdate(),
 			);
 
 			this.onImageDataUpdate();
 		} else if (selectedObjects.length > 0) {
 			// If not, clear the selection.
-			selectionTools.forEach(tool => tool.clearSelection());
+			selectionTools.forEach((tool) => tool.clearSelection());
 		}
 
 		// Show the submit button only when there is data to submit.
@@ -340,7 +336,7 @@ export default class InsertImageWidget extends BaseWidget {
 			this.hideDialog();
 
 			if (editingImage) {
-				const eraseCommand = new Erase([ editingImage ]);
+				const eraseCommand = new Erase([editingImage]);
 
 				// Try to preserve the original width
 				const originalTransform = editingImage.getTransformation();
@@ -349,16 +345,18 @@ export default class InsertImageWidget extends BaseWidget {
 				const newWidth = component.getBBox().transformedBoundingBox(originalTransform).width || 1;
 				const widthAdjustTransform = Mat33.scaling2D(originalWidth / newWidth);
 
-				await this.editor.dispatch(uniteCommands([
-					EditorImage.addElement(component),
-					component.transformBy(originalTransform.rightMul(widthAdjustTransform)),
-					component.setZIndex(editingImage.getZIndex()),
-					eraseCommand,
-				]));
+				await this.editor.dispatch(
+					uniteCommands([
+						EditorImage.addElement(component),
+						component.transformBy(originalTransform.rightMul(widthAdjustTransform)),
+						component.setZIndex(editingImage.getZIndex()),
+						eraseCommand,
+					]),
+				);
 
-				selectionTools[0]?.setSelection([ component ]);
+				selectionTools[0]?.setSelection([component]);
 			} else {
-				await this.editor.addAndCenterComponents([ component ]);
+				await this.editor.addAndCenterComponents([component]);
 			}
 		};
 	}

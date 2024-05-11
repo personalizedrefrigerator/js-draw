@@ -1,20 +1,19 @@
-
 import { Mat33, Vec2 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import DummyRenderer from './DummyRenderer';
 
 const makeRenderer = (): [DummyRenderer, Viewport] => {
 	const viewport = new Viewport(() => {});
-	return [ new DummyRenderer(viewport), viewport ];
+	return [new DummyRenderer(viewport), viewport];
 };
 
 describe('DummyRenderer', () => {
 	it('should correctly calculate the size of a pixel on the screen', () => {
-		const [ renderer, viewport ] = makeRenderer();
+		const [renderer, viewport] = makeRenderer();
 		viewport.updateScreenSize(Vec2.of(100, 100));
 		viewport.resetTransform(Mat33.identity);
 
-		expect(1/viewport.getScaleFactor()).toBe(1);
+		expect(1 / viewport.getScaleFactor()).toBe(1);
 		expect(renderer.getSizeOfCanvasPixelOnScreen()).toBe(1);
 
 		// Updating the translation matrix shouldn't affect the size of a pixel on the

@@ -17,7 +17,7 @@ export const load = (app: Application) => {
 		// Ref https://github.com/Gerrit0/typedoc-plugin-mdn-links/blob/main/src/index.ts
 		const moduleSource = declaration.moduleSource ?? '';
 		if (moduleSource.startsWith('@js-draw/')) {
-			const name = declaration.symbolReference?.path?.map(path => path.path).join('.');
+			const name = declaration.symbolReference?.path?.map((path) => path.path).join('.');
 
 			// We can't find the symbol if it's name is "default"
 			if (name && name !== 'default') {

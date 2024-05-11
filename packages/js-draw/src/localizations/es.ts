@@ -44,9 +44,13 @@ const localization: EditorLocalization = {
 	paste: 'Pegar',
 	closeSidebar: (toolName) => `Close sidebar for ${toolName}`,
 	dropdownShown: (toolName) => `Menú por ${toolName} es visible`,
-	dropdownHidden: (toolName) => { return `Menú por ${toolName} fue ocultado`; },
+	dropdownHidden: (toolName) => {
+		return `Menú por ${toolName} fue ocultado`;
+	},
 	zoomLevel: (zoomPercent) => `Zoom: ${zoomPercent}%`,
-	colorChangedAnnouncement: (color) => { return `Color fue cambiado a ${color}`; },
+	colorChangedAnnouncement: (color) => {
+		return `Color fue cambiado a ${color}`;
+	},
 	imageSize: (size, units) => `Tamaño del imagen: ${size} ${units}`,
 	imageLoadError: (message) => `Error cargando imagen: ${message}`,
 	penTool: (penId) => `Lapiz ${penId}`,
@@ -63,7 +67,7 @@ const localization: EditorLocalization = {
 	closeDialog: 'Cerrar',
 	anyDevicePanning: 'Mover la pantalla con todo dispotivo',
 	copied: (count) => `${count} cosas fueron copiados`,
-	pasted: (count) => count === 1 ? 'Pegado' : `${count} cosas fueron pegados`,
+	pasted: (count) => (count === 1 ? 'Pegado' : `${count} cosas fueron pegados`),
 	toolEnabledAnnouncement: (toolName) => `${toolName} fue activado`,
 	toolDisabledAnnouncement: (toolName) => `${toolName} fue desactivado`,
 	resizeOutputCommand: (newSize) => `Tamaño de imagen fue cambiado a ${newSize.w}x${newSize.h}`,

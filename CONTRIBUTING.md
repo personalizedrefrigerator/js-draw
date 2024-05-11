@@ -1,6 +1,7 @@
 # Building and testing
 
 `js-draw` uses `npm` as its build system and to manage dependencies. Thus, to install dependencies and build the project for the first time,
+
 ```bash
 # After cloning the project,
 bash$ cd path/to/js-draw
@@ -21,6 +22,7 @@ bash$ npm run doc
 ## Running/building the example projects
 
 First, switch to the `docs` directory:
+
 ```console
 bash$ cd path/to/js-draw/
 bash$ cd docs/
@@ -29,6 +31,7 @@ bash$ cd docs/
 Next, `cd` to one of the example projects.
 
 ### Main example project
+
 ```bash
 bash$ cd docs/demo/
 
@@ -43,6 +46,7 @@ bash$ npm run watch
 ```
 
 In a separate terminal, run a local web-server. Use the web-server to open the `example.html` file.
+
 ```bash
 bash$ python3 -m http.server
 ```
@@ -57,6 +61,7 @@ bash$ npm run watch
 ```
 
 and in a separate terminal,
+
 ```bash
 # Start the example project's server
 bash$ python3 server.py
@@ -82,6 +87,7 @@ with the exception that TypeDoc-style comments (`/** */`) are encouraged for doc
 Note that `//`-style comments can also be used for documentation.
 
 # Development FAQ
+
 ## How can I test changes to curve fitting for strokes?
 
 As of the time of this writing, curve fitting related code lives in [`StrokeSmoother.ts`](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/components/util/).
@@ -89,8 +95,10 @@ As of the time of this writing, curve fitting related code lives in [`StrokeSmoo
 Here's one possible workflow for making and testing changes:
 
 **Setup**:
+
 1. Run `npm install` in the project's root directory (if you haven't already)
 2. Start the compiler in `watch` mode in both `packages/js-draw/` and `docs/debugging/input-system-tester`:
+
 ```bash
 # Shell #1
 $ cd packages/js-draw
@@ -100,7 +108,9 @@ $ npm run watch
 $ cd docs/debugging/input-system-tester
 $ npm run watch
 ```
+
 3. Start a development server in the `docs` directory
+
 ```bash
 $ cd docs
 $ python3 -m http.server
@@ -112,5 +122,5 @@ $ python3 -m http.server
 5. Open https://js-draw.web.app/debugging/input-system-tester/ in a web browser
 
 Additional notes:
-- The `debugging/stroke-logging` utility allows pasting an input log into a textbox and playing back the input events, which may also be helpful here. This can be used to see how changes to `StrokeSmoother.ts` change the rendered output, for the same input.
 
+- The `debugging/stroke-logging` utility allows pasting an input log into a textbox and playing back the input events, which may also be helpful here. This can be used to see how changes to `StrokeSmoother.ts` change the rendered output, for the same input.

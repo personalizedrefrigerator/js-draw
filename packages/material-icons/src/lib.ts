@@ -1,4 +1,3 @@
-
 /**
  * # `@js-draw/material-icons`
  *
@@ -118,9 +117,12 @@ class MaterialIconProvider extends IconProvider {
 		svg.setAttribute('viewBox', '0 -880 960 1000');
 
 		const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-		line.setAttribute('d', `
+		line.setAttribute(
+			'd',
+			`
 			M110,-25 L850,-25
-		`);
+		`,
+		);
 		line.style.stroke = style.color.toHexString();
 		line.style.strokeWidth = `${Math.sqrt(style.thickness) * 20}`;
 

@@ -12,22 +12,23 @@ import getUniquePointerId from './getUniquePointerId';
  */
 const sendPenEvent = (
 	editor: Editor,
-	eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+	eventType: InputEvtType.PointerDownEvt | InputEvtType.PointerMoveEvt | InputEvtType.PointerUpEvt,
 	point: Point2,
 
-	allPointers?: Pointer[]
+	allPointers?: Pointer[],
 ) => {
 	const id = getUniquePointerId(allPointers ?? []);
 
 	const mainPointer = Pointer.ofCanvasPoint(
-		point, eventType !== InputEvtType.PointerUpEvt, editor.viewport, id
+		point,
+		eventType !== InputEvtType.PointerUpEvt,
+		editor.viewport,
+		id,
 	);
 
 	editor.toolController.dispatchInputEvent({
 		kind: eventType,
-		allPointers: allPointers ?? [
-			mainPointer,
-		],
+		allPointers: allPointers ?? [mainPointer],
 		current: mainPointer,
 	});
 

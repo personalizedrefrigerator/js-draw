@@ -1,5 +1,18 @@
 import { EditorNotifier, EditorEventType } from '../types';
-import { WheelEvt, PointerEvt, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent, InputEvt, InputEvtType, GestureCancelEvt, PointerDownEvt, PointerMoveEvt, PointerUpEvt } from '../inputEvents';
+import {
+	WheelEvt,
+	PointerEvt,
+	KeyPressEvent,
+	KeyUpEvent,
+	PasteEvent,
+	CopyEvent,
+	InputEvt,
+	InputEvtType,
+	GestureCancelEvt,
+	PointerDownEvt,
+	PointerMoveEvt,
+	PointerUpEvt,
+} from '../inputEvents';
 import ToolEnabledGroup from './ToolEnabledGroup';
 import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
@@ -7,15 +20,18 @@ import { DispatcherEventListener } from '../EventDispatcher';
 
 export default abstract class BaseTool implements InputEventListener {
 	#enabled: MutableReactiveValue<boolean>;
-	#group: ToolEnabledGroup|null = null;
+	#group: ToolEnabledGroup | null = null;
 
-	#inputMapper: InputMapper|null = null;
+	#inputMapper: InputMapper | null = null;
 
-	#readOnlyEditorChangeListener: DispatcherEventListener|null = null;
+	#readOnlyEditorChangeListener: DispatcherEventListener | null = null;
 
-	protected constructor(private notifier: EditorNotifier, public readonly description: string) {
+	protected constructor(
+		private notifier: EditorNotifier,
+		public readonly description: string,
+	) {
 		this.#enabled = ReactiveValue.fromInitialValue(true);
-		this.#enabled.onUpdate(enabled => {
+		this.#enabled.onUpdate((enabled) => {
 			// Ensure that at most one tool in the group is enabled.
 			if (enabled) {
 				this.#group?.notifyEnabled(this);
@@ -32,16 +48,15 @@ export default abstract class BaseTool implements InputEventListener {
 		});
 	}
 
-
 	/** Override this to allow this tool to be enabled in a read-only editor */
 	public canReceiveInputInReadOnlyEditor() {
 		return false;
 	}
 
-	public setInputMapper(mapper: InputMapper|null) {
+	public setInputMapper(mapper: InputMapper | null) {
 		this.#inputMapper = mapper;
 		if (mapper) {
-			mapper.setEmitListener(event => this.dispatchEventToCallback(event));
+			mapper.setEmitListener((event) => this.dispatchEventToCallback(event));
 		}
 	}
 
@@ -52,29 +67,29 @@ export default abstract class BaseTool implements InputEventListener {
 	private dispatchEventToCallback(event: InputEvt) {
 		let exhaustivenessCheck: never;
 		switch (event.kind) {
-		case InputEvtType.PointerDownEvt:
-			return this.onPointerDown(event);
-		case InputEvtType.PointerMoveEvt:
-			this.onPointerMove(event);
-			break;
-		case InputEvtType.PointerUpEvt:
-			return this.onPointerUp(event) ?? false;
-		case InputEvtType.GestureCancelEvt:
-			this.onGestureCancel(event);
-			break;
-		case InputEvtType.WheelEvt:
-			return this.onWheel(event);
-		case InputEvtType.KeyPressEvent:
-			return this.onKeyPress(event);
-		case InputEvtType.KeyUpEvent:
-			return this.onKeyUp(event);
-		case InputEvtType.CopyEvent:
-			return this.onCopy(event);
-		case InputEvtType.PasteEvent:
-			return this.onPaste(event);
-		default:
-			exhaustivenessCheck = event;
-			return exhaustivenessCheck;
+			case InputEvtType.PointerDownEvt:
+				return this.onPointerDown(event);
+			case InputEvtType.PointerMoveEvt:
+				this.onPointerMove(event);
+				break;
+			case InputEvtType.PointerUpEvt:
+				return this.onPointerUp(event) ?? false;
+			case InputEvtType.GestureCancelEvt:
+				this.onGestureCancel(event);
+				break;
+			case InputEvtType.WheelEvt:
+				return this.onWheel(event);
+			case InputEvtType.KeyPressEvent:
+				return this.onKeyPress(event);
+			case InputEvtType.KeyUpEvent:
+				return this.onKeyUp(event);
+			case InputEvtType.CopyEvent:
+				return this.onCopy(event);
+			case InputEvtType.PasteEvent:
+				return this.onPaste(event);
+			default:
+				exhaustivenessCheck = event;
+				return exhaustivenessCheck;
 		}
 		return true;
 	}
@@ -91,8 +106,10 @@ export default abstract class BaseTool implements InputEventListener {
 	 * Returns true iff the tool handled the event and thus should receive additional
 	 * events.
 	 */
-	public onPointerDown(_event: PointerDownEvt): boolean { return false; }
-	public onPointerMove(_event: PointerMoveEvt) { }
+	public onPointerDown(_event: PointerDownEvt): boolean {
+		return false;
+	}
+	public onPointerMove(_event: PointerMoveEvt) {}
 
 	/**
 	 * Returns true iff there are additional pointers down and the tool should
@@ -100,9 +117,9 @@ export default abstract class BaseTool implements InputEventListener {
 	 *
 	 * For most purposes, this should return `false` or nothing.
 	 */
-	public onPointerUp(_event: PointerUpEvt): boolean|void { }
+	public onPointerUp(_event: PointerUpEvt): boolean | void {}
 
-	public onGestureCancel(_event: GestureCancelEvt) { }
+	public onGestureCancel(_event: GestureCancelEvt) {}
 
 	public onWheel(_event: WheelEvt): boolean {
 		return false;
@@ -167,7 +184,7 @@ export default abstract class BaseTool implements InputEventListener {
 		this.#group = group;
 	}
 
-	public getToolGroup(): ToolEnabledGroup|null {
+	public getToolGroup(): ToolEnabledGroup | null {
 		if (this.#group) {
 			return this.#group;
 		}
@@ -183,4 +200,3 @@ export default abstract class BaseTool implements InputEventListener {
 		this.#group = null;
 	}
 }
-

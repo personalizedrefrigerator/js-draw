@@ -12,7 +12,7 @@ describe('InputPipeline', () => {
 		const mockEmitListener = jest.fn();
 		pipeline.setEmitListener(mockEmitListener);
 
-		const testCopyEvent: CopyEvent = { kind: InputEvtType.CopyEvent, setData: ()=>{} };
+		const testCopyEvent: CopyEvent = { kind: InputEvtType.CopyEvent, setData: () => {} };
 		pipeline.onEvent(testCopyEvent);
 		expect(mockEmitListener).toHaveBeenCalledTimes(1);
 		expect(mockEmitListener).toHaveBeenCalledWith(testCopyEvent);

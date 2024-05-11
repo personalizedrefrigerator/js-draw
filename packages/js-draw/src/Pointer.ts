@@ -22,7 +22,7 @@ export default class Pointer {
 		// surface.
 		public readonly canvasPos: Point2,
 
-		public readonly pressure: number|null,
+		public readonly pressure: number | null,
 		public readonly isPrimary: boolean,
 		public readonly down: boolean,
 
@@ -33,8 +33,7 @@ export default class Pointer {
 
 		// Numeric timestamp (milliseconds, as from `performance.now()`).
 		public readonly timeStamp: number,
-	) {
-	}
+	) {}
 
 	/**
 	 * Snaps this pointer to the nearest grid point (rounds the coordinates of this
@@ -86,7 +85,7 @@ export default class Pointer {
 			this.down,
 			this.device,
 			this.id,
-			timeStamp
+			timeStamp,
 		);
 	}
 
@@ -111,7 +110,12 @@ export default class Pointer {
 
 	// Creates a Pointer from a DOM event. If `relativeTo` is given, (0, 0) in screen coordinates is
 	// considered the top left of `relativeTo`.
-	public static ofEvent(evt: PointerEvent, isDown: boolean, viewport: Viewport, relativeTo?: HTMLElement): Pointer {
+	public static ofEvent(
+		evt: PointerEvent,
+		isDown: boolean,
+		viewport: Viewport,
+		relativeTo?: HTMLElement,
+	): Pointer {
 		let screenPos = Vec2.of(evt.clientX, evt.clientY);
 		if (relativeTo) {
 			const bbox = relativeTo.getBoundingClientRect();
@@ -119,9 +123,9 @@ export default class Pointer {
 		}
 
 		const pointerTypeToDevice: Record<string, PointerDevice> = {
-			'mouse': PointerDevice.PrimaryButtonMouse,
-			'pen': PointerDevice.Pen,
-			'touch': PointerDevice.Touch,
+			mouse: PointerDevice.PrimaryButtonMouse,
+			pen: PointerDevice.Pen,
+			touch: PointerDevice.Touch,
 		};
 
 		let device = pointerTypeToDevice[evt.pointerType] ?? PointerDevice.Other;
@@ -164,22 +168,13 @@ export default class Pointer {
 		id: number = 0,
 		device: PointerDevice = PointerDevice.Pen,
 		isPrimary: boolean = true,
-		pressure: number|null = null,
-		timeStamp: number|null = null,
+		pressure: number | null = null,
+		timeStamp: number | null = null,
 	): Pointer {
 		const screenPos = viewport.canvasToScreen(canvasPos);
 		timeStamp ??= performance.now();
 
-		return new Pointer(
-			screenPos,
-			canvasPos,
-			pressure,
-			isPrimary,
-			isDown,
-			device,
-			id,
-			timeStamp
-		);
+		return new Pointer(screenPos, canvasPos, pressure, isPrimary, isDown, device, id, timeStamp);
 	}
 
 	// Create a new Pointer from a point on the screen.
@@ -191,21 +186,12 @@ export default class Pointer {
 		id: number = 0,
 		device: PointerDevice = PointerDevice.Pen,
 		isPrimary: boolean = true,
-		pressure: number|null = null,
-		timeStamp: number|null = null,
+		pressure: number | null = null,
+		timeStamp: number | null = null,
 	): Pointer {
 		const canvasPos = viewport.screenToCanvas(screenPos);
 		timeStamp ??= performance.now();
 
-		return new Pointer(
-			screenPos,
-			canvasPos,
-			pressure,
-			isPrimary,
-			isDown,
-			device,
-			id,
-			timeStamp
-		);
+		return new Pointer(screenPos, canvasPos, pressure, isPrimary, isDown, device, id, timeStamp);
 	}
 }

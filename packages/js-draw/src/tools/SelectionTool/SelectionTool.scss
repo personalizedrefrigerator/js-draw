@@ -1,4 +1,3 @@
-
 .selection-tool-selection-background {
 	background-color: var(--selection-background-color);
 	opacity: 0.5;
@@ -96,7 +95,8 @@
 	//
 	// This is in addition to the overlay container, which needs zero height to prevent
 	// other overlay containers from being affected by its size.
-	&, .selection-tool-selection-outer-container {
+	&,
+	.selection-tool-selection-outer-container {
 		height: 0;
 		overflow: visible;
 	}
@@ -125,9 +125,15 @@
 }
 
 @keyframes selection-duplicated-animation {
-	0% { scale: 1 1; }
-	50% { scale: 1.02 1.02; }
-	100% { scale: 1 1; }
+	0% {
+		scale: 1 1;
+	}
+	50% {
+		scale: 1.02 1.02;
+	}
+	100% {
+		scale: 1 1;
+	}
 }
 
 /* Do not run the animation when the user has disabled motion animations. */

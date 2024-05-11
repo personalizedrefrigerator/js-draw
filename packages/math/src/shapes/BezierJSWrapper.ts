@@ -14,11 +14,9 @@ import Parameterized2DShape from './Parameterized2DShape';
  * @internal
  */
 export abstract class BezierJSWrapper extends Parameterized2DShape {
-	#bezierJs: Bezier|null = null;
+	#bezierJs: Bezier | null = null;
 
-	protected constructor(
-		bezierJsBezier?: Bezier
-	) {
+	protected constructor(bezierJsBezier?: Bezier) {
 		super();
 
 		if (bezierJsBezier) {
@@ -31,7 +29,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 
 	protected getBezier() {
 		if (!this.#bezierJs) {
-			this.#bezierJs = new Bezier(this.getPoints().map(p => p.xy));
+			this.#bezierJs = new Bezier(this.getPoints().map((p) => p.xy));
 		}
 		return this.#bezierJs;
 	}
@@ -96,41 +94,49 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 		const asLine = LineSegment2.ofSmallestContainingPoints(this.getPoints());
 		if (asLine) {
 			const intersection = asLine.intersectsLineSegment(line);
-			return intersection.map(p => this.nearestPointTo(p).parameterValue);
+			return intersection.map((p) => this.nearestPointTo(p).parameterValue);
 		}
 
 		const bezier = this.getBezier();
 
-		return bezier.intersects(line).map(t => {
-			// We're using the .intersects(line) function, which is documented
-			// to always return numbers. However, to satisfy the type checker (and
-			// possibly improperly-defined types),
-			if (typeof t === 'string') {
-				t = parseFloat(t);
-			}
+		return bezier
+			.intersects(line)
+			.map((t) => {
+				// We're using the .intersects(line) function, which is documented
+				// to always return numbers. However, to satisfy the type checker (and
+				// possibly improperly-defined types),
+				if (typeof t === 'string') {
+					t = parseFloat(t);
+				}
 
-			const point = Vec2.ofXY(this.at(t));
+				const point = Vec2.ofXY(this.at(t));
 
-			// Ensure that the intersection is on the line segment
-			if (point.distanceTo(line.p1) > line.length
-					|| point.distanceTo(line.p2) > line.length) {
-				return null;
-			}
+				// Ensure that the intersection is on the line segment
+				if (point.distanceTo(line.p1) > line.length || point.distanceTo(line.p2) > line.length) {
+					return null;
+				}
 
-			return t;
-		}).filter(entry => entry !== null) as number[];
+				return t;
+			})
+			.filter((entry) => entry !== null) as number[];
 	}
 
 	public override splitAt(t: number): [BezierJSWrapper] | [BezierJSWrapper, BezierJSWrapper] {
 		if (t <= 0 || t >= 1) {
-			return [ this ];
+			return [this];
 		}
 
 		const bezier = this.getBezier();
 		const split = bezier.split(t);
 		return [
-			new BezierJSWrapperImpl(split.left.points.map(point => Vec2.ofXY(point)), split.left),
-			new BezierJSWrapperImpl(split.right.points.map(point => Vec2.ofXY(point)), split.right),
+			new BezierJSWrapperImpl(
+				split.left.points.map((point) => Vec2.ofXY(point)),
+				split.left,
+			),
+			new BezierJSWrapperImpl(
+				split.right.points.map((point) => Vec2.ofXY(point)),
+				split.right,
+			),
 		];
 	}
 
@@ -162,7 +168,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 
 		// Start by testing a few points:
 		const pointsToTest = 4;
-		for (let i = 0; i < pointsToTest; i ++) {
+		for (let i = 0; i < pointsToTest; i++) {
 			const testT = i / (pointsToTest - 1);
 			const testMinSqrDist = sqrDistAt(testT);
 
@@ -181,8 +187,12 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 			const bPrime = this.derivativeAt(t);
 			const bPrimePrime = this.secondDerivativeAt(t);
 			return (
-				2 * bPrime.x * bPrime.x  +  2 * b.x * bPrimePrime.x  -  2 * point.x * bPrimePrime.x
-				+ 2 * bPrime.y * bPrime.y  +  2 * b.y * bPrimePrime.y  -  2 * point.y * bPrimePrime.y
+				2 * bPrime.x * bPrime.x +
+				2 * b.x * bPrimePrime.x -
+				2 * point.x * bPrimePrime.x +
+				2 * bPrime.y * bPrime.y +
+				2 * b.y * bPrimePrime.y -
+				2 * point.y * bPrimePrime.y
 			);
 		};
 		// Because we're zeroing f'(t), we also need to be able to compute it:
@@ -191,8 +201,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 			const b = this.at(t);
 			const bPrime = this.derivativeAt(t);
 			return (
-				2 * b.x * bPrime.x - 2 * point.x * bPrime.x
-				+ 2 * b.y * bPrime.y - 2 * point.y * bPrime.y
+				2 * b.x * bPrime.x - 2 * point.x * bPrime.x + 2 * b.y * bPrime.y - 2 * point.y * bPrime.y
 			);
 		};
 
@@ -226,7 +235,10 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 	}
 
 	public intersectsBezier(other: BezierJSWrapper) {
-		const intersections = this.getBezier().intersects(other.getBezier()) as (string[] | null | undefined);
+		const intersections = this.getBezier().intersects(other.getBezier()) as
+			| string[]
+			| null
+			| undefined;
 		if (!intersections || intersections.length === 0) {
 			return [];
 		}
@@ -239,7 +251,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 
 			if (!match) {
 				throw new Error(
-					`Incorrect format returned by .intersects: ${intersections} should be array of "number/number"!`
+					`Incorrect format returned by .intersects: ${intersections} should be array of "number/number"!`,
 				);
 			}
 
@@ -253,7 +265,9 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 	}
 
 	public override toString() {
-		return `Bézier(${this.getPoints().map(point => point.toString()).join(', ')})`;
+		return `Bézier(${this.getPoints()
+			.map((point) => point.toString())
+			.join(', ')})`;
 	}
 }
 
@@ -262,7 +276,10 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
  * around a `Bezier`.
  */
 class BezierJSWrapperImpl extends BezierJSWrapper {
-	public constructor(private controlPoints: readonly Point2[], curve?: Bezier) {
+	public constructor(
+		private controlPoints: readonly Point2[],
+		curve?: Bezier,
+	) {
 		super(curve);
 	}
 

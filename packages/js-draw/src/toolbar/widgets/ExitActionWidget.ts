@@ -10,7 +10,7 @@ class ExitActionWidget extends ActionButtonWidget {
 	public constructor(
 		editor: Editor,
 		localization: ToolbarLocalization,
-		saveCallback: ()=>void,
+		saveCallback: () => void,
 		labelOverride: Partial<ActionButtonIcon> = {},
 	) {
 		super(
@@ -21,9 +21,9 @@ class ExitActionWidget extends ActionButtonWidget {
 				return labelOverride.icon ?? editor.icons.makeCloseIcon();
 			},
 			labelOverride.label ?? localization.exit,
-			saveCallback
+			saveCallback,
 		);
-		this.setTags([ ToolbarWidgetTag.Exit ]);
+		this.setTags([ToolbarWidgetTag.Exit]);
 	}
 
 	protected override shouldAutoDisableInReadOnlyEditor() {

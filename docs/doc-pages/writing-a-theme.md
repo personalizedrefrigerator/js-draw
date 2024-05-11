@@ -2,9 +2,10 @@
 
 `js-draw` derives its colors from a set of CSS variables. By default, these variables are automatically
 set based on whether the user's browser is in dark mode
-(using [the CSS `prefers-color-scheme` `@media` selector](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)). 
+(using [the CSS `prefers-color-scheme` `@media` selector](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)).
 
 Here's a runnable example:
+
 ```css,runnable
 /* A yellowish theme! */
 

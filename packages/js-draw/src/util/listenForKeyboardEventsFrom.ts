@@ -1,4 +1,3 @@
-
 interface Callbacks {
 	filter(event: KeyboardEvent): boolean;
 	handleKeyDown(event: KeyboardEvent): void;
@@ -36,7 +35,6 @@ const listenForKeyboardEventsFrom = (elem: HTMLElement, callbacks: Callbacks) =>
 	// the keyup event is triggered.
 	let keysDown: KeyDownRecord[] = [];
 
-
 	// Return whether two objects that are similar to keyboard events represent the
 	// same key.
 	const keyEventsMatch = (a: KeyEventLike, b: KeyEventLike) => {
@@ -44,7 +42,7 @@ const listenForKeyboardEventsFrom = (elem: HTMLElement, callbacks: Callbacks) =>
 	};
 
 	const isKeyDown = (keyEvent: KeyEventLike) => {
-		return keysDown.some(other => keyEventsMatch(other, keyEvent));
+		return keysDown.some((other) => keyEventsMatch(other, keyEvent));
 	};
 
 	const keyEventToRecord = (event: KeyboardEvent): KeyDownRecord => {
@@ -73,11 +71,12 @@ const listenForKeyboardEventsFrom = (elem: HTMLElement, callbacks: Callbacks) =>
 			}
 
 			callbacks.handleKeyDown(htmlEvent);
-		} else { // keyup
+		} else {
+			// keyup
 			console.assert(htmlEvent.type === 'keyup');
 
 			// Remove the key from keysDown -- it's no longer down.
-			keysDown = keysDown.filter(event => {
+			keysDown = keysDown.filter((event) => {
 				const matches = keyEventsMatch(event, htmlEvent);
 				return !matches;
 			});
@@ -90,11 +89,11 @@ const listenForKeyboardEventsFrom = (elem: HTMLElement, callbacks: Callbacks) =>
 		}
 	};
 
-	elem.addEventListener('keydown', htmlEvent => {
+	elem.addEventListener('keydown', (htmlEvent) => {
 		handleKeyEvent(htmlEvent);
 	});
 
-	elem.addEventListener('keyup', htmlEvent => {
+	elem.addEventListener('keyup', (htmlEvent) => {
 		handleKeyEvent(htmlEvent);
 	});
 
@@ -102,14 +101,17 @@ const listenForKeyboardEventsFrom = (elem: HTMLElement, callbacks: Callbacks) =>
 		let stillHasFocus = false;
 		if (focusEvent.relatedTarget) {
 			const relatedTarget = focusEvent.relatedTarget as Node;
-			stillHasFocus = elem.contains(relatedTarget) || callbacks.getHandlesKeyEventsFrom(relatedTarget);
+			stillHasFocus =
+				elem.contains(relatedTarget) || callbacks.getHandlesKeyEventsFrom(relatedTarget);
 		}
 
 		if (!stillHasFocus) {
 			for (const event of keysDown) {
-				callbacks.handleKeyUp(new KeyboardEvent('keyup', {
-					...event,
-				}));
+				callbacks.handleKeyUp(
+					new KeyboardEvent('keyup', {
+						...event,
+					}),
+				);
 			}
 			keysDown = [];
 		}
@@ -146,35 +148,43 @@ const listenForKeyboardEventsFrom = (elem: HTMLElement, callbacks: Callbacks) =>
 		};
 
 		if (htmlEvent.shiftKey !== wasShiftDown) {
-			handleKeyEvent(new KeyboardEvent(eventName(htmlEvent.shiftKey), {
-				...eventInitDefaults,
-				key: 'Shift',
-				code: 'ShiftLeft',
-			}));
+			handleKeyEvent(
+				new KeyboardEvent(eventName(htmlEvent.shiftKey), {
+					...eventInitDefaults,
+					key: 'Shift',
+					code: 'ShiftLeft',
+				}),
+			);
 		}
 
 		if (htmlEvent.altKey !== wasAltDown) {
-			handleKeyEvent(new KeyboardEvent(eventName(htmlEvent.altKey), {
-				...eventInitDefaults,
-				key: 'Alt',
-				code: 'AltLeft',
-			}));
+			handleKeyEvent(
+				new KeyboardEvent(eventName(htmlEvent.altKey), {
+					...eventInitDefaults,
+					key: 'Alt',
+					code: 'AltLeft',
+				}),
+			);
 		}
 
 		if (htmlEvent.ctrlKey !== wasCtrlDown) {
-			handleKeyEvent(new KeyboardEvent(eventName(htmlEvent.ctrlKey), {
-				...eventInitDefaults,
-				key: 'Control',
-				code: 'ControlLeft',
-			}));
+			handleKeyEvent(
+				new KeyboardEvent(eventName(htmlEvent.ctrlKey), {
+					...eventInitDefaults,
+					key: 'Control',
+					code: 'ControlLeft',
+				}),
+			);
 		}
 
 		if (htmlEvent.metaKey !== wasMetaDown) {
-			handleKeyEvent(new KeyboardEvent(eventName(htmlEvent.metaKey), {
-				...eventInitDefaults,
-				key: 'Meta',
-				code: 'MetaLeft',
-			}));
+			handleKeyEvent(
+				new KeyboardEvent(eventName(htmlEvent.metaKey), {
+					...eventInitDefaults,
+					key: 'Meta',
+					code: 'MetaLeft',
+				}),
+			);
 		}
 	};
 

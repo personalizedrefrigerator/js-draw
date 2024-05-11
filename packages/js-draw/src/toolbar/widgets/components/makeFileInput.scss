@@ -1,8 +1,7 @@
-
 .toolbar-element .toolbar--file-input-container {
 	display: flex;
 
-	> input[type="file"] {
+	> input[type='file'] {
 		// Hide in a way such that screen readers can still access the
 		// input.
 		opacity: 0;
@@ -24,9 +23,7 @@
 		// Default border color if color-mix is not supported
 		--active-border-color: rgba(100, 100, 100, 0.5);
 
-		--active-border-color: color-mix(
-			in srgb, var(--foreground-color-1), transparent
-		);
+		--active-border-color: color-mix(in srgb, var(--foreground-color-1), transparent);
 
 		> .toolbar--file-input-description {
 			background-color: var(--background-color-3);
@@ -65,8 +62,9 @@
 			}
 		}
 
-
-		&:active, &:hover, &.drag-target {
+		&:active,
+		&:hover,
+		&.drag-target {
 			--active-border-color: var(--foreground-color-1);
 		}
 

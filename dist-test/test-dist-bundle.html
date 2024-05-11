@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
-		<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		<meta charset="utf-8" />
 		<title>Editor from a bundle</title>
 		<style>
 			body .js-draw.imageEditorContainer {
@@ -18,8 +18,8 @@
 	</head>
 	<body>
 		<p>
-			This file tests the bundled version of <code>js-draw</code>.
-			Be sure to run <code>npm run build</code> before opening this!
+			This file tests the bundled version of <code>js-draw</code>. Be sure to run
+			<code>npm run build</code> before opening this!
 		</p>
 		<script src="../packages/js-draw/dist/bundle.js"></script>
 		<script>
@@ -31,10 +31,12 @@
 
 			const editor2 = new jsdraw.Editor(document.body, {
 				wheelEventsEnabled: 'only-if-focused',
-				localization: jsdraw.getLocalizationTable([ 'es' ])
+				localization: jsdraw.getLocalizationTable(['es']),
 			});
 			editor2.addToolbar();
-			editor2.loadFromSVG('<svg><text>Wheel events enabled, only if focused.</text><text y=100>En Español</text></svg>');
+			editor2.loadFromSVG(
+				'<svg><text>Wheel events enabled, only if focused.</text><text y=100>En Español</text></svg>',
+			);
 
 			const editor3 = new jsdraw.Editor(document.body);
 			editor3.addToolbar();

@@ -1,4 +1,3 @@
-
 import katex from 'katex';
 import parseMarkdown, { RegionType } from './markdown/parseMarkdown';
 import htmlEscape from './markdown/htmlEscape';
@@ -34,9 +33,7 @@ const transformMarkdown = (markdown: string, callbacks: Callbacks) => {
 				data--mode="${htmlEscape(mode)}"
 				data--doctest="${doctest ? 'true' : 'false'}"
 				spellcheck="false"
-			>${
-	htmlEscape(content)
-}</pre>`;
+			>${htmlEscape(content)}</pre>`;
 
 			transformedMarkdown.push(makeRunnableContainer(false));
 			callbacks.addDoctest(makeRunnableContainer(true));

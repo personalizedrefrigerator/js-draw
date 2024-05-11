@@ -9,15 +9,9 @@
 	"entryPointStrategy": "packages",
 	"name": "js-draw",
 	"out": "docs/typedoc/",
-	"plugin": [ "@js-draw/typedoc-extensions" ],
+	"plugin": ["@js-draw/typedoc-extensions"],
 
-	"exclude": [
-		"**/*.test.ts",
-		"node_modules/**",
-		"**/dist/**",
-		"**/dist-test/**",
-		"src/testing/"
-	],
+	"exclude": ["**/*.test.ts", "node_modules/**", "**/dist/**", "**/dist-test/**", "src/testing/"],
 
 	"includes": "docs/",
 	"theme": "js-draw-theme",

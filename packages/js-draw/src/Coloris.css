@@ -1,4 +1,3 @@
-
 /* Imports Coloris' CSS and makes additional changes to the color picker */
 
 #clr-picker {
@@ -6,7 +5,8 @@
 }
 
 /* Coloris: Try to avoid scrolling instead of updating the color input. */
-#clr-picker #clr-color-area, #clr-picker .clr_hue {
+#clr-picker #clr-color-area,
+#clr-picker .clr_hue {
 	touch-action: none;
 }
 
@@ -17,13 +17,13 @@
 }
 
 /* Increase size of input thumb to make it easier to select colors. */
-#clr-picker.clr-picker input[type="range"]::-moz-range-thumb {
+#clr-picker.clr-picker input[type='range']::-moz-range-thumb {
 	width: var(--clr-slider-size);
 	height: var(--clr-slider-size);
 }
 
 /* Also apply to Chrome/iOS */
-#clr-picker.clr-picker input[type="range"]::-webkit-slider-thumb {
+#clr-picker.clr-picker input[type='range']::-webkit-slider-thumb {
 	/*
 	 Note: This doesn't seem to take effect in iOS if it's combined with the
 	       ::-moz-range-thumb rule above
@@ -32,11 +32,11 @@
 	height: var(--clr-slider-size);
 }
 
-#clr-picker.clr-picker input[type="range"]::-webkit-slider-runnable-track {
+#clr-picker.clr-picker input[type='range']::-webkit-slider-runnable-track {
 	height: var(--clr-slider-size);
 }
 
-#clr-picker.clr-picker input[type="range"]::-moz-range-track {
+#clr-picker.clr-picker input[type='range']::-moz-range-track {
 	height: var(--clr-slider-size);
 }
 

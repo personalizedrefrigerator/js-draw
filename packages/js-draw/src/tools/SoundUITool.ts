@@ -81,13 +81,13 @@ class SoundFeedback {
 		const hsv = color.asHSV();
 
 		// Choose frequencies that roughly correspond to hue, saturation, and value.
-		const hueFrequency = (-Math.cos(hsv.x / 2)) * 220 + 440;
+		const hueFrequency = -Math.cos(hsv.x / 2) * 220 + 440;
 		const saturationFrequency = hsv.y * 440 + 220;
 		const valueFrequency = (hsv.z + 0.1) * 440;
 
 		// Sigmoid with maximum 0.25 * alpha.
 		// Louder for greater value.
-		const gain = 0.25 * Math.min(1, color.a) / (1 + Math.exp(-(hsv.z - 0.5) * 3));
+		const gain = (0.25 * Math.min(1, color.a)) / (1 + Math.exp(-(hsv.z - 0.5) * 3));
 
 		this.colorOscHue.frequency.setValueAtTime(hueFrequency, this.ctx.currentTime);
 		this.colorOscSaturation.frequency.setValueAtTime(saturationFrequency, this.ctx.currentTime);
@@ -100,7 +100,10 @@ class SoundFeedback {
 		this.boundaryGain.gain.cancelScheduledValues(this.ctx.currentTime);
 		this.boundaryGain.gain.setValueAtTime(0, this.ctx.currentTime);
 		this.boundaryGain.gain.linearRampToValueAtTime(0.018, this.ctx.currentTime + 0.1);
-		this.boundaryOsc.frequency.setValueAtTime(440 + Math.atan(boundaryCrossCount / 2) * 100, this.ctx.currentTime);
+		this.boundaryOsc.frequency.setValueAtTime(
+			440 + Math.atan(boundaryCrossCount / 2) * 100,
+			this.ctx.currentTime,
+		);
 		this.boundaryGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
 	}
 
@@ -118,7 +121,7 @@ class SoundFeedback {
  * This allows the user to explore the content of the display without a working screen.
  */
 export default class SoundUITool extends BaseTool {
-	private soundFeedback: SoundFeedback|null = null;
+	private soundFeedback: SoundFeedback | null = null;
 	private toggleButton: HTMLElement;
 	private toggleButtonContainer: HTMLElement;
 
@@ -127,7 +130,6 @@ export default class SoundUITool extends BaseTool {
 		description: string,
 	) {
 		super(editor.notifier, description);
-
 
 		// Create a screen-reader-usable method of toggling the tool:
 		this.toggleButtonContainer = document.createElement('div');
@@ -205,9 +207,9 @@ export default class SoundUITool extends BaseTool {
 		this.soundFeedback?.setColor(this.editor.display.getColorAt(current.screenPos) ?? Color4.black);
 
 		const pointerMotionLine = new LineSegment2(this.lastPointerPos, current.canvasPos);
-		const collisions = this.editor.image.getElementsIntersectingRegion(pointerMotionLine.bbox).filter(
-			component => component.intersects(pointerMotionLine)
-		);
+		const collisions = this.editor.image
+			.getElementsIntersectingRegion(pointerMotionLine.bbox)
+			.filter((component) => component.intersects(pointerMotionLine));
 		this.lastPointerPos = current.canvasPos;
 
 		if (collisions.length > 0) {

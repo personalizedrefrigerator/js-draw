@@ -1,4 +1,3 @@
-
 import PenTool from './Pen';
 import { Mat33, Rect2, Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
@@ -173,8 +172,13 @@ describe('Pen', () => {
 		jest.advanceTimersByTime(14);
 
 		// Attempt to cancel the drawing
-		let firstPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0), [ mainPointer ]);
-		let secondPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(100, 0), [ firstPointer, mainPointer ]);
+		let firstPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0), [
+			mainPointer,
+		]);
+		let secondPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(100, 0), [
+			firstPointer,
+			mainPointer,
+		]);
 
 		const maxIterations = 10;
 		for (let i = 0; i < maxIterations; i++) {
@@ -184,26 +188,37 @@ describe('Pen', () => {
 			const point2 = Vec2.of(i * 5 + 100, 0);
 
 			const eventType = InputEvtType.PointerMoveEvt;
-			firstPointer = sendTouchEvent(editor, eventType, point1, [ secondPointer, mainPointer ]);
-			secondPointer = sendTouchEvent(editor, eventType, point2, [ firstPointer, mainPointer ]);
+			firstPointer = sendTouchEvent(editor, eventType, point1, [secondPointer, mainPointer]);
+			secondPointer = sendTouchEvent(editor, eventType, point2, [firstPointer, mainPointer]);
 
 			if (i === maxIterations - 1) {
 				jest.advanceTimersByTime(10);
 
-				sendTouchEvent(editor, InputEvtType.PointerUpEvt, point1, [ secondPointer, mainPointer ]);
-				sendTouchEvent(editor, InputEvtType.PointerUpEvt, point2, [ mainPointer ]);
+				sendTouchEvent(editor, InputEvtType.PointerUpEvt, point1, [secondPointer, mainPointer]);
+				sendTouchEvent(editor, InputEvtType.PointerUpEvt, point2, [mainPointer]);
 			}
 
 			jest.advanceTimersByTime(100);
 		}
 
 		// Finish the drawing
-		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 333), [firstPointer, secondPointer]);
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 333), [
+			firstPointer,
+			secondPointer,
+		]);
 		jest.advanceTimersByTime(8);
-		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 340), [firstPointer, secondPointer]);
-		sendMainEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(420, 340), [firstPointer, secondPointer]);
+		sendMainEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(420, 340), [
+			firstPointer,
+			secondPointer,
+		]);
+		sendMainEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(420, 340), [
+			firstPointer,
+			secondPointer,
+		]);
 
-		const elementsInDrawingArea = editor.image.getElementsIntersectingRegion(new Rect2(0, 0, 1000, 1000));
+		const elementsInDrawingArea = editor.image.getElementsIntersectingRegion(
+			new Rect2(0, 0, 1000, 1000),
+		);
 		if (mainEventIsPen) {
 			expect(elementsInDrawingArea).toHaveLength(1);
 		} else {
@@ -258,7 +273,7 @@ describe('Pen', () => {
 		expect(firstStroke.getPath().bbox).objEq(new Rect2(0, 0, 10, 10));
 	});
 
-	it('holding the pen stationary after a stroke should enable autocorrection', async() => {
+	it('holding the pen stationary after a stroke should enable autocorrection', async () => {
 		const editor = createEditor();
 		editor.viewport.resetTransform(Mat33.identity);
 

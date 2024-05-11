@@ -31,7 +31,7 @@ export default class Selection {
 
 	// The last-computed bounding box of selected content
 	// @see getTightBoundingBox
-	private selectionTightBoundingBox: Rect2|null = null;
+	private selectionTightBoundingBox: Rect2 | null = null;
 
 	private transformers;
 	private transform: Mat33 = Mat33.identity;
@@ -45,14 +45,16 @@ export default class Selection {
 
 	private hasParent: boolean = true;
 
-	public constructor(startPoint: Point2, private editor: Editor) {
+	public constructor(
+		startPoint: Point2,
+		private editor: Editor,
+	) {
 		this.originalRegion = new Rect2(startPoint.x, startPoint.y, 0, 0);
 		this.transformers = {
 			drag: new DragTransformer(editor, this),
 			resize: new ResizeTransformer(editor, this),
 			rotate: new RotateTransformer(editor, this),
 		};
-
 
 		// We need two containers for some CSS to apply (the outer container
 		// needs zero height, the inner needs to prevent the selection background
@@ -150,11 +152,12 @@ export default class Selection {
 	 * @internal
 	 */
 	public computeTightBoundingBox() {
-		const bbox = this.selectedElems.reduce((
-			accumulator: Rect2|null, elem: AbstractComponent
-		): Rect2 => {
-			return (accumulator ?? elem.getBBox()).union(elem.getBBox());
-		}, null);
+		const bbox = this.selectedElems.reduce(
+			(accumulator: Rect2 | null, elem: AbstractComponent): Rect2 => {
+				return (accumulator ?? elem.getBBox()).union(elem.getBBox());
+			},
+			null,
+		);
 
 		return bbox ?? Rect2.empty;
 	}
@@ -167,7 +170,7 @@ export default class Selection {
 		const toScreen = (vec: Point2) => this.editor.viewport.canvasToScreen(vec);
 		return Rect2.fromCorners(
 			toScreen(this.preTransformRegion.topLeft),
-			toScreen(this.preTransformRegion.bottomRight)
+			toScreen(this.preTransformRegion.bottomRight),
 		);
 	}
 
@@ -182,8 +185,11 @@ export default class Selection {
 		const screenCenter = toScreen.transformVec2(this.region.center);
 
 		return new Rect2(
-			screenCenter.x, screenCenter.y, scaleFactor * this.region.width, scaleFactor * this.region.height
-		).translatedBy(this.region.size.times(-scaleFactor/2));
+			screenCenter.x,
+			screenCenter.y,
+			scaleFactor * this.region.width,
+			scaleFactor * this.region.height,
+		).translatedBy(this.region.size.times(-scaleFactor / 2));
 	}
 
 	public get screenRegionRotation(): number {
@@ -207,8 +213,9 @@ export default class Selection {
 		const selectedBottommostZIndex = this.selectedElems[0].getZIndex();
 
 		const visibleObjects = this.editor.image.getElementsIntersectingRegion(this.region);
-		const topMostVisibleZIndex = visibleObjects[visibleObjects.length - 1]?.getZIndex() ?? selectedBottommostZIndex;
-		const deltaZIndex = (topMostVisibleZIndex + 1) - selectedBottommostZIndex;
+		const topMostVisibleZIndex =
+			visibleObjects[visibleObjects.length - 1]?.getZIndex() ?? selectedBottommostZIndex;
+		const deltaZIndex = topMostVisibleZIndex + 1 - selectedBottommostZIndex;
 
 		return deltaZIndex;
 	}
@@ -224,7 +231,7 @@ export default class Selection {
 
 		this.scrollTo();
 
-		let transformPromise: void|Promise<void> = undefined;
+		let transformPromise: void | Promise<void> = undefined;
 
 		// Make the commands undo-able.
 		// Don't check for non-empty transforms because this breaks changing the
@@ -232,9 +239,7 @@ export default class Selection {
 		if (this.selectedElems.length > 0) {
 			const deltaZIndex = this.getDeltaZIndexToMoveSelectionToTop();
 			transformPromise = this.editor.dispatch(
-				new Selection.ApplyTransformationCommand(
-					this, selectedElems, fullTransform, deltaZIndex,
-				)
+				new Selection.ApplyTransformationCommand(this, selectedElems, fullTransform, deltaZIndex),
 			);
 		}
 
@@ -247,17 +252,20 @@ export default class Selection {
 
 	/** Sends all selected elements to the bottom of the visible image. */
 	public sendToBack() {
-		const visibleObjects = this.editor.image.getElementsIntersectingRegion(this.editor.viewport.visibleRect);
+		const visibleObjects = this.editor.image.getElementsIntersectingRegion(
+			this.editor.viewport.visibleRect,
+		);
 
 		// VisibleObjects and selectedElems should both be sorted by z-index
 		const lowestVisibleZIndex = visibleObjects[0]?.getZIndex() ?? 0;
-		const highestSelectedZIndex = this.selectedElems[this.selectedElems.length - 1]?.getZIndex() ?? 0;
+		const highestSelectedZIndex =
+			this.selectedElems[this.selectedElems.length - 1]?.getZIndex() ?? 0;
 
 		const targetHighestZIndex = lowestVisibleZIndex - 1;
 		const deltaZIndex = targetHighestZIndex - highestSelectedZIndex;
 
 		if (deltaZIndex !== 0) {
-			const commands = this.selectedElems.map(elem => {
+			const commands = this.selectedElems.map((elem) => {
 				return elem.setZIndex(elem.getZIndex() + deltaZIndex);
 			});
 			return uniteCommands(commands, updateChunkSize);
@@ -269,7 +277,7 @@ export default class Selection {
 		SerializableCommand.register('selection-tool-transform', (json: any, _editor) => {
 			// The selection box is lost when serializing/deserializing. No need to store box rotation
 			const fullTransform: Mat33 = new Mat33(...(json.transform as Mat33Array));
-			const elemIds: string[] = (json.elems as any[] ?? []);
+			const elemIds: string[] = (json.elems as any[]) ?? [];
 			const deltaZIndex = parseInt(json.deltaZIndex ?? 0);
 
 			return new this.ApplyTransformationCommand(null, elemIds, fullTransform, deltaZIndex);
@@ -281,10 +289,10 @@ export default class Selection {
 		private selectedElemIds: string[];
 
 		public constructor(
-			private selection: Selection|null,
+			private selection: Selection | null,
 
 			// If a `string[]`, selectedElems is a list of element IDs.
-			selectedElems: AbstractComponent[]|string[],
+			selectedElems: AbstractComponent[] | string[],
 
 			// Full transformation used to transform elements.
 			private fullTransform: Mat33,
@@ -292,7 +300,7 @@ export default class Selection {
 		) {
 			super('selection-tool-transform');
 
-			const isIDList = (arr: AbstractComponent[]|string[]): arr is string[] => {
+			const isIDList = (arr: AbstractComponent[] | string[]): arr is string[] => {
 				return typeof arr[0] === 'string';
 			};
 
@@ -300,11 +308,9 @@ export default class Selection {
 			if (isIDList(selectedElems)) {
 				this.selectedElemIds = selectedElems;
 			} else {
-				this.selectedElemIds = selectedElems.map(elem => elem.getId());
-				this.transformCommands = selectedElems.map(elem => {
-					return elem.setZIndexAndTransformBy(
-						this.fullTransform, elem.getZIndex() + deltaZIndex
-					);
+				this.selectedElemIds = selectedElems.map((elem) => elem.getId());
+				this.transformCommands = selectedElems.map((elem) => {
+					return elem.setZIndexAndTransformBy(this.fullTransform, elem.getZIndex() + deltaZIndex);
 				});
 			}
 		}
@@ -314,33 +320,34 @@ export default class Selection {
 				return;
 			}
 
-			this.transformCommands = this.selectedElemIds.map(id => {
-				const elem = editor.image.lookupElement(id);
+			this.transformCommands = this.selectedElemIds
+				.map((id) => {
+					const elem = editor.image.lookupElement(id);
 
-				if (!elem) {
-					// There may be valid reasons for an element lookup to fail:
-					// For example, if the element was deleted remotely and the remote deletion
-					// hasn't been undone.
-					console.warn(`Unable to find element with ID, ${id}.`);
-					return null;
-				}
+					if (!elem) {
+						// There may be valid reasons for an element lookup to fail:
+						// For example, if the element was deleted remotely and the remote deletion
+						// hasn't been undone.
+						console.warn(`Unable to find element with ID, ${id}.`);
+						return null;
+					}
 
-				let originalZIndex = elem.getZIndex();
-				let targetZIndex = elem.getZIndex() + this.deltaZIndex;
+					let originalZIndex = elem.getZIndex();
+					let targetZIndex = elem.getZIndex() + this.deltaZIndex;
 
-				// If the command has already been applied, the element should currently
-				// have the target z-index.
-				if (isUndoing) {
-					targetZIndex = elem.getZIndex();
-					originalZIndex = elem.getZIndex() - this.deltaZIndex;
-				}
+					// If the command has already been applied, the element should currently
+					// have the target z-index.
+					if (isUndoing) {
+						targetZIndex = elem.getZIndex();
+						originalZIndex = elem.getZIndex() - this.deltaZIndex;
+					}
 
-				return elem.setZIndexAndTransformBy(
-					this.fullTransform, targetZIndex, originalZIndex,
-				);
-			}).filter( // Remove all null commands
-				command => command !== null,
-			) as SerializableCommand[];
+					return elem.setZIndexAndTransformBy(this.fullTransform, targetZIndex, originalZIndex);
+				})
+				.filter(
+					// Remove all null commands
+					(command) => command !== null,
+				) as SerializableCommand[];
 		}
 
 		public async apply(editor: Editor) {
@@ -423,12 +430,14 @@ export default class Selection {
 			singleItemSelectionMode = true;
 		}
 
-		this.selectedElems = this.editor.image.getElementsIntersectingRegion(this.region).filter(elem => {
-			return elem.intersectsRect(this.region) && elem.isSelectable();
-		});
+		this.selectedElems = this.editor.image
+			.getElementsIntersectingRegion(this.region)
+			.filter((elem) => {
+				return elem.intersectsRect(this.region) && elem.isSelectable();
+			});
 
 		if (singleItemSelectionMode && this.selectedElems.length > 0) {
-			this.selectedElems = [ this.selectedElems[this.selectedElems.length - 1] ];
+			this.selectedElems = [this.selectedElems[this.selectedElems.length - 1]];
 		}
 
 		// Find the bounding box of all selected elements.
@@ -466,9 +475,7 @@ export default class Selection {
 		if (sourceRegion.w < minSize || sourceRegion.h < minSize) {
 			// Add padding
 			const padding = minSize / 2;
-			this.originalRegion = Rect2.bboxOf(
-				sourceRegion.corners, padding
-			);
+			this.originalRegion = Rect2.bboxOf(sourceRegion.corners, padding);
 
 			this.updateUI();
 		}
@@ -500,7 +507,7 @@ export default class Selection {
 		this.backgroundElem.style.width = `${screenRegion.width}px`;
 		this.backgroundElem.style.height = `${screenRegion.height}px`;
 
-		const rotationDeg = this.screenRegionRotation * 180 / Math.PI;
+		const rotationDeg = (this.screenRegionRotation * 180) / Math.PI;
 		this.backgroundElem.style.transform = `rotate(${rotationDeg}deg)`;
 		this.backgroundElem.style.transformOrigin = 'center';
 
@@ -572,7 +579,7 @@ export default class Selection {
 
 	private removeDeletedElemsFromSelection() {
 		// Remove any deleted elements from the selection.
-		this.selectedElems = this.selectedElems.filter(elem => {
+		this.selectedElems = this.selectedElems.filter((elem) => {
 			const hasParent = !!this.editor.image.findParent(elem);
 
 			// If we removed the element and haven't added it back yet, don't remove it
@@ -582,7 +589,7 @@ export default class Selection {
 		});
 	}
 
-	private activeHandle: SelectionBoxChild|null = null;
+	private activeHandle: SelectionBoxChild | null = null;
 	private backgroundDragging: boolean = false;
 	public onDragStart(pointer: Pointer): boolean {
 		// Clear the HTML selection (prevent HTML drag and drop being triggered by this drag)
@@ -605,7 +612,6 @@ export default class Selection {
 				result = true;
 			}
 		}
-
 
 		if (result) {
 			this.removeDeletedElemsFromSelection();
@@ -636,8 +642,7 @@ export default class Selection {
 	public onDragEnd() {
 		if (this.backgroundDragging) {
 			this.transformers.drag.onDragEnd();
-		}
-		else if (this.activeHandle) {
+		} else if (this.activeHandle) {
 			this.activeHandle.handleDragEnd();
 		}
 
@@ -677,7 +682,8 @@ export default class Selection {
 			const delta = closestPointCanvas.minus(targetPointCanvas);
 
 			this.editor.dispatchNoAnnounce(
-				Viewport.transformBy(Mat33.translation(delta.times(0.5))), false
+				Viewport.transformBy(Mat33.translation(delta.times(0.5))),
+				false,
 			);
 
 			this.editor.queueRerender().then(() => {
@@ -698,7 +704,7 @@ export default class Selection {
 		return new Erase(this.selectedElems);
 	}
 
-	private selectionDuplicatedAnimationTimeout: ReturnType<typeof setTimeout>|null = null;
+	private selectionDuplicatedAnimationTimeout: ReturnType<typeof setTimeout> | null = null;
 	private runSelectionDuplicatedAnimation() {
 		if (this.selectionDuplicatedAnimationTimeout) {
 			clearTimeout(this.selectionDuplicatedAnimationTimeout);
@@ -715,7 +721,7 @@ export default class Selection {
 
 	public async duplicateSelectedObjects(): Promise<Command> {
 		const wasTransforming = this.backgroundDragging || this.activeHandle;
-		let tmpApplyCommand: Command|null = null;
+		let tmpApplyCommand: Command | null = null;
 
 		if (!wasTransforming) {
 			this.runSelectionDuplicatedAnimation();
@@ -723,10 +729,13 @@ export default class Selection {
 
 		if (wasTransforming) {
 			// Don't update the selection's focus when redoing/undoing
-			const selectionToUpdate: Selection|null = null;
+			const selectionToUpdate: Selection | null = null;
 			const deltaZIndex = this.getDeltaZIndexToMoveSelectionToTop();
 			tmpApplyCommand = new Selection.ApplyTransformationCommand(
-				selectionToUpdate, this.selectedElems, this.transform, deltaZIndex,
+				selectionToUpdate,
+				this.selectedElems,
+				this.transform,
+				deltaZIndex,
 			);
 
 			// Transform to ensure that the duplicates are in the correct location
@@ -780,7 +789,7 @@ export default class Selection {
 		this.originalRegion = bbox;
 		this.selectionTightBoundingBox = bbox;
 
-		this.selectedElems = objects.filter(object => object.isSelectable());
+		this.selectedElems = objects.filter((object) => object.isSelectable());
 		// Enforce increasing z-index invariant
 		this.selectedElems.sort((a, b) => a.getZIndex() - b.getZIndex());
 
@@ -792,4 +801,3 @@ export default class Selection {
 		return [...this.selectedElems];
 	}
 }
-

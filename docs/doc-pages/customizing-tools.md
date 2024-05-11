@@ -1,4 +1,3 @@
-
 # Customizing existing tools
 
 ## Changing which tools are in the toolbar
@@ -82,6 +81,7 @@ editor.addToolbar();
 To add a custom pen type that can be selected using the toolbar, use the `pen` setting.
 
 For example, to enable the polyline pen,
+
 ```ts,runnable
 import { Editor, makePolylineBuilder } from 'js-draw';
 
@@ -102,6 +102,7 @@ editor.addToolbar();
 ```
 
 We could then make it the default pen style for the first pen:
+
 ```ts,runnable
 ---use-previous---
 ---visible---
@@ -116,6 +117,7 @@ firstPen.setStrokeFactory(makePolylineBuilder);
 It's also possible to create custom pens.
 
 To create a custom pen type, create a class that implements `ComponentBuilder`. For example, to create a pen that draws wavy lines,
+
 ```ts,runnable
 import {
 	pathToRenderable, Path, Stroke, ComponentBuilderFactory, Point2, Vec2, Rect2, Color4, Viewport, StrokeDataPoint, RenderingStyle, PathCommandType, ComponentBuilder, AbstractRenderer
@@ -219,7 +221,7 @@ class CustomBuilder implements ComponentBuilder {
 
 // A ComponentBuilderFactory is responsible for creating instances of a
 // ComponentBuilder. It's what we'll provide to js-draw.
-export const makeCustomBuilder: ComponentBuilderFactory = 
+export const makeCustomBuilder: ComponentBuilderFactory =
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		const sizeOfScreenPixelOnCanvas = viewport.getSizeOfPixelOnCanvas();
 		return new CustomBuilder(initialPoint, sizeOfScreenPixelOnCanvas);
@@ -247,7 +249,7 @@ const editor = new Editor(document.body, {
 
 editor.addToolbar();
 
-/// 
+///
 /// Select our custom pen by default.
 ///
 

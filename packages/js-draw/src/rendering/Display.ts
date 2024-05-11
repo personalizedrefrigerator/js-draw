@@ -29,15 +29,17 @@ export default class Display {
 	private dryInkRenderer: AbstractRenderer;
 	private wetInkRenderer: AbstractRenderer;
 	private textRenderer: TextOnlyRenderer;
-	private textRerenderOutput: HTMLElement|null = null;
+	private textRerenderOutput: HTMLElement | null = null;
 	private cache: RenderingCache;
 	private devicePixelRatio: number = window.devicePixelRatio ?? 1;
-	private resizeSurfacesCallback?: ()=> void;
-	private flattenCallback?: ()=> void;
+	private resizeSurfacesCallback?: () => void;
+	private flattenCallback?: () => void;
 
 	/** @internal */
 	public constructor(
-		private editor: Editor, mode: RenderingMode, private parent: HTMLElement|null
+		private editor: Editor,
+		mode: RenderingMode,
+		private parent: HTMLElement | null,
 	) {
 		if (mode === RenderingMode.CanvasRenderer) {
 			this.initializeCanvasRendering();
@@ -87,7 +89,7 @@ export default class Display {
 			minProportionalRenderTimeToUseCache: 105 * 4,
 		});
 
-		this.editor.notifier.on(EditorEventType.DisplayResized, event => {
+		this.editor.notifier.on(EditorEventType.DisplayResized, (event) => {
 			if (event.kind !== EditorEventType.DisplayResized) {
 				throw new Error('Mismatched event.kinds!');
 			}
@@ -118,7 +120,7 @@ export default class Display {
 	 * @returns the color at the given point on the dry ink renderer, or `null` if `screenPos`
 	 * 	is not on the display.
 	 */
-	public getColorAt = (_screenPos: Point2): Color4|null => {
+	public getColorAt = (_screenPos: Point2): Color4 | null => {
 		return null;
 	};
 
@@ -172,10 +174,7 @@ export default class Display {
 
 				this.editor.notifier.dispatch(EditorEventType.DisplayResized, {
 					kind: EditorEventType.DisplayResized,
-					newSize: Vec2.of(
-						this.width,
-						this.height,
-					),
+					newSize: Vec2.of(this.width, this.height),
 				});
 			}
 		};

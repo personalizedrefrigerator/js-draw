@@ -6,7 +6,5 @@
 		"module": "CommonJS"
 	},
 
-	"include": [
-		"**/*.ts",
-	]
+	"include": ["**/*.ts"]
 }

@@ -11,7 +11,11 @@ import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 import makeSeparator from './components/makeSeparator';
 import HelpDisplay from '../utils/HelpDisplay';
 
-const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor, helpDisplay?: HelpDisplay) => {
+const makeZoomControl = (
+	localizationTable: ToolbarLocalization,
+	editor: Editor,
+	helpDisplay?: HelpDisplay,
+) => {
 	const zoomLevelRow = document.createElement('div');
 
 	const increaseButton = document.createElement('button');
@@ -26,7 +30,7 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor,
 	zoomLevelRow.classList.add(`${toolbarCSSPrefix}zoomLevelEditor`);
 	zoomLevelDisplay.classList.add('zoomDisplay');
 
-	let lastZoom: number|undefined;
+	let lastZoom: number | undefined;
 	const updateZoomDisplay = () => {
 		let zoomLevel = editor.viewport.getScaleFactor() * 100;
 
@@ -59,24 +63,37 @@ const makeZoomControl = (localizationTable: ToolbarLocalization, editor: Editor,
 	};
 
 	increaseButton.onclick = () => {
-		zoomBy(5.0/4);
+		zoomBy(5.0 / 4);
 	};
 
 	decreaseButton.onclick = () => {
-		zoomBy(4.0/5);
+		zoomBy(4.0 / 5);
 	};
 
 	resetViewButton.onclick = () => {
 		const addToHistory = false;
-		editor.dispatch(Viewport.transformBy(
-			editor.viewport.canvasToScreenTransform.inverse()
-		), addToHistory);
+		editor.dispatch(
+			Viewport.transformBy(editor.viewport.canvasToScreenTransform.inverse()),
+			addToHistory,
+		);
 	};
 
-	helpDisplay?.registerTextHelpForElement(increaseButton, localizationTable.handDropdown__zoomInHelpText);
-	helpDisplay?.registerTextHelpForElement(decreaseButton, localizationTable.handDropdown__zoomOutHelpText);
-	helpDisplay?.registerTextHelpForElement(resetViewButton, localizationTable.handDropdown__resetViewHelpText);
-	helpDisplay?.registerTextHelpForElement(zoomLevelDisplay, localizationTable.handDropdown__zoomDisplayHelpText);
+	helpDisplay?.registerTextHelpForElement(
+		increaseButton,
+		localizationTable.handDropdown__zoomInHelpText,
+	);
+	helpDisplay?.registerTextHelpForElement(
+		decreaseButton,
+		localizationTable.handDropdown__zoomOutHelpText,
+	);
+	helpDisplay?.registerTextHelpForElement(
+		resetViewButton,
+		localizationTable.handDropdown__resetViewHelpText,
+	);
+	helpDisplay?.registerTextHelpForElement(
+		zoomLevelDisplay,
+		localizationTable.handDropdown__zoomDisplayHelpText,
+	);
 
 	return zoomLevelRow;
 };
@@ -87,7 +104,7 @@ class HandModeWidget extends BaseWidget {
 
 		protected tool: PanZoom,
 		protected flag: PanZoomMode,
-		protected makeIcon: ()=> Element,
+		protected makeIcon: () => Element,
 		private title: string,
 		private helpText: string,
 
@@ -95,7 +112,7 @@ class HandModeWidget extends BaseWidget {
 	) {
 		super(editor, `pan-mode-${flag}`, localizationTable);
 
-		editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
+		editor.notifier.on(EditorEventType.ToolUpdated, (toolEvt) => {
 			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === tool) {
 				const allEnabled = !!(tool.getMode() & PanZoomMode.SinglePointerGestures);
 				this.setSelected(!!(tool.getMode() & flag) || allEnabled);
@@ -156,13 +173,13 @@ export default class HandToolWidget extends BaseToolWidget {
 	) {
 		const isGivenToolPrimary = editor.toolController.getPrimaryTools().includes(tool);
 		const primaryTool =
-			(isGivenToolPrimary ? tool : HandToolWidget.getPrimaryHandTool(editor.toolController))
-				?? tool;
+			(isGivenToolPrimary ? tool : HandToolWidget.getPrimaryHandTool(editor.toolController)) ??
+			tool;
 		super(editor, primaryTool, 'hand-tool-widget', localizationTable);
 
 		this.overridePanZoomTool =
-			(isGivenToolPrimary ? HandToolWidget.getOverrideHandTool(editor.toolController) : tool)
-				?? tool;
+			(isGivenToolPrimary ? HandToolWidget.getOverrideHandTool(editor.toolController) : tool) ??
+			tool;
 
 		// Only allow toggling a hand tool if we're using the primary hand tool and not the override
 		// hand tool for this button.
@@ -177,7 +194,8 @@ export default class HandToolWidget extends BaseToolWidget {
 		const touchPanningWidget = new HandModeWidget(
 			editor,
 
-			this.overridePanZoomTool, PanZoomMode.OneFingerTouchGestures,
+			this.overridePanZoomTool,
+			PanZoomMode.OneFingerTouchGestures,
 			() => this.editor.icons.makeTouchPanningIcon(),
 
 			localizationTable.touchPanning,
@@ -189,7 +207,8 @@ export default class HandToolWidget extends BaseToolWidget {
 		const rotationLockWidget = new HandModeWidget(
 			editor,
 
-			this.overridePanZoomTool, PanZoomMode.RotationLocked,
+			this.overridePanZoomTool,
+			PanZoomMode.RotationLocked,
 			() => this.editor.icons.makeRotationLockIcon(),
 
 			localizationTable.lockRotation,
@@ -202,16 +221,18 @@ export default class HandToolWidget extends BaseToolWidget {
 		this.addSubWidget(rotationLockWidget);
 	}
 
-	private static getPrimaryHandTool(toolController: ToolController): PanZoom|null {
-		const primaryPanZoomToolList = toolController.getPrimaryTools().filter(tool => tool instanceof PanZoom);
+	private static getPrimaryHandTool(toolController: ToolController): PanZoom | null {
+		const primaryPanZoomToolList = toolController
+			.getPrimaryTools()
+			.filter((tool) => tool instanceof PanZoom);
 		const primaryPanZoomTool = primaryPanZoomToolList[0];
-		return primaryPanZoomTool as PanZoom|null;
+		return primaryPanZoomTool as PanZoom | null;
 	}
 
-	private static getOverrideHandTool(toolController: ToolController): PanZoom|null {
+	private static getOverrideHandTool(toolController: ToolController): PanZoom | null {
 		const panZoomToolList = toolController.getMatchingTools(PanZoom);
 		const panZoomTool = panZoomToolList[0];
-		return panZoomTool as PanZoom|null;
+		return panZoomTool as PanZoom | null;
 	}
 
 	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
@@ -272,7 +293,10 @@ export default class HandToolWidget extends BaseToolWidget {
 
 	public override deserializeFrom(state: SavedToolbuttonState): void {
 		if (state.touchPanning !== undefined) {
-			this.overridePanZoomTool.setModeEnabled(PanZoomMode.OneFingerTouchGestures, state.touchPanning);
+			this.overridePanZoomTool.setModeEnabled(
+				PanZoomMode.OneFingerTouchGestures,
+				state.touchPanning,
+			);
 		}
 
 		if (state.rotationLocked !== undefined) {

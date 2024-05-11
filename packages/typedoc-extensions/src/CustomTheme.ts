@@ -10,7 +10,6 @@ class CustomTheme extends DefaultTheme {
 		loadRendererHooks(renderer);
 	}
 
-
 	public override buildNavigation(project: ProjectReflection): NavigationElement[] {
 		const options = this.application.options;
 		const sidebarReplacements = options.getValue('sidebarReplacements') as Record<string, string>;

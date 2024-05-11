@@ -1,53 +1,51 @@
 {
-    "short_name": "JS-draw",
-    "name": "JS-draw: Demo",
-    "icons": [
-        {
-            "src": "./icons/js-draw-icon-vector-large.svg",
-            "type": "image/svg+xml",
-            "sizes": "512x512",
-            "purpose": "maskable"
-        },
-        {
-            "src": "./icons/js-draw-icon-vector-medium.svg",
-            "type": "image/svg+xml",
-            "sizes": "192x192"
-        },
-        {
-            "src": "./icons/js-draw-icon-large.png",
-            "type": "image/png",
-            "sizes": "512x512"
-        },
-        {
-            "src": "./icons/js-draw-icon-medium.png",
-            "type": "image/png",
-            "sizes": "192x192"
-        },
-        {
-            "src": "./icons/js-draw-icon-small.png",
-            "type": "image/png",
-            "sizes": "64x64"
-        }
-    ],
-    "file_handlers": [
-        {
-            "action": "./",
-            "accept": {
-                "image/svg+xml": [
-                    ".svg"
-                ]
-            }
-        }
-    ],
-    "start_url": "./",
-    "background_color": "#853360",
-    "theme_color": "#803380",
-    "display": "standalone",
-    "screenshots": [
-        {
-            "src": "../img/js-draw.jpg",
-            "type": "image/jpg",
-            "sizes": "1668x979"
-        }
-    ]
+	"short_name": "JS-draw",
+	"name": "JS-draw: Demo",
+	"icons": [
+		{
+			"src": "./icons/js-draw-icon-vector-large.svg",
+			"type": "image/svg+xml",
+			"sizes": "512x512",
+			"purpose": "maskable"
+		},
+		{
+			"src": "./icons/js-draw-icon-vector-medium.svg",
+			"type": "image/svg+xml",
+			"sizes": "192x192"
+		},
+		{
+			"src": "./icons/js-draw-icon-large.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		},
+		{
+			"src": "./icons/js-draw-icon-medium.png",
+			"type": "image/png",
+			"sizes": "192x192"
+		},
+		{
+			"src": "./icons/js-draw-icon-small.png",
+			"type": "image/png",
+			"sizes": "64x64"
+		}
+	],
+	"file_handlers": [
+		{
+			"action": "./",
+			"accept": {
+				"image/svg+xml": [".svg"]
+			}
+		}
+	],
+	"start_url": "./",
+	"background_color": "#853360",
+	"theme_color": "#803380",
+	"display": "standalone",
+	"screenshots": [
+		{
+			"src": "../img/js-draw.jpg",
+			"type": "image/jpg",
+			"sizes": "1668x979"
+		}
+	]
 }

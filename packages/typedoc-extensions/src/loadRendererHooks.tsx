@@ -11,14 +11,11 @@ const loadRendererHooks = (renderer: Renderer) => {
 	renderer.on(
 		MarkdownEvent.PARSE,
 		(event: MarkdownEvent) => {
-			event.parsedText = transformMarkdown(
-				event.parsedText,
-				{
-					addDoctest: (doctestHtml) => {
-						doctestHandler.addDoctestFromEvent(doctestHtml, event);
-					},
-				}
-			);
+			event.parsedText = transformMarkdown(event.parsedText, {
+				addDoctest: (doctestHtml) => {
+					doctestHandler.addDoctestFromEvent(doctestHtml, event);
+				},
+			});
 		},
 		null,
 
@@ -38,7 +35,7 @@ const loadRendererHooks = (renderer: Renderer) => {
 		return (
 			<>
 				<script>
-					<JSX.Raw html={pageVariables}/>
+					<JSX.Raw html={pageVariables} />
 				</script>
 				<script src={event.relativeURL('assets/js-draw-typedoc-extension--browser.js')}></script>
 			</>
@@ -48,7 +45,7 @@ const loadRendererHooks = (renderer: Renderer) => {
 	renderer.hooks.on('body.end', (event) => {
 		return (
 			<>
-				<a style="float: right;" href={event.relativeURL('assets/licenses.txt')}>
+				<a style='float: right;' href={event.relativeURL('assets/licenses.txt')}>
 					OpenSource licenses
 				</a>
 			</>
@@ -64,7 +61,7 @@ const loadRendererHooks = (renderer: Renderer) => {
 			'js-draw-typedoc-extension--iframe.js',
 			doctestFilename,
 			'licenses.txt',
-		].map(fileName => path.resolve(distDir, fileName));
+		].map((fileName) => path.resolve(distDir, fileName));
 
 		// Copy fonts
 		for (const fileName of readdirSync(distDir)) {
@@ -74,7 +71,11 @@ const loadRendererHooks = (renderer: Renderer) => {
 		}
 
 		for (const filePath of filesToCopy) {
-			const targetPath = path.join(event.outputDirectory, 'assets', path.relative(distDir, filePath));
+			const targetPath = path.join(
+				event.outputDirectory,
+				'assets',
+				path.relative(distDir, filePath),
+			);
 			copyFileSync(filePath, targetPath);
 		}
 	});

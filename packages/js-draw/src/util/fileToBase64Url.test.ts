@@ -11,12 +11,12 @@ describe('fileToBase64Url', () => {
 		window.FileReader = originalFileReader;
 	});
 
-	it('should convert a Blob to a base64 URL if FileReader can\'t load', async () => {
+	it("should convert a Blob to a base64 URL if FileReader can't load", async () => {
 		window.FileReader = undefined as any;
 
 		const onWarning = jest.fn();
 
-		const blob = new Blob([ new Uint8Array([ 1, 2, 3, 4, ]).buffer ], { type: 'text/plain' });
+		const blob = new Blob([new Uint8Array([1, 2, 3, 4]).buffer], { type: 'text/plain' });
 		expect(await fileToBase64Url(blob, { onWarning })).toBe('data:text/plain;base64,AQIDBA==');
 
 		// Should have triggered a warning
