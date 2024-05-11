@@ -58,6 +58,7 @@ import Select from './icons/Select.svg';
 import Close from './icons/Close.svg';
 import Shapes from './icons/Shapes.svg';
 import Draw from './icons/Draw.svg';
+import ContentPaste from './icons/ContentPaste.svg';
 import InkPen from './icons/InkPen.svg';
 
 const icon = (data: string) => {
@@ -162,8 +163,17 @@ class MaterialIconProvider extends IconProvider {
 	public override makeDuplicateSelectionIcon(): IconElemType {
 		return icon(ContentCopy);
 	}
+	public override makeCopyIcon(): IconElemType {
+		return icon(ContentCopy);
+	}
+	public override makePasteIcon(): IconElemType {
+		return icon(ContentPaste);
+	}
 	public override makeDeleteSelectionIcon(): IconElemType {
 		return icon(Delete);
+	}
+	public override makeCheckIcon(): IconElemType {
+		return icon(Check);
 	}
 	public override makeCloseIcon(): IconElemType {
 		return icon(Close);

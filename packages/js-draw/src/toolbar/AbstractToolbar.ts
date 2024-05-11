@@ -11,7 +11,7 @@ import EraserTool from '../tools/Eraser';
 import PenTool from '../tools/Pen';
 import PenToolWidget from './widgets/PenToolWidget';
 import EraserWidget from './widgets/EraserToolWidget';
-import SelectionToolWidget from './widgets/SelectionToolWidget';
+import SelectionToolWidget from './widgets/SelectionToolWidget/SelectionToolWidget';
 import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget, { ToolbarWidgetTag } from './widgets/BaseWidget';

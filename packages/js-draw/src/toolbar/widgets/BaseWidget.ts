@@ -329,7 +329,7 @@ export default abstract class BaseWidget {
 		// Update title and icon
 		this.icon = null;
 		this.updateIcon();
-		this.label.innerText = this.getTitle();
+		this.updateTitle();
 
 		const longLabelCSSClass = 'long-label';
 		if (this.label.innerText.length > 7) {
@@ -420,7 +420,14 @@ export default abstract class BaseWidget {
 		this.container.remove();
 
 		this.#removeEditorListeners?.();
+		this.onRemove();
 	}
+
+	/**
+	 * Called just before the widget is removed. Prefer overriding this to
+	 * overriding the `.remove` method.
+	 */
+	protected onRemove() { }
 
 	public focus() {
 		this.button.focus();
@@ -437,7 +444,14 @@ export default abstract class BaseWidget {
 		this.container.classList.remove(className);
 	}
 
+	/** Causes the title shown for this widget to be refreshed. */
+	protected updateTitle() {
+		const newTitle = this.getTitle();
+		this.label.innerText = newTitle;
+		this.layoutManager?.onTitleChange?.(newTitle);
+	}
 
+	/** Causes the icon shown for this widget to be refreshed. */
 	protected updateIcon() {
 		let newIcon = this.createIcon();
 

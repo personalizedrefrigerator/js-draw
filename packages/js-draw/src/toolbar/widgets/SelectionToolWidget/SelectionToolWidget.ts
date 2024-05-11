@@ -1,88 +1,18 @@
-import { Color4 } from '@js-draw/math';
-import { isRestylableComponent } from '../../components/RestylableComponent';
-import Editor from '../../Editor';
-import uniteCommands from '../../commands/uniteCommands';
-import SelectionTool from '../../tools/SelectionTool/SelectionTool';
-import { EditorEventType } from '../../types';
-import { KeyPressEvent } from '../../inputEvents';
-import { ToolbarLocalization } from '../localization';
-import makeColorInput from './components/makeColorInput';
-import ActionButtonWidget from './ActionButtonWidget';
-import BaseToolWidget from './BaseToolWidget';
-import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
-import makeSeparator from './components/makeSeparator';
-import { toolbarCSSPrefix } from '../constants';
-import HelpDisplay from '../utils/HelpDisplay';
-
-const makeFormatMenu = (
-	editor: Editor,
-	selectionTool: SelectionTool,
-	localizationTable: ToolbarLocalization,
-) => {
-	const container = document.createElement('div');
-	container.classList.add(
-		'selection-format-menu', `${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}indentedList`
-	);
-
-	const colorRow = document.createElement('div');
-	const colorLabel = document.createElement('label');
-	const colorInputControl = makeColorInput(editor, color => {
-		const selection = selectionTool.getSelection();
-
-		if (selection) {
-			const updateStyleCommands = [];
-
-			for (const elem of selection.getSelectedObjects()) {
-				if (isRestylableComponent(elem)) {
-					updateStyleCommands.push(elem.updateStyle({ color }));
-				}
-			}
-
-			const unitedCommand = uniteCommands(updateStyleCommands);
-			editor.dispatch(unitedCommand);
-		}
-	});
-	const { input: colorInput, container: colorInputContainer } = colorInputControl;
-
-	colorLabel.innerText = localizationTable.colorLabel;
-
-	const update = () => {
-		const selection = selectionTool.getSelection();
-		if (selection && selection.getSelectedItemCount() > 0) {
-			colorInput.disabled = false;
-			container.classList.remove('disabled');
-
-			const colors = [];
-			for (const elem of selection.getSelectedObjects()) {
-				if (isRestylableComponent(elem)) {
-					const color = elem.getStyle().color;
-					if (color) {
-						colors.push(color);
-					}
-				}
-			}
-			colorInputControl.setValue(Color4.average(colors));
-		} else {
-			colorInput.disabled = true;
-			container.classList.add('disabled');
-			colorInputControl.setValue(Color4.transparent);
-		}
-	};
-
-	colorRow.replaceChildren(colorLabel, colorInputContainer);
-	container.replaceChildren(colorRow);
-
-	return {
-		addTo: (parent: HTMLElement) => {
-			parent.appendChild(container);
-		},
-		update,
-		registerHelpText: (helpDisplay: HelpDisplay) => {
-			helpDisplay.registerTextHelpForElement(colorRow, localizationTable.selectionDropdown__changeColorHelpText);
-			colorInputControl.registerWithHelpTextDisplay(helpDisplay);
-		},
-	};
-};
+import Editor from '../../../Editor';
+import SelectionTool from '../../../tools/SelectionTool/SelectionTool';
+import { EditorEventType } from '../../../types';
+import { KeyPressEvent } from '../../../inputEvents';
+import { ToolbarLocalization } from '../../localization';
+import ActionButtonWidget from '../ActionButtonWidget';
+import BaseToolWidget from '../BaseToolWidget';
+import { resizeImageToSelectionKeyboardShortcut } from '../keybindings';
+import makeSeparator from '../components/makeSeparator';
+import { toolbarCSSPrefix } from '../../constants';
+import HelpDisplay from '../../utils/HelpDisplay';
+import ClipboardHandler from '../../../util/ClipboardHandler';
+import BaseWidget from '../BaseWidget';
+import makeFormatMenu from './makeFormatMenu';
+import CopyPasteWidget from './CopyPasteWidget';
 
 export default class SelectionToolWidget extends BaseToolWidget {
 	private updateFormatMenu: ()=>void = () => {};
@@ -129,14 +59,31 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		duplicateButton.setHelpText(this.localizationTable.selectionDropdown__duplicateHelpText);
 
+		let copyPasteWidget: BaseWidget|null = null;
+
+		const clipboardHandler = new ClipboardHandler(this.editor);
+		if (clipboardHandler.canCopyPasteWithoutEvent()) {
+			copyPasteWidget = new CopyPasteWidget(
+				editor,
+				'copy-paste-widget',
+				this.tool,
+				clipboardHandler,
+				this.localizationTable,
+			);
+		}
+
 		this.addSubWidget(resizeButton);
 		this.addSubWidget(deleteButton);
 		this.addSubWidget(duplicateButton);
 
-		const updateDisabled = (disabled: boolean) => {
-			resizeButton.setDisabled(disabled);
-			deleteButton.setDisabled(disabled);
-			duplicateButton.setDisabled(disabled);
+		if (copyPasteWidget) {
+			this.addSubWidget(copyPasteWidget);
+		}
+
+		const updateDisabled = (missingSelection: boolean) => {
+			resizeButton.setDisabled(missingSelection);
+			deleteButton.setDisabled(missingSelection);
+			duplicateButton.setDisabled(missingSelection);
 		};
 		updateDisabled(true);
 
