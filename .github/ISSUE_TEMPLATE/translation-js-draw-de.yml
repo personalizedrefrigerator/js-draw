@@ -84,10 +84,11 @@ body:
     id: translation-pen
     attributes:
       label: "pen"
-      description: "Translate `Pen`.
-
-> **Note**
-> Likely unused"
+      description: |
+        Translate `Pen`.
+        
+        > **Note**
+        > Likely unused
       placeholder: "Pen"
       value: "Stift"
       render: "shell"
@@ -195,15 +196,17 @@ body:
     id: translation-dragAndDropHereOrBrowse
     attributes:
       label: "dragAndDropHereOrBrowse"
-      description: "Translate `Drag and drop here
-or
-{{browse}}`.
-
-> **Note**
-> Uses {{curly braces}} to denote bold text"
-      placeholder: "Drag and drop here
-or
-{{browse}}"
+      description: |
+        Translate `Drag and drop here
+        or
+        {{browse}}`.
+        
+        > **Note**
+        > Uses {{curly braces}} to denote bold text
+      placeholder: |
+        Drag and drop here
+        or
+        {{browse}}
       render: "shell"
     validations:
       required: false
@@ -666,12 +669,14 @@ or
     id: translation-penDropdown__penTypeHelpText
     attributes:
       label: "penDropdown__penTypeHelpText"
-      description: "Translate `Changes the pen style.
-
-Either a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.`."
-      placeholder: "Changes the pen style.
-
-Either a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes."
+      description: |
+        Translate `Changes the pen style.
+        
+        Either a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.`.
+      placeholder: |
+        Changes the pen style.
+        
+        Either a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.
       render: "shell"
     validations:
       required: false
@@ -679,12 +684,14 @@ Either a “pen” style or “shape” can be chosen. Choosing a “pen” styl
     id: translation-penDropdown__autocorrectHelpText
     attributes:
       label: "penDropdown__autocorrectHelpText"
-      description: "Translate `Converts approximate freehand lines and rectangles to perfect ones.
-
-The pen must be held stationary at the end of a stroke to trigger a correction.`."
-      placeholder: "Converts approximate freehand lines and rectangles to perfect ones.
-
-The pen must be held stationary at the end of a stroke to trigger a correction."
+      description: |
+        Translate `Converts approximate freehand lines and rectangles to perfect ones.
+        
+        The pen must be held stationary at the end of a stroke to trigger a correction.`.
+      placeholder: |
+        Converts approximate freehand lines and rectangles to perfect ones.
+        
+        The pen must be held stationary at the end of a stroke to trigger a correction.
       render: "shell"
     validations:
       required: false
@@ -692,12 +699,14 @@ The pen must be held stationary at the end of a stroke to trigger a correction."
     id: translation-penDropdown__stabilizationHelpText
     attributes:
       label: "penDropdown__stabilizationHelpText"
-      description: "Translate `Draws smoother strokes.
-
-This also adds a short delay between the mouse/stylus and the stroke.`."
-      placeholder: "Draws smoother strokes.
-
-This also adds a short delay between the mouse/stylus and the stroke."
+      description: |
+        Translate `Draws smoother strokes.
+        
+        This also adds a short delay between the mouse/stylus and the stroke.`.
+      placeholder: |
+        Draws smoother strokes.
+        
+        This also adds a short delay between the mouse/stylus and the stroke.
       render: "shell"
     validations:
       required: false
@@ -786,12 +795,14 @@ This also adds a short delay between the mouse/stylus and the stroke."
     id: translation-eraserDropdown__fullStrokeEraserHelpText
     attributes:
       label: "eraserDropdown__fullStrokeEraserHelpText"
-      description: "Translate `When in full-stroke mode, entire shapes are erased.
-
-When not in full-stroke mode, shapes can be partially erased.`."
-      placeholder: "When in full-stroke mode, entire shapes are erased.
-
-When not in full-stroke mode, shapes can be partially erased."
+      description: |
+        Translate `When in full-stroke mode, entire shapes are erased.
+        
+        When not in full-stroke mode, shapes can be partially erased.`.
+      placeholder: |
+        When in full-stroke mode, entire shapes are erased.
+        
+        When not in full-stroke mode, shapes can be partially erased.
       render: "shell"
     validations:
       required: false
@@ -808,12 +819,14 @@ When not in full-stroke mode, shapes can be partially erased."
     id: translation-selectionDropdown__resizeToHelpText
     attributes:
       label: "selectionDropdown__resizeToHelpText"
-      description: "Translate `Crops the drawing to the size of what's currently selected.
-
-If auto-resize is enabled, it will be disabled.`."
-      placeholder: "Crops the drawing to the size of what's currently selected.
-
-If auto-resize is enabled, it will be disabled."
+      description: |
+        Translate `Crops the drawing to the size of what's currently selected.
+        
+        If auto-resize is enabled, it will be disabled.`.
+      placeholder: |
+        Crops the drawing to the size of what's currently selected.
+        
+        If auto-resize is enabled, it will be disabled.
       render: "shell"
     validations:
       required: false
@@ -875,12 +888,14 @@ If auto-resize is enabled, it will be disabled."
     id: translation-pageDropdown__autoresizeCheckboxHelpText
     attributes:
       label: "pageDropdown__autoresizeCheckboxHelpText"
-      description: "Translate `When checked, the page grows to fit the drawing.
-
-When unchecked, the page is visible and its size can be set manually.`."
-      placeholder: "When checked, the page grows to fit the drawing.
-
-When unchecked, the page is visible and its size can be set manually."
+      description: |
+        Translate `When checked, the page grows to fit the drawing.
+        
+        When unchecked, the page is visible and its size can be set manually.`.
+      placeholder: |
+        When checked, the page grows to fit the drawing.
+        
+        When unchecked, the page is visible and its size can be set manually.
       render: "shell"
     validations:
       required: false
@@ -915,10 +930,11 @@ When unchecked, the page is visible and its size can be set manually."
     id: translation-closeSidebar
     attributes:
       label: "closeSidebar"
-      description: "Translate ``(toolName) => `Close sidebar for ${toolName}` ``.
-
-> **Note**
-> Currently used as an accessibilty label"
+      description: |
+        Translate ``(toolName) => `Close sidebar for ${toolName}` ``.
+        
+        > **Note**
+        > Currently used as an accessibilty label
       placeholder: "(toolName) => `Close sidebar for ${toolName}`"
       value: "(toolName) => `Close sidebar for ${toolName}`"
       render: "shell"

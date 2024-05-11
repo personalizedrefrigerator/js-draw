@@ -71,8 +71,14 @@ const generateTranslationTemplate = (
 
 			const value = `${attrs[key]}`;
 
-			const escapedValue = value.replace(/[\\]/g, '\\\\').replace(/"/g, '\\"');
-			lines.push(`      ${key}: "${escapedValue}"`);
+			if (value.includes('\n')) {
+				const indentation = '        ';
+				const indentedValue = indentation + value.replace(/(^|[\n])/g, `\n${indentation}`).trim();
+				lines.push(`      ${key}: |\n${indentedValue}`);
+			} else {
+				const escapedValue = value.replace(/[\\]/g, '\\\\').replace(/"/g, '\\"');
+				lines.push(`      ${key}: "${escapedValue}"`);
+			}
 		}
 
 		lines.push('    validations:');
