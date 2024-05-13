@@ -3,7 +3,7 @@ const stopPropagationOfScrollingWheelEvents = (scrollingContainer: HTMLElement) 
 	const scrollsAxis = (delta: number, clientSize: number, scrollOffset: number, scrollSize: number) => {
 		const hasScroll = clientSize !== scrollSize && delta !== 0;
 
-		const eventScrollsPastStart = scrollSize + delta <= 0;
+		const eventScrollsPastStart = scrollOffset + delta <= 0;
 		const scrollEnd = scrollOffset + clientSize;
 		const eventScrollsPastEnd = scrollEnd + delta > scrollSize;
 
