@@ -18,6 +18,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	dragAndDropHereOrBrowse: string; // Uses {{curly braces}} to bold text
 	cancel: string;
 	submit: string;
+	addAll: string;
 	roundedTipPen: string;
 	roundedTipPen2: string;
 	flatTipPen: string;
@@ -120,6 +121,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	chooseFile: 'Choose file',
 	dragAndDropHereOrBrowse: 'Drag and drop here\nor\n{{browse}}',
 	submit: 'Submit',
+	addAll: 'Add all',
 	cancel: 'Cancel',
 	resetView: 'Reset view',
 	thicknessLabel: 'Thickness',

@@ -1,12 +1,21 @@
 import ReactiveValue, { MutableReactiveValue } from '../../../util/ReactiveValue';
 import { ToolbarContext } from '../../types';
 
+export interface FileInputOptions {
+	accepts?: string;
+	allowMultiSelect?: boolean;
+}
+
 let idCounter = 0;
 
 /**
  * Creates a stylized file input.
  */
-const makeFileInput = (labelText: string, context: ToolbarContext, accepts: string = '*') => {
+const makeFileInput = (
+	labelText: string,
+	context: ToolbarContext,
+	{ accepts = '*', allowMultiSelect = false }: FileInputOptions = {},
+) => {
 	const container = document.createElement('div');
 	const label = document.createElement('label');
 	const input = document.createElement('input');
@@ -20,6 +29,7 @@ const makeFileInput = (labelText: string, context: ToolbarContext, accepts: stri
 	label.appendChild(document.createTextNode(labelText));
 	input.accept = accepts;
 	input.type = 'file';
+	input.multiple = allowMultiSelect;
 
 	// Associate the label with the input
 	const inputId = `js-draw-file-input-${idCounter ++}`;

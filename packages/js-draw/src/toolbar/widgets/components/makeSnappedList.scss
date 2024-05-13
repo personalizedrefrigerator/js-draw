@@ -1,0 +1,28 @@
+
+// Repeat for specificity.
+// TODO(v2): Refactor everything to use RCSS.
+:root .toolbar-snapped-scroll-list.toolbar-snapped-scroll-list.toolbar-snapped-scroll-list {
+	overflow-y: scroll;
+	scroll-snap-type: y mandatory;
+	height: min(200px, 50vh);
+	display: flex;
+	flex-direction: column;
+
+	> .item {
+		height: 100%;
+		width: 100%;
+		flex-shrink: 0;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
+		box-sizing: border-box;
+	}
+
+	&.-empty {
+		display: none;
+	}
+}

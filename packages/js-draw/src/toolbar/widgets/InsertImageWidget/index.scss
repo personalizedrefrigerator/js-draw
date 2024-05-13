@@ -11,8 +11,8 @@ $image-widget-selector: '.insert-image-widget-dropdown-content';
 	}
 
 	img {
-		max-width: min(50vw, 75%);
-		max-height: min(300px, 50vh);
+		max-width: 100%;
+		max-height: 100%;
 	
 		/* Center */
 		display: block;
@@ -23,6 +23,7 @@ $image-widget-selector: '.insert-image-widget-dropdown-content';
 	.insert-image-image-status-view {
 		display: flex;
 		justify-content: space-between;
+		padding-bottom: 0;
 	}
 
 	.action-button-row {
