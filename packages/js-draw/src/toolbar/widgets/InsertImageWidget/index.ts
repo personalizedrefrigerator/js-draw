@@ -274,13 +274,13 @@ export default class InsertImageWidget extends BaseWidget {
 		if (selectedObjects.length === 1 && selectedObjects[0] instanceof ImageComponent) {
 			editingImage = selectedObjects[0];
 
-			this.imageAltTextInput.value = editingImage.getAltText() ?? '';
 			const image = new Image();
 			const imageWrapper = ImageWrapper.fromSrcAndPreview(
 				editingImage.getURL(),
 				image,
 				() => this.onImageDataUpdate(),
 			);
+			imageWrapper.setAltText(editingImage.getAltText() ?? '');
 			this.images.set([{ data: imageWrapper, element: image }]);
 		} else if (selectedObjects.length > 0) {
 			// If not, clear the selection.
