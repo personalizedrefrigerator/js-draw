@@ -540,6 +540,7 @@ export default abstract class BaseWidget {
 		this.toplevel = toplevel;
 	}
 
+	/** Returns true if the menu for this widget is open. */
 	protected isDropdownVisible(): boolean {
 		return this.dropdown?.visible?.get() ?? false;
 	}
