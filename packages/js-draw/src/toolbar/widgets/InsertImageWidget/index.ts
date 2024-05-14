@@ -16,7 +16,7 @@ import bytesToSizeString from '../../../util/bytesToSizeString';
 import { ImageWrapper } from './ImageWrapper';
 import makeSnappedList, { SnappedListControl, SnappedListItem } from '../components/makeSnappedList';
 import { Command } from '../../../commands/lib';
-import { AbstractComponent } from 'js-draw/src/lib';
+import AbstractComponent from 'components/AbstractComponent';
 
 type ImageListItem = SnappedListItem<ImageWrapper|null>;
 
