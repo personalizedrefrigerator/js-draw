@@ -58,16 +58,16 @@ const makeFileInput = (
 	const updateStatusText = () => {
 		const files = selectedFiles.get();
 		if (loading) {
-			descriptionText.innerText = context.localization.fileInput__loading;
+			descriptionText.textContent = context.localization.fileInput__loading;
 			if (cancelLoading) {
 				const cancelText = document.createElement('b');
-				cancelText.innerText = context.localization.cancel;
-				cancelText.style.display = 'block';
+				cancelText.textContent = context.localization.cancel;
+				cancelText.classList.add('cancel-button');
 				descriptionText.appendChild(cancelText);
 			}
 			icon.style.display = 'none';
 		} else if (files.length > 0) {
-			descriptionText.innerText = files.map(file => file.name).join('\n');
+			descriptionText.textContent = files.map(file => file.name).join('\n');
 
 			// Only show the icon when there are files
 			icon.style.display = 'none';
@@ -90,7 +90,7 @@ const makeFileInput = (
 				// Inside a {{pair of curly braces}}?
 				if (i % 2 === 1) {
 					const boldedText = document.createElement('b');
-					boldedText.innerText = segments[i];
+					boldedText.textContent = segments[i];
 					descriptionText.appendChild(boldedText);
 				} else {
 					descriptionText.appendChild(document.createTextNode(segments[i]));

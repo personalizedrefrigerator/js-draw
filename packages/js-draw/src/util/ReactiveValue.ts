@@ -48,6 +48,16 @@ export abstract class ReactiveValue<T> {
 	 */
 	public abstract onUpdateAndNow(callback: UpdateCallback<T>): ListenerResult;
 
+	/** Returns a promise that resolves when this value is next changed. */
+	public waitForNextUpdate(): Promise<T> {
+		return new Promise<T>(resolve => {
+			const listener = this.onUpdate(value => {
+				listener.remove();
+				resolve(value);
+			});
+		});
+	}
+
 	/** Creates a `ReactiveValue` with an initial value, `initialValue`. */
 	public static fromInitialValue<T> (
 		initialValue: T
@@ -66,6 +76,8 @@ export abstract class ReactiveValue<T> {
 				callback(value);
 				return noOpUpdateListenerResult;
 			},
+			// Never resolves -- immutable.
+			waitForNextUpdate: () => new Promise<T>(()=>{}),
 		};
 	}
 

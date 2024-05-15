@@ -24,6 +24,20 @@ describe('ReactiveValue', () => {
 		value.set(6);
 	});
 
+	it('should resolve waitForNextUpdate callbacks on update', async () => {
+		const value = ReactiveValue.fromInitialValue(3);
+		const onFirstUpdatePromise = value.waitForNextUpdate();
+
+		value.set(2);
+		expect(await onFirstUpdatePromise).toBe(2);
+
+		// Should only resolve on change.
+		const onSecondUpdatePromise = value.waitForNextUpdate();
+		value.set(2);
+		value.set(4);
+		expect(await onSecondUpdatePromise).toBe(4);
+	});
+
 	it('values from callbacks should derive values from the callback', () => {
 		const sourceValue1 = ReactiveValue.fromInitialValue('test');
 		const sourceValue2 = ReactiveValue.fromInitialValue('test2');

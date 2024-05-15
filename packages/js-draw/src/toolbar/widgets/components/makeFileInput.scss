@@ -37,6 +37,10 @@
 			in srgb, var(--foreground-color-1), transparent
 		);
 
+		> .cancel-button {
+			display: block;
+		}
+
 		> .toolbar--file-input-description {
 			background-color: var(--background-color-3);
 			color: var(--foreground-color-3);
