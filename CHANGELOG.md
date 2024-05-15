@@ -1,4 +1,4 @@
-# 1.19.0
+# 1.19.0, 1.19.1
  * Features
     * Support adding multiple images at once from the image tool.
     * API to support customizing the default selectable fonts.
