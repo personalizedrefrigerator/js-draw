@@ -6,5 +6,5 @@ This example shows how to serialize `js-draw` commands (e.g. `AddElementCommand`
 
 > [!NOTE]
 >
-> Serialization/deserialization of `Command`s is as well tested as other parts of `js-draw`. If you encounter bugs, [please report them](https://github.com/personalizedrefrigerator/js-draw/issues).
+> Serialization/deserialization of `Command`s is **not** as well tested as other parts of `js-draw`. If you encounter bugs, [please report them](https://github.com/personalizedrefrigerator/js-draw/issues).
 >
