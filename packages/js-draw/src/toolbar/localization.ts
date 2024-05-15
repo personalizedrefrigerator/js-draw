@@ -64,6 +64,8 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	errorImageHasZeroSize: string;
 	describeTheImage: string;
 
+	fileInput__loading: string;
+
 	// Help text
 	penDropdown__baseHelpText: string;
 	penDropdown__colorHelpText: string;
@@ -171,6 +173,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	errorImageHasZeroSize: 'Error: Image has zero size',
 	describeTheImage: 'Image description',
+
+	fileInput__loading: 'Loading...',
 
 	// Help text
 	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines.',

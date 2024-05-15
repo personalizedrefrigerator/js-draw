@@ -36,6 +36,7 @@ import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
 import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
 import ClipboardHandler from './util/ClipboardHandler';
+import { ShowCustomFilePickerCallback } from './toolbar/widgets/components/makeFileInput';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -107,7 +108,7 @@ export interface EditorSettings {
 	}|null,
 
 	/**
-	 * Configures the default pen tools.
+	 * Configures the default {@link PenTool} tools.
 	 *
 	 * **Example**:
 	 * [[include:doc-pages/inline-examples/editor-settings-polyline-pen.md]]
@@ -135,10 +136,24 @@ export interface EditorSettings {
 		filterPenTypes?: (penType: PenTypeRecord)=>boolean,
 	}|null,
 
-	/** Configures the default {@link TextTool} control. */
+	/** Configures the default {@link TextTool} control and text tool. */
 	text: {
 		/** Fonts to show in the text UI. */
 		fonts?: string[],
+	}|null,
+
+	/** Configures the default {@link InsertImageWidget} control. */
+	image: {
+		/**
+		 * A custom callback to show an image picker. If given, this should return
+		 * a list of `File`s representing the images selected by the picker.
+		 *
+		 * If not given, the default file picker shown by a [file input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file)
+		 * is shown.
+		 *
+		 * @beta -- API may change between minor releases.
+		 */
+		showImagePicker?: ShowCustomFilePickerCallback;
 	}|null,
 }
 
@@ -333,6 +348,9 @@ export class Editor {
 			},
 			text: {
 				fonts: settings.text?.fonts ?? [ 'sans-serif', 'serif', 'monospace' ],
+			},
+			image: {
+				showImagePicker: settings.image?.showImagePicker ?? undefined,
 			},
 		};
 

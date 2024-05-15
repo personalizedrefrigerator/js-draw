@@ -2,7 +2,7 @@
 // Repeat for specificity.
 // TODO(v2): Refactor everything to use RCSS.
 :root .toolbar-snapped-scroll-list.toolbar-snapped-scroll-list.toolbar-snapped-scroll-list {
-	overflow-y: scroll;
+	overflow-y: auto;
 	scroll-snap-type: y mandatory;
 	height: min(200px, 50vh);
 	display: flex;

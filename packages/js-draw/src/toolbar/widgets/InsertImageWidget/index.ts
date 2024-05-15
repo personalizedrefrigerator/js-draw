@@ -5,7 +5,6 @@ import EditorImage from '../../../image/EditorImage';
 import uniteCommands from '../../../commands/uniteCommands';
 import SelectionTool from '../../../tools/SelectionTool/SelectionTool';
 import { Mat33, Vec2 } from '@js-draw/math';
-import fileToBase64Url from '../../../util/fileToBase64Url';
 import { ToolbarLocalization } from '../../localization';
 import BaseWidget from '../BaseWidget';
 import { EditorEventType } from '../../../types';
@@ -17,6 +16,8 @@ import { ImageWrapper } from './ImageWrapper';
 import makeSnappedList, { SnappedListControl, SnappedListItem } from '../components/makeSnappedList';
 import { Command } from '../../../commands/lib';
 import AbstractComponent from '../../../components/AbstractComponent';
+import { RenderableImage } from 'js-draw/src/rendering/renderers/AbstractRenderer';
+import fileToImages from './fileToImages';
 
 type ImageListItem = SnappedListItem<ImageWrapper|null>;
 
@@ -76,6 +77,9 @@ export default class InsertImageWidget extends BaseWidget {
 		// Update the dropdown just before showing.
 		if (this.isDropdownVisible()) {
 			this.updateInputs();
+		} else {
+			// Allow any previously-selected files to be freed.
+			this.selectedFiles?.set([]);
 		}
 	}
 
@@ -99,7 +103,11 @@ export default class InsertImageWidget extends BaseWidget {
 		} = makeFileInput(
 			this.localizationTable.chooseFile,
 			this.editor,
-			{ accepts: 'image/*', allowMultiSelect: true },
+			{
+				accepts: 'image/*',
+				allowMultiSelect: true,
+				customPickerAction: this.editor.getCurrentSettings().image?.showImagePicker,
+			},
 		);
 		const altTextRow = document.createElement('div');
 		this.imagesPreview = makeSnappedList(this.images);
@@ -139,45 +147,34 @@ export default class InsertImageWidget extends BaseWidget {
 			}
 		};
 
-		this.selectedFiles.onUpdateAndNow(async files => {
+		this.selectedFiles.onUpdateAndNow(async (files: File[]) => {
 			if (files.length === 0) {
 				this.images.set([]);
 				return;
 			}
 
-			const previews = await Promise.all(files.map(async (imageFile): Promise<SnappedListItem<ImageWrapper|null>> => {
-				let data: string|null = null;
-				let errorMessage: string|null = null;
-
+			const previews = (await Promise.all(files.map(async (imageFile): Promise<SnappedListItem<ImageWrapper>[]> => {
+				let renderableImages: RenderableImage[];
 				try {
-					data = await fileToBase64Url(imageFile);
+					renderableImages = await fileToImages(imageFile);
 				} catch (error) {
 					console.error('Image load error', error);
-					errorMessage = this.localizationTable.imageLoadError(error);
-				}
 
-				const imageElement = new Image();
-
-				let imageWrapper = null;
-				if (data) {
-					imageWrapper = ImageWrapper.fromSrcAndPreview(
-						data, imageElement, () => this.onImageDataUpdate(),
-					);
-				}
-
-				this.onImageDataUpdate();
-
-				// Show the error after image update callbacks to ensure it is
-				// actually shown.
-				if (errorMessage) {
+					const errorMessage = this.localizationTable.imageLoadError(error);
 					this.statusView.innerText = errorMessage;
+					return [];
 				}
 
-				return {
-					element: imageElement,
-					data: imageWrapper,
-				};
-			}));
+				return renderableImages.map(image => {
+					const { wrapper, preview } = ImageWrapper.fromRenderable(
+						image, () => this.onImageDataUpdate(),
+					);
+					return {
+						data: wrapper,
+						element: preview,
+					};
+				});
+			}))).flat();
 
 			this.images.set(previews);
 		});

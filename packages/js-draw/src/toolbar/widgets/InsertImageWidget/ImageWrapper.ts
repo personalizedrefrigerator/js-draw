@@ -1,3 +1,4 @@
+import { RenderableImage } from 'js-draw/src/rendering/renderers/AbstractRenderer';
 
 /** Handles filtering and other operations on an image. */
 export class ImageWrapper {
@@ -61,5 +62,21 @@ export class ImageWrapper {
 		onUrlUpdate: ()=>void,
 	) {
 		return new ImageWrapper(initialBase64Src, preview, onUrlUpdate);
+	}
+
+	public static fromRenderable(
+		renderable: RenderableImage,
+		onUrlUpdate: ()=>void,
+	) {
+		const preview = new Image();
+		preview.src = renderable.base64Url;
+		const result = new ImageWrapper(renderable.base64Url, preview, onUrlUpdate);
+
+		const altText = renderable.label ?? renderable.image.getAttribute('alt');
+		if (altText) {
+			result.setAltText(altText);
+		}
+
+		return { wrapper: result, preview };
 	}
 }
