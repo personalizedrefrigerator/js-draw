@@ -16,7 +16,8 @@ export interface FileInputOptions {
 let idCounter = 0;
 
 /**
- * Creates a stylized file input.
+ * Creates a stylized file input. This file input can either use the system file picker, or a custom
+ * one specified by `customPickerAction`.
  */
 const makeFileInput = (
 	labelText: string,

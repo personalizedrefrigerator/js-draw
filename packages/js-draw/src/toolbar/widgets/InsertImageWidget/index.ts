@@ -24,6 +24,8 @@ type ImageListItem = SnappedListItem<ImageWrapper|null>;
 /**
  * Provides a widget that allows inserting or modifying raster images.
  *
+ * It's possible to customize the file picker used by this widget through {@link EditorSettings.image}.
+ *
  * @example
  * ```ts,runnable
  * import { Editor, makeEdgeToolbar, InsertImageWidget } from 'js-draw';
