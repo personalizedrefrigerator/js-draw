@@ -1,11 +1,12 @@
 import UnknownSVGObject from '../components/UnknownSVGObject';
 import Editor from '../Editor';
-import { EditorImage, Rect2, StrokeComponent } from '../lib';
-import { LineSegment2, Vec2 } from '@js-draw/math';
+import { EditorImage, PointerDevice, Rect2, StrokeComponent } from '../lib';
+import { LineSegment2, Point2, Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import sendPenEvent from '../testing/sendPenEvent';
 import { InputEvtType } from '../inputEvents';
 import Eraser, { EraserMode } from './Eraser';
+import Pen from './Pen';
 
 const selectEraser = (editor: Editor) => {
 	const tools = editor.toolController;
@@ -13,6 +14,14 @@ const selectEraser = (editor: Editor) => {
 	eraser.setEnabled(true);
 
 	return eraser;
+};
+
+const sendEraserEvent = (
+	editor: Editor,
+	eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+	point: Point2,
+) => {
+	return sendPenEvent(editor, eventType, point, undefined, PointerDevice.Eraser);
 };
 
 const getAllStrokes = (editor: Editor) => {
@@ -227,5 +236,60 @@ describe('Eraser', () => {
 			expectedResults.push(false);
 		}
 		expect(intersectionResults).toMatchObject(expectedResults);
+	});
+
+	it('should switch to the eraser tool when the eraser button is pressed', async () => {
+		const editor = createEditor();
+
+		await editor.loadFromSVG(`
+			<svg>
+				<path d='m0,0 l2,0 l0,2 l-2,0 z' fill="#ff0000"/>
+				<path d='m50,50 l2,0 l0,2 l-2,0 z' fill="#ff0000"/>
+			</svg>
+		`, true);
+
+		editor.viewport.resetTransform();
+
+		const allStrokes = getAllStrokes(editor);
+		expect(allStrokes).toHaveLength(2);
+		expect(allStrokes[0].getBBox()).objEq(new Rect2(0, 0, 2, 2));
+		expect(allStrokes[1].getBBox()).objEq(new Rect2(50, 50, 2, 2));
+
+		const eraser = selectEraser(editor);
+		eraser.setThickness(10);
+
+		const pen = editor.toolController.getMatchingTools(Pen)[0];
+		pen.setEnabled(true);
+
+		// Erase the first stroke
+		sendEraserEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(3, 0));
+		jest.advanceTimersByTime(100);
+		sendEraserEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3, 0));
+
+		expect(getAllStrokes(editor)).toHaveLength(1);
+
+		// Draw a new stroke
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(47, 47));
+		jest.advanceTimersByTime(100);
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(47, 47));
+
+		expect(getAllStrokes(editor)).toHaveLength(2);
+
+		// Erase all strokes
+		sendEraserEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(3, 0));
+		jest.advanceTimersByTime(100);
+		sendEraserEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(47, 40));
+
+		// Should disable the pen while the eraser is down
+		expect(eraser.isEnabled()).toBe(true);
+		expect(pen.isEnabled()).toBe(false);
+
+		sendEraserEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(50, 50));
+
+		// ...should re-enable it
+		expect(eraser.isEnabled()).toBe(false);
+		expect(pen.isEnabled()).toBe(true);
+
+		expect(getAllStrokes(editor)).toHaveLength(0);
 	});
 });

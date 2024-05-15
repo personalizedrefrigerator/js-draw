@@ -52,6 +52,8 @@ export default class ToolController implements InputEventListener {
 		// Stabilize the secondary pen tool.
 		secondaryPenTool.setInputMapper(new InputStabilizer(editor.viewport));
 
+		const eraser = new Eraser(editor, localization.eraserTool);
+
 		const primaryTools = [
 			// Three pens
 			primaryPenTool,
@@ -68,7 +70,7 @@ export default class ToolController implements InputEventListener {
 				}
 			),
 
-			new Eraser(editor, localization.eraserTool),
+			eraser,
 			new SelectionTool(editor, localization.selectionTool),
 			new TextTool(editor, localization.textTool, localization),
 			new PanZoom(editor, PanZoomMode.SinglePointerGestures, localization.anyDevicePanning),
@@ -88,6 +90,7 @@ export default class ToolController implements InputEventListener {
 			new UndoRedoShortcut(editor),
 			new ToolbarShortcutHandler(editor),
 			new ToolSwitcherShortcut(editor),
+			eraser.makeEraserSwitcherTool(),
 			new FindTool(editor),
 			new PasteHandler(editor),
 			new SelectAllShortcutHandler(editor),
@@ -220,6 +223,14 @@ export default class ToolController implements InputEventListener {
 	/** @see {@link insertToolsAfter} */
 	public insertToolsBefore(insertBefore: BaseTool, toolsToInsert: BaseTool[]) {
 		this.insertTools(insertBefore, toolsToInsert, 'before');
+	}
+
+	/** @internal */
+	public changeActiveToolTo(tool: BaseTool) {
+		if (!tool.isEnabled()) {
+			tool.setEnabled(true);
+		}
+		this.activeTool = tool;
 	}
 
 	// @internal use `dispatchEvent` rather than calling `onEvent` directly.
