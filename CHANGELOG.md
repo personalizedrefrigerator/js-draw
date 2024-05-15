@@ -1,3 +1,14 @@
+# 1.19.0
+ * Features
+    * Support adding multiple images at once from the image tool.
+    * API to support customizing the default selectable fonts.
+    * (Beta) Image tool: Support specifying a custom file picker.
+ * Bug fixes
+    * Possible fix for eraser button not switching to the eraser tool on some devices.
+    * Fix unable to render text with a multi-word font.
+ * Improvements
+    * Decrease size of `Vec2`s in memory.
+
 # 1.18.0
  * Features
     * Partial stroke eraser.
