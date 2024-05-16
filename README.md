@@ -23,7 +23,7 @@ A core feature of `js-draw` is its [large zoom range](https://personalizedrefrig
 
 <details open><summary><strong>Demo</strong></summary>
 
-<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/f1c4afea-d7c8-4c36-835b-e01f2a646424"></video>
+<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/f1c4afea-d7c8-4c36-835b-e01f2a646424" alt="Video: Shows zooming out further and further" controls></video>
 
 </details>
 
@@ -35,7 +35,7 @@ Applications using `js-draw` can adjust this zoom range with custom [EditorSetti
 
 <details><summary><strong>Demo</strong></summary>
     
-<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/1f4ebeb1-9d2f-4884-9410-9fb1d5e455ee"></video>
+<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/1f4ebeb1-9d2f-4884-9410-9fb1d5e455ee" alt="Video: Shows canvas being rotated" controls></video>
 
 </details>
 
