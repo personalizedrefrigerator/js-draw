@@ -1,5 +1,5 @@
 
-import { BaseWidget, Editor } from 'js-draw';
+import { BaseWidget, Editor, EditorImage } from 'js-draw';
 import { Localization, getLocalizationTable } from './localization';
 
 export default class DebugToolbarWidget extends BaseWidget {
@@ -90,7 +90,7 @@ export default class DebugToolbarWidget extends BaseWidget {
 		const rendererDebugModeCheckbox = document.createElement('input');
 		rendererDebugModeCheckbox.type = 'checkbox';
 		rendererDebugModeCheckbox.oninput = () => {
-			this.editor.image.setDebugMode(rendererDebugModeCheckbox.checked);
+			EditorImage.setDebugMode(rendererDebugModeCheckbox.checked);
 
 			// Enabling renderer debugging disables the cache.
 			cacheDebugModeCheckbox.disabled = rendererDebugModeCheckbox.checked;

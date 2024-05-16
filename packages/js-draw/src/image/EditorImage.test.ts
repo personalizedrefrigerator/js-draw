@@ -55,6 +55,10 @@ describe('EditorImage', () => {
 	const testFill: RenderingStyle = { fill: Color4.black };
 	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
+	beforeEach(() => {
+		EditorImage.setDebugMode(true);
+	});
+
 	it('elements added to the image should be findable', () => {
 		const editor = createEditor();
 		const image = editor.image;

@@ -460,7 +460,7 @@ export default class EditorImage {
 	 *
 	 * @internal
 	 */
-	public setDebugMode(newDebugMode: boolean) {
+	public static setDebugMode(newDebugMode: boolean) {
 		debugMode = newDebugMode;
 	}
 
@@ -604,7 +604,7 @@ export class ImageNode {
 	private content: AbstractComponent|null;
 	private bbox: Rect2;
 	private children: ImageNode[];
-	private targetChildCount: number = 10;
+	private targetChildCount: number = 30;
 
 	private id: number;
 	private static idCounter: number = 0;
@@ -799,6 +799,8 @@ export class ImageNode {
 				this.parent?.recomputeBBox(true);
 			}
 		}
+
+		this.checkRep();
 	}
 
 	// Grows this' bounding box to also include `other`.
@@ -819,6 +821,8 @@ export class ImageNode {
 	}
 
 	private rebalance() {
+		this.checkRep();
+
 		// If the current node is its parent's only child,
 		if (this.parent && this.parent.children.length === 1) {
 			console.assert(this.parent.content === null);
@@ -827,10 +831,15 @@ export class ImageNode {
 			// Remove this' parent, if this' parent isn't the root.
 			const oldParent = this.parent;
 			if (oldParent.parent !== null) {
-				oldParent.children = [];
-				this.parent = oldParent.parent;
-				this.parent.children.push(this);
+				const newParent = oldParent.parent;
+				newParent.checkRep();
+
+				newParent.children = newParent.children.filter(c => c !== oldParent);
 				oldParent.parent = null;
+				oldParent.children = [];
+
+				this.parent = newParent;
+				newParent.children.push(this);
 				this.parent.recomputeBBox(false);
 			} else if (this.content === null) {
 				// Remove this and transfer this' children to the parent.
@@ -879,19 +888,30 @@ export class ImageNode {
 
 			if (childNodeChildren.length < this.children.length) {
 				this.children = newChildren;
+
 				const child = new ImageNode(this);
 				this.children.push(child);
-
 				child.children = childNodeChildren;
+				child.updateParents(false);
+
 				child.recomputeBBox(false);
 				child.rebalance();
 			}
 		}
+
+		// Empty?
+		if (this.parent && this.children.length === 0 && this.content === null) {
+			this.remove();
+		}
+
+		this.checkRep();
 	}
 
 	// Removes the parent-to-child link.
 	// Called internally by `.remove`
 	protected removeChild(child: ImageNode) {
+		this.checkRep();
+
 		const oldChildCount = this.children.length;
 		this.children = this.children.filter(node => {
 			return node !== child;
@@ -902,11 +922,15 @@ export class ImageNode {
 			`${oldChildCount - 1} ≠ ${this.children.length} after removing all nodes equal to ${child}. Nodes should only be removed once.`
 		);
 
+		this.recomputeBBox(true);
 		this.children.forEach(child => {
 			child.rebalance();
 		});
 
 		this.recomputeBBox(true);
+		this.rebalance();
+
+		this.checkRep();
 	}
 
 	// Remove this node and all of its children
@@ -926,6 +950,8 @@ export class ImageNode {
 		this.parent = null;
 		this.content = null;
 		this.children = [];
+
+		this.checkRep();
 	}
 
 	// Creates a (potentially incomplete) async rendering of this image.
@@ -1013,9 +1039,41 @@ export class ImageNode {
 		renderer.drawRect(bbox.intersection(visibleRect)!, lineWidth, { fill });
 		renderer.endObject();
 
+		if (bbox.maxDimension > visibleRect.maxDimension / 3) {
+			const textStyle = {
+				fontFamily: 'monospace',
+				size: bbox.minDimension / 20,
+				renderingStyle: { fill: Color4.red },
+			};
+			renderer.drawText(`Depth: ${depth}`, Mat33.translation(bbox.bottomLeft), textStyle);
+		}
+
 		// Render debug information for children
 		for (const child of this.children) {
 			child.renderDebugBoundingBoxes(renderer, visibleRect, depth + 1);
+		}
+	}
+
+	private checkRep(depth: number = 0) {
+		// Slow -- disabld by default
+		if (debugMode) {
+			if (this.parent && !this.parent.children.includes(this)) {
+				throw new Error(`Parent does not have this node as a child. (depth: ${depth})`);
+			}
+
+			let expectedBBox = null;
+			for (const child of this.children) {
+				expectedBBox ??= child.getBBox();
+				expectedBBox = expectedBBox.union(child.getBBox());
+
+				if (child.parent !== this) {
+					throw new Error(`Child with bbox ${child.getBBox()} and ${child.children.length} has wrong parent (was ${child.parent}).`);
+				}
+			}
+
+			if (expectedBBox && !this.bbox.eq(expectedBBox)) {
+				throw new Error(`Wrong bounding box ${expectedBBox} \\neq ${this.bbox} (depth: ${depth})`);
+			}
 		}
 	}
 }
