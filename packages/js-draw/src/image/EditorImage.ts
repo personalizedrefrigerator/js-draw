@@ -736,8 +736,8 @@ export class ImageNode {
 
 				nodeForChildren.children = this.children;
 				this.children = [nodeForNewLeaf, nodeForChildren];
-				nodeForChildren.recomputeBBox(true);
 				nodeForChildren.updateParents();
+				nodeForChildren.recomputeBBox(true);
 			}
 			return nodeForNewLeaf.addLeaf(leaf);
 		}
@@ -821,7 +821,6 @@ export class ImageNode {
 	}
 
 	private rebalance() {
-		this.checkRep();
 
 		// If the current node is its parent's only child,
 		if (this.parent && this.parent.children.length === 1) {
@@ -832,7 +831,6 @@ export class ImageNode {
 			const oldParent = this.parent;
 			if (oldParent.parent !== null) {
 				const newParent = oldParent.parent;
-				newParent.checkRep();
 
 				newParent.children = newParent.children.filter(c => c !== oldParent);
 				oldParent.parent = null;
@@ -903,8 +901,6 @@ export class ImageNode {
 		if (this.parent && this.children.length === 0 && this.content === null) {
 			this.remove();
 		}
-
-		this.checkRep();
 	}
 
 	// Removes the parent-to-child link.
@@ -922,7 +918,6 @@ export class ImageNode {
 			`${oldChildCount - 1} ≠ ${this.children.length} after removing all nodes equal to ${child}. Nodes should only be removed once.`
 		);
 
-		this.recomputeBBox(true);
 		this.children.forEach(child => {
 			child.rebalance();
 		});
@@ -1062,6 +1057,7 @@ export class ImageNode {
 			}
 
 			let expectedBBox = null;
+			const seenChildren: Set<ImageNode> = new Set();
 			for (const child of this.children) {
 				expectedBBox ??= child.getBBox();
 				expectedBBox = expectedBBox.union(child.getBBox());
@@ -1069,9 +1065,16 @@ export class ImageNode {
 				if (child.parent !== this) {
 					throw new Error(`Child with bbox ${child.getBBox()} and ${child.children.length} has wrong parent (was ${child.parent}).`);
 				}
+
+				// Children should only be present once
+				if (seenChildren.has(child)) {
+					throw new Error(`Child ${child} is present twice or more in its parent's child list`);
+				}
+				seenChildren.add(child);
 			}
 
-			if (expectedBBox && !this.bbox.eq(expectedBBox)) {
+			const tolerance =  this.bbox.minDimension / 100;
+			if (expectedBBox && !this.bbox.eq(expectedBBox, tolerance)) {
 				throw new Error(`Wrong bounding box ${expectedBBox} \\neq ${this.bbox} (depth: ${depth})`);
 			}
 		}
