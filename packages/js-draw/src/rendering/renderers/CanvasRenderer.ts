@@ -84,8 +84,8 @@ export default class CanvasRenderer extends AbstractRenderer {
 	public override setDraftMode(draftMode: boolean) {
 		if (draftMode) {
 			this.minSquareCurveApproxDist = 9;
-			this.minRenderSizeBothDimens = 2;
-			this.minRenderSizeAnyDimen = 0.5;
+			this.minRenderSizeBothDimens = 1;
+			this.minRenderSizeAnyDimen = 0.1;
 		} else {
 			this.minSquareCurveApproxDist = 0.5;
 			this.minRenderSizeBothDimens = 0.1;
@@ -301,7 +301,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	// @internal
 	public isTooSmallToRender(rect: Rect2): boolean {
 		// Should we ignore all objects within this object's bbox?
-		const diagonal = rect.size.times(this.getCanvasToScreenTransform().getScaleFactor());
+		const diagonal = rect.size.times(this.getSizeOfCanvasPixelOnScreen());
 
 		const bothDimenMinSize = this.minRenderSizeBothDimens;
 		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;
