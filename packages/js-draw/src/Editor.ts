@@ -1115,9 +1115,9 @@ export class Editor {
 				const cmd = commands[j];
 
 				if (apply) {
-					await cmd.apply(this);
+					cmd.apply(this);
 				} else {
-					await cmd.unapply(this);
+					cmd.unapply(this);
 				}
 			}
 
