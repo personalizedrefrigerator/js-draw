@@ -44,6 +44,13 @@ export class ImageWrapper {
 		return this.imageBase64Url !== this.originalSrc;
 	}
 
+	// Returns true if the current image is large enough to display a "decrease size"
+	// option.
+	public isLarge() {
+		const largeImageThreshold = 0.12 * 1024 * 1024; // 0.12 MiB
+		return this.getBase64Url().length > largeImageThreshold;
+	}
+
 	public getBase64Url() {
 		return this.imageBase64Url;
 	}
@@ -54,6 +61,7 @@ export class ImageWrapper {
 
 	public setAltText(text: string) {
 		this.altText = text;
+		this.preview.alt = text;
 	}
 
 	public static fromSrcAndPreview(

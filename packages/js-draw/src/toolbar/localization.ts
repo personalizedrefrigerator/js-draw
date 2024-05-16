@@ -65,6 +65,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	describeTheImage: string;
 
 	fileInput__loading: string;
+	fileInput__andNMoreFiles: (count: number)=>string;
 
 	// Help text
 	penDropdown__baseHelpText: string;
@@ -175,6 +176,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	describeTheImage: 'Image description',
 
 	fileInput__loading: 'Loading...',
+	fileInput__andNMoreFiles: (n: number) => `(...${n} more)`,
 
 	// Help text
 	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines.',

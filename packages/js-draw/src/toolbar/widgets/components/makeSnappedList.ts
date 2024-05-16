@@ -22,8 +22,79 @@ const makeSnappedList = <DataType> (
 	const container = document.createElement('div');
 	container.classList.add('toolbar-snapped-scroll-list');
 
+	const scroller = document.createElement('div');
+	scroller.classList.add('scroller');
+
 	const visibleIndex = MutableReactiveValue.fromInitialValue(0);
 	let observer: IntersectionObserver|null = null;
+
+	const makePageMarkers = () => {
+		const markerContainer = document.createElement('div');
+		markerContainer.classList.add('page-markers');
+		const markers: HTMLElement[] = [];
+
+		const pairedItems = ReactiveValue.union<[number, SnappedListItems<DataType>]>([ visibleIndex, itemsValue ]);
+		pairedItems.onUpdateAndNow(([currentVisibleIndex, items]) => {
+			let addedOrRemovedMarkers = false;
+
+			// Items may have been removed from the list of pages. Make the markers reflect that.
+			while (items.length < markers.length) {
+				markers.pop();
+				addedOrRemovedMarkers = true;
+			}
+
+			let activeMarker;
+			for (let i = 0; i < items.length; i ++) {
+				let marker;
+				if (i >= markers.length) {
+					marker = document.createElement('div');
+
+					// Use a separate content element to increase the clickable size of
+					// the marker.
+					const content = document.createElement('div');
+					content.classList.add('content');
+					marker.replaceChildren(content);
+
+					markers.push(marker);
+					addedOrRemovedMarkers = true;
+				} else {
+					marker = markers[i];
+				}
+
+				marker.classList.add('marker');
+				if (i === currentVisibleIndex) {
+					marker.classList.add('-active');
+					activeMarker = marker;
+				} else {
+					marker.classList.remove('-active');
+				}
+
+				const markerIndex = i;
+				marker.onclick = () => {
+					wrappedItems.get()[markerIndex]?.element?.scrollIntoView({ behavior: 'smooth' });
+				};
+			}
+
+			// Only call .replaceChildren when necessary -- doing so on every change would
+			// break transitions.
+			if (addedOrRemovedMarkers) {
+				markerContainer.replaceChildren(...markers);
+			}
+
+			// Handles the case where there are many markers and the current is offscreen
+			if (activeMarker) {
+				activeMarker.scrollIntoView({ block: 'nearest' });
+			}
+
+			if (markers.length === 1) {
+				markerContainer.classList.add('-one-element');
+			} else {
+				markerContainer.classList.remove('-one-element');
+			}
+		});
+
+		return markerContainer;
+	};
 
 	const createObserver = () => {
 		observer = new IntersectionObserver((entries) => {
@@ -40,7 +111,7 @@ const makeSnappedList = <DataType> (
 		}, {
 			// Element to use as the boudning box with which to intersect.
 			// See https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
-			root: container,
+			root: scroller,
 
 			// Fraction of an element that must be visible to trigger the callback:
 			threshold: 0.9,
@@ -78,7 +149,7 @@ const makeSnappedList = <DataType> (
 		for (const item of lastItems) {
 			observer?.unobserve(item.element);
 		}
-		container.replaceChildren();
+		scroller.replaceChildren();
 
 		// An observer is only necessary if there are multiple items to scroll through.
 		if (items.length > 1) {
@@ -95,7 +166,7 @@ const makeSnappedList = <DataType> (
 		}
 
 		for (const item of items) {
-			container.appendChild(item.element);
+			scroller.appendChild(item.element);
 		}
 
 		visibleIndex.set(0);
@@ -117,7 +188,9 @@ const makeSnappedList = <DataType> (
 
 	// makeSnappedList is generally shown within the toolbar. This allows users to
 	// scroll it with a touchpad.
-	stopPropagationOfScrollingWheelEvents(container);
+	stopPropagationOfScrollingWheelEvents(scroller);
+
+	container.replaceChildren(makePageMarkers(), scroller);
 
 	return {
 		container,

@@ -68,7 +68,17 @@ const makeFileInput = (
 			}
 			icon.style.display = 'none';
 		} else if (files.length > 0) {
-			descriptionText.textContent = files.map(file => file.name).join('\n');
+			const fileNames = files.map(file => file.name);
+			const maxNames = 5;
+			if (fileNames.length <= maxNames) {
+				descriptionText.textContent = fileNames.join('\n');
+			} else {
+				const fileNamesToShow = fileNames.slice(0, maxNames - 1);
+				descriptionText.textContent = [
+					...fileNamesToShow,
+					context.localization.fileInput__andNMoreFiles(fileNames.length - fileNamesToShow.length),
+				].join('\n');
+			}
 
 			// Only show the icon when there are files
 			icon.style.display = 'none';

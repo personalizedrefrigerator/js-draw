@@ -246,11 +246,20 @@ export default class InsertImageWidget extends BaseWidget {
 
 		this.statusView.replaceChildren(sizeText);
 
-		const largeImageThreshold = 0.12 * 1024 * 1024; // 0.12 MiB
-		if (imageData.length > largeImageThreshold) {
+		if (currentImage?.isLarge()) {
 			this.statusView.appendChild(decreaseSizeButton);
 		} else if (currentImage?.isChanged()) {
 			this.statusView.appendChild(resetSizeButton);
+		} else {
+			const hasLargeOrChangedImages = this.images.get().some(
+				image => image.data?.isChanged() || image.data?.isLarge()
+			);
+			if (hasLargeOrChangedImages) {
+				// Still show the button -- prevents the layout from readjusting while
+				// scrolling through the image list
+				decreaseSizeButton.disabled = true;
+				this.statusView.appendChild(decreaseSizeButton);
+			}
 		}
 	}
 

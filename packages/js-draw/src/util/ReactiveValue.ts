@@ -14,6 +14,10 @@ const noOpSetUpdateListener = () => {
 	return noOpUpdateListenerResult;
 };
 
+type ReactiveValuesOf<T extends unknown[]> = {
+	[key in keyof T]: ReactiveValue<T[key]>;
+};
+
 /**
  * A `ReactiveValue` is a value that
  * - updates periodically,
@@ -155,6 +159,12 @@ export abstract class ReactiveValue<T> {
 		}
 
 		return result;
+	}
+
+	public static union<Values extends [...unknown[]]> (values: ReactiveValuesOf<Values>): ReactiveValue<Values> {
+		return ReactiveValue.fromCallback(() => {
+			return values.map(value => value.get()) as [...Values];
+		}, values);
 	}
 }
 

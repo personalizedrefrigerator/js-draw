@@ -51,4 +51,16 @@ describe('uniteCommands', () => {
 		const deserialized = SerializableCommand.deserialize(command.serialize(), editor);
 		expect(deserialized.description(editor, editor.localization)).toBe('Bar');
 	});
+
+	it('should ignore applyChunkSize when fewer than that many commands are present', async () => {
+		const editor = createEditor();
+		const command = uniteCommands([
+			EditorImage.addElement(new StrokeComponent([ ])),
+			editor.setBackgroundColor(Color4.red),
+		], { applyChunkSize: 10 });
+
+		// Should apply immediately
+		editor.dispatch(command);
+		expect(editor.estimateBackgroundColor()).objEq(Color4.red);
+	});
 });
