@@ -21,7 +21,7 @@ For example usage, see [one of the examples](https://github.com/personalizedrefr
 
 A core feature of `js-draw` is its [large zoom range](https://personalizedrefrigerator.github.io/js-draw/typedoc/interfaces/js_draw.EditorSettings.html#maxZoom) (from roughly 10⁻¹⁰x to 10¹⁰x).
 
-<details><summary><strong>Demo</strong></summary>
+<details open><summary><strong>Demo</strong></summary>
 
 https://github.com/personalizedrefrigerator/js-draw/assets/46334387/f1c4afea-d7c8-4c36-835b-e01f2a646424
 
@@ -33,7 +33,11 @@ Applications using `js-draw` can adjust this zoom range with custom [EditorSetti
 
 `js-draw` supports touchscreen pinch zoom and rotate gestures. To simplify editing, screen rotation snaps to multiples of 90 degrees.
 
+<details><summary><strong>Demo</strong></summary>
+    
 https://github.com/personalizedrefrigerator/js-draw/assets/46334387/1f4ebeb1-9d2f-4884-9410-9fb1d5e455ee
+
+</details>
 
 It's also possible to disable touch drawing. This can be useful when drawing with a stylus and can be done with either [PanZoomTool.setMode](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.PanZoomTool.html#setMode) or, by a user, with the "hand" tool menu:
 
