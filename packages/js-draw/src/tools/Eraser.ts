@@ -84,7 +84,7 @@ export default class Eraser extends BaseTool {
 	private modeValue: MutableReactiveValue<EraserMode>;
 
 	private toRemove: AbstractComponent[];
-	private toAdd: AbstractComponent[];
+	private toAdd: Set<AbstractComponent> = new Set();
 
 	// Commands that each remove one element
 	private eraseCommands: Erase[] = [];
@@ -225,15 +225,18 @@ export default class Eraser extends BaseTool {
 
 			const finalToErase = [];
 			for (const item of toErase) {
-				if (this.toAdd.includes(item)) {
-					this.toAdd = this.toAdd.filter(i => i !== item);
+				if (this.toAdd.has(item)) {
+					this.toAdd.delete(item);
 				} else {
 					finalToErase.push(item);
 				}
 			}
 
 			this.toRemove.push(...finalToErase);
-			this.toAdd.push(...toAdd);
+
+			for (const item of toAdd) {
+				this.toAdd.add(item);
+			}
 			this.eraseCommands.push(new Erase(finalToErase));
 			this.addCommands.push(...newAddCommands);
 		}
@@ -246,7 +249,7 @@ export default class Eraser extends BaseTool {
 		if (event.allPointers.length === 1 || event.current.device === PointerDevice.Eraser) {
 			this.lastPoint = event.current.canvasPos;
 			this.toRemove = [];
-			this.toAdd = [];
+			this.toAdd.clear();
 			this.isFirstEraseEvt = true;
 
 			this.drawPreviewAt(event.current.canvasPos);
@@ -270,7 +273,22 @@ export default class Eraser extends BaseTool {
 		if (this.addCommands.length > 0) {
 			this.addCommands.forEach(cmd => cmd.unapply(this.editor));
 
-			commands.push(...this.toAdd.map(a => EditorImage.addElement(a)));
+			// Remove items from toAdd that are also present in toRemove -- adding, then
+			// removing these does nothing, and can break undo/redo.
+			for (const item of this.toAdd) {
+				if (this.toRemove.includes(item)) {
+					this.toAdd.delete(item);
+					this.toRemove = this.toRemove.filter(other => other !== item);
+				}
+			}
+			for (const item of this.toRemove) {
+				if (this.toAdd.has(item)) {
+					this.toAdd.delete(item);
+					this.toRemove = this.toRemove.filter(other => other !== item);
+				}
+			}
+
+			commands.push(...[...this.toAdd].map(a => EditorImage.addElement(a)));
 
 			this.addCommands = [];
 		}
