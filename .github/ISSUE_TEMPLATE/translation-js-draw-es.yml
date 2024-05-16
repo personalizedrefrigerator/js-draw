@@ -219,6 +219,15 @@ body:
     validations:
       required: false
   - type: textarea
+    id: translation-addAll
+    attributes:
+      label: "addAll"
+      description: "Translate `Add all`."
+      placeholder: "Add all"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
     id: translation-cancel
     attributes:
       label: "cancel"
@@ -633,6 +642,25 @@ body:
       label: "describeTheImage"
       description: "Translate `Image description`."
       placeholder: "Image description"
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-fileInput__loading
+    attributes:
+      label: "fileInput__loading"
+      description: "Translate `Loading...`."
+      placeholder: "Loading..."
+      render: "shell"
+    validations:
+      required: false
+  - type: textarea
+    id: translation-fileInput__andNMoreFiles
+    attributes:
+      label: "fileInput__andNMoreFiles"
+      description: "Translate ``(n) => `(...${n} more)` ``."
+      placeholder: "(n) => `(...${n} more)`"
+      value: "(n) => `(...${n} more)`"
       render: "shell"
     validations:
       required: false
