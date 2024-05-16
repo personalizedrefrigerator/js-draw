@@ -604,7 +604,7 @@ export class ImageNode {
 	private content: AbstractComponent|null;
 	private bbox: Rect2;
 	private children: ImageNode[];
-	private targetChildCount: number = 30;
+	private targetChildCount: number = 10;
 
 	private id: number;
 	private static idCounter: number = 0;
@@ -760,6 +760,11 @@ export class ImageNode {
 		const newNode = ImageNode.createLeafNode(this, leaf);
 		this.children.push(newNode);
 		newNode.recomputeBBox(true);
+
+		if (this.children.length >= this.targetChildCount) {
+			this.rebalance();
+		}
+
 		return newNode;
 	}
 
@@ -832,6 +837,54 @@ export class ImageNode {
 				this.parent.children = this.children;
 				this.parent.updateParents();
 				this.parent = null;
+			}
+		}
+
+		// Create virtual containers for children. Handles the case where there
+		// are many small, often non-overlapping children that we still want to be grouped.
+		if (this.children.length > this.targetChildCount * 10) {
+			const grid = this.getBBox().divideIntoGrid(4, 4);
+			const indexToCount = [];
+			while (indexToCount.length < grid.length) {
+				indexToCount.push(0);
+			}
+
+			for (const child of this.children) {
+				for (let i = 0; i < grid.length; i++) {
+					if (grid[i].containsRect(child.getBBox())) {
+						indexToCount[i] ++;
+					}
+				}
+			}
+
+			let indexWithGreatest = 0;
+			let greatestCount = indexToCount[0];
+			for (let i = 1; i < indexToCount.length; i++) {
+				if (indexToCount[i] > greatestCount) {
+					indexWithGreatest = i;
+					greatestCount = indexToCount[i];
+				}
+			}
+			const targetGridSquare = grid[indexWithGreatest];
+
+			const newChildren = [];
+			const childNodeChildren = [];
+			for (const child of this.children) {
+				if (targetGridSquare.containsRect(child.getBBox())) {
+					childNodeChildren.push(child);
+				} else {
+					newChildren.push(child);
+				}
+			}
+
+			if (childNodeChildren.length < this.children.length) {
+				this.children = newChildren;
+				const child = new ImageNode(this);
+				this.children.push(child);
+
+				child.children = childNodeChildren;
+				child.recomputeBBox(false);
+				child.rebalance();
 			}
 		}
 	}
