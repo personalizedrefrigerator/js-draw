@@ -87,7 +87,7 @@ const makeSnappedList = <DataType> (
 			}
 
 			// Handles the case where there are many markers and the current is offscreen
-			if (activeMarker) {
+			if (activeMarker && markerContainer.scrollHeight > container.clientHeight) {
 				activeMarker.scrollIntoView({ block: 'nearest' });
 			}
 
