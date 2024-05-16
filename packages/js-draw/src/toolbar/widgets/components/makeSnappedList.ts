@@ -76,7 +76,7 @@ const makeSnappedList = <DataType> (
 
 				const markerIndex = i;
 				marker.onclick = () => {
-					wrappedItems.get()[markerIndex]?.element?.scrollIntoView({ behavior: 'smooth' });
+					wrappedItems.get()[markerIndex]?.element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 				};
 			}
 
