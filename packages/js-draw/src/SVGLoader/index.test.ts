@@ -1,11 +1,11 @@
-import { Rect2, TextComponent, Vec2 } from '../lib';
+import { Color4, Rect2, TextComponent, Vec2 } from '../lib';
 import SVGLoader, { SVGLoaderLoadMethod } from '.';
 import createEditor from '../testing/createEditor';
 
 describe('SVGLoader', () => {
 	// Run all tests with both load methods
 	describe.each([
-		SVGLoaderLoadMethod.DOMParser, SVGLoaderLoadMethod.IFrame
+		SVGLoaderLoadMethod.DOMParser, SVGLoaderLoadMethod.IFrame,
 	])('should load SVGs correctly from strings', (loadMethod) => {
 		it('should correctly load x/y-positioned text nodes', async () => {
 			const editor = createEditor();
@@ -58,6 +58,25 @@ describe('SVGLoader', () => {
 			expect(elem.getBBox().topLeft.y).toBeLessThan(0);
 			expect(elem.getBBox().topLeft.x).toBe(0);
 			expect(elem.getBBox().h).toBeGreaterThan(200);
+		});
+
+		it('should correctly load text object colors', async () => {
+			const editor = createEditor();
+			await editor.loadFrom(SVGLoader.fromString(`
+				<svg>
+					<text style="fill: #ff0000;">
+						Testing...
+						<tspan x='0' y='100'>Test 2...</tspan>
+						<tspan x='0' y='200'>Test 2...</tspan>
+					</text>
+				</svg>
+			`, { sanitize: true, loadMethod }));
+
+			const elem = editor.image
+				.getElementsIntersectingRegion(new Rect2(-1000, -1000, 10000, 10000))
+				.filter(elem => elem instanceof TextComponent)[0] as TextComponent;
+			expect(elem).toBeTruthy();
+			expect(elem.getStyle().color).objEq(Color4.red);
 		});
 
 		it('tspans without specified font-sizes should inherit their font size from their parent element', async () => {
