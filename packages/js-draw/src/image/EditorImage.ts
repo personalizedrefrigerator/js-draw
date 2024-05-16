@@ -874,26 +874,30 @@ export class ImageNode {
 			}
 			const targetGridSquare = grid[indexWithGreatest];
 
-			const newChildren = [];
-			const childNodeChildren = [];
-			for (const child of this.children) {
-				if (targetGridSquare.containsRect(child.getBBox())) {
-					childNodeChildren.push(child);
-				} else {
-					newChildren.push(child);
+			// Avoid clustering if just a few children would be grouped.
+			// Unnecessary clustering can lead to unnecessarily nested nodes.
+			if (greatestCount > 4) {
+				const newChildren = [];
+				const childNodeChildren = [];
+				for (const child of this.children) {
+					if (targetGridSquare.containsRect(child.getBBox())) {
+						childNodeChildren.push(child);
+					} else {
+						newChildren.push(child);
+					}
 				}
-			}
 
-			if (childNodeChildren.length < this.children.length) {
-				this.children = newChildren;
+				if (childNodeChildren.length < this.children.length) {
+					this.children = newChildren;
 
-				const child = new ImageNode(this);
-				this.children.push(child);
-				child.children = childNodeChildren;
-				child.updateParents(false);
+					const child = new ImageNode(this);
+					this.children.push(child);
+					child.children = childNodeChildren;
+					child.updateParents(false);
 
-				child.recomputeBBox(false);
-				child.rebalance();
+					child.recomputeBBox(false);
+					child.rebalance();
+				}
 			}
 		}
 
@@ -938,7 +942,6 @@ export class ImageNode {
 
 			return;
 		}
-
 		this.parent.removeChild(this);
 
 		// Remove the child-to-parent link and invalid this
