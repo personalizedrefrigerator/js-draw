@@ -31,6 +31,11 @@ const makeSnappedList = <DataType> (
 	const makePageMarkers = () => {
 		const markerContainer = document.createElement('div');
 		markerContainer.classList.add('page-markers');
+
+		// Keyboard focus should go to the main scrolling list.
+		// TODO: Does it make sense for the page marker list to be focusable?
+		markerContainer.setAttribute('tabindex', '-1');
+
 		const markers: HTMLElement[] = [];
 
 		const pairedItems = ReactiveValue.union<[number, SnappedListItems<DataType>]>([ visibleIndex, itemsValue ]);
