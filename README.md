@@ -23,7 +23,7 @@ A core feature of `js-draw` is its [large zoom range](https://personalizedrefrig
 
 <details open><summary><strong>Demo</strong></summary>
 
-https://github.com/personalizedrefrigerator/js-draw/assets/46334387/f1c4afea-d7c8-4c36-835b-e01f2a646424
+<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/f1c4afea-d7c8-4c36-835b-e01f2a646424"></video>
 
 </details>
 
@@ -35,7 +35,7 @@ Applications using `js-draw` can adjust this zoom range with custom [EditorSetti
 
 <details><summary><strong>Demo</strong></summary>
     
-https://github.com/personalizedrefrigerator/js-draw/assets/46334387/1f4ebeb1-9d2f-4884-9410-9fb1d5e455ee
+<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/1f4ebeb1-9d2f-4884-9410-9fb1d5e455ee"></video>
 
 </details>
 
@@ -57,7 +57,7 @@ It's possible for applications using `js-draw` to [add custom pen types](https:/
 
 - <details><summary>Partial stroke erasing</summary>
 
-  https://github.com/personalizedrefrigerator/js-draw/assets/46334387/c8c2b8d5-5537-4df8-a8b5-899c2d7ea5ce
+  <video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/c8c2b8d5-5537-4df8-a8b5-899c2d7ea5ce"></video>
 
   </details>
 - [Collaborative editing](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples/example-collaborative)
