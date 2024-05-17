@@ -1,3 +1,11 @@
+# 1.20.0
+ * Features
+    * Added an additional scroll indicator when the image tool displays multiple images.
+       * This works around [a lack of scrollbars in Android WebViews](https://issues.chromium.org/issues/40226034).
+ * Improvements
+    * Improve performance when loading large images.
+
+
 # 1.19.0, 1.19.1
  * Features
     * Support adding multiple images at once from the image tool.
