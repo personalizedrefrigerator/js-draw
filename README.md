@@ -172,7 +172,7 @@ For example, although `js-draw` doesn't support `<circle/>` elements,
 ```
 renders as
 
-![screenshot of the image editor, displaying a green checkmark. The circle is invisible](docs/img/readme-images/unsupported-elements--in-editor.png)
+<img alt="screenshot of the image editor, displaying a green checkmark. The circle is invisible" src="docs/img/readme-images/unsupported-elements--in-editor.png" width="600"/>
 
 but exports to
 ```xml
