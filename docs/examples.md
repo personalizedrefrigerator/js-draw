@@ -8,6 +8,7 @@
 
 # Sample images created with `js-draw`
 
+ * [![Drawing: js-draw logo](./img/readme-images/logo.svg)](./img/readme-images/logo.svg)
  * [![Drawing: Hot air balloon with js-draw written to the left.](./img/sample/sample-1.svg)](./img/sample/sample-1.svg)
  * [![Drawing: embedded image labels an arrow pointing to an autosterogram.](./img/sample/sample-2.svg)](./img/sample/sample-2.svg)
  * [![Drawing: js-draw written, surrounded by shapes.](./img/sample/sample-3.svg)](./img/sample/sample-3.svg)
