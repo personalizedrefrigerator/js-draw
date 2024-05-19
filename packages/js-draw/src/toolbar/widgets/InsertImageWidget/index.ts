@@ -309,7 +309,10 @@ export default class InsertImageWidget extends BaseWidget {
 
 				const image = new Image();
 				image.src = imageWrapper.getBase64Url();
-				image.setAttribute('alt', imageWrapper.getAltText());
+				const altText = imageWrapper.getAltText();
+				if (altText) {
+					image.setAttribute('alt', altText);
+				}
 
 				let component;
 				try {
