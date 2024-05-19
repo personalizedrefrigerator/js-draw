@@ -1,3 +1,7 @@
+# 1.20.1
+ * Bug fixes
+    * Image tool: Fix ALT text input applies ALT text to wrong images when multiple images are selected.
+
 # 1.20.0
  * Features
     * Added an additional scroll indicator when the image tool displays multiple images.
