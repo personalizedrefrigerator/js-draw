@@ -37,8 +37,9 @@
 			in srgb, var(--foreground-color-1), transparent
 		);
 
-		> .cancel-button {
-			display: block;
+		.cancel-button {
+			padding-left: 3px;
+			padding-right: 3px;
 		}
 
 		> .toolbar--file-input-description {
