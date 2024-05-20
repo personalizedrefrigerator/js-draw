@@ -225,14 +225,6 @@ export default class ToolController implements InputEventListener {
 		this.insertTools(insertBefore, toolsToInsert, 'before');
 	}
 
-	/** @internal */
-	public changeActiveToolTo(tool: BaseTool) {
-		if (!tool.isEnabled()) {
-			tool.setEnabled(true);
-		}
-		this.activeTool = tool;
-	}
-
 	// @internal use `dispatchEvent` rather than calling `onEvent` directly.
 	private onEventInternal(event: InputEvt): boolean {
 		const isEditorReadOnly = this.isEditorReadOnly.get();
