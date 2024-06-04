@@ -8,7 +8,7 @@ import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2, Vec3, Color4, Mat33, Rect2 } from '@js-draw/math';
 import Display, { RenderingMode } from './rendering/Display';
-import SVGLoader from './SVGLoader';
+import SVGLoader from './SVGLoader/SVGLoader';
 import Pointer from './Pointer';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';

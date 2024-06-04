@@ -1,6 +1,6 @@
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import { Mat33, Rect2, Point2, Vec2, toRoundedString } from '@js-draw/math';
-import { svgAttributesDataKey, svgLoaderAttributeContainerID, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
+import { svgAttributesDataKey, svgLoaderAttributeContainerID, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader/SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';

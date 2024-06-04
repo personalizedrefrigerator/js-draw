@@ -1,7 +1,7 @@
 import { Color4 } from '@js-draw/math';
 import { imageBackgroundCSSClassName } from './components/BackgroundComponent';
 import { RestyleableComponent } from './lib';
-import SVGLoader from './SVGLoader';
+import SVGLoader from './SVGLoader/SVGLoader';
 import createEditor from './testing/createEditor';
 
 describe('Editor.loadFrom', () => {

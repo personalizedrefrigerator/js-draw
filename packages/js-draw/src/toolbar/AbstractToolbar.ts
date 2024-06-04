@@ -16,7 +16,7 @@ import TextToolWidget from './widgets/TextToolWidget';
 import HandToolWidget from './widgets/HandToolWidget';
 import BaseWidget, { ToolbarWidgetTag } from './widgets/BaseWidget';
 import ActionButtonWidget from './widgets/ActionButtonWidget';
-import InsertImageWidget from './widgets/InsertImageWidget';
+import InsertImageWidget from './widgets/InsertImageWidget/InsertImageWidget';
 import DocumentPropertiesWidget from './widgets/DocumentPropertiesWidget';
 import { DispatcherEventListener } from '../EventDispatcher';
 import { Color4 } from '@js-draw/math';

@@ -25,6 +25,7 @@
     },
     "./Editor": {
       "types": "./dist/mjs/Editor.d.ts",
+      "require": "./dist/cjs/Editor.js",
       "default": "./dist/mjs/Editor.mjs"
     },
     "./types": {

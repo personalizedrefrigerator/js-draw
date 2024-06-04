@@ -1,5 +1,5 @@
 import { Color4, Rect2, TextComponent, Vec2 } from '../lib';
-import SVGLoader, { SVGLoaderLoadMethod } from '.';
+import SVGLoader, { SVGLoaderLoadMethod } from './SVGLoader';
 import createEditor from '../testing/createEditor';
 
 describe('SVGLoader', () => {

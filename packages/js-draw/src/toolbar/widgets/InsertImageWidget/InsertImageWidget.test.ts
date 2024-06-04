@@ -3,7 +3,7 @@ import { ImageComponent } from '../../../components/lib';
 import createEditor from '../../../testing/createEditor';
 import { SelectionTool } from '../../../tools/lib';
 import { makeDropdownToolbar } from '../../DropdownToolbar';
-import InsertImageWidget from '.';
+import InsertImageWidget from './InsertImageWidget';
 
 // Exposes additional methods for testing
 class TestInsertImageWidget extends InsertImageWidget {

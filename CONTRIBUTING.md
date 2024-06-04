@@ -79,7 +79,11 @@ Because `js-draw` was originally created as a part of a pull request for the Jop
 [it mostly follows Joplin's style guide](https://github.com/laurent22/joplin/blob/dev/readme/dev/coding_style.md),
 with the exception that TypeDoc-style comments (`/** */`) are encouraged for documentation.
 
-Note that `//`-style comments can also be used for documentation.
+
+**Notes**:
+- `//`-style comments can also be used for documentation, but should be avoided.
+- [Avoid directory imports](https://github.com/personalizedrefrigerator/js-draw/issues/70)
+   - Use `import {Something} from './Test/index.ts'` instead of `import {Something} from './Test'`.
 
 # Development FAQ
 ## How can I test changes to curve fitting for strokes?
