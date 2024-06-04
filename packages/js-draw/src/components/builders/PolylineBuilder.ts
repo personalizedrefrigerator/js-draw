@@ -14,7 +14,9 @@ import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
  */
 export const makePolylineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
-		const minFit = viewport.getSizeOfPixelOnCanvas();
+		// Fit to a value slightly smaller than the pixel size. A larger value can
+		// cause the stroke to appear jagged at some zoom levels.
+		const minFit = viewport.getSizeOfPixelOnCanvas() * 0.75;
 		return new PolylineBuilder(initialPoint, minFit, viewport);
 	}
 );
@@ -106,7 +108,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 	}
 
 	private getMinFit(): number {
-		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 3);
+		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 4);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
