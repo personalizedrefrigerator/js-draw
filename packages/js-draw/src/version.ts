@@ -4,5 +4,5 @@
  * @internal
  */
 export default {
-	number: '1.20.2',
+	number: '1.20.3',
 };

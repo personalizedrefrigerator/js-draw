@@ -1,3 +1,9 @@
+# 1.20.3
+ * Bug fixes
+    * Fix importing `js-draw`, `js-draw/Editor`, etc. as an ES module.
+    * Fix importing `js-draw/Editor` as a CommonJS module.
+    * Fix rounding size was too large at some zoom levels with the polyline pen.
+
 # 1.20.1 and 1.20.2
  * Bug fixes
     * Image tool: Fix ALT text input applies ALT text to wrong images when multiple images are selected.
