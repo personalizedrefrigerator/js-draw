@@ -73,17 +73,6 @@ KeyboardShortcutManager.registerDefaultKeyboardShortcut(
 	zoomOutKeyboardShortcutId, [ 'KeyS' ], 'Zoom out'
 );
 
-// Selection
-export const selectAllKeyboardShortcut = 'jsdraw.tools.SelectionTool.selectAll';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	selectAllKeyboardShortcut, [ 'CtrlOrMeta+KeyA' ], 'Select all'
-);
-export const duplicateSelectionShortcut = 'jsdraw.tools.SelectionTool.duplicateSelection';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	duplicateSelectionShortcut, [ 'CtrlOrMeta+KeyD' ], 'Duplicate selection'
-);
-export const sendToBackSelectionShortcut = 'jsdraw.tools.SelectionTool.sendToBack';
-KeyboardShortcutManager.registerDefaultKeyboardShortcut(
-	sendToBackSelectionShortcut, [ 'End' ], 'Send to back'
-);
+// Selection tool
 
+export * from './SelectionTool/keybindings';

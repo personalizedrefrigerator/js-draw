@@ -9,7 +9,7 @@ import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
-import { duplicateSelectionShortcut, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
+import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
 import Pointer from '../../Pointer';
 
@@ -318,45 +318,35 @@ export default class SelectionTool extends BaseTool {
 		let xScaleSteps = 0;
 		let yScaleSteps = 0;
 
-		switch (event.key) {
-		case 'a':
-		case 'h':
-		case 'ArrowLeft':
+		if (shortcucts.matchesShortcut(translateLeftSelectionShortcutId, event)) {
 			xTranslateSteps -= 1;
-			break;
-		case 'd':
-		case 'l':
-		case 'ArrowRight':
+		}
+		else if (shortcucts.matchesShortcut(translateRightSelectionShortcutId, event)) {
 			xTranslateSteps += 1;
-			break;
-		case 'q':
-		case 'k':
-		case 'ArrowUp':
+		}
+		else if (shortcucts.matchesShortcut(translateUpSelectionShortcutId, event)) {
 			yTranslateSteps -= 1;
-			break;
-		case 'e':
-		case 'j':
-		case 'ArrowDown':
+		}
+		else if (shortcucts.matchesShortcut(translateDownSelectionShortcutId, event)) {
 			yTranslateSteps += 1;
-			break;
-		case 'r':
+		}
+		else if (shortcucts.matchesShortcut(rotateClockwiseSelectionShortcutId, event)) {
 			rotationSteps += 1;
-			break;
-		case 'R':
+		}
+		else if (shortcucts.matchesShortcut(rotateCounterClockwiseSelectionShortcutId, event)) {
 			rotationSteps -= 1;
-			break;
-		case 'i':
+		}
+		else if (shortcucts.matchesShortcut(shrinkXSelectionShortcutId, event)) {
 			xScaleSteps -= 1;
-			break;
-		case 'I':
+		}
+		else if (shortcucts.matchesShortcut(stretchXSelectionShortcutId, event)) {
 			xScaleSteps += 1;
-			break;
-		case 'o':
+		}
+		else if (shortcucts.matchesShortcut(shrinkYSelectionShortcutId, event)) {
 			yScaleSteps -= 1;
-			break;
-		case 'O':
+		}
+		else if (shortcucts.matchesShortcut(stretchYSelectionShortcutId, event)) {
 			yScaleSteps += 1;
-			break;
 		}
 
 		let handled = xTranslateSteps !== 0
