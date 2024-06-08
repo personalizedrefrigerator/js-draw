@@ -1,7 +1,7 @@
 import EditorImage from './image/EditorImage';
 import ToolController from './tools/ToolController';
 import { EditorNotifier, EditorEventType, ImageLoader } from './types';
-import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent } from './inputEvents';
+import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent, PointerEvtType } from './inputEvents';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
@@ -1324,7 +1324,7 @@ export class Editor {
 	 * @see {@link sendPenEvent} {@link sendTouchEvent}
 	 */
 	public sendPenEvent(
-		eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+		eventType: PointerEvtType,
 		point: Point2,
 
 		// @deprecated

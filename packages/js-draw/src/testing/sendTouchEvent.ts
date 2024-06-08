@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import { Vec2 } from '@js-draw/math';
 import Pointer, { PointerDevice } from '../Pointer';
-import { InputEvtType } from '../inputEvents';
+import { InputEvtType, PointerEvtType } from '../inputEvents';
 import getUniquePointerId from './getUniquePointerId';
 
 /**
@@ -42,7 +42,7 @@ import getUniquePointerId from './getUniquePointerId';
  */
 const sendTouchEvent = (
 	editor: Editor,
-	eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+	eventType: PointerEvtType,
 	screenPos: Vec2,
 	allOtherPointers?: Pointer[]
 ) => {

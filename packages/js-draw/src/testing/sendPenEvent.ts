@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import { Point2 } from '@js-draw/math';
 import Pointer, { PointerDevice } from '../Pointer';
-import { InputEvtType } from '../inputEvents';
+import { InputEvtType, PointerEvtType } from '../inputEvents';
 import getUniquePointerId from './getUniquePointerId';
 
 /**
@@ -12,7 +12,7 @@ import getUniquePointerId from './getUniquePointerId';
  */
 const sendPenEvent = (
 	editor: Editor,
-	eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+	eventType: PointerEvtType,
 	point: Point2,
 
 	allPointers?: Pointer[],
