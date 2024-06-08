@@ -33,6 +33,9 @@ const loadRendererHooks = (renderer: Renderer) => {
 			window.basePath = ${JSON.stringify(event.relativeURL('.'))}
 			window.assetsURL = ${JSON.stringify(event.relativeURL('assets/'))};
 			window.imagesURL = ${JSON.stringify(event.relativeURL('../img/'))};
+
+			/* Needed for TypeScript compilation */
+			window.process ??= { versions: {} };
 		`;
 
 		return (
