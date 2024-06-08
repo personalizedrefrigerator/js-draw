@@ -12,12 +12,12 @@ cd "$root_dir"
 
 # Build all TypeDoc documentation
 echo 'Building documentation'
-npm run doc
+yarn run doc
 
 # Build the main example app
 echo 'Build demo app'
 cd docs/demo
-npm run build
+yarn run build
 
 # Create symlinks between files/directories that have moved
 echo 'Symlink old paths'

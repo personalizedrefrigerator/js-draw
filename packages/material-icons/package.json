@@ -10,10 +10,9 @@
 	},
 	"author": "Henry Heino",
 	"license": "(MIT AND Apache-2.0)",
-	"private": false,
 	"scripts": {
-		"dist": "npm run build",
-		"build": "rm -rf ./dist/* && build-tool build",
+		"dist": "yarn run build",
+		"build": "build-tool build",
 		"watch": "build-tool watch"
 	},
 	"devDependencies": {

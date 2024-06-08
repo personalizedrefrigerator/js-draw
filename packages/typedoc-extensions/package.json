@@ -12,9 +12,9 @@
 	"license": "MIT",
 	"private": true,
 	"scripts": {
-		"dist": "npm run build",
-		"build": "rm -rf ./dist && mkdir dist && build-tool build",
-		"watch": "rm -rf ./dist && mkdir dist && build-tool watch"
+		"dist": "yarn run build",
+		"build": "build-tool build",
+		"watch": "build-tool watch"
 	},
 	"dependencies": {
 		"katex": "0.16.10",
@@ -33,7 +33,7 @@
 		"@js-draw/math": "^1.19.0",
 		"@lezer/highlight": "1.1.6",
 		"@types/katex": "0.16.7",
-		"@types/react": "18.2.28",
+		"@types/react": "18.3.3",
 		"codemirror": "6.0.1",
 		"js-draw": "^1.20.3"
 	},

@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 import { argv, exit } from 'node:process';
-import path from 'node:path';
-import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
+import path, { join, normalize } from 'node:path';
+import { existsSync, rmSync, mkdirSync, readFileSync, realpathSync, readdirSync } from 'node:fs';
 import CompiledTypeScriptDirectory from './CompiledTypeScriptDirectory';
 import BundledFile from './BundledFile';
 import buildTranslationTemplates from './buildTranslationTemplates';
@@ -24,9 +24,9 @@ const isBuildCommand = (a: string): a is BuildCommand => {
 };
 
 const printUsage = () => {
-	console.log(`Usage: ${argv[0]} build|watch`);
-	console.log();
-	console.log(
+	console.info(`Usage: ${argv[0]} build|watch`);
+	console.info();
+	console.info(
 		'Both build and watch read from a build-config.json in the ' +
 		'current directory.'
 	);
@@ -202,6 +202,26 @@ const main = async () => {
 
 	const config = readConfig();
 
+	if (config.outDirectory) {
+		if (existsSync(config.outDirectory)) {
+			console.info('Removing output directory...');
+
+			if (!normalize(config.outDirectory).startsWith(normalize(rootDir))) {
+				throw new Error('Invalid output directory -- not in project. Refusing to remove.');
+			}
+
+			const files = readdirSync(config.outDirectory);
+			for (const file of files) {
+				const toRemove = join(config.outDirectory, file);
+				console.log('  rm -r', toRemove);
+				rmSync(toRemove, { recursive: true });
+			}
+		} else {
+			console.info('Creating output directory...');
+			mkdirSync(config.outDirectory, { recursive: true });
+		}
+	}
+
 	if (config.prebuild) {
 		console.log('Prebuild: Executing ', config.prebuild.scriptPath);
 
@@ -221,13 +241,7 @@ const main = async () => {
 		console.log('Building translation templates...');
 		buildTranslationTemplates(config);
 	} else {
-		if (config.outDirectory && !existsSync(config.outDirectory)) {
-			console.log('Creating output directory...');
-			mkdirSync(config.outDirectory, { recursive: true });
-		}
-
 		void bundleFiles(config, buildMode);
-
 		void compileSCSS(config, buildMode);
 
 		if (config.inDirectory && config.outDirectory) {

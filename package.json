@@ -15,7 +15,7 @@
     "build-translation-templates": "lerna run build-translation-templates",
     "translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
     "preinstall": "git config core.hookspath .githooks",
-    "postinstall": "npm run build",
+    "postinstall": "yarn run build",
     "publish-ci": "lerna publish from-package --yes"
   },
   "workspaces": [
@@ -34,6 +34,8 @@
     "lerna": "8.1.2",
     "lint-staged": "13.2.3",
     "ts-jest": "29.1.2",
-    "typedoc": "0.25.8"
-  }
+    "typedoc": "0.25.8",
+    "typescript": "5.4.5"
+  },
+  "packageManager": "yarn@4.2.2"
 }
