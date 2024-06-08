@@ -20,7 +20,7 @@
 	"scripts": {
 		"dist-test": "cd dist-test/test_imports && yarn install && yarn run test",
 		"dist": "yarn run build && yarn run dist-test",
-		"build": "rm -rf ./dist && build-tool build",
+		"build": "build-tool build",
 		"watch": "build-tool watch"
 	},
 	"dependencies": {

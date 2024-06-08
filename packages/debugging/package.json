@@ -20,7 +20,7 @@
 	"private": true,
 	"scripts": {
 		"dist": "yarn run build",
-		"build": "rm -rf ./dist && build-tool build",
+		"build": "build-tool build",
 		"watch": "build-tool watch"
 	},
 	"devDependencies": {
