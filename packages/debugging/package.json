@@ -24,7 +24,8 @@
 		"watch": "build-tool watch"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.19.0"
+		"@js-draw/build-tool": "^1.19.0",
+		"js-draw": "^1.8.0"
 	},
 	"peerDependencies": {
 		"js-draw": "^1.8.0"
