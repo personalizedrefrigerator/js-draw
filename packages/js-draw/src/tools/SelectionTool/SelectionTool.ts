@@ -9,7 +9,7 @@ import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
-import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId } from '../keybindings';
+import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId, stretchXYSelectionShortcutId, shrinkXYSelectionShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
 import Pointer from '../../Pointer';
 
@@ -266,15 +266,6 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	private static handleableKeys = [
-		'a', 'h', 'ArrowLeft',
-		'd', 'l', 'ArrowRight',
-		'q', 'k', 'ArrowUp',
-		'e', 'j', 'ArrowDown',
-		'r', 'R',
-		'i', 'I', 'o', 'O',
-		'Control', 'Meta',
-	];
 	// Whether the last keypress corresponded to an action that didn't transform the
 	// selection (and thus does not need to be finalized on onKeyUp).
 	private hasUnfinalizedTransformFromKeyPress: boolean = false;
@@ -346,6 +337,14 @@ export default class SelectionTool extends BaseTool {
 			yScaleSteps -= 1;
 		}
 		else if (shortcucts.matchesShortcut(stretchYSelectionShortcutId, event)) {
+			yScaleSteps += 1;
+		}
+		else if (shortcucts.matchesShortcut(shrinkXYSelectionShortcutId, event)) {
+			xScaleSteps -= 1;
+			yScaleSteps -= 1;
+		}
+		else if (shortcucts.matchesShortcut(stretchXYSelectionShortcutId, event)) {
+			xScaleSteps += 1;
 			yScaleSteps += 1;
 		}
 
@@ -449,7 +448,7 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
-		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
+		if (this.selectionBox) {
 			this.selectionBox.finalizeTransform();
 			this.hasUnfinalizedTransformFromKeyPress = false;
 			return true;
