@@ -4,7 +4,7 @@ import { EditorImage, PointerDevice, Rect2, StrokeComponent } from '../lib';
 import { LineSegment2, Point2, Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
 import sendPenEvent from '../testing/sendPenEvent';
-import { InputEvtType } from '../inputEvents';
+import { InputEvtType, PointerEvtType } from '../inputEvents';
 import Eraser, { EraserMode } from './Eraser';
 import Pen from './Pen';
 
@@ -18,7 +18,7 @@ const selectEraser = (editor: Editor) => {
 
 const sendEraserEvent = (
 	editor: Editor,
-	eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+	eventType: PointerEvtType,
 	point: Point2,
 ) => {
 	return sendPenEvent(editor, eventType, point, undefined, PointerDevice.Eraser);

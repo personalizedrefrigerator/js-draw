@@ -25,6 +25,7 @@ export default class Pen extends BaseTool {
 	private lastPoint: StrokeDataPoint|null = null;
 	private startPoint: StrokeDataPoint|null = null;
 	private currentDeviceType: PointerDevice|null = null;
+	private currentPointerId: number|null = null;
 	private styleValue: MutableReactiveValue<PenStyle>;
 	private style: PenStyle;
 
@@ -106,26 +107,23 @@ export default class Pen extends BaseTool {
 	}
 
 	public override onPointerDown(event: PointerEvt): boolean {
-		const { current, allPointers } = event;
-		const isEraser = current.device === PointerDevice.Eraser;
-
-		let anyDeviceIsStylus = false;
-		for (const pointer of allPointers) {
-			if (pointer.device === PointerDevice.Pen) {
-				anyDeviceIsStylus = true;
-				break;
-			}
-		}
-
 		// Avoid canceling an existing stroke
 		if (this.builder && !this.eventCanCancelStroke(event)) {
 			return true;
 		}
 
-		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
+		const { current, allPointers } = event;
+		const isEraser = current.device === PointerDevice.Eraser;
+		const isPen = current.device === PointerDevice.Pen;
+
+		// Always start strokes if the current device is a pen. This is useful in the case
+		// where an accidental touch gesture from a user's hand is ongoing. This gesture
+		// should not prevent the user from drawing.
+		if ((allPointers.length === 1 && !isEraser) || isPen) {
 			this.startPoint = this.toStrokePoint(current);
 			this.builder = this.style.factory(this.startPoint, this.editor.viewport);
 			this.currentDeviceType = current.device;
+			this.currentPointerId = current.id;
 
 			if (this.shapeAutocompletionEnabled) {
 				const stationaryDetectionConfig = {
@@ -173,6 +171,7 @@ export default class Pen extends BaseTool {
 	public override onPointerMove({ current }: PointerEvt): void {
 		if (!this.builder) return;
 		if (current.device !== this.currentDeviceType) return;
+		if (current.id !== this.currentPointerId) return;
 
 		const isStationary = this.stationaryDetector?.onPointerMove(current);
 
@@ -190,7 +189,7 @@ export default class Pen extends BaseTool {
 
 	public override onPointerUp({ current }: PointerEvt) {
 		if (!this.builder) return false;
-		if (current.device !== this.currentDeviceType) {
+		if (current.id !== this.currentPointerId) {
 			// this.builder still exists, so we're handling events from another
 			// device type.
 			return true;
@@ -206,10 +205,7 @@ export default class Pen extends BaseTool {
 		};
 
 		this.addPointToStroke(strokePoint);
-
-		if (current.isPrimary) {
-			this.finalizeStroke();
-		}
+		this.finalizeStroke();
 
 		return false;
 	}
