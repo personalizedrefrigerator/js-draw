@@ -991,6 +991,7 @@ __metadata:
   resolution: "@js-draw/debugging@workspace:packages/debugging"
   dependencies:
     "@js-draw/build-tool": "npm:^1.19.0"
+    js-draw: "npm:^1.8.0"
   peerDependencies:
     js-draw: ^1.8.0
   languageName: unknown
@@ -5951,7 +5952,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-draw@npm:^1.20.3, js-draw@workspace:packages/js-draw":
+"js-draw@npm:^1.20.3, js-draw@npm:^1.8.0, js-draw@workspace:packages/js-draw":
   version: 0.0.0-use.local
   resolution: "js-draw@workspace:packages/js-draw"
   dependencies:
