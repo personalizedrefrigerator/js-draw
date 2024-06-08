@@ -19,7 +19,7 @@
 	"license": "MIT",
 	"private": true,
 	"scripts": {
-		"dist": "npm run build",
+		"dist": "yarn run build",
 		"build": "rm -rf ./dist && build-tool build",
 		"watch": "build-tool watch"
 	},

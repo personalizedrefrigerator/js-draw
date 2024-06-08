@@ -94,6 +94,14 @@ export default class BundledFile {
 					'path': require.resolve('path-browserify'),
 				},
 			},
+			resolveLoader: {
+				alias: {
+					'ts-loader': require.resolve('ts-loader'),
+					'style-loader': require.resolve('style-loader'),
+					'css-loader': require.resolve('css-loader'),
+					'sass-loader': require.resolve('sass-loader'),
+				}
+			},
 		};
 
 		return config;

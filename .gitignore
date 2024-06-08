@@ -75,3 +75,12 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# Other yarn files -- see https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

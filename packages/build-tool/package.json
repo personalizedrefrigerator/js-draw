@@ -4,9 +4,11 @@
 	"description": "Tool to facilitate building and bundling TypeScript for js-draw.",
 	"license": "MIT",
 	"private": true,
-	"main": "src/lib.ts",
-	"bin": {
-		"build-tool": "./src/main.ts"
+	"main": "./src/lib.ts",
+	"bin": "./dist/main.js",
+	"scripts": {
+		"postinstall": "yarn run build",
+		"build": "tsc"
 	},
 	"dependencies": {
 		"css-loader": "6.10.0",

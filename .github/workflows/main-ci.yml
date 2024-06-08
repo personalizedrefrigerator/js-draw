@@ -34,13 +34,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: npm install
+        run: yarn install
       - name: Test imports
-        run: npm run dist-test
+        run: yarn run dist-test
       - name: Run tests
-        run: npm run test
+        run: yarn run test
       - name: Lint
-        run: npm run lint-ci
+        run: yarn run lint-ci
       - name: Build pages
         run: bash scripts/build-website.sh
       - name: Setup Pages

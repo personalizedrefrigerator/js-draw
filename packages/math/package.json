@@ -17,10 +17,9 @@
 	},
 	"author": "Henry Heino",
 	"license": "MIT",
-	"private": false,
 	"scripts": {
-		"dist-test": "cd dist-test/test_imports && npm install && npm run test",
-		"dist": "npm run build && npm run dist-test",
+		"dist-test": "cd dist-test/test_imports && yarn install && yarn run test",
+		"dist": "yarn run build && yarn run dist-test",
 		"build": "rm -rf ./dist && build-tool build",
 		"watch": "build-tool watch"
 	},
