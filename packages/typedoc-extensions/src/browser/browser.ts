@@ -65,15 +65,20 @@ const navigateBasedOnURL = () => {
 	}
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+const onDomContentLoaded = () => {
 	fixImageURLs();
 	replaceInternalPackageToPackageLinks();
 	navigateBasedOnURL();
-});
-
-window.addEventListener('load', () => {
 	initRunnableElements();
-});
+};
+
+if (document.readyState === 'loading') {
+	window.addEventListener('DOMContentLoaded', () => {
+		onDomContentLoaded();
+	});
+} else {
+	onDomContentLoaded();
+}
 
 (window as any).navigateTo = (packageName: string, _exportName: string) => {
 	location.replace(join(basePath, packageName.replace(/[^a-zA-Z_0-9]/g, '_') + '.html'));
