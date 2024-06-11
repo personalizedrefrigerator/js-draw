@@ -38,13 +38,12 @@ const loadRendererHooks = (renderer: Renderer) => {
 			window.process ??= { versions: {} };
 		`;
 
-		// Note: The browser extension script **must** be marked as defer. If it isn't, it breaks TypeDoc >= 0.25.9.
 		return (
 			<>
 				<script>
 					<JSX.Raw html={pageVariables}/>
 				</script>
-				<script defer src={event.relativeURL('assets/js-draw-typedoc-extension--browser.js')}></script>
+				<script src={event.relativeURL('assets/js-draw-typedoc-extension--browser.js')}></script>
 			</>
 		);
 	});
