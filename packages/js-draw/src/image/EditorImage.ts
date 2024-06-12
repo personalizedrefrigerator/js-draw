@@ -241,7 +241,8 @@ export default class EditorImage {
 	 *
 	 * @see {@link Display.flatten}
 	 *
-	 * @example
+	 * **Example**:
+	 *
 	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
 	 */
 	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {

@@ -42,6 +42,10 @@ window.addEventListener('load', () => {
 				wrapper.appendChild(colorSquare);
 				wrapper.appendChild(document.createTextNode(part.toString()));
 			}
+			else if (part instanceof jsdrawMath.Mat33) {
+				wrapper.appendChild(document.createTextNode(part.toString()));
+				wrapper.classList.add('matrix-output');
+			}
 			else {
 				const details = document.createElement('details');
 				details.style.display = 'inline-block';
