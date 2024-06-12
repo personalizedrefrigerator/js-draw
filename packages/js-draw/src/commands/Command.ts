@@ -1,6 +1,11 @@
 import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
 
+/**
+ * A `Command` is an action that can be done, redone, and undone. It's used to enable undo/redo.
+ *
+ * See {@link Editor.dispatch}.
+ */
 export abstract class Command {
 	public abstract apply(editor: Editor): Promise<void>|void;
 	public abstract unapply(editor: Editor): Promise<void>|void;

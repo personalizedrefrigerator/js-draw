@@ -22,11 +22,12 @@ import { IconElemType } from '../IconProvider';
 import HelpDisplay from '../utils/HelpDisplay';
 import { makePolylineBuilder } from '../../components/builders/PolylineBuilder';
 
+/** Represents a style that can be applied to a pen tool. */
 export interface PenTypeRecord {
 	// Description of the factory (e.g. 'Freehand line')
 	name: string;
 
-	// A unique ID for the facotory (e.g. 'chisel-tip-pen')
+	// A unique ID for the factory (e.g. 'chisel-tip-pen')
 	id: string;
 
 	// True if the pen type generates shapes (and should thus be shown in the GUI

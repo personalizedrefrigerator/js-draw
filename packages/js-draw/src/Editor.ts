@@ -1062,7 +1062,12 @@ export class Editor {
 		return this.readOnly;
 	}
 
-	/** `apply` a command. `command` will be announced for accessibility. */
+	/**
+	 * `apply` a command. `command` will be announced for accessibility.
+	 *
+	 * **Example**:
+	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
+	 */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		const dispatchResult = this.dispatchNoAnnounce(command, addToHistory);
 		const commandDescription = command.description(this, this.localization);
