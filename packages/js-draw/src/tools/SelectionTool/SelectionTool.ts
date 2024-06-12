@@ -104,7 +104,8 @@ export default class SelectionTool extends BaseTool {
 			current = current.snappedToGrid(this.editor.viewport);
 		}
 
-		if (allPointers.length === 1 && current.isPrimary) {
+		// Don't rely on .isPrimary -- it's buggy in Firefox. See https://github.com/personalizedrefrigerator/js-draw/issues/71
+		if (allPointers.length === 1) {
 			this.startPoint = current.canvasPos;
 
 			let transforming = false;
