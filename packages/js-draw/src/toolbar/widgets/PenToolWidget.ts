@@ -37,6 +37,11 @@ export interface PenTypeRecord {
 	factory: ComponentBuilderFactory;
 }
 
+/**
+ * This toolbar widget allows a user to control a single {@link Pen} tool.
+ *
+ * See also {@link AbstractToolbar.addDefaultToolWidgets}.
+ */
 export default class PenToolWidget extends BaseToolWidget {
 	private updateInputs: ()=> void = () => {};
 	protected penTypes: Readonly<PenTypeRecord>[];

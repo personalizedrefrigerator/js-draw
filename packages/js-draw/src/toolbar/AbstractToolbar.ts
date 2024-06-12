@@ -50,6 +50,11 @@ export type ToolbarActionButtonOptions = {
 	autoDisableInReadOnlyEditors?: boolean;
 };
 
+/**
+ * Abstract base class for js-draw editor toolbars.
+ *
+ * See {@link Editor.addToolbar}, {@link makeDropdownToolbar}, and {@link makeEdgeToolbar}.
+ */
 export default abstract class AbstractToolbar {
 	#listeners: DispatcherEventListener[] = [];
 

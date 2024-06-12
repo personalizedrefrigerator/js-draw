@@ -20,6 +20,14 @@ export enum ToolbarWidgetTag {
 	Redo = 'redo',
 }
 
+/**
+ * The `abstract` base class for items that can be shown in a `js-draw` toolbar. See also {@link AbstractToolbar.addWidget}.
+ *
+ * See [the custom tool example](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples/example-custom-tools/example.ts)
+ * for how to create a custom toolbar widget for a tool.
+ *
+ * For custom action buttons, {@link AbstractToolbar.addActionButton} may be sufficient for most use cases.
+ */
 export default abstract class BaseWidget {
 	protected readonly container: HTMLElement;
 	private button: HTMLElement;

@@ -76,6 +76,9 @@ class EraserSwitcher extends BaseTool {
 	}
 }
 
+/**
+ * A tool that allows a user to erase parts of an image.
+ */
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2|null = null;
 	private isFirstEraseEvt: boolean = true;
@@ -357,6 +360,7 @@ export default class Eraser extends BaseTool {
 		return this.thicknessValue;
 	}
 
+	/** @returns An object that allows switching between a full stroke and a partial stroke eraser. */
 	public getModeValue() {
 		return this.modeValue;
 	}
