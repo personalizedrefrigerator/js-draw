@@ -136,6 +136,7 @@ export default class Selection {
 		return this.originalRegion;
 	}
 
+	// The **canvas** region.
 	public get region(): Rect2 {
 		// TODO: This currently assumes that the region rotates about its center.
 		// This may not be true.
