@@ -7,7 +7,7 @@ class CustomTheme extends DefaultTheme {
 	public constructor(renderer: Renderer) {
 		super(renderer);
 
-		loadRendererHooks(renderer);
+		loadRendererHooks(renderer, this.application.options);
 	}
 
 

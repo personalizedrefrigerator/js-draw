@@ -3,6 +3,8 @@
 export enum MarkdownTokenType {
 	CodeDelim,
 	MathDelim,
+	IncludeStartDelim,
+	IncludeEndDelim,
 	Text,
 	Space,
 }
@@ -46,8 +48,21 @@ const tokenizeMarkdown = (markdown: string) => {
 		buffer.push(text);
 	};
 
-	for (const char of markdown) {
+	for (let i = 0; i < markdown.length; i ++) {
+		const char = markdown.charAt(i);
 		let handled = false;
+
+		const matches = (text: string) => markdown.substring(i, i + text.length) === text;
+		const eatIfMatching = (text: string, tokenType: MarkdownTokenType) => {
+			if (matches(text)) {
+				i += text.length - 1;
+				extendToken(tokenType, text);
+				flushToken();
+				return true;
+			}
+			return false;
+		};
+
 		if (!escaped) {
 			if (char === '`') {
 				// code
@@ -64,6 +79,12 @@ const tokenizeMarkdown = (markdown: string) => {
 				}
 
 				handled = true;
+			}
+			else if (matches('[[include:') || matches(']]')) {
+				// include
+				handled = (
+					eatIfMatching('[[include:', MarkdownTokenType.IncludeStartDelim) || eatIfMatching(']]', MarkdownTokenType.IncludeEndDelim)
+				);
 			}
 			else if (char === '\\') {
 				// escape

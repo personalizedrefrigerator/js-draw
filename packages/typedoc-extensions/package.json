@@ -22,7 +22,7 @@
 		"typescript": "5.4.5"
 	},
 	"peerDependencies": {
-		"typedoc": "0.25.x"
+		"typedoc": "0.26.x"
 	},
 	"devDependencies": {
 		"@codemirror/lang-css": "6.2.1",

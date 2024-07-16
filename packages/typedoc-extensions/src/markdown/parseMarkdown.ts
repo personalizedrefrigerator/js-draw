@@ -4,6 +4,7 @@ export enum RegionType {
 	Text='text',
 	Code='code',
 	Math='math',
+	Include='include',
 }
 
 interface LabeledRegion {
@@ -27,13 +28,8 @@ interface StartInformation {
 	readonly startToken: MarkdownToken;
 }
 
-const parseMarkdown = (markdown: string) => {
-	const tokens = tokenizeMarkdown(markdown);
-
-	if (tokens.length === 0) {
-		return [];
-	}
-
+/** Creates larger blocks of information from the given `tokens`. */
+const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 	const labeledRegions: LabeledRegion[] = [];
 
 	const getSpaceInformationAt = (i: number) => {
@@ -70,6 +66,12 @@ const parseMarkdown = (markdown: string) => {
 			return;
 		}
 
+		// Assuming that the current region starts and ends with a delimiter token,
+		// returns the text between the delimiters.
+		const contentWithoutDelimiters = () => {
+			return buffer.slice(1, buffer.length - 1).map(token => token.text).join('');
+		};
+
 		if (currentRegionType === RegionType.Text) {
 			labeledRegions.push({
 				type: RegionType.Text,
@@ -94,7 +96,18 @@ const parseMarkdown = (markdown: string) => {
 				type: currentRegionType,
 				block: surroundedByNewlines && hasBlockDelimiters,
 				fullText: text,
-				content: buffer.slice(1, buffer.length - 1).map(token => token.text).join(''),
+				content: contentWithoutDelimiters(),
+
+				start,
+				stop: start + text.length,
+			});
+		}
+		else if (currentRegionType === RegionType.Include) {
+			labeledRegions.push({
+				type: currentRegionType,
+				block: false,
+				fullText: text,
+				content: contentWithoutDelimiters(),
 
 				start,
 				stop: start + text.length,
@@ -153,6 +166,10 @@ const parseMarkdown = (markdown: string) => {
 			) {
 				startNewRegion(RegionType.Math, startInformation);
 			}
+			// Text -> Include
+			else if (current.type === MarkdownTokenType.IncludeStartDelim && !nextIsSpace) {
+				startNewRegion(RegionType.Include, startInformation);
+			}
 		}
 		else {
 			const startInformation: StartInformation = {
@@ -165,7 +182,9 @@ const parseMarkdown = (markdown: string) => {
 
 			// Delimiter at the start of the code/math region
 			const enterDelim = currentStartInformation.startToken.text;
-			const inlineDelim = enterDelim.length === 1;
+			// Single-character enter delimiters mean that code or math is inline.
+			// Includes are always inline.
+			const inlineDelim = currentRegionType === RegionType.Include || enterDelim.length === 1;
 
 			if (
 				inlineDelim
@@ -173,6 +192,9 @@ const parseMarkdown = (markdown: string) => {
 				&& (
 					// if we're at the end of the line
 					(current.type === MarkdownTokenType.Space && current.text.includes('\n'))
+
+					// if an include region has a newline
+					|| (currentRegionType === RegionType.Include && current.text.includes('\n'))
 
 					// or there was a space just before the delimiter and it's math
 					|| (prevIsSpace && current.type === MarkdownTokenType.MathDelim)
@@ -201,7 +223,14 @@ const parseMarkdown = (markdown: string) => {
 						startNewRegion(RegionType.Text, startInformation);
 					}
 				}
-			} else {
+			}
+			else if (currentRegionType === RegionType.Include) {
+				// Include -> text
+				if (current.type === MarkdownTokenType.IncludeEndDelim) {
+					startNewRegion(RegionType.Text, startInformation);
+				}
+			}
+			else {
 				const exhaustivenessCheck: never = currentRegionType;
 				return exhaustivenessCheck;
 			}
@@ -212,6 +241,13 @@ const parseMarkdown = (markdown: string) => {
 
 	finalizeRegion();
 
+	return labeledRegions;
+};
+
+/**
+ * Joins neighboring text regions in `labeledRegions` into larger text regions.
+ */
+const coalesceTextRegions = (labeledRegions: LabeledRegion[]) => {
 	// Coalesce -- join neighboring regions of the same type
 	// where appliccable.
 	const coalescedRegions: LabeledRegion[] = [];
@@ -243,6 +279,16 @@ const parseMarkdown = (markdown: string) => {
 	}
 
 	return coalescedRegions;
+};
+
+const parseMarkdown = (markdown: string) => {
+	const tokens = tokenizeMarkdown(markdown);
+
+	if (tokens.length === 0) {
+		return [];
+	}
+
+	return coalesceTextRegions(buildLabeledRegions(tokens));
 };
 
 export default parseMarkdown;
