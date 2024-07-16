@@ -81,16 +81,32 @@ editor.addToolbar();
 
 To add a custom pen type that can be selected using the toolbar, use the `pen` setting.
 
-For example, to enable the polyline pen,
+For example, to add a pen that switches between the polyline and the circle tools,
 ```ts,runnable
-import { Editor, makePolylineBuilder } from 'js-draw';
+import { Editor, makePolylineBuilder, makeOutlinedCircleBuilder, ComponentBuilderFactory } from 'js-draw';
+
+// A pen factory's job is to return a ComponentBuilder when starting a new stroke.
+// Below, we randomly choose between a circle ComponentBuilder and a polyline pen ComponentBuilder.
+//
+// Parameters:
+//   startPoint - the first point on the stroke.
+//   viewport - information about the current rotation/scale of the drawing canvas.
+const customPenFactory: ComponentBuilderFactory = (startPoint, viewport) => {
+	// Randomly choose either a polyline or a circle for this stroke.
+	if (Math.random() < 0.5) {
+		return makePolylineBuilder(startPoint, viewport);
+	} else {
+		return makeOutlinedCircleBuilder(startPoint, viewport);
+	}
+};
 
 const editor = new Editor(document.body, {
 	pens: {
+		// The polyline is already present by default --
 		additionalPenTypes: [{
 			name: 'Polyline pen',
 			id: 'custom-polyline',
-			factory: makePolylineBuilder,
+			factory: customPenFactory,
 
 			// The pen doesn't create fixed shapes (e.g. squares, rectangles, etc)
 			// and so should go under the "pens" section.
@@ -108,7 +124,7 @@ We could then make it the default pen style for the first pen:
 import { PenTool } from 'js-draw';
 
 const firstPen = editor.toolController.getMatchingTools(PenTool)[0];
-firstPen.setStrokeFactory(makePolylineBuilder);
+firstPen.setStrokeFactory(customPenFactory);
 ```
 
 ### Custom pens

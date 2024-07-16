@@ -315,7 +315,7 @@ export default abstract class AbstractToolbar {
 	 * Called by `serializeState` to attach any additional JSONifyable data
 	 * to the serialized result.
 	 *
-	 * @reutrns an object that can be converted to JSON with `JSON.stringify`.
+	 * @returns an object that can be converted to JSON with `JSON.stringify`.
 	 */
 	protected serializeInternal(): any {}
 

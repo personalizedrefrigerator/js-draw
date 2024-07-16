@@ -651,9 +651,16 @@ export class ImageNode {
 		return this.getChildrenIntersectingRegion(region);
 	}
 
-	// Returns a list of `ImageNode`s with content (and thus no children).
-	// Override getChildrenIntersectingRegion to customize how this method
-	// determines whether/which children are in `region`.
+	/**
+	 * Returns a list of `ImageNode`s with content (and thus no children).
+	 * Override getChildrenIntersectingRegion to customize how this method
+	 * determines whether/which children are in `region`.
+	 *
+	 * @paran region - All resultant `ImageNode`s must intersect `region`.
+	 * @param isTooSmall - If `isTooSmall` returns true for an image node, that node
+	 *                     is excluded from the output.
+	 *
+	 */
 	public getLeavesIntersectingRegion(region: Rect2, isTooSmall?: TooSmallToRenderCheck): ImageNode[] {
 		const result: ImageNode[] = [];
 		const workList: ImageNode[] = [];
