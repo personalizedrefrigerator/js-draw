@@ -1112,7 +1112,7 @@ __metadata:
     react: "npm:18.2.0"
     typescript: "npm:5.4.5"
   peerDependencies:
-    typedoc: 0.25.x
+    typedoc: 0.26.x
   languageName: unknown
   linkType: soft
 
