@@ -94,8 +94,8 @@ export interface EditorSettings {
 	notices: AboutDialogEntry[],
 
 	/**
-	 * Information about the app/website js-draw is running within
-	 * to show at the beginning of the about dialog.
+	 * Information about the app/website js-draw is running within. This is shown
+	 * at the beginning of the about dialog.
 	 */
 	appInfo: {
 		name: string,
@@ -480,13 +480,17 @@ export class Editor {
 		return this.container;
 	}
 
-	/** @param fractionLoaded - should be a number from 0 to 1, where 1 represents completely loaded. */
+	/**
+	 * Shows a "Loading..." message.
+	 * @param fractionLoaded - should be a number from 0 to 1, where 1 represents completely loaded.
+	 */
 	public showLoadingWarning(fractionLoaded: number) {
 		const loadingPercent = Math.round(fractionLoaded * 100);
 		this.loadingWarning.innerText = this.localization.loading(loadingPercent);
 		this.loadingWarning.style.display = 'block';
 	}
 
+	/** @see {@link showLoadingWarning} */
 	public hideLoadingWarning() {
 		this.loadingWarning.style.display = 'none';
 		this.announceForAccessibility(this.localization.doneLoading);
@@ -1138,13 +1142,16 @@ export class Editor {
 		this.hideLoadingWarning();
 	}
 
-	// @see {@link asyncApplyOrUnapplyCommands }
+	/** @see {@link asyncApplyOrUnapplyCommands } */
 	public asyncApplyCommands(commands: Command[], chunkSize: number) {
 		return this.asyncApplyOrUnapplyCommands(commands, true, chunkSize);
 	}
 
-	// If `unapplyInReverseOrder`, commands are reversed before unapplying.
-	// @see {@link asyncApplyOrUnapplyCommands }
+	/**
+	 * @see {@link asyncApplyOrUnapplyCommands}
+	 *
+	 * If `unapplyInReverseOrder`, commands are reversed before unapplying.
+	 */
 	public asyncUnapplyCommands(commands: Command[], chunkSize: number, unapplyInReverseOrder: boolean = false) {
 		if (unapplyInReverseOrder) {
 			commands = [ ...commands ]; // copy
