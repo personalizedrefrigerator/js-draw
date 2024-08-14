@@ -32,7 +32,9 @@ export type PreRenderComponentCallback = (component: AbstractComponent, componen
 
 let debugMode = false;
 
-// Handles lookup/storage of elements in the image
+/**
+ * Handles lookup/storage of elements in the image.
+ */
 export default class EditorImage {
 	private root: ImageNode;
 	private background: ImageNode;
