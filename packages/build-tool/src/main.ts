@@ -202,7 +202,8 @@ const main = async () => {
 
 	const config = readConfig();
 
-	if (config.outDirectory) {
+	const needsClean = buildMode === 'watch' || buildMode === 'build';
+	if (config.outDirectory && needsClean) {
 		if (existsSync(config.outDirectory)) {
 			console.info('Removing output directory...');
 
