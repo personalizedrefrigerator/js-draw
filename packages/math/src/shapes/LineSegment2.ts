@@ -9,7 +9,18 @@ interface IntersectionResult {
 	t: number;
 }
 
-/** Represents a line segment. A `LineSegment2` is immutable. */
+/**
+ * Represents a line segment. A `LineSegment2` is immutable.
+ *
+ * @example
+ * ```ts,runnable,console
+ * import {LineSegment2, Vec2} from '@js-draw/math';
+ * const l = new LineSegment2(Vec2.of(1, 1), Vec2.of(2, 2));
+ * console.log('length: ', l.length);
+ * console.log('direction: ', l.direction);
+ * console.log('bounding box: ', l.bbox);
+ * ```
+ */
 export class LineSegment2 extends Parameterized2DShape {
 	// invariant: ||direction|| = 1
 
@@ -51,7 +62,7 @@ export class LineSegment2 extends Parameterized2DShape {
 	 * if no such line segment exists.
 	 *
 	 * @example
-	 * ```ts,runnable
+	 * ```ts,runnable,console
 	 * import {LineSegment2, Vec2} from '@js-draw/math';
 	 * console.log(LineSegment2.ofSmallestContainingPoints([Vec2.of(1, 0), Vec2.of(0, 1)]));
 	 * ```

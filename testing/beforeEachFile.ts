@@ -60,6 +60,19 @@ HTMLElement.prototype.setPointerCapture ??= () => {};
 // eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.releasePointerCapture ??= () => {};
 
+// Mock support for .innerText
+// See https://github.com/jsdom/jsdom/issues/1245
+Object.defineProperty(HTMLElement.prototype, 'innerText', {
+	get() {
+		// Not exactly equivalent to .innerText. See
+		// https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent#differences_from_innertext
+		return this.textContent;
+	},
+	set(value: string) {
+		this.replaceChildren(document.createTextNode(value));
+	},
+});
+
 // eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLDialogElement.prototype.showModal ??= function() {
 	this.style.display = 'block';

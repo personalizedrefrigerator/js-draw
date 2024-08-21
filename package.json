@@ -15,7 +15,7 @@
     "build-translation-templates": "lerna run build-translation-templates",
     "translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
     "preinstall": "git config core.hookspath .githooks",
-    "postinstall": "npm run build",
+    "postinstall": "yarn run build",
     "publish-ci": "lerna publish from-package --yes"
   },
   "workspaces": [
@@ -30,10 +30,12 @@
     "eslint": "8.57.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "jsdom": "24.0.0",
-    "lerna": "8.1.2",
+    "jsdom": "24.1.1",
+    "lerna": "8.1.8",
     "lint-staged": "13.2.3",
     "ts-jest": "29.1.2",
-    "typedoc": "0.25.8"
-  }
+    "typedoc": "0.26.4",
+    "typescript": "5.4.5"
+  },
+  "packageManager": "yarn@4.2.2"
 }

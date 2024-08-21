@@ -15,6 +15,55 @@
 
 For example usage, see [one of the examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md) or read [the documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/).
 
+# Features
+
+## Very large zoom range
+
+A core feature of `js-draw` is its [large zoom range](https://personalizedrefrigerator.github.io/js-draw/typedoc/interfaces/js_draw.EditorSettings.html#maxZoom) (from roughly 10⁻¹⁰x to 10¹⁰x).
+
+<details open><summary><strong>Demo</strong></summary>
+
+<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/f1c4afea-d7c8-4c36-835b-e01f2a646424" alt="Video: Shows zooming out further and further" controls></video>
+
+</details>
+
+Applications using `js-draw` can adjust this zoom range with custom [EditorSettings](https://personalizedrefrigerator.github.io/js-draw/typedoc/interfaces/js_draw.EditorSettings.html).
+
+## Touchscreen and stylus support
+
+`js-draw` supports touchscreen pinch zoom and rotate gestures. To simplify editing, screen rotation snaps to multiples of 90 degrees.
+
+<details><summary><strong>Demo</strong></summary>
+    
+<video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/1f4ebeb1-9d2f-4884-9410-9fb1d5e455ee" alt="Video: Shows canvas being rotated" controls></video>
+
+</details>
+
+It's also possible to disable touch drawing. This can be useful when drawing with a stylus and can be done with either [PanZoomTool.setMode](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.PanZoomTool.html#setMode) or, by a user, with the "hand" tool menu:
+
+<img alt="screenshot: Hand tool menu at the bottom of the screen includes 'lock rotation' and 'touchscreen panning'. 'Touchscreen panning' is highlighted." src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/d96e2df5-6132-4122-954d-d25402754bc2" width="400"/>
+
+## User-configurable tools
+
+With the default toolbar, users can change the pen style, color, and more:
+
+<img alt="screenshot: Pen configuration menu includes pen size, color, type, stabilization, autocorrect,..." src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/476ad0e4-1f95-43bf-925d-549292d141e3" width="400"/>
+
+It's possible for applications using `js-draw` to [add custom pen types](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/Additional_Documentation.CustomizingTools__.html) that can also be customized in this way. It's also possible to [save the toolbar state](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples/example-save-restore-toolbar-state/example.ts) and restore it after reloading the app.
+
+## More features
+
+`js-draw` also supports:
+
+- <details><summary>Partial stroke erasing</summary>
+
+  <video src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/c8c2b8d5-5537-4df8-a8b5-899c2d7ea5ce"></video>
+
+  </details>
+- [Collaborative editing](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples/example-collaborative)
+- Saving to and loading from a subset of SVG
+
+
 # API
 
 ## Creating an `Editor`
@@ -123,7 +172,7 @@ For example, although `js-draw` doesn't support `<circle/>` elements,
 ```
 renders as
 
-![screenshot of the image editor, displaying a green checkmark. The circle is invisible](docs/img/readme-images/unsupported-elements--in-editor.png)
+<img alt="screenshot of the image editor, displaying a green checkmark. The circle is invisible" src="docs/img/readme-images/unsupported-elements--in-editor.png" width="600"/>
 
 but exports to
 ```xml
@@ -328,6 +377,8 @@ body .imageEditorContainer {
 }
 ```
 disables the dark theme and creates a theme that primarily uses yellow/green colors.
+
+See also [adjustEditorThemeForContrast](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.adjustEditorThemeForContrast.html).
 
 # Examples and resources
 

@@ -2,7 +2,11 @@
 .toolbar-element .toolbar--file-input-container {
 	display: flex;
 
-	> input[type="file"] {
+	&.-loading {
+		opacity: 0.8;
+	}
+
+	> input.file-input {
 		// Hide in a way such that screen readers can still access the
 		// input.
 		opacity: 0;
@@ -11,6 +15,11 @@
 		min-width: 0 !important;
 		max-width: 0;
 		height: 0;
+
+		// Needed when the input is a button.
+		overflow: hidden;
+		padding: 0;
+		margin: 0;
 	}
 
 	> label {
@@ -27,6 +36,11 @@
 		--active-border-color: color-mix(
 			in srgb, var(--foreground-color-1), transparent
 		);
+
+		.cancel-button {
+			padding-left: 3px;
+			padding-right: 3px;
+		}
 
 		> .toolbar--file-input-description {
 			background-color: var(--background-color-3);

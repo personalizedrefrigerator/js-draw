@@ -9,7 +9,7 @@ import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
-import { duplicateSelectionShortcut, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
+import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId, stretchXYSelectionShortcutId, shrinkXYSelectionShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
 import Pointer from '../../Pointer';
 
@@ -104,7 +104,8 @@ export default class SelectionTool extends BaseTool {
 			current = current.snappedToGrid(this.editor.viewport);
 		}
 
-		if (allPointers.length === 1 && current.isPrimary) {
+		// Don't rely on .isPrimary -- it's buggy in Firefox. See https://github.com/personalizedrefrigerator/js-draw/issues/71
+		if (allPointers.length === 1) {
 			this.startPoint = current.canvasPos;
 
 			let transforming = false;
@@ -266,15 +267,6 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	private static handleableKeys = [
-		'a', 'h', 'ArrowLeft',
-		'd', 'l', 'ArrowRight',
-		'q', 'k', 'ArrowUp',
-		'e', 'j', 'ArrowDown',
-		'r', 'R',
-		'i', 'I', 'o', 'O',
-		'Control', 'Meta',
-	];
 	// Whether the last keypress corresponded to an action that didn't transform the
 	// selection (and thus does not need to be finalized on onKeyUp).
 	private hasUnfinalizedTransformFromKeyPress: boolean = false;
@@ -318,45 +310,43 @@ export default class SelectionTool extends BaseTool {
 		let xScaleSteps = 0;
 		let yScaleSteps = 0;
 
-		switch (event.key) {
-		case 'a':
-		case 'h':
-		case 'ArrowLeft':
+		if (shortcucts.matchesShortcut(translateLeftSelectionShortcutId, event)) {
 			xTranslateSteps -= 1;
-			break;
-		case 'd':
-		case 'l':
-		case 'ArrowRight':
+		}
+		else if (shortcucts.matchesShortcut(translateRightSelectionShortcutId, event)) {
 			xTranslateSteps += 1;
-			break;
-		case 'q':
-		case 'k':
-		case 'ArrowUp':
+		}
+		else if (shortcucts.matchesShortcut(translateUpSelectionShortcutId, event)) {
 			yTranslateSteps -= 1;
-			break;
-		case 'e':
-		case 'j':
-		case 'ArrowDown':
+		}
+		else if (shortcucts.matchesShortcut(translateDownSelectionShortcutId, event)) {
 			yTranslateSteps += 1;
-			break;
-		case 'r':
+		}
+		else if (shortcucts.matchesShortcut(rotateClockwiseSelectionShortcutId, event)) {
 			rotationSteps += 1;
-			break;
-		case 'R':
+		}
+		else if (shortcucts.matchesShortcut(rotateCounterClockwiseSelectionShortcutId, event)) {
 			rotationSteps -= 1;
-			break;
-		case 'i':
+		}
+		else if (shortcucts.matchesShortcut(shrinkXSelectionShortcutId, event)) {
 			xScaleSteps -= 1;
-			break;
-		case 'I':
+		}
+		else if (shortcucts.matchesShortcut(stretchXSelectionShortcutId, event)) {
 			xScaleSteps += 1;
-			break;
-		case 'o':
+		}
+		else if (shortcucts.matchesShortcut(shrinkYSelectionShortcutId, event)) {
 			yScaleSteps -= 1;
-			break;
-		case 'O':
+		}
+		else if (shortcucts.matchesShortcut(stretchYSelectionShortcutId, event)) {
 			yScaleSteps += 1;
-			break;
+		}
+		else if (shortcucts.matchesShortcut(shrinkXYSelectionShortcutId, event)) {
+			xScaleSteps -= 1;
+			yScaleSteps -= 1;
+		}
+		else if (shortcucts.matchesShortcut(stretchXYSelectionShortcutId, event)) {
+			xScaleSteps += 1;
+			yScaleSteps += 1;
 		}
 
 		let handled = xTranslateSteps !== 0
@@ -459,7 +449,7 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
-		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
+		if (this.selectionBox) {
 			this.selectionBox.finalizeTransform();
 			this.hasUnfinalizedTransformFromKeyPress = false;
 			return true;

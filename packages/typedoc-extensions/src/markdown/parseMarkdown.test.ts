@@ -298,4 +298,129 @@ describe('parseMarkdown', () => {
 			},
 		]);
 	});
+
+	it('should parse include directives', () => {
+		expect(parseMarkdown('testing [[include:path/to/a/file.md]]')).toMatchInlineSnapshot(`
+[
+  {
+    "block": false,
+    "content": "testing ",
+    "fullText": "testing ",
+    "start": 0,
+    "stop": 8,
+    "type": "text",
+  },
+  {
+    "block": false,
+    "content": "path/to/a/file.md",
+    "fullText": "[[include:path/to/a/file.md]]",
+    "start": 8,
+    "stop": 37,
+    "type": "include",
+  },
+]
+`);
+		// Should support including based on paths
+		expect(parseMarkdown('[[include:path/to/another/file.md]]')).toMatchInlineSnapshot(`
+[
+  {
+    "block": false,
+    "content": "path/to/another/file.md",
+    "fullText": "[[include:path/to/another/file.md]]",
+    "start": 0,
+    "stop": 35,
+    "type": "include",
+  },
+]
+`);
+		// Includes cannot contain newlines.
+		expect(parseMarkdown('[[include:path\n/to/another/file.md]]')).toMatchInlineSnapshot(`
+[
+  {
+    "block": false,
+    "content": "[[include:path
+/to/another/file.md]]",
+    "fullText": "[[include:path
+/to/another/file.md]]",
+    "start": 0,
+    "stop": 36,
+    "type": "text",
+  },
+]
+`);
+		// Includes need an ending delimiter, and are otherwise marked as text:
+		expect(parseMarkdown('[[include:')).toMatchInlineSnapshot(`
+[
+  {
+    "block": false,
+    "content": "[[include:",
+    "fullText": "[[include:",
+    "start": 0,
+    "stop": 10,
+    "type": "text",
+  },
+]
+`);
+		// Not all text in [[brackets]] should be marked as an include.
+		expect(parseMarkdown('[[include:path/to/another/file.md]]. Test. [[test]]. [[Include:TEST]]')).toMatchInlineSnapshot(`
+[
+  {
+    "block": false,
+    "content": "path/to/another/file.md",
+    "fullText": "[[include:path/to/another/file.md]]",
+    "start": 0,
+    "stop": 35,
+    "type": "include",
+  },
+  {
+    "block": false,
+    "content": ". Test. [[test]]. [[Include:TEST]]",
+    "fullText": ". Test. [[test]]. [[Include:TEST]]",
+    "start": 35,
+    "stop": 69,
+    "type": "text",
+  },
+]
+`);
+		// Should support [[brackets] within an include, so long as these brackets aren't the
+		// ending delimiter. Should also support multiple includes.
+		expect(parseMarkdown('[[include:[[path/to/another/file].md]]]]. Test.\n [[include:test]] [[include:')).toMatchInlineSnapshot(`
+[
+  {
+    "block": false,
+    "content": "[[path/to/another/file].md",
+    "fullText": "[[include:[[path/to/another/file].md]]",
+    "start": 0,
+    "stop": 38,
+    "type": "include",
+  },
+  {
+    "block": false,
+    "content": "]]. Test.
+ ",
+    "fullText": "]]. Test.
+ ",
+    "start": 38,
+    "stop": 49,
+    "type": "text",
+  },
+  {
+    "block": false,
+    "content": "test",
+    "fullText": "[[include:test]]",
+    "start": 49,
+    "stop": 65,
+    "type": "include",
+  },
+  {
+    "block": false,
+    "content": " [[include:",
+    "fullText": " [[include:",
+    "start": 65,
+    "stop": 76,
+    "type": "text",
+  },
+]
+`);
+	});
 });

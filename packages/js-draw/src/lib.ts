@@ -22,7 +22,7 @@ export * from './inputEvents';
 export { default as getLocalizationTable, matchingLocalizationTable } from './localizations/getLocalizationTable';
 export * from './localization';
 
-export { default as SVGLoader } from './SVGLoader';
+export { default as SVGLoader } from './SVGLoader/SVGLoader';
 export { default as Viewport } from './Viewport';
 export * from '@js-draw/math';
 export * from './components/lib';

@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import AbstractComponent from '../components/AbstractComponent';
 import TextComponent from '../components/TextComponent';
-import SVGLoader from '../SVGLoader';
+import SVGLoader from '../SVGLoader/SVGLoader';
 import { PasteEvent } from '../inputEvents';
 import { Mat33, Color4 } from '@js-draw/math';
 import BaseTool from './BaseTool';

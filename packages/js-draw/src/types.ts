@@ -7,8 +7,13 @@ import type AbstractComponent from './components/AbstractComponent';
 import type Command from './commands/Command';
 import type { WidgetContentLayoutManager } from './toolbar/widgets/layout/types';
 
+/**
+ * The type of the {@link Editor.notifier}, which provides notifications for
+ * various editor-related events.
+ */
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
+/** @see {@link EditorNotifier} */
 export enum EditorEventType {
 	ToolEnabled,
 	ToolDisabled,

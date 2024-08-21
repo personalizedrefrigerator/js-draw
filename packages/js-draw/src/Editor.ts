@@ -1,14 +1,14 @@
 import EditorImage from './image/EditorImage';
 import ToolController from './tools/ToolController';
 import { EditorNotifier, EditorEventType, ImageLoader } from './types';
-import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent } from './inputEvents';
+import { HTMLPointerEventName, HTMLPointerEventFilter, InputEvtType, PointerEvt, keyUpEventFromHTMLEvent, keyPressEventFromHTMLEvent, PointerEvtType } from './inputEvents';
 import Command from './commands/Command';
 import UndoRedoHistory from './UndoRedoHistory';
 import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2, Vec3, Color4, Mat33, Rect2 } from '@js-draw/math';
 import Display, { RenderingMode } from './rendering/Display';
-import SVGLoader from './SVGLoader';
+import SVGLoader from './SVGLoader/SVGLoader';
 import Pointer from './Pointer';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
@@ -36,6 +36,7 @@ import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
 import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
 import ClipboardHandler from './util/ClipboardHandler';
+import { ShowCustomFilePickerCallback } from './toolbar/widgets/components/makeFileInput';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -93,8 +94,8 @@ export interface EditorSettings {
 	notices: AboutDialogEntry[],
 
 	/**
-	 * Information about the app/website js-draw is running within
-	 * to show at the beginning of the about dialog.
+	 * Information about the app/website js-draw is running within. This is shown
+	 * at the beginning of the about dialog.
 	 */
 	appInfo: {
 		name: string,
@@ -107,7 +108,7 @@ export interface EditorSettings {
 	}|null,
 
 	/**
-	 * Configures the default pen tools.
+	 * Configures the default {@link PenTool} tools.
 	 *
 	 * **Example**:
 	 * [[include:doc-pages/inline-examples/editor-settings-polyline-pen.md]]
@@ -135,10 +136,24 @@ export interface EditorSettings {
 		filterPenTypes?: (penType: PenTypeRecord)=>boolean,
 	}|null,
 
-	/** Configures the default {@link TextTool} control. */
+	/** Configures the default {@link TextTool} control and text tool. */
 	text: {
 		/** Fonts to show in the text UI. */
 		fonts?: string[],
+	}|null,
+
+	/** Configures the default {@link InsertImageWidget} control. */
+	image: {
+		/**
+		 * A custom callback to show an image picker. If given, this should return
+		 * a list of `File`s representing the images selected by the picker.
+		 *
+		 * If not given, the default file picker shown by a [file input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file)
+		 * is shown.
+		 *
+		 * @beta -- API may change between minor releases.
+		 */
+		showImagePicker?: ShowCustomFilePickerCallback;
 	}|null,
 }
 
@@ -334,6 +349,9 @@ export class Editor {
 			text: {
 				fonts: settings.text?.fonts ?? [ 'sans-serif', 'serif', 'monospace' ],
 			},
+			image: {
+				showImagePicker: settings.image?.showImagePicker ?? undefined,
+			},
 		};
 
 		// Validate settings
@@ -462,13 +480,17 @@ export class Editor {
 		return this.container;
 	}
 
-	/** @param fractionLoaded - should be a number from 0 to 1, where 1 represents completely loaded. */
+	/**
+	 * Shows a "Loading..." message.
+	 * @param fractionLoaded - should be a number from 0 to 1, where 1 represents completely loaded.
+	 */
 	public showLoadingWarning(fractionLoaded: number) {
 		const loadingPercent = Math.round(fractionLoaded * 100);
 		this.loadingWarning.innerText = this.localization.loading(loadingPercent);
 		this.loadingWarning.style.display = 'block';
 	}
 
+	/** @see {@link showLoadingWarning} */
 	public hideLoadingWarning() {
 		this.loadingWarning.style.display = 'none';
 		this.announceForAccessibility(this.localization.doneLoading);
@@ -1044,7 +1066,12 @@ export class Editor {
 		return this.readOnly;
 	}
 
-	/** `apply` a command. `command` will be announced for accessibility. */
+	/**
+	 * `apply` a command. `command` will be announced for accessibility.
+	 *
+	 * **Example**:
+	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
+	 */
 	public dispatch(command: Command, addToHistory: boolean = true) {
 		const dispatchResult = this.dispatchNoAnnounce(command, addToHistory);
 		const commandDescription = command.description(this, this.localization);
@@ -1115,13 +1142,16 @@ export class Editor {
 		this.hideLoadingWarning();
 	}
 
-	// @see {@link asyncApplyOrUnapplyCommands }
+	/** @see {@link asyncApplyOrUnapplyCommands } */
 	public asyncApplyCommands(commands: Command[], chunkSize: number) {
 		return this.asyncApplyOrUnapplyCommands(commands, true, chunkSize);
 	}
 
-	// If `unapplyInReverseOrder`, commands are reversed before unapplying.
-	// @see {@link asyncApplyOrUnapplyCommands }
+	/**
+	 * @see {@link asyncApplyOrUnapplyCommands}
+	 *
+	 * If `unapplyInReverseOrder`, commands are reversed before unapplying.
+	 */
 	public asyncUnapplyCommands(commands: Command[], chunkSize: number, unapplyInReverseOrder: boolean = false) {
 		if (unapplyInReverseOrder) {
 			commands = [ ...commands ]; // copy
@@ -1306,7 +1336,7 @@ export class Editor {
 	 * @see {@link sendPenEvent} {@link sendTouchEvent}
 	 */
 	public sendPenEvent(
-		eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+		eventType: PointerEvtType,
 		point: Point2,
 
 		// @deprecated
@@ -1718,7 +1748,7 @@ export class Editor {
 				'',
 				'',
 				'== js-draw ==',
-				mitLicenseAttribution('2023 Henry Heino'),
+				mitLicenseAttribution('2023-2024 Henry Heino'),
 				'',
 			].join('\n'),
 			minimized: true,

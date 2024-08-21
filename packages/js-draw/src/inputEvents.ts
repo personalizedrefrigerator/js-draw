@@ -118,6 +118,9 @@ export interface PointerUpEvt extends PointerEvtBase {
  */
 export type PointerEvt = PointerDownEvt | PointerMoveEvt | PointerUpEvt;
 
+/** The type of any internal {@link PointerEvt} record. */
+export type PointerEvtType = InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt;
+
 /**
  * An internal `js-draw` input event type.
  *

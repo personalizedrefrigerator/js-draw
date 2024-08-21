@@ -17,8 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare yarn
+        run: corepack enable
       - name: Install dependencies
-        run: npm install
+        run: yarn install
       - name: Build
         run: bash ./scripts/build-website.sh
       - uses: FirebaseExtended/action-hosting-deploy@v0

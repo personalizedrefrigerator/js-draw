@@ -1,7 +1,7 @@
 import EditorImage, { PreRenderComponentCallback } from '../EditorImage';
 import { Rect2 } from '@js-draw/math';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
-import { svgLoaderAutoresizeClassName } from '../../SVGLoader';
+import { svgLoaderAutoresizeClassName } from '../../SVGLoader/SVGLoader';
 import adjustExportedSVGSize, { SVGSizingOptions } from './adjustExportedSVGSize';
 
 export interface SVGExportOptions extends SVGSizingOptions {

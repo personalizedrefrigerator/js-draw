@@ -1,6 +1,9 @@
 import { Point2, Vec2 } from './Vec2';
 import Vec3 from './Vec3';
 
+/**
+ * See {@link Mat33.toArray}.
+ */
 export type Mat33Array = [
 	number, number, number,
 	number, number, number,
@@ -11,6 +14,46 @@ export type Mat33Array = [
  * Represents a three dimensional linear transformation or
  * a two-dimensional affine transformation. (An affine transformation scales/rotates/shears
  * **and** translates while a linear transformation just scales/rotates/shears).
+ *
+ * In addition to other matrices, {@link Mat33}s can be used to transform {@link Vec3}s and {@link Vec2}s.
+ *
+ * For example, to move the point $(1, 1)$ by 5 units to the left and 6 units up,
+ * ```ts,runnable,console
+ * import {Mat33, Vec2} from '@js-draw/math';
+ *
+ * const moveLeftAndUp = Mat33.translation(Vec2.of(5, 6));
+ * console.log(moveLeftAndUp);
+ * ```
+ *
+ * This `moveLeftAndUp` matrix could then translate (move) a {@link Vec2} using
+ * {@link Mat33.transformVec2}:
+ *
+ * ```ts,runnable,console
+ * ---use-previous---
+ * ---visible---
+ * console.log(moveLeftAndUp.transformVec2(Vec2.of(1, 1)));
+ * console.log(moveLeftAndUp.transformVec2(Vec2.of(-1, 2)));
+ * ```
+ *
+ * It's also possible to create transformation matrices that scale and rotate.
+ * A single transform matrix can be created from multiple using matrix multiplication
+ * (see {@link Mat33.rightMul}):
+ *
+ * ```ts,runnable,console
+ * ---use-previous---
+ * ---visible---
+ * // Create a matrix by right multiplying.
+ * const scaleThenRotate =
+ *   // The resultant matrix first scales by a factor of two
+ *   Mat33.scaling2D(2).rightMul(
+ *     // ...then rotates by pi/2 radians = 90 degrees.
+ *     Mat33.zRotation(Math.PI / 2)
+ *   );
+ * console.log(scaleThenRotate);
+ *
+ * // Use scaleThenRotate to scale then rotate a vector.
+ * console.log(scaleThenRotate.transformVec2(Vec2.unitX));
+ * ```
  */
 export class Mat33 {
 	private readonly rows: Vec3[];
@@ -24,6 +67,9 @@ export class Mat33 {
 	 *   c1 & c2 & c3
 	 * \end{bmatrix}
 	 * $$
+	 *
+	 * Static constructor methods are also available.
+	 * See {@link Mat33.scaling2D}, {@link Mat33.zRotation}, {@link Mat33.translation}, and {@link Mat33.fromCSSMatrix}.
 	 */
 	public constructor(
 		public readonly a1: number,
@@ -63,6 +109,7 @@ export class Mat33 {
 		);
 	}
 
+	/** The 3x3 [identity matrix](https://en.wikipedia.org/wiki/Identity_matrix). */
 	public static identity = new Mat33(
 		1, 0, 0,
 		0, 1, 0,
@@ -178,6 +225,29 @@ export class Mat33 {
 		);
 	}
 
+	/**
+	 * [Right-multiplies](https://en.wikipedia.org/wiki/Matrix_multiplication) this by `other`.
+	 *
+	 * See also {@link transformVec3} and {@link transformVec2}.
+	 *
+	 * Example:
+	 * ```ts,runnable,console
+	 * import {Mat33, Vec2} from '@js-draw/math';
+	 * console.log(Mat33.identity.rightMul(Mat33.identity));
+	 *
+	 * // Create a matrix by right multiplying.
+	 * const scaleThenRotate =
+	 *   // The resultant matrix first scales by a factor of two
+	 *   Mat33.scaling2D(2).rightMul(
+	 *     // ...then rotates by pi/4 radians = 45 degrees.
+	 *     Mat33.zRotation(Math.PI / 4)
+	 *   );
+	 * console.log(scaleThenRotate);
+	 *
+	 * // Use scaleThenRotate to scale then rotate a vector.
+	 * console.log(scaleThenRotate.transformVec2(Vec2.unitX));
+	 * ```
+	 */
 	public rightMul(other: Mat33): Mat33 {
 		other = other.transposed();
 
@@ -245,6 +315,15 @@ export class Mat33 {
 		return true;
 	}
 
+	/**
+	 * Creates a human-readable representation of the matrix.
+	 *
+	 * Example:
+	 * ```ts,runnable,console
+	 * import { Mat33 } from '@js-draw/math';
+	 * console.log(Mat33.identity.toString());
+	 * ```
+	 */
 	public toString(): string {
 		let result = '';
 		const maxColumnLens = [ 0, 0, 0 ];
@@ -296,6 +375,18 @@ export class Mat33 {
 	 * result[0] = top left element
 	 * result[1] = element at row zero, column 1
 	 * ...
+	 * ```
+	 *
+	 * Example:
+	 * ```ts,runnable,console
+	 * import { Mat33 } from '@js-draw/math';
+	 * console.log(
+	 *   new Mat33(
+	 *     1, 2, 3,
+	 *     4, 5, 6,
+	 *     7, 8, 9,
+	 *   )
+	 * );
 	 * ```
 	 */
 	public toArray(): Mat33Array {

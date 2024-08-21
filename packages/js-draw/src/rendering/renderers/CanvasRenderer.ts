@@ -10,9 +10,15 @@ import RenderablePathSpec, { visualEquivalent } from '../RenderablePathSpec';
  * Renders onto a `CanvasRenderingContext2D`.
  *
  * @example
- * ```ts
- * const editor = new Editor(document.body);
+ * ```ts,runnable
+ * import {Editor,CanvasRenderer} from 'js-draw';
  *
+ * // Create an editor and load initial data -- don't add to the body (hidden editor).
+ * const editor = new Editor(document.createElement('div'));
+ * await editor.loadFromSVG('<svg><path d="m0,0 l100,5 l-50,60 l30,20 z" fill="green"/></svg>');
+ * ---visible---
+ * // Given some editor.
+ * // Set up the canvas to be drawn onto.
  * const canvas = document.createElement('canvas');
  * const ctx = canvas.getContext('2d');
  *
@@ -24,6 +30,9 @@ import RenderablePathSpec, { visualEquivalent } from '../RenderablePathSpec';
  * // Render editor.image onto the renderer
  * const renderer = new CanvasRenderer(ctx, viewport);
  * editor.image.render(renderer, viewport);
+ *
+ * // Add the rendered canvas to the document.
+ * document.body.appendChild(canvas);
  * ```
  */
 export default class CanvasRenderer extends AbstractRenderer {
@@ -84,11 +93,11 @@ export default class CanvasRenderer extends AbstractRenderer {
 	public override setDraftMode(draftMode: boolean) {
 		if (draftMode) {
 			this.minSquareCurveApproxDist = 9;
-			this.minRenderSizeBothDimens = 2;
-			this.minRenderSizeAnyDimen = 0.5;
+			this.minRenderSizeBothDimens = 1;
+			this.minRenderSizeAnyDimen = 0.1;
 		} else {
 			this.minSquareCurveApproxDist = 0.5;
-			this.minRenderSizeBothDimens = 0.2;
+			this.minRenderSizeBothDimens = 0.1;
 			this.minRenderSizeAnyDimen = 1e-6;
 		}
 	}
@@ -301,7 +310,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	// @internal
 	public isTooSmallToRender(rect: Rect2): boolean {
 		// Should we ignore all objects within this object's bbox?
-		const diagonal = rect.size.times(this.getCanvasToScreenTransform().getScaleFactor());
+		const diagonal = rect.size.times(this.getSizeOfCanvasPixelOnScreen());
 
 		const bothDimenMinSize = this.minRenderSizeBothDimens;
 		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;

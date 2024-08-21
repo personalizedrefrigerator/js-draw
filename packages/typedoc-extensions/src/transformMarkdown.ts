@@ -2,12 +2,14 @@
 import katex from 'katex';
 import parseMarkdown, { RegionType } from './markdown/parseMarkdown';
 import htmlEscape from './markdown/htmlEscape';
+import * as fs from 'node:fs';
 
 interface Callbacks {
 	addDoctest(testData: string): void;
+	resolveIncludePath(path: string): string|null;
 }
 
-const transformMarkdown = (markdown: string, callbacks: Callbacks) => {
+const transformMarkdown = (markdown: string, callbacks: Callbacks): string => {
 	// No need for a tree -- a flat list is sufficient.
 	const nodes = parseMarkdown(markdown);
 	const transformedMarkdown = [];
@@ -40,6 +42,18 @@ const transformMarkdown = (markdown: string, callbacks: Callbacks) => {
 
 			transformedMarkdown.push(makeRunnableContainer(false));
 			callbacks.addDoctest(makeRunnableContainer(true));
+		} else if (node.type === RegionType.Include) {
+			const targetPath = callbacks.resolveIncludePath(node.content);
+			if (!targetPath) {
+				throw new Error(`Invalid include: ${node.content}. Is it a path within the project's includeBaseDirectory?\nContext: Processing ${markdown}`);
+			}
+
+			if (!fs.statSync(targetPath).isFile()) {
+				throw new Error(`Cannot include non-file at path ${targetPath}. While processing: ${markdown}`);
+			}
+
+			const content = fs.readFileSync(targetPath, 'utf-8');
+			transformedMarkdown.push(transformMarkdown(content, callbacks));
 		} else {
 			transformedMarkdown.push(node.fullText);
 		}

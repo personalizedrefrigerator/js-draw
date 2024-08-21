@@ -28,6 +28,7 @@ export default class DoctestHandler {
 					<script>
 						window.assetsURL = './';
 						window.baseURL = ${JSON.stringify(baseUrl)};
+						window.process ??= { versions: {} };
 					</script>
 					<script src="./js-draw-typedoc-extension--browser.js"></script>
 					<style>

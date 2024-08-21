@@ -17,12 +17,17 @@ interface PinchData {
 }
 
 export enum PanZoomMode {
+	/** Touch gestures with a single pointer. Ignores non-touch gestures. */
 	OneFingerTouchGestures = 0x1,
+	/** Touch gestures with exactly two pointers. Ignores non-touch gestures. */
 	TwoFingerTouchGestures = 0x1 << 1,
 	RightClickDrags = 0x1 << 2,
+	/** Single-pointer gestures of *any* type (including touch). */
 	SinglePointerGestures = 0x1 << 3,
+	/** Keyboard navigation (e.g. LeftArrow to move left). */
 	Keyboard = 0x1 << 4,
 
+	/** If provided, prevents **this** tool from rotating the viewport (other tools may still do so). */
 	RotationLocked = 0x1 << 5,
 }
 
@@ -87,6 +92,15 @@ class InertialScroller {
 	}
 }
 
+/**
+ * This tool moves the viewport in response to touchpad, touchscreen, mouse, and keyboard events.
+ *
+ * Which events are handled, and which are skipped, are determined by the tool's `mode`. For example,
+ * a `PanZoom` tool with `mode = PanZoomMode.TwoFingerTouchGestures|PanZoomMode.RightClickDrags` would
+ * respond to right-click drag events and two-finger touch gestures.
+ *
+ * @see {@link setModeEnabled}
+ */
 export default class PanZoom extends BaseTool {
 	private transform: ViewportTransform|null = null;
 
@@ -567,8 +581,32 @@ export default class PanZoom extends BaseTool {
 		return !!(this.mode & PanZoomMode.RotationLocked);
 	}
 
-	// Sets whether the given `mode` is enabled. `mode` should be a single
-	// mode from the `PanZoomMode` enum.
+	/**
+	 * Changes the types of gestures used by this pan/zoom tool.
+	 *
+	 * @see {@link PanZoomMode} {@link setMode}
+	 *
+	 * @example
+	 * ```ts,runnable
+	 * import { Editor, PanZoomTool, PanZoomMode } from 'js-draw';
+	 *
+	 * const editor = new Editor(document.body);
+	 *
+	 * // By default, there are multiple PanZoom tools that handle different events.
+	 * // This gets all PanZoomTools.
+	 * const panZoomToolList = editor.toolController.getMatchingTools(PanZoomTool);
+	 *
+	 * // The first PanZoomTool is the highest priority -- by default,
+	 * // this tool is responsible for handling multi-finger touch gestures.
+	 * //
+	 * // Lower-priority PanZoomTools handle one-finger touch gestures and
+	 * // key-presses.
+	 * const panZoomTool = panZoomToolList[0];
+	 *
+	 * // Lock rotation for multi-finger touch gestures.
+	 * panZoomTool.setModeEnabled(PanZoomMode.RotationLocked, true);
+	 * ```
+	 */
 	public setModeEnabled(mode: PanZoomMode, enabled: boolean) {
 		let newMode = this.mode;
 		if (enabled) {
@@ -579,6 +617,16 @@ export default class PanZoom extends BaseTool {
 		this.setMode(newMode);
 	}
 
+	/**
+	 * Sets all modes for this tool using a bitmask.
+	 *
+	 * @see {@link setModeEnabled}
+	 *
+	 * @example
+	 * ```ts
+	 * tool.setMode(PanZoomMode.RotationLocked|PanZoomMode.TwoFingerTouchGestures);
+	 * ```
+	 */
 	public setMode(mode: PanZoomMode) {
 		if (mode !== this.mode) {
 			this.mode = mode;
@@ -590,6 +638,10 @@ export default class PanZoom extends BaseTool {
 		}
 	}
 
+	/**
+	 * Returns a bitmask indicating the currently-enabled modes.
+	 * @see {@link setModeEnabled}
+	 */
 	public getMode(): PanZoomMode {
 		return this.mode;
 	}

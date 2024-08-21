@@ -19,7 +19,7 @@
 		"src/testing/"
 	],
 
-	"includes": "docs/",
+	"includeBaseDirectory": "docs/",
 	"theme": "js-draw-theme",
 
 	"sidebarReplacements": {

@@ -8,6 +8,12 @@ export const load = (app: Application) => {
 		help: 'maps navigation text to replacement text',
 		defaultValue: {},
 	});
+	app.options.addDeclaration({
+		name: 'includeBaseDirectory',
+		type: ParameterType.Path,
+		help: 'base directory for all [[include:]] directives',
+		defaultValue: undefined,
+	});
 
 	app.renderer.defineTheme('js-draw-theme', CustomTheme);
 

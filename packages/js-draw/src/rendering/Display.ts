@@ -105,6 +105,7 @@ export default class Display {
 		return this.dryInkRenderer.displaySize().x;
 	}
 
+	/** @returns the visible height of the display. See {@link width}. */
 	public get height(): number {
 		return this.dryInkRenderer.displaySize().y;
 	}

@@ -1,3 +1,32 @@
+# 1.20.3
+ * Bug fixes
+    * Fix importing `js-draw`, `js-draw/Editor`, etc. as an ES module.
+    * Fix importing `js-draw/Editor` as a CommonJS module.
+    * Fix rounding size was too large at some zoom levels with the polyline pen.
+
+# 1.20.1 and 1.20.2
+ * Bug fixes
+    * Image tool: Fix ALT text input applies ALT text to wrong images when multiple images are selected.
+
+# 1.20.0
+ * Features
+    * Added an additional scroll indicator when the image tool displays multiple images.
+       * This works around [a lack of scrollbars in Android WebViews](https://issues.chromium.org/issues/40226034).
+ * Improvements
+    * Improve performance when loading large images.
+
+
+# 1.19.0, 1.19.1
+ * Features
+    * Support adding multiple images at once from the image tool.
+    * API to support customizing the default selectable fonts.
+    * (Beta) Image tool: Support specifying a custom file picker.
+ * Bug fixes
+    * Possible fix for eraser button not switching to the eraser tool on some devices.
+    * Fix unable to render text with a multi-word font.
+ * Improvements
+    * Decrease size of `Vec2`s in memory.
+
 # 1.18.0
  * Features
     * Partial stroke eraser.

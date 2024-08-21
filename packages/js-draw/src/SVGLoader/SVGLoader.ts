@@ -83,7 +83,9 @@ export default class SVGLoader implements ImageLoader {
 		let stroke;
 
 		// If possible, use computedStyles (allows property inheritance).
-		const fillAttribute = node.getAttribute('fill') ?? computedStyles?.fill ?? node.style?.fill;
+		// Chromium, however, sets .fill to a falsy, but not undefined value in some cases where
+		// styles are available. As such, use || instead of ??.
+		const fillAttribute = node.getAttribute('fill') ?? (computedStyles?.fill || node.style?.fill);
 		if (fillAttribute) {
 			try {
 				fill = Color4.fromString(fillAttribute);

@@ -1,6 +1,6 @@
 {
   "name": "js-draw",
-  "version": "1.18.0",
+  "version": "1.20.3",
   "description": "Draw pictures using a pen, touchscreen, or mouse! JS-draw is a drawing library for JavaScript and TypeScript. ",
   "types": "./dist/mjs/lib.d.ts",
   "main": "./dist/cjs/lib.js",
@@ -25,6 +25,7 @@
     },
     "./Editor": {
       "types": "./dist/mjs/Editor.d.ts",
+      "require": "./dist/cjs/Editor.js",
       "default": "./dist/mjs/Editor.mjs"
     },
     "./types": {
@@ -53,22 +54,21 @@
   },
   "author": "Henry Heino",
   "license": "MIT",
-  "private": false,
   "scripts": {
-    "dist-test": "cd dist-test/test_imports && npm install && npm run test",
-    "dist": "npm run build && npm run dist-test",
-    "build": "rm -rf ./dist/* && build-tool build",
+    "dist-test": "cd dist-test/test_imports && yarn install && yarn run test",
+    "dist": "yarn run build && yarn run dist-test",
+    "build": "build-tool build",
     "watch": "build-tool watch",
     "build-translation-templates": "build-tool build-translation-templates",
-    "prepack": "npm run dist && cd ../../ && npm run test && cd packages/js-draw && ts-node tools/copyREADME.ts copy",
+    "prepack": "yarn run dist && cd ../../ && yarn run test && cd packages/js-draw && ts-node tools/copyREADME.ts copy",
     "postpack": "ts-node tools/copyREADME.ts revert"
   },
   "dependencies": {
-    "@js-draw/math": "^1.18.0",
+    "@js-draw/math": "^1.19.0",
     "@melloware/coloris": "0.22.0"
   },
   "devDependencies": {
-    "@js-draw/build-tool": "^1.17.0",
+    "@js-draw/build-tool": "^1.19.0",
     "@types/jest": "29.5.5",
     "@types/jsdom": "21.1.3"
   },

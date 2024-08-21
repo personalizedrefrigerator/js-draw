@@ -1,12 +1,18 @@
 
 import PenTool from './Pen';
-import { Mat33, Rect2, Vec2 } from '@js-draw/math';
+import { Mat33, Point2, Rect2, Vec2 } from '@js-draw/math';
 import createEditor from '../testing/createEditor';
-import { InputEvtType } from '../inputEvents';
+import { InputEvtType, PointerEvtType } from '../inputEvents';
 import StrokeComponent from '../components/Stroke';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import sendPenEvent from '../testing/sendPenEvent';
 import sendTouchEvent from '../testing/sendTouchEvent';
+import Pointer, { PointerDevice } from '../Pointer';
+import EditorImage from '../image/EditorImage';
+
+const getAllStrokes = (image: EditorImage) => {
+	return image.getAllElements().filter(elem => elem instanceof StrokeComponent);
+};
 
 describe('Pen', () => {
 	it('should draw horizontal lines', () => {
@@ -150,6 +156,56 @@ describe('Pen', () => {
 
 		expect(elems[0].getBBox().topLeft).objEq(Vec2.of(420, 24), 32); // ± 32
 		expect(elems[0].getBBox().bottomRight).objEq(Vec2.of(420, 340), 25); // ± 25
+	});
+
+	it('should finalize strokes even if drawn with a nonprimary stylus', async () => {
+		const editor = createEditor();
+
+		// See https://github.com/personalizedrefrigerator/js-draw/issues/71
+		const sendNonPrimaryPenEvent = (eventType: PointerEvtType, point: Point2) => {
+			const id = 0;
+			const isPrimary = false;
+			const mainPointer = Pointer.ofCanvasPoint(
+				point, eventType !== InputEvtType.PointerUpEvt, editor.viewport, id, PointerDevice.Pen, isPrimary,
+			);
+
+			editor.toolController.dispatchInputEvent({
+				kind: eventType,
+				allPointers: [
+					mainPointer,
+				],
+				current: mainPointer,
+			});
+			jest.advanceTimersByTime(35);
+
+			return mainPointer;
+		};
+
+		// Should draw with a nonprimary stylus
+		sendNonPrimaryPenEvent(InputEvtType.PointerDownEvt, Vec2.of(10, 10));
+		sendNonPrimaryPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(20, 20));
+		sendNonPrimaryPenEvent(InputEvtType.PointerUpEvt, Vec2.of(50, 50));
+
+		sendNonPrimaryPenEvent(InputEvtType.PointerDownEvt, Vec2.of(10, 20));
+		sendNonPrimaryPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(20, 30));
+		sendNonPrimaryPenEvent(InputEvtType.PointerUpEvt, Vec2.of(50, 60));
+
+		expect(getAllStrokes(editor.image)).toHaveLength(2);
+
+		// Should ignore touch events sent while drawing with a nonprimary stylus
+		sendNonPrimaryPenEvent(InputEvtType.PointerDownEvt, Vec2.of(10, 10));
+		const mainPointer = sendNonPrimaryPenEvent(InputEvtType.PointerMoveEvt, Vec2.of(20, 20));
+
+		// Touch the screen -- should be ignored.
+		sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(0, 0), [ mainPointer ]);
+		sendTouchEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(5, 0), [ mainPointer ]);
+		jest.advanceTimersByTime(50);
+		sendTouchEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(10, 0), [ mainPointer ]);
+
+		sendNonPrimaryPenEvent(InputEvtType.PointerUpEvt, Vec2.of(50, 50));
+
+		// Should have added the stroke.
+		expect(getAllStrokes(editor.image)).toHaveLength(3);
 	});
 
 	// if `mainEventIsPen` is false, tests with touch events.

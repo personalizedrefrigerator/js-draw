@@ -137,6 +137,7 @@ class HandModeWidget extends BaseWidget {
 	}
 }
 
+/** This toolbar widget allows controlling the editor's {@link PanZoom} tool(s). */
 export default class HandToolWidget extends BaseToolWidget {
 	private allowTogglingBaseTool: boolean;
 

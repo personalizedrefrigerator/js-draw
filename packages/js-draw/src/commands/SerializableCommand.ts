@@ -3,9 +3,16 @@ import Command from './Command';
 
 export type DeserializationCallback = (data: Record<string, any>|any[], editor: Editor) => SerializableCommand;
 
+/**
+ * A command that can be serialized to or deserialized from JSON. To allow a command to be deserialized, {@link SerializableCommand.register}
+ * must be called for each {@link SerializableCommand}.
+ *
+ * This is used to [allow collaborative editing](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples/example-collaborative).
+ */
 export default abstract class SerializableCommand extends Command {
 	readonly #commandTypeId: string;
 
+	/** @param commandTypeId - A unique identifier for this command. */
 	public constructor(commandTypeId: string) {
 		super();
 
@@ -34,6 +41,8 @@ export default abstract class SerializableCommand extends Command {
 
 	// Convert a `string` containing JSON data (or the output of `JSON.parse`) into a
 	// `Command`.
+	//
+	// Implementations should assume that `data` is untrusted.
 	public static deserialize(data: string|Record<string, any>, editor: Editor): SerializableCommand {
 		const json = typeof data === 'string' ? JSON.parse(data) : data;
 		const commandType = json.commandType as string;

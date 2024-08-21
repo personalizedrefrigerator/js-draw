@@ -27,6 +27,7 @@ export const cloneTextStyle = (style: TextRenderingStyle) => {
 	};
 };
 
+/** `json` can either be a `string` or an `object`. */
 export const textStyleFromJSON = (json: any) => {
 	if (typeof json === 'string') {
 		json = JSON.parse(json);

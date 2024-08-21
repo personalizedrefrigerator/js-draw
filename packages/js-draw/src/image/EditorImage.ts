@@ -32,7 +32,9 @@ export type PreRenderComponentCallback = (component: AbstractComponent, componen
 
 let debugMode = false;
 
-// Handles lookup/storage of elements in the image
+/**
+ * Handles lookup/storage of elements in the image.
+ */
 export default class EditorImage {
 	private root: ImageNode;
 	private background: ImageNode;
@@ -241,7 +243,8 @@ export default class EditorImage {
 	 *
 	 * @see {@link Display.flatten}
 	 *
-	 * @example
+	 * **Example**:
+	 *
 	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
 	 */
 	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {
@@ -460,7 +463,7 @@ export default class EditorImage {
 	 *
 	 * @internal
 	 */
-	public setDebugMode(newDebugMode: boolean) {
+	public static setDebugMode(newDebugMode: boolean) {
 		debugMode = newDebugMode;
 	}
 
@@ -650,9 +653,16 @@ export class ImageNode {
 		return this.getChildrenIntersectingRegion(region);
 	}
 
-	// Returns a list of `ImageNode`s with content (and thus no children).
-	// Override getChildrenIntersectingRegion to customize how this method
-	// determines whether/which children are in `region`.
+	/**
+	 * Returns a list of `ImageNode`s with content (and thus no children).
+	 * Override getChildrenIntersectingRegion to customize how this method
+	 * determines whether/which children are in `region`.
+	 *
+	 * @paran region - All resultant `ImageNode`s must intersect `region`.
+	 * @param isTooSmall - If `isTooSmall` returns true for an image node, that node
+	 *                     is excluded from the output.
+	 *
+	 */
 	public getLeavesIntersectingRegion(region: Rect2, isTooSmall?: TooSmallToRenderCheck): ImageNode[] {
 		const result: ImageNode[] = [];
 		const workList: ImageNode[] = [];
@@ -736,8 +746,8 @@ export class ImageNode {
 
 				nodeForChildren.children = this.children;
 				this.children = [nodeForNewLeaf, nodeForChildren];
-				nodeForChildren.recomputeBBox(true);
 				nodeForChildren.updateParents();
+				nodeForChildren.recomputeBBox(true);
 			}
 			return nodeForNewLeaf.addLeaf(leaf);
 		}
@@ -760,6 +770,11 @@ export class ImageNode {
 		const newNode = ImageNode.createLeafNode(this, leaf);
 		this.children.push(newNode);
 		newNode.recomputeBBox(true);
+
+		if (this.children.length >= this.targetChildCount) {
+			this.rebalance();
+		}
+
 		return newNode;
 	}
 
@@ -794,6 +809,8 @@ export class ImageNode {
 				this.parent?.recomputeBBox(true);
 			}
 		}
+
+		this.checkRep();
 	}
 
 	// Grows this' bounding box to also include `other`.
@@ -814,6 +831,7 @@ export class ImageNode {
 	}
 
 	private rebalance() {
+
 		// If the current node is its parent's only child,
 		if (this.parent && this.parent.children.length === 1) {
 			console.assert(this.parent.content === null);
@@ -822,10 +840,14 @@ export class ImageNode {
 			// Remove this' parent, if this' parent isn't the root.
 			const oldParent = this.parent;
 			if (oldParent.parent !== null) {
-				oldParent.children = [];
-				this.parent = oldParent.parent;
-				this.parent.children.push(this);
+				const newParent = oldParent.parent;
+
+				newParent.children = newParent.children.filter(c => c !== oldParent);
 				oldParent.parent = null;
+				oldParent.children = [];
+
+				this.parent = newParent;
+				newParent.children.push(this);
 				this.parent.recomputeBBox(false);
 			} else if (this.content === null) {
 				// Remove this and transfer this' children to the parent.
@@ -834,11 +856,72 @@ export class ImageNode {
 				this.parent = null;
 			}
 		}
+
+		// Create virtual containers for children. Handles the case where there
+		// are many small, often non-overlapping children that we still want to be grouped.
+		if (this.children.length > this.targetChildCount * 10) {
+			const grid = this.getBBox().divideIntoGrid(4, 4);
+			const indexToCount = [];
+			while (indexToCount.length < grid.length) {
+				indexToCount.push(0);
+			}
+
+			for (const child of this.children) {
+				for (let i = 0; i < grid.length; i++) {
+					if (grid[i].containsRect(child.getBBox())) {
+						indexToCount[i] ++;
+					}
+				}
+			}
+
+			let indexWithGreatest = 0;
+			let greatestCount = indexToCount[0];
+			for (let i = 1; i < indexToCount.length; i++) {
+				if (indexToCount[i] > greatestCount) {
+					indexWithGreatest = i;
+					greatestCount = indexToCount[i];
+				}
+			}
+			const targetGridSquare = grid[indexWithGreatest];
+
+			// Avoid clustering if just a few children would be grouped.
+			// Unnecessary clustering can lead to unnecessarily nested nodes.
+			if (greatestCount > 4) {
+				const newChildren = [];
+				const childNodeChildren = [];
+				for (const child of this.children) {
+					if (targetGridSquare.containsRect(child.getBBox())) {
+						childNodeChildren.push(child);
+					} else {
+						newChildren.push(child);
+					}
+				}
+
+				if (childNodeChildren.length < this.children.length) {
+					this.children = newChildren;
+
+					const child = new ImageNode(this);
+					this.children.push(child);
+					child.children = childNodeChildren;
+					child.updateParents(false);
+
+					child.recomputeBBox(false);
+					child.rebalance();
+				}
+			}
+		}
+
+		// Empty?
+		if (this.parent && this.children.length === 0 && this.content === null) {
+			this.remove();
+		}
 	}
 
 	// Removes the parent-to-child link.
 	// Called internally by `.remove`
 	protected removeChild(child: ImageNode) {
+		this.checkRep();
+
 		const oldChildCount = this.children.length;
 		this.children = this.children.filter(node => {
 			return node !== child;
@@ -854,6 +937,9 @@ export class ImageNode {
 		});
 
 		this.recomputeBBox(true);
+		this.rebalance();
+
+		this.checkRep();
 	}
 
 	// Remove this node and all of its children
@@ -866,13 +952,14 @@ export class ImageNode {
 
 			return;
 		}
-
 		this.parent.removeChild(this);
 
 		// Remove the child-to-parent link and invalid this
 		this.parent = null;
 		this.content = null;
 		this.children = [];
+
+		this.checkRep();
 	}
 
 	// Creates a (potentially incomplete) async rendering of this image.
@@ -960,9 +1047,49 @@ export class ImageNode {
 		renderer.drawRect(bbox.intersection(visibleRect)!, lineWidth, { fill });
 		renderer.endObject();
 
+		if (bbox.maxDimension > visibleRect.maxDimension / 3) {
+			const textStyle = {
+				fontFamily: 'monospace',
+				size: bbox.minDimension / 20,
+				renderingStyle: { fill: Color4.red },
+			};
+			renderer.drawText(`Depth: ${depth}`, Mat33.translation(bbox.bottomLeft), textStyle);
+		}
+
 		// Render debug information for children
 		for (const child of this.children) {
 			child.renderDebugBoundingBoxes(renderer, visibleRect, depth + 1);
+		}
+	}
+
+	private checkRep(depth: number = 0) {
+		// Slow -- disabld by default
+		if (debugMode) {
+			if (this.parent && !this.parent.children.includes(this)) {
+				throw new Error(`Parent does not have this node as a child. (depth: ${depth})`);
+			}
+
+			let expectedBBox = null;
+			const seenChildren: Set<ImageNode> = new Set();
+			for (const child of this.children) {
+				expectedBBox ??= child.getBBox();
+				expectedBBox = expectedBBox.union(child.getBBox());
+
+				if (child.parent !== this) {
+					throw new Error(`Child with bbox ${child.getBBox()} and ${child.children.length} has wrong parent (was ${child.parent}).`);
+				}
+
+				// Children should only be present once
+				if (seenChildren.has(child)) {
+					throw new Error(`Child ${child} is present twice or more in its parent's child list`);
+				}
+				seenChildren.add(child);
+			}
+
+			const tolerance =  this.bbox.minDimension / 100;
+			if (expectedBBox && !this.bbox.eq(expectedBBox, tolerance)) {
+				throw new Error(`Wrong bounding box ${expectedBBox} \\neq ${this.bbox} (depth: ${depth})`);
+			}
 		}
 	}
 }

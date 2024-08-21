@@ -18,6 +18,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	dragAndDropHereOrBrowse: string; // Uses {{curly braces}} to bold text
 	cancel: string;
 	submit: string;
+	addAll: string;
 	roundedTipPen: string;
 	roundedTipPen2: string;
 	flatTipPen: string;
@@ -64,6 +65,9 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 
 	errorImageHasZeroSize: string;
 	describeTheImage: string;
+
+	fileInput__loading: string;
+	fileInput__andNMoreFiles: (count: number)=>string;
 
 	// Help text
 	penDropdown__baseHelpText: string;
@@ -122,6 +126,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	chooseFile: 'Choose file',
 	dragAndDropHereOrBrowse: 'Drag and drop here\nor\n{{browse}}',
 	submit: 'Submit',
+	addAll: 'Add all',
 	cancel: 'Cancel',
 	resetView: 'Reset view',
 	thicknessLabel: 'Thickness',
@@ -173,6 +178,9 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	errorImageHasZeroSize: 'Error: Image has zero size',
 	describeTheImage: 'Image description',
+
+	fileInput__loading: 'Loading...',
+	fileInput__andNMoreFiles: (n: number) => `(...${n} more)`,
 
 	// Help text
 	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines.',

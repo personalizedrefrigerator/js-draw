@@ -1,6 +1,6 @@
 import { Color4, Mat33, Rect2, TextComponent, EditorImage, Vec2, StrokeComponent, SelectionTool, sendPenEvent, InputEvtType } from './lib';
 import TextRenderingStyle from './rendering/TextRenderingStyle';
-import SVGLoader from './SVGLoader';
+import SVGLoader from './SVGLoader/SVGLoader';
 import createEditor from './testing/createEditor';
 
 describe('Editor.toSVG', () => {

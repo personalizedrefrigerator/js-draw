@@ -1,5 +1,5 @@
 import { EditorEventType } from '../types';
-import { KeyPressEvent, PointerEvt } from '../inputEvents';
+import { GestureCancelEvt, KeyPressEvent, PointerDownEvt, PointerEvt, PointerMoveEvt, PointerUpEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 import Editor from '../Editor';
 import { Point2, Vec2, LineSegment2, Color4, Rect2, Path } from '@js-draw/math';
@@ -24,6 +24,61 @@ export interface InitialEraserOptions {
 	mode?: EraserMode;
 }
 
+/** Handles switching from other primary tools to the eraser and back */
+class EraserSwitcher extends BaseTool {
+	private previousEnabledTool: BaseTool|null;
+	private previousEraserEnabledState: boolean;
+
+	public constructor(private editor: Editor, private eraser: Eraser) {
+		super(editor.notifier, editor.localization.changeTool);
+	}
+
+	public override onPointerDown(event: PointerDownEvt): boolean {
+		if (event.allPointers.length === 1 && event.current.device === PointerDevice.Eraser) {
+			const toolController = this.editor.toolController;
+			const enabledPrimaryTools = toolController.getPrimaryTools().filter(tool => tool.isEnabled());
+			if (enabledPrimaryTools.length) {
+				this.previousEnabledTool = enabledPrimaryTools[0];
+			} else {
+				this.previousEnabledTool = null;
+			}
+			this.previousEraserEnabledState = this.eraser.isEnabled();
+
+			this.eraser.setEnabled(true);
+			if (this.eraser.onPointerDown(event)) {
+				return true;
+			} else {
+				this.restoreOriginalTool();
+			}
+		}
+		return false;
+	}
+
+	public override onPointerMove(event: PointerMoveEvt) {
+		this.eraser.onPointerMove(event);
+	}
+
+	private restoreOriginalTool() {
+		this.eraser.setEnabled(this.previousEraserEnabledState);
+		if (this.previousEnabledTool) {
+			this.previousEnabledTool.setEnabled(true);
+		}
+	}
+
+	public override onPointerUp(event: PointerUpEvt) {
+		this.eraser.onPointerUp(event);
+		this.restoreOriginalTool();
+	}
+
+	public override onGestureCancel(event: GestureCancelEvt): void {
+		this.eraser.onGestureCancel(event);
+		this.restoreOriginalTool();
+	}
+}
+
+/**
+ * A tool that allows a user to erase parts of an image.
+ */
 export default class Eraser extends BaseTool {
 	private lastPoint: Point2|null = null;
 	private isFirstEraseEvt: boolean = true;
@@ -31,9 +86,8 @@ export default class Eraser extends BaseTool {
 	private thicknessValue: MutableReactiveValue<number>;
 	private modeValue: MutableReactiveValue<EraserMode>;
 
-
 	private toRemove: AbstractComponent[];
-	private toAdd: AbstractComponent[];
+	private toAdd: Set<AbstractComponent> = new Set();
 
 	// Commands that each remove one element
 	private eraseCommands: Erase[] = [];
@@ -60,6 +114,14 @@ export default class Eraser extends BaseTool {
 				tool: this,
 			});
 		});
+	}
+
+	/**
+	 * @returns a tool that briefly enables the eraser when a physical eraser is used.
+	 * This tool should be added to the tool list after the primary tools.
+	 */
+	public makeEraserSwitcherTool(): BaseTool {
+		return new EraserSwitcher(this.editor, this);
 	}
 
 	private clearPreview() {
@@ -166,15 +228,18 @@ export default class Eraser extends BaseTool {
 
 			const finalToErase = [];
 			for (const item of toErase) {
-				if (this.toAdd.includes(item)) {
-					this.toAdd = this.toAdd.filter(i => i !== item);
+				if (this.toAdd.has(item)) {
+					this.toAdd.delete(item);
 				} else {
 					finalToErase.push(item);
 				}
 			}
 
 			this.toRemove.push(...finalToErase);
-			this.toAdd.push(...toAdd);
+
+			for (const item of toAdd) {
+				this.toAdd.add(item);
+			}
 			this.eraseCommands.push(new Erase(finalToErase));
 			this.addCommands.push(...newAddCommands);
 		}
@@ -187,7 +252,7 @@ export default class Eraser extends BaseTool {
 		if (event.allPointers.length === 1 || event.current.device === PointerDevice.Eraser) {
 			this.lastPoint = event.current.canvasPos;
 			this.toRemove = [];
-			this.toAdd = [];
+			this.toAdd.clear();
 			this.isFirstEraseEvt = true;
 
 			this.drawPreviewAt(event.current.canvasPos);
@@ -211,7 +276,22 @@ export default class Eraser extends BaseTool {
 		if (this.addCommands.length > 0) {
 			this.addCommands.forEach(cmd => cmd.unapply(this.editor));
 
-			commands.push(...this.toAdd.map(a => EditorImage.addElement(a)));
+			// Remove items from toAdd that are also present in toRemove -- adding, then
+			// removing these does nothing, and can break undo/redo.
+			for (const item of this.toAdd) {
+				if (this.toRemove.includes(item)) {
+					this.toAdd.delete(item);
+					this.toRemove = this.toRemove.filter(other => other !== item);
+				}
+			}
+			for (const item of this.toRemove) {
+				if (this.toAdd.has(item)) {
+					this.toAdd.delete(item);
+					this.toRemove = this.toRemove.filter(other => other !== item);
+				}
+			}
+
+			commands.push(...[...this.toAdd].map(a => EditorImage.addElement(a)));
 
 			this.addCommands = [];
 		}
@@ -234,7 +314,7 @@ export default class Eraser extends BaseTool {
 		this.clearPreview();
 	}
 
-	public override onGestureCancel(): void {
+	public override onGestureCancel(_event: GestureCancelEvt): void {
 		this.addCommands.forEach(cmd => cmd.unapply(this.editor));
 		this.eraseCommands.forEach(cmd => cmd.unapply(this.editor));
 		this.eraseCommands = [];
@@ -280,6 +360,7 @@ export default class Eraser extends BaseTool {
 		return this.thicknessValue;
 	}
 
+	/** @returns An object that allows switching between a full stroke and a partial stroke eraser. */
 	public getModeValue() {
 		return this.modeValue;
 	}

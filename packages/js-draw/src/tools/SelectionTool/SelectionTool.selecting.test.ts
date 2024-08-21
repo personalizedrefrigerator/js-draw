@@ -1,4 +1,4 @@
-import { Color4, Path, Vec2 } from '@js-draw/math';
+import { Color4, Path, Rect2, Vec2 } from '@js-draw/math';
 
 import { InputEvtType } from '../../inputEvents';
 import Pointer, { PointerDevice } from '../../Pointer';
@@ -7,6 +7,7 @@ import createEditor from '../../testing/createEditor';
 import SelectionTool from './SelectionTool';
 import { pathToRenderable, Stroke } from '../../lib';
 import sendPenEvent from '../../testing/sendPenEvent';
+import sendTouchEvent from '../../testing/sendTouchEvent';
 
 
 describe('SelectionTool.selecting', () => {
@@ -167,5 +168,67 @@ describe('SelectionTool.selecting', () => {
 		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 100));
 
 		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
+	});
+
+	it('should allow creating a selection with nonprimary pointers', async () => {
+		const editor = createEditor();
+		await editor.loadFromSVG('<svg width="100" height="100"><path d="m0,0 l10,10 l-1,0" stroke="red" fill="red"></path></svg>');
+
+		// Should have loaded the stroke
+		expect(editor.image.getElementsIntersectingRegion(Rect2.unitSquare)).toHaveLength(1);
+
+		const selectionTool = editor.toolController.getMatchingTools(SelectionTool)[0];
+		selectionTool.setEnabled(true);
+
+		const initialCanvasPos = Vec2.of(0, 0);
+		const isPrimary = false;
+		let pointer = Pointer.ofCanvasPoint(
+			initialCanvasPos, false, editor.viewport, 0, PointerDevice.Pen, isPrimary,
+		);
+
+		// Select with a single non-primary pointer
+		editor.toolController.dispatchInputEvent({
+			kind: InputEvtType.PointerDownEvt,
+			current: pointer,
+			allPointers: [ pointer ],
+		});
+
+		pointer = pointer.withCanvasPosition(Vec2.of(10, 10), editor.viewport);
+		editor.toolController.dispatchInputEvent({
+			kind: InputEvtType.PointerMoveEvt,
+			current: pointer,
+			allPointers: [ pointer ],
+		});
+		editor.toolController.dispatchInputEvent({
+			kind: InputEvtType.PointerUpEvt,
+			current: pointer,
+			allPointers: [ pointer ],
+		});
+
+		expect(selectionTool.getSelectedObjects()).toHaveLength(1);
+	});
+
+	it('should cancel a touch selection when interrupted by a pinch gesture', async () => {
+		const editor = createEditor();
+		await editor.loadFromSVG('<svg width="10" height="10"><path d="m0,0 l10,10 l-1,0" stroke="red" fill="red"></path></svg>');
+
+		const selectionTool = editor.toolController.getMatchingTools(SelectionTool)[0];
+		selectionTool.setEnabled(true);
+
+		let pointer1 = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.zero);
+		pointer1 = sendTouchEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3, 3));
+
+		expect(selectionTool.getSelection()!.getScreenRegion()).objEq(new Rect2(0, 0, 3, 3), 1e-6);
+
+		// Second pointer -- cancel the selection
+		let pointer2 = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.unitX, [pointer1]);
+		pointer2 = sendTouchEvent(editor, InputEvtType.PointerMoveEvt, Vec2.unitY, [pointer1]);
+
+		// Should be cancelled.
+		expect(selectionTool.getSelection()).toBeNull();
+
+		// Should stay cancelled.
+		pointer1 = sendTouchEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3, -4), [pointer2]);
+		expect(selectionTool.getSelection()).toBeNull();
 	});
 });

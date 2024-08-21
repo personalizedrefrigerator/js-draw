@@ -307,12 +307,17 @@
 		border: none;
 		padding: 10px;
 
-		color: var(--foreground-color-1);
-
 		transition: 0.2s ease box-shadow;
 
-		&:hover {
+		&:not(:disabled):hover {
 			box-shadow: 0 1px 2px var(--shadow-color);
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			font-weight: unset;
+			cursor: unset;
+			color: var(--foreground-color-1);
 		}
 
 		font-weight: bold;
