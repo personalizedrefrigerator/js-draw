@@ -751,6 +751,14 @@ export default class Selection {
 		return duplicateCommand;
 	}
 
+	public setHandlesVisible(showHandles: boolean) {
+		if (!showHandles) {
+			this.innerContainer.classList.add('-hide-handles');
+		} else {
+			this.innerContainer.classList.remove('-hide-handles');
+		}
+	}
+
 	public addTo(elem: HTMLElement) {
 		if (this.outerContainer.parentElement) {
 			this.outerContainer.remove();

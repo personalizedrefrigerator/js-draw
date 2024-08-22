@@ -129,6 +129,7 @@ export default class SelectionTool extends BaseTool {
 				// Shift key: Combine the new and old selection boxes at the end of the gesture.
 				this.expandingSelectionBox = this.shiftKeyPressed;
 				this.makeSelectionBox(current.canvasPos);
+				this.selectionBox?.setHandlesVisible(false);
 			}
 			else {
 				// Only autoscroll if we're transforming an existing selection
@@ -178,6 +179,7 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		this.selectionBox.setToPoint(currentPointer.canvasPos);
+		this.selectionBox.setHandlesVisible(true);
 
 		// Were we expanding the previous selection?
 		if (this.expandingSelectionBox && this.prevSelectionBox) {

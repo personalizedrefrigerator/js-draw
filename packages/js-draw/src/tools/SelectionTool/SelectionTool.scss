@@ -121,6 +121,10 @@
 		&.-empty {
 			opacity: 0;
 		}
+
+		&.-hide-handles .selection-tool-handle {
+			display: none;
+		}
 	}
 }
 
