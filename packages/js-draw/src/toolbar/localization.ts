@@ -173,7 +173,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	lockRotation: 'Lock rotation',
 
 	copyButton__paste: 'Paste',
-	copyButton__copy: 'Copy',
+	copyButton__copy: 'Copy to clipboard',
 	copyButton__copied: 'Copied',
 
 	errorImageHasZeroSize: 'Error: Image has zero size',

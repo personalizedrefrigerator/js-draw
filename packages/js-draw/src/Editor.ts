@@ -1402,8 +1402,13 @@ export class Editor {
 
 		if (selectComponents) {
 			for (const selectionTool of this.toolController.getMatchingTools(SelectionTool)) {
+				const wasEnabled = selectionTool.isEnabled();
 				selectionTool.setEnabled(true);
 				selectionTool.setSelection(components);
+
+				if (wasEnabled) {
+					selectionTool.getSelection()?.runSelectionDuplicatedAnimation();
+				}
 			}
 		}
 	}

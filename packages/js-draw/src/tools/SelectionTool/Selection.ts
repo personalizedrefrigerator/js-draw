@@ -700,7 +700,8 @@ export default class Selection {
 	}
 
 	private selectionDuplicatedAnimationTimeout: ReturnType<typeof setTimeout>|null = null;
-	private runSelectionDuplicatedAnimation() {
+	// @internal
+	public runSelectionDuplicatedAnimation() {
 		if (this.selectionDuplicatedAnimationTimeout) {
 			clearTimeout(this.selectionDuplicatedAnimationTimeout);
 		}

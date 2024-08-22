@@ -10,7 +10,6 @@ import makeSeparator from '../components/makeSeparator';
 import { toolbarCSSPrefix } from '../../constants';
 import HelpDisplay from '../../utils/HelpDisplay';
 import ClipboardHandler from '../../../util/ClipboardHandler';
-import BaseWidget from '../BaseWidget';
 import makeFormatMenu from './makeFormatMenu';
 import CopyPasteWidget from './CopyPasteWidget';
 
@@ -59,7 +58,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		duplicateButton.setHelpText(this.localizationTable.selectionDropdown__duplicateHelpText);
 
-		let copyPasteWidget: BaseWidget|null = null;
+		let copyPasteWidget: CopyPasteWidget|null = null;
 
 		const clipboardHandler = new ClipboardHandler(this.editor);
 		if (clipboardHandler.canCopyPasteWithoutEvent()) {

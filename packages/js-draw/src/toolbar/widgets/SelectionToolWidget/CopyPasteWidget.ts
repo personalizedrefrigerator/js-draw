@@ -14,6 +14,8 @@ enum CopyPasteWidgetMode {
 
 export default class CopyPasteWidget extends BaseWidget {
 	#toolUpdateListener: DispatcherEventListener;
+	#pasteUnsupported: boolean = false;
+	#copyUnsupported: boolean = false;
 	#pastePermissionStatus?: PermissionStatus;
 	#copyPermissionStatus?: PermissionStatus;
 
@@ -41,13 +43,20 @@ export default class CopyPasteWidget extends BaseWidget {
 		void this.#permissionsSetup();
 	}
 
+	public unsupported() {
+		return this.#pasteUnsupported === true && this.#copyUnsupported === true;
+	}
+
 	async #permissionsSetup() {
-		const queryPermissions = (options: PermissionDescriptor) => {
+		const queryPermissions = async (options: PermissionDescriptor) => {
 			if (navigator.permissions && navigator.permissions.query) {
-				return navigator.permissions.query(options);
-			} else {
-				return undefined;
+				try {
+					return await navigator.permissions.query(options);
+				} catch (error) {
+					console.error('Failed to request permission', options.name, error);
+				}
 			}
+			return undefined;
 		};
 		this.#pastePermissionStatus = await queryPermissions({
 			name: 'clipboard-read',
@@ -57,15 +66,22 @@ export default class CopyPasteWidget extends BaseWidget {
 			name: 'clipboard-write',
 			allowWithoutGesture: false,
 		} as any);
-		this.#onPermissionStatusChanged();
 		this.#pastePermissionStatus?.addEventListener('change', this.#onPermissionStatusChanged);
 		this.#copyPermissionStatus?.addEventListener('change', this.#onPermissionStatusChanged);
+
+		if (!this.#pastePermissionStatus) {
+			this.#pasteUnsupported = true;
+		}
+		if (!this.#copyPermissionStatus) {
+			this.#copyUnsupported = true;
+		}
+		this.#onPermissionStatusChanged();
 	}
 
 	#updateDisabled() {
-		if (this.#mode === CopyPasteWidgetMode.Paste && this.#pastePermissionStatus?.state === 'denied') {
+		if (this.#mode === CopyPasteWidgetMode.Paste && this.#pasteUnsupported === true) {
 			this.setDisabled(true);
-		} else if (this.#mode === CopyPasteWidgetMode.Copy && this.#copyPermissionStatus?.state === 'denied') {
+		} else if (this.#mode === CopyPasteWidgetMode.Copy && this.#copyUnsupported === true) {
 			this.setDisabled(true);
 		} else {
 			this.setDisabled(false);
@@ -73,7 +89,17 @@ export default class CopyPasteWidget extends BaseWidget {
 	}
 
 	#onPermissionStatusChanged = () => {
+		if (this.#copyPermissionStatus?.state === 'denied') {
+			this.#copyUnsupported = true;
+		}
+		if (this.#pastePermissionStatus?.state === 'denied') {
+			this.#pasteUnsupported = true;
+		}
 		this.#updateDisabled();
+
+		if (this.unsupported()) {
+			this.remove();
+		}
 	};
 
 	#mode: CopyPasteWidgetMode;
