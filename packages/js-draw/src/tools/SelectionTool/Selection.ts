@@ -19,6 +19,7 @@ import { DragTransformer, ResizeTransformer, RotateTransformer } from './Transfo
 import { ResizeMode, SelectionBoxChild } from './types';
 import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
+import SelectionTopMenu from './SelectionTopMenu';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -108,12 +109,17 @@ export default class Selection {
 			(currentPoint) => this.transformers.rotate.onDragUpdate(currentPoint),
 			() => this.transformers.rotate.onDragEnd(),
 		);
+		const commandMenu = new SelectionTopMenu(this, this.editor.viewport);
+		commandMenu.addButton('Duplicate', async () => {
+			await this.editor.dispatch(await this.duplicateSelectedObjects());
+		});
 
 		this.childwidgets = [
 			resizeBothHandle,
 			...resizeHorizontalHandles,
 			resizeVerticalHandle,
 			rotationHandle,
+			commandMenu
 		];
 
 		for (const widget of this.childwidgets) {

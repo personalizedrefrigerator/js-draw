@@ -80,6 +80,29 @@
 	}
 }
 
+.selection-tool-selection-menu {
+	> button {
+		max-height: var(--vertical-offset);
+		background-color: var(--background-color-1);
+		font-size: 14px;
+
+		color: var(--foreground-color-1);
+		border: 0.5px solid var(--foreground-color-1);
+		border-radius: 3px;
+		padding: 3px;
+		opacity: 0.8;
+
+		&:hover, &:focus-visible {
+			background-color: var(--background-color-2);
+			color: var(--foreground-color-2);
+			cursor: pointer;
+			opacity: 1;
+		}
+
+		transition: 0.2s ease opacity;
+	}
+}
+
 .overlay.handleOverlay {
 	touch-action: none;
 
