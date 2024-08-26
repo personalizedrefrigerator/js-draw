@@ -5,9 +5,6 @@ import Selection from './Selection';
 import Pointer from '../../Pointer';
 import Viewport from '../../Viewport';
 import { SelectionBoxChild } from './types';
-import createMenuOverlay from '../util/createMenuOverlay';
-import Editor from '../../Editor';
-import { IconElemType } from '../../toolbar/IconProvider';
 
 
 const verticalOffset = 40;
@@ -17,11 +14,7 @@ export type DragStartCallback = (startPoint: Point2)=>void;
 export type DragUpdateCallback = (canvasPoint: Point2)=> void;
 export type DragEndCallback = ()=> Promise<void>|void;
 
-export interface SelectionMenuAction {
-	icon: ()=>IconElemType,
-	text: string;
-	onClick: ()=>void;
-}
+type OnShowContextMenu = (anchor: Point2)=>void;
 
 export default class SelectionTopMenu implements SelectionBoxChild {
 	private element: HTMLElement;
@@ -29,8 +22,7 @@ export default class SelectionTopMenu implements SelectionBoxChild {
 	public constructor(
 		private readonly parent: Selection,
 		private readonly viewport: Viewport,
-		editor: Editor,
-		actions: SelectionMenuAction[],
+		showContextMenu: OnShowContextMenu,
 	) {
 		this.element = document.createElement('div');
 		this.element.classList.add(
@@ -41,16 +33,7 @@ export default class SelectionTopMenu implements SelectionBoxChild {
 
 		this.addButton('...', async () => {
 			const anchor = this.getBBoxCanvasCoords().center;
-			const onActivate = await createMenuOverlay(editor, anchor, actions.map((action) => ({
-				text: action.text,
-				icon: action.icon,
-				disabled: false,
-				key: action.onClick,
-			})));
-
-			if (onActivate) {
-				onActivate();
-			}
+			showContextMenu(anchor);
 		});
 
 		this.updatePosition();

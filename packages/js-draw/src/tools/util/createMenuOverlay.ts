@@ -7,7 +7,6 @@ import { EditorEventType } from '../../types';
 interface MenuOption<KeyType> {
 	key: KeyType;
 	text: string;
-	disabled: boolean;
 	icon: ()=>IconElemType;
 }
 
@@ -47,7 +46,7 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 		};
 
 		menuContainer.onclick = async (event) => {
-			if (event.target === menuContainer) {
+			if (event.target === menuContainer && !event.defaultPrevented) {
 				event.preventDefault();
 				await hideMenu();
 				resolve(null);
@@ -64,7 +63,9 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 				option.icon(),
 				document.createTextNode(option.text),
 			);
-			optionContainer.onclick = () => {
+			optionContainer.onclick = (event) => {
+				if (event.defaultPrevented) return;
+
 				onOptionSelected(option.key);
 			};
 			contentElement.appendChild(optionContainer);

@@ -19,7 +19,7 @@ import { DragTransformer, ResizeTransformer, RotateTransformer } from './Transfo
 import { ResizeMode, SelectionBoxChild } from './types';
 import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
-import SelectionTopMenu, { SelectionMenuAction } from './SelectionTopMenu';
+import SelectionTopMenu from './SelectionTopMenu';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -49,7 +49,7 @@ export default class Selection {
 	public constructor(
 		startPoint: Point2,
 		private editor: Editor,
-		actions: SelectionMenuAction[],
+		showContextMenu: (anchor: Point2)=>void,
 	) {
 		this.originalRegion = new Rect2(startPoint.x, startPoint.y, 0, 0);
 		this.transformers = {
@@ -116,7 +116,7 @@ export default class Selection {
 		const commandMenu = new SelectionTopMenu(
 			this,
 			this.editor.viewport,
-			this.editor, actions,
+			showContextMenu,
 		);
 
 		this.childwidgets = [
