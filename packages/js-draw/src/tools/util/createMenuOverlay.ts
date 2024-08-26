@@ -45,6 +45,7 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 			resolve(key);
 		};
 
+		// TODO: In Firefox, this is fired when the menu overlay is opened by a long press.
 		menuContainer.onclick = async (event) => {
 			if (event.target === menuContainer && !event.defaultPrevented) {
 				event.preventDefault();

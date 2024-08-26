@@ -37,6 +37,7 @@ import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
 import ClipboardHandler from './util/ClipboardHandler';
 import { ShowCustomFilePickerCallback } from './toolbar/widgets/components/makeFileInput';
+import ContextMenuRecognizer from './tools/InputFilter/ContextMenuRecognizer';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -408,6 +409,7 @@ export class Editor {
 
 		// TODO: Make this pipeline configurable (e.g. allow users to add global input stabilization)
 		this.toolController.addInputMapper(StrokeKeyboardControl.fromEditor(this));
+		this.toolController.addInputMapper(new ContextMenuRecognizer());
 
 		parent.appendChild(this.container);
 
@@ -738,6 +740,8 @@ export class Editor {
 			if (!this.pointers[pointer.id]) {
 				return false;
 			}
+
+			console.log('pointerup');
 
 			this.pointers[pointer.id] = pointer;
 			this.releasePointerCapture(eventTarget, pointer.id);

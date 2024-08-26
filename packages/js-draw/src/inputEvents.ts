@@ -30,6 +30,8 @@ export enum InputEvtType {
 
 	CopyEvent,
 	PasteEvent,
+
+	ContextMenu,
 }
 
 // [delta.x] is horizontal scroll,
@@ -111,6 +113,12 @@ export interface PointerUpEvt extends PointerEvtBase {
 	readonly kind: InputEvtType.PointerUpEvt;
 }
 
+export interface ContextMenuEvt {
+	readonly kind: InputEvtType.ContextMenu;
+	readonly screenPos: Point2;
+	readonly canvasPos: Point2;
+}
+
 /**
  * An internal `js-draw` pointer event type.
  *
@@ -126,7 +134,7 @@ export type PointerEvtType = InputEvtType.PointerDownEvt|InputEvtType.PointerMov
  *
  * These are not DOM events.
  */
-export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt | CopyEvent | PasteEvent;
+export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt | CopyEvent | PasteEvent | ContextMenuEvt;
 
 type KeyEventType = InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent;
 

@@ -45,6 +45,8 @@ export default class StationaryPenDetector {
 		this.stationaryStartPointer = startPointer;
 		this.lastPointer = startPointer;
 		this.averageVelocity = Vec2.zero;
+
+		this.setStationaryTimeout(this.config.minTimeSeconds * 1000);
 	}
 
 	// Returns true if stationary

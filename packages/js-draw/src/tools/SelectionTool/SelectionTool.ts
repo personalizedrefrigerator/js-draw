@@ -2,7 +2,7 @@ import AbstractComponent from '../../components/AbstractComponent';
 import Editor from '../../Editor';
 import { Mat33, Rect2, Point2, Vec2 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
-import { CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
+import { ContextMenuEvt, CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
 import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
 import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
@@ -11,9 +11,8 @@ import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
 import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId, stretchXYSelectionShortcutId, shrinkXYSelectionShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
-import Pointer, { PointerDevice } from '../../Pointer';
+import Pointer from '../../Pointer';
 import ClipboardHandler from '../../util/ClipboardHandler';
-import StationaryPenDetector, { defaultStationaryDetectionConfig } from '../util/StationaryPenDetector';
 import createMenuOverlay from '../util/createMenuOverlay';
 
 export const cssPrefix = 'selection-tool-';
@@ -25,7 +24,6 @@ export default class SelectionTool extends BaseTool {
 	private prevSelectionBox: Selection | null;
 	private selectionBox: Selection | null;
 
-	private stationaryDetector: StationaryPenDetector|null = null;
 	private startPoint: Vec2 | null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
@@ -101,11 +99,9 @@ export default class SelectionTool extends BaseTool {
 		this.selectionBox.finalizeTransform();
 	}
 
-	private showContextMenu = async (canvasAnchor: Point2) => {
-		this.stationaryDetector?.destroy();
-		this.stationaryDetector = null;
-
-		const onActivated = await createMenuOverlay(this.editor, canvasAnchor, [{
+	private showContextMenu = async (canvasAnchor: Point2, preferSelectionMenu = true) => {
+		const showSelectionMenu = this.selectionBox?.getSelectedItemCount() && preferSelectionMenu;
+		const onActivated = await createMenuOverlay(this.editor, canvasAnchor, showSelectionMenu ? [{
 			text: 'Duplicate', // TODO: localize
 			icon: () => this.editor.icons.makeDuplicateSelectionIcon(),
 			key: async () => {
@@ -129,9 +125,22 @@ export default class SelectionTool extends BaseTool {
 				const clipboardHandler = new ClipboardHandler(this.editor);
 				await clipboardHandler.copy();
 			},
+		}] : [{
+			text: 'Paste', // TODO: Localize
+			icon: () => this.editor.icons.makeSelectionIcon(),
+			key: async () => {
+				const clipboardHandler = new ClipboardHandler(this.editor);
+				await clipboardHandler.paste();
+			},
 		}]);
 		onActivated?.();
 	};
+
+	public override onContextMenu(event: ContextMenuEvt): boolean {
+		const canShowSelectionMenu = this.selectionBox?.getScreenRegion()?.containsPoint(event.screenPos);
+		void this.showContextMenu(event.canvasPos, canShowSelectionMenu);
+		return true;
+	}
 
 	private selectionBoxHandlingEvt: boolean = false;
 	public override onPointerDown({ allPointers, current }: PointerEvt): boolean {
@@ -143,14 +152,6 @@ export default class SelectionTool extends BaseTool {
 		// Don't rely on .isPrimary -- it's buggy in Firefox. See https://github.com/personalizedrefrigerator/js-draw/issues/71
 		if (allPointers.length === 1) {
 			this.startPoint = current.canvasPos;
-
-			this.stationaryDetector?.destroy();
-			this.stationaryDetector = new StationaryPenDetector(
-				current,
-				defaultStationaryDetectionConfig,
-				pointer => this.showContextMenu(pointer.canvasPos),
-			);
-			this.stationaryDetector.onPointerMove(current);
 
 			let transforming = false;
 
@@ -191,7 +192,6 @@ export default class SelectionTool extends BaseTool {
 
 	private onMainPointerUpdated(currentPointer: Pointer) {
 		this.lastPointer = currentPointer;
-		this.stationaryDetector?.onPointerMove(currentPointer);
 
 		if (!this.selectionBox) return;
 
@@ -215,12 +215,6 @@ export default class SelectionTool extends BaseTool {
 
 	public override onPointerUp(event: PointerEvt): void {
 		this.autoscroller.stop();
-		if (this.stationaryDetector && !this.stationaryDetector?.getHasMovedOutOfRadius() && event.current.device === PointerDevice.RightButtonMouse) {
-			this.showContextMenu(event.current.canvasPos);
-		}
-		this.stationaryDetector?.onPointerUp(event.current);
-		this.stationaryDetector?.destroy();
-		this.stationaryDetector = null;
 
 		if (!this.selectionBox) return;
 
@@ -258,9 +252,6 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public override onGestureCancel(): void {
-		this.stationaryDetector?.destroy();
-		this.stationaryDetector = null;
-
 		this.autoscroller.stop();
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox?.onDragCancel();
