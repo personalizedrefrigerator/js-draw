@@ -12,6 +12,7 @@ import TextComponent from '../../components/TextComponent';
 import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId, stretchXYSelectionShortcutId, shrinkXYSelectionShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
 import Pointer from '../../Pointer';
+import ClipboardHandler from '../../util/ClipboardHandler';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -74,7 +75,31 @@ export default class SelectionTool extends BaseTool {
 	private makeSelectionBox(selectionStartPos: Point2) {
 		this.prevSelectionBox = this.selectionBox;
 		this.selectionBox = new Selection(
-			selectionStartPos, this.editor
+			selectionStartPos, this.editor, [{
+				text: 'Duplicate', // TODO: localize
+				icon: () => this.editor.icons.makeDuplicateSelectionIcon(),
+				onClick: async () => {
+					await this.editor.dispatch(await this.selectionBox!.duplicateSelectedObjects());
+				},
+			}, {
+				text: 'Delete', // TODO: localize
+				icon: () => this.editor.icons.makeDeleteSelectionIcon(),
+				onClick: async () => {
+					await this.editor.dispatch(this.selectionBox!.deleteSelectedObjects());
+					this.clearSelection();
+					// TODO: Handle this in a better way -- currently, the selection box leaves
+					//       a rendered copy of the selected content.
+					this.editor.display.getWetInkRenderer().clear();
+					this.editor.queueRerender();
+				},
+			}, {
+				text: 'Copy to clipboard', // TODO: localize
+				icon: () => this.editor.icons.makeDuplicateSelectionIcon(),
+				onClick: async () => {
+					const clipboardHandler = new ClipboardHandler(this.editor);
+					await clipboardHandler.copy();
+				},
+			}]
 		);
 
 		if (!this.expandingSelectionBox) {
@@ -178,7 +203,9 @@ export default class SelectionTool extends BaseTool {
 			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
 		}
 
-		this.selectionBox.setToPoint(currentPointer.canvasPos);
+		if (!this.selectionBoxHandlingEvt) {
+			this.selectionBox.setToPoint(currentPointer.canvasPos);
+		}
 		this.selectionBox.setHandlesVisible(true);
 
 		// Were we expanding the previous selection?

@@ -19,7 +19,7 @@ import { DragTransformer, ResizeTransformer, RotateTransformer } from './Transfo
 import { ResizeMode, SelectionBoxChild } from './types';
 import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
-import SelectionTopMenu from './SelectionTopMenu';
+import SelectionTopMenu, { SelectionMenuAction } from './SelectionTopMenu';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -46,7 +46,11 @@ export default class Selection {
 
 	private hasParent: boolean = true;
 
-	public constructor(startPoint: Point2, private editor: Editor) {
+	public constructor(
+		startPoint: Point2,
+		private editor: Editor,
+		actions: SelectionMenuAction[],
+	) {
 		this.originalRegion = new Rect2(startPoint.x, startPoint.y, 0, 0);
 		this.transformers = {
 			drag: new DragTransformer(editor, this),
@@ -109,10 +113,11 @@ export default class Selection {
 			(currentPoint) => this.transformers.rotate.onDragUpdate(currentPoint),
 			() => this.transformers.rotate.onDragEnd(),
 		);
-		const commandMenu = new SelectionTopMenu(this, this.editor.viewport);
-		commandMenu.addButton('Duplicate', async () => {
-			await this.editor.dispatch(await this.duplicateSelectedObjects());
-		});
+		const commandMenu = new SelectionTopMenu(
+			this,
+			this.editor.viewport,
+			this.editor, actions,
+		);
 
 		this.childwidgets = [
 			resizeBothHandle,
