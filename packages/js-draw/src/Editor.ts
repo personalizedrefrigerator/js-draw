@@ -750,8 +750,6 @@ export class Editor {
 				return false;
 			}
 
-			console.log('pointerup');
-
 			this.pointers[pointer.id] = pointer;
 			this.releasePointerCapture(eventTarget, pointer.id);
 			if (this.toolController.dispatchInputEvent({
