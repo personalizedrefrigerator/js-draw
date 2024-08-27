@@ -36,7 +36,7 @@ export default class SelectionTopMenu implements SelectionBoxChild {
 			const anchor = this.getBBoxCanvasCoords().center;
 			showContextMenu(anchor);
 		};
-		this.addButton('...', (_event) => {
+		this.addButton('...', () => {
 			this.onClick();
 		});
 
@@ -49,16 +49,19 @@ export default class SelectionTopMenu implements SelectionBoxChild {
 
 	public remove() { this.element.remove(); }
 
-	private addButton(label: string, onClick: (event: MouseEvent)=>void) {
+	private addButton(label: string, onActivate: ()=>void) {
 		const button = document.createElement('button');
 		button.textContent = label;
-		button.onclick = (event) => {
-			onClick(event);
+		// To prevent editor event handlers from conflicting with those for the button,
+		// don't register a [click] handler. An onclick handler can be fired incorrectly
+		// in this case (in Chrome) after onClick is fired in onDragEnd, leading to a double
+		// on-click action.
+		button.onkeydown = (event) => {
+			if (event.key === 'Enter') onActivate();
 		};
 		this.element.appendChild(button);
 
 		// Update the bounding box of this in response to the new button.
-		// TODO: Use a ResizeObserver when available.
 		requestAnimationFrame(() => {
 			this.updatePosition();
 		});
