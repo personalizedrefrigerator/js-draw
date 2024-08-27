@@ -1,7 +1,7 @@
 import waitForTimeout from '../../util/waitForTimeout';
 import Editor from '../../Editor';
 import { IconElemType } from '../../toolbar/IconProvider';
-import { Point2, Rect2 } from '@js-draw/math';
+import { Point2 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
 
 interface MenuOption<KeyType> {
@@ -20,7 +20,7 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 	const hideMenuTimeout = 240;
 	menuContainer.style.setProperty('--hide-menu-animation-timeout', `${hideMenuTimeout}ms`);
 	const updateMenuLocation = () => {
-		const overlayRect = Rect2.of(overlay.getBoundingClientRect());
+		const overlayRect = editor.getOutputBBoxInDOM();
 		const anchor = editor.viewport.canvasToScreen(canvasAnchor).plus(overlayRect.topLeft);
 		menuContainer.style.setProperty('--anchor-x', `${anchor.x}px`);
 		menuContainer.style.setProperty('--anchor-y', `${anchor.y}px`);
