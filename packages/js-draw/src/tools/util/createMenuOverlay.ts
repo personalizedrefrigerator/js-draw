@@ -66,6 +66,8 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 				return true;
 			}
 			return false;
+		}, (_eventName, event) => {
+			return event.target === menuModal;
 		});
 
 		const contentElement = document.createElement('div');
