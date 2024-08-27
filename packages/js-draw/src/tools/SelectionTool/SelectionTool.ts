@@ -120,14 +120,14 @@ export default class SelectionTool extends BaseTool {
 			},
 		}, {
 			text: 'Copy to clipboard', // TODO: localize
-			icon: () => this.editor.icons.makeDuplicateSelectionIcon(),
+			icon: () => this.editor.icons.makeCopyIcon(),
 			key: async () => {
 				const clipboardHandler = new ClipboardHandler(this.editor);
 				await clipboardHandler.copy();
 			},
 		}] : [{
 			text: 'Paste', // TODO: Localize
-			icon: () => this.editor.icons.makeSelectionIcon(),
+			icon: () => this.editor.icons.makePasteIcon(),
 			key: async () => {
 				const clipboardHandler = new ClipboardHandler(this.editor);
 				await clipboardHandler.paste();
