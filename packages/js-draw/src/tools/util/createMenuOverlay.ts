@@ -14,45 +14,59 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 	const overlay = document.createElement('div');
 	const { remove: removeOverlay } = editor.createHTMLOverlay(overlay);
 
-	const menuContainer = document.createElement('dialog');
-	menuContainer.classList.add('editor-popup-menu');
+	const menuModal = document.createElement('dialog');
+	menuModal.classList.add('editor-popup-menu');
 
 	const hideMenuTimeout = 240;
-	menuContainer.style.setProperty('--hide-menu-animation-timeout', `${hideMenuTimeout}ms`);
+	menuModal.style.setProperty('--hide-menu-animation-timeout', `${hideMenuTimeout}ms`);
 	const updateMenuLocation = () => {
 		const overlayRect = editor.getOutputBBoxInDOM();
 		const anchor = editor.viewport.canvasToScreen(canvasAnchor).plus(overlayRect.topLeft);
-		menuContainer.style.setProperty('--anchor-x', `${anchor.x}px`);
-		menuContainer.style.setProperty('--anchor-y', `${anchor.y}px`);
+		menuModal.style.setProperty('--anchor-x', `${anchor.x}px`);
+		menuModal.style.setProperty('--anchor-y', `${anchor.y}px`);
 	};
 	updateMenuLocation();
 	const viewportChangeListener = editor.notifier.on(EditorEventType.ViewportChanged, updateMenuLocation);
 
-	overlay.appendChild(menuContainer);
-	menuContainer.showModal();
+	overlay.appendChild(menuModal);
+	menuModal.showModal();
 
-	const hideMenu = async () => {
+	let dismissing = false;
+	const dismissMenu = async () => {
+		if (dismissing) return;
+		dismissing = true;
+
 		viewportChangeListener.remove();
-		menuContainer.classList.add('-hide');
+		menuModal.classList.add('-hide');
 		await waitForTimeout(hideMenuTimeout);
-		menuContainer.close();
-		removeOverlay();
+		menuModal.close();
 	};
 
 	return new Promise<KeyType|null>(resolve => {
-		const onOptionSelected = async (key: KeyType|null) => {
-			await hideMenu();
-			resolve(key);
+		let selectedResult: KeyType|null = null;
+
+		menuModal.onclose = () => {
+			removeOverlay();
+			resolve(selectedResult);
 		};
 
-		// TODO: In Firefox, this is fired when the menu overlay is opened by a long press.
-		menuContainer.onclick = async (event) => {
-			if (event.target === menuContainer && !event.defaultPrevented) {
-				event.preventDefault();
-				await hideMenu();
-				resolve(null);
-			}
+		const onOptionSelected = async (key: KeyType|null) => {
+			selectedResult = key;
+			await dismissMenu();
 		};
+
+		editor.handlePointerEventsExceptClicksFrom(menuModal, (eventName, event) => {
+			if (event.target === menuModal && eventName === 'pointerdown') {
+				void dismissMenu();
+				return true;
+			} else if (dismissing) {
+				// Send pointer events to the editor if the dialog is in the process of being
+				// dismissed (e.g. pointermove events just after a pointerdown outside of the
+				// editor).
+				return true;
+			}
+			return false;
+		});
 
 		const contentElement = document.createElement('div');
 		contentElement.classList.add('content');
@@ -72,7 +86,7 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 			contentElement.appendChild(optionContainer);
 		}
 
-		menuContainer.appendChild(contentElement);
+		menuModal.appendChild(contentElement);
 
 		// Ensures that the menu is visible even if triggered near the edge of the screen.
 		contentElement.scrollIntoView({ block: 'nearest' });
