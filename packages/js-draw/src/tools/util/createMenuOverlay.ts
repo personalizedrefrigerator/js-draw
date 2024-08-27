@@ -44,16 +44,21 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 	};
 
 	return new Promise<KeyType|null>(resolve => {
-		let selectedResult: KeyType|null = null;
+		let resolved = false;
 
 		menuModal.onclose = () => {
 			removeOverlay();
-			resolve(selectedResult);
+			if (!resolved) {
+				resolve(null);
+			}
 		};
 
 		const onOptionSelected = async (key: KeyType|null) => {
-			selectedResult = key;
 			await dismissMenu();
+			if (!resolved) {
+				resolved = true;
+				resolve(key);
+			}
 		};
 
 		editor.handlePointerEventsExceptClicksFrom(menuModal, (eventName, event) => {
