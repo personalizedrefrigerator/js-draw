@@ -13,6 +13,7 @@
 	animation: var(--hide-menu-animation-timeout) ease show-popup-menu-animation;
 	opacity: 1;
 	transition: var(--hide-menu-animation-timeout) ease opacity;
+	overflow: hidden;
 
 	&.-hide {
 		opacity: 0;

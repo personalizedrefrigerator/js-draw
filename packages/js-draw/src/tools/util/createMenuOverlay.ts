@@ -73,6 +73,9 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 		}
 
 		menuContainer.appendChild(contentElement);
+
+		// Ensures that the menu is visible even if triggered near the edge of the screen.
+		contentElement.scrollIntoView({ block: 'nearest' });
 	});
 };
 
