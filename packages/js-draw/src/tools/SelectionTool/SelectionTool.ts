@@ -100,15 +100,16 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	private showContextMenu = async (canvasAnchor: Point2, preferSelectionMenu = true) => {
+		const localization = this.editor.localization;
 		const showSelectionMenu = this.selectionBox?.getSelectedItemCount() && preferSelectionMenu;
 		const onActivated = await createMenuOverlay(this.editor, canvasAnchor, showSelectionMenu ? [{
-			text: 'Duplicate', // TODO: localize
+			text: localization.selectionMenu__duplicate,
 			icon: () => this.editor.icons.makeDuplicateSelectionIcon(),
 			key: async () => {
 				await this.editor.dispatch(await this.selectionBox!.duplicateSelectedObjects());
 			},
 		}, {
-			text: 'Delete', // TODO: localize
+			text: localization.selectionMenu__delete,
 			icon: () => this.editor.icons.makeDeleteSelectionIcon(),
 			key: async () => {
 				await this.editor.dispatch(this.selectionBox!.deleteSelectedObjects());
@@ -119,14 +120,14 @@ export default class SelectionTool extends BaseTool {
 				this.editor.queueRerender();
 			},
 		}, {
-			text: 'Copy to clipboard', // TODO: localize
+			text: localization.selectionMenu__copyToClipboard,
 			icon: () => this.editor.icons.makeCopyIcon(),
 			key: async () => {
 				const clipboardHandler = new ClipboardHandler(this.editor);
 				await clipboardHandler.copy();
 			},
 		}] : [{
-			text: 'Paste', // TODO: Localize
+			text: localization.selectionMenu__paste,
 			icon: () => this.editor.icons.makePasteIcon(),
 			key: async () => {
 				const clipboardHandler = new ClipboardHandler(this.editor);

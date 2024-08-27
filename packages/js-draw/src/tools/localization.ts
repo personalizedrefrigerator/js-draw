@@ -33,6 +33,10 @@ export interface ToolLocalization {
 
 	anyDevicePanning: string;
 
+	selectionMenu__copyToClipboard: string;
+	selectionMenu__duplicate: string;
+	selectionMenu__delete: string;
+	selectionMenu__paste: string;
 	copied: (count: number) => string;
 	pasted: (count: number) => string;
 
@@ -51,6 +55,11 @@ export const defaultToolLocalization: ToolLocalization = {
 	rightClickDragPanTool: 'Right-click drag',
 	pipetteTool: 'Pick color from screen',
 	keyboardPanZoom: 'Keyboard pan/zoom shortcuts',
+
+	selectionMenu__copyToClipboard: 'Copy to clipboard',
+	selectionMenu__duplicate: 'Duplicate',
+	selectionMenu__delete: 'Delete',
+	selectionMenu__paste: 'Paste',
 
 	autocorrectedTo: (strokeDescription) => `Autocorrected to ${strokeDescription}`,
 	autocorrectionCanceled: 'Autocorrect cancelled',
