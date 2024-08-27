@@ -18,6 +18,7 @@ type OnShowContextMenu = (anchor: Point2)=>void;
 
 export default class SelectionTopMenu implements SelectionBoxChild {
 	private element: HTMLElement;
+	private onClick: ()=>void;
 
 	public constructor(
 		private readonly parent: Selection,
@@ -31,9 +32,12 @@ export default class SelectionTopMenu implements SelectionBoxChild {
 		);
 		this.element.style.setProperty('--vertical-offset', `${verticalOffset}px`);
 
-		this.addButton('...', async () => {
+		this.onClick = async () => {
 			const anchor = this.getBBoxCanvasCoords().center;
 			showContextMenu(anchor);
+		};
+		this.addButton('...', (_event) => {
+			this.onClick();
 		});
 
 		this.updatePosition();
@@ -45,11 +49,11 @@ export default class SelectionTopMenu implements SelectionBoxChild {
 
 	public remove() { this.element.remove(); }
 
-	public addButton(label: string, onClick: ()=>void) {
+	private addButton(label: string, onClick: (event: MouseEvent)=>void) {
 		const button = document.createElement('button');
 		button.textContent = label;
-		button.onclick = (_event) => {
-			onClick();
+		button.onclick = (event) => {
+			onClick(event);
 		};
 		this.element.appendChild(button);
 
@@ -102,14 +106,20 @@ export default class SelectionTopMenu implements SelectionBoxChild {
 		return this.getBBoxCanvasCoords().containsPoint(canvasPoint);
 	}
 
-	public handleDragStart(_pointer: Pointer) {
+	private lastDragPointer: Pointer|null = null;
+	public handleDragStart(pointer: Pointer) {
+		this.lastDragPointer = pointer;
 		return true;
 	}
 
-	public handleDragUpdate(_pointer: Pointer) {
-		// No-op
+	public handleDragUpdate(pointer: Pointer) {
+		this.lastDragPointer = pointer;
 	}
 
 	public handleDragEnd() {
+		if (this.lastDragPointer && this.containsPoint(this.lastDragPointer.canvasPos)) {
+			this.onClick();
+		}
+		this.lastDragPointer = null;
 	}
 }
