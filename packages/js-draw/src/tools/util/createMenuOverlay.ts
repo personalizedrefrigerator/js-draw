@@ -10,6 +10,8 @@ interface MenuOption<KeyType> {
 	icon: ()=>IconElemType;
 }
 
+let idCounter = 0;
+
 const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2, options: MenuOption<KeyType>[]) => {
 	const overlay = document.createElement('div');
 	const { remove: removeOverlay } = editor.createHTMLOverlay(overlay);
@@ -29,7 +31,6 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 	const viewportChangeListener = editor.notifier.on(EditorEventType.ViewportChanged, updateMenuLocation);
 
 	overlay.appendChild(menuModal);
-	menuModal.showModal();
 
 	let dismissing = false;
 	const dismissMenu = async () => {
@@ -74,10 +75,36 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 		contentElement.classList.add('content');
 		contentElement.role = 'menu';
 
-		// TODO: Keyboard focus handling as described in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/menu_role.
+		const optionElements: HTMLElement[] = [];
+
+		// Keyboard focus handling as described in
+		// - https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/menu_role and
+		// - https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/
+		contentElement.addEventListener('keydown', (event) => {
+			const focusedIndex = optionElements.findIndex(item => item === document.activeElement);
+			if (focusedIndex === -1) return;
+			let newFocusedIndex = focusedIndex;
+
+			if (event.key === 'ArrowDown') {
+				newFocusedIndex ++;
+			} else if (event.key === 'ArrowUp') {
+				newFocusedIndex --;
+			}
+
+			if (newFocusedIndex < 0) {
+				newFocusedIndex += optionElements.length;
+			}
+			newFocusedIndex %= optionElements.length;
+
+			if (newFocusedIndex !== focusedIndex) {
+				event.preventDefault();
+				optionElements[newFocusedIndex].focus();
+			}
+		});
 
 		for (const option of options) {
 			const optionElement = document.createElement('button');
+			optionElement.id = `menu-overlay-option-${idCounter++}`;
 			optionElement.role = 'menuitem';
 			optionElement.classList.add('option', 'editor-popup-menu-option');
 			optionElement.replaceChildren(
@@ -90,9 +117,15 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 				onOptionSelected(option.key);
 			};
 			contentElement.appendChild(optionElement);
+
+			if (optionElements.length === 0) {
+				optionElement.autofocus = true;
+			}
+			optionElements.push(optionElement);
 		}
 
 		menuModal.appendChild(contentElement);
+		menuModal.showModal();
 
 		// Ensures that the menu is visible even if triggered near the edge of the screen.
 		contentElement.scrollIntoView({ block: 'nearest' });
