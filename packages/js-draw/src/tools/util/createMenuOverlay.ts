@@ -70,20 +70,24 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 
 		const contentElement = document.createElement('div');
 		contentElement.classList.add('content');
+		contentElement.role = 'menu';
+
+		// TODO: Keyboard focus handling as described in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/menu_role.
 
 		for (const option of options) {
-			const optionContainer = document.createElement('button');
-			optionContainer.classList.add('option', 'editor-popup-menu-option');
-			optionContainer.replaceChildren(
+			const optionElement = document.createElement('button');
+			optionElement.role = 'menuitem';
+			optionElement.classList.add('option', 'editor-popup-menu-option');
+			optionElement.replaceChildren(
 				option.icon(),
 				document.createTextNode(option.text),
 			);
-			optionContainer.onclick = (event) => {
+			optionElement.onclick = (event) => {
 				if (event.defaultPrevented) return;
 
 				onOptionSelected(option.key);
 			};
-			contentElement.appendChild(optionContainer);
+			contentElement.appendChild(optionElement);
 		}
 
 		menuModal.appendChild(contentElement);

@@ -49,7 +49,7 @@
 	border: none;
 	font-size: 1em;
 
-	&:hover {
+	&:hover, &:focus-visible {
 		background-color: var(--background-color-2);
 		color: var(--foreground-color-2);
 	}
