@@ -12,8 +12,7 @@ import TextComponent from '../../components/TextComponent';
 import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId, stretchXYSelectionShortcutId, shrinkXYSelectionShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
 import Pointer from '../../Pointer';
-import ClipboardHandler from '../../util/ClipboardHandler';
-import createMenuOverlay from '../util/createMenuOverlay';
+import showSelectionContextMenu from './util/showSelectionContextMenu';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -100,37 +99,13 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	private showContextMenu = async (canvasAnchor: Point2, preferSelectionMenu = true) => {
-		const localization = this.editor.localization;
-		const showSelectionMenu = this.selectionBox?.getSelectedItemCount() && preferSelectionMenu;
-		const onActivated = await createMenuOverlay(this.editor, canvasAnchor, showSelectionMenu ? [{
-			text: localization.selectionMenu__duplicate,
-			icon: () => this.editor.icons.makeDuplicateSelectionIcon(),
-			key: async () => {
-				await this.editor.dispatch(await this.selectionBox!.duplicateSelectedObjects());
-			},
-		}, {
-			text: localization.selectionMenu__delete,
-			icon: () => this.editor.icons.makeDeleteSelectionIcon(),
-			key: async () => {
-				await this.editor.dispatch(this.selectionBox!.deleteSelectedObjects());
-				this.clearSelection();
-			},
-		}, {
-			text: localization.selectionMenu__copyToClipboard,
-			icon: () => this.editor.icons.makeCopyIcon(),
-			key: async () => {
-				const clipboardHandler = new ClipboardHandler(this.editor);
-				await clipboardHandler.copy();
-			},
-		}] : [{
-			text: localization.selectionMenu__paste,
-			icon: () => this.editor.icons.makePasteIcon(),
-			key: async () => {
-				const clipboardHandler = new ClipboardHandler(this.editor);
-				await clipboardHandler.paste();
-			},
-		}]);
-		onActivated?.();
+		await showSelectionContextMenu(
+			this.selectionBox,
+			this.editor,
+			canvasAnchor,
+			preferSelectionMenu,
+			() => this.clearSelection(),
+		);
 	};
 
 	public override onContextMenu(event: ContextMenuEvt): boolean {
