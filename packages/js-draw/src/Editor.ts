@@ -37,6 +37,7 @@ import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
 import ClipboardHandler from './util/ClipboardHandler';
 import { ShowCustomFilePickerCallback } from './toolbar/widgets/components/makeFileInput';
+import ContextMenuRecognizer from './tools/InputFilter/ContextMenuRecognizer';
 
 /**
  * Provides settings to an instance of an editor. See the Editor {@link Editor.constructor}.
@@ -408,6 +409,7 @@ export class Editor {
 
 		// TODO: Make this pipeline configurable (e.g. allow users to add global input stabilization)
 		this.toolController.addInputMapper(StrokeKeyboardControl.fromEditor(this));
+		this.toolController.addInputMapper(new ContextMenuRecognizer());
 
 		parent.appendChild(this.container);
 
@@ -478,6 +480,15 @@ export class Editor {
 	 */
 	public getRootElement(): HTMLElement {
 		return this.container;
+	}
+
+	/**
+	 * @returns the bounding box of the main rendering region of the editor in the HTML viewport.
+	 *
+	 * @internal
+	 */
+	public getOutputBBoxInDOM(): Rect2 {
+		return Rect2.of(this.renderingRegion.getBoundingClientRect());
 	}
 
 	/**
@@ -635,8 +646,8 @@ export class Editor {
 		}
 
 		// Ensure that `pos` is relative to `this.renderingRegion`
-		const bbox = this.renderingRegion.getBoundingClientRect();
-		const pos = Vec2.of(event.clientX, event.clientY).minus(Vec2.of(bbox.left, bbox.top));
+		const bbox = this.getOutputBBoxInDOM();
+		const pos = Vec2.of(event.clientX, event.clientY).minus(bbox.topLeft);
 
 		if (this.toolController.dispatchInputEvent({
 			kind: InputEvtType.WheelEvt,
@@ -1276,7 +1287,7 @@ export class Editor {
 	 * This is useful for displaying content on top of the rendered content
 	 * (e.g. a selection box).
 	 */
-	public createHTMLOverlay(overlay: HTMLElement) {
+	public createHTMLOverlay(overlay: HTMLElement) { // TODO(v2): Fix conflict with toolbars that have been added to the editor.
 		overlay.classList.add('overlay', 'js-draw-editor-overlay');
 		this.container.appendChild(overlay);
 

@@ -11,7 +11,7 @@ import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 import InputStabilizer from './InputFilter/InputStabilizer';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
-import StationaryPenDetector from './util/StationaryPenDetector';
+import StationaryPenDetector, { defaultStationaryDetectionConfig } from './util/StationaryPenDetector';
 import AbstractComponent from '../components/AbstractComponent';
 
 export interface PenStyle {
@@ -126,13 +126,10 @@ export default class Pen extends BaseTool {
 			this.currentPointerId = current.id;
 
 			if (this.shapeAutocompletionEnabled) {
-				const stationaryDetectionConfig = {
-					maxSpeed: 8.5, // screenPx/s
-					maxRadius: 11, // screenPx
-					minTimeSeconds: 0.5, // s
-				};
 				this.stationaryDetector = new StationaryPenDetector(
-					current, stationaryDetectionConfig, pointer => this.autocorrectShape(pointer),
+					current,
+					defaultStationaryDetectionConfig,
+					pointer => this.autocorrectShape(pointer),
 				);
 			} else {
 				this.stationaryDetector = null;

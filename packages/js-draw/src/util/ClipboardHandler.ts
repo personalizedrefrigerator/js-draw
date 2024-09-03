@@ -7,6 +7,11 @@ const isTextMimeType = (mime: string) =>
 	// +xml: Handles image/svg+xml
 	mime.endsWith('+xml') || mime.startsWith('text/');
 
+interface Callbacks {
+	onPasteError(error: Error|unknown): void;
+	onCopyError(error: Error|unknown): void;
+}
+
 /**
  * Handles conversion between the browser clipboard APIs and internal
  * js-draw clipboard events.
@@ -14,8 +19,12 @@ const isTextMimeType = (mime: string) =>
 export default class ClipboardHandler {
 	#preferClipboardEvents = false;
 
-	public constructor(private editor: Editor) {
+	public constructor(
+		private editor: Editor,
+		private callbacks?: Callbacks,
+	) {
 	}
+
 
 	/**
 	 * Pastes data from the clipboard into the editor associated with
@@ -25,7 +34,28 @@ export default class ClipboardHandler {
 	 * 				`navigator.clipboard` will be used instead.
 	 * @returns true if the paste event was handled by the editor.
 	 */
-	public async paste(event?: DragEvent|ClipboardEvent) {
+	public paste(event?: DragEvent|ClipboardEvent) {
+		const onError = (error: unknown) => {
+			if (this.callbacks?.onPasteError) {
+				this.callbacks.onPasteError(error);
+
+				return Promise.resolve(false);
+			} else {
+				throw error;
+			}
+		};
+
+		try {
+			// Use .catch rather than `async` to prevent future modifications from
+			// moving clipboard handling logic out of user event handlers.
+			// In the past, `await`s have caused permissions issues in some browsers.
+			return this.pasteInternal(event).catch(onError);
+		} catch (error) {
+			return onError(error);
+		}
+	}
+
+	private async pasteInternal(event?: DragEvent|ClipboardEvent) {
 		const editor = this.editor;
 
 		const clipboardData: DataTransfer|null = (event as any)?.dataTransfer ?? (event as any)?.clipboardData ?? null;
@@ -134,6 +164,25 @@ export default class ClipboardHandler {
 	 * images.
 	 */
 	public copy(event?: ClipboardEvent) {
+		const onError = (error: Error|unknown) => {
+			if (this.callbacks?.onCopyError) {
+				this.callbacks.onCopyError(error);
+				return Promise.resolve();
+			} else {
+				throw error;
+			}
+		};
+
+		try {
+			// As above, use `.catch` to be certain that certain copyInternal
+			// is run now, before returning.
+			return this.copyInternal(event).catch(onError);
+		} catch (error) {
+			return onError(error);
+		}
+	}
+
+	private copyInternal(event: ClipboardEvent|undefined) {
 		const mimeToData: Record<string, Promise<Blob>|string> = Object.create(null);
 
 		if (this.editor.toolController.dispatchInputEvent({
@@ -148,9 +197,9 @@ export default class ClipboardHandler {
 		const mimeTypes = Object.keys(mimeToData);
 		const hasNonTextMimeTypes = mimeTypes.some(mime => !isTextMimeType(mime));
 
-		const copyToEvent = () => {
+		const copyToEvent = (reason?: unknown) => {
 			if (!event) {
-				throw new Error('Unable to paste -- no event provided.');
+				throw new Error(`Unable to copy -- no event provided${reason ? `. Original error: ${reason}` : ''}`);
 			}
 
 			for (const key in mimeToData) {
@@ -193,12 +242,12 @@ export default class ClipboardHandler {
 				);
 				this.#preferClipboardEvents = true;
 
-				copyToEvent();
+				copyToEvent(reason);
 			};
 
 			try {
 				clipboardApiPromise = copyToClipboardApi();
-			} catch(error) {
+			} catch (error) {
 				fallBackToCopyEvent(error);
 			}
 

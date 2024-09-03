@@ -2,7 +2,7 @@ import AbstractComponent from '../../components/AbstractComponent';
 import Editor from '../../Editor';
 import { Mat33, Rect2, Point2, Vec2 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
-import { CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
+import { ContextMenuEvt, CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
 import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
 import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
@@ -12,6 +12,7 @@ import TextComponent from '../../components/TextComponent';
 import { duplicateSelectionShortcut, translateLeftSelectionShortcutId, translateRightSelectionShortcutId, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId, translateDownSelectionShortcutId, translateUpSelectionShortcutId, rotateClockwiseSelectionShortcutId, rotateCounterClockwiseSelectionShortcutId, stretchXSelectionShortcutId, shrinkXSelectionShortcutId, shrinkYSelectionShortcutId, stretchYSelectionShortcutId, stretchXYSelectionShortcutId, shrinkXYSelectionShortcutId } from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
 import Pointer from '../../Pointer';
+import showSelectionContextMenu from './util/showSelectionContextMenu';
 
 export const cssPrefix = 'selection-tool-';
 
@@ -74,7 +75,7 @@ export default class SelectionTool extends BaseTool {
 	private makeSelectionBox(selectionStartPos: Point2) {
 		this.prevSelectionBox = this.selectionBox;
 		this.selectionBox = new Selection(
-			selectionStartPos, this.editor
+			selectionStartPos, this.editor, this.showContextMenu,
 		);
 
 		if (!this.expandingSelectionBox) {
@@ -95,6 +96,22 @@ export default class SelectionTool extends BaseTool {
 		const oldTransform = this.selectionBox.getTransform();
 		this.selectionBox.setTransform(oldTransform.rightMul(Mat33.translation(snapDelta)));
 		this.selectionBox.finalizeTransform();
+	}
+
+	private showContextMenu = async (canvasAnchor: Point2, preferSelectionMenu = true) => {
+		await showSelectionContextMenu(
+			this.selectionBox,
+			this.editor,
+			canvasAnchor,
+			preferSelectionMenu,
+			() => this.clearSelection(),
+		);
+	};
+
+	public override onContextMenu(event: ContextMenuEvt): boolean {
+		const canShowSelectionMenu = this.selectionBox?.getScreenRegion()?.containsPoint(event.screenPos);
+		void this.showContextMenu(event.canvasPos, canShowSelectionMenu);
+		return true;
 	}
 
 	private selectionBoxHandlingEvt: boolean = false;
@@ -178,7 +195,9 @@ export default class SelectionTool extends BaseTool {
 			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
 		}
 
-		this.selectionBox.setToPoint(currentPointer.canvasPos);
+		if (!this.selectionBoxHandlingEvt) {
+			this.selectionBox.setToPoint(currentPointer.canvasPos);
+		}
 		this.selectionBox.setHandlesVisible(true);
 
 		// Were we expanding the previous selection?

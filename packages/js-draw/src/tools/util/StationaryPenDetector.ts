@@ -15,6 +15,12 @@ interface Config {
 	maxRadius: number;
 }
 
+export const defaultStationaryDetectionConfig: Config = {
+	maxSpeed: 8.5, // screenPx/s
+	maxRadius: 11, // screenPx
+	minTimeSeconds: 0.5, // s
+};
+
 type OnStationaryCallback = (lastPointer: Pointer)=>void;
 
 export default class StationaryPenDetector {
@@ -23,6 +29,7 @@ export default class StationaryPenDetector {
 	private stationaryStartPointer: Pointer|null;
 	private lastPointer: Pointer;
 	private averageVelocity: Vec2;
+	private hasMovedOutOfRadius: boolean;
 
 	private timeout: ReturnType<typeof setTimeout>|null = null;
 
@@ -38,6 +45,8 @@ export default class StationaryPenDetector {
 		this.stationaryStartPointer = startPointer;
 		this.lastPointer = startPointer;
 		this.averageVelocity = Vec2.zero;
+
+		this.setStationaryTimeout(this.config.minTimeSeconds * 1000);
 	}
 
 	// Returns true if stationary
@@ -71,10 +80,13 @@ export default class StationaryPenDetector {
 		this.averageVelocity = this.averageVelocity.lerp(currentVelocity, 0.5); // px/s
 
 		const dtFromStart = currentPointer.timeStamp - this.stationaryStartPointer.timeStamp; // ms
+		const movedOutOfRadius = dxFromStationaryStart.length() > this.config.maxRadius;
+
+		this.hasMovedOutOfRadius ||= movedOutOfRadius;
 
 		// If not stationary
 		if (
-			dxFromStationaryStart.length() > this.config.maxRadius
+			movedOutOfRadius
 			|| this.averageVelocity.length() > this.config.maxSpeed
 			|| dtFromStart < this.config.minTimeSeconds
 		) {
@@ -101,6 +113,10 @@ export default class StationaryPenDetector {
 	public destroy() {
 		this.cancelStationaryTimeout();
 		this.stationaryStartPointer = null;
+	}
+
+	public getHasMovedOutOfRadius() {
+		return this.hasMovedOutOfRadius;
 	}
 
 	private cancelStationaryTimeout() {

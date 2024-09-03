@@ -59,6 +59,8 @@ window.PointerEvent ??= class extends MouseEvent {
 HTMLElement.prototype.setPointerCapture ??= () => {};
 // eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.releasePointerCapture ??= () => {};
+// eslint-disable-next-line @typescript-eslint/unbound-method
+HTMLElement.prototype.scrollIntoView ??= () => {};
 
 // Mock support for .innerText
 // See https://github.com/jsdom/jsdom/issues/1245

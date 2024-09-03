@@ -470,6 +470,16 @@ export default class PanZoom extends BaseTool {
 		}
 	}
 
+	/**
+	 * Updates the current transform and clears it. Use this method for events that are not part of
+	 * a larger gesture (i.e. have no start and end event). For example, this would be used for `onwheel`
+	 * events, but not for `onpointer` events.
+	 */
+	private applyAndFinalizeTransform(transformUpdate: Mat33) {
+		this.updateTransform(transformUpdate, true);
+		this.transform = null;
+	}
+
 	public override onWheel({ delta, screenPos }: WheelEvt): boolean {
 		this.inertialScroller?.stop();
 
@@ -497,7 +507,7 @@ export default class PanZoom extends BaseTool {
 		).rightMul(
 			Mat33.translation(translation)
 		);
-		this.updateTransform(transformUpdate, true);
+		this.applyAndFinalizeTransform(transformUpdate);
 
 		return true;
 	}
@@ -572,7 +582,7 @@ export default class PanZoom extends BaseTool {
 		)).rightMul(Mat33.translation(
 			translation
 		));
-		this.updateTransform(transformUpdate, true);
+		this.applyAndFinalizeTransform(transformUpdate);
 
 		return true;
 	}

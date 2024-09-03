@@ -1,5 +1,5 @@
 import { EditorNotifier, EditorEventType } from '../types';
-import { WheelEvt, PointerEvt, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent, InputEvt, InputEvtType, GestureCancelEvt, PointerDownEvt, PointerMoveEvt, PointerUpEvt } from '../inputEvents';
+import { WheelEvt, PointerEvt, KeyPressEvent, KeyUpEvent, PasteEvent, CopyEvent, InputEvt, InputEvtType, GestureCancelEvt, PointerDownEvt, PointerMoveEvt, PointerUpEvt, ContextMenuEvt } from '../inputEvents';
 import ToolEnabledGroup from './ToolEnabledGroup';
 import InputMapper, { InputEventListener } from './InputFilter/InputMapper';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
@@ -72,6 +72,8 @@ export default abstract class BaseTool implements InputEventListener {
 			return this.onCopy(event);
 		case InputEvtType.PasteEvent:
 			return this.onPaste(event);
+		case InputEvtType.ContextMenu:
+			return this.onContextMenu(event);
 		default:
 			exhaustivenessCheck = event;
 			return exhaustivenessCheck;
@@ -121,6 +123,10 @@ export default abstract class BaseTool implements InputEventListener {
 	}
 
 	public onKeyUp(_event: KeyUpEvent): boolean {
+		return false;
+	}
+
+	public onContextMenu(_event: ContextMenuEvt) {
 		return false;
 	}
 

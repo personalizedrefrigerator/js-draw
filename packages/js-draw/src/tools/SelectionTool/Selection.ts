@@ -19,6 +19,7 @@ import { DragTransformer, ResizeTransformer, RotateTransformer } from './Transfo
 import { ResizeMode, SelectionBoxChild } from './types';
 import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
+import SelectionMenuShortcut from './SelectionMenuShortcut';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -45,7 +46,11 @@ export default class Selection {
 
 	private hasParent: boolean = true;
 
-	public constructor(startPoint: Point2, private editor: Editor) {
+	public constructor(
+		startPoint: Point2,
+		private editor: Editor,
+		showContextMenu: (anchor: Point2)=>void,
+	) {
 		this.originalRegion = new Rect2(startPoint.x, startPoint.y, 0, 0);
 		this.transformers = {
 			drag: new DragTransformer(editor, this),
@@ -108,12 +113,19 @@ export default class Selection {
 			(currentPoint) => this.transformers.rotate.onDragUpdate(currentPoint),
 			() => this.transformers.rotate.onDragEnd(),
 		);
+		const menuToggleButton = new SelectionMenuShortcut(
+			this,
+			this.editor.viewport,
+			showContextMenu,
+			this.editor.localization,
+		);
 
 		this.childwidgets = [
 			resizeBothHandle,
 			...resizeHorizontalHandles,
 			resizeVerticalHandle,
 			rotationHandle,
+			menuToggleButton,
 		];
 
 		for (const widget of this.childwidgets) {
@@ -238,10 +250,6 @@ export default class Selection {
 				)
 			);
 		}
-
-		// Clear renderings of any in-progress transformations
-		const wetInkRenderer = this.editor.display.getWetInkRenderer();
-		wetInkRenderer.clear();
 
 		return transformPromise;
 	}
@@ -567,6 +575,10 @@ export default class Selection {
 		this.editor.queueRerender().then(() => {
 			if (!inImage) {
 				this.previewTransformCmds();
+			} else {
+				// Clear renderings of any in-progress transformations
+				const wetInkRenderer = this.editor.display.getWetInkRenderer();
+				wetInkRenderer.clear();
 			}
 		});
 	}
