@@ -247,7 +247,7 @@ export default class ClipboardHandler {
 
 			try {
 				clipboardApiPromise = copyToClipboardApi();
-			} catch(error) {
+			} catch (error) {
 				fallBackToCopyEvent(error);
 			}
 

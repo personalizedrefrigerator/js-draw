@@ -44,19 +44,27 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 	};
 
 	return new Promise<KeyType|null>(resolve => {
-		const resolved = false;
+		let resolved = false;
 		let result: KeyType|null = null;
-
-		menuModal.onclose = () => {
-			removeOverlay();
+		const resolveWithSelectedResult = () => {
 			if (!resolved) {
 				resolve(result);
+				resolved = true;
 			}
 		};
 
-		const onOptionSelected = async (key: KeyType|null) => {
+		menuModal.onclose = () => {
+			removeOverlay();
+			resolveWithSelectedResult();
+		};
+
+		const onOptionSelected = (key: KeyType|null) => {
 			result = key;
-			await dismissMenu();
+			void dismissMenu();
+
+			// To properly handle clipboard events, this needs to be called synchronously
+			// and not after a delay:
+			resolveWithSelectedResult();
 		};
 
 		editor.handlePointerEventsExceptClicksFrom(menuModal, (eventName, event) => {
