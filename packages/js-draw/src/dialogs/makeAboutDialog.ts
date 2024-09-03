@@ -1,4 +1,5 @@
 import type Editor from '../Editor';
+import makeMessageDialog from './makeMessageDialog';
 
 export interface AboutDialogLink {
 	kind: 'link',
@@ -13,32 +14,10 @@ export interface AboutDialogEntry {
 }
 
 const makeAboutDialog = (editor: Editor, entries: AboutDialogEntry[]) => {
-	const overlay = document.createElement('div');
-	const { remove: removeOverlay } = editor.createHTMLOverlay(overlay);
-
-	overlay.classList.add('dialog-container', 'about-dialog-container');
-	const dialog = document.createElement('dialog');
-
-	const heading = document.createElement('h1');
-	heading.innerText = editor.localization.about;
-	heading.setAttribute('autofocus', 'true');
-
-	const closeButton = document.createElement('button');
-	closeButton.innerText = editor.localization.closeDialog;
-	closeButton.classList.add('close-button');
-
-	closeButton.onclick = () => removeOverlay();
-	overlay.onclick = event => {
-		if (event.target === overlay) {
-			removeOverlay();
-		}
-	};
-
-	const licenseContainer = document.createElement('div');
-	licenseContainer.classList.add('about-entry-container');
-
-	// Allow scrolling in the license container -- don't forward wheel events.
-	licenseContainer.onwheel = evt => evt.stopPropagation();
+	const dialog = makeMessageDialog(editor, {
+		title: editor.localization.about,
+		classNames: [ 'about-dialog-container' ],
+	});
 
 	for (const entry of entries) {
 		const container = document.createElement(entry.minimized ? 'details' : 'div');
@@ -64,17 +43,12 @@ const makeAboutDialog = (editor: Editor, entries: AboutDialogEntry[]) => {
 			container.appendChild(bodyText);
 		}
 
-		licenseContainer.appendChild(container);
+		dialog.appendChild(container);
 	}
-
-	dialog.replaceChildren(heading, licenseContainer, closeButton);
-	overlay.replaceChildren(dialog);
-
-	dialog.show();
 
 	return {
 		close: () => {
-			removeOverlay();
+			return dialog.close();
 		},
 	};
 };

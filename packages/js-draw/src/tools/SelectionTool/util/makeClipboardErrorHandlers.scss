@@ -1,0 +1,11 @@
+
+.clipboard-error-dialog {
+	details > summary {
+		cursor: pointer;
+	}
+
+	textarea {
+		width: 100%;
+		box-sizing: border-box;
+	}
+}

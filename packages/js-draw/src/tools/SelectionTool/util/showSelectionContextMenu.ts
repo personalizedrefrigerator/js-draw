@@ -3,6 +3,7 @@ import Editor from '../../../Editor';
 import Selection from '../Selection';
 import createMenuOverlay from '../../util/createMenuOverlay';
 import ClipboardHandler from '../../../util/ClipboardHandler';
+import makeClipboardErrorHandlers from './makeClipboardErrorHandlers';
 
 const showSelectionContextMenu = async (
 	selectionBox: Selection|null,
@@ -17,9 +18,9 @@ const showSelectionContextMenu = async (
 	const noSelectionMenu = [{
 		text: localization.selectionMenu__paste,
 		icon: () => editor.icons.makePasteIcon(),
-		key: async () => {
-			const clipboardHandler = new ClipboardHandler(editor);
-			await clipboardHandler.paste();
+		key: () => {
+			const clipboardHandler = new ClipboardHandler(editor, makeClipboardErrorHandlers(editor));
+			void clipboardHandler.paste();
 		},
 	}];
 
@@ -39,9 +40,9 @@ const showSelectionContextMenu = async (
 	}, {
 		text: localization.selectionMenu__copyToClipboard,
 		icon: () => editor.icons.makeCopyIcon(),
-		key: async () => {
-			const clipboardHandler = new ClipboardHandler(editor);
-			await clipboardHandler.copy();
+		key: () => {
+			const clipboardHandler = new ClipboardHandler(editor, makeClipboardErrorHandlers(editor));
+			void clipboardHandler.copy();
 		},
 	}, ...noSelectionMenu ] : noSelectionMenu);
 	onActivated?.();

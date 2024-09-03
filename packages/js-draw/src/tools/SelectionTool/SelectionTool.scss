@@ -1,3 +1,4 @@
+@use "./util/makeClipboardErrorHandlers.scss";
 
 .selection-tool-selection-background {
 	background-color: var(--selection-background-color);
