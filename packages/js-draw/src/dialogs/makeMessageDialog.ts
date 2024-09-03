@@ -24,7 +24,7 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 	const contentWrapper = document.createElement('div');
 	contentWrapper.classList.add('content');
 
-	// Allow scrolling in the license container -- don't forward wheel events.
+	// Allow scrolling in the scrollable container -- don't forward wheel events.
 	contentWrapper.onwheel = evt => evt.stopPropagation();
 
 	dialog.replaceChildren(heading, contentWrapper, closeButton);
