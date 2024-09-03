@@ -4,6 +4,10 @@
 		cursor: pointer;
 	}
 
+	details[open] {
+		margin-bottom: 12px;
+	}
+
 	textarea {
 		width: 100%;
 		box-sizing: border-box;
