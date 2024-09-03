@@ -113,7 +113,7 @@ export default class Selection {
 			(currentPoint) => this.transformers.rotate.onDragUpdate(currentPoint),
 			() => this.transformers.rotate.onDragEnd(),
 		);
-		const commandMenu = new SelectionMenuShortcut(
+		const menuToggleButton = new SelectionMenuShortcut(
 			this,
 			this.editor.viewport,
 			showContextMenu,
@@ -125,7 +125,7 @@ export default class Selection {
 			...resizeHorizontalHandles,
 			resizeVerticalHandle,
 			rotationHandle,
-			commandMenu
+			menuToggleButton,
 		];
 
 		for (const widget of this.childwidgets) {
