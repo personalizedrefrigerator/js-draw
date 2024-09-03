@@ -197,9 +197,9 @@ export default class ClipboardHandler {
 		const mimeTypes = Object.keys(mimeToData);
 		const hasNonTextMimeTypes = mimeTypes.some(mime => !isTextMimeType(mime));
 
-		const copyToEvent = () => {
+		const copyToEvent = (reason?: unknown) => {
 			if (!event) {
-				throw new Error('Unable to copy -- no event provided.');
+				throw new Error(`Unable to copy -- no event provided${reason ? `. Original error: ${reason}` : ''}`);
 			}
 
 			for (const key in mimeToData) {
@@ -242,7 +242,7 @@ export default class ClipboardHandler {
 				);
 				this.#preferClipboardEvents = true;
 
-				copyToEvent();
+				copyToEvent(reason);
 			};
 
 			try {
