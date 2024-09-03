@@ -92,6 +92,10 @@ const createMenuOverlay = async <KeyType> (editor: Editor, canvasAnchor: Point2,
 				newFocusedIndex ++;
 			} else if (event.key === 'ArrowUp') {
 				newFocusedIndex --;
+			} else if (event.key === 'End') {
+				newFocusedIndex = optionElements.length - 1;
+			} else if (event.key === 'Home') {
+				newFocusedIndex = 0;
 			}
 
 			if (newFocusedIndex < 0) {
