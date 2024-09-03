@@ -16,7 +16,7 @@ export type DragEndCallback = ()=> Promise<void>|void;
 
 type OnShowContextMenu = (anchor: Point2)=>void;
 
-export default class SelectionTopMenu implements SelectionBoxChild {
+export default class SelectionMenuShortcut implements SelectionBoxChild {
 	private element: HTMLElement;
 	private onClick: ()=>void;
 

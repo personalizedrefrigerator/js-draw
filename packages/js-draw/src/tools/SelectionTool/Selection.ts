@@ -19,7 +19,7 @@ import { DragTransformer, ResizeTransformer, RotateTransformer } from './Transfo
 import { ResizeMode, SelectionBoxChild } from './types';
 import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
-import SelectionTopMenu from './SelectionTopMenu';
+import SelectionMenuShortcut from './SelectionMenuShortcut';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -113,7 +113,7 @@ export default class Selection {
 			(currentPoint) => this.transformers.rotate.onDragUpdate(currentPoint),
 			() => this.transformers.rotate.onDragEnd(),
 		);
-		const commandMenu = new SelectionTopMenu(
+		const commandMenu = new SelectionMenuShortcut(
 			this,
 			this.editor.viewport,
 			showContextMenu,
