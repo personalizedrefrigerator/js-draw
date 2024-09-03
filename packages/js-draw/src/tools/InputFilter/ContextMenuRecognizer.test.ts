@@ -1,5 +1,5 @@
 import { Vec2 } from '@js-draw/math';
-import { InputEvt, InputEvtType, PointerEvt, PointerEvtType } from '../../inputEvents';
+import { InputEvtType, PointerEvt, PointerEvtType } from '../../inputEvents';
 import Pointer, { PointerDevice } from '../../Pointer';
 import ContextMenuRecognizer from './ContextMenuRecognizer';
 import InputPipeline from './InputPipeline';
@@ -28,7 +28,7 @@ const setUpPipeline = () => {
 	return {
 		pipeline,
 		emitListener,
-		getAllEventTypes: (): InputEvt[] => {
+		getAllEventTypes: (): InputEvtType[] => {
 			return emitListener.mock.calls.map(args => args[0]?.kind);
 		},
 	};
@@ -51,11 +51,14 @@ describe('ContextMenuRecognizer', () => {
 		expect(getAllEventTypes()).toContain(InputEvtType.ContextMenu);
 	});
 
-	test('should detect long-press touch events as contextmenu events', async () => {
+	test.each([
+		[ PointerDevice.Touch, true ],
+		[ PointerDevice.PrimaryButtonMouse, false ],
+	])('should detect long-press touch events as contextmenu events (case %#)', async (device, shouldSendMenuEvent) => {
 		const { pipeline, getAllEventTypes } = setUpPipeline();
 
 		pipeline.onEvent(createPointerEvent(
-			InputEvtType.PointerDownEvt, 0, PointerDevice.Touch,
+			InputEvtType.PointerDownEvt, 0, device,
 		));
 
 		expect(getAllEventTypes()).not.toContain(InputEvtType.ContextMenu);
@@ -63,15 +66,15 @@ describe('ContextMenuRecognizer', () => {
 		await jest.advanceTimersByTimeAsync(200);
 
 		pipeline.onEvent(createPointerEvent(
-			InputEvtType.PointerMoveEvt, 0, PointerDevice.Touch,
+			InputEvtType.PointerMoveEvt, 0, device,
 		));
 
 		await jest.advanceTimersByTimeAsync(2000);
 
 		pipeline.onEvent(createPointerEvent(
-			InputEvtType.PointerUpEvt, 0, PointerDevice.Touch,
+			InputEvtType.PointerUpEvt, 0, device,
 		));
 
-		expect(getAllEventTypes()).toContain(InputEvtType.ContextMenu);
+		expect(getAllEventTypes().includes(InputEvtType.ContextMenu)).toBe(shouldSendMenuEvent);
 	});
 });
