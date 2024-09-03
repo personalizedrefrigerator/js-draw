@@ -251,10 +251,6 @@ export default class Selection {
 			);
 		}
 
-		// Clear renderings of any in-progress transformations
-		const wetInkRenderer = this.editor.display.getWetInkRenderer();
-		wetInkRenderer.clear();
-
 		return transformPromise;
 	}
 
@@ -579,6 +575,10 @@ export default class Selection {
 		this.editor.queueRerender().then(() => {
 			if (!inImage) {
 				this.previewTransformCmds();
+			} else {
+				// Clear renderings of any in-progress transformations
+				const wetInkRenderer = this.editor.display.getWetInkRenderer();
+				wetInkRenderer.clear();
 			}
 		});
 	}

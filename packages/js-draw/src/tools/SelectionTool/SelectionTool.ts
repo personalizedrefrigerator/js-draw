@@ -114,10 +114,6 @@ export default class SelectionTool extends BaseTool {
 			key: async () => {
 				await this.editor.dispatch(this.selectionBox!.deleteSelectedObjects());
 				this.clearSelection();
-				// TODO: Handle this in a better way -- currently, the selection box leaves
-				//       a rendered copy of the selected content.
-				this.editor.display.getWetInkRenderer().clear();
-				this.editor.queueRerender();
 			},
 		}, {
 			text: localization.selectionMenu__copyToClipboard,
