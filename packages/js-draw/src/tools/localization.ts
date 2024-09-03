@@ -33,6 +33,7 @@ export interface ToolLocalization {
 
 	anyDevicePanning: string;
 
+	selectionMenu__show: string;
 	selectionMenu__copyToClipboard: string;
 	selectionMenu__duplicate: string;
 	selectionMenu__delete: string;
@@ -56,6 +57,7 @@ export const defaultToolLocalization: ToolLocalization = {
 	pipetteTool: 'Pick color from screen',
 	keyboardPanZoom: 'Keyboard pan/zoom shortcuts',
 
+	selectionMenu__show: 'Show selection menu',
 	selectionMenu__copyToClipboard: 'Copy to clipboard',
 	selectionMenu__duplicate: 'Duplicate',
 	selectionMenu__delete: 'Delete',

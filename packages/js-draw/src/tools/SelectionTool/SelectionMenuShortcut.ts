@@ -5,6 +5,7 @@ import Selection from './Selection';
 import Pointer from '../../Pointer';
 import Viewport from '../../Viewport';
 import { SelectionBoxChild } from './types';
+import { ToolLocalization } from '../localization';
 
 
 const verticalOffset = 40;
@@ -24,6 +25,7 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		private readonly parent: Selection,
 		private readonly viewport: Viewport,
 		showContextMenu: OnShowContextMenu,
+		private localization: ToolLocalization,
 	) {
 		this.element = document.createElement('div');
 		this.element.classList.add(
@@ -36,28 +38,23 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 			const anchor = this.getBBoxCanvasCoords().center;
 			showContextMenu(anchor);
 		};
-		this.addButton('...', () => {
-			this.onClick();
-		});
 
+		this.initUI();
 		this.updatePosition();
 	}
 
-	public addTo(container: HTMLElement) {
-		container.appendChild(this.element);
-	}
-
-	public remove() { this.element.remove(); }
-
-	private addButton(label: string, onActivate: ()=>void) {
+	private initUI() {
 		const button = document.createElement('button');
-		button.textContent = label;
+		button.textContent = '...';
+		button.ariaLabel = this.localization.selectionMenu__show;
+		button.title = button.ariaLabel;
+
 		// To prevent editor event handlers from conflicting with those for the button,
 		// don't register a [click] handler. An onclick handler can be fired incorrectly
 		// in this case (in Chrome) after onClick is fired in onDragEnd, leading to a double
 		// on-click action.
 		button.onkeydown = (event) => {
-			if (event.key === 'Enter') onActivate();
+			if (event.key === 'Enter') this.onClick();
 		};
 		this.element.appendChild(button);
 
@@ -66,6 +63,12 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 			this.updatePosition();
 		});
 	}
+
+	public addTo(container: HTMLElement) {
+		container.appendChild(this.element);
+	}
+
+	public remove() { this.element.remove(); }
 
 	private getElementScreenSize() {
 		return Vec2.of(this.element.clientWidth, this.element.clientHeight);

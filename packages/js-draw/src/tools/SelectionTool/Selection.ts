@@ -117,6 +117,7 @@ export default class Selection {
 			this,
 			this.editor.viewport,
 			showContextMenu,
+			this.editor.localization,
 		);
 
 		this.childwidgets = [
