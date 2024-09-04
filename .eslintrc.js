@@ -1,58 +1,32 @@
 module.exports = {
-	'env': {
-		'browser': true,
-		'es2021': true,
-		'node': true
+	env: {
+		browser: true,
+		es2021: true,
+		node: true,
 	},
-	'extends': [
+	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/eslint-recommended',
 		'plugin:@typescript-eslint/recommended',
 		'eslint-config-prettier',
 	],
 	// See https://typescript-eslint.io/linting/troubleshooting/#i-get-errors-telling-me-eslint-was-configured-to-run--however-that-tsconfig-does-not--none-of-those-tsconfigs-include-this-file
-	'overrides': [
+	overrides: [
 		{
-			'extends': ['plugin:@typescript-eslint/disable-type-checked'],
-			'files': ['./**/*.js'],
+			extends: ['plugin:@typescript-eslint/disable-type-checked'],
+			files: ['./**/*.js'],
 		},
 	],
-	'parser': '@typescript-eslint/parser',
-	'parserOptions': {
-		'ecmaVersion': 'latest',
-		'sourceType': 'module',
-		'project': './tsconfig.eslint.json',
+	parser: '@typescript-eslint/parser',
+	parserOptions: {
+		ecmaVersion: 'latest',
+		sourceType: 'module',
+		project: './tsconfig.eslint.json',
 	},
-	'plugins': [
-		'@typescript-eslint'
-	],
-	'rules': {
-		// Deprecated and removed:
-		// TODO: Replace
-		// '@typescript-eslint/indent': [
-		// 	'error',
-		// 	'tab',
-		// 	{
-		// 		'ignoredNodes': [
-		// 			// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
-		// 			'TSUnionType',
-		// 		]
-		// 	}
-		// ],
-		'linebreak-style': [
-			'error',
-			'unix'
-		],
-		'quotes': [
-			'error',
-			'single'
-		],
-		'semi': [
-			'error',
-			'always'
-		],
+	plugins: ['@typescript-eslint'],
+	rules: {
+		'linebreak-style': ['error', 'unix'],
 		'no-constant-binary-expression': 'error',
-		'no-trailing-spaces': 'error',
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'@typescript-eslint/no-empty-function': 'off',
 		'@typescript-eslint/no-empty-interface': 'off',
@@ -72,7 +46,7 @@ module.exports = {
 
 		// Ideally, this should be closer to 20. However, several blocks of old
 		// code prevent this.
-		'complexity': ['error', 40],
+		complexity: ['error', 40],
 
 		// A subset of the default recommended-type-checked rules.
 		// See https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/configs/recommended-type-checked.ts
@@ -104,22 +78,22 @@ module.exports = {
 		'@typescript-eslint/unbound-method': [
 			'error',
 			{
-				'ignoreStatic': true
+				ignoreStatic: true,
 			},
 		],
 
 		'@typescript-eslint/no-unused-vars': [
 			'error',
 			{
-				'argsIgnorePattern': '^_',
-			}
+				argsIgnorePattern: '^_',
+			},
 		],
 		'@typescript-eslint/no-explicit-any': 'off',
 
 		// namespaces can be useful when defining helper methods for interfaces.
 		'@typescript-eslint/no-namespace': 'off',
 	},
-	'ignorePatterns': [
+	ignorePatterns: [
 		'**/*.bundle.js',
 		'**/dist/',
 		'docs/typedoc/',
