@@ -43,6 +43,8 @@ jobs:
         run: yarn run test
       - name: Lint
         run: yarn run lint-ci
+      - name: Check formatting
+        run: yarn run format-ci
       - name: Build pages
         run: bash scripts/build-website.sh
       - name: Setup Pages
