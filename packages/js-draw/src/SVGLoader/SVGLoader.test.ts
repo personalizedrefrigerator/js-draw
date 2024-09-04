@@ -74,7 +74,7 @@ describe('SVGLoader', () => {
 
 			const elem = editor.image
 				.getElementsIntersectingRegion(new Rect2(-1000, -1000, 10000, 10000))
-				.filter(elem => elem instanceof TextComponent)[0] as TextComponent;
+				.filter(elem => elem instanceof TextComponent)[0];
 			expect(elem).toBeTruthy();
 			expect(elem.getStyle().color).objEq(Color4.red);
 		});
@@ -93,7 +93,7 @@ describe('SVGLoader', () => {
 			`, { sanitize: true, loadMethod }));
 			const elem = editor.image
 				.getAllElements()
-				.filter(elem => elem instanceof TextComponent)[0] as TextComponent;
+				.filter(elem => elem instanceof TextComponent)[0];
 			expect(elem).toBeTruthy();
 
 			// Ensure each child object has the correct size

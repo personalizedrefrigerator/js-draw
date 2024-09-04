@@ -171,7 +171,7 @@ ${bodyContentLines.join('\n')}`;
 const buildTranslationTemplate = async (source: TranslationSource, destFolder: string) => {
 	const projName = source.name;
 
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	const translationData = require(source.path);
 
 	const locales = translationData.default ?? translationData.locales;

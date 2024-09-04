@@ -89,7 +89,7 @@ export default class SVGLoader implements ImageLoader {
 		if (fillAttribute) {
 			try {
 				fill = Color4.fromString(fillAttribute);
-			} catch (e) {
+			} catch {
 				console.error('Unknown fill color,', fillAttribute);
 			}
 		}
@@ -322,8 +322,8 @@ export default class SVGLoader implements ImageLoader {
 			try {
 				transform = Mat33.fromCSSMatrix(rawTransformData);
 				supportedAttrs?.push(highpTransformAttribute);
-			} catch(e) {
-				console.warn(`Unable to parse raw transform data, ${rawTransformData}. Falling back to CSS data.`);
+			} catch (e) {
+				console.warn(`Unable to parse raw transform data, ${rawTransformData}. Falling back to CSS data. Error:`, e);
 			}
 		}
 

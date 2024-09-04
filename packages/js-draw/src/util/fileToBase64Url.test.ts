@@ -1,7 +1,7 @@
 import fileToBase64Url from './fileToBase64Url';
 
 // Use NodeJS's Blob (jsdom's Blob doesn't support .arrayBuffer).
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { Blob } = require('node:buffer');
 
 const originalFileReader = window.FileReader;

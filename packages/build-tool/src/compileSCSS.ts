@@ -39,7 +39,7 @@ const compileSCSS = async (config: BuildConfig, buildMode: BuildMode) => {
 			return null;
 		}).filter(depPath => depPath !== null);
 
-		return dependencies as string[];
+		return dependencies;
 	};
 
 	type FileChangeListener = ()=>Promise<void>;

@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 
 // Type declarations for custom matchers
 interface CustomMatchers<R = unknown> {

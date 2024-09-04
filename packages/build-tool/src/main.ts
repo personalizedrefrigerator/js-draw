@@ -226,7 +226,7 @@ const main = async () => {
 	if (config.prebuild) {
 		console.log('Prebuild: Executing ', config.prebuild.scriptPath);
 
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const scriptResult = require(path.resolve(config.prebuild.scriptPath));
 
 		if (scriptResult && scriptResult.default) {

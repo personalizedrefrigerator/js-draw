@@ -69,7 +69,7 @@ window.addEventListener('load', () => {
 				if (part instanceof Error) {
 					try {
 						addProperty('stack');
-					} catch (_err) {
+					} catch {
 						// May fail
 					}
 				}

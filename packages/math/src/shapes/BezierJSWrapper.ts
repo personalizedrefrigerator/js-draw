@@ -118,7 +118,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 			}
 
 			return t;
-		}).filter(entry => entry !== null) as number[];
+		}).filter(entry => entry !== null);
 	}
 
 	public override splitAt(t: number): [BezierJSWrapper] | [BezierJSWrapper, BezierJSWrapper] {

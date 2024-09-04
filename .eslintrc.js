@@ -26,16 +26,18 @@ module.exports = {
 		'@typescript-eslint'
 	],
 	'rules': {
-		'@typescript-eslint/indent': [
-			'error',
-			'tab',
-			{
-				'ignoredNodes': [
-					// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
-					'TSUnionType',
-				]
-			}
-		],
+		// Deprecated and removed:
+		// TODO: Replace
+		// '@typescript-eslint/indent': [
+		// 	'error',
+		// 	'tab',
+		// 	{
+		// 		'ignoredNodes': [
+		// 			// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
+		// 			'TSUnionType',
+		// 		]
+		// 	}
+		// ],
 		'linebreak-style': [
 			'error',
 			'unix'
@@ -77,7 +79,10 @@ module.exports = {
 		// Disallows TypeScript directives that restrict error reporting
 		'@typescript-eslint/ban-ts-comment': 'error',
 		// Bans types like Function and Object that should be more specific
-		'@typescript-eslint/ban-types': 'error',
+		'@typescript-eslint/no-restricted-types': 'error',
+		'@typescript-eslint/no-empty-object-type': 'error',
+		'@typescript-eslint/no-wrapper-object-types': 'error',
+		'@typescript-eslint/no-unsafe-function-type': 'error',
 
 		// Replace several ESLint defaults with the TypeScript equivalents
 		'@typescript-eslint/no-array-constructor': 'error',

@@ -260,7 +260,7 @@ export default class TextTool extends BaseTool {
 			const halfTestRegionSize = Vec2.of(2.5, 2.5).times(this.editor.viewport.getSizeOfPixelOnCanvas());
 			const testRegion = Rect2.fromCorners(canvasPos.minus(halfTestRegionSize), canvasPos.plus(halfTestRegionSize));
 			const targetNodes = this.editor.image.getElementsIntersectingRegion(testRegion);
-			let targetTextNodes = targetNodes.filter(node => node instanceof TextComponent) as TextComponent[];
+			let targetTextNodes = targetNodes.filter(node => node instanceof TextComponent);
 
 			// Don't try to edit text nodes that contain the viewport (this allows us
 			// to zoom in on text nodes and add text on top of them.)

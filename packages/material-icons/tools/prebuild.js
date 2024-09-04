@@ -1,7 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fs = require('node:fs/promises');
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { dirname, join, resolve, basename } = require('node:path');
 
 // Converts all SVG icons in src/icons into importable .ts files.

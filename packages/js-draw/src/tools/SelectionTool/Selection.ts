@@ -349,7 +349,7 @@ export default class Selection {
 				);
 			}).filter( // Remove all null commands
 				command => command !== null,
-			) as SerializableCommand[];
+			);
 		}
 
 		public async apply(editor: Editor) {

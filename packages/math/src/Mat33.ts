@@ -572,7 +572,7 @@ export class Mat33 {
 
 				return argNumber;
 			});
-			return parsed.filter(n => n !== null) as number[];
+			return parsed.filter(n => n !== null);
 		};
 
 

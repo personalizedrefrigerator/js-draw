@@ -10,7 +10,7 @@ import startPinchGesture from '../testing/startPinchGesture';
 
 const selectPanZom = (editor: Editor): PanZoom => {
 	const primaryTools = editor.toolController.getPrimaryTools();
-	const panZoom = primaryTools.filter(tool => tool instanceof PanZoom)[0] as PanZoom;
+	const panZoom = primaryTools.filter(tool => tool instanceof PanZoom)[0];
 	panZoom.setEnabled(true);
 	return panZoom;
 };
