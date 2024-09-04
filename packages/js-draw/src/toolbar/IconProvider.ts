@@ -8,7 +8,7 @@ import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuil
 import { makePolylineBuilder } from '../components/builders/PolylineBuilder';
 import { EraserMode } from '../tools/Eraser';
 
-export type IconElemType = HTMLImageElement|SVGElement;
+export type IconElemType = HTMLImageElement | SVGElement;
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
 const iconColorFill = `
@@ -61,7 +61,6 @@ const makeRedoIcon = (mirror: boolean) => {
 	icon.setAttribute('viewBox', '0 0 100 100');
 	return icon;
 };
-
 
 /**
  * Provides icons that can be used in the toolbar and other locations.
@@ -239,7 +238,8 @@ export default class IconProvider {
 		const strokeWidth = '3';
 
 		// Draw a cursor-like shape
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			m 10,60
 				5,30
 			H 90
@@ -259,7 +259,11 @@ export default class IconProvider {
 			L 25,60
 			C 20,45 10,50 10,60
 			Z
-		`, fill, strokeColor, strokeWidth);
+		`,
+			fill,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	public makeTouchPanningIcon(): IconElemType {
@@ -267,7 +271,8 @@ export default class IconProvider {
 		const strokeColor = 'var(--icon-color)';
 		const strokeWidth = '3';
 
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			M 5,5.5
 			V 17.2
 			L 16.25,5.46
@@ -293,7 +298,11 @@ export default class IconProvider {
 			L 33.1,23
 			C 30.3125,20.128192 27.9,19 25.830078,19.119756
 			Z
-		`, fill, strokeColor, strokeWidth);
+		`,
+			fill,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	/** Unused by js-draw. @deprecated */
@@ -301,7 +310,8 @@ export default class IconProvider {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
 		const strokeWidth = '3';
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			M 5 5
 			L 5 17.5
 				17.5 5
@@ -350,7 +360,11 @@ export default class IconProvider {
 			L 17.5 55
 			L 5 42.5
 			z
-		`, fill, strokeColor, strokeWidth);
+		`,
+			fill,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	public makeZoomIcon(): IconElemType {
@@ -507,9 +521,7 @@ export default class IconProvider {
 		const penTipPath = `M 25,35 ${10 - tipThickness / 4},${70 - tipThickness / 2} 20,75 25,85 60,75 70,55 45,25 Z`;
 
 		const pencilTipColor = Color4.fromHex('#f4d7d7');
-		const tipColor = pencilTipColor.mix(
-			color, tipThickness / 40 - 0.1
-		).toHexString();
+		const tipColor = pencilTipColor.mix(color, tipThickness / 40 - 0.1).toHexString();
 
 		const checkerboardPattern = makeCheckerboardPattern();
 
@@ -584,9 +596,7 @@ export default class IconProvider {
 		return icon;
 	}
 
-	public makeIconFromFactory(
-		penStyle: PenStyle,
-	): IconElemType {
+	public makeIconFromFactory(penStyle: PenStyle): IconElemType {
 		// Increase the thickness we use to generate the icon less with larger actual thicknesses.
 		// We want the icon to be recognisable with a large range of thicknesses.
 		const thickness = Math.sqrt(penStyle.thickness) * 3;
@@ -627,7 +637,7 @@ export default class IconProvider {
 			const background = document.createElementNS(svgNamespace, 'g');
 			icon.appendChild(background);
 
-			renderer = new class extends SVGRenderer {
+			renderer = new (class extends SVGRenderer {
 				public constructor() {
 					super(icon, viewport);
 				}
@@ -654,7 +664,7 @@ export default class IconProvider {
 
 					return addedPath;
 				}
-			}();
+			})();
 		} else {
 			renderer = new SVGRenderer(icon, viewport);
 		}
@@ -662,7 +672,6 @@ export default class IconProvider {
 
 		// If only a single path was rendered, try to give it a checkerboard background to
 		// emphasize transparency. TODO: This is very fragile
-
 
 		const bbox = builder.getBBox();
 		icon.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.w} ${bbox.h}`);
@@ -740,20 +749,30 @@ export default class IconProvider {
 	public makeShapeAutocorrectIcon(): IconElemType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			m 79.129476,33.847107 9.967823,-0.03218 v 55 h -55 l 0.03218,-9.96782
 			M 71.1,40.8 a 30,30 0 0 1 -30,30 30,30 0 0 1 -30,-30 30,30 0 0 1 30,-30 30,30 0 0 1 30,30 L 71.1,40.8
 			M 34.1,58.8 v -25 h 25 v 0
-		`, fill, strokeColor, '7px');
+		`,
+			fill,
+			strokeColor,
+			'7px',
+		);
 	}
 
 	public makeStrokeSmoothingIcon(): IconElemType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			m 31,83.2 c -50,0 30,-65 -20,-65
 			M 75,17.3 40,59.7 38.2,77.6 55.5,72.4 90.5,30 Z
-		`, fill, strokeColor, '7px');
+		`,
+			fill,
+			strokeColor,
+			'7px',
+		);
 	}
 
 	/** Unused. @deprecated */
@@ -818,10 +837,15 @@ export default class IconProvider {
 		const strokeColor = 'var(--icon-color)';
 		const fillColor = 'none';
 
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			M 15,15 85,85
 			M 15,85 85,15
-		`, fillColor, strokeColor, strokeWidth);
+		`,
+			fillColor,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	public makeDeleteSelectionIcon(): IconElemType {
@@ -972,5 +996,7 @@ export default class IconProvider {
 	}
 
 	/** Must be overridden by icon packs that need attribution. */
-	public licenseInfo(): string|null { return null; }
+	public licenseInfo(): string | null {
+		return null;
+	}
 }

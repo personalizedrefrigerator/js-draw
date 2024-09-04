@@ -25,7 +25,7 @@ import SaveActionWidget from './widgets/SaveActionWidget';
 import { BaseTool } from '../lib';
 import ExitActionWidget from './widgets/ExitActionWidget';
 
-type UpdateColorisCallback = ()=>void;
+type UpdateColorisCallback = () => void;
 type WidgetByIdMap = Record<string, BaseWidget>;
 
 export interface SpacerOptions {
@@ -62,11 +62,12 @@ export default abstract class AbstractToolbar {
 	#widgetList: Array<BaseWidget> = [];
 
 	private static colorisStarted: boolean = false;
-	#updateColoris: UpdateColorisCallback|null = null;
+	#updateColoris: UpdateColorisCallback | null = null;
 
 	/** @internal */
 	public constructor(
-		protected editor: Editor, protected localizationTable: ToolbarLocalization = defaultToolbarLocalization,
+		protected editor: Editor,
+		protected localizationTable: ToolbarLocalization = defaultToolbarLocalization,
 	) {
 		if (!AbstractToolbar.colorisStarted) {
 			colorisInit();
@@ -75,7 +76,7 @@ export default abstract class AbstractToolbar {
 		this.setupColorPickers();
 	}
 
-	private closeColorPickerOverlay: HTMLElement|null = null;
+	private closeColorPickerOverlay: HTMLElement | null = null;
 	private setupCloseColorPickerOverlay() {
 		if (this.closeColorPickerOverlay) return;
 
@@ -84,19 +85,21 @@ export default abstract class AbstractToolbar {
 		this.editor.createHTMLOverlay(this.closeColorPickerOverlay);
 
 		// Hide the color picker when attempting to draw on the overlay.
-		this.#listeners.push(this.editor.handlePointerEventsExceptClicksFrom(this.closeColorPickerOverlay, (eventName) => {
-			if (eventName === 'pointerdown') {
-				closeColoris();
-			}
+		this.#listeners.push(
+			this.editor.handlePointerEventsExceptClicksFrom(this.closeColorPickerOverlay, (eventName) => {
+				if (eventName === 'pointerdown') {
+					closeColoris();
+				}
 
-			// Transfer focus to the editor to allow keyboard events to be handled.
-			if (eventName === 'pointerup') {
-				this.editor.focus();
-			}
+				// Transfer focus to the editor to allow keyboard events to be handled.
+				if (eventName === 'pointerup') {
+					this.editor.focus();
+				}
 
-			// Send the event to the editor
-			return true;
-		}));
+				// Send the event to the editor
+				return true;
+			}),
+		);
 	}
 
 	// @internal
@@ -135,7 +138,7 @@ export default abstract class AbstractToolbar {
 
 					swatches,
 				});
-			} catch(err) {
+			} catch (err) {
 				console.warn('Failed to initialize Coloris. Error: ', err);
 
 				// Try again --- a known issue is that Coloris fails to load if the document
@@ -144,9 +147,13 @@ export default abstract class AbstractToolbar {
 					colorisInitScheduled = true;
 
 					// Wait to initialize after the document has loaded
-					document.addEventListener('load', () => {
-						initColoris();
-					}, { once: true });
+					document.addEventListener(
+						'load',
+						() => {
+							initColoris();
+						},
+						{ once: true },
+					);
 				}
 			}
 		};
@@ -171,24 +178,28 @@ export default abstract class AbstractToolbar {
 			}
 		};
 
-		this.#listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerToggled, event => {
-			if (event.kind !== EditorEventType.ColorPickerToggled) {
-				return;
-			}
+		this.#listeners.push(
+			this.editor.notifier.on(EditorEventType.ColorPickerToggled, (event) => {
+				if (event.kind !== EditorEventType.ColorPickerToggled) {
+					return;
+				}
 
-			// Show/hide the overlay. Making the overlay visible gives users a surface to click
-			// on that shows/hides the color picker.
-			if (this.closeColorPickerOverlay) {
-				this.closeColorPickerOverlay.style.display = event.open ? 'block' : 'none';
-			}
-		}));
+				// Show/hide the overlay. Making the overlay visible gives users a surface to click
+				// on that shows/hides the color picker.
+				if (this.closeColorPickerOverlay) {
+					this.closeColorPickerOverlay.style.display = event.open ? 'block' : 'none';
+				}
+			}),
+		);
 
 		// Add newly-selected colors to the swatch.
-		this.#listeners.push(this.editor.notifier.on(EditorEventType.ColorPickerColorSelected, event => {
-			if (event.kind === EditorEventType.ColorPickerColorSelected) {
-				addColorToSwatch(event.color.toHexString());
-			}
-		}));
+		this.#listeners.push(
+			this.editor.notifier.on(EditorEventType.ColorPickerColorSelected, (event) => {
+				if (event.kind === EditorEventType.ColorPickerColorSelected) {
+					addColorToSwatch(event.color.toHexString());
+				}
+			}),
+		);
 	}
 
 	protected closeColorPickers() {
@@ -199,7 +210,7 @@ export default abstract class AbstractToolbar {
 		return widget.getUniqueIdIn(this.#widgetsById);
 	}
 
-	protected getWidgetFromId(id: string): BaseWidget|undefined {
+	protected getWidgetFromId(id: string): BaseWidget | undefined {
 		return this.#widgetsById[id];
 	}
 
@@ -265,9 +276,8 @@ export default abstract class AbstractToolbar {
 		this.removeWidgetInternal(widget);
 
 		delete this.#widgetsById[id];
-		this.#widgetList = this.#widgetList.filter(otherWidget => otherWidget !== widget);
+		this.#widgetList = this.#widgetList.filter((otherWidget) => otherWidget !== widget);
 	}
-
 
 	/** Called by `removeWidget`. Implement this to remove a new widget from the toolbar. */
 	protected abstract removeWidgetInternal(widget: BaseWidget): void;
@@ -332,9 +342,9 @@ export default abstract class AbstractToolbar {
 	 * {@link addActionButton}
 	 */
 	protected makeActionButton(
-		title: string|ActionButtonIcon,
-		command: ()=>void,
-		options: ToolbarActionButtonOptions|boolean = true,
+		title: string | ActionButtonIcon,
+		command: () => void,
+		options: ToolbarActionButtonOptions | boolean = true,
 	): BaseWidget {
 		// Parse options
 		if (typeof options === 'boolean') {
@@ -380,9 +390,9 @@ export default abstract class AbstractToolbar {
 	 * @return The added button.
 	 */
 	public addActionButton(
-		title: string|ActionButtonIcon,
-		command: ()=> void,
-		options: ToolbarActionButtonOptions|boolean = true,
+		title: string | ActionButtonIcon,
+		command: () => void,
+		options: ToolbarActionButtonOptions | boolean = true,
 	): BaseWidget {
 		const widget = this.makeActionButton(title, command, options);
 		this.addWidget(widget);
@@ -394,10 +404,10 @@ export default abstract class AbstractToolbar {
 	 * different toolbar styles to give the button tag-dependent styles.
 	 */
 	public addTaggedActionButton(
-		tags: (ToolbarWidgetTag|string)[],
-		title: string|ActionButtonIcon,
-		command: ()=>void,
-		options: ToolbarActionButtonOptions|boolean = true,
+		tags: (ToolbarWidgetTag | string)[],
+		title: string | ActionButtonIcon,
+		command: () => void,
+		options: ToolbarActionButtonOptions | boolean = true,
 	): BaseWidget {
 		const widget = this.makeActionButton(title, command, options);
 		widget.setTags(tags);
@@ -422,9 +432,15 @@ export default abstract class AbstractToolbar {
 	 *
 	 * `labelOverride` can optionally be used to change the `label` or `icon` of the button.
 	 */
-	public addSaveButton(saveCallback: ()=>void, labelOverride: Partial<ActionButtonIcon> = {}): BaseWidget {
+	public addSaveButton(
+		saveCallback: () => void,
+		labelOverride: Partial<ActionButtonIcon> = {},
+	): BaseWidget {
 		const widget = new SaveActionWidget(
-			this.editor, this.localizationTable, saveCallback, labelOverride,
+			this.editor,
+			this.localizationTable,
+			saveCallback,
+			labelOverride,
 		);
 		this.addWidget(widget);
 
@@ -450,9 +466,15 @@ export default abstract class AbstractToolbar {
 	 *
 	 * @final
 	 */
-	public addExitButton(exitCallback: ()=>void, labelOverride: Partial<ActionButtonIcon> = {}): BaseWidget {
+	public addExitButton(
+		exitCallback: () => void,
+		labelOverride: Partial<ActionButtonIcon> = {},
+	): BaseWidget {
 		const widget = new ExitActionWidget(
-			this.editor, this.localizationTable, exitCallback, labelOverride,
+			this.editor,
+			this.localizationTable,
+			exitCallback,
+			labelOverride,
 		);
 		this.addWidget(widget);
 
@@ -465,24 +487,28 @@ export default abstract class AbstractToolbar {
 	 */
 	public addUndoRedoButtons(undoFirst = true) {
 		const makeUndo = () => {
-			return this.addTaggedActionButton([
-				ToolbarWidgetTag.Undo,
-			], {
-				label: this.localizationTable.undo,
-				icon: this.editor.icons.makeUndoIcon()
-			}, () => {
-				this.editor.history.undo();
-			});
+			return this.addTaggedActionButton(
+				[ToolbarWidgetTag.Undo],
+				{
+					label: this.localizationTable.undo,
+					icon: this.editor.icons.makeUndoIcon(),
+				},
+				() => {
+					this.editor.history.undo();
+				},
+			);
 		};
 		const makeRedo = () => {
-			return this.addTaggedActionButton([
-				ToolbarWidgetTag.Redo,
-			], {
-				label: this.localizationTable.redo,
-				icon: this.editor.icons.makeRedoIcon(),
-			}, () => {
-				this.editor.history.redo();
-			});
+			return this.addTaggedActionButton(
+				[ToolbarWidgetTag.Redo],
+				{
+					label: this.localizationTable.redo,
+					icon: this.editor.icons.makeRedoIcon(),
+				},
+				() => {
+					this.editor.history.redo();
+				},
+			);
 		};
 
 		let undoButton: BaseWidget;
@@ -497,7 +523,7 @@ export default abstract class AbstractToolbar {
 
 		undoButton.setDisabled(true);
 		redoButton.setDisabled(true);
-		this.editor.notifier.on(EditorEventType.UndoRedoStackUpdated, event => {
+		this.editor.notifier.on(EditorEventType.UndoRedoStackUpdated, (event) => {
 			if (event.kind !== EditorEventType.UndoRedoStackUpdated) {
 				throw new Error('Wrong event type!');
 			}
@@ -513,28 +539,22 @@ export default abstract class AbstractToolbar {
 	 * If `filter` returns `false` for a tool, no widget is added for that tool.
 	 * See {@link addDefaultToolWidgets}
 	 */
-	public addWidgetsForPrimaryTools(filter?: (tool: BaseTool)=>boolean) {
+	public addWidgetsForPrimaryTools(filter?: (tool: BaseTool) => boolean) {
 		for (const tool of this.editor.toolController.getPrimaryTools()) {
 			if (filter && !filter?.(tool)) {
 				continue;
 			}
 
 			if (tool instanceof PenTool) {
-				const widget = new PenToolWidget(
-					this.editor, tool, this.localizationTable,
-				);
+				const widget = new PenToolWidget(this.editor, tool, this.localizationTable);
 				this.addWidget(widget);
-			}
-			else if (tool instanceof EraserTool) {
+			} else if (tool instanceof EraserTool) {
 				this.addWidget(new EraserWidget(this.editor, tool, this.localizationTable));
-			}
-			else if (tool instanceof SelectionTool) {
+			} else if (tool instanceof SelectionTool) {
 				this.addWidget(new SelectionToolWidget(this.editor, tool, this.localizationTable));
-			}
-			else if (tool instanceof TextTool) {
+			} else if (tool instanceof TextTool) {
 				this.addWidget(new TextToolWidget(this.editor, tool, this.localizationTable));
-			}
-			else if (tool instanceof PanZoomTool) {
+			} else if (tool instanceof PanZoomTool) {
 				this.addWidget(new HandToolWidget(this.editor, tool, this.localizationTable));
 			}
 		}

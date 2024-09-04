@@ -17,7 +17,8 @@ const playInputLog = async (editor: jsdraw.Editor, log: any) => {
 		if (!event.timeStamp) continue;
 
 		if (['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].includes(event.eventType)) {
-			const device = event.pointerType === 'touch' ? jsdraw.PointerDevice.Touch : jsdraw.PointerDevice.Pen;
+			const device =
+				event.pointerType === 'touch' ? jsdraw.PointerDevice.Touch : jsdraw.PointerDevice.Pen;
 			const pointerId: number = event.pointerId;
 			const isDown = event.eventType === 'pointerdown' || pointersDown.has(pointerId);
 			const screenPos = jsdraw.Vec2.of(event.x, event.y);
@@ -94,10 +95,12 @@ const makeEditor = (label: string) => {
 	const penTool = new jsdraw.PenTool(editor, 'Debug tool', {});
 	const transformTool = new jsdraw.PanZoomTool(
 		editor,
-		jsdraw.PanZoomMode.Keyboard|jsdraw.PanZoomMode.SinglePointerGestures|jsdraw.PanZoomMode.TwoFingerTouchGestures,
-		'Pan zoom'
+		jsdraw.PanZoomMode.Keyboard |
+			jsdraw.PanZoomMode.SinglePointerGestures |
+			jsdraw.PanZoomMode.TwoFingerTouchGestures,
+		'Pan zoom',
 	);
-	editor.toolController.setTools([ ]);
+	editor.toolController.setTools([]);
 	editor.toolController.addPrimaryTool(penTool);
 
 	const scaleToImage = () => {
@@ -109,7 +112,7 @@ const makeEditor = (label: string) => {
 	};
 
 	const waitForNextAnimationFrame = () => {
-		return new Promise<void>(resolve => {
+		return new Promise<void>((resolve) => {
 			requestAnimationFrame(() => resolve());
 		});
 	};

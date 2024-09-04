@@ -16,16 +16,12 @@ const selectEraser = (editor: Editor) => {
 	return eraser;
 };
 
-const sendEraserEvent = (
-	editor: Editor,
-	eventType: PointerEvtType,
-	point: Point2,
-) => {
+const sendEraserEvent = (editor: Editor, eventType: PointerEvtType, point: Point2) => {
 	return sendPenEvent(editor, eventType, point, undefined, PointerDevice.Eraser);
 };
 
 const getAllStrokes = (editor: Editor) => {
-	return editor.image.getAllElements().filter(elem => elem instanceof StrokeComponent);
+	return editor.image.getAllElements().filter((elem) => elem instanceof StrokeComponent);
 };
 
 describe('Eraser', () => {
@@ -56,12 +52,15 @@ describe('Eraser', () => {
 	it('should erase objects within eraser.thickness of an event when not zoomed', async () => {
 		const editor = createEditor();
 
-		await editor.loadFromSVG(`
+		await editor.loadFromSVG(
+			`
 			<svg>
 				<path d='m0,0 l2,0 l0,2 l-2,0 z' fill="#ff0000"/>
 				<path d='m50,50 l2,0 l0,2 l-2,0 z' fill="#ff0000"/>
 			</svg>
-		`, true);
+		`,
+			true,
+		);
 
 		editor.viewport.resetTransform();
 
@@ -90,13 +89,14 @@ describe('Eraser', () => {
 
 	it('should not erase unselectable objects', () => {
 		const editor = createEditor();
-		const unerasableObj = new UnknownSVGObject(document.createElementNS('http://www.w3.org/2000/svg', 'arc'));
+		const unerasableObj = new UnknownSVGObject(
+			document.createElementNS('http://www.w3.org/2000/svg', 'arc'),
+		);
 
 		// Add to the image
 		expect(editor.image.getAllElements()).toHaveLength(0);
 		editor.dispatch(EditorImage.addElement(unerasableObj));
 		expect(editor.image.getAllElements()).toHaveLength(1);
-
 
 		const eraser = selectEraser(editor);
 		eraser.setThickness(100);
@@ -117,7 +117,7 @@ describe('Eraser', () => {
 			path: 'M0,0 L200,0',
 			strokeWidth: 20,
 			eraserSize: 25,
-			erasePoints: [ Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22) ],
+			erasePoints: [Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22)],
 			expected: {
 				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
 				finalStrokeCount: 2,
@@ -133,7 +133,7 @@ describe('Eraser', () => {
 			path: 'M0,0 L200,0',
 			strokeWidth: 20,
 			eraserSize: 15,
-			erasePoints: [ Vec2.of(-20, 1), Vec2.of(-10, 1), Vec2.of(-5, 1), Vec2.of(5, 1) ],
+			erasePoints: [Vec2.of(-20, 1), Vec2.of(-10, 1), Vec2.of(-5, 1), Vec2.of(5, 1)],
 			expected: {
 				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
 				finalStrokeCount: 1,
@@ -141,9 +141,7 @@ describe('Eraser', () => {
 					new LineSegment2(Vec2.of(10, -100), Vec2.of(10, 100)),
 					new LineSegment2(Vec2.of(200, -100), Vec2.of(200, 100)),
 				],
-				finalStrokesNoIntersect: [
-					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
-				],
+				finalStrokesNoIntersect: [new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100))],
 			},
 		},
 		// A line-shaped Bezier-curve
@@ -151,7 +149,7 @@ describe('Eraser', () => {
 			path: 'M0,0 Q50,0 200,0',
 			strokeWidth: 20,
 			eraserSize: 25,
-			erasePoints: [ Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22) ],
+			erasePoints: [Vec2.of(40, -22), Vec2.of(40, -15), Vec2.of(40, 0), Vec2.of(40, 22)],
 			expected: {
 				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 220, h: 20 }),
 				finalStrokeCount: 2,
@@ -170,10 +168,7 @@ describe('Eraser', () => {
 			path: 'M0,0 Q50,0 100,0',
 			strokeWidth: 20,
 			eraserSize: 5,
-			erasePoints: [
-				Vec2.of(41, -15),
-				Vec2.of(38, 22),
-			],
+			erasePoints: [Vec2.of(41, -15), Vec2.of(38, 22)],
 			expected: {
 				initialStrokeBBox: Rect2.of({ x: -10, y: -10, w: 120, h: 20 }),
 				finalStrokeCount: 2,
@@ -189,21 +184,24 @@ describe('Eraser', () => {
 			path: 'M0,0q0,0 0,0',
 			strokeWidth: 120,
 			eraserSize: 40,
-			erasePoints: [ Vec2.of(60, 0), Vec2.of(58, 1), Vec2.of(50, 1) ],
+			erasePoints: [Vec2.of(60, 0), Vec2.of(58, 1), Vec2.of(50, 1)],
 			expected: {
 				initialStrokeBBox: Rect2.of({ x: -60, y: -60, w: 120, h: 120 }),
 				finalStrokeCount: 0,
-				finalStrokesIntersect: [ ],
+				finalStrokesIntersect: [],
 			},
 		},
 	])('should support erasing partial strokes (case %#)', async (testData) => {
 		const editor = createEditor();
 
-		await editor.loadFromSVG(`
+		await editor.loadFromSVG(
+			`
 			<svg>
 				<path d=${JSON.stringify(testData.path)} fill="none" stroke-width="${+testData.strokeWidth}" stroke="red"/>
 			</svg>
-		`, true);
+		`,
+			true,
+		);
 
 		editor.viewport.resetTransform();
 
@@ -228,11 +226,11 @@ describe('Eraser', () => {
 		const intersectionResults = [];
 		const expectedResults = [];
 		for (const line of testData.expected.finalStrokesIntersect) {
-			intersectionResults.push(getAllStrokes(editor).some(s => !!s.intersects(line)));
+			intersectionResults.push(getAllStrokes(editor).some((s) => !!s.intersects(line)));
 			expectedResults.push(true);
 		}
-		for (const line of (testData.expected.finalStrokesNoIntersect ?? [])) {
-			intersectionResults.push(getAllStrokes(editor).some(s => !!s.intersects(line)));
+		for (const line of testData.expected.finalStrokesNoIntersect ?? []) {
+			intersectionResults.push(getAllStrokes(editor).some((s) => !!s.intersects(line)));
 			expectedResults.push(false);
 		}
 		expect(intersectionResults).toMatchObject(expectedResults);
@@ -241,12 +239,15 @@ describe('Eraser', () => {
 	it('should switch to the eraser tool when the eraser button is pressed', async () => {
 		const editor = createEditor();
 
-		await editor.loadFromSVG(`
+		await editor.loadFromSVG(
+			`
 			<svg>
 				<path d='m0,0 l2,0 l0,2 l-2,0 z' fill="#ff0000"/>
 				<path d='m50,50 l2,0 l0,2 l-2,0 z' fill="#ff0000"/>
 			</svg>
-		`, true);
+		`,
+			true,
+		);
 
 		editor.viewport.resetTransform();
 

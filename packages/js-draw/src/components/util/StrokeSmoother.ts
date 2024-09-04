@@ -11,7 +11,7 @@ export interface Curve {
 	endPoint: Vec2;
 }
 
-type OnCurveAddedCallback = (curve: Curve|null)=>void;
+type OnCurveAddedCallback = (curve: Curve | null) => void;
 
 // Handles stroke smoothing
 export class StrokeSmoother {
@@ -19,8 +19,8 @@ export class StrokeSmoother {
 
 	private buffer: Point2[];
 	private lastPoint: StrokeDataPoint;
-	private lastExitingVec: Vec2|null = null;
-	private currentCurve: QuadraticBezier|null = null;
+	private lastExitingVec: Vec2 | null = null;
+	private currentCurve: QuadraticBezier | null = null;
 	private curveStartWidth: number;
 	private curveEndWidth: number;
 
@@ -54,7 +54,7 @@ export class StrokeSmoother {
 		return this.bbox;
 	}
 
-	public preview(): Curve|null {
+	public preview(): Curve | null {
 		if (!this.currentCurve) {
 			return null;
 		}
@@ -89,9 +89,7 @@ export class StrokeSmoother {
 
 		// Use the last two points to start a new curve (the last point isn't used
 		// in the current curve and we want connected curves to share end points)
-		this.buffer = [
-			this.buffer[this.buffer.length - 2], lastPoint,
-		];
+		this.buffer = [this.buffer[this.buffer.length - 2], lastPoint];
 		this.currentCurve = null;
 
 		this.isFirstSegment = false;
@@ -140,8 +138,8 @@ export class StrokeSmoother {
 			}
 
 			const threshold = Math.min(this.lastPoint.width, newPoint.width) / 3;
-			const shouldSnapToInitial = this.startPoint.pos.distanceTo(newPoint.pos) < threshold
-				&& this.isFirstSegment;
+			const shouldSnapToInitial =
+				this.startPoint.pos.distanceTo(newPoint.pos) < threshold && this.isFirstSegment;
 
 			// Snap to the starting point if the stroke is contained within a small ball centered
 			// at the starting point.
@@ -176,13 +174,15 @@ export class StrokeSmoother {
 
 			// Quadratic Bézier curve
 			this.currentCurve = new QuadraticBezier(p1, p2, p3);
-			console.assert(!isNaN(p1.magnitude()) && !isNaN(p2.magnitude()) && !isNaN(p3.magnitude()), 'Expected !NaN');
+			console.assert(
+				!isNaN(p1.magnitude()) && !isNaN(p2.magnitude()) && !isNaN(p3.magnitude()),
+				'Expected !NaN',
+			);
 
 			if (this.isFirstSegment) {
 				// The start of a curve often lacks accurate pressure information. Update it.
 				this.curveStartWidth = (this.curveStartWidth + pointRadius) / 2;
-			}
-			else {
+			} else {
 				this.curveStartWidth = prevEndWidth;
 			}
 		}
@@ -208,29 +208,39 @@ export class StrokeSmoother {
 		const maxControlPointDist = maxRelativeLength * startEndDist;
 
 		// Exit in cases where we would divide by zero
-		if (maxControlPointDist === 0 || exitingVec.magnitude() === 0 || !isFinite(exitingVec.magnitude())) {
+		if (
+			maxControlPointDist === 0 ||
+			exitingVec.magnitude() === 0 ||
+			!isFinite(exitingVec.magnitude())
+		) {
 			return;
 		}
 
-		console.assert(isFinite(enteringVec.magnitude()), 'Pre-normalized enteringVec has NaN or ∞ magnitude!');
+		console.assert(
+			isFinite(enteringVec.magnitude()),
+			'Pre-normalized enteringVec has NaN or ∞ magnitude!',
+		);
 
 		enteringVec = enteringVec.normalized();
 		exitingVec = exitingVec.normalized();
 
-		console.assert(isFinite(enteringVec.magnitude()), 'Normalized enteringVec has NaN or ∞ magnitude!');
+		console.assert(
+			isFinite(enteringVec.magnitude()),
+			'Normalized enteringVec has NaN or ∞ magnitude!',
+		);
 
 		const lineFromStart = new LineSegment2(
 			segmentStart,
-			segmentStart.plus(enteringVec.times(maxControlPointDist))
+			segmentStart.plus(enteringVec.times(maxControlPointDist)),
 		);
 		const lineFromEnd = new LineSegment2(
 			segmentEnd.minus(exitingVec.times(maxControlPointDist)),
-			segmentEnd
+			segmentEnd,
 		);
 		const intersection = lineFromEnd.intersection(lineFromStart);
 
 		// Position the control point at this intersection
-		let controlPoint: Point2|null = null;
+		let controlPoint: Point2 | null = null;
 		if (intersection) {
 			controlPoint = intersection.point;
 		}
@@ -264,10 +274,10 @@ export class StrokeSmoother {
 		// Should we start making a new curve? Check whether all buffer points are within
 		// ±strokeWidth of the curve.
 		const curveMatchesPoints = (curve: QuadraticBezier): boolean => {
-			const minFit = Math.min(Math.max(
-				Math.min(this.curveStartWidth, this.curveEndWidth) / 4,
-				this.minFitAllowed
-			), this.maxFitAllowed);
+			const minFit = Math.min(
+				Math.max(Math.min(this.curveStartWidth, this.curveEndWidth) / 4, this.minFitAllowed),
+				this.maxFitAllowed,
+			);
 
 			// The sum of distances greater than minFit must not exceed this:
 			const maxNonMatchingDistSum = minFit;

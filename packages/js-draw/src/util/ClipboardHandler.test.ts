@@ -4,11 +4,14 @@ import ClipboardHandler from './ClipboardHandler';
 import { CopyEvent, PasteEvent } from '../inputEvents';
 import Editor from '../Editor';
 
-type ClipboardTestData = Record<string, string|Blob>;
+type ClipboardTestData = Record<string, string | Blob>;
 
 // A tool that handles all copy events
 class TestCopyPasteTool extends BaseTool {
-	public constructor(editor: Editor, private data: ClipboardTestData) {
+	public constructor(
+		editor: Editor,
+		private data: ClipboardTestData,
+	) {
 		super(editor.notifier, 'copy tool');
 	}
 
@@ -85,24 +88,28 @@ describe('ClipboardHandler', () => {
 
 			// Should have written to navigator.clipboard
 			const clipboardItems = await navigator.clipboard.read();
-			const itemTypes = clipboardItems.map(item => item.types).flat();
+			const itemTypes = clipboardItems.map((item) => item.types).flat();
 			expect(itemTypes).toContain('image/png');
 			expect(itemTypes).toContain('text/plain');
 			expect(itemTypes).toContain('text/html');
 		});
 
 		it.each([
-			[{
-				'text/plain': 'Testing!',
-				'text/html': '<i>Testing!</i>',
-			}],
-			[{
-				'text/plain': 'Test 2',
-				'text/html': '<i>...</i>',
+			[
+				{
+					'text/plain': 'Testing!',
+					'text/html': '<i>Testing!</i>',
+				},
+			],
+			[
+				{
+					'text/plain': 'Test 2',
+					'text/html': '<i>...</i>',
 
-				// image/svg+xml is a text format, so shouldn't cause navigator.clipboard to be used
-				'image/svg+xml': 'test',
-			}]
+					// image/svg+xml is a text format, so shouldn't cause navigator.clipboard to be used
+					'image/svg+xml': 'test',
+				},
+			],
 		])('should use event.dataTransfer when no images are to be copied (case %#)', async (data) => {
 			const editor = createEditor();
 			setUpCopyPasteTool(editor, data);
@@ -146,7 +153,9 @@ describe('ClipboardHandler', () => {
 
 			const clipboardItems = await navigator.clipboard.read();
 			expect(clipboardItems).toHaveLength(1);
-			expect(await (await clipboardItems[0].getType('text/html')).text()).toBe('<svg>This should be copied.</svg>');
+			expect(await (await clipboardItems[0].getType('text/html')).text()).toBe(
+				'<svg>This should be copied.</svg>',
+			);
 		});
 	});
 

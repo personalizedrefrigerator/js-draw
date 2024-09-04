@@ -34,9 +34,9 @@ export interface HandlePresentation {
 export const handleSize = 30;
 
 // `startPoint` is in screen coordinates
-export type DragStartCallback = (startPoint: Point2)=>void;
-export type DragUpdateCallback = (canvasPoint: Point2)=> void;
-export type DragEndCallback = ()=> Promise<void>|void;
+export type DragStartCallback = (startPoint: Point2) => void;
+export type DragUpdateCallback = (canvasPoint: Point2) => void;
+export type DragEndCallback = () => Promise<void> | void;
 
 export default class SelectionHandle implements SelectionBoxChild {
 	private element: HTMLElement;
@@ -54,10 +54,7 @@ export default class SelectionHandle implements SelectionBoxChild {
 		private readonly onDragEnd: DragEndCallback,
 	) {
 		this.element = document.createElement('div');
-		this.element.classList.add(
-			`${cssPrefix}handle`,
-			`${cssPrefix}${presentation.action}`,
-		);
+		this.element.classList.add(`${cssPrefix}handle`, `${cssPrefix}${presentation.action}`);
 
 		// Create a slightly smaller content/background element.
 		const visibleContent = document.createElement('div');
@@ -79,14 +76,14 @@ export default class SelectionHandle implements SelectionBoxChild {
 		}
 
 		switch (this.shape) {
-		case HandleShape.Circle:
-			this.element.classList.add(`${cssPrefix}circle`);
-			break;
-		case HandleShape.Square:
-			this.element.classList.add(`${cssPrefix}square`);
-			break;
-		default:
-			assertUnreachable(this.shape);
+			case HandleShape.Circle:
+				this.element.classList.add(`${cssPrefix}circle`);
+				break;
+			case HandleShape.Square:
+				this.element.classList.add(`${cssPrefix}square`);
+				break;
+			default:
+				assertUnreachable(this.shape);
 		}
 
 		this.updatePosition();
@@ -104,7 +101,9 @@ export default class SelectionHandle implements SelectionBoxChild {
 	 * Removes this element from its container. Should only be called
 	 * after {@link addTo}.
 	 */
-	public remove() { this.element.remove(); }
+	public remove() {
+		this.element.remove();
+	}
 
 	/**
 	 * Returns this handle's bounding box relative to the top left of the
@@ -113,9 +112,10 @@ export default class SelectionHandle implements SelectionBoxChild {
 	private getBBoxParentCoords() {
 		const parentRect = this.parent.getScreenRegion();
 		const size = Vec2.of(handleSize, handleSize);
-		const topLeft = parentRect.size.scale(this.parentSide)
+		const topLeft = parentRect.size
+			.scale(this.parentSide)
 			// Center
-			.minus(size.times(1/2));
+			.minus(size.times(1 / 2));
 
 		return new Rect2(topLeft.x, topLeft.y, size.x, size.y);
 	}
@@ -123,11 +123,13 @@ export default class SelectionHandle implements SelectionBoxChild {
 	/** @returns this handle's bounding box relative to the canvas. */
 	private getBBoxCanvasCoords() {
 		const parentRect = this.parent.region;
-		const size = Vec2.of(handleSize, handleSize).times(1/this.viewport.getScaleFactor());
+		const size = Vec2.of(handleSize, handleSize).times(1 / this.viewport.getScaleFactor());
 
 		const topLeftFromParent = parentRect.size.scale(this.parentSide).minus(size.times(0.5));
 
-		return new Rect2(topLeftFromParent.x, topLeftFromParent.y, size.x, size.y).translatedBy(parentRect.topLeft);
+		return new Rect2(topLeftFromParent.x, topLeftFromParent.y, size.x, size.y).translatedBy(
+			parentRect.topLeft,
+		);
 	}
 
 	/**
@@ -161,7 +163,7 @@ export default class SelectionHandle implements SelectionBoxChild {
 		return result;
 	}
 
-	private dragLastPos: Vec2|null = null;
+	private dragLastPos: Vec2 | null = null;
 	public handleDragStart(pointer: Pointer) {
 		this.onDragStart(pointer.canvasPos);
 		this.dragLastPos = pointer.canvasPos;

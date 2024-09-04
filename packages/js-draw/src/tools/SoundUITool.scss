@@ -1,18 +1,18 @@
-
 .js-draw-sound-ui-toggle {
 	width: 0px;
 	height: 0px;
-	overflow: hidden;  
+	overflow: hidden;
 
 	user-select: none;
-	-webkit-user-select: none;  
+	-webkit-user-select: none;
 }
 
 .js-draw-sound-ui-toggle button {
 	margin-top: 1px;
 }
 
-.js-draw-sound-ui-toggle:focus-within, .js-draw-sound-ui-toggle.sound-ui-tool-enabled {
+.js-draw-sound-ui-toggle:focus-within,
+.js-draw-sound-ui-toggle.sound-ui-tool-enabled {
 	overflow: visible;
 	z-index: 5;
 }

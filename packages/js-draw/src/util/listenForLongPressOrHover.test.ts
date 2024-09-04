@@ -7,7 +7,8 @@ describe('listenForLongPressOrHover', () => {
 		const onStart = jest.fn();
 		const onEnd = jest.fn();
 		const listener = listenForLongPressOrHover(element, {
-			onStart, onEnd,
+			onStart,
+			onEnd,
 		});
 
 		element.dispatchEvent(new PointerEvent('pointerenter', { pointerId: 0 }));
@@ -71,7 +72,6 @@ describe('listenForLongPressOrHover', () => {
 		const onStart = jest.fn();
 		const onEnd = jest.fn();
 		listenForLongPressOrHover(element, { onStart, onEnd });
-
 
 		element.dispatchEvent(new PointerEvent('pointerenter', { pointerId: 0 }));
 		await jest.advanceTimersByTimeAsync(10);

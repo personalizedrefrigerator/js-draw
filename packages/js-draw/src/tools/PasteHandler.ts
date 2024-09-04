@@ -55,12 +55,10 @@ export default class PasteHandler extends BaseTool {
 		if (svgData) {
 			void this.doSVGPaste(svgData);
 			return true;
-		}
-		else if (mime === 'text/plain') {
+		} else if (mime === 'text/plain') {
 			void this.doTextPaste(event.data);
 			return true;
-		}
-		else if (mime === 'image/png' || mime === 'image/jpeg') {
+		} else if (mime === 'image/png' || mime === 'image/jpeg') {
 			void this.doImagePaste(event.data);
 			return true;
 		}
@@ -70,7 +68,9 @@ export default class PasteHandler extends BaseTool {
 
 	private async addComponentsFromPaste(components: AbstractComponent[]) {
 		await this.editor.addAndCenterComponents(
-			components, true, this.editor.localization.pasted(components.length),
+			components,
+			true,
+			this.editor.localization.pasted(components.length),
 		);
 	}
 
@@ -80,10 +80,12 @@ export default class PasteHandler extends BaseTool {
 			const loader = SVGLoader.fromString(data, true);
 
 			const components: AbstractComponent[] = [];
-			await loader.start((component) => {
-				components.push(component);
-			},
-			(_countProcessed: number, _totalToProcess: number) => null);
+			await loader.start(
+				(component) => {
+					components.push(component);
+				},
+				(_countProcessed: number, _totalToProcess: number) => null,
+			);
 
 			await this.addComponentsFromPaste(components);
 		} finally {
@@ -106,7 +108,11 @@ export default class PasteHandler extends BaseTool {
 			return 0;
 		});
 
-		const defaultTextStyle: TextRenderingStyle = { size: 12, fontFamily: 'sans', renderingStyle: { fill: Color4.red } };
+		const defaultTextStyle: TextRenderingStyle = {
+			size: 12,
+			fontFamily: 'sans',
+			renderingStyle: { fill: Color4.red },
+		};
 		const pastedTextStyle: TextRenderingStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
 
 		// Don't paste text that would be invisible.
@@ -115,13 +121,15 @@ export default class PasteHandler extends BaseTool {
 		}
 
 		const lines = text.split('\n');
-		await this.addComponentsFromPaste([ TextComponent.fromLines(lines, Mat33.identity, pastedTextStyle) ]);
+		await this.addComponentsFromPaste([
+			TextComponent.fromLines(lines, Mat33.identity, pastedTextStyle),
+		]);
 	}
 
 	private async doImagePaste(dataURL: string) {
 		const image = new Image();
 		image.src = dataURL;
 		const component = await ImageComponent.fromImage(image, Mat33.identity);
-		await this.addComponentsFromPaste([ component ]);
+		await this.addComponentsFromPaste([component]);
 	}
 }

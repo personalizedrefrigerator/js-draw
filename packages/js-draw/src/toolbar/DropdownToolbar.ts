@@ -43,11 +43,12 @@ export default class DropdownToolbar extends AbstractToolbar {
 	private widgetOrderCounter: number = 0;
 
 	// Widget to toggle overflow menu.
-	private overflowWidget: OverflowWidget|null = null;
+	private overflowWidget: OverflowWidget | null = null;
 
 	/** @internal */
 	public constructor(
-		editor: Editor, parent: HTMLElement,
+		editor: Editor,
+		parent: HTMLElement,
 		localizationTable: ToolbarLocalization = defaultToolbarLocalization,
 	) {
 		super(editor, localizationTable);
@@ -144,11 +145,7 @@ export default class DropdownToolbar extends AbstractToolbar {
 			// Move widgets to the overflow menu.
 
 			// Start with the rightmost widget, move to the leftmost
-			for (
-				let i = allWidgets.length - 1;
-				i >= 0 && shownWidgetWidth >= availableWidth;
-				i--
-			) {
+			for (let i = allWidgets.length - 1; i >= 0 && shownWidgetWidth >= availableWidth; i--) {
 				const child = allWidgets[i];
 
 				if (this.overflowWidget.hasAsChild(child)) {

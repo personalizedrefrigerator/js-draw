@@ -2,11 +2,24 @@ import Editor from '../Editor';
 import EditorImage, { EditorImageEventType } from '../image/EditorImage';
 import { DispatcherEventListener } from '../EventDispatcher';
 import SerializableCommand from '../commands/SerializableCommand';
-import { LineSegment2, Mat33, Rect2, Color4, toRoundedString, Path, PathCommandType, Vec2, PathCommand } from '@js-draw/math';
+import {
+	LineSegment2,
+	Mat33,
+	Rect2,
+	Color4,
+	toRoundedString,
+	Path,
+	PathCommandType,
+	Vec2,
+	PathCommand,
+} from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import AbstractComponent, { ComponentSizingMode } from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
-import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
+import RestyleableComponent, {
+	ComponentStyle,
+	createRestyleComponentCommand,
+} from './RestylableComponent';
 import Viewport from '../Viewport';
 import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
@@ -23,7 +36,8 @@ export const imageBackgroundGridSizeCSSPrefix = 'js-draw-image-background-grid-'
 
 // Flag included in rendered SVGs (etc) that indicates that the secondary color of the
 // background has been manually set.
-export const imageBackgroundNonAutomaticSecondaryColorCSSClassName = 'js-draw-image-background-non-automatic-secondary-color';
+export const imageBackgroundNonAutomaticSecondaryColorCSSClassName =
+	'js-draw-image-background-non-automatic-secondary-color';
 
 export const backgroundTypeToClassNameMap = {
 	[BackgroundType.Grid]: 'js-draw-image-background-grid',
@@ -34,8 +48,8 @@ export const backgroundTypeToClassNameMap = {
 // Represents the background of the editor's canvas.
 export default class BackgroundComponent extends AbstractComponent implements RestyleableComponent {
 	protected contentBBox: Rect2;
-	private viewportSizeChangeListener: DispatcherEventListener|null = null;
-	private autoresizeChangedListener: DispatcherEventListener|null = null;
+	private viewportSizeChangeListener: DispatcherEventListener | null = null;
+	private autoresizeChangedListener: DispatcherEventListener | null = null;
 
 	// Whether the background should grow/shrink to match the screen size,
 	// rather than being clipped to the image boundaries.
@@ -43,20 +57,24 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 
 	private gridSize: number = Viewport.getGridSize(2);
 	private gridStrokeWidth: number = 0.7;
-	private secondaryColor: Color4|null = null;
+	private secondaryColor: Color4 | null = null;
 
 	// eslint-disable-next-line @typescript-eslint/prefer-as-const
 	readonly isRestylableComponent: true = true;
 
 	public constructor(
-		private backgroundType: BackgroundType, private mainColor: Color4
+		private backgroundType: BackgroundType,
+		private mainColor: Color4,
 	) {
 		super('image-background', 0);
 		this.contentBBox = Rect2.empty;
 	}
 
 	public static ofGrid(
-		backgroundColor: Color4, gridSize?: number, gridColor?: Color4, gridStrokeWidth?: number
+		backgroundColor: Color4,
+		gridSize?: number,
+		gridColor?: Color4,
+		gridStrokeWidth?: number,
 	) {
 		const background = new BackgroundComponent(BackgroundType.Grid, backgroundColor);
 
@@ -95,7 +113,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 	}
 
 	public getStyle(): ComponentStyle {
-		let color: Color4|undefined = this.mainColor;
+		let color: Color4 | undefined = this.mainColor;
 
 		if (this.backgroundType === BackgroundType.None) {
 			color = undefined;
@@ -140,9 +158,11 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		}
 
 		this.viewportSizeChangeListener = image.notifier.on(
-			EditorImageEventType.ExportViewportChanged, () => {
+			EditorImageEventType.ExportViewportChanged,
+			() => {
 				this.recomputeBBox(image);
-			});
+			},
+		);
 
 		this.autoresizeChangedListener = image.notifier.on(
 			EditorImageEventType.AutoresizeModeChanged,
@@ -192,7 +212,9 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		const contentBBox = this.getFullBoundingBox(visibleRect);
 
 		// .grownBy acts on all sides, so we need only grow by strokeWidth / 2 (1 * the stroke radius)
-		const targetRect = (visibleRect?.intersection(contentBBox) ?? contentBBox).grownBy(this.gridStrokeWidth / 2);
+		const targetRect = (visibleRect?.intersection(contentBBox) ?? contentBBox).grownBy(
+			this.gridStrokeWidth / 2,
+		);
 
 		const roundDownToGrid = (coord: number) => Math.floor(coord / this.gridSize) * this.gridSize;
 		const roundUpToGrid = (coord: number) => Math.ceil(coord / this.gridSize) * this.gridSize;
@@ -234,7 +256,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 			});
 			result.push({
 				kind: PathCommandType.LineTo,
-				point: Vec2.of(x, targetRect.y + targetRect.h)
+				point: Vec2.of(x, targetRect.y + targetRect.h),
 			});
 		}
 
@@ -269,22 +291,29 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		const contentBBox = this.getFullBoundingBox(visibleRect);
 		canvas.startObject(contentBBox, clip);
 
-		if (this.backgroundType === BackgroundType.SolidColor || this.backgroundType === BackgroundType.Grid) {
+		if (
+			this.backgroundType === BackgroundType.SolidColor ||
+			this.backgroundType === BackgroundType.Grid
+		) {
 			// If the rectangle for this region contains the visible rect,
 			// we can fill the entire visible rectangle (which may be more efficient than
 			// filling the entire region for this.)
 			const intersection = visibleRect?.intersection(contentBBox);
 			if (intersection) {
 				canvas.fillRect(intersection, this.mainColor);
-			}
-			else if (mustRender) {
+			} else if (mustRender) {
 				canvas.fillRect(contentBBox, this.mainColor);
 			}
 		}
 
 		if (this.backgroundType === BackgroundType.Grid) {
 			let gridColor = this.secondaryColor;
-			gridColor ??= Color4.ofRGBA(1 - this.mainColor.r, 1 - this.mainColor.g, 1 - this.mainColor.b, 0.2);
+			gridColor ??= Color4.ofRGBA(
+				1 - this.mainColor.r,
+				1 - this.mainColor.g,
+				1 - this.mainColor.b,
+				0.2,
+			);
 
 			// If the background fill is completely transparent, ensure visibility on otherwise light
 			// and dark backgrounds.
@@ -294,13 +323,13 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 
 			const style = {
 				fill: Color4.transparent,
-				stroke: { width: this.gridStrokeWidth, color: gridColor }
+				stroke: { width: this.gridStrokeWidth, color: gridColor },
 			};
 			canvas.drawPath(pathToRenderable(this.generateGridPath(visibleRect), style));
 		}
 
 		const backgroundTypeCSSClass = backgroundTypeToClassNameMap[this.backgroundType];
-		const classNames = [ imageBackgroundCSSClassName ];
+		const classNames = [imageBackgroundCSSClassName];
 
 		if (backgroundTypeCSSClass !== imageBackgroundCSSClassName) {
 			classNames.push(backgroundTypeCSSClass);
@@ -317,7 +346,7 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 	}
 
 	public intersects(lineSegment: LineSegment2): boolean {
-		return this.contentBBox.getEdges().some(edge => edge.intersects(lineSegment));
+		return this.contentBBox.getEdges().some((edge) => edge.intersects(lineSegment));
 	}
 
 	public override isSelectable(): boolean {
@@ -377,8 +406,9 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 		const jsonBackgroundType = json.backgroundType as BackgroundType;
 
 		if (
-			jsonBackgroundType === BackgroundType.None || jsonBackgroundType === BackgroundType.Grid
-			|| jsonBackgroundType === BackgroundType.SolidColor
+			jsonBackgroundType === BackgroundType.None ||
+			jsonBackgroundType === BackgroundType.Grid ||
+			jsonBackgroundType === BackgroundType.SolidColor
 		) {
 			backgroundType = jsonBackgroundType;
 		} else {
@@ -388,8 +418,8 @@ export default class BackgroundComponent extends AbstractComponent implements Re
 
 		const mainColor = Color4.fromHex(json.mainColor);
 		const secondaryColor = json.secondaryColor ? Color4.fromHex(json.secondaryColor) : null;
-		const gridSize: number|undefined = json.gridSize ?? undefined;
-		const gridStrokeWidth: number|undefined = json.gridStrokeWidth ?? undefined;
+		const gridSize: number | undefined = json.gridSize ?? undefined;
+		const gridStrokeWidth: number | undefined = json.gridStrokeWidth ?? undefined;
 
 		const result = new BackgroundComponent(backgroundType, mainColor);
 		result.secondaryColor = secondaryColor;

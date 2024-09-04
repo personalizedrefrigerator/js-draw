@@ -1,4 +1,3 @@
-
 // A cache record with sub-nodes.
 
 import { ImageNode, computeFirstIndexToRender, sortLeavesByZIndex } from '../../image/EditorImage';
@@ -14,17 +13,17 @@ const cacheDivisionSize = 3;
 export default class RenderingCacheNode {
 	// invariant: instantiatedChildren.length === 9
 	private instantiatedChildren: RenderingCacheNode[] = [];
-	private parent: RenderingCacheNode|null = null;
+	private parent: RenderingCacheNode | null = null;
 
-	private cachedRenderer: CacheRecord|null = null;
+	private cachedRenderer: CacheRecord | null = null;
 	// invariant: sortedInAscendingOrder(renderedIds)
 	private renderedIds: Array<number> = [];
-	private renderedMaxZIndex: number|null = null;
+	private renderedMaxZIndex: number | null = null;
 
 	public constructor(
-		public readonly region: Rect2, private readonly cacheState: CacheState
-	) {
-	}
+		public readonly region: Rect2,
+		private readonly cacheState: CacheState,
+	) {}
 
 	// Creates a previous layer of the cache tree and adds this as a child near the
 	// center of the previous layer's children.
@@ -36,7 +35,7 @@ export default class RenderingCacheNode {
 
 		const parentRegion = Rect2.fromCorners(
 			this.region.topLeft.minus(this.region.size),
-			this.region.bottomRight.plus(this.region.size)
+			this.region.bottomRight.plus(this.region.size),
 		);
 		const parent = new RenderingCacheNode(parentRegion, this.cacheState);
 		parent.generateChildren();
@@ -46,7 +45,7 @@ export default class RenderingCacheNode {
 		const middleChildIdx = (parent.instantiatedChildren.length - 1) / 2;
 		if (!parent.instantiatedChildren[middleChildIdx].region.eq(this.region, checkTolerance)) {
 			console.error(parent.instantiatedChildren[middleChildIdx].region, '≠', this.region);
-			throw new Error('Logic error: [this] is not contained within its parent\'s center child');
+			throw new Error("Logic error: [this] is not contained within its parent's center child");
 		}
 
 		// Replace the middle child
@@ -59,7 +58,10 @@ export default class RenderingCacheNode {
 	// Generates children, if missing.
 	private generateChildren() {
 		if (this.instantiatedChildren.length === 0) {
-			if (this.region.size.x / cacheDivisionSize === 0 || this.region.size.y / cacheDivisionSize === 0) {
+			if (
+				this.region.size.x / cacheDivisionSize === 0 ||
+				this.region.size.y / cacheDivisionSize === 0
+			) {
 				console.warn('Cache element has zero size! Not generating children.');
 				return;
 			}
@@ -87,7 +89,7 @@ export default class RenderingCacheNode {
 		return this.instantiatedChildren;
 	}
 
-	public smallestChildContaining(rect: Rect2): RenderingCacheNode|null {
+	public smallestChildContaining(rect: Rect2): RenderingCacheNode | null {
 		const largerThanChildren = rect.maxDimension > this.region.maxDimension / cacheDivisionSize;
 		if (!this.region.containsRect(rect) || largerThanChildren) {
 			return null;
@@ -178,10 +180,7 @@ export default class RenderingCacheNode {
 
 	// Render all [items] within [viewport]
 	public renderItems(screenRenderer: AbstractRenderer, items: ImageNode[], viewport: Viewport) {
-		if (
-			!viewport.visibleRect.intersects(this.region)
-			|| items.length === 0
-		) {
+		if (!viewport.visibleRect.intersects(this.region) || items.length === 0) {
 			return;
 		}
 
@@ -213,28 +212,31 @@ export default class RenderingCacheNode {
 		}
 
 		if (this.cacheState.debugMode) {
-			screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), { fill: Color4.yellow });
+			screenRenderer.drawRect(this.region, viewport.getSizeOfPixelOnCanvas(), {
+				fill: Color4.yellow,
+			});
 		}
 
 		// Could we render direclty from [this] or do we need to recurse?
 		const couldRender = this.renderingWouldBeHighEnoughResolution(viewport);
 		if (!couldRender) {
 			for (const child of this.getChildren()) {
-				child.renderItems(screenRenderer, items.filter(item => {
-					return item.getBBox().intersects(child.region);
-				}), viewport);
+				child.renderItems(
+					screenRenderer,
+					items.filter((item) => {
+						return item.getBBox().intersects(child.region);
+					}),
+					viewport,
+				);
 			}
 		} else {
 			// Determine whether we already have rendered the items
-			const tooSmallToRender = (rect: Rect2) => rect.w / this.region.w < 1 / this.cacheState.props.blockResolution.x;
+			const tooSmallToRender = (rect: Rect2) =>
+				rect.w / this.region.w < 1 / this.cacheState.props.blockResolution.x;
 
 			const leaves = [];
 			for (const item of items) {
-				leaves.push(
-					...item.getLeavesIntersectingRegion(
-						this.region, tooSmallToRender,
-					)
-				);
+				leaves.push(...item.getLeavesIntersectingRegion(this.region, tooSmallToRender));
 			}
 			sortLeavesByZIndex(leaves);
 			const leavesByIds = this.computeSortedByLeafIds(leaves);
@@ -244,7 +246,7 @@ export default class RenderingCacheNode {
 				return;
 			}
 
-			const leafIds = leavesByIds.map(leaf => leaf.getId());
+			const leafIds = leavesByIds.map((leaf) => leaf.getId());
 
 			let thisRenderer;
 			if (!this.renderingIsUpToDate(leafIds)) {
@@ -266,16 +268,19 @@ export default class RenderingCacheNode {
 				if (leafApproxRenderTime > this.cacheState.props.minProportionalRenderTimePerCache) {
 					let fullRerenderNeeded = true;
 					if (!this.cachedRenderer) {
-						this.cachedRenderer = this.cacheState.recordManager.allocCanvas(
-							this.region,
-							() => this.onRegionDealloc()
+						this.cachedRenderer = this.cacheState.recordManager.allocCanvas(this.region, () =>
+							this.onRegionDealloc(),
 						);
-					} else if (leavesByIds.length > this.renderedIds.length && this.allRenderedIdsIn(leafIds) && this.renderedMaxZIndex !== null) {
+					} else if (
+						leavesByIds.length > this.renderedIds.length &&
+						this.allRenderedIdsIn(leafIds) &&
+						this.renderedMaxZIndex !== null
+					) {
 						// We often don't need to do a full re-render even if something's changed.
 						// Check whether we can just draw on top of the existing cache.
 						const newLeaves = [];
 
-						let minNewZIndex: number|null = null;
+						let minNewZIndex: number | null = null;
 
 						for (let i = 0; i < leavesByIds.length; i++) {
 							const leaf = leavesByIds[i];
@@ -308,15 +313,25 @@ export default class RenderingCacheNode {
 
 							if (this.cacheState.debugMode) {
 								// Clay for adding new elements
-								screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.clay });
+								screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), {
+									fill: Color4.clay,
+								});
 							}
 						}
 					} else if (this.cacheState.debugMode) {
-						console.log('Decided on a full re-render. Reason: At least one of the following is false:',
-							'\n leafIds.length > this.renderedIds.length: ', leafIds.length > this.renderedIds.length,
-							'\n this.allRenderedIdsIn(leafIds): ', this.allRenderedIdsIn(leafIds),
-							'\n this.renderedMaxZIndex !== null: ', this.renderedMaxZIndex !== null,
-							'\n\nthis.rerenderedIds: ', this.renderedIds, ', leafIds: ', leafIds);
+						console.log(
+							'Decided on a full re-render. Reason: At least one of the following is false:',
+							'\n leafIds.length > this.renderedIds.length: ',
+							leafIds.length > this.renderedIds.length,
+							'\n this.allRenderedIdsIn(leafIds): ',
+							this.allRenderedIdsIn(leafIds),
+							'\n this.renderedMaxZIndex !== null: ',
+							this.renderedMaxZIndex !== null,
+							'\n\nthis.rerenderedIds: ',
+							this.renderedIds,
+							', leafIds: ',
+							leafIds,
+						);
 					}
 
 					if (fullRerenderNeeded) {
@@ -337,7 +352,9 @@ export default class RenderingCacheNode {
 
 						if (this.cacheState.debugMode) {
 							// Red for full rerender
-							screenRenderer.drawRect(this.region, 3 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.red });
+							screenRenderer.drawRect(this.region, 3 * viewport.getSizeOfPixelOnCanvas(), {
+								fill: Color4.red,
+							});
 						}
 					}
 					this.renderedIds = leafIds;
@@ -348,8 +365,10 @@ export default class RenderingCacheNode {
 					// Divide by two because grownBy expands the rectangle on all sides.
 					const pixelSize = viewport.getSizeOfPixelOnCanvas();
 					const expandedRegion = new Rect2(
-						this.region.x, this.region.y,
-						this.region.w + pixelSize, this.region.h + pixelSize
+						this.region.x,
+						this.region.y,
+						this.region.w + pixelSize,
+						this.region.h + pixelSize,
 					);
 
 					const clip = true;
@@ -362,7 +381,9 @@ export default class RenderingCacheNode {
 
 					if (this.cacheState.debugMode) {
 						// Green for no cache needed render
-						screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), { fill: Color4.green });
+						screenRenderer.drawRect(this.region, 2 * viewport.getSizeOfPixelOnCanvas(), {
+							fill: Color4.green,
+						});
 					}
 				}
 			} else {
@@ -375,7 +396,7 @@ export default class RenderingCacheNode {
 			}
 
 			// Can we clean up this' children? (Are they unused?)
-			if (this.instantiatedChildren.every(child => child.isEmpty())) {
+			if (this.instantiatedChildren.every((child) => child.isEmpty())) {
 				this.instantiatedChildren = [];
 			}
 		}
@@ -389,7 +410,7 @@ export default class RenderingCacheNode {
 			return false;
 		}
 
-		return this.instantiatedChildren.every(child => child.isEmpty());
+		return this.instantiatedChildren.every((child) => child.isEmpty());
 	}
 
 	private onRegionDealloc() {
@@ -400,8 +421,13 @@ export default class RenderingCacheNode {
 	}
 
 	private checkRep() {
-		if (this.instantiatedChildren.length !== cacheDivisionSize * cacheDivisionSize && this.instantiatedChildren.length !== 0) {
-			throw new Error(`Repcheck: Wrong number of children. Got ${this.instantiatedChildren.length}`);
+		if (
+			this.instantiatedChildren.length !== cacheDivisionSize * cacheDivisionSize &&
+			this.instantiatedChildren.length !== 0
+		) {
+			throw new Error(
+				`Repcheck: Wrong number of children. Got ${this.instantiatedChildren.length}`,
+			);
 		}
 
 		if (this.renderedIds[1] !== undefined && this.renderedIds[0] >= this.renderedIds[1]) {
@@ -416,7 +442,7 @@ export default class RenderingCacheNode {
 		}
 
 		if (this.cachedRenderer && !this.cachedRenderer.isAllocd()) {
-			throw new Error('this\' cachedRenderer != null, but is dealloc\'d');
+			throw new Error("this' cachedRenderer != null, but is dealloc'd");
 		}
 	}
 }

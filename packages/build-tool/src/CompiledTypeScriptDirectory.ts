@@ -1,4 +1,3 @@
-
 // See https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API
 
 import path, { dirname } from 'path';
@@ -11,24 +10,27 @@ import { mkdir, writeFile } from 'fs/promises';
 const scriptDir = dirname(__dirname);
 const rootDir = dirname(dirname(scriptDir));
 
-type ModuleType = 'mjs'|'cjs';
+type ModuleType = 'mjs' | 'cjs';
 
 // Used by TypeScript to format diagnostic messages.
 // See https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#writing-an-incremental-program-watcher
 const formatHost: ts.FormatDiagnosticsHost = {
-	getCanonicalFileName: filePath => filePath,
+	getCanonicalFileName: (filePath) => filePath,
 	getCurrentDirectory: () => ts.sys.getCurrentDirectory(),
 	getNewLine: () => ts.sys.newLine,
 };
 
 interface TSConfigData {
 	compilerOptions: ts.CompilerOptions;
-	fileNames: string[]|null;
+	fileNames: string[] | null;
 }
 
 class CompiledTypeScriptDirectory {
 	private rootConfig: TSConfigData;
-	public constructor(private inDir: string, private outDir: string) {
+	public constructor(
+		private inDir: string,
+		private outDir: string,
+	) {
 		this.rootConfig = this.getCompilerOptionsFromConfig();
 	}
 
@@ -46,18 +48,10 @@ class CompiledTypeScriptDirectory {
 
 	private getCompilerOptionsFromConfig(): TSConfigData {
 		const searchPath = './';
-		let path = ts.findConfigFile(
-			searchPath,
-			path => ts.sys.fileExists(path),
-			'tsconfig.json'
-		);
+		let path = ts.findConfigFile(searchPath, (path) => ts.sys.fileExists(path), 'tsconfig.json');
 
 		if (!path) {
-			path = ts.findConfigFile(
-				rootDir,
-				path => ts.sys.fileExists(path),
-				'tsconfig.json'
-			);
+			path = ts.findConfigFile(rootDir, (path) => ts.sys.fileExists(path), 'tsconfig.json');
 		}
 
 		const defaultConfig = {};
@@ -95,17 +89,13 @@ class CompiledTypeScriptDirectory {
 	}
 
 	private reportDiagnostic(diagnostic: ts.Diagnostic) {
-		console.error(
-			'[🛑] Error',
-			diagnostic.code,
-			ts.formatDiagnostic(diagnostic, formatHost)
-		);
+		console.error('[🛑] Error', diagnostic.code, ts.formatDiagnostic(diagnostic, formatHost));
 	}
 
 	private filterTranspiledFile(
 		moduleType: ModuleType,
-		fileRecord: { filePath: string, text: string }
-	): { filePath: string, text: string} {
+		fileRecord: { filePath: string; text: string },
+	): { filePath: string; text: string } {
 		let { filePath, text } = fileRecord;
 
 		// Don't update .d.ts files
@@ -125,7 +115,10 @@ class CompiledTypeScriptDirectory {
 
 			// TODO: Switch to using the TypeScript compiler API. This has the danger of changing imports
 			// in multi-line strings.
-			text = text.replace(/([\n]|^)(import|export)(.*)from\s+(['"])(\.*\/[^\n]+)(['"])/g, '$1$2 $3 from $4$5.mjs$6');
+			text = text.replace(
+				/([\n]|^)(import|export)(.*)from\s+(['"])(\.*\/[^\n]+)(['"])/g,
+				'$1$2 $3 from $4$5.mjs$6',
+			);
 		} else {
 			// .cjs file. No changes needed.
 		}
@@ -137,7 +130,7 @@ class CompiledTypeScriptDirectory {
 		// Largely based on
 		// https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#incremental-build-support-using-the-language-services
 		const fileVersions: Record<string, number> = {};
-		const targetFiles = this.rootConfig.fileNames ?? await this.getTargetFiles();
+		const targetFiles = this.rootConfig.fileNames ?? (await this.getTargetFiles());
 
 		const documentRegistry = ts.createDocumentRegistry();
 		const makeLanguageService = (additionalOptions: ts.CompilerOptions) => {
@@ -149,17 +142,15 @@ class CompiledTypeScriptDirectory {
 
 			const servicesHost: ts.LanguageServiceHost = {
 				getScriptFileNames: () => targetFiles,
-				getScriptVersion: filePath => {
+				getScriptVersion: (filePath) => {
 					return fileVersions[path.resolve(filePath)]?.toString();
 				},
-				getScriptSnapshot: fileName => {
+				getScriptSnapshot: (fileName) => {
 					if (!fs.existsSync(fileName)) {
 						return undefined;
 					}
 
-					return ts.ScriptSnapshot.fromString(
-						fs.readFileSync(fileName, { encoding: 'utf-8' })
-					);
+					return ts.ScriptSnapshot.fromString(fs.readFileSync(fileName, { encoding: 'utf-8' }));
 				},
 				getCurrentDirectory: () => process.cwd(),
 				getCompilationSettings: () => options,
@@ -175,11 +166,11 @@ class CompiledTypeScriptDirectory {
 		};
 
 		const langServices: Record<ModuleType, ts.LanguageService> = {
-			'mjs': makeLanguageService({
+			mjs: makeLanguageService({
 				module: ts.ModuleKind.ES2020,
 				outDir: path.join(this.outDir, 'mjs'),
 			}),
-			'cjs': makeLanguageService({
+			cjs: makeLanguageService({
 				module: ts.ModuleKind.CommonJS,
 				outDir: path.join(this.outDir, 'cjs'),
 			}),
@@ -237,21 +228,23 @@ class CompiledTypeScriptDirectory {
 		}
 
 		// If there were any errors emitting,
-		if (!(await Promise.all(emitFilePromises)).every(v => v)) {
+		if (!(await Promise.all(emitFilePromises)).every((v) => v)) {
 			throw new Error('[😱] There were transpilation errors!');
 		}
 
 		if (watch) {
 			// Maps from file paths to whether that file is being processed
 			const updatingFile: Record<string, boolean> = {};
-			const postUpdateFile: Record<string, ()=>Promise<void>> = {};
+			const postUpdateFile: Record<string, () => Promise<void>> = {};
 
 			if (!ts.sys.watchFile) {
 				throw new Error('ts.sys.watchDirectory is null. (Unsupported on the current platform?)');
 			}
 
 			// TODO: This currently doesn't watch for added/removed files.
-			console.warn('[⚠️] Warning: This watcher currently doesn\'t check for added/removed files and directories');
+			console.warn(
+				"[⚠️] Warning: This watcher currently doesn't check for added/removed files and directories",
+			);
 
 			const watchers: ts.FileWatcher[] = [];
 
@@ -260,47 +253,51 @@ class CompiledTypeScriptDirectory {
 				fileVersions[absolutePath] ??= 0;
 
 				const pollInterval = 1000;
-				const watcher = ts.sys.watchFile(filePath, () => {
-					console.log(`[ ] Watcher: ${filePath} updated`);
-					fileVersions[absolutePath] ++;
+				const watcher = ts.sys.watchFile(
+					filePath,
+					() => {
+						console.log(`[ ] Watcher: ${filePath} updated`);
+						fileVersions[absolutePath]++;
 
-					const updateFile = async () => {
-						if (fs.existsSync(filePath)) {
-							associatedFiles[filePath] = [];
-							try {
-								updatingFile[filePath] = true;
-								await emitFile('cjs', filePath);
-								await emitFile('mjs', filePath);
+						const updateFile = async () => {
+							if (fs.existsSync(filePath)) {
+								associatedFiles[filePath] = [];
+								try {
+									updatingFile[filePath] = true;
+									await emitFile('cjs', filePath);
+									await emitFile('mjs', filePath);
 
-								console.log(`[✅] Emitted ${filePath}`);
-							} finally {
-								updatingFile[filePath] = false;
+									console.log(`[✅] Emitted ${filePath}`);
+								} finally {
+									updatingFile[filePath] = false;
+								}
+
+								if (postUpdateFile[filePath]) {
+									void postUpdateFile[filePath]();
+									delete postUpdateFile[filePath];
+								}
+							} else {
+								for (const path of associatedFiles[filePath] ?? []) {
+									fs.unlinkSync(path);
+								}
 							}
+						};
 
-							if (postUpdateFile[filePath]) {
-								void postUpdateFile[filePath]();
-								delete postUpdateFile[filePath];
-							}
+						if (updatingFile[filePath]) {
+							postUpdateFile[filePath] = updateFile;
 						} else {
-							for (const path of associatedFiles[filePath] ?? []) {
-								fs.unlinkSync(path);
-							}
+							updateFile();
 						}
-					};
-
-					if (updatingFile[filePath]) {
-						postUpdateFile[filePath] = updateFile;
-					} else {
-						updateFile();
-					}
-				}, pollInterval);
+					},
+					pollInterval,
+				);
 				watchers.push(watcher);
 			}
 
 			return {
 				stop() {
-					watchers.forEach(watcher => watcher.close());
-				}
+					watchers.forEach((watcher) => watcher.close());
+				},
 			};
 		} else {
 			console.info('[✅] Transpiled successfully!');

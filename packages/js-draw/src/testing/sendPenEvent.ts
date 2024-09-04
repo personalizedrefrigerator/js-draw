@@ -22,14 +22,16 @@ const sendPenEvent = (
 	const id = getUniquePointerId(allPointers ?? []);
 
 	const mainPointer = Pointer.ofCanvasPoint(
-		point, eventType !== InputEvtType.PointerUpEvt, editor.viewport, id, deviceType,
+		point,
+		eventType !== InputEvtType.PointerUpEvt,
+		editor.viewport,
+		id,
+		deviceType,
 	);
 
 	editor.toolController.dispatchInputEvent({
 		kind: eventType,
-		allPointers: allPointers ?? [
-			mainPointer,
-		],
+		allPointers: allPointers ?? [mainPointer],
 		current: mainPointer,
 	});
 

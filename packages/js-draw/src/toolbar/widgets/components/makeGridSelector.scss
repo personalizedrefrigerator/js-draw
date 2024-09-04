@@ -1,14 +1,13 @@
-
 .toolbar-grid-selector {
 	position: relative;
 
 	& > div {
 		display: flex;
 		flex-direction: row;
-	
+
 		max-width: 350px;
 		flex-wrap: wrap;
-	
+
 		--button-size: 48px;
 	}
 
@@ -17,7 +16,7 @@
 		flex-direction: column-reverse;
 		box-sizing: border-box;
 		cursor: pointer;
-	
+
 		flex-shrink: 1;
 		margin: 2px;
 
@@ -35,10 +34,10 @@
 			display: flex;
 			flex-direction: column;
 			box-sizing: border-box;
-		
+
 			width: var(--button-size);
 			height: var(--button-size);
-		
+
 			font-size: 0.7rem;
 			align-items: center;
 			justify-content: center;
@@ -54,13 +53,11 @@
 			flex-shrink: 1;
 			width: 100%;
 		}
-		
+
 		&.checked {
 			background-color: var(--selection-background-color);
 			color: var(--selection-foreground-color);
 			--icon-color: var(--selection-foreground-color);
 		}
 	}
-	
-
 }

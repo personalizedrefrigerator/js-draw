@@ -13,13 +13,16 @@ import makeFileInput from '../components/makeFileInput';
 import { MutableReactiveValue } from '../../../util/ReactiveValue';
 import bytesToSizeString from '../../../util/bytesToSizeString';
 import { ImageWrapper } from './ImageWrapper';
-import makeSnappedList, { SnappedListControl, SnappedListItem } from '../components/makeSnappedList';
+import makeSnappedList, {
+	SnappedListControl,
+	SnappedListItem,
+} from '../components/makeSnappedList';
 import { Command } from '../../../commands/lib';
 import AbstractComponent from '../../../components/AbstractComponent';
 import { RenderableImage } from 'js-draw/src/rendering/renderers/AbstractRenderer';
 import fileToImages from './fileToImages';
 
-type ImageListItem = SnappedListItem<ImageWrapper|null>;
+type ImageListItem = SnappedListItem<ImageWrapper | null>;
 
 /**
  * Provides a widget that allows inserting or modifying raster images.
@@ -38,9 +41,9 @@ type ImageListItem = SnappedListItem<ImageWrapper|null>;
  */
 export default class InsertImageWidget extends BaseWidget {
 	private images: MutableReactiveValue<ImageListItem[]>;
-	private imagesPreview: SnappedListControl<ImageWrapper|null>;
+	private imagesPreview: SnappedListControl<ImageWrapper | null>;
 
-	private selectedFiles: MutableReactiveValue<File[]>|null;
+	private selectedFiles: MutableReactiveValue<File[]> | null;
 	private imageAltTextInput: HTMLInputElement;
 	private statusView: HTMLElement;
 	private submitButton: HTMLButtonElement;
@@ -53,7 +56,7 @@ export default class InsertImageWidget extends BaseWidget {
 		// Make the dropdown showable
 		this.container.classList.add('dropdownShowable');
 
-		editor.notifier.on(EditorEventType.SelectionUpdated, event => {
+		editor.notifier.on(EditorEventType.SelectionUpdated, (event) => {
 			if (event.kind === EditorEventType.SelectionUpdated && this.isDropdownVisible()) {
 				this.updateInputs();
 			}
@@ -99,10 +102,7 @@ export default class InsertImageWidget extends BaseWidget {
 			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
 		);
 
-		const {
-			container: chooseImageRow,
-			selectedFiles,
-		} = makeFileInput(
+		const { container: chooseImageRow, selectedFiles } = makeFileInput(
 			this.localizationTable.chooseFile,
 			this.editor,
 			{
@@ -155,28 +155,32 @@ export default class InsertImageWidget extends BaseWidget {
 				return;
 			}
 
-			const previews = (await Promise.all(files.map(async (imageFile): Promise<SnappedListItem<ImageWrapper>[]> => {
-				let renderableImages: RenderableImage[];
-				try {
-					renderableImages = await fileToImages(imageFile);
-				} catch (error) {
-					console.error('Image load error', error);
+			const previews = (
+				await Promise.all(
+					files.map(async (imageFile): Promise<SnappedListItem<ImageWrapper>[]> => {
+						let renderableImages: RenderableImage[];
+						try {
+							renderableImages = await fileToImages(imageFile);
+						} catch (error) {
+							console.error('Image load error', error);
 
-					const errorMessage = this.localizationTable.imageLoadError(error);
-					this.statusView.innerText = errorMessage;
-					return [];
-				}
+							const errorMessage = this.localizationTable.imageLoadError(error);
+							this.statusView.innerText = errorMessage;
+							return [];
+						}
 
-				return renderableImages.map(image => {
-					const { wrapper, preview } = ImageWrapper.fromRenderable(
-						image, () => this.onImageDataUpdate(),
-					);
-					return {
-						data: wrapper,
-						element: preview,
-					};
-				});
-			}))).flat();
+						return renderableImages.map((image) => {
+							const { wrapper, preview } = ImageWrapper.fromRenderable(image, () =>
+								this.onImageDataUpdate(),
+							);
+							return {
+								data: wrapper,
+								element: preview,
+							};
+						});
+					}),
+				)
+			).flat();
 
 			this.images.set(previews);
 		});
@@ -185,7 +189,11 @@ export default class InsertImageWidget extends BaseWidget {
 		actionButtonRow.replaceChildren(this.submitButton);
 
 		container.replaceChildren(
-			chooseImageRow, altTextRow, this.imagesPreview.container, this.statusView, actionButtonRow
+			chooseImageRow,
+			altTextRow,
+			this.imagesPreview.container,
+			this.statusView,
+			actionButtonRow,
 		);
 
 		dropdown.replaceChildren(container);
@@ -251,9 +259,9 @@ export default class InsertImageWidget extends BaseWidget {
 		} else if (currentImage?.isChanged()) {
 			this.statusView.appendChild(resetSizeButton);
 		} else {
-			const hasLargeOrChangedImages = this.images.get().some(
-				image => image.data?.isChanged() || image.data?.isLarge()
-			);
+			const hasLargeOrChangedImages = this.images
+				.get()
+				.some((image) => image.data?.isChanged() || image.data?.isLarge());
 			if (hasLargeOrChangedImages) {
 				// Still show the button -- prevents the layout from readjusting while
 				// scrolling through the image list
@@ -275,24 +283,22 @@ export default class InsertImageWidget extends BaseWidget {
 		resetInputs();
 
 		const selectionTools = this.editor.toolController.getMatchingTools(SelectionTool);
-		const selectedObjects = selectionTools.map(tool => tool.getSelectedObjects()).flat();
+		const selectedObjects = selectionTools.map((tool) => tool.getSelectedObjects()).flat();
 
 		// Check: Is there a selected image that can be edited?
-		let editingImage: ImageComponent|null = null;
+		let editingImage: ImageComponent | null = null;
 		if (selectedObjects.length === 1 && selectedObjects[0] instanceof ImageComponent) {
 			editingImage = selectedObjects[0];
 
 			const image = new Image();
-			const imageWrapper = ImageWrapper.fromSrcAndPreview(
-				editingImage.getURL(),
-				image,
-				() => this.onImageDataUpdate(),
+			const imageWrapper = ImageWrapper.fromSrcAndPreview(editingImage.getURL(), image, () =>
+				this.onImageDataUpdate(),
 			);
 			imageWrapper.setAltText(editingImage.getAltText() ?? '');
 			this.images.set([{ data: imageWrapper, element: image }]);
 		} else if (selectedObjects.length > 0) {
 			// If not, clear the selection.
-			selectionTools.forEach(tool => tool.clearSelection());
+			selectionTools.forEach((tool) => tool.clearSelection());
 		}
 
 		// Show the submit button only when there is data to submit.
@@ -341,12 +347,14 @@ export default class InsertImageWidget extends BaseWidget {
 
 			if (newComponents.length) {
 				if (!fullBBox) {
-					throw new Error('Logic error: Full bounding box must be calculated when components are to be added.');
+					throw new Error(
+						'Logic error: Full bounding box must be calculated when components are to be added.',
+					);
 				}
 				this.hideDialog();
 
 				if (editingImage) {
-					const eraseCommand = new Erase([ editingImage ]);
+					const eraseCommand = new Erase([editingImage]);
 
 					// Try to preserve the original width
 					const originalTransform = editingImage.getTransformation();
@@ -364,10 +372,7 @@ export default class InsertImageWidget extends BaseWidget {
 						);
 					}
 
-					this.editor.dispatch(uniteCommands([
-						...commands,
-						eraseCommand,
-					]));
+					this.editor.dispatch(uniteCommands([...commands, eraseCommand]));
 
 					selectionTools[0]?.setSelection(newComponents);
 				} else {

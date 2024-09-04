@@ -10,7 +10,11 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 	const overlay = document.createElement('div');
 	const { remove: removeOverlay } = editor.createHTMLOverlay(overlay);
 
-	overlay.classList.add('dialog-container', 'message-dialog-container', ...(options.classNames ?? []));
+	overlay.classList.add(
+		'dialog-container',
+		'message-dialog-container',
+		...(options.classNames ?? []),
+	);
 	const dialog = document.createElement('dialog');
 
 	const heading = document.createElement('h1');
@@ -25,7 +29,7 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 	contentWrapper.classList.add('content');
 
 	// Allow scrolling in the scrollable container -- don't forward wheel events.
-	contentWrapper.onwheel = evt => evt.stopPropagation();
+	contentWrapper.onwheel = (evt) => evt.stopPropagation();
 
 	dialog.replaceChildren(heading, contentWrapper, closeButton);
 	overlay.replaceChildren(dialog);
@@ -38,7 +42,7 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 		dialog.close();
 	};
 	const addCloseListeners = () => {
-		dialog.addEventListener('pointerdown', event => {
+		dialog.addEventListener('pointerdown', (event) => {
 			if (event.target === dialog) {
 				void closeDialog();
 			}

@@ -1,4 +1,11 @@
-import { BackgroundComponent, BaseTool, InputEvtType, RenderingMode, SelectionTool, sendPenEvent } from './lib';
+import {
+	BackgroundComponent,
+	BaseTool,
+	InputEvtType,
+	RenderingMode,
+	SelectionTool,
+	sendPenEvent,
+} from './lib';
 import { Color4, Point2, Vec2 } from '@js-draw/math';
 import Editor from './Editor';
 import createEditor from './testing/createEditor';
@@ -22,13 +29,13 @@ describe('Editor', () => {
 
 				public override onKeyPress = keyPressMock;
 				public override onKeyUp = keyReleaseMock;
-			})()
+			})(),
 		]);
 
 		inputArea.focus();
 
 		// Sends a keyboard event to the editor
-		const dispatchKeyEvent = (kind: 'keydown'|'keyup', code: string, key: string) => {
+		const dispatchKeyEvent = (kind: 'keydown' | 'keyup', code: string, key: string) => {
 			const event = new KeyboardEvent(kind, {
 				bubbles: true,
 				key,
@@ -79,7 +86,7 @@ describe('Editor', () => {
 		expect(keyReleaseMock).toHaveBeenCalledTimes(1);
 		expect(keyReleaseMock).toHaveBeenLastCalledWith({
 			...keyAEvent,
-			kind: InputEvtType.KeyUpEvent
+			kind: InputEvtType.KeyUpEvent,
 		});
 
 		// Defocus the input --- this should fire a key up event for the keys still down
@@ -96,16 +103,20 @@ describe('Editor', () => {
 		const secondToLastCall = keyReleaseMock.mock.calls[keyReleaseMock.mock.calls.length - 2];
 		const lastCall = keyReleaseMock.mock.lastCall;
 
-		expect(secondToLastCall).toMatchObject([{
-			kind: InputEvtType.KeyUpEvent,
-			key: 'b',
-			code: 'KeyB',
-		}]);
-		expect(lastCall).toMatchObject([{
-			kind: InputEvtType.KeyUpEvent,
-			key: 'f',
-			code: 'KeyF',
-		}]);
+		expect(secondToLastCall).toMatchObject([
+			{
+				kind: InputEvtType.KeyUpEvent,
+				key: 'b',
+				code: 'KeyB',
+			},
+		]);
+		expect(lastCall).toMatchObject([
+			{
+				kind: InputEvtType.KeyUpEvent,
+				key: 'f',
+				code: 'KeyF',
+			},
+		]);
 	});
 
 	it('should throw if given minimum zoom greater than maximum zoom', () => {
@@ -227,16 +238,21 @@ describe('Editor', () => {
 		const testElement = document.createElement('div');
 		const eventHandler = editor.handlePointerEventsExceptClicksFrom(testElement);
 
-		const dispatchEventAt = (eventName: 'pointerdown'|'pointermove'|'pointerup', pos: Point2) => {
-			testElement.dispatchEvent(new PointerEvent(eventName, {
-				clientX: pos.x,
-				clientY: pos.y,
-				screenX: pos.x,
-				screenY: pos.y,
-				pointerId: 0,
-				pointerType: 'mouse',
-				isPrimary: true,
-			}));
+		const dispatchEventAt = (
+			eventName: 'pointerdown' | 'pointermove' | 'pointerup',
+			pos: Point2,
+		) => {
+			testElement.dispatchEvent(
+				new PointerEvent(eventName, {
+					clientX: pos.x,
+					clientY: pos.y,
+					screenX: pos.x,
+					screenY: pos.y,
+					pointerId: 0,
+					pointerType: 'mouse',
+					isPrimary: true,
+				}),
+			);
 		};
 
 		// An actual click
@@ -258,7 +274,7 @@ describe('Editor', () => {
 		for (let i = 0; i <= maxSteps; i += 1) {
 			await jest.advanceTimersByTimeAsync(10);
 
-			const angle = i / maxSteps * Math.PI * 2;
+			const angle = (i / maxSteps) * Math.PI * 2;
 			const circlePoint = Vec2.of(Math.cos(angle) * circleRadius, Math.sin(angle) * circleRadius);
 			dispatchEventAt('pointermove', circlePoint);
 		}
@@ -294,7 +310,8 @@ describe('Editor', () => {
 				expectedStyle: { color: Color4.transparent, type: BackgroundType.Grid, autoresize: true },
 				expectedBackgroundCount: 1,
 			},
-		])('should support setting the background style of an image with no default background (style: %j)',
+		])(
+			'should support setting the background style of an image with no default background (style: %j)',
 			async ({ style, expectedBackgroundCount, expectedStyle }) => {
 				const editor = createEditor();
 				expect(editor.estimateBackgroundColor()).objEq(Color4.transparent);
@@ -313,7 +330,7 @@ describe('Editor', () => {
 				// Should also be possible to remove a background with .setBackgroundStyle
 				editor.dispatch(editor.setBackgroundStyle({ type: BackgroundType.None }));
 				expect(editor.image.getBackgroundComponents()).toHaveLength(0);
-			}
+			},
 		);
 
 		it('setting autoresize: false on an empty image should not result in a 0x0 background', async () => {

@@ -3,15 +3,12 @@ import Editor from '../../../Editor';
 import ClipboardHandler from '../../../util/ClipboardHandler';
 
 const makeClipboardErrorHandlers = (editor: Editor) => {
-
-	const makeErrorDialog = (error: Error|unknown) => {
+	const makeErrorDialog = (error: Error | unknown) => {
 		const dialog = makeMessageDialog(editor, {
 			title: editor.localization.copyPasteError__heading,
-			classNames: ['clipboard-error-dialog']
+			classNames: ['clipboard-error-dialog'],
 		});
-		dialog.appendChild(
-			document.createTextNode(editor.localization.copyPasteError__description)
-		);
+		dialog.appendChild(document.createTextNode(editor.localization.copyPasteError__description));
 
 		const errorDetailsElement = document.createElement('details');
 		const errorDetailsSummary = document.createElement('summary');
@@ -25,10 +22,10 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 	};
 
 	return {
-		async onCopyError(error: Error|unknown) {
+		async onCopyError(error: Error | unknown) {
 			makeErrorDialog(error);
 		},
-		onPasteError(error: Error|unknown) {
+		onPasteError(error: Error | unknown) {
 			const dialog = makeErrorDialog(error);
 
 			const textboxLabel = document.createElement('label');
@@ -37,7 +34,7 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 			textboxLabel.appendChild(pasteTextbox);
 
 			const retryHandler = new ClipboardHandler(editor);
-			const handlePaste = (event: ClipboardEvent|DragEvent) => {
+			const handlePaste = (event: ClipboardEvent | DragEvent) => {
 				event.preventDefault();
 
 				// Use .then to ensure that .paste runs within the event handler.

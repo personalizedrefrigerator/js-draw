@@ -1,19 +1,19 @@
-
 // Converts a response to the GitHub translation form to
 // possible contents of a TypeScript file.
 
 import {
-	createInterface as createReadlineInterface, Interface as ReadlineInterface
+	createInterface as createReadlineInterface,
+	Interface as ReadlineInterface,
 } from 'node:readline/promises';
 import { stdin, stderr } from 'node:process';
 
 const readAllInput = (inputReader: ReadlineInterface): Promise<string> => {
 	const lines: string[] = [];
-	inputReader.on('line', line => {
+	inputReader.on('line', (line) => {
 		lines.push(line);
 	});
 
-	return new Promise(resolve => {
+	return new Promise((resolve) => {
 		inputReader.on('close', () => {
 			resolve(lines.join('\n'));
 		});
@@ -28,7 +28,7 @@ const main = async () => {
 
 	const data: Record<string, string> = {};
 
-	let nextKey: string|null = null;
+	let nextKey: string | null = null;
 	for (const line of input.split('\n')) {
 		if (!nextKey) {
 			nextKey = line;
@@ -65,8 +65,8 @@ const main = async () => {
 	}
 
 	const tsFileData = [
-		'import { defaultEditorLocalization, EditorLocalization } from \'../localization\';',
-		'throw new Error(\'This file needs to be manually verified -- translations can contain JavaScript\');',
+		"import { defaultEditorLocalization, EditorLocalization } from '../localization';",
+		"throw new Error('This file needs to be manually verified -- translations can contain JavaScript');",
 		`// ${lang} localization`,
 		'const localization: EditorLocalization = {',
 		'\t...defaultEditorLocalization,',

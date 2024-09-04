@@ -26,33 +26,36 @@ describe('PenToolWidget', () => {
 			shouldFind: ['Line', 'Outlined circle', 'Polyline'],
 			shouldNotFind: ['Flat'],
 		},
-	])('should support hiding pen types with filterPenTypes (case %#)', ({ filter, shouldFind, shouldNotFind }) => {
-		const editor = createEditor({
-			pens: {
-				filterPenTypes: filter
-			},
-			localization: getLocalizationTable(['en']),
-		});
-		const toolbar = makeDropdownToolbar(editor);
+	])(
+		'should support hiding pen types with filterPenTypes (case %#)',
+		({ filter, shouldFind, shouldNotFind }) => {
+			const editor = createEditor({
+				pens: {
+					filterPenTypes: filter,
+				},
+				localization: getLocalizationTable(['en']),
+			});
+			const toolbar = makeDropdownToolbar(editor);
 
-		const pen = editor.toolController.getMatchingTools(PenTool)[0];
-		const toolWidget = new TestPenToolWidget(editor, pen);
-		toolbar.addWidget(toolWidget);
+			const pen = editor.toolController.getMatchingTools(PenTool)[0];
+			const toolWidget = new TestPenToolWidget(editor, pen);
+			toolbar.addWidget(toolWidget);
 
-		toolWidget.toggleDropdownVisible();
-		expect(toolWidget.getDropdownVisible()).toBe(true);
+			toolWidget.toggleDropdownVisible();
+			expect(toolWidget.getDropdownVisible()).toBe(true);
 
-		const opionExists = (name: string) => {
-			return !!document.querySelector(`.toolbar-grid-selector *[title=${JSON.stringify(name)}]`);
-		};
+			const opionExists = (name: string) => {
+				return !!document.querySelector(`.toolbar-grid-selector *[title=${JSON.stringify(name)}]`);
+			};
 
-		for (const expected of shouldFind) {
-			expect(opionExists(expected)).toBe(true);
-		}
-		for (const unexpected of shouldNotFind) {
-			expect(opionExists(unexpected)).toBe(false);
-		}
+			for (const expected of shouldFind) {
+				expect(opionExists(expected)).toBe(true);
+			}
+			for (const unexpected of shouldNotFind) {
+				expect(opionExists(unexpected)).toBe(false);
+			}
 
-		editor.remove();
-	});
+			editor.remove();
+		},
+	);
 });

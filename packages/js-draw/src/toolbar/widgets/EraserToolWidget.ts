@@ -9,16 +9,16 @@ import { SavedToolbuttonState } from './BaseWidget';
 import makeThicknessSlider from './components/makeThicknessSlider';
 
 export default class EraserToolWidget extends BaseToolWidget {
-	private updateInputs: ()=>void = () => {};
+	private updateInputs: () => void = () => {};
 
 	public constructor(
 		editor: Editor,
 		private tool: Eraser,
-		localizationTable?: ToolbarLocalization
+		localizationTable?: ToolbarLocalization,
 	) {
 		super(editor, tool, 'eraser-tool-widget', localizationTable);
 
-		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
+		this.editor.notifier.on(EditorEventType.ToolUpdated, (toolEvt) => {
 			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === this.tool) {
 				this.updateInputs();
 				this.updateIcon();
@@ -55,14 +55,19 @@ export default class EraserToolWidget extends BaseToolWidget {
 		checkboxElement.type = 'checkbox';
 
 		checkboxElement.oninput = () => {
-			this.tool.getModeValue().set(checkboxElement.checked ? EraserMode.FullStroke : EraserMode.PartialStroke);
+			this.tool
+				.getModeValue()
+				.set(checkboxElement.checked ? EraserMode.FullStroke : EraserMode.PartialStroke);
 		};
 		const updateValue = () => {
 			checkboxElement.checked = this.tool.getModeValue().get() === EraserMode.FullStroke;
 		};
 
 		container.replaceChildren(labelElement, checkboxElement);
-		helpDisplay?.registerTextHelpForElement(container, this.localizationTable.eraserDropdown__fullStrokeEraserHelpText);
+		helpDisplay?.registerTextHelpForElement(
+			container,
+			this.localizationTable.eraserDropdown__fullStrokeEraserHelpText,
+		);
 
 		return {
 			addTo: (parent: HTMLElement) => {
@@ -75,9 +80,12 @@ export default class EraserToolWidget extends BaseToolWidget {
 	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		const container = document.createElement('div');
 
-		container.classList.add(`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`);
+		container.classList.add(
+			`${toolbarCSSPrefix}spacedList`,
+			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
+		);
 
-		const thicknessSlider = makeThicknessSlider(this.editor, thickness => {
+		const thicknessSlider = makeThicknessSlider(this.editor, (thickness) => {
 			this.tool.setThickness(thickness);
 		});
 		thicknessSlider.setBounds(10, 55);
@@ -118,7 +126,7 @@ export default class EraserToolWidget extends BaseToolWidget {
 
 			if (typeof parsedThickness !== 'number' || !isFinite(parsedThickness)) {
 				throw new Error(
-					`Deserializing property ${parsedThickness} is not a number or is not finite.`
+					`Deserializing property ${parsedThickness} is not a number or is not finite.`,
 				);
 			}
 

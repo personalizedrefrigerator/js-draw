@@ -8,9 +8,9 @@ import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Viewport from '../Viewport';
 
-export type LoadSaveData = (string[]|Record<symbol, string|number>);
+export type LoadSaveData = string[] | Record<symbol, string | number>;
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
-export type DeserializeCallback = (data: string)=>AbstractComponent;
+export type DeserializeCallback = (data: string) => AbstractComponent;
 type ComponentId = string;
 
 export enum ComponentSizingMode {
@@ -68,7 +68,7 @@ export default abstract class AbstractComponent {
 		private readonly componentKind: string,
 		initialZIndex?: number,
 	) {
-		this.lastChangedTime = (new Date()).getTime();
+		this.lastChangedTime = new Date().getTime();
 
 		if (initialZIndex !== undefined) {
 			this.zIndex = initialZIndex;
@@ -80,7 +80,9 @@ export default abstract class AbstractComponent {
 		this.id = `${new Date().getTime()}-${Math.random()}`;
 
 		if (AbstractComponent.deserializationCallbacks[componentKind] === undefined) {
-			throw new Error(`Component ${componentKind} has not been registered using AbstractComponent.registerComponent`);
+			throw new Error(
+				`Component ${componentKind} has not been registered using AbstractComponent.registerComponent`,
+			);
 		}
 	}
 
@@ -90,15 +92,12 @@ export default abstract class AbstractComponent {
 		return this.id;
 	}
 
-	private static deserializationCallbacks: Record<ComponentId, DeserializeCallback|null> = {};
+	private static deserializationCallbacks: Record<ComponentId, DeserializeCallback | null> = {};
 
 	// Store the deserialization callback (or lack of it) for [componentKind].
 	// If components are registered multiple times (as may be done in automated tests),
 	// the most recent deserialization callback is used.
-	public static registerComponent(
-		componentKind: string,
-		deserialize: DeserializeCallback|null,
-	) {
+	public static registerComponent(componentKind: string, deserialize: DeserializeCallback | null) {
 		this.deserializationCallbacks[componentKind] = deserialize ?? null;
 	}
 
@@ -166,8 +165,8 @@ export default abstract class AbstractComponent {
 	}
 
 	/** Called when this component is added to the given image. */
-	public onAddToImage(_image: EditorImage): void { }
-	public onRemoveFromImage(): void { }
+	public onAddToImage(_image: EditorImage): void {}
+	public onRemoveFromImage(): void {}
 
 	/**
 	 * Renders this component onto the given `canvas`.
@@ -204,7 +203,7 @@ export default abstract class AbstractComponent {
 
 		// Otherwise check if it intersects one of the rectangle's edges.
 		const testLines = rect.getEdges();
-		return testLines.some(edge => this.intersects(edge));
+		return testLines.some((edge) => this.intersects(edge));
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
@@ -241,7 +240,12 @@ export default abstract class AbstractComponent {
 
 	// Returns a command that updates this component's z-index.
 	public setZIndex(newZIndex: number): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex);
+		return new AbstractComponent.TransformElementCommand(
+			Mat33.identity,
+			this.getId(),
+			this,
+			newZIndex,
+		);
 	}
 
 	/**
@@ -252,10 +256,16 @@ export default abstract class AbstractComponent {
 	 *                         this command.
 	 */
 	public setZIndexAndTransformBy(
-		affineTransfm: Mat33, newZIndex: number, originalZIndex?: number
+		affineTransfm: Mat33,
+		newZIndex: number,
+		originalZIndex?: number,
 	): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(
-			affineTransfm, this.getId(), this, newZIndex, originalZIndex,
+			affineTransfm,
+			this.getId(),
+			this,
+			newZIndex,
+			originalZIndex,
 		);
 	}
 
@@ -311,7 +321,7 @@ export default abstract class AbstractComponent {
 
 			this.component.applyTransformation(newTransfm);
 			this.component.zIndex = targetZIndex;
-			this.component.lastChangedTime = (new Date()).getTime();
+			this.component.lastChangedTime = new Date().getTime();
 
 			// Ensure that new components are automatically drawn above the current component.
 			if (targetZIndex >= AbstractComponent.zIndexCounter) {
@@ -343,20 +353,23 @@ export default abstract class AbstractComponent {
 		}
 
 		static {
-			SerializableCommand.register(AbstractComponent.transformElementCommandId, (json: any, editor: Editor) => {
-				const elem = editor.image.lookupElement(json.id) ?? undefined;
-				const transform = new Mat33(...(json.transfm as Mat33Array));
-				const targetZIndex = json.targetZIndex;
-				const origZIndex = json.origZIndex ?? undefined;
+			SerializableCommand.register(
+				AbstractComponent.transformElementCommandId,
+				(json: any, editor: Editor) => {
+					const elem = editor.image.lookupElement(json.id) ?? undefined;
+					const transform = new Mat33(...(json.transfm as Mat33Array));
+					const targetZIndex = json.targetZIndex;
+					const origZIndex = json.origZIndex ?? undefined;
 
-				return new AbstractComponent.TransformElementCommand(
-					transform,
-					json.id,
-					elem,
-					targetZIndex,
-					origZIndex,
-				);
-			});
+					return new AbstractComponent.TransformElementCommand(
+						transform,
+						json.id,
+						elem,
+						targetZIndex,
+						origZIndex,
+					);
+				},
+			);
 		}
 
 		protected serializeToJSON() {
@@ -404,7 +417,7 @@ export default abstract class AbstractComponent {
 	public withRegionErased?(shape: Path, viewport: Viewport): AbstractComponent[];
 
 	// Return null iff this object cannot be safely serialized/deserialized.
-	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
+	protected abstract serializeToJSON(): any[] | Record<string, any> | number | string | null;
 
 	// Convert the component to an object that can be passed to
 	// `JSON.stringify`.
@@ -429,7 +442,7 @@ export default abstract class AbstractComponent {
 
 	// Returns true if `data` is not deserializable. May return false even if [data]
 	// is not deserializable.
-	private static isNotDeserializable(json: any|string) {
+	private static isNotDeserializable(json: any | string) {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}
@@ -450,7 +463,7 @@ export default abstract class AbstractComponent {
 	}
 
 	// Convert a string or an object produced by `JSON.parse` into an `AbstractComponent`.
-	public static deserialize(json: string|any): AbstractComponent {
+	public static deserialize(json: string | any): AbstractComponent {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}
@@ -467,7 +480,8 @@ export default abstract class AbstractComponent {
 
 			// Ensure that new components will be added on top.
 			AbstractComponent.zIndexCounter = Math.max(
-				AbstractComponent.zIndexCounter, instance.zIndex + 1
+				AbstractComponent.zIndexCounter,
+				instance.zIndex + 1,
 			);
 		}
 

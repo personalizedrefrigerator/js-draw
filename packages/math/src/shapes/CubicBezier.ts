@@ -23,12 +23,12 @@ class CubicBezier extends BezierJSWrapper {
 	}
 
 	public override getPoints() {
-		return [ this.p0, this.p1, this.p2, this.p3 ];
+		return [this.p0, this.p1, this.p2, this.p3];
 	}
 
 	/** Returns an overestimate of this shape's bounding box. */
 	public override getLooseBoundingBox(): Rect2 {
-		return Rect2.bboxOf([ this.p0, this.p1, this.p2, this.p3 ]);
+		return Rect2.bboxOf([this.p0, this.p1, this.p2, this.p3]);
 	}
 }
 

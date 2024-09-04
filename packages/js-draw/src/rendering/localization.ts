@@ -1,4 +1,3 @@
-
 export interface TextRendererLocalization {
 	pathNodeCount(pathCount: number): string;
 	textNodeCount(nodeCount: number): string;

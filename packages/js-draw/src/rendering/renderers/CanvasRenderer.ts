@@ -36,9 +36,9 @@ import RenderablePathSpec, { visualEquivalent } from '../RenderablePathSpec';
  * ```
  */
 export default class CanvasRenderer extends AbstractRenderer {
-	private ignoreObjectsAboveLevel: number|null = null;
+	private ignoreObjectsAboveLevel: number | null = null;
 	private ignoringObject: boolean = false;
-	private currentObjectBBox: Rect2|null = null;
+	private currentObjectBBox: Rect2 | null = null;
 
 	// Minimum square distance of a control point from the line between the end points
 	// for the curve not to be drawn as a line.
@@ -56,7 +56,10 @@ export default class CanvasRenderer extends AbstractRenderer {
 	 * The `viewport` is used to determine the translation/rotation/scaling of the content
 	 * to draw.
 	 */
-	public constructor(private ctx: CanvasRenderingContext2D, viewport: Viewport) {
+	public constructor(
+		private ctx: CanvasRenderingContext2D,
+		viewport: Viewport,
+	) {
 		super(viewport);
 		this.setDraftMode(false);
 	}
@@ -68,9 +71,12 @@ export default class CanvasRenderer extends AbstractRenderer {
 		// ⎢ b d f ⎥ transforms content drawn to [ctx].
 		// ⎣ 0 0 1 ⎦
 		this.ctx.transform(
-			transformBy.a1, transformBy.b1, // a, b
-			transformBy.a2, transformBy.b2, // c, d
-			transformBy.a3, transformBy.b3, // e, f
+			transformBy.a1,
+			transformBy.b1, // a, b
+			transformBy.a2,
+			transformBy.b2, // c, d
+			transformBy.a3,
+			transformBy.b3, // e, f
 		);
 	}
 
@@ -103,10 +109,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	public displaySize(): Vec2 {
-		return Vec2.of(
-			this.ctx.canvas.clientWidth,
-			this.ctx.canvas.clientHeight,
-		);
+		return Vec2.of(this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
 	}
 
 	public clear() {
@@ -166,8 +169,10 @@ export default class CanvasRenderer extends AbstractRenderer {
 		// Approximate the curve if small enough.
 		const delta1 = p2.minus(p1);
 		const delta2 = p3.minus(p2);
-		if (delta1.magnitudeSquared() < this.minSquareCurveApproxDist
-			&& delta2.magnitudeSquared() < this.minSquareCurveApproxDist) {
+		if (
+			delta1.magnitudeSquared() < this.minSquareCurveApproxDist &&
+			delta2.magnitudeSquared() < this.minSquareCurveApproxDist
+		) {
 			this.ctx.lineTo(p3.x, p3.y);
 		} else {
 			this.ctx.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
@@ -183,9 +188,7 @@ export default class CanvasRenderer extends AbstractRenderer {
 		if (delta.magnitudeSquared() < this.minSquareCurveApproxDist) {
 			this.ctx.lineTo(endPoint.x, endPoint.y);
 		} else {
-			this.ctx.quadraticCurveTo(
-				controlPoint.x, controlPoint.y, endPoint.x, endPoint.y
-			);
+			this.ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, endPoint.x, endPoint.y);
 		}
 	}
 
@@ -275,7 +278,10 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 
 		// If exiting an object with a too-small-to-draw bounding box,
-		if (this.ignoreObjectsAboveLevel !== null && this.getNestingLevel() <= this.ignoreObjectsAboveLevel) {
+		if (
+			this.ignoreObjectsAboveLevel !== null &&
+			this.getNestingLevel() <= this.ignoreObjectsAboveLevel
+		) {
 			this.ignoreObjectsAboveLevel = null;
 			this.ignoringObject = false;
 		}
@@ -293,7 +299,8 @@ export default class CanvasRenderer extends AbstractRenderer {
 			this.ctx.fillStyle = Color4.ofRGBA(
 				0.5 + Math.sin(i) / 2,
 				1.0,
-				0.5 + Math.cos(i * 0.2) / 4, 0.5
+				0.5 + Math.cos(i * 0.2) / 4,
+				0.5,
 			).toHexString();
 			this.ctx.lineWidth = 2;
 			this.ctx.fill();
@@ -313,15 +320,20 @@ export default class CanvasRenderer extends AbstractRenderer {
 		const diagonal = rect.size.times(this.getSizeOfCanvasPixelOnScreen());
 
 		const bothDimenMinSize = this.minRenderSizeBothDimens;
-		const bothTooSmall = Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;
+		const bothTooSmall =
+			Math.abs(diagonal.x) < bothDimenMinSize && Math.abs(diagonal.y) < bothDimenMinSize;
 		const anyDimenMinSize = this.minRenderSizeAnyDimen;
-		const anyTooSmall = Math.abs(diagonal.x) < anyDimenMinSize || Math.abs(diagonal.y) < anyDimenMinSize;
+		const anyTooSmall =
+			Math.abs(diagonal.x) < anyDimenMinSize || Math.abs(diagonal.y) < anyDimenMinSize;
 
 		return bothTooSmall || anyTooSmall;
 	}
 
 	// @internal
-	public static fromViewport(exportViewport: Viewport, options: { canvasSize?: Vec2, maxCanvasDimen?: number } = {}) {
+	public static fromViewport(
+		exportViewport: Viewport,
+		options: { canvasSize?: Vec2; maxCanvasDimen?: number } = {},
+	) {
 		const canvas = document.createElement('canvas');
 
 		const exportRectSize = exportViewport.getScreenRectSize();

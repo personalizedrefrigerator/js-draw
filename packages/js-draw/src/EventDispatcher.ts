@@ -1,14 +1,13 @@
-
 // Code shared with Joplin (from when it was MIT licensed)
 // (js-draw was originally intended to be part of Joplin).
 
 // @see EventDispatcher
-type Listener<Value> = (data: Value)=> void;
+type Listener<Value> = (data: Value) => void;
 
-type CallbackHandler<EventType> = (data: EventType)=> void;
+type CallbackHandler<EventType> = (data: EventType) => void;
 
 export interface DispatcherEventListener {
-	remove: ()=>void;
+	remove: () => void;
 }
 
 /**
@@ -27,7 +26,10 @@ export interface DispatcherEventListener {
  * ```
  *
  */
-export default class EventDispatcher<EventKeyType extends string|symbol|number, EventMessageType> {
+export default class EventDispatcher<
+	EventKeyType extends string | symbol | number,
+	EventMessageType,
+> {
 	private listeners: Partial<Record<EventKeyType, Array<Listener<EventMessageType>>>>;
 	public constructor() {
 		this.listeners = {};
@@ -43,7 +45,10 @@ export default class EventDispatcher<EventKeyType extends string|symbol|number, 
 		}
 	}
 
-	public on(eventName: EventKeyType, callback: CallbackHandler<EventMessageType>): DispatcherEventListener {
+	public on(
+		eventName: EventKeyType,
+		callback: CallbackHandler<EventMessageType>,
+	): DispatcherEventListener {
 		if (!this.listeners[eventName]) this.listeners[eventName] = [];
 		this.listeners[eventName]!.push(callback);
 
@@ -66,8 +71,6 @@ export default class EventDispatcher<EventKeyType extends string|symbol|number, 
 		// Replace the current list of listeners with a new, shortened list.
 		// This allows any iterators over this.listeners to continue iterating
 		// without skipping elements.
-		this.listeners[eventName] = listeners.filter(
-			otherCallback => otherCallback !== callback
-		);
+		this.listeners[eventName] = listeners.filter((otherCallback) => otherCallback !== callback);
 	}
 }

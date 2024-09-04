@@ -1,6 +1,5 @@
 import { numberRegex } from './constants';
 
-
 /**
  * Returns the length of `numberAsString` after a decimal point.
  *
@@ -16,7 +15,7 @@ export const getLenAfterDecimal = (numberAsString: string) => {
 		// like NaN or Infinity)
 		if (numberAsString.search(/[eE]/) !== -1 || /^[a-zA-Z]+$/.exec(numberAsString)) {
 			return -1;
-		// Or it has no decimal point
+			// Or it has no decimal point
 		} else {
 			return 0;
 		}

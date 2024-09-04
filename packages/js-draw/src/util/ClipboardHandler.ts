@@ -1,4 +1,3 @@
-
 import { Editor } from '../Editor';
 import { InputEvtType } from '../inputEvents';
 import fileToBase64Url from './fileToBase64Url';
@@ -8,8 +7,8 @@ const isTextMimeType = (mime: string) =>
 	mime.endsWith('+xml') || mime.startsWith('text/');
 
 interface Callbacks {
-	onPasteError(error: Error|unknown): void;
-	onCopyError(error: Error|unknown): void;
+	onPasteError(error: Error | unknown): void;
+	onCopyError(error: Error | unknown): void;
 }
 
 /**
@@ -22,9 +21,7 @@ export default class ClipboardHandler {
 	public constructor(
 		private editor: Editor,
 		private callbacks?: Callbacks,
-	) {
-	}
-
+	) {}
 
 	/**
 	 * Pastes data from the clipboard into the editor associated with
@@ -34,7 +31,7 @@ export default class ClipboardHandler {
 	 * 				`navigator.clipboard` will be used instead.
 	 * @returns true if the paste event was handled by the editor.
 	 */
-	public paste(event?: DragEvent|ClipboardEvent) {
+	public paste(event?: DragEvent | ClipboardEvent) {
 		const onError = (error: unknown) => {
 			if (this.callbacks?.onPasteError) {
 				this.callbacks.onPasteError(error);
@@ -55,28 +52,26 @@ export default class ClipboardHandler {
 		}
 	}
 
-	private async pasteInternal(event?: DragEvent|ClipboardEvent) {
+	private async pasteInternal(event?: DragEvent | ClipboardEvent) {
 		const editor = this.editor;
 
-		const clipboardData: DataTransfer|null = (event as any)?.dataTransfer ?? (event as any)?.clipboardData ?? null;
+		const clipboardData: DataTransfer | null =
+			(event as any)?.dataTransfer ?? (event as any)?.clipboardData ?? null;
 		const hasEvent = !!clipboardData;
 
-		const sendPasteEvent = (mime: string, data: string|null) => {
-			return data && editor.toolController.dispatchInputEvent({
-				kind: InputEvtType.PasteEvent,
-				mime,
-				data,
-			});
+		const sendPasteEvent = (mime: string, data: string | null) => {
+			return (
+				data &&
+				editor.toolController.dispatchInputEvent({
+					kind: InputEvtType.PasteEvent,
+					mime,
+					data,
+				})
+			);
 		};
 
 		// Listed in order of precedence
-		const supportedMIMEs = [
-			'image/svg+xml',
-			'text/html',
-			'image/png',
-			'image/jpeg',
-			'text/plain',
-		];
+		const supportedMIMEs = ['image/svg+xml', 'text/html', 'image/png', 'image/jpeg', 'text/plain'];
 
 		let files: Blob[] = [];
 		const textData: Map<string, string> = new Map<string, string>();
@@ -164,7 +159,7 @@ export default class ClipboardHandler {
 	 * images.
 	 */
 	public copy(event?: ClipboardEvent) {
-		const onError = (error: Error|unknown) => {
+		const onError = (error: Error | unknown) => {
 			if (this.callbacks?.onCopyError) {
 				this.callbacks.onCopyError(error);
 				return Promise.resolve();
@@ -182,24 +177,28 @@ export default class ClipboardHandler {
 		}
 	}
 
-	private copyInternal(event: ClipboardEvent|undefined) {
-		const mimeToData: Record<string, Promise<Blob>|string> = Object.create(null);
+	private copyInternal(event: ClipboardEvent | undefined) {
+		const mimeToData: Record<string, Promise<Blob> | string> = Object.create(null);
 
-		if (this.editor.toolController.dispatchInputEvent({
-			kind: InputEvtType.CopyEvent,
-			setData: (mime, data) => {
-				mimeToData[mime] = data;
-			},
-		})) {
+		if (
+			this.editor.toolController.dispatchInputEvent({
+				kind: InputEvtType.CopyEvent,
+				setData: (mime, data) => {
+					mimeToData[mime] = data;
+				},
+			})
+		) {
 			event?.preventDefault();
 		}
 
 		const mimeTypes = Object.keys(mimeToData);
-		const hasNonTextMimeTypes = mimeTypes.some(mime => !isTextMimeType(mime));
+		const hasNonTextMimeTypes = mimeTypes.some((mime) => !isTextMimeType(mime));
 
 		const copyToEvent = (reason?: unknown) => {
 			if (!event) {
-				throw new Error(`Unable to copy -- no event provided${reason ? `. Original error: ${reason}` : ''}`);
+				throw new Error(
+					`Unable to copy -- no event provided${reason ? `. Original error: ${reason}` : ''}`,
+				);
 			}
 
 			for (const key in mimeToData) {
@@ -211,7 +210,7 @@ export default class ClipboardHandler {
 		};
 
 		const copyToClipboardApi = () => {
-			const mappedMimeToData: Record<string, Blob|Promise<Blob>> = Object.create(null);
+			const mappedMimeToData: Record<string, Blob | Promise<Blob>> = Object.create(null);
 			const mimeMapping: Record<string, string> = {
 				// image/svg+xml is unsupported in Chrome.
 				'image/svg+xml': 'text/html',
@@ -220,25 +219,25 @@ export default class ClipboardHandler {
 				const data = mimeToData[key];
 				const mappedKey = mimeMapping[key] || key;
 				if (typeof data === 'string') {
-					mappedMimeToData[mappedKey] = new Blob([new TextEncoder().encode(data)], { type: mappedKey });
+					mappedMimeToData[mappedKey] = new Blob([new TextEncoder().encode(data)], {
+						type: mappedKey,
+					});
 				} else {
 					mappedMimeToData[mappedKey] = data;
 				}
 			}
-			return navigator.clipboard.write([ new ClipboardItem(mappedMimeToData) ]);
+			return navigator.clipboard.write([new ClipboardItem(mappedMimeToData)]);
 		};
 
-		const supportsClipboardApi = (
-			typeof ClipboardItem !== 'undefined'
-			&& typeof navigator?.clipboard?.write !== 'undefined'
-		);
+		const supportsClipboardApi =
+			typeof ClipboardItem !== 'undefined' && typeof navigator?.clipboard?.write !== 'undefined';
 		if (!this.#preferClipboardEvents && supportsClipboardApi && (hasNonTextMimeTypes || !event)) {
-			let clipboardApiPromise: Promise<void>|null = null;
+			let clipboardApiPromise: Promise<void> | null = null;
 
 			const fallBackToCopyEvent = (reason: unknown) => {
 				console.warn(
 					'Unable to copy to the clipboard API. Future calls to .copy will use ClipboardEvents if possible.',
-					reason
+					reason,
 				);
 				this.#preferClipboardEvents = true;
 

@@ -31,11 +31,10 @@ export default class UnknownSVGObject extends AbstractComponent {
 	}
 
 	public override intersects(lineSegment: LineSegment2): boolean {
-		return this.contentBBox.getEdges().some(edge => edge.intersection(lineSegment) !== null);
+		return this.contentBBox.getEdges().some((edge) => edge.intersection(lineSegment) !== null);
 	}
 
-	protected applyTransformation(_affineTransfm: Mat33): void {
-	}
+	protected applyTransformation(_affineTransfm: Mat33): void {}
 
 	public override isSelectable() {
 		return false;

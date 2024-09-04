@@ -1,10 +1,10 @@
 import tokenizeMarkdown, { MarkdownToken, MarkdownTokenType } from './tokenizeMarkdown';
 
 export enum RegionType {
-	Text='text',
-	Code='code',
-	Math='math',
-	Include='include',
+	Text = 'text',
+	Code = 'code',
+	Math = 'math',
+	Include = 'include',
 }
 
 interface LabeledRegion {
@@ -39,8 +39,10 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 		const nextIsNewline = i === tokens.length - 1 || tokens[i + 1].text.startsWith('\n');
 
 		return {
-			prevIsSpace, prevIsNewline,
-			nextIsSpace, nextIsNewline,
+			prevIsSpace,
+			prevIsNewline,
+			nextIsSpace,
+			nextIsNewline,
 		};
 	};
 
@@ -53,7 +55,7 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 	let currentInformation = getSpaceInformationAt(0);
 
 	const bufferText = () => {
-		return buffer.map(token => token.text).join('');
+		return buffer.map((token) => token.text).join('');
 	};
 
 	const finalizeRegion = () => {
@@ -69,7 +71,10 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 		// Assuming that the current region starts and ends with a delimiter token,
 		// returns the text between the delimiters.
 		const contentWithoutDelimiters = () => {
-			return buffer.slice(1, buffer.length - 1).map(token => token.text).join('');
+			return buffer
+				.slice(1, buffer.length - 1)
+				.map((token) => token.text)
+				.join('');
 		};
 
 		if (currentRegionType === RegionType.Text) {
@@ -82,8 +87,7 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 				start,
 				stop: start + text.length,
 			});
-		}
-		else if (currentRegionType === RegionType.Code || currentRegionType === RegionType.Math) {
+		} else if (currentRegionType === RegionType.Code || currentRegionType === RegionType.Math) {
 			const surroundedByNewlines =
 				currentInformation.nextIsNewline && currentStartInformation.prevIsNewline;
 
@@ -101,8 +105,7 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 				start,
 				stop: start + text.length,
 			});
-		}
-		else if (currentRegionType === RegionType.Include) {
+		} else if (currentRegionType === RegionType.Include) {
 			labeledRegions.push({
 				type: currentRegionType,
 				block: false,
@@ -112,8 +115,7 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 				start,
 				stop: start + text.length,
 			});
-		}
-		else {
+		} else {
 			const exhaustivenessCheck: never = currentRegionType;
 			return exhaustivenessCheck;
 		}
@@ -126,7 +128,7 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 
 		currentStartInformation = startInformation;
 		currentRegionType = type;
-		buffer = [ ];
+		buffer = [];
 	};
 
 	for (let i = 0; i < tokens.length; i++) {
@@ -158,11 +160,9 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 			}
 			// Text -> math
 			else if (
-				current.type === MarkdownTokenType.MathDelim
-				&& (
-					(prevIsSpace && !nextIsSpace && current.text === '$')
-					|| (prevIsNewline && current.text === '$$')
-				)
+				current.type === MarkdownTokenType.MathDelim &&
+				((prevIsSpace && !nextIsSpace && current.text === '$') ||
+					(prevIsNewline && current.text === '$$'))
 			) {
 				startNewRegion(RegionType.Math, startInformation);
 			}
@@ -170,8 +170,7 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 			else if (current.type === MarkdownTokenType.IncludeStartDelim && !nextIsSpace) {
 				startNewRegion(RegionType.Include, startInformation);
 			}
-		}
-		else {
+		} else {
 			const startInformation: StartInformation = {
 				...currentInformation,
 				startToken: nextToken ?? current,
@@ -187,34 +186,29 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 			const inlineDelim = currentRegionType === RegionType.Include || enterDelim.length === 1;
 
 			if (
-				inlineDelim
-
-				&& (
-					// if we're at the end of the line
-					(current.type === MarkdownTokenType.Space && current.text.includes('\n'))
-
+				inlineDelim &&
+				// if we're at the end of the line
+				((current.type === MarkdownTokenType.Space && current.text.includes('\n')) ||
 					// if an include region has a newline
-					|| (currentRegionType === RegionType.Include && current.text.includes('\n'))
-
+					(currentRegionType === RegionType.Include && current.text.includes('\n')) ||
 					// or there was a space just before the delimiter and it's math
-					|| (prevIsSpace && current.type === MarkdownTokenType.MathDelim)
-				)
+					(prevIsSpace && current.type === MarkdownTokenType.MathDelim))
 			) {
 				// Switch the region to text and backtrack to the
 				// token just after the start of the region.
 				currentRegionType = RegionType.Text;
-				for (; i > startInformation.startToken.position; i --) {
+				for (; i > startInformation.startToken.position; i--) {
 					buffer.pop();
 				}
-			}
-			else if (currentRegionType === RegionType.Code) {
-
+			} else if (currentRegionType === RegionType.Code) {
 				// Code -> text
-				if (current.type === MarkdownTokenType.CodeDelim && current.text.length >= enterDelim.length) {
+				if (
+					current.type === MarkdownTokenType.CodeDelim &&
+					current.text.length >= enterDelim.length
+				) {
 					startNewRegion(RegionType.Text, startInformation);
 				}
-			}
-			else if (currentRegionType === RegionType.Math) {
+			} else if (currentRegionType === RegionType.Math) {
 				const enterDelim = currentStartInformation.startToken.text;
 
 				// Math -> text
@@ -223,14 +217,12 @@ const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 						startNewRegion(RegionType.Text, startInformation);
 					}
 				}
-			}
-			else if (currentRegionType === RegionType.Include) {
+			} else if (currentRegionType === RegionType.Include) {
 				// Include -> text
 				if (current.type === MarkdownTokenType.IncludeEndDelim) {
 					startNewRegion(RegionType.Text, startInformation);
 				}
-			}
-			else {
+			} else {
 				const exhaustivenessCheck: never = currentRegionType;
 				return exhaustivenessCheck;
 			}
@@ -252,14 +244,15 @@ const coalesceTextRegions = (labeledRegions: LabeledRegion[]) => {
 	// where appliccable.
 	const coalescedRegions: LabeledRegion[] = [];
 
-	for (let i = 0; i < labeledRegions.length; i ++) {
+	for (let i = 0; i < labeledRegions.length; i++) {
 		const current = labeledRegions[i];
 		const previous = i > 0 ? coalescedRegions[i - 1] : null;
 
 		// Join neighboring blocks of text.
 		if (
-			current.type === RegionType.Text && previous?.type === RegionType.Text
-			&& current.block === previous.block
+			current.type === RegionType.Text &&
+			previous?.type === RegionType.Text &&
+			current.block === previous.block
 		) {
 			const text = previous.fullText + current.fullText;
 
@@ -272,8 +265,7 @@ const coalesceTextRegions = (labeledRegions: LabeledRegion[]) => {
 				fullText: text,
 				content: text,
 			});
-		}
-		else {
+		} else {
 			coalescedRegions.push(current);
 		}
 	}

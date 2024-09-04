@@ -1,9 +1,9 @@
-
 .about-dialog-container > dialog > .content {
 	white-space: pre-wrap;
 	font-family: monospace;
 
-	& > h2, & > details > summary {
+	& > h2,
+	& > details > summary {
 		cursor: pointer;
 		margin-top: 15px;
 
