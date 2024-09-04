@@ -980,7 +980,7 @@ __metadata:
     terser-webpack-plugin: "npm:5.3.9"
     ts-loader: "npm:9.5.1"
     ts-node: "npm:10.9.2"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.5.4"
     webpack: "npm:5.91.0"
   bin:
     build-tool: ./dist/main.js
@@ -1114,7 +1114,7 @@ __metadata:
     lint-staged: "npm:13.2.3"
     ts-jest: "npm:29.1.2"
     typedoc: "npm:0.26.4"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.5.4"
   languageName: unknown
   linkType: soft
 
@@ -1145,7 +1145,7 @@ __metadata:
     js-draw: "npm:^1.20.3"
     katex: "npm:0.16.10"
     react: "npm:18.2.0"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.5.4"
   peerDependencies:
     typedoc: 0.26.x
   languageName: unknown
@@ -9408,7 +9408,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.4.5, typescript@npm:>=3 < 6":
+"typescript@npm:5.5.4":
+  version: 5.5.4
+  resolution: "typescript@npm:5.5.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/422be60f89e661eab29ac488c974b6cc0a660fb2228003b297c3d10c32c90f3bcffc1009b43876a082515a3c376b1eefcce823d6e78982e6878408b9a923199c
+  languageName: node
+  linkType: hard
+
+"typescript@npm:>=3 < 6":
   version: 5.4.5
   resolution: "typescript@npm:5.4.5"
   bin:
@@ -9418,7 +9428,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A>=3 < 6#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A5.5.4#optional!builtin<compat/typescript>":
+  version: 5.5.4
+  resolution: "typescript@patch:typescript@npm%3A5.5.4#optional!builtin<compat/typescript>::version=5.5.4&hash=b45daf"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/10dd9881baba22763de859e8050d6cb6e2db854197495c6f1929b08d1eb2b2b00d0b5d9b0bcee8472f1c3f4a7ef6a5d7ebe0cfd703f853aa5ae465b8404bc1ba
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A>=3 < 6#optional!builtin<compat/typescript>":
   version: 5.4.5
   resolution: "typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"
   bin:
