@@ -4,6 +4,7 @@ import waitForTimeout from '../util/waitForTimeout';
 export interface MessageDialogOptions {
 	title: string;
 	classNames?: string[];
+	contentClassNames?: string[];
 }
 
 const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
@@ -16,6 +17,8 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 		...(options.classNames ?? []),
 	);
 	const dialog = document.createElement('dialog');
+	const contentWrapper = document.createElement('div');
+	contentWrapper.classList.add('message-dialog-content', ...(options.contentClassNames ?? []));
 
 	const heading = document.createElement('h1');
 	heading.textContent = options.title;
@@ -25,13 +28,14 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 	closeButton.innerText = editor.localization.closeDialog;
 	closeButton.classList.add('close');
 
-	const contentWrapper = document.createElement('div');
-	contentWrapper.classList.add('content');
+	const scrollRegion = document.createElement('div');
+	scrollRegion.classList.add('scroll');
 
 	// Allow scrolling in the scrollable container -- don't forward wheel events.
-	contentWrapper.onwheel = (evt) => evt.stopPropagation();
+	scrollRegion.onwheel = (evt) => evt.stopPropagation();
 
-	dialog.replaceChildren(heading, contentWrapper, closeButton);
+	contentWrapper.replaceChildren(heading, scrollRegion, closeButton);
+	dialog.replaceChildren(contentWrapper);
 	overlay.replaceChildren(dialog);
 
 	const closeTimeout = 300;
@@ -61,7 +65,7 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 			return closeDialog();
 		},
 		appendChild: (child: Node) => {
-			contentWrapper.appendChild(child);
+			scrollRegion.appendChild(child);
 		},
 	};
 };

@@ -16,7 +16,7 @@ export interface AboutDialogEntry {
 const makeAboutDialog = (editor: Editor, entries: AboutDialogEntry[]) => {
 	const dialog = makeMessageDialog(editor, {
 		title: editor.localization.about,
-		classNames: ['about-dialog-container'],
+		contentClassNames: ['about-dialog-content'],
 	});
 
 	for (const entry of entries) {
