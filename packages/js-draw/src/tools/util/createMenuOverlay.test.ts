@@ -7,18 +7,21 @@ import firstElementAncestorOfNode from '../../testing/firstElementAncestorOfNode
 describe('createMenuOverlay', () => {
 	test('should return the key for the clicked item', async () => {
 		const editor = createEditor();
-		const result = createMenuOverlay(editor, Vec2.zero, [{
-			key: 'test',
-			text: 'Item to be selected',
-			icon: ()=>editor.icons.makeCopyIcon(),
-		}, {
-			key: 'test2',
-			text: 'Some other item',
-			icon: ()=>editor.icons.makePasteIcon(),
-		}]);
+		const result = createMenuOverlay(editor, Vec2.zero, [
+			{
+				key: 'test',
+				text: 'Item to be selected',
+				icon: () => editor.icons.makeCopyIcon(),
+			},
+			{
+				key: 'test2',
+				text: 'Some other item',
+				icon: () => editor.icons.makePasteIcon(),
+			},
+		]);
 
 		const target = firstElementAncestorOfNode(
-			findNodeWithText('Item to be selected', editor.getRootElement())
+			findNodeWithText('Item to be selected', editor.getRootElement()),
 		);
 		if (!target) {
 			throw new Error('Unable to find target item');

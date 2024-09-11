@@ -42,9 +42,9 @@ describe('InsertImageWidget/index', () => {
 		toolWidget.toggleDropdownVisible();
 		expect(toolWidget.getDropdownVisible()).toBe(true);
 
-		const altTextInputs = editor.getRootElement().querySelectorAll<HTMLInputElement>(
-			'input[placeholder*="Image description"]'
-		);
+		const altTextInputs = editor
+			.getRootElement()
+			.querySelectorAll<HTMLInputElement>('input[placeholder*="Image description"]');
 		expect(altTextInputs).toHaveLength(1);
 
 		const altTextInput = altTextInputs[0];

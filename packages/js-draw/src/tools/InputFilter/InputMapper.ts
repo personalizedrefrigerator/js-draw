@@ -1,6 +1,6 @@
 import { InputEvt } from '../../inputEvents';
 
-type OnEventCallback = (event: InputEvt)=>boolean;
+type OnEventCallback = (event: InputEvt) => boolean;
 
 export interface InputEventListener {
 	// Returns true if handled
@@ -11,13 +11,13 @@ export interface InputEventListener {
  * Accepts input events and emits input events.
  */
 export default abstract class InputMapper implements InputEventListener {
-	#listener: OnEventCallback|null = null;
+	#listener: OnEventCallback | null = null;
 
-	public constructor() { }
+	public constructor() {}
 
 	// @internal
-	public setEmitListener(listener: InputEventListener|OnEventCallback|null) {
-		if (listener && typeof (listener) === 'object') {
+	public setEmitListener(listener: InputEventListener | OnEventCallback | null) {
+		if (listener && typeof listener === 'object') {
 			this.#listener = (event) => {
 				return listener.onEvent(event) ?? false;
 			};

@@ -29,7 +29,7 @@ export interface Localization {
 
 	// Settings screen
 	settings: string;
-	reset: string,
+	reset: string;
 	keyboardShortcuts: string;
 	bindingParseError: (errorMessage: string) => string;
 
@@ -49,7 +49,7 @@ export interface Localization {
 	imageSize: (imageSize: string) => string;
 }
 
-const localizationTables: Record<string, Localization> = { };
+const localizationTables: Record<string, Localization> = {};
 
 localizationTables.en = {
 	localStorageSave: 'Local Storage',
@@ -61,7 +61,8 @@ localizationTables.en = {
 	templateEmptyPageLight: 'Empty Page (Light)',
 	templateEmptyPageDark: 'Empty Page (Dark)',
 
-	warningSaveTargetOnlySupportsOneImage: 'Warning: On this system, js-draw only supports saving one image. While this image will still be downloadable, you won\'t be able to save it to this website.',
+	warningSaveTargetOnlySupportsOneImage:
+		"Warning: On this system, js-draw only supports saving one image. While this image will still be downloadable, you won't be able to save it to this website.",
 
 	confirmUnsavedChanges: 'There may be unsaved changes. Really quit?',
 

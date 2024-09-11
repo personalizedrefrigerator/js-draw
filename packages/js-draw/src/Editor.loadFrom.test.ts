@@ -13,9 +13,14 @@ describe('Editor.loadFrom', () => {
 		expect(backgroundComponents).toHaveLength(1);
 		expect((backgroundComponents[0] as RestyleableComponent).getStyle().color).objEq(Color4.red);
 
-		await editor.loadFrom(SVGLoader.fromString(`<svg viewBox='0 0 100 100'>
+		await editor.loadFrom(
+			SVGLoader.fromString(
+				`<svg viewBox='0 0 100 100'>
 			<path class='${imageBackgroundCSSClassName}' d='m0,0 L100,0 L100,100 L0,100 z' fill='#000'/>
-		</svg>`, true));
+		</svg>`,
+				true,
+			),
+		);
 
 		backgroundComponents = editor.image.getBackgroundComponents();
 		expect(backgroundComponents).toHaveLength(1);

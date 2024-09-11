@@ -11,7 +11,7 @@ describe('EventDispatcher', () => {
 		const dispatcher = new EventDispatcher<TestKey, void>();
 		let calledCount = 0;
 		dispatcher.on(TestKey.FooEvent, () => {
-			calledCount ++;
+			calledCount++;
 		});
 
 		expect(calledCount).toBe(0);
@@ -23,7 +23,7 @@ describe('EventDispatcher', () => {
 		const dispatcher = new EventDispatcher<TestKey, void>();
 		let calledCount = 0;
 		const handle = dispatcher.on(TestKey.FooEvent, () => {
-			calledCount ++;
+			calledCount++;
 		});
 
 		handle.remove();
@@ -38,12 +38,12 @@ describe('EventDispatcher', () => {
 
 		let fooCount = 0;
 		const fooListener = dispatcher.on(TestKey.FooEvent, () => {
-			fooCount ++;
+			fooCount++;
 		});
 
 		let barCount = 0;
 		const barListener1 = dispatcher.on(TestKey.BarEvent, () => {
-			barCount ++;
+			barCount++;
 		});
 		const barListener2 = dispatcher.on(TestKey.BarEvent, () => {
 			barCount += 3;
@@ -82,13 +82,12 @@ describe('EventDispatcher', () => {
 		const dispatcher = new EventDispatcher<TestKey, void>();
 
 		let count = 0;
-		const barListener = () => {
-		};
+		const barListener = () => {};
 		const bazListener = () => {
 			count += 5;
 		};
 		const fooListener = () => {
-			count ++;
+			count++;
 			dispatcher.off(TestKey.FooEvent, barListener);
 		};
 		dispatcher.on(TestKey.FooEvent, barListener);

@@ -25,9 +25,8 @@ export class Color4 {
 		public readonly b: number,
 
 		/** Alpha/transparent component. ${\tt a} \in [0, 1]$. 0 = transparent */
-		public readonly a: number
-	) {
-	}
+		public readonly a: number,
+	) {}
 
 	/**
 	 * Create a color from red, green, blue components. The color is fully opaque (`a = 1.0`).
@@ -62,7 +61,7 @@ export class Color4 {
 			const components = hexString.split('');
 
 			// Convert to RRGGBBAA or RRGGBB format
-			hexString = components.map(component => `${component}0`).join('');
+			hexString = components.map((component) => `${component}0`).join('');
 		}
 
 		if (hexString.length === 6) {
@@ -108,14 +107,21 @@ export class Color4 {
 
 			if (componentsList.length === 3) {
 				return Color4.ofRGB(
-					componentsList[0] / 255, componentsList[1] / 255, componentsList[2] / 255
+					componentsList[0] / 255,
+					componentsList[1] / 255,
+					componentsList[2] / 255,
 				);
 			} else if (componentsList.length === 4) {
 				return Color4.ofRGBA(
-					componentsList[0] / 255, componentsList[1] / 255, componentsList[2] / 255, componentsList[3]
+					componentsList[0] / 255,
+					componentsList[1] / 255,
+					componentsList[2] / 255,
+					componentsList[3],
 				);
 			} else {
-				throw new Error(`RGB string, ${text}, has wrong number of components: ${componentsList.length}`);
+				throw new Error(
+					`RGB string, ${text}, has wrong number of components: ${componentsList.length}`,
+				);
 			}
 		}
 
@@ -145,7 +151,7 @@ export class Color4 {
 	}
 
 	/** @returns true if `this` and `other` are approximately equal. */
-	public eq(other: Color4|null|undefined): boolean {
+	public eq(other: Color4 | null | undefined): boolean {
 		if (other == null) {
 			return false;
 		}
@@ -202,7 +208,7 @@ export class Color4 {
 		// - https://stackoverflow.com/a/9733420
 
 		// Normalize the components, as per above
-		const components = [ this.r, this.g, this.b ].map(component => {
+		const components = [this.r, this.g, this.b].map((component) => {
 			if (component < 0.03928) {
 				return component / 12.92;
 			} else {
@@ -358,23 +364,22 @@ export class Color4 {
 
 		let rgb;
 		if (huePrime < 1) {
-			rgb = [ chroma, secondLargestComponent, 0 ];
+			rgb = [chroma, secondLargestComponent, 0];
 		} else if (huePrime < 2) {
-			rgb = [ secondLargestComponent, chroma, 0 ];
+			rgb = [secondLargestComponent, chroma, 0];
 		} else if (huePrime < 3) {
-			rgb = [ 0, chroma, secondLargestComponent ];
+			rgb = [0, chroma, secondLargestComponent];
 		} else if (huePrime < 4) {
-			rgb = [ 0, secondLargestComponent, chroma ];
+			rgb = [0, secondLargestComponent, chroma];
 		} else if (huePrime < 5) {
-			rgb = [ secondLargestComponent, 0, chroma ];
+			rgb = [secondLargestComponent, 0, chroma];
 		} else {
-			rgb = [ chroma, 0, secondLargestComponent ];
+			rgb = [chroma, 0, secondLargestComponent];
 		}
 
 		const adjustment = value - chroma;
 		return Color4.ofRGB(rgb[0] + adjustment, rgb[1] + adjustment, rgb[2] + adjustment);
 	}
-
 
 	/**
 	 * Equivalent to `ofRGB(rgb.x, rgb.y, rgb.z)`.
@@ -385,7 +390,7 @@ export class Color4 {
 		return Color4.ofRGBA(rgb.x, rgb.y, rgb.z, alpha ?? 1);
 	}
 
-	private hexString: string|null = null;
+	private hexString: string | null = null;
 
 	/**
 	 * @returns a hexadecimal color string representation of `this`, in the form `#rrggbbaa`.

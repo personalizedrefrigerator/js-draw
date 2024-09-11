@@ -8,7 +8,6 @@ const editor = new jsdraw.Editor(document.body);
 // For debugging
 (window as any).editor = editor;
 
-
 const toolbar = jsdraw.makeEdgeToolbar(editor);
 toolbar.addDefaults();
 
@@ -77,7 +76,7 @@ const trimColumnToLength = (column: HTMLElement, expectedEntryCount: number) => 
 	}
 };
 
-editor.notifier.on(jsdraw.EditorEventType.UndoRedoStackUpdated, event => {
+editor.notifier.on(jsdraw.EditorEventType.UndoRedoStackUpdated, (event) => {
 	if (event.kind !== jsdraw.EditorEventType.UndoRedoStackUpdated) {
 		return;
 	}
@@ -89,12 +88,10 @@ editor.notifier.on(jsdraw.EditorEventType.UndoRedoStackUpdated, event => {
 	if (event.stackUpdateType === jsdraw.UndoEventType.CommandDone) {
 		addCommandToUndo(event.command);
 		redoColumn.replaceChildren();
-	}
-	else if (event.stackUpdateType === jsdraw.UndoEventType.CommandUndone) {
+	} else if (event.stackUpdateType === jsdraw.UndoEventType.CommandUndone) {
 		popFromUndoStack();
 		addCommandToRedo(event.command);
-	}
-	else {
+	} else {
 		popFromRedoStack();
 		addCommandToUndo(event.command);
 	}

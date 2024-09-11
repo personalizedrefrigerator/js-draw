@@ -29,12 +29,11 @@ export const restoreToolbarState = (toolbar: jsdraw.AbstractToolbar) => {
 		// we fail to deserialize the toolbar state.
 		try {
 			toolbar.deserializeState(toolbarState);
-		} catch(e) {
+		} catch (e) {
 			console.warn('Error deserializing toolbar state: ', e);
 		}
 	}
 };
-
 
 const editor = new jsdraw.Editor(document.body);
 const toolbar = editor.addToolbar();

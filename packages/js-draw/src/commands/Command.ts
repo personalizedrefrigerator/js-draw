@@ -7,17 +7,17 @@ import { EditorLocalization } from '../localization';
  * See {@link Editor.dispatch}.
  */
 export abstract class Command {
-	public abstract apply(editor: Editor): Promise<void>|void;
-	public abstract unapply(editor: Editor): Promise<void>|void;
+	public abstract apply(editor: Editor): Promise<void> | void;
+	public abstract unapply(editor: Editor): Promise<void> | void;
 
 	// Called when the command is being deleted
-	public onDrop(_editor: Editor) { }
+	public onDrop(_editor: Editor) {}
 
 	public abstract description(editor: Editor, localizationTable: EditorLocalization): string;
 
 	/** @deprecated Use {@link uniteCommands} */
 	public static union(a: Command, b: Command): Command {
-		return new class extends Command {
+		return new (class extends Command {
 			public apply(editor: Editor) {
 				a.apply(editor);
 				b.apply(editor);
@@ -38,14 +38,16 @@ export abstract class Command {
 
 				return `${aDescription}, ${bDescription}`;
 			}
-		};
+		})();
 	}
 
-	public static readonly empty = new class extends Command {
-		public description(_editor: Editor, _localizationTable: EditorLocalization) { return ''; }
-		public apply(_editor: Editor) { }
-		public unapply(_editor: Editor) { }
-	};
+	public static readonly empty = new (class extends Command {
+		public description(_editor: Editor, _localizationTable: EditorLocalization) {
+			return '';
+		}
+		public apply(_editor: Editor) {}
+		public unapply(_editor: Editor) {}
+	})();
 }
 
 export default Command;

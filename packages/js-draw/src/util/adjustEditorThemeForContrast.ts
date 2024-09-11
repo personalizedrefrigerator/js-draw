@@ -51,22 +51,25 @@ import Editor from '../Editor';
  * });
  * ```
  */
-const adjustEditorThemeForContrast = (editor: Editor, options?: { dontClearOverrides: boolean }) => {
+const adjustEditorThemeForContrast = (
+	editor: Editor,
+	options?: { dontClearOverrides: boolean },
+) => {
 	const editorElem = editor.getRootElement();
 
 	// Each set of entries in colorPairs should resolve to colors with sufficient
 	// contrast.
 	const colorPairs: [string, string, boolean, boolean][] = [
-		[ '--background-color-1', '--foreground-color-1', true, true],
-		[ '--background-color-2', '--foreground-color-2', true, true],
-		[ '--background-color-3', '--foreground-color-3', true, true],
-		[ '--background-color-2', '--primary-action-foreground-color', false, true ],
-		[ '--selection-background-color', '--selection-foreground-color', false, true],
+		['--background-color-1', '--foreground-color-1', true, true],
+		['--background-color-2', '--foreground-color-2', true, true],
+		['--background-color-3', '--foreground-color-3', true, true],
+		['--background-color-2', '--primary-action-foreground-color', false, true],
+		['--selection-background-color', '--selection-foreground-color', false, true],
 	];
 
 	if (!options?.dontClearOverrides) {
 		// Clear any overrides
-		for (const [ backgroundVar, foregroundVar ] of colorPairs) {
+		for (const [backgroundVar, foregroundVar] of colorPairs) {
 			editorElem.style.setProperty(backgroundVar, null);
 			editorElem.style.setProperty(foregroundVar, null);
 		}
@@ -85,8 +88,12 @@ const adjustEditorThemeForContrast = (editor: Editor, options?: { dontClearOverr
 		updateVar2: boolean,
 	) => {
 		// Fetch from updatedColors if available -- styles isn't updated dynamically.
-		let color1 = updatedColors[var1] ? updatedColors[var1] : Color4.fromString(styles.getPropertyValue(var1));
-		let color2 = updatedColors[var2] ? updatedColors[var2] : Color4.fromString(styles.getPropertyValue(var2));
+		let color1 = updatedColors[var1]
+			? updatedColors[var1]
+			: Color4.fromString(styles.getPropertyValue(var1));
+		let color2 = updatedColors[var2]
+			? updatedColors[var2]
+			: Color4.fromString(styles.getPropertyValue(var2));
 
 		// Ensure that color1 has the lesser luminance
 		if (color1.relativeLuminance() < color2.relativeLuminance()) {
@@ -126,7 +133,7 @@ const adjustEditorThemeForContrast = (editor: Editor, options?: { dontClearOverr
 
 			currentContrast = Color4.contrastRatio(color1, color2);
 			colorsUpdated = true;
-			iterations ++;
+			iterations++;
 		}
 
 		// Update the CSS variables if necessary
@@ -139,11 +146,23 @@ const adjustEditorThemeForContrast = (editor: Editor, options?: { dontClearOverr
 	};
 
 	// Also adjust the selection background
-	adjustVariablesForContrast('--selection-background-color', '--background-color-2', 1.29, true, false);
+	adjustVariablesForContrast(
+		'--selection-background-color',
+		'--background-color-2',
+		1.29,
+		true,
+		false,
+	);
 
-	for (const [ backgroundVar, foregroundVar, updateBackground, updateForeground ] of colorPairs) {
+	for (const [backgroundVar, foregroundVar, updateBackground, updateForeground] of colorPairs) {
 		const minContrast = 4.5;
-		adjustVariablesForContrast(backgroundVar, foregroundVar, minContrast, updateBackground, updateForeground);
+		adjustVariablesForContrast(
+			backgroundVar,
+			foregroundVar,
+			minContrast,
+			updateBackground,
+			updateForeground,
+		);
 	}
 };
 

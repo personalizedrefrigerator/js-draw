@@ -6,7 +6,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	touchPanning: string;
 	lockRotation: string;
 	outlinedRectanglePen: string;
-	outlinedCirclePen: string,
+	outlinedCirclePen: string;
 	filledRectanglePen: string;
 	linePen: string;
 	arrowPen: string;
@@ -55,7 +55,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	imageHeightOption: string;
 	useGridOption: string;
 	enableAutoresizeOption: string;
-	toggleOverflow: string,
+	toggleOverflow: string;
 
 	about: string;
 	inputStabilization: string;
@@ -65,7 +65,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	describeTheImage: string;
 
 	fileInput__loading: string;
-	fileInput__andNMoreFiles: (count: number)=>string;
+	fileInput__andNMoreFiles: (count: number) => string;
 
 	// Help text
 	penDropdown__baseHelpText: string;
@@ -98,14 +98,14 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	colorPickerToggleHelpText: string;
 
 	// closeSidebar is used for accessibility in a button label.
-	closeSidebar: (toolName: string)=>string;
-	dropdownShown: (toolName: string)=> string;
-	dropdownHidden: (toolName: string)=> string;
+	closeSidebar: (toolName: string) => string;
+	dropdownShown: (toolName: string) => string;
+	dropdownHidden: (toolName: string) => string;
 
-	zoomLevel: (zoomPercentage: number)=> string;
-	colorChangedAnnouncement: (color: string)=> string;
-	imageSize: (size: number, units: string)=> string;
-	imageLoadError: (message: string)=> string;
+	zoomLevel: (zoomPercentage: number) => string;
+	colorChangedAnnouncement: (color: string) => string;
+	imageSize: (size: number, units: string) => string;
+	imageLoadError: (message: string) => string;
 }
 
 export const defaultToolbarLocalization: ToolbarLocalization = {
@@ -146,7 +146,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
 	colorSelectionCanceledAnnouncement: 'Color selection canceled',
-	selectionToolKeyboardShortcuts: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
+	selectionToolKeyboardShortcuts:
+		'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 	documentProperties: 'Page',
 	backgroundColor: 'Background color',
 	imageWidthOption: 'Width',
@@ -180,10 +181,10 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 
 	// Help text
 	penDropdown__baseHelpText: 'This tool draws shapes or freehand lines.',
-	penDropdown__colorHelpText: 'Changes the pen\'s color',
-	penDropdown__thicknessHelpText:
-		'Changes the thickness of strokes drawn by the pen.',
-	penDropdown__penTypeHelpText: 'Changes the pen style.\n\nEither a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.',
+	penDropdown__colorHelpText: "Changes the pen's color",
+	penDropdown__thicknessHelpText: 'Changes the thickness of strokes drawn by the pen.',
+	penDropdown__penTypeHelpText:
+		'Changes the pen style.\n\nEither a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.',
 	penDropdown__autocorrectHelpText:
 		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
 	penDropdown__stabilizationHelpText:
@@ -192,8 +193,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'This tool is responsible for scrolling, rotating, and zooming the editor.',
 	handDropdown__zoomInHelpText: 'Zooms in.',
 	handDropdown__zoomOutHelpText: 'Zooms out.',
-	handDropdown__resetViewHelpText:
-		'Resets the zoom level to 100% and resets scroll.',
+	handDropdown__resetViewHelpText: 'Resets the zoom level to 100% and resets scroll.',
 	handDropdown__zoomDisplayHelpText:
 		'Shows the current zoom level. 100% shows the image at its actual size.',
 	handDropdown__touchPanningHelpText:
@@ -205,14 +205,16 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	eraserDropdown__fullStrokeEraserHelpText:
 		'When in full-stroke mode, entire shapes are erased.\n\nWhen not in full-stroke mode, shapes can be partially erased.',
 	selectionDropdown__baseHelpText: 'Selects content and manipulates the selection',
-	selectionDropdown__resizeToHelpText: 'Crops the drawing to the size of what\'s currently selected.\n\nIf auto-resize is enabled, it will be disabled.',
+	selectionDropdown__resizeToHelpText:
+		"Crops the drawing to the size of what's currently selected.\n\nIf auto-resize is enabled, it will be disabled.",
 	selectionDropdown__deleteHelpText: 'Erases selected items.',
 	selectionDropdown__duplicateHelpText: 'Makes a copy of selected items.',
 	selectionDropdown__changeColorHelpText: 'Changes the color of selected items.',
-	pageDropdown__baseHelpText: 'Controls the drawing canvas\' background color, pattern, and size.',
+	pageDropdown__baseHelpText: "Controls the drawing canvas' background color, pattern, and size.",
 	pageDropdown__backgroundColorHelpText: 'Changes the background color of the drawing canvas.',
 	pageDropdown__gridCheckboxHelpText: 'Enables/disables a background grid pattern.',
-	pageDropdown__autoresizeCheckboxHelpText: 'When checked, the page grows to fit the drawing.\n\nWhen unchecked, the page is visible and its size can be set manually.',
+	pageDropdown__autoresizeCheckboxHelpText:
+		'When checked, the page grows to fit the drawing.\n\nWhen unchecked, the page is visible and its size can be set manually.',
 	pageDropdown__aboutButtonHelpText: 'Shows version, debug, and other information.',
 	colorPickerPipetteHelpText: 'Picks a color from the screen.',
 	colorPickerToggleHelpText: 'Opens/closes the color picker.',
@@ -225,5 +227,5 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	colorChangedAnnouncement: (color: string) => `Color changed to ${color}`,
 	imageSize: (size: number, units: string) => `Image size: ${size} ${units}`,
 
-	imageLoadError: (message: string)=> `Error loading image: ${message}`,
+	imageLoadError: (message: string) => `Error loading image: ${message}`,
 };

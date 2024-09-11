@@ -1,4 +1,3 @@
-
 # example
 
 [index.html](./index.html) | [index.ts](./index.ts)

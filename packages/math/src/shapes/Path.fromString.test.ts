@@ -27,7 +27,7 @@ describe('Path.fromString', () => {
 			},
 			{
 				kind: PathCommandType.MoveTo,
-				point: Vec2.of(3,3),
+				point: Vec2.of(3, 3),
 			},
 		]);
 		expect(path3.startPoint).toMatchObject(Vec2.of(1, 1));
@@ -71,7 +71,7 @@ describe('Path.fromString', () => {
 		const path1 = Path.fromString('m3,3 l1,2 l1,1 z');
 		const path2 = Path.fromString('m3,3 l1,2 l1,1 Z');
 
-		expect(path1.startPoint).toMatchObject(Vec2.of(3,3));
+		expect(path1.startPoint).toMatchObject(Vec2.of(3, 3));
 		expect(path2.startPoint).toMatchObject(path1.startPoint);
 		expect(path1.parts).toMatchObject(path2.parts);
 		expect(path1.parts).toMatchObject([
@@ -86,7 +86,7 @@ describe('Path.fromString', () => {
 			{
 				kind: PathCommandType.LineTo,
 				point: path1.startPoint,
-			}
+			},
 		]);
 	});
 
@@ -128,7 +128,7 @@ describe('Path.fromString', () => {
 				controlPoint1: Vec2.of(1, 1),
 				controlPoint2: Vec2.of(0.1, 0.1),
 				endPoint: Vec2.zero,
-			}
+			},
 		]);
 	});
 

@@ -20,13 +20,15 @@ export abstract class Parameterized2DShape extends Abstract2DShape {
 	/**
 	 * Divides this shape into two separate shapes at parameter value $t$.
 	 */
-	abstract splitAt(t: number): [ Parameterized2DShape ] | [ Parameterized2DShape, Parameterized2DShape ];
+	abstract splitAt(
+		t: number,
+	): [Parameterized2DShape] | [Parameterized2DShape, Parameterized2DShape];
 
 	/**
 	 * Returns the nearest point on `this` to `point` and the `parameterValue` at which
 	 * that point occurs.
 	 */
-	abstract nearestPointTo(point: Point2): { point: Point2, parameterValue: number };
+	abstract nearestPointTo(point: Point2): { point: Point2; parameterValue: number };
 
 	/**
 	 * Returns the **parameter values** at which `lineSegment` intersects this shape.
@@ -35,9 +37,8 @@ export abstract class Parameterized2DShape extends Abstract2DShape {
 	 */
 	public abstract argIntersectsLineSegment(lineSegment: LineSegment2): number[];
 
-
 	public override intersectsLineSegment(line: LineSegment2): Point2[] {
-		return this.argIntersectsLineSegment(line).map(t => this.at(t));
+		return this.argIntersectsLineSegment(line).map((t) => this.at(t));
 	}
 }
 

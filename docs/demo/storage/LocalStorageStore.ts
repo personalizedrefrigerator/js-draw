@@ -37,7 +37,7 @@ export class LocalStorageStore implements AbstractStore {
 		}
 
 		// Local storage only supports a single entry.
-		return [ this.entry ];
+		return [this.entry];
 	}
 
 	public async createNewEntry(): Promise<StoreEntry | null> {

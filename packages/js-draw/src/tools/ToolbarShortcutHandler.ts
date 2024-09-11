@@ -6,7 +6,7 @@ import { KeyPressEvent } from '../inputEvents';
 import BaseTool from './BaseTool';
 
 // Returns true if the event was handled, false otherwise.
-type KeyPressListener = (event: KeyPressEvent)=>boolean;
+type KeyPressListener = (event: KeyPressEvent) => boolean;
 
 export default class ToolbarShortcutHandler extends BaseTool {
 	private listeners: Set<KeyPressListener> = new Set([]);

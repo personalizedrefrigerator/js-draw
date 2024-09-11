@@ -2,10 +2,18 @@ import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import { Vec2, LineSegment2, Rect2, Mat33, Mat33Array, Color4 } from '@js-draw/math';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import { cloneTextStyle, TextRenderingStyle, textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
+import {
+	cloneTextStyle,
+	TextRenderingStyle,
+	textStyleFromJSON,
+	textStyleToJSON,
+} from '../rendering/TextRenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
-import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
+import RestyleableComponent, {
+	ComponentStyle,
+	createRestyleComponentCommand,
+} from './RestylableComponent';
 
 const componentTypeId = 'text';
 
@@ -23,10 +31,12 @@ export enum TextTransformMode {
 	RELATIVE_Y_ABSOLUTE_X,
 }
 
-type TextElement = TextComponent|string;
+type TextElement = TextComponent | string;
 
 const defaultTextStyle: TextRenderingStyle = {
-	fontFamily: 'sans', size: 12, renderingStyle: { fill: Color4.purple },
+	fontFamily: 'sans',
+	size: 12,
+	renderingStyle: { fill: Color4.purple },
 };
 
 /**
@@ -93,7 +103,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 		// If this has no direct children, choose a style representative of this' content
 		// (useful for estimating the style of the TextComponent).
-		const hasDirectContent = textObjects.some(obj => typeof obj === 'string');
+		const hasDirectContent = textObjects.some((obj) => typeof obj === 'string');
 		if (!hasDirectContent && textObjects.length > 0) {
 			this.style = (textObjects[0] as TextComponent).getTextStyle();
 		}
@@ -103,20 +113,21 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		// Quote the font family if necessary.
 		const hasSpaces = style.fontFamily.match(/\s/);
 		const isQuoted = style.fontFamily.match(/^".*"$/);
-		const fontFamily = hasSpaces && !isQuoted ? `"${style.fontFamily.replace(/["]/g, '\\"')}"` : style.fontFamily;
+		const fontFamily =
+			hasSpaces && !isQuoted ? `"${style.fontFamily.replace(/["]/g, '\\"')}"` : style.fontFamily;
 
-		ctx.font =[
+		ctx.font = [
 			style.fontStyle ?? '',
 			style.fontWeight ?? '',
 			(style.size ?? 12) + 'px',
-			`${fontFamily}`
+			`${fontFamily}`,
 		].join(' ');
 
 		// TODO: Support RTL
 		ctx.textAlign = 'left';
 	}
 
-	private static textMeasuringCtx: CanvasRenderingContext2D|null = null;
+	private static textMeasuringCtx: CanvasRenderingContext2D | null = null;
 
 	// Roughly estimate the bounding box of `text`. Use if no CanvasRenderingContext2D is available.
 	private static estimateTextDimens(text: string, style: TextRenderingStyle): Rect2 {
@@ -125,11 +136,11 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 		// Text is drawn with (0, 0) as its baseline. As such, the majority of the text's height should
 		// be above (0, 0).
-		return new Rect2(0, -heightEst * 2/3, widthEst, heightEst);
+		return new Rect2(0, (-heightEst * 2) / 3, widthEst, heightEst);
 	}
 
 	// Returns a set of TextMetrics for the given text, if a canvas is available.
-	private static getTextMetrics(text: string, style: TextRenderingStyle): TextMetrics|null {
+	private static getTextMetrics(text: string, style: TextRenderingStyle): TextMetrics | null {
 		TextComponent.textMeasuringCtx ??= document.createElement('canvas').getContext('2d') ?? null;
 		if (!TextComponent.textMeasuringCtx) {
 			return null;
@@ -168,12 +179,13 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	}
 
 	private recomputeBBox() {
-		let bbox: Rect2|null = null;
+		let bbox: Rect2 | null = null;
 		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const textObject of this.textObjects) {
 			const transform = cursor.update(textObject).transform;
-			const currentBBox = this.computeUntransformedBBoxOfPart(textObject).transformedBoundingBox(transform);
+			const currentBBox =
+				this.computeUntransformedBBoxOfPart(textObject).transformedBoundingBox(transform);
 
 			bbox ??= currentBBox;
 			bbox = bbox.union(currentBBox);
@@ -197,9 +209,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 			} else {
 				canvas.pushTransform(transform);
 
-				textObject.renderInternal(
-					canvas, visibleRect?.transformedBoundingBox(transform.inverse())
-				);
+				textObject.renderInternal(canvas, visibleRect?.transformedBoundingBox(transform.inverse()));
 				canvas.popTransform();
 			}
 		}
@@ -228,7 +238,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 
 				// TODO: Use a better intersection check. Perhaps draw the text onto a CanvasElement and
 				// use pixel-testing to check for intersection with its contour.
-				if (textBBox.getEdges().some(edge => transformedLine.intersection(edge) !== null)) {
+				if (textBBox.getEdges().some((edge) => transformedLine.intersection(edge) !== null)) {
 					return true;
 				}
 			} else {
@@ -259,7 +269,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		return createRestyleComponentCommand(this.getStyle(), style, this);
 	}
 
-	public forceStyle(style: ComponentStyle, editor: Editor|null): void {
+	public forceStyle(style: ComponentStyle, editor: Editor | null): void {
 		if (style.textStyle) {
 			this.style = cloneTextStyle(style.textStyle);
 		} else if (style.color) {
@@ -305,7 +315,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	}
 
 	protected createClone(): AbstractComponent {
-		const clonedTextObjects = this.textObjects.map(obj => {
+		const clonedTextObjects = this.textObjects.map((obj) => {
 			if (typeof obj === 'string') {
 				return obj;
 			} else {
@@ -337,7 +347,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	protected serializeToJSON(): Record<string, any> {
 		const serializableStyle = textStyleToJSON(this.style);
 
-		const serializedTextObjects = this.textObjects.map(text => {
+		const serializedTextObjects = this.textObjects.map((text) => {
 			if (typeof text === 'string') {
 				return {
 					text,
@@ -397,8 +407,12 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	 * const text = TextComponent.fromLines('foo\nbar'.split('\n'), Mat33.identity, textStyle);
 	 * ```
 	 */
-	public static fromLines(lines: string[], transform: Mat33, style: TextRenderingStyle): AbstractComponent {
-		let lastComponent: TextComponent|null = null;
+	public static fromLines(
+		lines: string[],
+		transform: Mat33,
+		style: TextRenderingStyle,
+	): AbstractComponent {
+		let lastComponent: TextComponent | null = null;
 		const components: TextComponent[] = [];
 
 		const lineMargin = Math.round(this.getFontHeight(style));
@@ -409,7 +423,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 				position = position.plus(Vec2.unitY.times(lineMargin));
 			}
 
-			const component = new TextComponent([ line ], Mat33.translation(position), style);
+			const component = new TextComponent([line], Mat33.translation(position), style);
 			components.push(component);
 			lastComponent = component;
 		}
@@ -420,8 +434,9 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	private static TextCursor = class {
 		public transform: Mat33 = Mat33.identity;
 		public constructor(
-			private parentTransform: Mat33 = Mat33.identity, private parentStyle: TextRenderingStyle
-		) { }
+			private parentTransform: Mat33 = Mat33.identity,
+			private parentStyle: TextRenderingStyle,
+		) {}
 
 		/**
 		 * Based on previous calls to `update`, returns the transformation and bounding box (relative
@@ -434,7 +449,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 			let elementTransform = Mat33.identity;
 			let elemInternalTransform = Mat33.identity;
 			let textSize;
-			if (typeof(elem) === 'string') {
+			if (typeof elem === 'string') {
 				textSize = TextComponent.getTextDimens(elem, this.parentStyle);
 			} else {
 				// TODO: Double-check whether we need to take elem.transform into account here.
@@ -442,12 +457,16 @@ export default class TextComponent extends AbstractComponent implements Restylea
 				elemInternalTransform = elem.transform;
 				textSize = elem.getBBox();
 			}
-			const positioning = typeof(elem) === 'string' ? TextTransformMode.RELATIVE_XY : elem.transformMode;
+			const positioning =
+				typeof elem === 'string' ? TextTransformMode.RELATIVE_XY : elem.transformMode;
 
 			if (positioning === TextTransformMode.RELATIVE_XY) {
 				// Position relative to the previous element's transform.
 				elementTransform = this.transform.rightMul(elementTransform);
-			} else if (positioning === TextTransformMode.RELATIVE_X_ABSOLUTE_Y || positioning === TextTransformMode.RELATIVE_Y_ABSOLUTE_X) {
+			} else if (
+				positioning === TextTransformMode.RELATIVE_X_ABSOLUTE_Y ||
+				positioning === TextTransformMode.RELATIVE_Y_ABSOLUTE_X
+			) {
 				// Zero the absolute component of this.transform's translation
 				const transform = this.transform.mapEntries((component, [row, col]) => {
 					if (positioning === TextTransformMode.RELATIVE_X_ABSOLUTE_Y) {
@@ -478,4 +497,6 @@ export default class TextComponent extends AbstractComponent implements Restylea
 	};
 }
 
-AbstractComponent.registerComponent(componentTypeId, (data: string) => TextComponent.deserializeFromString(data));
+AbstractComponent.registerComponent(componentTypeId, (data: string) =>
+	TextComponent.deserializeFromString(data),
+);

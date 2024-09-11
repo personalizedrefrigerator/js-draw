@@ -20,15 +20,19 @@ export default class TextTool extends BaseTool {
 	private textStyle: TextRenderingStyle;
 
 	private textEditOverlay: HTMLElement;
-	private textInputElem: HTMLTextAreaElement|null = null;
-	private textTargetPosition: Vec2|null = null;
-	private textMeasuringCtx: CanvasRenderingContext2D|null = null;
+	private textInputElem: HTMLTextAreaElement | null = null;
+	private textTargetPosition: Vec2 | null = null;
+	private textMeasuringCtx: CanvasRenderingContext2D | null = null;
 	private textRotation: number;
 	private textScale: Vec2 = Vec2.of(1, 1);
 
-	private removeExistingCommand: Erase|null = null;
+	private removeExistingCommand: Erase | null = null;
 
-	public constructor(private editor: Editor, description: string, private localizationTable: ToolLocalization) {
+	public constructor(
+		private editor: Editor,
+		description: string,
+		private localizationTable: ToolLocalization,
+	) {
 		super(editor.notifier, description);
 		const editorFonts = editor.getCurrentSettings().text?.fonts ?? [];
 		this.textStyleValue = ReactiveValue.fromInitialValue({
@@ -93,7 +97,7 @@ export default class TextTool extends BaseTool {
 		}
 
 		// Estimate
-		return style.size * 2 / 3;
+		return (style.size * 2) / 3;
 	}
 
 	// Take input from this' textInputElem and add it to the EditorImage.
@@ -117,24 +121,23 @@ export default class TextTool extends BaseTool {
 				return;
 			}
 
-			const textTransform = Mat33.translation(
-				this.textTargetPosition
-			).rightMul(
-				this.getTextScaleMatrix()
-			).rightMul(
-				Mat33.scaling2D(this.editor.viewport.getSizeOfPixelOnCanvas())
-			).rightMul(
-				Mat33.zRotation(this.textRotation)
-			);
+			const textTransform = Mat33.translation(this.textTargetPosition)
+				.rightMul(this.getTextScaleMatrix())
+				.rightMul(Mat33.scaling2D(this.editor.viewport.getSizeOfPixelOnCanvas()))
+				.rightMul(Mat33.zRotation(this.textRotation));
 
-			const textComponent = TextComponent.fromLines(content.split('\n'), textTransform, this.textStyle);
+			const textComponent = TextComponent.fromLines(
+				content.split('\n'),
+				textTransform,
+				this.textStyle,
+			);
 
 			const action = EditorImage.addElement(textComponent);
 			if (this.removeExistingCommand) {
 				// Unapply so that `removeExistingCommand` can be added to the undo stack.
 				this.removeExistingCommand.unapply(this.editor);
 
-				this.editor.dispatch(uniteCommands([ this.removeExistingCommand, action ]));
+				this.editor.dispatch(uniteCommands([this.removeExistingCommand, action]));
 				this.removeExistingCommand = null;
 			} else {
 				this.editor.dispatch(action);
@@ -143,7 +146,7 @@ export default class TextTool extends BaseTool {
 	}
 
 	private getTextScaleMatrix() {
-		return Mat33.scaling2D(this.textScale.times(1/this.editor.viewport.getSizeOfPixelOnCanvas()));
+		return Mat33.scaling2D(this.textScale.times(1 / this.editor.viewport.getSizeOfPixelOnCanvas()));
 	}
 
 	private updateTextInput() {
@@ -178,8 +181,7 @@ export default class TextTool extends BaseTool {
 
 		const rotation = this.textRotation + viewport.getRotationAngle();
 		const scale: Mat33 = this.getTextScaleMatrix();
-		this.textInputElem.style.transform =
-			`${scale.toCSSMatrix()} rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-vertAdjust}px)`;
+		this.textInputElem.style.transform = `${scale.toCSSMatrix()} rotate(${(rotation * 180) / Math.PI}deg) translate(0, ${-vertAdjust}px)`;
 		this.textInputElem.style.transformOrigin = 'top left';
 
 		// Match the line height of default rendered text.
@@ -254,18 +256,22 @@ export default class TextTool extends BaseTool {
 		}
 
 		if (allPointers.length === 1) {
-
 			// Are we clicking on a text node?
 			const canvasPos = current.canvasPos;
-			const halfTestRegionSize = Vec2.of(2.5, 2.5).times(this.editor.viewport.getSizeOfPixelOnCanvas());
-			const testRegion = Rect2.fromCorners(canvasPos.minus(halfTestRegionSize), canvasPos.plus(halfTestRegionSize));
+			const halfTestRegionSize = Vec2.of(2.5, 2.5).times(
+				this.editor.viewport.getSizeOfPixelOnCanvas(),
+			);
+			const testRegion = Rect2.fromCorners(
+				canvasPos.minus(halfTestRegionSize),
+				canvasPos.plus(halfTestRegionSize),
+			);
 			const targetNodes = this.editor.image.getElementsIntersectingRegion(testRegion);
-			let targetTextNodes = targetNodes.filter(node => node instanceof TextComponent);
+			let targetTextNodes = targetNodes.filter((node) => node instanceof TextComponent);
 
 			// Don't try to edit text nodes that contain the viewport (this allows us
 			// to zoom in on text nodes and add text on top of them.)
 			const visibleRect = this.editor.viewport.visibleRect;
-			targetTextNodes = targetTextNodes.filter(node => !node.getBBox().containsRect(visibleRect));
+			targetTextNodes = targetTextNodes.filter((node) => !node.getBBox().containsRect(visibleRect));
 
 			// End any TextNodes we're currently editing.
 			this.flushInput();
@@ -275,7 +281,7 @@ export default class TextTool extends BaseTool {
 				this.setTextStyle(targetNode.getTextStyle());
 
 				// Create and temporarily apply removeExistingCommand.
-				this.removeExistingCommand = new Erase([ targetNode ]);
+				this.removeExistingCommand = new Erase([targetNode]);
 				this.removeExistingCommand.apply(this.editor);
 
 				this.startTextInput(targetNode.getBaselinePos(), targetNode.getText());

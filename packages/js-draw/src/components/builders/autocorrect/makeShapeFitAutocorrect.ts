@@ -5,7 +5,9 @@ import AbstractComponent from '../../AbstractComponent';
 import { ComponentBuilder, ComponentBuilderFactory } from '../types';
 import AbstractRenderer from '../../../rendering/renderers/AbstractRenderer';
 
-const makeShapeFitAutocorrect = (sourceFactory: ComponentBuilderFactory): ComponentBuilderFactory => {
+const makeShapeFitAutocorrect = (
+	sourceFactory: ComponentBuilderFactory,
+): ComponentBuilderFactory => {
 	return (startPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new ShapeFitBuilder(sourceFactory, startPoint, viewport);
 	};
@@ -19,15 +21,16 @@ interface ShapeTemplate {
 }
 
 const makeLineTemplate = (startPoint: Point2, points: Point2[], _bbox: Rect2): ShapeTemplate => {
-	const templatePoints = [
-		startPoint,
-		points[points.length - 1],
-	];
-	return { points: templatePoints, };
+	const templatePoints = [startPoint, points[points.length - 1]];
+	return { points: templatePoints };
 };
 
-const makeRectangleTemplate = (_startPoint: Point2, _points: Point2[], bbox: Rect2): ShapeTemplate => {
-	return { points: [ ...bbox.corners, bbox.corners[0] ], };
+const makeRectangleTemplate = (
+	_startPoint: Point2,
+	_points: Point2[],
+	bbox: Rect2,
+): ShapeTemplate => {
+	return { points: [...bbox.corners, bbox.corners[0]] };
 };
 
 class ShapeFitBuilder implements ComponentBuilder {
@@ -37,10 +40,10 @@ class ShapeFitBuilder implements ComponentBuilder {
 	public constructor(
 		private sourceFactory: ComponentBuilderFactory,
 		private startPoint: StrokeDataPoint,
-		private viewport: Viewport
+		private viewport: Viewport,
 	) {
 		this.builder = sourceFactory(startPoint, viewport);
-		this.points = [ startPoint ];
+		this.points = [startPoint];
 	}
 
 	public getBBox(): Rect2 {
@@ -63,17 +66,14 @@ class ShapeFitBuilder implements ComponentBuilder {
 	public async autocorrectShape() {
 		// Use screen points so that autocorrected shapes rotate with the screen.
 		const startPoint = this.viewport.canvasToScreen(this.startPoint.pos);
-		const points = this.points.map(point => this.viewport.canvasToScreen(point.pos));
+		const points = this.points.map((point) => this.viewport.canvasToScreen(point.pos));
 		const bbox = Rect2.bboxOf(points);
 
-		const snappedStartPoint =
-			this.viewport.canvasToScreen(
-				this.viewport.snapToGrid(this.startPoint.pos)
-			);
-		const snappedPoints = this.points.map(point =>
-			this.viewport.canvasToScreen(
-				this.viewport.snapToGrid(point.pos)
-			),
+		const snappedStartPoint = this.viewport.canvasToScreen(
+			this.viewport.snapToGrid(this.startPoint.pos),
+		);
+		const snappedPoints = this.points.map((point) =>
+			this.viewport.canvasToScreen(this.viewport.snapToGrid(point.pos)),
 		);
 		const snappedBBox = Rect2.bboxOf(snappedPoints);
 
@@ -118,7 +118,7 @@ class ShapeFitBuilder implements ComponentBuilder {
 					return templatePoints[index];
 				};
 
-				let closestToFirst: Point2|null = null;
+				let closestToFirst: Point2 | null = null;
 				let closestToFirstSqrDist = Infinity;
 				let templateStartIndex = 0;
 

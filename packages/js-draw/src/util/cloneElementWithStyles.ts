@@ -1,4 +1,3 @@
-
 /**
  * Makes a clone of `element` and recursively applies styles from the original to the
  * clone's children.

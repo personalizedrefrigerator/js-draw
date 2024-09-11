@@ -1,4 +1,3 @@
-
 .toolbar-element .toolbar--file-input-container {
 	display: flex;
 
@@ -33,9 +32,7 @@
 		// Default border color if color-mix is not supported
 		--active-border-color: rgba(100, 100, 100, 0.5);
 
-		--active-border-color: color-mix(
-			in srgb, var(--foreground-color-1), transparent
-		);
+		--active-border-color: color-mix(in srgb, var(--foreground-color-1), transparent);
 
 		.cancel-button {
 			padding-left: 3px;
@@ -79,8 +76,9 @@
 			}
 		}
 
-
-		&:active, &:hover, &.drag-target {
+		&:active,
+		&:hover,
+		&.drag-target {
 			--active-border-color: var(--foreground-color-1);
 		}
 

@@ -1,4 +1,3 @@
-
 import { Point2, Rect2, Vec2 } from '@js-draw/math';
 import { cssPrefix } from './SelectionTool';
 import Selection from './Selection';
@@ -7,19 +6,18 @@ import Viewport from '../../Viewport';
 import { SelectionBoxChild } from './types';
 import { ToolLocalization } from '../localization';
 
-
 const verticalOffset = 40;
 
 // `startPoint` is in screen coordinates
-export type DragStartCallback = (startPoint: Point2)=>void;
-export type DragUpdateCallback = (canvasPoint: Point2)=> void;
-export type DragEndCallback = ()=> Promise<void>|void;
+export type DragStartCallback = (startPoint: Point2) => void;
+export type DragUpdateCallback = (canvasPoint: Point2) => void;
+export type DragEndCallback = () => Promise<void> | void;
 
-type OnShowContextMenu = (anchor: Point2)=>void;
+type OnShowContextMenu = (anchor: Point2) => void;
 
 export default class SelectionMenuShortcut implements SelectionBoxChild {
 	private element: HTMLElement;
-	private onClick: ()=>void;
+	private onClick: () => void;
 
 	public constructor(
 		private readonly parent: Selection,
@@ -28,10 +26,7 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		private localization: ToolLocalization,
 	) {
 		this.element = document.createElement('div');
-		this.element.classList.add(
-			`${cssPrefix}handle`,
-			`${cssPrefix}selection-menu`,
-		);
+		this.element.classList.add(`${cssPrefix}handle`, `${cssPrefix}selection-menu`);
 		this.element.style.setProperty('--vertical-offset', `${verticalOffset}px`);
 
 		this.onClick = async () => {
@@ -68,7 +63,9 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		container.appendChild(this.element);
 	}
 
-	public remove() { this.element.remove(); }
+	public remove() {
+		this.element.remove();
+	}
 
 	private getElementScreenSize() {
 		return Vec2.of(this.element.clientWidth, this.element.clientHeight);
@@ -92,12 +89,7 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		const handleSizeCanvas = verticalOffset / this.viewport.getScaleFactor();
 
 		const topLeft = Vec2.of(parentCanvasRect.x, parentCanvasRect.y - handleSizeCanvas);
-		return new Rect2(
-			topLeft.x,
-			topLeft.y,
-			contentCanvasSize.x,
-			contentCanvasSize.y,
-		);
+		return new Rect2(topLeft.x, topLeft.y, contentCanvasSize.x, contentCanvasSize.y);
 	}
 
 	public updatePosition() {
@@ -112,7 +104,7 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		return this.getBBoxCanvasCoords().containsPoint(canvasPoint);
 	}
 
-	private lastDragPointer: Pointer|null = null;
+	private lastDragPointer: Pointer | null = null;
 	public handleDragStart(pointer: Pointer) {
 		this.lastDragPointer = pointer;
 		return true;

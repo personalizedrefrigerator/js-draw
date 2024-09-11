@@ -2,7 +2,10 @@ import { makeArrowBuilder } from '../../components/builders/ArrowBuilder';
 import { makeFreehandLineBuilder } from '../../components/builders/FreehandLineBuilder';
 import { makePressureSensitiveFreehandLineBuilder } from '../../components/builders/PressureSensitiveFreehandLineBuilder';
 import { makeLineBuilder } from '../../components/builders/LineBuilder';
-import { makeFilledRectangleBuilder, makeOutlinedRectangleBuilder } from '../../components/builders/RectangleBuilder';
+import {
+	makeFilledRectangleBuilder,
+	makeOutlinedRectangleBuilder,
+} from '../../components/builders/RectangleBuilder';
 import { makeOutlinedCircleBuilder } from '../../components/builders/CircleBuilder';
 import { ComponentBuilderFactory } from '../../components/builders/types';
 import Editor from '../../Editor';
@@ -44,7 +47,7 @@ export interface PenTypeRecord {
  * See also {@link AbstractToolbar.addDefaultToolWidgets}.
  */
 export default class PenToolWidget extends BaseToolWidget {
-	private updateInputs: ()=> void = () => {};
+	private updateInputs: () => void = () => {};
 	protected penTypes: Readonly<PenTypeRecord>[];
 	protected shapelikeIDs: string[];
 
@@ -52,16 +55,18 @@ export default class PenToolWidget extends BaseToolWidget {
 	private static idCounter: number = 0;
 
 	public constructor(
-		editor: Editor, private tool: Pen, localization?: ToolbarLocalization
+		editor: Editor,
+		private tool: Pen,
+		localization?: ToolbarLocalization,
 	) {
 		super(editor, tool, 'pen', localization);
 
 		// Pen types that correspond to
-		this.shapelikeIDs = [ 'pressure-sensitive-pen', 'freehand-pen' ];
+		this.shapelikeIDs = ['pressure-sensitive-pen', 'freehand-pen'];
 
 		// Additional client-specified pens.
 		const additionalPens = editor.getCurrentSettings().pens?.additionalPenTypes ?? [];
-		const filterPens = editor.getCurrentSettings().pens?.filterPenTypes ?? (()=>true);
+		const filterPens = editor.getCurrentSettings().pens?.filterPenTypes ?? (() => true);
 
 		// Default pen types
 		this.penTypes = [
@@ -84,7 +89,7 @@ export default class PenToolWidget extends BaseToolWidget {
 
 				factory: makePolylineBuilder,
 			},
-			...(additionalPens.filter(pen => !pen.isShapeBuilder)),
+			...additionalPens.filter((pen) => !pen.isShapeBuilder),
 
 			// Shape pens
 			{
@@ -122,10 +127,10 @@ export default class PenToolWidget extends BaseToolWidget {
 				isShapeBuilder: true,
 				factory: makeOutlinedCircleBuilder,
 			},
-			...(additionalPens.filter(pen => pen.isShapeBuilder)),
+			...additionalPens.filter((pen) => pen.isShapeBuilder),
 		].filter(filterPens);
 
-		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
+		this.editor.notifier.on(EditorEventType.ToolUpdated, (toolEvt) => {
 			if (toolEvt.kind !== EditorEventType.ToolUpdated) {
 				throw new Error('Invalid event type!');
 			}
@@ -149,7 +154,7 @@ export default class PenToolWidget extends BaseToolWidget {
 	private getCurrentPenTypeIdx(): number {
 		const currentFactory = this.tool.getStrokeFactory();
 
-		for (let i = 0; i < this.penTypes.length; i ++) {
+		for (let i = 0; i < this.penTypes.length; i++) {
 			if (this.penTypes[i].factory === currentFactory) {
 				return i;
 			}
@@ -157,7 +162,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		return -1;
 	}
 
-	private getCurrentPenType(): PenTypeRecord|null {
+	private getCurrentPenType(): PenTypeRecord | null {
 		for (const penType of this.penTypes) {
 			if (penType.factory === this.tool.getStrokeFactory()) {
 				return penType;
@@ -166,7 +171,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		return null;
 	}
 
-	private createIconForRecord(record: PenTypeRecord|null) {
+	private createIconForRecord(record: PenTypeRecord | null) {
 		const style = {
 			...this.tool.getStyleValue().get(),
 		};
@@ -176,7 +181,12 @@ export default class PenToolWidget extends BaseToolWidget {
 		}
 
 		const strokeFactory = record?.factory;
-		if (!strokeFactory || strokeFactory === makeFreehandLineBuilder || strokeFactory === makePressureSensitiveFreehandLineBuilder || strokeFactory === makePolylineBuilder) {
+		if (
+			!strokeFactory ||
+			strokeFactory === makeFreehandLineBuilder ||
+			strokeFactory === makePressureSensitiveFreehandLineBuilder ||
+			strokeFactory === makePolylineBuilder
+		) {
 			return this.editor.icons.makePenIcon(style);
 		} else {
 			return this.editor.icons.makeIconFromFactory(style);
@@ -186,7 +196,6 @@ export default class PenToolWidget extends BaseToolWidget {
 	protected createIcon(): Element {
 		return this.createIconForRecord(this.getCurrentPenType());
 	}
-
 
 	// Creates a widget that allows selecting different pen types
 	private createPenTypeSelector(helpOverlay?: HelpDisplay) {
@@ -202,13 +211,13 @@ export default class PenToolWidget extends BaseToolWidget {
 		const penSelector = makeGridSelector(
 			this.localizationTable.selectPenType,
 			this.getCurrentPenTypeIdx(),
-			allChoices.filter(choice => !choice.isShapeBuilder),
+			allChoices.filter((choice) => !choice.isShapeBuilder),
 		);
 
 		const shapeSelector = makeGridSelector(
 			this.localizationTable.selectShape,
 			this.getCurrentPenTypeIdx(),
-			allChoices.filter(choice => choice.isShapeBuilder),
+			allChoices.filter((choice) => choice.isShapeBuilder),
 		);
 
 		const onSelectorUpdate = (newPenTypeIndex: number) => {
@@ -261,7 +270,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			container.appendChild(button);
 
 			let checked = false;
-			let onChangeListener = (_checked: boolean)=>{};
+			let onChangeListener = (_checked: boolean) => {};
 
 			const result = {
 				setChecked(newChecked: boolean) {
@@ -269,7 +278,7 @@ export default class PenToolWidget extends BaseToolWidget {
 					button.setAttribute('aria-checked', `${checked}`);
 					onChangeListener(checked);
 				},
-				setOnInputListener(listener: (checked: boolean)=>void) {
+				setOnInputListener(listener: (checked: boolean) => void) {
 					onChangeListener = listener;
 				},
 				addHelpText(text: string) {
@@ -287,7 +296,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			this.localizationTable.inputStabilization,
 			this.editor.icons.makeStrokeSmoothingIcon(),
 		);
-		stabilizationOption.setOnInputListener(enabled => {
+		stabilizationOption.setOnInputListener((enabled) => {
 			this.tool.setHasStabilization(enabled);
 		});
 
@@ -295,7 +304,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			this.localizationTable.strokeAutocorrect,
 			this.editor.icons.makeShapeAutocorrectIcon(),
 		);
-		autocorrectOption.setOnInputListener(enabled => {
+		autocorrectOption.setOnInputListener((enabled) => {
 			this.tool.setStrokeAutocorrectEnabled(enabled);
 		});
 
@@ -322,17 +331,21 @@ export default class PenToolWidget extends BaseToolWidget {
 	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		const container = document.createElement('div');
 		container.classList.add(
-			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
+			`${toolbarCSSPrefix}spacedList`,
+			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
 		);
 
 		// Thickness: Value of the input is squared to allow for finer control/larger values.
-		const { container: thicknessRow, setValue: setThickness } = makeThicknessSlider(this.editor, thickness => {
-			this.tool.setThickness(thickness);
-		});
+		const { container: thicknessRow, setValue: setThickness } = makeThicknessSlider(
+			this.editor,
+			(thickness) => {
+				this.tool.setThickness(thickness);
+			},
+		);
 
 		const colorRow = document.createElement('div');
 		const colorLabel = document.createElement('label');
-		const colorInputControl = makeColorInput(this.editor, color => {
+		const colorInputControl = makeColorInput(this.editor, (color) => {
 			this.tool.setColor(color);
 		});
 		const { input: colorInput, container: colorInputContainer } = colorInputControl;
@@ -353,7 +366,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		// features users are least interested in.
 		helpDisplay?.registerTextHelpForElement(
 			colorRow,
-			this.localizationTable.penDropdown__colorHelpText
+			this.localizationTable.penDropdown__colorHelpText,
 		);
 
 		if (helpDisplay) {
@@ -361,9 +374,9 @@ export default class PenToolWidget extends BaseToolWidget {
 		}
 
 		helpDisplay?.registerTextHelpForElement(
-			thicknessRow, this.localizationTable.penDropdown__thicknessHelpText,
+			thicknessRow,
+			this.localizationTable.penDropdown__thicknessHelpText,
 		);
-
 
 		this.updateInputs = () => {
 			colorInputControl.setValue(this.tool.getColor());
@@ -427,12 +440,15 @@ export default class PenToolWidget extends BaseToolWidget {
 	public override deserializeFrom(state: SavedToolbuttonState) {
 		super.deserializeFrom(state);
 
-		const verifyPropertyType = (propertyName: string, expectedType: 'string'|'number'|'object') => {
-			const actualType = typeof(state[propertyName]);
+		const verifyPropertyType = (
+			propertyName: string,
+			expectedType: 'string' | 'number' | 'object',
+		) => {
+			const actualType = typeof state[propertyName];
 			if (actualType !== expectedType) {
 				throw new Error(
 					`Deserializing property ${propertyName}: Invalid type. Expected ${expectedType},` +
-					` was ${actualType}.`
+						` was ${actualType}.`,
 				);
 			}
 		};

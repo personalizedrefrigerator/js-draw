@@ -1,29 +1,50 @@
-
 $label-visible-opacity: 0.8;
 $show-delay: 0.3s;
 
 @keyframes rehide-label {
-	0% { opacity: $label-visible-opacity; }
-	80% { opacity: $label-visible-opacity; }
-	100% { opacity: 0.1; }
+	0% {
+		opacity: $label-visible-opacity;
+	}
+	80% {
+		opacity: $label-visible-opacity;
+	}
+	100% {
+		opacity: 0.1;
+	}
 }
 
 @keyframes show-label-delayed {
-	0% { opacity: 0; }
+	0% {
+		opacity: 0;
+	}
 	// Keep the label hidden before showing
-	80% { opacity: 0; }
-	100% { opacity: $label-visible-opacity; }
+	80% {
+		opacity: 0;
+	}
+	100% {
+		opacity: $label-visible-opacity;
+	}
 }
 
 @keyframes show-label-now {
-	0% { opacity: 0; }
-	5% { opacity: 0; }
-	100% { opacity: $label-visible-opacity; }
+	0% {
+		opacity: 0;
+	}
+	5% {
+		opacity: 0;
+	}
+	100% {
+		opacity: $label-visible-opacity;
+	}
 }
 
 @keyframes keep-label-hidden {
-	0% { opacity: 0; }
-	100% { opacity: 0; }
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 0;
+	}
 }
 
 // Shows a lable on hover
@@ -41,8 +62,7 @@ $show-delay: 0.3s;
 		// show the label immediately otherwise.
 		&:hover:not(:focus-visible) > #{$label-selector},
 		// When the user is pressing/long-pressing the button
-		&:active > #{$label-selector}
-		{
+		&:active > #{$label-selector} {
 			opacity: $label-visible-opacity;
 			animation: 1s ease show-label-delayed;
 		}
@@ -56,7 +76,8 @@ $show-delay: 0.3s;
 
 	// .focus-visible: Allow setting focus-visible from JS (in cases where this
 	// element isn't the focus target and the browser doesn't support :has).
-	&:focus-visible, &.focus-visible {
+	&:focus-visible,
+	&.focus-visible {
 		& > #{$label-selector} {
 			animation: $keyboard-hide-animation;
 			opacity: 0;
@@ -87,7 +108,9 @@ $show-delay: 0.3s;
 		border-radius: 25px;
 		padding: 10px;
 
-		transition: $show-delay ease opacity, 0.2s ease margin-top;
+		transition:
+			$show-delay ease opacity,
+			0.2s ease margin-top;
 
 		@media (prefers-reduced-motion: reduce) {
 			transition: none;

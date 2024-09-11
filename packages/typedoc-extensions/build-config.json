@@ -1,19 +1,19 @@
 {
-    "inDirectory": "./src",
-    "outDirectory": "./dist",
+	"inDirectory": "./src",
+	"outDirectory": "./dist",
 
-    "bundledFiles": [
-        {
-            "name": "browser",
-	        "inPath": "./src/browser/browser.ts",
-            "outPath": "./dist/js-draw-typedoc-extension--browser.js"
-        },
+	"bundledFiles": [
+		{
+			"name": "browser",
+			"inPath": "./src/browser/browser.ts",
+			"outPath": "./dist/js-draw-typedoc-extension--browser.js"
+		},
 
-        {
-            "name": "preview",
-	        "inPath": "./src/browser/iframe-preview-setup.ts",
-            "outPath": "./dist/js-draw-typedoc-extension--iframe.js"
-        }
-    ],
+		{
+			"name": "preview",
+			"inPath": "./src/browser/iframe-preview-setup.ts",
+			"outPath": "./dist/js-draw-typedoc-extension--iframe.js"
+		}
+	],
 	"prebuild": { "scriptPath": "./tools/prebuild.js" }
 }

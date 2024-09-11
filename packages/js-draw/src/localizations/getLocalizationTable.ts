@@ -1,4 +1,3 @@
-
 import { defaultEditorLocalization, EditorLocalization } from '../localization';
 import de from './de';
 import en from './en';
@@ -27,12 +26,12 @@ const languageFromLocale = (locale: string) => {
  * the list of `userLocales`. If there is no matching language, returns
  * `defaultLocalizationTable`.
  */
-export const matchingLocalizationTable = <T> (
+export const matchingLocalizationTable = <T>(
 	userLocales: readonly string[],
 	localizationTables: Record<string, T>,
-	defaultLocalizationTable: T
+	defaultLocalizationTable: T,
 ): T => {
-	let prevLanguage: string|undefined;
+	let prevLanguage: string | undefined;
 	for (const locale of userLocales) {
 		const language = languageFromLocale(locale);
 

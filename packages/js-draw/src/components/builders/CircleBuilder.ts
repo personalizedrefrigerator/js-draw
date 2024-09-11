@@ -33,11 +33,13 @@ class CircleBuilder implements ComponentBuilder {
 	private buildPreview(): Stroke {
 		const pathCommands: PathCommand[] = [];
 		const numDivisions = 6;
-		const stepSize = Math.PI * 2 / numDivisions;
+		const stepSize = (Math.PI * 2) / numDivisions;
 
 		// Round the stroke width so that when exported it doesn't have unnecessary trailing decimals.
-		const strokeWidth =
-			Viewport.roundPoint(this.endPoint.width, 5 / this.viewport.getScaleFactor());
+		const strokeWidth = Viewport.roundPoint(
+			this.endPoint.width,
+			5 / this.viewport.getScaleFactor(),
+		);
 
 		const center = this.startPoint.pos.lerp(this.endPoint.pos, 0.5);
 		const startEndDelta = this.endPoint.pos.minus(center);
@@ -46,20 +48,14 @@ class CircleBuilder implements ComponentBuilder {
 		const startPoint = center.plus(Vec2.of(radius, 0));
 
 		for (let t = stepSize; t <= Math.PI * 2; t += stepSize) {
-			const endPoint = Vec2.of(
-				radius * Math.cos(t),
-				-radius * Math.sin(t),
-			).plus(center);
+			const endPoint = Vec2.of(radius * Math.cos(t), -radius * Math.sin(t)).plus(center);
 
 			// controlPointRadiusScale is selected to make the circles appear circular and
 			// **does** depend on stepSize.
 			const controlPointRadiusScale = 1.141;
-			const controlPoint = Vec2.of(
-				Math.cos(t - stepSize / 2),
-				-Math.sin(t - stepSize / 2),
-			).times(
-				radius * controlPointRadiusScale
-			).plus(center);
+			const controlPoint = Vec2.of(Math.cos(t - stepSize / 2), -Math.sin(t - stepSize / 2))
+				.times(radius * controlPointRadiusScale)
+				.plus(center);
 
 			pathCommands.push({
 				kind: PathCommandType.QuadraticBezierTo,
@@ -73,8 +69,9 @@ class CircleBuilder implements ComponentBuilder {
 			point: startPoint,
 		});
 
-		const path = new Path(startPoint, pathCommands)
-			.mapPoints(point => this.viewport.roundPoint(point));
+		const path = new Path(startPoint, pathCommands).mapPoints((point) =>
+			this.viewport.roundPoint(point),
+		);
 
 		const preview = new Stroke([
 			pathToRenderable(path, {

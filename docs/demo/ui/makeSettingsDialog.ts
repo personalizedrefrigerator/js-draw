@@ -1,8 +1,14 @@
 import { KeyboardShortcutManager, KeyBinding } from 'js-draw';
 import { Localization } from '../localization';
-import { getIsEdgeToolbar, isDebugWidgetEnabled, loadKeybindingOverrides, saveIsDebugWidgetEnabled, saveIsEdgeToolbar, saveKeybindingOverrides } from '../storage/settings';
+import {
+	getIsEdgeToolbar,
+	isDebugWidgetEnabled,
+	loadKeybindingOverrides,
+	saveIsDebugWidgetEnabled,
+	saveIsEdgeToolbar,
+	saveKeybindingOverrides,
+} from '../storage/settings';
 import './settingsDialog.css';
-
 
 /**
  * Creates a dialog that allows users to adjust settings (e.g. keybindings)
@@ -33,7 +39,8 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 
 		// Adds an input that allows users to specify custom keyboard shortcuts
 		const addKeybindingInput = (id: string) => {
-			const description = KeyboardShortcutManager.getShortcutDescription(id, navigator.languages) ?? id;
+			const description =
+				KeyboardShortcutManager.getShortcutDescription(id, navigator.languages) ?? id;
 			const defaultBindings = KeyboardShortcutManager.getShortcutDefaultKeybindings(id);
 
 			const rowContainer = document.createElement('li');
@@ -51,7 +58,7 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 			}
 
 			const bindingListToString = (bindings: KeyBinding[]) =>
-				bindings.map(binding => binding.toString()).join(', ');
+				bindings.map((binding) => binding.toString()).join(', ');
 			const defaultBindingsStrings = bindingListToString(defaultBindings);
 
 			const label = document.createElement('label');
@@ -70,11 +77,9 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 
 			input.oninput = () => {
 				let hadError = false;
-				let errorMessage: string|null = null;
+				let errorMessage: string | null = null;
 				try {
-					const bindings = input.value
-						.split(', ')
-						.map(binding => KeyBinding.fromString(binding));
+					const bindings = input.value.split(', ').map((binding) => KeyBinding.fromString(binding));
 
 					if (bindingListToString(bindings) !== defaultBindingsStrings) {
 						changedShortcuts[id] = bindings;
@@ -83,7 +88,7 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 						delete changedShortcuts[id];
 						resetButton.style.display = 'none';
 					}
-				} catch(e) {
+				} catch (e) {
 					console.warn('invalid input. Error: ', e);
 					errorMessage = `${e}`;
 					hadError = true;
@@ -92,7 +97,8 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 				if (hadError) {
 					input.setAttribute('aria-invalid', 'true');
 					invalidWarning.setAttribute(
-						'title', localization.bindingParseError(errorMessage ?? 'null')
+						'title',
+						localization.bindingParseError(errorMessage ?? 'null'),
 					);
 				}
 				invalidWarning.style.display = hadError ? 'inline-block' : 'none';
@@ -122,9 +128,11 @@ const makeSettingsDialog = (localization: Localization): Promise<void> => {
 		return onSave;
 	};
 
-
 	const makeCheckboxSection = (
-		headerText: string, labelText: string, initialValue: boolean, onSave: (checked: boolean)=>void,
+		headerText: string,
+		labelText: string,
+		initialValue: boolean,
+		onSave: (checked: boolean) => void,
 	) => {
 		const toolbarHeader = document.createElement('h2');
 		toolbarHeader.innerText = headerText;

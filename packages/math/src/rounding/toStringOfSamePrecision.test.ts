@@ -1,6 +1,5 @@
 import { toStringOfSamePrecision } from './toStringOfSamePrecision';
 
-
 it('toStringOfSamePrecision', () => {
 	expect(toStringOfSamePrecision(1.23456, '1.12')).toBe('1.23');
 	expect(toStringOfSamePrecision(1.23456, '1.120')).toBe('1.235');

@@ -2,13 +2,13 @@ import type Editor from '../Editor';
 import makeMessageDialog from './makeMessageDialog';
 
 export interface AboutDialogLink {
-	kind: 'link',
+	kind: 'link';
 	text: string;
 	href: string;
 }
 
 export interface AboutDialogEntry {
-	heading: string|AboutDialogLink;
+	heading: string | AboutDialogLink;
 	text?: string;
 	minimized?: boolean;
 }
@@ -16,7 +16,7 @@ export interface AboutDialogEntry {
 const makeAboutDialog = (editor: Editor, entries: AboutDialogEntry[]) => {
 	const dialog = makeMessageDialog(editor, {
 		title: editor.localization.about,
-		contentClassNames: [ 'about-dialog-content' ],
+		contentClassNames: ['about-dialog-content'],
 	});
 
 	for (const entry of entries) {
@@ -25,7 +25,7 @@ const makeAboutDialog = (editor: Editor, entries: AboutDialogEntry[]) => {
 
 		const header = document.createElement(entry.minimized ? 'summary' : 'h2');
 
-		if (typeof (entry.heading) === 'string') {
+		if (typeof entry.heading === 'string') {
 			header.innerText = entry.heading;
 		} else {
 			const link = document.createElement('a');

@@ -1,0 +1,14 @@
+# See https://editorconfig.org/
+
+root = true
+
+[*.{js,json,ts,html,py}]
+indent_style = tab
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{md,yml}]
+end_of_line = lf
+

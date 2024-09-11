@@ -9,14 +9,10 @@ export type ResolveFromComponentCallback = () => SerializableCommand;
  * the command is created.
  */
 export default abstract class UnresolvedSerializableCommand extends SerializableCommand {
-	protected component: AbstractComponent|null;
+	protected component: AbstractComponent | null;
 	protected readonly componentID: string;
 
-	protected constructor(
-		commandId: string,
-		componentID: string,
-		component?: AbstractComponent
-	) {
+	protected constructor(commandId: string, componentID: string, component?: AbstractComponent) {
 		super(commandId);
 		this.component = component ?? null;
 		this.componentID = componentID;

@@ -27,18 +27,15 @@ export interface DragControl {
 }
 
 const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): DragControl => {
-	const dragElements = [
-		...options.draggableChildElements,
-		dragElement,
-	];
+	const dragElements = [...options.draggableChildElements, dragElement];
 	let lastX = 0;
 	let lastY = 0;
 	let startX = 0;
 	let startY = 0;
 	let pointerDown = false;
-	let capturedPointerId: number|null = null;
+	let capturedPointerId: number | null = null;
 
-	const isDraggableElement = (element: HTMLElement|null) => {
+	const isDraggableElement = (element: HTMLElement | null) => {
 		if (!element) {
 			return false;
 		}
@@ -49,7 +46,7 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 
 		// Some inputs handle dragging themselves. Don't also interpret such gestures
 		// as dragging the dropdown.
-		const undraggableElementTypes = [ 'INPUT', 'SELECT', 'IMG' ];
+		const undraggableElementTypes = ['INPUT', 'SELECT', 'IMG'];
 
 		let hasSuitableAncestors = false;
 		let ancestor = element.parentElement;
@@ -67,11 +64,20 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		return !undraggableElementTypes.includes(element.tagName) && hasSuitableAncestors;
 	};
 
-	const removeEventListenerCallbacks: Array<()=>void> = [];
+	const removeEventListenerCallbacks: Array<() => void> = [];
 
-	type PointerListenerType = 'pointerdown'|'pointermove'|'pointerup'|'pointerleave'|'pointercancel';
-	type PointerEventListener = (event: PointerEvent)=>void;
-	const addEventListener = (listenerType: PointerListenerType, listener: PointerEventListener, options?: AddEventListenerOptions) => {
+	type PointerListenerType =
+		| 'pointerdown'
+		| 'pointermove'
+		| 'pointerup'
+		| 'pointerleave'
+		| 'pointercancel';
+	type PointerEventListener = (event: PointerEvent) => void;
+	const addEventListener = (
+		listenerType: PointerListenerType,
+		listener: PointerEventListener,
+		options?: AddEventListenerOptions,
+	) => {
 		dragElement.addEventListener(listenerType, listener, options);
 
 		removeEventListenerCallbacks.push(() => {
@@ -90,24 +96,28 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 
 	let startedDragging = false;
 
-	addEventListener('pointerdown', event => {
-		if (event.defaultPrevented || !isDraggableElement(event.target as HTMLElement)) {
-			return;
-		}
+	addEventListener(
+		'pointerdown',
+		(event) => {
+			if (event.defaultPrevented || !isDraggableElement(event.target as HTMLElement)) {
+				return;
+			}
 
-		if (event.isPrimary) {
-			startedDragging = false;
+			if (event.isPrimary) {
+				startedDragging = false;
 
-			lastX = event.clientX;
-			lastY = event.clientY;
+				lastX = event.clientX;
+				lastY = event.clientY;
 
-			startX = event.clientX;
-			startY = event.clientY;
+				startX = event.clientX;
+				startY = event.clientY;
 
-			capturedPointerId = null;
-			pointerDown = true;
-		}
-	}, { passive: true });
+				capturedPointerId = null;
+				pointerDown = true;
+			}
+		},
+		{ passive: true },
+	);
 
 	const onGestureEnd = (_event: Event) => {
 		// If the pointerup/pointercancel event was for a pointer not being tracked,
@@ -129,7 +139,7 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		startedDragging = false;
 	};
 
-	addEventListener('pointermove', event => {
+	addEventListener('pointermove', (event) => {
 		if (!event.isPrimary || !pointerDown) {
 			return undefined;
 		}
@@ -166,7 +176,7 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		}
 	});
 
-	addEventListener('pointerleave', event => {
+	addEventListener('pointerleave', (event) => {
 		// Capture the pointer if it exits the container while dragging.
 		if (capturedPointerId === null && pointerDown && event.isPrimary) {
 			dragElement.setPointerCapture(event.pointerId);

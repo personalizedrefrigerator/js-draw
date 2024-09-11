@@ -7,9 +7,11 @@ const log = document.querySelector('#log') as HTMLTextAreaElement;
 const logData: any[] = [];
 
 const updateLog = () => {
-	log.value = (
-		logData.slice().reverse().map(item => JSON.stringify(item)).join(',\n')
-	);
+	log.value = logData
+		.slice()
+		.reverse()
+		.map((item) => JSON.stringify(item))
+		.join(',\n');
 };
 
 const autoUpdateLogCheckbox = document.querySelector<HTMLInputElement>('input#live-update')!;
@@ -27,17 +29,17 @@ log.oninput = () => {
 	playbackButton.style.display = '';
 };
 
-
 class LoggingEditor extends jsdraw.Editor {
 	// Override and log several internal event handler callbacks
 	public override handleHTMLPointerEvent(
-		eventType: 'pointerdown'|'pointermove'|'pointerup'|'pointercancel', evt: PointerEvent
+		eventType: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel',
+		evt: PointerEvent,
 	) {
 		const result = super.handleHTMLPointerEvent(eventType, evt);
 
 		const data = {
 			eventType,
-			currentTime: (new Date().getTime()),
+			currentTime: new Date().getTime(),
 			timeStamp: evt.timeStamp,
 
 			x: evt.clientX,
@@ -54,7 +56,7 @@ class LoggingEditor extends jsdraw.Editor {
 		return result;
 	}
 
-	protected override handlePaste(event: ClipboardEvent|DragEvent) {
+	protected override handlePaste(event: ClipboardEvent | DragEvent) {
 		const result = super.handlePaste(event);
 		addToLog({
 			eventType: event.type,
@@ -68,7 +70,7 @@ class LoggingEditor extends jsdraw.Editor {
 	protected override setPointerCapture(target: HTMLElement, pointer: number) {
 		try {
 			target.setPointerCapture(pointer);
-		} catch(error) {
+		} catch (error) {
 			// release/setPointerCapture can fail on event playback (when `pointer`
 			// isn't actually down anymore)
 			console.warn(error);
@@ -78,7 +80,7 @@ class LoggingEditor extends jsdraw.Editor {
 	protected override releasePointerCapture(target: HTMLElement, pointer: number) {
 		try {
 			target.releasePointerCapture(pointer);
-		} catch(error) {
+		} catch (error) {
 			console.warn(error);
 		}
 	}
@@ -147,12 +149,12 @@ const editor = new LoggingEditor(document.body, {
 				factory: jsdraw.makePolylineBuilder,
 			},
 		],
-	}
+	},
 });
 const toolbar = editor.addToolbar();
 toolbar.addWidget(new DebugToolbarWidget(editor));
 
-editor.notifier.on(jsdraw.EditorEventType.CommandDone, event => {
+editor.notifier.on(jsdraw.EditorEventType.CommandDone, (event) => {
 	if (event.kind !== jsdraw.EditorEventType.CommandDone) throw new Error('Bad event type.');
 
 	const description = event.command.description(editor, editor.localization).replace(/\t/g, ' ');
@@ -169,7 +171,7 @@ editor.notifier.on(jsdraw.EditorEventType.CommandDone, event => {
 	});
 });
 
-editor.notifier.on(jsdraw.EditorEventType.ToolEnabled, event => {
+editor.notifier.on(jsdraw.EditorEventType.ToolEnabled, (event) => {
 	if (event.kind !== jsdraw.EditorEventType.ToolEnabled) throw new Error('Wrong event type');
 
 	addToLog({
@@ -178,7 +180,7 @@ editor.notifier.on(jsdraw.EditorEventType.ToolEnabled, event => {
 	});
 });
 
-editor.notifier.on(jsdraw.EditorEventType.ToolDisabled, event => {
+editor.notifier.on(jsdraw.EditorEventType.ToolDisabled, (event) => {
 	if (event.kind !== jsdraw.EditorEventType.ToolDisabled) throw new Error('Wrong event type');
 
 	addToLog({
@@ -187,7 +189,7 @@ editor.notifier.on(jsdraw.EditorEventType.ToolDisabled, event => {
 	});
 });
 
-editor.notifier.on(jsdraw.EditorEventType.ToolUpdated, event => {
+editor.notifier.on(jsdraw.EditorEventType.ToolUpdated, (event) => {
 	if (event.kind !== jsdraw.EditorEventType.ToolUpdated) throw new Error('Wrong event type');
 
 	addToLog({
@@ -222,7 +224,7 @@ log.value = '';
 log.placeholder = [
 	'Started successfully! Click "Update" to show the log.',
 	'',
-	'Alternatively, paste an input log into this textbox, then click "play back log".'
+	'Alternatively, paste an input log into this textbox, then click "play back log".',
 ].join('\n');
 
 // To facilitate debugging

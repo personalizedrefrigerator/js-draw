@@ -26,7 +26,7 @@ export default class ToolSwitcherShortcut extends BaseTool {
 		// Map keys 0-9 to primary tools.
 		const keyMatch = /^[0-9]$/.exec(key);
 
-		let targetTool: BaseTool|undefined;
+		let targetTool: BaseTool | undefined;
 		if (keyMatch) {
 			const targetIdx = parseInt(keyMatch[0], 10) - 1;
 			targetTool = primaryTools[targetIdx];

@@ -1,8 +1,7 @@
-
 // See https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values for
 // more
 const keyToKeyCode: Record<string, string> = {
-	'Control': 'ControlLeft',
+	Control: 'ControlLeft',
 	'=': 'Equal',
 	'-': 'Minus',
 	';': 'Semicolon',

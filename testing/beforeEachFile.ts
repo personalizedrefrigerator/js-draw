@@ -19,13 +19,13 @@ HTMLCanvasElement.prototype.getContext = () => null;
 
 // jsdom also doesn't support ResizeObserver. Mock it.
 window.ResizeObserver ??= class {
-	public constructor(_callback: ResizeObserverCallback) { }
+	public constructor(_callback: ResizeObserverCallback) {}
 
-	public disconnect() { }
+	public disconnect() {}
 
-	public observe() { }
+	public observe() {}
 
-	public unobserve() { }
+	public unobserve() {}
 };
 
 // jsdom doesn't support PointerEvent.
@@ -41,7 +41,8 @@ window.PointerEvent ??= class extends MouseEvent {
 	public twist: number;
 
 	public constructor(
-		type: 'pointerdown'|'pointermove'|'pointerup', initDict: PointerEventInit = {},
+		type: 'pointerdown' | 'pointermove' | 'pointerup',
+		initDict: PointerEventInit = {},
 	) {
 		super(type, initDict);
 
@@ -76,16 +77,15 @@ Object.defineProperty(HTMLElement.prototype, 'innerText', {
 });
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
-HTMLDialogElement.prototype.showModal ??= function() {
+HTMLDialogElement.prototype.showModal ??= function () {
 	this.style.display = 'block';
 };
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
-HTMLDialogElement.prototype.close ??= function() {
+HTMLDialogElement.prototype.close ??= function () {
 	this.style.display = 'none';
 	this.dispatchEvent(new Event('close'));
 };
-
 
 // jsdom doesn't support the clipboard API or ClipboardEvents.
 // For now, these are mocked here:
@@ -116,10 +116,10 @@ window.ClipboardItem ??= class {
 	public readonly types: string[];
 
 	public constructor(
-		public readonly items: Record<string, string|Blob|PromiseLike<string|Blob>>,
-		public readonly options?: ClipboardItemOptions
+		public readonly items: Record<string, string | Blob | PromiseLike<string | Blob>>,
+		public readonly options?: ClipboardItemOptions,
 	) {
-		this.types = Object.keys(items).map(key => key.toLowerCase());
+		this.types = Object.keys(items).map((key) => key.toLowerCase());
 	}
 
 	public async getType(type: string) {
@@ -133,7 +133,7 @@ window.ClipboardItem ??= class {
 };
 
 window.ClipboardEvent ??= class extends Event {
-	public clipboardData: DataTransfer|null;
+	public clipboardData: DataTransfer | null;
 
 	public constructor(type: string, options?: ClipboardEventInit) {
 		super(type, options);
@@ -153,7 +153,7 @@ window.DataTransfer ??= class {
 		for (const file of this.files) {
 			types.add(file.type);
 		}
-		return [ ...types.values() ];
+		return [...types.values()];
 	}
 
 	public get items() {
@@ -172,5 +172,5 @@ window.DataTransfer ??= class {
 		this.#data.clear();
 	}
 
-	public setDragImage() { }
+	public setDragImage() {}
 } as any;

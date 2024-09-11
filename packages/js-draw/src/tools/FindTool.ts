@@ -35,15 +35,13 @@ export default class FindTool extends BaseTool {
 	private getMatches(searchFor: string): Rect2[] {
 		const lowerSearchFor = searchFor.toLocaleLowerCase();
 
-		const matchingComponents = this.editor.image.getAllElements().filter(component => {
+		const matchingComponents = this.editor.image.getAllElements().filter((component) => {
 			let text = '';
 			if (component instanceof TextComponent) {
 				text = component.getText();
-			}
-			else if (component instanceof ImageComponent) {
+			} else if (component instanceof ImageComponent) {
 				text = component.getAltText() ?? '';
-			}
-			else {
+			} else {
 				return false;
 			}
 
@@ -53,7 +51,7 @@ export default class FindTool extends BaseTool {
 			return hasLowercaseMatch || hasSameCaseMatch;
 		});
 
-		return matchingComponents.map(match => match.getBBox());
+		return matchingComponents.map((match) => match.getBBox());
 	}
 
 	private focusCurrentMatch() {
@@ -66,20 +64,23 @@ export default class FindTool extends BaseTool {
 
 		if (matchIdx < matches.length) {
 			const undoable = false;
-			void this.editor.dispatch(this.editor.viewport.zoomTo(matches[matchIdx], true, true), undoable);
+			void this.editor.dispatch(
+				this.editor.viewport.zoomTo(matches[matchIdx], true, true),
+				undoable,
+			);
 			this.editor.announceForAccessibility(
-				this.editor.localization.focusedFoundText(matchIdx + 1, matches.length)
+				this.editor.localization.focusedFoundText(matchIdx + 1, matches.length),
 			);
 		}
 	}
 
 	private toNextMatch() {
-		this.currentMatchIdx ++;
+		this.currentMatchIdx++;
 		this.focusCurrentMatch();
 	}
 
 	private toPrevMatch() {
-		this.currentMatchIdx --;
+		this.currentMatchIdx--;
 		this.focusCurrentMatch();
 	}
 
@@ -105,11 +106,9 @@ export default class FindTool extends BaseTool {
 				} else {
 					this.toNextMatch();
 				}
-			}
-			else if (ev.key === 'Escape') {
+			} else if (ev.key === 'Escape') {
 				this.setVisible(false);
-			}
-			else if (this.editor.shortcuts.matchesShortcut(toggleFindVisibleShortcutId, ev)) {
+			} else if (this.editor.shortcuts.matchesShortcut(toggleFindVisibleShortcutId, ev)) {
 				ev.preventDefault();
 				this.toggleVisible();
 			}

@@ -1,4 +1,3 @@
-
 /**
  * Creates a separator element that renders a line and, optionally, a header.
  */

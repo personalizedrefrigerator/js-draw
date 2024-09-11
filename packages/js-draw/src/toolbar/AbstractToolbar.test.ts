@@ -3,7 +3,7 @@ import createEditor from '../testing/createEditor';
 import { makeDropdownToolbar } from './DropdownToolbar';
 import { makeEdgeToolbar } from './EdgeToolbar';
 
-const toolbarConstructors = [ makeDropdownToolbar, makeEdgeToolbar ];
+const toolbarConstructors = [makeDropdownToolbar, makeEdgeToolbar];
 
 describe('AbstractToolbar', () => {
 	test('should allow overriding labels and icons of save and exit buttons', () => {
@@ -59,7 +59,7 @@ describe('AbstractToolbar', () => {
 		const editorElement = editor.getRootElement();
 
 		const toolbar1 = makeEdgeToolbar(editor);
-		toolbar1.addWidgetsForPrimaryTools(tool => !(tool instanceof EraserTool));
+		toolbar1.addWidgetsForPrimaryTools((tool) => !(tool instanceof EraserTool));
 
 		const eraserBtnQuerySelector = '.toolbar-internalWidgetId--eraser-tool-widget';
 		expect(editorElement.querySelectorAll(eraserBtnQuerySelector)).toHaveLength(0);

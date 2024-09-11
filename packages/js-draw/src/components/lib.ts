@@ -11,7 +11,11 @@ import Stroke from './Stroke';
 import TextComponent from './TextComponent';
 import ImageComponent from './ImageComponent';
 import RestyleableComponent from './RestylableComponent';
-import { createRestyleComponentCommand, isRestylableComponent, ComponentStyle as RestyleableComponentStyle } from './RestylableComponent';
+import {
+	createRestyleComponentCommand,
+	isRestylableComponent,
+	ComponentStyle as RestyleableComponentStyle,
+} from './RestylableComponent';
 import BackgroundComponent, { BackgroundType } from './BackgroundComponent';
 
 export {
@@ -20,12 +24,10 @@ export {
 	createRestyleComponentCommand,
 	isRestylableComponent,
 	RestyleableComponentStyle,
-
 	TextComponent,
 
 	/** @deprecated use {@link TextComponent} */
 	TextComponent as Text,
-
 	Stroke as StrokeComponent,
 	BackgroundComponent,
 	BackgroundType as BackgroundComponentBackgroundType,

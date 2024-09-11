@@ -4,10 +4,7 @@ import { ToolbarContext } from '../../types';
 
 let idCounter = 0;
 
-const makeThicknessSlider = (
-	context: ToolbarContext,
-	onChange: (value: number)=>void
-) => {
+const makeThicknessSlider = (context: ToolbarContext, onChange: (value: number) => void) => {
 	const container = document.createElement('div');
 
 	const thicknessLabel = document.createElement('label');
@@ -23,7 +20,7 @@ const makeThicknessSlider = (
 
 	// Use a logarithmic scale for thicknessInput (finer control over thinner strokewidths.)
 	const inverseThicknessInputFn = (t: number) => Math.log10(t);
-	const thicknessInputFn = (t: number) => 10**t;
+	const thicknessInputFn = (t: number) => 10 ** t;
 
 	thicknessInput.type = 'range';
 	thicknessInput.oninput = () => {

@@ -10,13 +10,16 @@ import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 export const makeArrowBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new ArrowBuilder(initialPoint, viewport);
-	}
+	},
 );
 
 export default class ArrowBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;
 
-	public constructor(private readonly startPoint: StrokeDataPoint, private readonly viewport: Viewport) {
+	public constructor(
+		private readonly startPoint: StrokeDataPoint,
+		private readonly viewport: Viewport,
+	) {
 		this.endPoint = startPoint;
 	}
 
@@ -79,8 +82,8 @@ export default class ArrowBuilder implements ComponentBuilder {
 				kind: PathCommandType.LineTo,
 				point: arrowTipBase.minus(scaledBaseNormal),
 			},
-		// Round all points in the arrow (to remove unnecessary decimal places)
-		]).mapPoints(point => this.viewport.roundPoint(point));
+			// Round all points in the arrow (to remove unnecessary decimal places)
+		]).mapPoints((point) => this.viewport.roundPoint(point));
 
 		const preview = new Stroke([
 			{
@@ -88,8 +91,8 @@ export default class ArrowBuilder implements ComponentBuilder {
 				commands: path.parts,
 				style: {
 					fill: this.startPoint.color,
-				}
-			}
+				},
+			},
 		]);
 
 		return preview;

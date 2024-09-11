@@ -1,4 +1,3 @@
-
 @use './makeAboutDialog.scss';
 @use './makeMessageDialog.scss';
 
@@ -8,7 +7,7 @@
 		color: var(--foreground-color-1);
 		border: none;
 		outline: none;
-	
+
 		box-shadow: 0 0 2px var(--shadow-color);
 		border-radius: 8px;
 
@@ -19,7 +18,7 @@
 		&::backdrop {
 			backdrop-filter: blur(5px);
 			-webkit-backdrop-filter: blur(5px);
-			background-color: var( --background-color-transparent);
+			background-color: var(--background-color-transparent);
 		}
 	}
 }

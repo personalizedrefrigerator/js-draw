@@ -1,11 +1,10 @@
-
 import { Editor } from 'js-draw';
 
 //
 // See /docs/debugging/stroke-logging
 //
-const playInputLog = async (editor: Editor, data: any[], rate: number|undefined) => {
-	let lastEventTimestamp: number|null = null;
+const playInputLog = async (editor: Editor, data: any[], rate: number | undefined) => {
+	let lastEventTimestamp: number | null = null;
 	let encounteredSignificantEvent = false;
 
 	for (const event of data) {
@@ -27,7 +26,6 @@ const playInputLog = async (editor: Editor, data: any[], rate: number|undefined)
 		lastEventTimestamp = event.timeStamp;
 
 		if (['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].includes(event.eventType)) {
-
 			const ptrEvent = new PointerEvent(event.eventType, {
 				clientX: event.x,
 				clientY: event.y,

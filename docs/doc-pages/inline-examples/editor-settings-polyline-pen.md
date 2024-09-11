@@ -1,4 +1,3 @@
-
 ```ts,runnable
 import { Editor, makePolylineBuilder } from 'js-draw';
 

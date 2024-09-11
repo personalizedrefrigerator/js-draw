@@ -1,4 +1,3 @@
-
 // Imports from js-draw. Because thsi file is part of the js-draw
 // workspace, we use a relative path to impor these.
 import { Vec2, Editor } from 'js-draw';
@@ -21,10 +20,10 @@ const showSavePopup = (
 	imageSaver: ImageSaver,
 
 	// Called when data has been saved successfully.
-	onSaveSuccess: ()=>void,
+	onSaveSuccess: () => void,
 
 	// Called when the dialog is closed
-	onDialogClose?: ()=>void,
+	onDialogClose?: () => void,
 ) => {
 	let imgHTML = img.outerHTML;
 
@@ -42,7 +41,7 @@ const showSavePopup = (
 	//       Until then, the iframe provides no additional security protections (which is fine
 	//       for how we're currently using it).
 	popupIframe.setAttribute('sandbox', 'allow-same-origin allow-downloads allow-scripts');
-	popupIframe.setAttribute('csp', 'default-src \'about:blank\'');
+	popupIframe.setAttribute('csp', "default-src 'about:blank'");
 	popupContainer.replaceChildren(popupIframe);
 
 	const popup = popupIframe.contentWindow!;
@@ -161,8 +160,7 @@ const showSavePopup = (
 				</div>
 			</main>
 		</body>
-		</html>`
-	);
+		</html>`);
 	popupDoc.close();
 
 	popupContainer.show();
@@ -202,9 +200,7 @@ const showSavePopup = (
 		const updatePreview = (content: string) => {
 			// Convert unicode characters to base64. See https://stackoverflow.com/a/75155959
 			// TODO: simplify
-			const encoded = window.btoa(
-				String.fromCharCode(...new TextEncoder().encode(content))
-			);
+			const encoded = window.btoa(String.fromCharCode(...new TextEncoder().encode(content)));
 
 			imagePreview.src = 'data:image/svg+xml;base64,' + encoded;
 		};
@@ -219,7 +215,10 @@ const showSavePopup = (
 		};
 
 		previewRegion.replaceChildren(
-			messageContainer, svgTextContainer, imagePreview, saveChangesButton
+			messageContainer,
+			svgTextContainer,
+			imagePreview,
+			saveChangesButton,
 		);
 	};
 
@@ -236,7 +235,7 @@ const showSavePopup = (
 	const downloadButton = popup.document.createElement('button');
 	downloadButton.innerText = localization.download;
 	downloadButton.onclick = () => {
-		const blob = new Blob([ imgHTML ], { type: 'image/svg' });
+		const blob = new Blob([imgHTML], { type: 'image/svg' });
 		const objectURL = URL.createObjectURL(blob);
 
 		const link = popup.document.createElement('a');
@@ -306,9 +305,9 @@ const showSavePopup = (
 	popupControlsArea.appendChild(downloadButton);
 
 	const writeImage = async (svgText: string) => {
-		let imageSize = `${Math.round(svgText.length / 1024 * 10) / 10} KiB`;
+		let imageSize = `${Math.round((svgText.length / 1024) * 10) / 10} KiB`;
 		if (svgText.length > 1024 * 1024) {
-			imageSize = `${Math.round(svgText.length / 1024 * 10 / 1024) / 10} MiB`;
+			imageSize = `${Math.round(((svgText.length / 1024) * 10) / 1024) / 10} MiB`;
 		}
 
 		let saveStatus = localization.savedAs(imageSaver.title);
@@ -330,9 +329,7 @@ const showSavePopup = (
 		previewRegion.replaceChildren(
 			popup.document.createTextNode(saveStatus),
 			popup.document.createTextNode(' '),
-			popup.document.createTextNode(
-				localization.imageSize(imageSize)
-			),
+			popup.document.createTextNode(localization.imageSize(imageSize)),
 		);
 
 		if (!error) {

@@ -1,4 +1,3 @@
-
 export interface KeyCombination {
 	/** A key (e.g. `a`, `b`, `control`). */
 	readonly key: string;
@@ -12,7 +11,7 @@ export interface KeyCombination {
 	/**
 	 * Whether the shift key must be pressed to trigger the shortcut.
 	 */
-	readonly shiftKey: boolean|undefined;
+	readonly shiftKey: boolean | undefined;
 
 	/** Whether the control key must be pressed to trigger the shortcut */
 	readonly ctrlKey: boolean;
@@ -28,15 +27,11 @@ export interface KeyCombination {
 }
 
 const isUppercaseLetter = (text: string) => {
-	return text.toUpperCase() === text
-		&& text.toLowerCase() !== text
-		&& text.length === 1;
+	return text.toUpperCase() === text && text.toLowerCase() !== text && text.length === 1;
 };
 
 const isLowercaseLetter = (text: string) => {
-	return text.toLowerCase() === text
-		&& text.toUpperCase() !== text
-		&& text.length === 1;
+	return text.toLowerCase() === text && text.toUpperCase() !== text && text.length === 1;
 };
 
 /** Represents a key combination that can trigger a keyboard shortcut. */
@@ -47,7 +42,7 @@ export default class KeyBinding implements KeyCombination {
 	/**
 	 * If undefined, the state of the shift key is ignored.
 	 */
-	public readonly shiftKey: boolean|undefined;
+	public readonly shiftKey: boolean | undefined;
 
 	/** @inheritdoc */
 	public readonly ctrlKey: boolean;
@@ -81,10 +76,9 @@ export default class KeyBinding implements KeyCombination {
 		const ctrlKey = (keyEvent.ctrlKey ?? false) || lowercaseKey === 'control';
 		const altKey = (keyEvent.altKey ?? false) || lowercaseKey === 'alt';
 		const metaKey = (keyEvent.metaKey ?? false) || lowercaseKey === 'meta';
-		const shiftKey =
-				(keyEvent.shiftKey ?? isUpperCaseKey) || lowercaseKey === 'shift';
+		const shiftKey = (keyEvent.shiftKey ?? isUpperCaseKey) || lowercaseKey === 'shift';
 		const keyEventHasCtrlOrMeta =
-				keyEvent.controlOrMeta || keyEvent.ctrlKey || keyEvent.metaKey || false;
+			keyEvent.controlOrMeta || keyEvent.ctrlKey || keyEvent.metaKey || false;
 
 		// If we're not working with key codes,
 		if (this.key !== keyEvent.code) {
@@ -98,7 +92,8 @@ export default class KeyBinding implements KeyCombination {
 			if ((isUpperCaseKey || isLowercaseKey) && this.key !== keyEvent.key) {
 				// this.shiftKey may be interpreted as allowing this shortcut to be uppercased.
 				// If so, try making this.key uppercase and matching the shortcut.
-				const uppercaseKeyMatches = this.shiftKey === true && this.key.toUpperCase() === keyEvent.key;
+				const uppercaseKeyMatches =
+					this.shiftKey === true && this.key.toUpperCase() === keyEvent.key;
 				if (!uppercaseKeyMatches) {
 					return false;
 				}
@@ -109,14 +104,12 @@ export default class KeyBinding implements KeyCombination {
 		// Match ctrl/meta if the shortcut doesn't have controlOrMeta specified
 		// (controlOrMeta should match either).
 		const ctrlAndMetaMatches =
-			ctrlKey === this.ctrlKey
-			&& metaKey === this.metaKey
-			&& !shortcutControlOrMeta;
+			ctrlKey === this.ctrlKey && metaKey === this.metaKey && !shortcutControlOrMeta;
 
 		const matches =
-			(ctrlAndMetaMatches || (shortcutControlOrMeta && keyEventHasCtrlOrMeta))
-			&& altKey === this.altKey
-			&& (shiftKey === this.shiftKey || this.shiftKey === undefined);
+			(ctrlAndMetaMatches || (shortcutControlOrMeta && keyEventHasCtrlOrMeta)) &&
+			altKey === this.altKey &&
+			(shiftKey === this.shiftKey || this.shiftKey === undefined);
 		return matches;
 	}
 
@@ -155,12 +148,11 @@ export default class KeyBinding implements KeyCombination {
 		const getDefaultModifiers = (key: string) => {
 			// Unless a letter, as long as the given key matches, it shouldn't matter whether
 			// the shift key is pressed.
-			let shiftKey: boolean|undefined = undefined;
+			let shiftKey: boolean | undefined = undefined;
 
 			if (isUppercaseLetter(key)) {
 				shiftKey = true;
-			}
-			else if (isLowercaseLetter(key)) {
+			} else if (isLowercaseLetter(key)) {
 				shiftKey = false;
 			}
 			// If not just a single character (e.g. a key code like KeyA), shift must
@@ -218,29 +210,29 @@ export default class KeyBinding implements KeyCombination {
 			}
 
 			switch (modifier.toLowerCase()) {
-			case 'shift':
-				shiftKey = true;
-				break;
-			case 'anyshift':
-				shiftKey = undefined;
-				break;
-			case 'ctrl':
-			case 'control':
-				ctrlKey = true;
-				break;
-			case 'meta':
-				metaKey = true;
-				break;
-			case 'ctrlormeta':
-			case 'ctrl or meta':
-			case 'controlormeta':
-				controlOrMeta = true;
-				break;
-			case 'alt':
-				altKey = true;
-				break;
-			default:
-				throw new Error(`Unknown modifier: "${modifier}" in shortcut ${shortcutStr}.`);
+				case 'shift':
+					shiftKey = true;
+					break;
+				case 'anyshift':
+					shiftKey = undefined;
+					break;
+				case 'ctrl':
+				case 'control':
+					ctrlKey = true;
+					break;
+				case 'meta':
+					metaKey = true;
+					break;
+				case 'ctrlormeta':
+				case 'ctrl or meta':
+				case 'controlormeta':
+					controlOrMeta = true;
+					break;
+				case 'alt':
+					altKey = true;
+					break;
+				default:
+					throw new Error(`Unknown modifier: "${modifier}" in shortcut ${shortcutStr}.`);
 			}
 		}
 

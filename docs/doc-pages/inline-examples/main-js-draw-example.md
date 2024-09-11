@@ -1,4 +1,3 @@
-
 ```ts,runnable
 import { Editor, Vec3, Mat33, EditorSettings, ShortcutManager } from 'js-draw';
 
@@ -15,7 +14,7 @@ import 'js-draw/styles';
 	const settings: EditorSettings = {
 		// Use a non-default set of icons
 		iconProvider: new MaterialIconProvider(),
-	
+
 		// Only capture mouse wheel events if the editor has focus. This is useful
 		// when the editor is part of a larger, scrolling page.
 		wheelEventsEnabled: 'only-if-focused',

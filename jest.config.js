@@ -5,14 +5,9 @@ const config = {
 	preset: 'ts-jest',
 
 	// File extensions for imports, in order of precedence:
-	moduleFileExtensions: [
-		'ts',
-		'js',
-	],
+	moduleFileExtensions: ['ts', 'js'],
 
-	testPathIgnorePatterns: [
-		'<rootDir>/dist/', '<rootDir>/node_modules/'
-	],
+	testPathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/node_modules/'],
 
 	// Mocks.
 	// See https://jestjs.io/docs/webpack#handling-static-assets
@@ -29,7 +24,7 @@ const config = {
 		// from being repeatedly logged to the console during testing.
 		runScripts: 'outside-only',
 	},
-	setupFilesAfterEnv: [ '<rootDir>/testing/beforeEachFile.ts' ],
+	setupFilesAfterEnv: ['<rootDir>/testing/beforeEachFile.ts'],
 };
 
 module.exports = config;

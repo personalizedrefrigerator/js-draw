@@ -1,4 +1,3 @@
-
 /**
  * Solves an equation of the form ax² + bx + c = 0.
  * The larger solution is returned first.
@@ -21,13 +20,13 @@ const solveQuadratic = (a: number, b: number, c: number): [number, number] => {
 			solution = -c / b;
 		}
 
-		return [ solution, solution ];
+		return [solution, solution];
 	}
 
 	const discriminant = b * b - 4 * a * c;
 
 	if (discriminant < 0) {
-		return [ NaN, NaN ];
+		return [NaN, NaN];
 	}
 
 	const rootDiscriminant = Math.sqrt(discriminant);
@@ -35,9 +34,9 @@ const solveQuadratic = (a: number, b: number, c: number): [number, number] => {
 	const solution2 = (-b - rootDiscriminant) / (2 * a);
 
 	if (solution1 > solution2) {
-		return [ solution1, solution2 ];
+		return [solution1, solution2];
 	} else {
-		return [ solution2, solution1 ];
+		return [solution2, solution1];
 	}
 };
 export default solveQuadratic;

@@ -1,4 +1,3 @@
-
 import { BaseWidget, Editor, EditorImage } from 'js-draw';
 import { Localization, getLocalizationTable } from './localization';
 
@@ -55,7 +54,7 @@ export default class DebugToolbarWidget extends BaseWidget {
 		container.classList.add('toolbar-spacedList', 'toolbar-nonbutton-controls-main-list');
 
 		const addLabeledInput = (label: string, input: HTMLInputElement) => {
-			const id = `debugwidget-input-${this.idCounter ++}`;
+			const id = `debugwidget-input-${this.idCounter++}`;
 
 			const newContainer = document.createElement('div');
 			const labelElement = document.createElement('label');
@@ -78,14 +77,12 @@ export default class DebugToolbarWidget extends BaseWidget {
 		dprInput.value = `${window.devicePixelRatio}`;
 		addLabeledInput('DPR', dprInput);
 
-
 		const cacheDebugModeCheckbox = document.createElement('input');
 		cacheDebugModeCheckbox.type = 'checkbox';
 		cacheDebugModeCheckbox.oninput = () => {
 			this.editor.display.getCache().setIsDebugMode(cacheDebugModeCheckbox.checked);
 		};
 		addLabeledInput('Cache debugging', cacheDebugModeCheckbox);
-
 
 		const rendererDebugModeCheckbox = document.createElement('input');
 		rendererDebugModeCheckbox.type = 'checkbox';
@@ -100,15 +97,16 @@ export default class DebugToolbarWidget extends BaseWidget {
 		};
 		addLabeledInput('EditorImage debugging', rendererDebugModeCheckbox);
 
-
 		const rightToLeftModeCheckbox = document.createElement('input');
 		rightToLeftModeCheckbox.type = 'checkbox';
 		rightToLeftModeCheckbox.oninput = () => {
-			this.editor.getRootElement().style.direction = rightToLeftModeCheckbox.checked ? 'rtl' : 'ltr';
+			this.editor.getRootElement().style.direction = rightToLeftModeCheckbox.checked
+				? 'rtl'
+				: 'ltr';
 		};
-		rightToLeftModeCheckbox.checked = getComputedStyle(this.editor.getRootElement()).direction === 'rtl';
+		rightToLeftModeCheckbox.checked =
+			getComputedStyle(this.editor.getRootElement()).direction === 'rtl';
 		addLabeledInput('RTL', rightToLeftModeCheckbox);
-
 
 		dropdown.replaceChildren(container);
 

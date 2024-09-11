@@ -1,6 +1,6 @@
-name: "Bug report"
-description: "Report an issue with js-draw."
-title: "Bug: "
+name: 'Bug report'
+description: 'Report an issue with js-draw.'
+title: 'Bug: '
 labels: [bug]
 assignees: []
 body:
@@ -11,55 +11,55 @@ body:
   - type: textarea
     id: issue-description
     attributes:
-      label: "Describe the issue"
-      description: "This should be a short and simple description of the issue."
-      placeholder: "A clear and concise description of the issue."
+      label: 'Describe the issue'
+      description: 'This should be a short and simple description of the issue.'
+      placeholder: 'A clear and concise description of the issue.'
     validations:
       required: true
   - type: textarea
     id: reproduction-steps
     attributes:
-      label: "Steps to reproduce the issue"
-      description: "If possible, provide a list of steps to reproduce the issue."
+      label: 'Steps to reproduce the issue'
+      description: 'If possible, provide a list of steps to reproduce the issue.'
       value: |
         1. Open ...
         2. Switch to the ... tool.
         3. ...
-      placeholder: "Reproduction steps"
+      placeholder: 'Reproduction steps'
   - type: textarea
     id: expected-behavior
     attributes:
-      label: "Expected behavior"
-      description: "What should have happened?"
-      placeholder: "A concise description of what was expected to happen."
+      label: 'Expected behavior'
+      description: 'What should have happened?'
+      placeholder: 'A concise description of what was expected to happen.'
   - type: textarea
     id: observed-behavior
     attributes:
-      label: "Observed behavior"
-      description: "What happened?"
-      placeholder: "A concise description of what happened."
+      label: 'Observed behavior'
+      description: 'What happened?'
+      placeholder: 'A concise description of what happened.'
   - type: input
     id: version
     attributes:
-      label: "Version information"
-      description: "What version of js-draw were you using?"
-      placeholder: "version (e.g. 1.7.0, 0.20.5, or unknown)"
+      label: 'Version information'
+      description: 'What version of js-draw were you using?'
+      placeholder: 'version (e.g. 1.7.0, 0.20.5, or unknown)'
     validations:
       required: true
   - type: textarea
     id: platform
     attributes:
-      label: "Platform"
-      description: "What browsers/environments did you test with? (For example, `Chrome 120.0.1234.56`, `Joplin Mobile 12.3`, or `Firefox 113.1`)"
+      label: 'Platform'
+      description: 'What browsers/environments did you test with? (For example, `Chrome 120.0.1234.56`, `Joplin Mobile 12.3`, or `Firefox 113.1`)'
   - type: textarea
     id: logs
     attributes:
-      label: "Logs"
-      description: "If appropriate, [it may be helpful to create and attach an input log](https://js-draw.web.app/debugging/stroke-logging/)."
-      placeholder: "Input log"
+      label: 'Logs'
+      description: 'If appropriate, [it may be helpful to create and attach an input log](https://js-draw.web.app/debugging/stroke-logging/).'
+      placeholder: 'Input log'
       render: shell
   - type: textarea
     id: additional-info
     attributes:
-      label: "Additional information"
-      description: "Any additional context or information (e.g. screenshots)."
+      label: 'Additional information'
+      description: 'Any additional context or information (e.g. screenshots).'

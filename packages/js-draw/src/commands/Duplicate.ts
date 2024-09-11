@@ -35,7 +35,7 @@ export default class Duplicate extends SerializableCommand {
 	public constructor(private toDuplicate: AbstractComponent[]) {
 		super('duplicate');
 
-		this.duplicates = toDuplicate.map(elem => elem.clone());
+		this.duplicates = toDuplicate.map((elem) => elem.clone());
 		this.reverse = new Erase(this.duplicates);
 	}
 
@@ -58,12 +58,12 @@ export default class Duplicate extends SerializableCommand {
 
 		return localizationTable.duplicateAction(
 			describeComponentList(localizationTable, this.duplicates) ?? localizationTable.elements,
-			this.duplicates.length
+			this.duplicates.length,
 		);
 	}
 
 	protected serializeToJSON() {
-		return this.toDuplicate.map(elem => elem.getId());
+		return this.toDuplicate.map((elem) => elem.getId());
 	}
 
 	static {

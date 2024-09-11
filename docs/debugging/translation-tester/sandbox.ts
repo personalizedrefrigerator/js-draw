@@ -9,8 +9,8 @@ const generateTranslationScript = (input: string) => {
 
 	const lines = input.split('\n');
 
-	let nextKey: string|null = null;
-	for (let i = 0; i < lines.length; i ++) {
+	let nextKey: string | null = null;
+	for (let i = 0; i < lines.length; i++) {
 		let line = lines[i];
 		if (!nextKey) {
 			nextKey = line.replace(/^###\s*/, '');
@@ -28,7 +28,7 @@ const generateTranslationScript = (input: string) => {
 			const valueLines = [];
 
 			i++;
-			for (; i < lines.length; i ++) {
+			for (; i < lines.length; i++) {
 				line = lines[i];
 				if (line === '```') {
 					break;
@@ -63,10 +63,11 @@ const generateTranslationScript = (input: string) => {
 		translationLines.push(`\t${key}: ${value},`);
 	}
 
-	const warningLine = 'console.warn(\'This file needs to be manually verified -- translations can contain JavaScript\');';
+	const warningLine =
+		"console.warn('This file needs to be manually verified -- translations can contain JavaScript');";
 
 	const tsFileData = [
-		'import { defaultEditorLocalization, EditorLocalization } from \'../localization\';',
+		"import { defaultEditorLocalization, EditorLocalization } from '../localization';",
 		'',
 		warningLine,
 		`// ${lang} localization`,
@@ -78,12 +79,7 @@ const generateTranslationScript = (input: string) => {
 		'export default localization;',
 	];
 
-	const jsFileData = [
-		'({',
-		'\t...defaultEditorLocalization,',
-		...translationLines,
-		'})',
-	];
+	const jsFileData = ['({', '\t...defaultEditorLocalization,', ...translationLines, '})'];
 
 	return {
 		ts: tsFileData.join('\n'),
@@ -141,7 +137,6 @@ const main = () => {
 
 		editor.addToolbar();
 	};
-
 };
 
 main();

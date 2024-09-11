@@ -1,4 +1,11 @@
-import { AbstractToolbar, Editor, EditorEventType, EventDispatcher, makeDropdownToolbar, makeEdgeToolbar } from 'js-draw';
+import {
+	AbstractToolbar,
+	Editor,
+	EditorEventType,
+	EventDispatcher,
+	makeDropdownToolbar,
+	makeEdgeToolbar,
+} from 'js-draw';
 import 'js-draw/styles';
 import MaterialIconProvider from '@js-draw/material-icons';
 import { DebugToolbarWidget } from '@js-draw/debugging';
@@ -16,7 +23,13 @@ import FloatingActionButton from './ui/FloatingActionButton';
 import { makeIconFromText } from './icons';
 import makeNewImageDialog from './ui/makeNewImageDialog';
 import { AppNotifier } from './types';
-import { getIsEdgeToolbar, isDebugWidgetEnabled, loadKeybindingOverrides, restoreToolbarState, saveToolbarState } from './storage/settings';
+import {
+	getIsEdgeToolbar,
+	isDebugWidgetEnabled,
+	loadKeybindingOverrides,
+	restoreToolbarState,
+	saveToolbarState,
+} from './storage/settings';
 import makeSettingsDialog from './ui/makeSettingsDialog';
 
 // Creates and sets up a new Editor
@@ -30,10 +43,10 @@ const createEditor = async (
 	appNotifier: AppNotifier,
 
 	// Function that can be called to save the content of the editor.
-	saveCallback: (onComplete?: ()=>void)=>void,
+	saveCallback: (onComplete?: () => void) => void,
 
 	// Function that returns the initial editor data
-	getInitialSVGData: ()=>Promise<string>,
+	getInitialSVGData: () => Promise<string>,
 ): Promise<Editor> => {
 	const parentElement = document.body;
 	const editor = new Editor(parentElement, {
@@ -44,11 +57,11 @@ const createEditor = async (
 		// but not a custom version.
 		appInfo: {
 			name: 'js-draw demo',
-			description: 'An app demonstrating the js-draw library\'s functionality.',
+			description: "An app demonstrating the js-draw library's functionality.",
 		},
 
 		text: {
-			fonts: [ 'serif', 'sans-serif', 'monospace' ],
+			fonts: ['serif', 'sans-serif', 'monospace'],
 		},
 	});
 
@@ -67,7 +80,6 @@ const createEditor = async (
 		dropdownToolbar.addOverflowWidget();
 		toolbar = dropdownToolbar;
 	}
-
 
 	const closeEditor = () => {
 		editor.remove();
@@ -90,11 +102,9 @@ const createEditor = async (
 		saveCallback();
 	});
 
-
 	if (isDebugWidgetEnabled()) {
 		toolbar.addWidget(new DebugToolbarWidget(editor));
 	}
-
 
 	// Save toolbar state whenever tool state changes (which could be caused by a
 	// change in the one of the toolbar widgets).
@@ -156,9 +166,7 @@ const watchForChanges = (editor: Editor, appNotifier: AppNotifier) => {
 
 // Show a confirmation dialog if the user attemtps to close the page while there
 // are unsaved changes.
-const setUpUnsavedChangesWarning = (
-	localization: Localization, hasChanges: ()=>boolean,
-) => {
+const setUpUnsavedChangesWarning = (localization: Localization, hasChanges: () => boolean) => {
 	// Show a confirmation dialog when the user tries to close the page.
 	window.onbeforeunload = () => {
 		if (hasChanges()) {
@@ -167,7 +175,6 @@ const setUpUnsavedChangesWarning = (
 
 		return undefined;
 	};
-
 };
 
 // Saves the contents of `editor` using the given `saveMethod` (an ImageSaver is an
@@ -182,7 +189,7 @@ const saveImage = (
 	saveMethod: ImageSaver,
 	appNotifier: AppNotifier,
 
-	onDialogClose?: ()=>void
+	onDialogClose?: () => void,
 ) => {
 	const onSaveSuccess = () => {
 		// Notify other parts of the app that the image was saved successfully.
@@ -194,11 +201,18 @@ const saveImage = (
 		minDimension: 30,
 	};
 
-	showSavePopup(localization, editor.toSVG(toSVGOptions), editor, saveMethod, onSaveSuccess, onDialogClose);
+	showSavePopup(
+		localization,
+		editor.toSVG(toSVGOptions),
+		editor,
+		saveMethod,
+		onSaveSuccess,
+		onDialogClose,
+	);
 };
 
 // Destroys the welcome screen.
-let launchScreen: HTMLElement|null = null;
+let launchScreen: HTMLElement | null = null;
 const hideLaunchOptions = () => {
 	launchScreen = document.querySelector('#launchOptions');
 	launchScreen?.remove();
@@ -241,16 +255,19 @@ const handlePWALaunching = (localization: Localization, appNotifier: AppNotifier
 				localization,
 				appNotifier,
 
-				onClose => saveImage(localization, editor, fileSaver, appNotifier, onClose),
+				(onClose) => saveImage(localization, editor, fileSaver, appNotifier, onClose),
 
-				() => blob.text());
+				() => blob.text(),
+			);
 		});
 	}
 };
 
 // Fills `launchButtonContainer` with a list of recent saves
 const fillLaunchList = async (
-	launchButtonContainer: HTMLElement, localization: Localization, appNotifier: AppNotifier
+	launchButtonContainer: HTMLElement,
+	localization: Localization,
+	appNotifier: AppNotifier,
 ) => {
 	// Load from a data store entry. `storeEntry` might be, for example,
 	// an image and its metadata as stored in this app's database.
@@ -263,7 +280,7 @@ const fillLaunchList = async (
 
 			// A function called when the save button is pressed
 			// onClose should be fired when the save dialog closes.
-			onClose => saveImage(localization, editor, storeEntry, appNotifier, onClose),
+			(onClose) => saveImage(localization, editor, storeEntry, appNotifier, onClose),
 
 			// A function that returns the initial SVG data to load
 			() => storeEntry.read(),
@@ -286,7 +303,7 @@ const fillLaunchList = async (
 
 	// Wrap window.indexeddb in a similar class. Both extend AbstractStore, which
 	// allows our image saving/loading code to work with either/both.
-	let dbStore: IndexedDBStore|null;
+	let dbStore: IndexedDBStore | null;
 	try {
 		dbStore = await IndexedDBStore.create(localization);
 	} catch (error) {
@@ -300,14 +317,21 @@ const fillLaunchList = async (
 		launchButtonContainer.appendChild(dbLoadSaveList);
 	}
 
-	const lsLoadSaveList = await makeLoadFromSaveList(localStorageDataStore, loadFromStoreEntry, localization);
+	const lsLoadSaveList = await makeLoadFromSaveList(
+		localStorageDataStore,
+		loadFromStoreEntry,
+		localization,
+	);
 	launchButtonContainer.appendChild(lsLoadSaveList);
 
 	// Add a "new image" floating action button.
-	const newImageFAB = new FloatingActionButton({
-		title: localization.new,
-		icon: makeIconFromText('+')
-	}, launchButtonContainer);
+	const newImageFAB = new FloatingActionButton(
+		{
+			title: localization.new,
+			icon: makeIconFromText('+'),
+		},
+		launchButtonContainer,
+	);
 
 	newImageFAB.addClickListener(async () => {
 		// Disable the FAB while the "new image" dialog is open: We don't want

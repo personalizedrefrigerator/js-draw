@@ -5,19 +5,21 @@ import KeyboardShortcutManager from './KeyboardShortcutManager';
 describe('KeyboardShortcutManager', () => {
 	it('should contain default shortcuts for undo', () => {
 		const defaultUndoShortcutKeybinds =
-				KeyboardShortcutManager.getShortcutDefaultKeybindings(undoKeyboardShortcutId);
+			KeyboardShortcutManager.getShortcutDefaultKeybindings(undoKeyboardShortcutId);
 		expect(defaultUndoShortcutKeybinds.length).toBeGreaterThanOrEqual(1);
-		expect(defaultUndoShortcutKeybinds.some(shortcut => {
-			return shortcut.key === 'KeyZ' && shortcut.controlOrMeta;
-		})).toBe(true);
+		expect(
+			defaultUndoShortcutKeybinds.some((shortcut) => {
+				return shortcut.key === 'KeyZ' && shortcut.controlOrMeta;
+			}),
+		).toBe(true);
 	});
 
 	it('should be possible to override keyboard shortcuts', () => {
 		const testNewId = 'someIdThatDoesNowExist';
 		KeyboardShortcutManager.registerDefaultKeyboardShortcut(
 			testNewId,
-			[ KeyBinding.fromString('ctrl-1'), KeyBinding.fromString('-') ],
-			'Some description'
+			[KeyBinding.fromString('ctrl-1'), KeyBinding.fromString('-')],
+			'Some description',
 		);
 
 		const shortcutManager = new KeyboardShortcutManager({
@@ -28,43 +30,20 @@ describe('KeyboardShortcutManager', () => {
 		});
 
 		// Should work before overriding
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-1'))
-		).toBe(true);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('-'))
-		).toBe(true);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-b'))
-		).toBe(false);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-0'))
-		).toBe(false);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('1'))
-		).toBe(false);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-1'))).toBe(true);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('-'))).toBe(true);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-b'))).toBe(false);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-0'))).toBe(false);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('1'))).toBe(false);
 
-		shortcutManager.overrideShortcut(testNewId, [
-			KeyBinding.fromString('ctrl-b'),
-		]);
-
+		shortcutManager.overrideShortcut(testNewId, [KeyBinding.fromString('ctrl-b')]);
 
 		// Should work after overriding
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-1'))
-		).toBe(false);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('-'))
-		).toBe(false);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-b'))
-		).toBe(true);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-0'))
-		).toBe(false);
-		expect(
-			shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('1'))
-		).toBe(false);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-1'))).toBe(false);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('-'))).toBe(false);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-b'))).toBe(true);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('ctrl-0'))).toBe(false);
+		expect(shortcutManager.matchesShortcut(testNewId, KeyBinding.fromString('1'))).toBe(false);
 	});
 
 	it('should provide localized descriptions of keyboard shortcuts', () => {
@@ -72,24 +51,20 @@ describe('KeyboardShortcutManager', () => {
 		const defaultDescription = 'Some description 1';
 		KeyboardShortcutManager.registerDefaultKeyboardShortcut(
 			testNewId,
-			[ KeyBinding.fromString('ctrl-1'), KeyBinding.fromString('-') ],
-			defaultDescription
+			[KeyBinding.fromString('ctrl-1'), KeyBinding.fromString('-')],
+			defaultDescription,
 		);
 
 		expect(KeyboardShortcutManager.getShortcutDescription(testNewId)).toBe(defaultDescription);
-		expect(
-			KeyboardShortcutManager.getShortcutDescription(testNewId, ['fakeLocale'])
-		).toBe(defaultDescription);
-
-		const spanishDescription = 'Alguna descripción';
-		KeyboardShortcutManager.provideShortcutDescription(
-			testNewId,
-			'es',
-			spanishDescription
+		expect(KeyboardShortcutManager.getShortcutDescription(testNewId, ['fakeLocale'])).toBe(
+			defaultDescription,
 		);
 
-		expect(
-			KeyboardShortcutManager.getShortcutDescription(testNewId, ['es', 'en'])
-		).toBe(spanishDescription);
+		const spanishDescription = 'Alguna descripción';
+		KeyboardShortcutManager.provideShortcutDescription(testNewId, 'es', spanishDescription);
+
+		expect(KeyboardShortcutManager.getShortcutDescription(testNewId, ['es', 'en'])).toBe(
+			spanishDescription,
+		);
 	});
 });

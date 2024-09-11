@@ -11,7 +11,7 @@ export class CacheRecordManager {
 	public constructor(cacheProps: CacheProps) {
 		this.maxCanvases = Math.ceil(
 			// Assuming four components per pixel:
-			cacheProps.cacheSize / 4 / cacheProps.blockResolution.x / cacheProps.blockResolution.y
+			cacheProps.cacheSize / 4 / cacheProps.blockResolution.x / cacheProps.blockResolution.y,
 		);
 	}
 
@@ -21,15 +21,17 @@ export class CacheRecordManager {
 
 	public allocCanvas(drawTo: Rect2, onDealloc: BeforeDeallocCallback): CacheRecord {
 		if (this.cacheRecords.length < this.maxCanvases) {
-			const record: CacheRecord = new CacheRecord(
-				onDealloc,
-				this.cacheState,
-			);
+			const record: CacheRecord = new CacheRecord(onDealloc, this.cacheState);
 			record.setRenderingRegion(drawTo);
 			this.cacheRecords.push(record);
 
 			if (this.cacheState.debugMode) {
-				console.log('[Cache] Cache spaces used: ', this.cacheRecords.length, ' of ', this.maxCanvases);
+				console.log(
+					'[Cache] Cache spaces used: ',
+					this.cacheRecords.length,
+					' of ',
+					this.maxCanvases,
+				);
 			}
 
 			return record;
@@ -38,9 +40,12 @@ export class CacheRecordManager {
 
 			if (this.cacheState.debugMode) {
 				console.log(
-					'[Cache] Re-alloc. Times allocated: ', lru.allocCount,
-					'\nLast used cycle: ', lru.getLastUsedCycle(),
-					'\nCurrent cycle: ', this.cacheState.currentRenderingCycle
+					'[Cache] Re-alloc. Times allocated: ',
+					lru.allocCount,
+					'\nLast used cycle: ',
+					lru.getLastUsedCycle(),
+					'\nCurrent cycle: ',
+					this.cacheState.currentRenderingCycle,
 				);
 			}
 
@@ -48,12 +53,10 @@ export class CacheRecordManager {
 			lru.setRenderingRegion(drawTo);
 
 			if (this.cacheState.debugMode) {
-				console.log(
-					'[Cache] Now re-alloc\'d. Last used cycle: ', lru.getLastUsedCycle()
-				);
+				console.log("[Cache] Now re-alloc'd. Last used cycle: ", lru.getLastUsedCycle());
 				console.assert(
 					lru['cacheState'] === this.cacheState,
-					'[Cache] Unequal cache states! cacheState should be a shared object!'
+					'[Cache] Unequal cache states! cacheState should be a shared object!',
 				);
 			}
 
@@ -62,7 +65,7 @@ export class CacheRecordManager {
 	}
 
 	// Returns null if there are no cache records. Returns an unalloc'd record if one exists.
-	private getLeastRecentlyUsedRecord(): CacheRecord|null {
+	private getLeastRecentlyUsedRecord(): CacheRecord | null {
 		this.cacheRecords.sort((a, b) => a.getLastUsedCycle() - b.getLastUsedCycle());
 		return this.cacheRecords[0];
 	}
@@ -75,7 +78,7 @@ export class CacheRecordManager {
 			averageReassignedCount += cacheRecord.allocCount;
 
 			if (cacheRecord.isAllocd()) {
-				numberAllocd ++;
+				numberAllocd++;
 			}
 		}
 		averageReassignedCount /= Math.max(this.cacheRecords.length, 1);

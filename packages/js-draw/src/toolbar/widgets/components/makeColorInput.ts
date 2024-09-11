@@ -4,13 +4,10 @@ import PipetteTool from '../../../tools/PipetteTool';
 import { EditorEventType } from '../../../types';
 import type HelpDisplay from '../../utils/HelpDisplay';
 
-type OnColorChangeListener = (color: Color4)=>void;
+type OnColorChangeListener = (color: Color4) => void;
 
 // Returns [ color input, input container, callback to change the color value ].
-export const makeColorInput = (
-	editor: Editor,
-	onColorChange: OnColorChangeListener,
-) => {
+export const makeColorInput = (editor: Editor, onColorChange: OnColorChangeListener) => {
 	const container = document.createElement('span');
 
 	const inputWrapper = document.createElement('span');
@@ -35,7 +32,7 @@ export const makeColorInput = (
 		}
 	});
 
-	let currentColor: Color4|undefined;
+	let currentColor: Color4 | undefined;
 	const handleColorInput = () => {
 		currentColor = Color4.fromHex(colorInput.value);
 	};
@@ -47,7 +44,7 @@ export const makeColorInput = (
 
 		if (currentColor) {
 			editor.announceForAccessibility(
-				editor.localization.colorChangedAnnouncement(currentColor.toHexString())
+				editor.localization.colorChangedAnnouncement(currentColor.toHexString()),
 			);
 			onColorChange(currentColor);
 			editor.notifier.dispatch(EditorEventType.ColorPickerColorSelected, {
@@ -71,7 +68,9 @@ export const makeColorInput = (
 		// Focus the Coloris color picker, if it exists.
 		// Don't focus the text input within the color picker, however,
 		// as this displays a keyboard on mobile devices.
-		const colorPickerElem: HTMLElement|null = document.querySelector('#clr-picker #clr-hue-slider');
+		const colorPickerElem: HTMLElement | null = document.querySelector(
+			'#clr-picker #clr-hue-slider',
+		);
 		colorPickerElem?.focus();
 	});
 
@@ -92,7 +91,7 @@ export const makeColorInput = (
 		onClose();
 	});
 
-	const setColorInputValue = (color: Color4|string) => {
+	const setColorInputValue = (color: Color4 | string) => {
 		if (typeof color === 'object') {
 			color = color.toHexString();
 		}
@@ -115,7 +114,8 @@ export const makeColorInput = (
 		},
 		registerWithHelpTextDisplay: (helpDisplay: HelpDisplay) => {
 			helpDisplay.registerTextHelpForElement(
-				inputWrapper, editor.localization.colorPickerToggleHelpText,
+				inputWrapper,
+				editor.localization.colorPickerToggleHelpText,
 			);
 			pipetteController.registerWithHelpTextDisplay(helpDisplay);
 		},
@@ -137,13 +137,12 @@ const addPipetteTool = (
 	pickColorLabel.innerText = editor.localization.clickToPickColorAnnouncement;
 
 	const updatePipetteButtonContent = (color?: Color4) => {
-		pipetteButton.replaceChildren(
-			editor.icons.makePipetteIcon(color), pickColorLabel
-		);
+		pipetteButton.replaceChildren(editor.icons.makePipetteIcon(color), pickColorLabel);
 	};
 	updatePipetteButtonContent();
 
-	const pipetteTool: PipetteTool|undefined = editor.toolController.getMatchingTools(PipetteTool)[0];
+	const pipetteTool: PipetteTool | undefined =
+		editor.toolController.getMatchingTools(PipetteTool)[0];
 
 	const endColorSelectMode = () => {
 		pipetteTool?.clearColorListener();
@@ -151,7 +150,7 @@ const addPipetteTool = (
 		pipetteButton.classList.remove('active');
 	};
 
-	const pipetteColorSelect = (color: Color4|null) => {
+	const pipetteColorSelect = (color: Color4 | null) => {
 		endColorSelectMode();
 
 		if (color) {
@@ -159,7 +158,7 @@ const addPipetteTool = (
 		}
 	};
 
-	const pipetteColorPreview = (color: Color4|null) => {
+	const pipetteColorPreview = (color: Color4 | null) => {
 		if (color) {
 			updatePipetteButtonContent(color);
 		} else {
@@ -175,10 +174,7 @@ const addPipetteTool = (
 			return;
 		}
 
-		pipetteTool?.setColorListener(
-			pipetteColorPreview,
-			pipetteColorSelect,
-		);
+		pipetteTool?.setColorListener(pipetteColorPreview, pipetteColorSelect);
 
 		if (pipetteTool) {
 			pipetteButton.classList.add('active');
@@ -197,7 +193,8 @@ const addPipetteTool = (
 
 		registerWithHelpTextDisplay: (helpDisplay: HelpDisplay) => {
 			helpDisplay.registerTextHelpForElement(
-				pipetteButton, editor.localization.colorPickerPipetteHelpText,
+				pipetteButton,
+				editor.localization.colorPickerPipetteHelpText,
 			);
 		},
 	};

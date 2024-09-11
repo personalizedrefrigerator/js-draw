@@ -91,7 +91,7 @@ export default class BundledFile {
 
 				// Allow using the NodeJS path module in generated JS
 				fallback: {
-					'path': require.resolve('path-browserify'),
+					path: require.resolve('path-browserify'),
 				},
 			},
 		};
@@ -169,9 +169,7 @@ export default class BundledFile {
 		const compiler = webpack(this.getWebpackOptions('development'));
 		const watchOptions = {
 			followSymlinks: true,
-			ignored: [
-				'node_modules/',
-			]
+			ignored: ['node_modules/'],
 		};
 
 		console.info('Watching bundle: ', this.bundleName);

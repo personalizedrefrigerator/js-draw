@@ -12,8 +12,12 @@ describe('adjustEditorThemeForContrast', () => {
 
 		const originalStyle = getComputedStyle(editor.getRootElement());
 		const originalBG = Color4.fromString(originalStyle.getPropertyValue('--background-color-2'));
-		const originalSelectionBG = Color4.fromString(originalStyle.getPropertyValue('--selection-background-color'));
-		const originalSelectionFG = Color4.fromString(originalStyle.getPropertyValue('--selection-foreground-color'));
+		const originalSelectionBG = Color4.fromString(
+			originalStyle.getPropertyValue('--selection-background-color'),
+		);
+		const originalSelectionFG = Color4.fromString(
+			originalStyle.getPropertyValue('--selection-foreground-color'),
+		);
 
 		expect(Color4.contrastRatio(originalBG, originalSelectionBG)).toBeLessThan(1.2);
 		expect(Color4.contrastRatio(originalSelectionBG, originalSelectionFG)).toBeLessThan(2);
@@ -23,8 +27,12 @@ describe('adjustEditorThemeForContrast', () => {
 		adjustEditorThemeForContrast(editor, { dontClearOverrides: true });
 
 		const updatedBG = Color4.fromString(editorRoot.style.getPropertyValue('--background-color-2'));
-		const updatedSelectionBG = Color4.fromString(editorRoot.style.getPropertyValue('--selection-background-color'));
-		const updatedSelectionFG = Color4.fromString(editorRoot.style.getPropertyValue('--selection-foreground-color'));
+		const updatedSelectionBG = Color4.fromString(
+			editorRoot.style.getPropertyValue('--selection-background-color'),
+		);
+		const updatedSelectionFG = Color4.fromString(
+			editorRoot.style.getPropertyValue('--selection-foreground-color'),
+		);
 		expect(Color4.contrastRatio(updatedBG, updatedSelectionBG)).toBeGreaterThan(1.2);
 		expect(Color4.contrastRatio(updatedSelectionBG, updatedSelectionFG)).toBeGreaterThan(4.5);
 	});

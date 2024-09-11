@@ -7,7 +7,10 @@ import { toolbarCSSPrefix } from '../constants';
 
 const isToolWidgetFocused = () => {
 	const currentFocus = [...document.querySelectorAll('*:focus')];
-	return currentFocus.length && currentFocus.some(elem => elem.classList.contains(`${toolbarCSSPrefix}button`));
+	return (
+		currentFocus.length &&
+		currentFocus.some((elem) => elem.classList.contains(`${toolbarCSSPrefix}button`))
+	);
 };
 
 export default abstract class BaseToolWidget extends BaseWidget {
@@ -19,7 +22,7 @@ export default abstract class BaseToolWidget extends BaseWidget {
 	) {
 		super(editor, id, localizationTable);
 
-		this.targetTool.enabledValue().onUpdateAndNow(enabled => {
+		this.targetTool.enabledValue().onUpdateAndNow((enabled) => {
 			if (enabled) {
 				this.setSelected(true);
 

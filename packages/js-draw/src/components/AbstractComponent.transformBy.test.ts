@@ -4,9 +4,11 @@ import createEditor from '../testing/createEditor';
 import Stroke from './Stroke';
 
 describe('AbstractComponent.transformBy', () => {
-	it('should restore the component\'s z-index on undo', () => {
+	it("should restore the component's z-index on undo", () => {
 		const editor = createEditor();
-		const component = new Stroke([ pathToRenderable(Path.fromRect(Rect2.unitSquare), { fill: Color4.red }) ]);
+		const component = new Stroke([
+			pathToRenderable(Path.fromRect(Rect2.unitSquare), { fill: Color4.red }),
+		]);
 		EditorImage.addElement(component).apply(editor);
 
 		const origZIndex = component.getZIndex();

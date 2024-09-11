@@ -1,8 +1,7 @@
-
 /** Computes the font size of a text element, based on style information. */
 const determineFontSize = (
-	elem: SVGTextElement|SVGTSpanElement,
-	computedStyles: CSSStyleDeclaration|undefined,
+	elem: SVGTextElement | SVGTSpanElement,
+	computedStyles: CSSStyleDeclaration | undefined,
 
 	// output: Written to to update supported style attributes
 	supportedStyleAttrs: Set<string>,

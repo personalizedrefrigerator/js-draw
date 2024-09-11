@@ -4,19 +4,18 @@ import waitForAll from '../util/waitForAll';
 import Command from './Command';
 import SerializableCommand from './SerializableCommand';
 
-
 class NonSerializableUnion extends Command {
 	public constructor(
 		private commands: Command[],
-		private applyChunkSize: number|undefined,
-		private descriptionOverride: string|undefined,
+		private applyChunkSize: number | undefined,
+		private descriptionOverride: string | undefined,
 	) {
 		super();
 	}
 
 	public apply(editor: Editor) {
 		if (this.applyChunkSize === undefined) {
-			const results = this.commands.map(cmd => cmd.apply(editor));
+			const results = this.commands.map((cmd) => cmd.apply(editor));
 			return waitForAll(results);
 		} else {
 			return editor.asyncApplyCommands(this.commands, this.applyChunkSize);
@@ -24,11 +23,11 @@ class NonSerializableUnion extends Command {
 	}
 
 	public unapply(editor: Editor) {
-		const commands = [ ...this.commands ];
+		const commands = [...this.commands];
 		commands.reverse();
 
 		if (this.applyChunkSize === undefined) {
-			const results = commands.map(cmd => cmd.unapply(editor));
+			const results = commands.map((cmd) => cmd.unapply(editor));
 			return waitForAll(results);
 		} else {
 			return editor.asyncUnapplyCommands(commands, this.applyChunkSize, false);
@@ -36,7 +35,7 @@ class NonSerializableUnion extends Command {
 	}
 
 	public override onDrop(editor: Editor): void {
-		this.commands.forEach(command => command.onDrop(editor));
+		this.commands.forEach((command) => command.onDrop(editor));
 	}
 
 	public description(editor: Editor, localizationTable: EditorLocalization) {
@@ -46,7 +45,7 @@ class NonSerializableUnion extends Command {
 
 		const descriptions: string[] = [];
 
-		let lastDescription: string|null = null;
+		let lastDescription: string | null = null;
 		let duplicateDescriptionCount: number = 0;
 		let handledCommandCount: number = 0;
 		for (const part of this.commands) {
@@ -57,8 +56,8 @@ class NonSerializableUnion extends Command {
 				duplicateDescriptionCount = 0;
 			}
 
-			duplicateDescriptionCount ++;
-			handledCommandCount ++;
+			duplicateDescriptionCount++;
+			handledCommandCount++;
 			lastDescription ??= description;
 
 			// Long descriptions aren't very useful to the user.
@@ -75,7 +74,9 @@ class NonSerializableUnion extends Command {
 		}
 
 		if (handledCommandCount < this.commands.length) {
-			descriptions.push(localizationTable.andNMoreCommands(this.commands.length - handledCommandCount));
+			descriptions.push(
+				localizationTable.andNMoreCommands(this.commands.length - handledCommandCount),
+			);
 		}
 
 		return descriptions.join(', ');
@@ -88,11 +89,15 @@ class SerializableUnion extends SerializableCommand {
 
 	public constructor(
 		private commands: SerializableCommand[],
-		private applyChunkSize: number|undefined,
-		private descriptionOverride: string|undefined,
+		private applyChunkSize: number | undefined,
+		private descriptionOverride: string | undefined,
 	) {
 		super('union');
-		this.nonserializableCommand = new NonSerializableUnion(commands, applyChunkSize, descriptionOverride);
+		this.nonserializableCommand = new NonSerializableUnion(
+			commands,
+			applyChunkSize,
+			descriptionOverride,
+		);
 	}
 
 	protected serializeToJSON() {
@@ -102,7 +107,7 @@ class SerializableUnion extends SerializableCommand {
 
 		return {
 			applyChunkSize: this.applyChunkSize,
-			data: this.commands.map(command => command.serialize()),
+			data: this.commands.map((command) => command.serialize()),
 			description: this.descriptionOverride,
 		};
 	}
@@ -168,7 +173,10 @@ export interface UniteCommandsOptions {
  * // applying them shouldn't be done all at once (which would block the UI).
  * ```
  */
-const uniteCommands = <T extends Command> (commands: T[], options?: UniteCommandsOptions|number): T extends SerializableCommand ? SerializableCommand : Command => {
+const uniteCommands = <T extends Command>(
+	commands: T[],
+	options?: UniteCommandsOptions | number,
+): T extends SerializableCommand ? SerializableCommand : Command => {
 	let allSerializable = true;
 	for (const command of commands) {
 		if (!(command instanceof SerializableCommand)) {
@@ -198,12 +206,11 @@ SerializableCommand.register('union', (data: any, editor) => {
 	if (typeof data.data.length !== 'number') {
 		throw new Error('Unions of commands must serialize to lists of serialization data.');
 	}
-	const applyChunkSize: number|undefined = data.applyChunkSize;
+	const applyChunkSize: number | undefined = data.applyChunkSize;
 	if (typeof applyChunkSize !== 'number' && applyChunkSize !== undefined) {
 		throw new Error('serialized applyChunkSize is neither undefined nor a number.');
 	}
 	const description = typeof data.description === 'string' ? data.description : undefined;
-
 
 	const commands: SerializableCommand[] = [];
 	for (const part of data.data as any[]) {
@@ -212,6 +219,5 @@ SerializableCommand.register('union', (data: any, editor) => {
 
 	return uniteCommands(commands, { applyChunkSize, description });
 });
-
 
 export default uniteCommands;

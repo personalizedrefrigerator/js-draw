@@ -53,7 +53,7 @@ export default class Erase extends SerializableCommand {
 		super('erase');
 
 		// Clone the list
-		this.toRemove = toRemove.map(elem => elem);
+		this.toRemove = toRemove.map((elem) => elem);
 		this.applied = false;
 	}
 
@@ -95,14 +95,15 @@ export default class Erase extends SerializableCommand {
 			return localizationTable.erasedNoElements;
 		}
 
-		const description = describeComponentList(localizationTable, this.toRemove) ?? localizationTable.elements;
+		const description =
+			describeComponentList(localizationTable, this.toRemove) ?? localizationTable.elements;
 		return localizationTable.eraseAction(description, this.toRemove.length);
 	}
 
 	protected serializeToJSON() {
 		// If applied, the elements can't be fetched from the image because they're
 		// erased. Serialize and return the elements themselves.
-		const elems = this.toRemove.map(elem => elem.serialize());
+		const elems = this.toRemove.map((elem) => elem.serialize());
 		return elems;
 	}
 
@@ -112,13 +113,13 @@ export default class Erase extends SerializableCommand {
 				throw new Error('seralized erase data must be an array');
 			}
 
-			const elems = json
-				.map((elemData: any) => {
-					const componentId = typeof elemData === 'string' ? elemData : `${elemData.id}`;
+			const elems = json.map((elemData: any) => {
+				const componentId = typeof elemData === 'string' ? elemData : `${elemData.id}`;
 
-					const component = editor.image.lookupElement(componentId) ?? AbstractComponent.deserialize(elemData);
-					return component;
-				});
+				const component =
+					editor.image.lookupElement(componentId) ?? AbstractComponent.deserialize(elemData);
+				return component;
+			});
 			return new Erase(elems);
 		});
 	}

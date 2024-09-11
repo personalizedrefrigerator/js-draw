@@ -1,4 +1,3 @@
-
 # input-system-tester
 
 Displays strokes processed by `StrokeSmoother` from preset input data.

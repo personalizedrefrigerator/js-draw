@@ -1,4 +1,3 @@
-
 import { EditorLocalization } from '../localization';
 
 /**

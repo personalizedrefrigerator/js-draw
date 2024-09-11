@@ -1,6 +1,6 @@
 import KeyBinding from './KeyBinding';
 
-describe('KeyBinding', ()  => {
+describe('KeyBinding', () => {
 	it('toString should produce keybinds that can be interpreted by fromString', () => {
 		const testStrings = [
 			'c',
@@ -35,7 +35,9 @@ describe('KeyBinding', ()  => {
 		expect(ctrlOrMetaA.matchesEvent(ctrlOrMetaShiftB)).toBe(false);
 		expect(
 			ctrlOrMetaShiftB.matchesEvent({
-				key: 'b', shiftKey: true, metaKey: true
+				key: 'b',
+				shiftKey: true,
+				metaKey: true,
 			}),
 		).toBe(true);
 		expect(ctrlOrMetaShiftB.matchesEvent(shiftB)).toBe(false);
@@ -53,8 +55,12 @@ describe('KeyBinding', ()  => {
 		const ctrlA = KeyBinding.fromString('ctrl-KeyA');
 
 		expect(ctrlA.matchesEvent({ code: 'KeyA', shiftKey: false, ctrlKey: true })).toBe(true);
-		expect(ctrlA.matchesEvent({ key: 'a', code: 'KeyA', shiftKey: false, ctrlKey: true })).toBe(true);
-		expect(ctrlA.matchesEvent({ key: 'a', code: 'KeyA', shiftKey: false, ctrlKey: false })).toBe(false);
+		expect(ctrlA.matchesEvent({ key: 'a', code: 'KeyA', shiftKey: false, ctrlKey: true })).toBe(
+			true,
+		);
+		expect(ctrlA.matchesEvent({ key: 'a', code: 'KeyA', shiftKey: false, ctrlKey: false })).toBe(
+			false,
+		);
 		expect(ctrlA.matchesEvent({ code: 'KeyB', shiftKey: false, ctrlKey: true })).toBe(false);
 		expect(ctrlA.matchesEvent({ code: 'KeyA', shiftKey: true, ctrlKey: true })).toBe(false);
 	});

@@ -10,7 +10,7 @@ describe('parseMarkdown', () => {
 				fullText: '`a test`',
 				start: 0,
 				stop: 8,
-			}
+			},
 		]);
 
 		expect(parseMarkdown('another `test`')).toMatchObject([
@@ -81,7 +81,9 @@ describe('parseMarkdown', () => {
 			},
 		]);
 
-		expect(parseMarkdown('A multiline\ntest with `inline`\n``co`de``... ``:)``\n\na`a\n`$4+4$`')).toMatchObject([
+		expect(
+			parseMarkdown('A multiline\ntest with `inline`\n``co`de``... ``:)``\n\na`a\n`$4+4$`'),
+		).toMatchObject([
 			{
 				type: RegionType.Text,
 				block: false,
@@ -145,7 +147,7 @@ describe('parseMarkdown', () => {
 				fullText: '`$4+4$`',
 				start: 56,
 				stop: 63,
-			}
+			},
 		]);
 	});
 
@@ -158,7 +160,7 @@ describe('parseMarkdown', () => {
 				fullText: '$a test$',
 				start: 0,
 				stop: 8,
-			}
+			},
 		]);
 
 		expect(parseMarkdown('some $\\TeX$')).toMatchObject([
@@ -212,7 +214,6 @@ describe('parseMarkdown', () => {
 				stop: 14,
 			},
 		]);
-
 
 		expect(parseMarkdown('Sum $x$ and $\\int_0^1 y^2 dy$. 3$.')).toMatchObject([
 			{
@@ -277,7 +278,6 @@ describe('parseMarkdown', () => {
 				stop: 15,
 			},
 		]);
-
 
 		expect(parseMarkdown('some \n$$\n \\text{multiline} \n \\TeX\n$$')).toMatchObject([
 			{
@@ -362,7 +362,8 @@ describe('parseMarkdown', () => {
 ]
 `);
 		// Not all text in [[brackets]] should be marked as an include.
-		expect(parseMarkdown('[[include:path/to/another/file.md]]. Test. [[test]]. [[Include:TEST]]')).toMatchInlineSnapshot(`
+		expect(parseMarkdown('[[include:path/to/another/file.md]]. Test. [[test]]. [[Include:TEST]]'))
+			.toMatchInlineSnapshot(`
 [
   {
     "block": false,
@@ -384,7 +385,11 @@ describe('parseMarkdown', () => {
 `);
 		// Should support [[brackets] within an include, so long as these brackets aren't the
 		// ending delimiter. Should also support multiple includes.
-		expect(parseMarkdown('[[include:[[path/to/another/file].md]]]]. Test.\n [[include:test]] [[include:')).toMatchInlineSnapshot(`
+		expect(
+			parseMarkdown(
+				'[[include:[[path/to/another/file].md]]]]. Test.\n [[include:test]] [[include:',
+			),
+		).toMatchInlineSnapshot(`
 [
   {
     "block": false,

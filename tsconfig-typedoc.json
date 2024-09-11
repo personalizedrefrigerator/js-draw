@@ -1,13 +1,7 @@
 {
-    "extends": "./tsconfig.json",
+	"extends": "./tsconfig.json",
 
-	"include": [
-		"packages/**/*.ts",
-		"docs/doc-pages/*.ts"
-	],
+	"include": ["packages/**/*.ts", "docs/doc-pages/*.ts"],
 
-	"exclude": [
-		"packages/typedoc-extensions/",
-		"**/*.test.ts"
-	]
+	"exclude": ["packages/typedoc-extensions/", "**/*.test.ts"]
 }

@@ -32,7 +32,7 @@ interface AbstractStore {
 	getEntries(): Promise<StoreEntry[]>;
 
 	/** Creates a new `StoreEntry` or, on error, returns `null`. */
-	createNewEntry(): Promise<StoreEntry|null>;
+	createNewEntry(): Promise<StoreEntry | null>;
 }
 
 export default AbstractStore;

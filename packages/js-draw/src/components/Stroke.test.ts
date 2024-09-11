@@ -8,48 +8,49 @@ import RenderablePathSpec, { pathToRenderable } from '../rendering/RenderablePat
 
 describe('Stroke', () => {
 	it('empty stroke should have an empty bounding box', () => {
-		const stroke = new Stroke([{
-			startPoint: Vec2.zero,
-			commands: [],
-			style: {
-				fill: Color4.blue,
+		const stroke = new Stroke([
+			{
+				startPoint: Vec2.zero,
+				commands: [],
+				style: {
+					fill: Color4.blue,
+				},
 			},
-		}]);
+		]);
 		expect(stroke.getBBox()).toMatchObject({
-			x: 0, y: 0, w: 0, h: 0,
+			x: 0,
+			y: 0,
+			w: 0,
+			h: 0,
 		});
 	});
 
 	it('cloned strokes should have the same points', () => {
 		const stroke = new Stroke([
-			pathToRenderable(Path.fromString('m1,1 2,2 3,3 z'), { fill: Color4.red })
+			pathToRenderable(Path.fromString('m1,1 2,2 3,3 z'), { fill: Color4.red }),
 		]);
 		const clone = stroke.clone();
 
-		expect(
-			(clone as Stroke).getPath().toString()
-		).toBe(
-			stroke.getPath().toString()
-		);
+		expect((clone as Stroke).getPath().toString()).toBe(stroke.getPath().toString());
 	});
 
 	it('transforming a cloned stroke should not affect the original', () => {
 		const editor = createEditor();
 		const stroke = new Stroke([
-			pathToRenderable(Path.fromString('m1,1 2,2 3,3 z'), { fill: Color4.red })
+			pathToRenderable(Path.fromString('m1,1 2,2 3,3 z'), { fill: Color4.red }),
 		]);
 		const origBBox = stroke.getBBox();
 		expect(origBBox).toMatchObject({
-			x: 1, y: 1,
-			w: 5, h: 5,
+			x: 1,
+			y: 1,
+			w: 5,
+			h: 5,
 		});
 
 		const copy = stroke.clone();
 		expect(copy.getBBox()).objEq(origBBox);
 
-		stroke.transformBy(
-			Mat33.scaling2D(Vec2.of(10, 10))
-		).apply(editor);
+		stroke.transformBy(Mat33.scaling2D(Vec2.of(10, 10))).apply(editor);
 
 		expect(stroke.getBBox()).not.objEq(origBBox);
 		expect(copy.getBBox()).objEq(origBBox);
@@ -98,9 +99,12 @@ describe('Stroke', () => {
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#f00'));
 
 		// Should restyle even if no editor
-		stroke.forceStyle({
-			color: Color4.fromHex('#0f0')
-		}, null);
+		stroke.forceStyle(
+			{
+				color: Color4.fromHex('#0f0'),
+			},
+			null,
+		);
 
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#0f0'));
 
@@ -127,7 +131,10 @@ describe('Stroke', () => {
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#0f0'));
 
 		// As should a deserialized updateStyle.
-		const deserializedUpdateStyle = SerializableCommand.deserialize(updateStyleCommand.serialize(), editor);
+		const deserializedUpdateStyle = SerializableCommand.deserialize(
+			updateStyleCommand.serialize(),
+			editor,
+		);
 		deserializedUpdateStyle.apply(editor);
 
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#00f'));
@@ -135,13 +142,13 @@ describe('Stroke', () => {
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#0f0'));
 	});
 
-	it('calling .getParts on a stroke should return (a copy of) that stroke\'s parts', () => {
+	it("calling .getParts on a stroke should return (a copy of) that stroke's parts", () => {
 		const originalParts: RenderablePathSpec[] = [
 			{
 				startPoint: Vec2.zero,
 				commands: [
-					{ kind: PathCommandType.LineTo, point: Vec2.of(1, 2), },
-					{ kind: PathCommandType.LineTo, point: Vec2.of(0, 2), },
+					{ kind: PathCommandType.LineTo, point: Vec2.of(1, 2) },
+					{ kind: PathCommandType.LineTo, point: Vec2.of(0, 2) },
 				],
 				style: {
 					fill: Color4.blue,
@@ -150,8 +157,8 @@ describe('Stroke', () => {
 			{
 				startPoint: Vec2.zero,
 				commands: [
-					{ kind: PathCommandType.LineTo, point: Vec2.of(1, 2), },
-					{ kind: PathCommandType.LineTo, point: Vec2.of(100, 2), },
+					{ kind: PathCommandType.LineTo, point: Vec2.of(1, 2) },
+					{ kind: PathCommandType.LineTo, point: Vec2.of(100, 2) },
 				],
 				style: {
 					stroke: {
@@ -169,7 +176,13 @@ describe('Stroke', () => {
 	});
 
 	it('should correctly calculate the bounding box of a stroke with a single point', () => {
-		const stroke = new Stroke([ { startPoint: Vec2.zero, commands: [], style: { fill: Color4.transparent, stroke: { width: 2, color: Color4.red } } } ]);
+		const stroke = new Stroke([
+			{
+				startPoint: Vec2.zero,
+				commands: [],
+				style: { fill: Color4.transparent, stroke: { width: 2, color: Color4.red } },
+			},
+		]);
 		expect(stroke.getExactBBox()).objEq(new Rect2(-1, -1, 2, 2));
 		expect(stroke.getBBox()).objEq(new Rect2(-1, -1, 2, 2));
 	});

@@ -1,5 +1,3 @@
-
-
 /**
  * A vector with three components, $\begin{pmatrix} x \\ y \\ z \end{pmatrix}$.
  * Can also be used to represent a two-component vector.
@@ -28,7 +26,7 @@ export interface Vec3 {
 	 * Returns the x, y components of this.
 	 * May be implemented as a getter method.
 	 */
-	readonly xy: { x: number, y: number };
+	readonly xy: { x: number; y: number };
 
 	/** Returns the vector's `idx`th component. For example, `Vec3.of(1, 2, 3).at(1) → 2`. */
 	at(i: number): number;
@@ -124,7 +122,7 @@ export interface Vec3 {
 	 * Vec3.of(1, 2, 3).scale(Vec3.of(2, 4, 6)); // → Vec3(2, 8, 18)
 	 * ```
 	 */
-	scale(other: Vec3|number): Vec3;
+	scale(other: Vec3 | number): Vec3;
 
 	/**
 	 * Returns a vector orthogonal to this. If this is a Vec2, returns `this` rotated
@@ -154,9 +152,7 @@ export interface Vec3 {
 	 * console.log(zipped.toString()); // → Vec(0.5, 2, 2.9)
 	 * ```
 	 */
-	zip(
-		other: Vec3, zip: (componentInThis: number, componentInOther: number)=> number
-	): Vec3;
+	zip(other: Vec3, zip: (componentInThis: number, componentInOther: number) => number): Vec3;
 
 	/**
 	 * Returns a vector with each component acted on by `fn`.
@@ -167,10 +163,9 @@ export interface Vec3 {
 	 * console.log(Vec3.of(1, 2, 3).map(val => val + 1)); // → Vec(2, 3, 4)
 	 * ```
 	 */
-	map(fn: (component: number, index: number)=> number): Vec3;
+	map(fn: (component: number, index: number) => number): Vec3;
 
-	asArray(): [ number, number, number ];
-
+	asArray(): [number, number, number];
 
 	/**
 	 * [fuzz] The maximum difference between two components for this and [other]
@@ -196,9 +191,8 @@ class Vec3Impl implements Vec3 {
 	public constructor(
 		public readonly x: number,
 		public readonly y: number,
-		public readonly z: number
-	) {
-	}
+		public readonly z: number,
+	) {}
 
 	public get xy(): { x: number; y: number } {
 		// Useful for APIs that behave differently if .z is present.
@@ -288,16 +282,12 @@ class Vec3Impl implements Vec3 {
 		);
 	}
 
-	public scale(other: Vec3|number): Vec3 {
+	public scale(other: Vec3 | number): Vec3 {
 		if (typeof other === 'number') {
 			return this.times(other);
 		}
 
-		return Vec3.of(
-			this.x * other.x,
-			this.y * other.y,
-			this.z * other.z,
-		);
+		return Vec3.of(this.x * other.x, this.y * other.y, this.z * other.z);
 	}
 
 	public orthog(): Vec3 {
@@ -318,28 +308,25 @@ class Vec3Impl implements Vec3 {
 	}
 
 	public zip(
-		other: Vec3, zip: (componentInThis: number, componentInOther: number)=> number
+		other: Vec3,
+		zip: (componentInThis: number, componentInOther: number) => number,
 	): Vec3 {
-		return Vec3.of(
-			zip(other.x, this.x),
-			zip(other.y, this.y),
-			zip(other.z, this.z)
-		);
+		return Vec3.of(zip(other.x, this.x), zip(other.y, this.y), zip(other.z, this.z));
 	}
 
-	public map(fn: (component: number, index: number)=> number): Vec3 {
+	public map(fn: (component: number, index: number) => number): Vec3 {
 		return Vec3.of(fn(this.x, 0), fn(this.y, 1), fn(this.z, 2));
 	}
 
-	public asArray(): [ number, number, number ] {
+	public asArray(): [number, number, number] {
 		return [this.x, this.y, this.z];
 	}
 
 	public eq(other: Vec3, fuzz: number = defaultEqlTolerance): boolean {
 		return (
-			Math.abs(other.x - this.x) <= fuzz
-			&& Math.abs(other.y - this.y) <= fuzz
-			&& Math.abs(other.z - this.z) <= fuzz
+			Math.abs(other.x - this.x) <= fuzz &&
+			Math.abs(other.y - this.y) <= fuzz &&
+			Math.abs(other.z - this.z) <= fuzz
 		);
 	}
 
@@ -352,10 +339,11 @@ class Vec2Impl implements Vec3 {
 	public constructor(
 		public readonly x: number,
 		public readonly y: number,
-	) {
-	}
+	) {}
 
-	public get z() { return 0; }
+	public get z() {
+		return 0;
+	}
 
 	public get xy(): { x: number; y: number } {
 		// Useful for APIs that behave differently if .z is present.
@@ -436,22 +424,15 @@ class Vec2Impl implements Vec3 {
 		// | i  j  k |
 		// | x1 y1 z1| = (i)(y1z2 - y2z1) - (j)(x1z2 - x2z1) + (k)(x1y2 - x2y1)
 		// | x2 y2 z2|
-		return Vec3.of(
-			this.y * other.z,
-			-this.x * other.z,
-			this.x * other.y - other.x * this.y,
-		);
+		return Vec3.of(this.y * other.z, -this.x * other.z, this.x * other.y - other.x * this.y);
 	}
 
-	public scale(other: Vec3|number): Vec3 {
+	public scale(other: Vec3 | number): Vec3 {
 		if (typeof other === 'number') {
 			return this.times(other);
 		}
 
-		return Vec2.of(
-			this.x * other.x,
-			this.y * other.y,
-		);
+		return Vec2.of(this.x * other.x, this.y * other.y);
 	}
 
 	public orthog(): Vec3 {
@@ -472,30 +453,25 @@ class Vec2Impl implements Vec3 {
 	}
 
 	public zip(
-		other: Vec3, zip: (componentInThis: number, componentInOther: number)=> number
+		other: Vec3,
+		zip: (componentInThis: number, componentInOther: number) => number,
 	): Vec3 {
-		return Vec3.of(
-			zip(other.x, this.x),
-			zip(other.y, this.y),
-			zip(other.z, 0),
-		);
+		return Vec3.of(zip(other.x, this.x), zip(other.y, this.y), zip(other.z, 0));
 	}
 
-	public map(fn: (component: number, index: number)=> number): Vec3 {
-		return Vec3.of(
-			fn(this.x, 0), fn(this.y, 1), fn(0, 2)
-		);
+	public map(fn: (component: number, index: number) => number): Vec3 {
+		return Vec3.of(fn(this.x, 0), fn(this.y, 1), fn(0, 2));
 	}
 
-	public asArray(): [ number, number, number ] {
+	public asArray(): [number, number, number] {
 		return [this.x, this.y, 0];
 	}
 
 	public eq(other: Vec3, fuzz: number = defaultEqlTolerance): boolean {
 		return (
-			Math.abs(other.x - this.x) <= fuzz
-			&& Math.abs(other.y - this.y) <= fuzz
-			&& Math.abs(other.z) <= fuzz
+			Math.abs(other.x - this.x) <= fuzz &&
+			Math.abs(other.y - this.y) <= fuzz &&
+			Math.abs(other.z) <= fuzz
 		);
 	}
 
@@ -537,7 +513,7 @@ export namespace Vec2 {
 	 * const v2 = Vec2.ofXY({ x: -123.4, y: 1 });
 	 * ```
 	 */
-	export const ofXY = ({x, y}: {x: number, y: number}) => {
+	export const ofXY = ({ x, y }: { x: number; y: number }) => {
 		return Vec2.of(x, y);
 	};
 

@@ -1,4 +1,3 @@
-
 import Vec3 from './Vec3';
 
 describe('Vec3', () => {
@@ -60,7 +59,7 @@ describe('Vec3', () => {
 		{ from: Vec3.of(-1, -10, 0), to: Vec3.of(1, 2, 0), expected: 148 },
 	])(
 		'.squareDistanceTo and .distanceTo should return correct square and euclidean distances (%j)',
-		({ from , to, expected }) => {
+		({ from, to, expected }) => {
 			expect(from.squareDistanceTo(to)).toBe(expected);
 			expect(to.squareDistanceTo(from)).toBe(expected);
 			expect(to.distanceTo(from)).toBeCloseTo(Math.sqrt(expected));

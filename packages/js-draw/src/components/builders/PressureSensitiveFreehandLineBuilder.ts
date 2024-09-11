@@ -1,6 +1,15 @@
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import RenderablePathSpec from '../../rendering/RenderablePathSpec';
-import { Point2, Vec2, Rect2, PathCommand, PathCommandType, QuadraticBezierPathCommand, LinePathCommand, QuadraticBezier } from '@js-draw/math';
+import {
+	Point2,
+	Vec2,
+	Rect2,
+	PathCommand,
+	PathCommandType,
+	QuadraticBezierPathCommand,
+	LinePathCommand,
+	QuadraticBezier,
+} from '@js-draw/math';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';
@@ -9,37 +18,39 @@ import RenderingStyle from '../../rendering/RenderingStyle';
 import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
 import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
-export const makePressureSensitiveFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
-	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
+export const makePressureSensitiveFreehandLineBuilder: ComponentBuilderFactory =
+	makeShapeFitAutocorrect((initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
 		// less than ±1 px from the curve.
 		const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
 		const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
 
 		return new PressureSensitiveFreehandLineBuilder(
-			initialPoint, minSmoothingDist, maxSmoothingDist, viewport
+			initialPoint,
+			minSmoothingDist,
+			maxSmoothingDist,
+			viewport,
 		);
-	}
-);
+	});
 
 type CurrentSegmentToPathResult = {
-	upperCurveCommand: QuadraticBezierPathCommand,
-	lowerToUpperConnector: PathCommand,
-	upperToLowerConnector: PathCommand,
-	lowerCurveCommand: QuadraticBezierPathCommand,
+	upperCurveCommand: QuadraticBezierPathCommand;
+	lowerToUpperConnector: PathCommand;
+	upperToLowerConnector: PathCommand;
+	lowerCurveCommand: QuadraticBezierPathCommand;
 
-	upperCurve: QuadraticBezier,
-	lowerCurve: QuadraticBezier,
+	upperCurve: QuadraticBezier;
+	lowerCurve: QuadraticBezier;
 
-	nextCurveStartConnector: PathCommand[],
+	nextCurveStartConnector: PathCommand[];
 };
 
 // Handles stroke smoothing and creates Strokes from user/stylus input.
 export default class PressureSensitiveFreehandLineBuilder implements ComponentBuilder {
 	private isFirstSegment: boolean = true;
-	private pathStartConnector: PathCommand[]|null = null;
-	private mostRecentConnector: PathCommand|null = null;
-	private nextCurveStartConnector: PathCommand[]|null = null;
+	private pathStartConnector: PathCommand[] | null = null;
+	private mostRecentConnector: PathCommand | null = null;
+	private nextCurveStartConnector: PathCommand[] | null = null;
 
 	//    Beginning of the list of lower parts
 	//        ↓
@@ -56,8 +67,8 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 	// recent edge.
 	private upperSegments: PathCommand[];
 	private lowerSegments: PathCommand[];
-	private lastUpperBezier: QuadraticBezier|null = null;
-	private lastLowerBezier: QuadraticBezier|null = null;
+	private lastUpperBezier: QuadraticBezier | null = null;
+	private lastLowerBezier: QuadraticBezier | null = null;
 	private parts: RenderablePathSpec[] = [];
 	private curveFitter: StrokeSmoother;
 
@@ -80,7 +91,9 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		this.upperSegments = [];
 		this.lowerSegments = [];
 
-		this.curveFitter = new StrokeSmoother(startPoint, minFitAllowed, maxFitAllowed, curve => this.addCurve(curve));
+		this.curveFitter = new StrokeSmoother(startPoint, minFitAllowed, maxFitAllowed, (curve) =>
+			this.addCurve(curve),
+		);
 
 		this.curveStartWidth = startPoint.width;
 		this.bbox = new Rect2(this.startPoint.pos.x, this.startPoint.pos.y, 0, 0);
@@ -96,7 +109,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		};
 	}
 
-	private previewCurrentPath(extendWithLatest: boolean = true): RenderablePathSpec|null {
+	private previewCurrentPath(extendWithLatest: boolean = true): RenderablePathSpec | null {
 		const upperPath = this.upperSegments.slice();
 		const lowerPath = this.lowerSegments.slice();
 		let lowerToUpperCap: PathCommand;
@@ -104,9 +117,8 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 
 		const currentCurve = this.curveFitter.preview();
 		if (currentCurve && extendWithLatest) {
-			const {
-				upperCurveCommand, lowerToUpperConnector, upperToLowerConnector, lowerCurveCommand
-			} = this.segmentToPath(currentCurve);
+			const { upperCurveCommand, lowerToUpperConnector, upperToLowerConnector, lowerCurveCommand } =
+				this.segmentToPath(currentCurve);
 
 			upperPath.push(upperCurveCommand);
 			lowerPath.push(lowerCurveCommand);
@@ -124,7 +136,10 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 
 		let startPoint: Point2;
 		const lastLowerSegment = lowerPath[lowerPath.length - 1];
-		if (lastLowerSegment.kind === PathCommandType.LineTo || lastLowerSegment.kind === PathCommandType.MoveTo) {
+		if (
+			lastLowerSegment.kind === PathCommandType.LineTo ||
+			lastLowerSegment.kind === PathCommandType.MoveTo
+		) {
 			startPoint = lastLowerSegment.point;
 		} else {
 			startPoint = lastLowerSegment.endPoint;
@@ -169,10 +184,10 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		};
 	}
 
-	private previewFullPath(): RenderablePathSpec[]|null {
+	private previewFullPath(): RenderablePathSpec[] | null {
 		const preview = this.previewCurrentPath();
 		if (preview) {
-			return [ ...this.parts, preview ];
+			return [...this.parts, preview];
 		}
 		return null;
 	}
@@ -215,7 +230,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 			return false;
 		}
 
-		const getIntersection = (curve1: QuadraticBezier, curve2: QuadraticBezier): Point2|null => {
+		const getIntersection = (curve1: QuadraticBezier, curve2: QuadraticBezier): Point2 | null => {
 			const intersections = curve1.intersectsBezier(curve2);
 			if (!intersections.length) return null;
 			return intersections[0].point;
@@ -238,12 +253,13 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		// where the next stroke and the previous stroke are in different directions.
 		//
 		// Are the exit/enter directions of the previous and current curves in different enough directions?
-		if (getEnterDirection(upperCurve).dot(getExitDirection(this.lastUpperBezier)) < 0.35
-			|| getEnterDirection(lowerCurve).dot(getExitDirection(this.lastLowerBezier)) < 0.35
-
+		if (
+			getEnterDirection(upperCurve).dot(getExitDirection(this.lastUpperBezier)) < 0.35 ||
+			getEnterDirection(lowerCurve).dot(getExitDirection(this.lastLowerBezier)) < 0.35 ||
 			// Also handle if the curves exit/enter directions differ
-			|| getEnterDirection(upperCurve).dot(getExitDirection(upperCurve)) < 0
-			|| getEnterDirection(lowerCurve).dot(getExitDirection(lowerCurve)) < 0) {
+			getEnterDirection(upperCurve).dot(getExitDirection(upperCurve)) < 0 ||
+			getEnterDirection(lowerCurve).dot(getExitDirection(lowerCurve)) < 0
+		) {
 			return true;
 		}
 
@@ -262,7 +278,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		return false;
 	}
 
-	private addCurve(curve: Curve|null) {
+	private addCurve(curve: Curve | null) {
 		// Case where no points have been added
 		if (!curve) {
 			// Don't create a circle around the initial point if the stroke has more than one point.
@@ -270,7 +286,10 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 				return;
 			}
 
-			const width = Viewport.roundPoint(this.startPoint.width / 2.2, Math.min(this.minFitAllowed, this.startPoint.width / 4));
+			const width = Viewport.roundPoint(
+				this.startPoint.width / 2.2,
+				Math.min(this.minFitAllowed, this.startPoint.width / 4),
+			);
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
@@ -306,7 +325,7 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 					kind: PathCommandType.QuadraticBezierTo,
 					controlPoint: center.plus(Vec2.of(width, -width)),
 					endPoint: center.plus(Vec2.of(width, 0)),
-				}
+				},
 			);
 			const connector: PathCommand = {
 				kind: PathCommandType.LineTo,
@@ -319,8 +338,12 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		}
 
 		const {
-			upperCurveCommand, lowerToUpperConnector, upperToLowerConnector, lowerCurveCommand,
-			lowerCurve, upperCurve,
+			upperCurveCommand,
+			lowerToUpperConnector,
+			upperToLowerConnector,
+			lowerCurveCommand,
+			lowerCurve,
+			upperCurve,
 			nextCurveStartConnector,
 		} = this.segmentToPath(curve);
 
@@ -379,10 +402,9 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		const projectionT = bezier.nearestPointTo(controlPoint).parameterValue;
 
 		const halfVecT = projectionT;
-		const halfVec = bezier.normal(halfVecT).times(
-			curve.startWidth / 2 * halfVecT
-				+ curve.endWidth / 2 * (1 - halfVecT)
-		);
+		const halfVec = bezier
+			.normal(halfVecT)
+			.times((curve.startWidth / 2) * halfVecT + (curve.endWidth / 2) * (1 - halfVecT));
 
 		// Each starts at startPt ± startVec
 		const lowerCurveStartPoint = this.roundPoint(startPt.plus(startVec));
@@ -429,12 +451,24 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 			endPoint: upperCurveEndPoint,
 		};
 
-		const upperCurve = new QuadraticBezier(upperCurveStartPoint, upperCurveControlPoint, upperCurveEndPoint);
-		const lowerCurve = new QuadraticBezier(lowerCurveStartPoint, lowerCurveControlPoint, lowerCurveEndPoint);
+		const upperCurve = new QuadraticBezier(
+			upperCurveStartPoint,
+			upperCurveControlPoint,
+			upperCurveEndPoint,
+		);
+		const lowerCurve = new QuadraticBezier(
+			lowerCurveStartPoint,
+			lowerCurveControlPoint,
+			lowerCurveEndPoint,
+		);
 
 		return {
-			upperCurveCommand, upperToLowerConnector, lowerToUpperConnector, lowerCurveCommand,
-			upperCurve, lowerCurve,
+			upperCurveCommand,
+			upperToLowerConnector,
+			lowerToUpperConnector,
+			lowerCurveCommand,
+			upperCurve,
+			lowerCurve,
 
 			nextCurveStartConnector,
 		};

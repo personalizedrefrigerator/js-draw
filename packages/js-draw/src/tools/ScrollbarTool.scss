@@ -1,4 +1,3 @@
-
 .ScrollbarTool-overlay {
 	width: 0;
 	height: 0;
@@ -15,8 +14,12 @@
 	}
 
 	@keyframes fade-out {
-		from { opacity: $visible-opacity; }
-		to { opacity: 0; }
+		from {
+			opacity: $visible-opacity;
+		}
+		to {
+			opacity: 0;
+		}
 	}
 
 	&:not(.just-updated) {
@@ -26,7 +29,8 @@
 
 	--scrollbar-size: 3px;
 
-	.vertical-scrollbar, .horizontal-scrollbar {
+	.vertical-scrollbar,
+	.horizontal-scrollbar {
 		width: var(--scrollbar-size);
 		height: var(--scrollbar-size);
 
@@ -48,7 +52,7 @@
 			margin-left: calc(var(--editor-current-display-width-px) - var(--scrollbar-size));
 		}
 	}
-	
+
 	&:not(.scrollbar-top) {
 		.horizontal-scrollbar {
 			margin-top: calc(var(--editor-current-display-height-px) - var(--scrollbar-size));

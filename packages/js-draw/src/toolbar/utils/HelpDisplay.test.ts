@@ -33,10 +33,14 @@ const createTestHelpDisplay = (testHelpTexts: string[]) => {
 	expect(overlayElementMatches).toHaveLength(1);
 	const helpOverlay = overlayElementMatches[0];
 
-	const nextButton = helpOverlay.querySelector<HTMLButtonElement>('.navigation-buttons > button.next')!;
+	const nextButton = helpOverlay.querySelector<HTMLButtonElement>(
+		'.navigation-buttons > button.next',
+	)!;
 	expect(nextButton).not.toBeFalsy();
 
-	const previousButton = helpOverlay.querySelector<HTMLButtonElement>('.navigation-buttons > button.previous')!;
+	const previousButton = helpOverlay.querySelector<HTMLButtonElement>(
+		'.navigation-buttons > button.previous',
+	)!;
 	expect(previousButton).not.toBeFalsy();
 
 	const closeButton = helpOverlay.querySelector<HTMLButtonElement>('.close-button')!;
@@ -65,9 +69,8 @@ describe('HelpDisplay', () => {
 	});
 
 	test('should show help registered for just the current element', async () => {
-		const { helpOverlay, getLabel, closeButton, nextButton, previousButton } = createTestHelpDisplay(
-			[ 'Help text here...', 'Help text 2' ]
-		);
+		const { helpOverlay, getLabel, closeButton, nextButton, previousButton } =
+			createTestHelpDisplay(['Help text here...', 'Help text 2']);
 
 		// Should show the help text for the first item
 		expect(getLabel().innerText).toMatch('Help text here...');
@@ -103,9 +106,7 @@ describe('HelpDisplay', () => {
 	});
 
 	test('dragging the dialog background should transition between items', async () => {
-		const { helpOverlay, getLabel } = createTestHelpDisplay(
-			[ 'Item 1', 'Item 2', 'Item 3' ]
-		);
+		const { helpOverlay, getLabel } = createTestHelpDisplay(['Item 1', 'Item 2', 'Item 3']);
 
 		expect(getLabel().innerText).toBe('Item 1');
 

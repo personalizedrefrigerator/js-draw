@@ -1,4 +1,3 @@
-
 // This file contains code for creating icons specific to the example app.
 // js-draw has its own code for creating icons (e.g. toolbar icons).
 
@@ -14,12 +13,15 @@ export const makeIconFromText = (text: string) => {
 		textNode.appendChild(document.createTextNode(text));
 		textNode.setAttribute('x', '50');
 		textNode.setAttribute('y', '50');
-		textNode.setAttribute('style', `
+		textNode.setAttribute(
+			'style',
+			`
 			text-anchor: middle;
 			dominant-baseline: middle;
 			font-size: 100px;
 			${styles}
-		`);
+		`,
+		);
 
 		icon.appendChild(textNode);
 	};

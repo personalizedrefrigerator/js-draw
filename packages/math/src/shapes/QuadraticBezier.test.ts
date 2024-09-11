@@ -27,24 +27,27 @@ describe('QuadraticBezier', () => {
 	});
 
 	test.each([
-		[ new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY), Vec2.zero, 0 ],
-		[ new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY), Vec2.unitY, 1 ],
+		[new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY), Vec2.zero, 0],
+		[new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY), Vec2.unitY, 1],
 
-		[ new QuadraticBezier(Vec2.zero, Vec2.of(0.5, 0), Vec2.of(1, 0)), Vec2.of(0.4, 0), 0.4],
-		[ new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.of(0, 1)), Vec2.of(0, 0.4), 0.4],
-		[ new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY), Vec2.unitX, 0.42514 ],
+		[new QuadraticBezier(Vec2.zero, Vec2.of(0.5, 0), Vec2.of(1, 0)), Vec2.of(0.4, 0), 0.4],
+		[new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.of(0, 1)), Vec2.of(0, 0.4), 0.4],
+		[new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY), Vec2.unitX, 0.42514],
 
 		// Should not return an out-of-range parameter
-		[ new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.unitY), Vec2.of(0, -1000), 0 ],
-		[ new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.unitY), Vec2.of(0, 1000), 1 ],
+		[new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.unitY), Vec2.of(0, -1000), 0],
+		[new QuadraticBezier(Vec2.zero, Vec2.of(0, 0.5), Vec2.unitY), Vec2.of(0, 1000), 1],
 
 		// Edge case -- just a point
-		[ new QuadraticBezier(Vec2.zero, Vec2.zero, Vec2.zero), Vec2.of(0, 1000), 0 ],
-	])('nearestPointTo should return the nearest point and parameter value on %s to %s', (bezier, point, expectedParameter) => {
-		const nearest = bezier.nearestPointTo(point);
-		expect(nearest.parameterValue).toBeCloseTo(expectedParameter, 0.0001);
-		expect(nearest.point).objEq(bezier.at(nearest.parameterValue));
-	});
+		[new QuadraticBezier(Vec2.zero, Vec2.zero, Vec2.zero), Vec2.of(0, 1000), 0],
+	])(
+		'nearestPointTo should return the nearest point and parameter value on %s to %s',
+		(bezier, point, expectedParameter) => {
+			const nearest = bezier.nearestPointTo(point);
+			expect(nearest.parameterValue).toBeCloseTo(expectedParameter, 0.0001);
+			expect(nearest.point).objEq(bezier.at(nearest.parameterValue));
+		},
+	);
 
 	test('.normalAt should return a unit normal vector at the given parameter value', () => {
 		const curves = [
@@ -72,13 +75,16 @@ describe('QuadraticBezier', () => {
 		new QuadraticBezier(Vec2.zero, Vec2.unitY, Vec2.unitY.times(2)),
 		new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY),
 		new QuadraticBezier(Vec2.zero, Vec2.unitY, Vec2.unitX),
-	])('.derivativeAt should return a derivative vector with the correct direction (curve: %s)', (curve) => {
-		for (let t = 0; t < 1; t += 0.1) {
-			const derivative = curve.derivativeAt(t);
-			const derivativeApprox = curve.at(t + 0.001).minus(curve.at(t - 0.001));
-			expect(derivativeApprox.normalized()).objEq(derivative.normalized(), 0.01);
-		}
-	});
+	])(
+		'.derivativeAt should return a derivative vector with the correct direction (curve: %s)',
+		(curve) => {
+			for (let t = 0; t < 1; t += 0.1) {
+				const derivative = curve.derivativeAt(t);
+				const derivativeApprox = curve.at(t + 0.001).minus(curve.at(t - 0.001));
+				expect(derivativeApprox.normalized()).objEq(derivative.normalized(), 0.01);
+			}
+		},
+	);
 
 	test('should support Bezier-Bezier intersections', () => {
 		const b1 = new QuadraticBezier(Vec2.zero, Vec2.unitX, Vec2.unitY);

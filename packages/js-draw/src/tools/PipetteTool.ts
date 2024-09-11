@@ -5,7 +5,7 @@ import Editor from '../Editor';
 import { PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
 
-type ColorListener = (color: Color4|null)=>void;
+type ColorListener = (color: Color4 | null) => void;
 
 /**
  * A tool used internally to pick colors from the canvas.
@@ -16,8 +16,8 @@ type ColorListener = (color: Color4|null)=>void;
  * @internal
  */
 export default class PipetteTool extends BaseTool {
-	private colorPreviewListener: ColorListener|null = null;
-	private colorSelectListener: ColorListener|null = null;
+	private colorPreviewListener: ColorListener | null = null;
+	private colorSelectListener: ColorListener | null = null;
 
 	public constructor(
 		private editor: Editor,
@@ -41,8 +41,7 @@ export default class PipetteTool extends BaseTool {
 
 		if (this.isEnabled() && this.colorSelectListener && this.colorPreviewListener) {
 			this.editor.getRootElement().classList.add(className);
-		}
-		else {
+		} else {
 			this.editor.getRootElement().classList.remove(className);
 		}
 	}

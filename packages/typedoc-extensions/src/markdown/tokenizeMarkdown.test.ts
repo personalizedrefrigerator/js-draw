@@ -10,7 +10,6 @@ describe('tokenizeMarkdown', () => {
 			{ type: MarkdownTokenType.CodeDelim, position: 11, text: '`' },
 		]);
 
-
 		expect(tokenizeMarkdown('`code ✅ `` ... ``` a \n`b')).toMatchObject([
 			{ type: MarkdownTokenType.CodeDelim, position: 0, text: '`' },
 			{ type: MarkdownTokenType.Text, position: 1, text: 'code' },
@@ -38,7 +37,6 @@ describe('tokenizeMarkdown', () => {
 			{ type: MarkdownTokenType.Text, position: 14, text: 'test' },
 			{ type: MarkdownTokenType.CodeDelim, position: 18, text: '``' },
 			{ type: MarkdownTokenType.Text, position: 20, text: '...' },
-
 		]);
 	});
 

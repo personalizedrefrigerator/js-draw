@@ -29,17 +29,17 @@ export default class ScrollbarTool extends BaseTool {
 		this.horizontalScrollbar.classList.add('horizontal-scrollbar');
 
 		this.scrollbarOverlay.replaceChildren(this.verticalScrollbar, this.horizontalScrollbar);
-		let overlay: ReturnType<typeof editor.createHTMLOverlay>|null = null;
+		let overlay: ReturnType<typeof editor.createHTMLOverlay> | null = null;
 
-		let viewportListener: DispatcherEventListener|null = null;
-		this.enabledValue().onUpdateAndNow(enabled => {
+		let viewportListener: DispatcherEventListener | null = null;
+		this.enabledValue().onUpdateAndNow((enabled) => {
 			overlay?.remove();
 			viewportListener?.remove();
 			viewportListener = null;
 			overlay = null;
 
 			if (enabled) {
-				viewportListener = editor.notifier.on(EditorEventType.ViewportChanged, _event => {
+				viewportListener = editor.notifier.on(EditorEventType.ViewportChanged, (_event) => {
 					this.updateScrollbars();
 				});
 				this.updateScrollbars();
@@ -49,24 +49,25 @@ export default class ScrollbarTool extends BaseTool {
 		});
 	}
 
-	private fadeOutTimeout: ReturnType<typeof setTimeout>|null = null;
+	private fadeOutTimeout: ReturnType<typeof setTimeout> | null = null;
 	private updateScrollbars() {
 		const viewport = this.editor.viewport;
 		const screenSize = viewport.getScreenRectSize();
 		const screenRect = new Rect2(0, 0, screenSize.x, screenSize.y);
-		const imageRect = this.editor.getImportExportRect()
-		// The scrollbars are positioned in screen coordinates, so the exportRect also needs
-		// to be in screen coordinates
+		const imageRect = this.editor
+			.getImportExportRect()
+			// The scrollbars are positioned in screen coordinates, so the exportRect also needs
+			// to be in screen coordinates
 			.transformedBoundingBox(viewport.canvasToScreenTransform)
 
-		// If the screenRect is outside of the exportRect, expand the image rectangle
+			// If the screenRect is outside of the exportRect, expand the image rectangle
 			.union(screenRect);
 
-		const scrollbarWidth = screenRect.width / imageRect.width * screenSize.x;
-		const scrollbarHeight = screenRect.height / imageRect.height * screenSize.y;
+		const scrollbarWidth = (screenRect.width / imageRect.width) * screenSize.x;
+		const scrollbarHeight = (screenRect.height / imageRect.height) * screenSize.y;
 
-		const scrollbarX = (screenRect.x - imageRect.x) / imageRect.width * (screenSize.x);
-		const scrollbarY = (screenRect.y - imageRect.y) / imageRect.height * (screenSize.y);
+		const scrollbarX = ((screenRect.x - imageRect.x) / imageRect.width) * screenSize.x;
+		const scrollbarY = ((screenRect.y - imageRect.y) / imageRect.height) * screenSize.y;
 
 		this.horizontalScrollbar.style.width = `${scrollbarWidth}px`;
 		this.verticalScrollbar.style.height = `${scrollbarHeight}px`;

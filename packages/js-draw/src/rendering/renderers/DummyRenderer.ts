@@ -9,11 +9,11 @@ export default class DummyRenderer extends AbstractRenderer {
 	// Variables that track the state of what's been rendered
 	public clearedCount: number = 0;
 	public renderedPathCount: number = 0;
-	public lastFillStyle: RenderingStyle|null = null;
-	public lastPoint: Point2|null = null;
+	public lastFillStyle: RenderingStyle | null = null;
+	public lastPoint: Point2 | null = null;
 	public objectNestingLevel: number = 0;
-	public lastText: string|null = null;
-	public lastImage: RenderableImage|null = null;
+	public lastText: string | null = null;
+	public lastImage: RenderableImage | null = null;
 
 	// List of points drawn since the last clear.
 	public pointBuffer: Point2[] = [];
@@ -37,7 +37,7 @@ export default class DummyRenderer extends AbstractRenderer {
 	}
 
 	public clear() {
-		this.clearedCount ++;
+		this.clearedCount++;
 		this.renderedPathCount = 0;
 		this.pointBuffer = [];
 		this.lastText = null;
@@ -45,9 +45,7 @@ export default class DummyRenderer extends AbstractRenderer {
 
 		// Ensure all objects finished rendering
 		if (this.objectNestingLevel > 0) {
-			throw new Error(
-				`Within an object while clearing! Nesting level: ${this.objectNestingLevel}`
-			);
+			throw new Error(`Within an object while clearing! Nesting level: ${this.objectNestingLevel}`);
 		}
 	}
 
@@ -97,7 +95,6 @@ export default class DummyRenderer extends AbstractRenderer {
 		// As such, it is unlikely to be the target of automated tests.
 	}
 
-
 	public drawText(text: string, _transform: Mat33, _style: TextRenderingStyle): void {
 		this.lastText = text;
 	}
@@ -122,7 +119,6 @@ export default class DummyRenderer extends AbstractRenderer {
 		return false;
 	}
 
-
 	public override canRenderFromWithoutDataLoss(other: AbstractRenderer) {
 		return other instanceof DummyRenderer;
 	}
@@ -135,9 +131,11 @@ export default class DummyRenderer extends AbstractRenderer {
 		this.renderedPathCount += other.renderedPathCount;
 		this.lastFillStyle = other.lastFillStyle;
 		this.lastPoint = other.lastPoint;
-		this.pointBuffer.push(...other.pointBuffer.map(point => {
-			return transform.transformVec2(point);
-		}));
+		this.pointBuffer.push(
+			...other.pointBuffer.map((point) => {
+				return transform.transformVec2(point);
+			}),
+		);
 	}
 
 	public override toString() {

@@ -5,9 +5,10 @@ import { join } from 'path';
 import replaceElementWithRunnableCode from './editor/replaceElementWithRunnableCode';
 import { imagesPath, basePath } from './constants';
 
-
 const initRunnableElements = () => {
-	const runnableElements = [...document.querySelectorAll('pre.runnable-code')] as HTMLTextAreaElement[];
+	const runnableElements = [
+		...document.querySelectorAll('pre.runnable-code'),
+	] as HTMLTextAreaElement[];
 
 	for (const runnable of runnableElements) {
 		replaceElementWithRunnableCode(runnable);

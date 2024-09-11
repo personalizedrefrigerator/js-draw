@@ -2,7 +2,7 @@ import { Point2, Rect2, Vec2 } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import untilNextAnimationFrame from '../../util/untilNextAnimationFrame';
 
-type ScrollByCallback = (delta: Vec2)=>void;
+type ScrollByCallback = (delta: Vec2) => void;
 
 /**
  * Automatically scrolls the viewport such that the user's pointer is visible.
@@ -11,11 +11,13 @@ export default class ToPointerAutoscroller {
 	private started: boolean = false;
 	private updateLoopId: number = 0;
 	private updateLoopRunning = false;
-	private targetPoint: Point2|null = null;
+	private targetPoint: Point2 | null = null;
 	private scrollRate: number = 1000; // px/s
 
-	public constructor(private viewport: Viewport, private scrollByCanvasDelta: ScrollByCallback) {
-	}
+	public constructor(
+		private viewport: Viewport,
+		private scrollByCanvasDelta: ScrollByCallback,
+	) {}
 
 	private getScrollForPoint(screenPoint: Point2) {
 		const screenSize = this.viewport.getScreenRectSize();
@@ -70,7 +72,7 @@ export default class ToPointerAutoscroller {
 		}
 
 		(async () => {
-			this.updateLoopId ++;
+			this.updateLoopId++;
 			const currentUpdateLoopId = this.updateLoopId;
 
 			let lastUpdateTime = performance.now();
@@ -81,10 +83,10 @@ export default class ToPointerAutoscroller {
 				const deltaTimeMs = currentTime - lastUpdateTime;
 
 				const scrollDirection = this.getScrollForPoint(this.targetPoint);
-				const screenScrollAmount = scrollDirection.times(this.scrollRate * deltaTimeMs / 1000);
+				const screenScrollAmount = scrollDirection.times((this.scrollRate * deltaTimeMs) / 1000);
 
 				this.scrollByCanvasDelta(
-					this.viewport.screenToCanvasTransform.transformVec3(screenScrollAmount)
+					this.viewport.screenToCanvasTransform.transformVec3(screenScrollAmount),
 				);
 
 				lastUpdateTime = currentTime;
@@ -96,6 +98,6 @@ export default class ToPointerAutoscroller {
 	}
 
 	private stopUpdateLoop() {
-		this.updateLoopId ++;
+		this.updateLoopId++;
 	}
 }

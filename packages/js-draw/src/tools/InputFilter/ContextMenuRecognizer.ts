@@ -1,15 +1,16 @@
 import { InputEvt, InputEvtType, isPointerEvt, PointerEvt } from '../../inputEvents';
 import InputMapper from './InputMapper';
-import StationaryPenDetector, { defaultStationaryDetectionConfig } from '../util/StationaryPenDetector';
+import StationaryPenDetector, {
+	defaultStationaryDetectionConfig,
+} from '../util/StationaryPenDetector';
 import { Point2 } from '@js-draw/math';
 import Pointer, { PointerDevice } from '../../Pointer';
-
 
 export default class ContextMenuRecognizer extends InputMapper {
 	private canShowContextMenu = false;
 	private contextMenuTriggerPointer: Pointer;
 	private contextMenuStartPoint: Point2;
-	private stationaryDetector: StationaryPenDetector|null = null;
+	private stationaryDetector: StationaryPenDetector | null = null;
 	private clickTolerance = 12;
 
 	public constructor() {
@@ -22,9 +23,7 @@ export default class ContextMenuRecognizer extends InputMapper {
 	 * one such device.
 	 */
 	private canMakeLongPressMenuEvent(event: PointerEvt) {
-		const allowedDevices = [
-			PointerDevice.Touch,
-		];
+		const allowedDevices = [PointerDevice.Touch];
 		return event.allPointers.length === 1 && allowedDevices.includes(event.current.device);
 	}
 

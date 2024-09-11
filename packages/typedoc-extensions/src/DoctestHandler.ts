@@ -20,7 +20,9 @@ export default class DoctestHandler {
 
 	public render(outputFilepath: string) {
 		const baseUrl = '../';
-		writeFileSync(outputFilepath, `<!DOCTYPE html>
+		writeFileSync(
+			outputFilepath,
+			`<!DOCTYPE html>
 			<html lang="en">
 				<head>
 					<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
@@ -55,8 +57,9 @@ export default class DoctestHandler {
 						<p>
 							Part of the goal of this page is to easily find broken examples.
 						</p>
-						${this.doctests.map(
-		(test, index) => `
+						${this.doctests
+							.map(
+								(test, index) => `
 								<h2>Example ${index + 1}</h2>
 								<div>
 									<p>
@@ -64,11 +67,13 @@ export default class DoctestHandler {
 									</p>
 									${test.testHtml}
 								</div>
-							`
-	).join('')}
+							`,
+							)
+							.join('')}
 					</main>
 				</body>
 			</html>
-		`);
+		`,
+		);
 	}
 }

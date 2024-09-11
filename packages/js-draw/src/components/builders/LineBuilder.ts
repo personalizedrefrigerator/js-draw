@@ -17,7 +17,10 @@ export const makeLineBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrec
 export default class LineBuilder implements ComponentBuilder {
 	private endPoint: StrokeDataPoint;
 
-	public constructor(private readonly startPoint: StrokeDataPoint, private readonly viewport: Viewport) {
+	public constructor(
+		private readonly startPoint: StrokeDataPoint,
+		private readonly viewport: Viewport,
+	) {
 		this.endPoint = startPoint;
 	}
 
@@ -57,11 +60,9 @@ export default class LineBuilder implements ComponentBuilder {
 				kind: PathCommandType.LineTo,
 				point: startPoint.minus(scaledStartNormal),
 			},
-		]).mapPoints(point => this.viewport.roundPoint(point));
+		]).mapPoints((point) => this.viewport.roundPoint(point));
 
-		const preview = new Stroke([
-			pathToRenderable(path, { fill: this.startPoint.color })
-		]);
+		const preview = new Stroke([pathToRenderable(path, { fill: this.startPoint.color })]);
 
 		return preview;
 	}

@@ -23,7 +23,6 @@ class TestWidget extends BaseWidget {
 		this.clickMock();
 	}
 
-
 	public keyPressStopsPropagation = true;
 
 	protected override onKeyPress(event: KeyPressEvent): boolean {

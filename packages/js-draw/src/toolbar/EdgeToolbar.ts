@@ -40,7 +40,6 @@ export const makeEdgeToolbar = (editor: Editor): AbstractToolbar => {
 	return new EdgeToolbar(editor, editor.getRootElement(), editor.localization);
 };
 
-
 export default class EdgeToolbar extends AbstractToolbar {
 	private toolbarContainer: HTMLElement;
 
@@ -63,13 +62,10 @@ export default class EdgeToolbar extends AbstractToolbar {
 	private sidebarY: MutableReactiveValue<number>;
 	private sidebarTitle: MutableReactiveValue<string>;
 
-	private clearDragListeners: (()=>void)|null = null;
+	private clearDragListeners: (() => void) | null = null;
 
 	/** @internal */
-	public constructor(
-		editor: Editor, parent: HTMLElement,
-		localizationTable: ToolbarLocalization,
-	) {
+	public constructor(editor: Editor, parent: HTMLElement, localizationTable: ToolbarLocalization) {
 		super(editor, localizationTable);
 
 		this.toolbarContainer = document.createElement('div');
@@ -114,7 +110,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 		this.sidebarContent = document.createElement('div');
 
 		// Setup resizing/dragging
-		this.sidebarY.onUpdateAndNow(y => {
+		this.sidebarY.onUpdateAndNow((y) => {
 			const belowEdgeClassName = 'dropdown-below-edge';
 			if (y > 0) {
 				this.sidebarContainer.style.transform = `translate(0, ${y}px)`;
@@ -132,13 +128,13 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		// The close button has default focus -- forward its events to the main editor so that keyboard
 		// shortcuts still work.
-		this.editor.handleKeyEventsFrom(this.closeButton, event => {
+		this.editor.handleKeyEventsFrom(this.closeButton, (event) => {
 			// Don't send
 			return event.code !== 'Space' && event.code !== 'Enter' && event.code !== 'Tab';
 		});
 
 		// Close the sidebar when pressing escape
-		this.sidebarContainer.addEventListener('keyup', event => {
+		this.sidebarContainer.addEventListener('keyup', (event) => {
 			if (!event.defaultPrevented && event.code === 'Escape') {
 				this.sidebarVisible.set(false);
 				event.preventDefault();
@@ -163,7 +159,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 			localizationTable,
 		);
 
-		this.sidebarTitle.onUpdateAndNow(title => {
+		this.sidebarTitle.onUpdateAndNow((title) => {
 			this.closeButton.setAttribute('aria-label', localizationTable.closeSidebar(title));
 		});
 
@@ -176,7 +172,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 	}
 
 	private listenForVisibilityChanges() {
-		let animationTimeout: ReturnType<typeof setTimeout>|null = null;
+		let animationTimeout: ReturnType<typeof setTimeout> | null = null;
 		const animationDuration = 170;
 
 		if (!this.sidebarVisible.get()) {
@@ -189,7 +185,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 
 		const prefersReduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)') ?? '';
 
-		this.sidebarVisible.onUpdate(visible => {
+		this.sidebarVisible.onUpdate((visible) => {
 			const animationProperties = `${animationDuration}ms ease`;
 
 			// We need to use different animations when reducing motion.
@@ -204,25 +200,20 @@ export default class EdgeToolbar extends AbstractToolbar {
 				}
 
 				this.menuContainer.style.display = '';
-				this.sidebarContainer.style.animation =
-					`${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-in${reduceMotion}`;
-				this.menuContainer.style.animation =
-					`${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-in${reduceMotion}`;
+				this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-in${reduceMotion}`;
+				this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-in${reduceMotion}`;
 				this.menuContainer.style.opacity = '1';
-
 
 				// Focus the close button when first shown, but prevent scroll because the button
 				// is likely at the bottom of the screen (and we want the full sidebar to remain
 				// visible).
-				this.closeButton.focus({ preventScroll: true, });
+				this.closeButton.focus({ preventScroll: true });
 			} else {
 				this.closeColorPickers();
 
 				if (animationTimeout === null) {
-					this.sidebarContainer.style.animation =
-						`${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-out${reduceMotion}`;
-					this.menuContainer.style.animation =
-						`${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-out${reduceMotion}`;
+					this.sidebarContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-transition-out${reduceMotion}`;
+					this.menuContainer.style.animation = `${animationProperties} ${toolbarCSSPrefix}-edgemenu-container-transition-out${reduceMotion}`;
 
 					// Manually set the container's opacity to prevent flickering when closing
 					// the toolbar.
@@ -233,7 +224,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 					//this.menuContainer.style.overflowY = 'hidden';
 
 					this.editor.announceForAccessibility(
-						this.localizationTable.dropdownHidden(this.sidebarTitle.get())
+						this.localizationTable.dropdownHidden(this.sidebarTitle.get()),
 					);
 
 					animationTimeout = setTimeout(() => {
@@ -261,7 +252,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 				// that the button's width is its height plus some padding.
 				const buttonBaseSize = child.clientHeight;
 				currentWidth += buttonBaseSize;
-				numVisibleButtons ++;
+				numVisibleButtons++;
 
 				if (currentWidth > visibleWidth) {
 					// We want extraPadding + (currentWidth - buttonWidth / 2) = visibleWidth.
@@ -276,7 +267,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 				}
 			}
 
-			const perButtonPadding = Math.round(extraPadding/numVisibleButtons * 10) / 10;
+			const perButtonPadding = Math.round((extraPadding / numVisibleButtons) * 10) / 10;
 			this.toolbarToolRow.style.setProperty('--extra-left-right-padding', `${perButtonPadding}px`);
 		};
 
@@ -357,31 +348,37 @@ export default class EdgeToolbar extends AbstractToolbar {
 	}
 
 	private initDragListeners() {
-		const dragElements = [ this.closeButton, this.sidebarContainer, this.sidebarContent ];
+		const dragElements = [this.closeButton, this.sidebarContainer, this.sidebarContent];
 		// Forward longer touch events from the menu background to the
 		// editor (and close the sidebar).
-		this.manageListener(this.editor.handlePointerEventsExceptClicksFrom(this.menuContainer, (eventName, event) => {
-			if (event.target === this.menuContainer) {
-				if (eventName === 'pointerdown') {
-					this.sidebarVisible.set(false);
+		this.manageListener(
+			this.editor.handlePointerEventsExceptClicksFrom(
+				this.menuContainer,
+				(eventName, event) => {
+					if (event.target === this.menuContainer) {
+						if (eventName === 'pointerdown') {
+							this.sidebarVisible.set(false);
 
-					// A delay seems necessary for the editor
-					setTimeout(() => this.editor.focus(), 0);
-				}
+							// A delay seems necessary for the editor
+							setTimeout(() => this.editor.focus(), 0);
+						}
 
-				return true;
-			}
+						return true;
+					}
 
-			if (!this.sidebarVisible.get()) {
-				return true;
-			}
+					if (!this.sidebarVisible.get()) {
+						return true;
+					}
 
-			// Don't send pointer events that don't directly target mainContainer
-			// to the editor
-			return false;
-		}, (_eventName, event) => {
-			return event.target === this.menuContainer;
-		}));
+					// Don't send pointer events that don't directly target mainContainer
+					// to the editor
+					return false;
+				},
+				(_eventName, event) => {
+					return event.target === this.menuContainer;
+				},
+			),
+		);
 
 		// Set lastGestureWasRoughlyClick to `true` initially because on page load
 		// performance.now() is zero.
@@ -403,9 +400,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 			const wasJustDragging = performance.now() - gestureEndTimestamp < 100;
 
 			// Ignore the click event if it was caused by dragging the button.
-			if (
-				(wasJustDragging && lastGestureWasRoughlyClick) || !wasJustDragging
-			) {
+			if ((wasJustDragging && lastGestureWasRoughlyClick) || !wasJustDragging) {
 				this.sidebarVisible.set(false);
 			}
 		};
@@ -424,7 +419,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 	private snappedSidebarY(sidebarY?: number) {
 		const y = sidebarY ?? this.sidebarY.get();
 
-		const snapYs = [ -100, 0 ];
+		const snapYs = [-100, 0];
 
 		// Allow some amount of scrolling if the sidebar is too tall to fit entirely
 		// in the window.

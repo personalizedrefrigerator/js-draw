@@ -36,8 +36,8 @@ describe('FindTool', () => {
 		expect(getComputedStyle(overlay).display).not.toBe('none');
 
 		// Add some text to the image
-		const style = { size: 12, fontFamily: 'serif', renderingStyle: { fill: Color4.red }};
-		const text = TextComponent.fromLines([ 'test' ], Mat33.scaling2D(0.01), style);
+		const style = { size: 12, fontFamily: 'serif', renderingStyle: { fill: Color4.red } };
+		const text = TextComponent.fromLines(['test'], Mat33.scaling2D(0.01), style);
 		void editor.image.addElement(text).apply(editor);
 
 		// Should focus the search input
@@ -47,10 +47,12 @@ describe('FindTool', () => {
 
 		// Should not change the view when searching for something that doesn't exist.
 		searchInput.setAttribute('value', 'testing');
-		searchInput.dispatchEvent(new KeyboardEvent('keydown', {
-			key: 'Enter',
-			code: 'Enter',
-		}));
+		searchInput.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				key: 'Enter',
+				code: 'Enter',
+			}),
+		);
 		expect(editor.viewport.getScaleFactor()).toBeCloseTo(1);
 
 		// Search input should still have focus
@@ -58,10 +60,12 @@ describe('FindTool', () => {
 
 		// When searching for a substring that does exist, should zoom.
 		searchInput.setAttribute('value', 'test');
-		searchInput.dispatchEvent(new KeyboardEvent('keydown', {
-			key: 'Enter',
-			code: 'Enter',
-		}));
+		searchInput.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				key: 'Enter',
+				code: 'Enter',
+			}),
+		);
 		expect(editor.viewport.getScaleFactor()).not.toBeCloseTo(1);
 	});
 });

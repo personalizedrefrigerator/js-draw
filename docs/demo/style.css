@@ -2,7 +2,8 @@
 	background-color: white;
 }
 
-body, dialog {
+body,
+dialog {
 	color: black;
 }
 
@@ -69,7 +70,6 @@ body, dialog {
 	padding: 20px;
 }
 
-
 /* Container for the save popup. */
 .popupContainer iframe {
 	width: 100vw;
@@ -79,7 +79,7 @@ body, dialog {
 	padding: 0;
 	margin: 0;
 
-	background-color: rgba(0, 0, 0, 0.0);
+	background-color: rgba(0, 0, 0, 0);
 }
 
 .popupContainer {
@@ -110,7 +110,7 @@ body, dialog {
 }
 
 .error-container li::before {
-	content: "❗";
+	content: '❗';
 }
 
 .error-container.has-errors {
@@ -122,7 +122,8 @@ body, dialog {
 		background-color: black;
 	}
 
-	body, dialog {
+	body,
+	dialog {
 		color: white;
 	}
 

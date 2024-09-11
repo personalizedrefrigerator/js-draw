@@ -5,8 +5,8 @@ import InputMapper from './InputMapper';
  * The composition of multiple `InputMapper`s.
  */
 export default class InputPipeline extends InputMapper {
-	#head: InputMapper|null = null;
-	#tail: InputMapper|null = null;
+	#head: InputMapper | null = null;
+	#tail: InputMapper | null = null;
 
 	public override onEvent(event: InputEvt): boolean {
 		if (this.#head === null) {
@@ -29,6 +29,6 @@ export default class InputPipeline extends InputMapper {
 			this.#tail.setEmitListener(mapper);
 			this.#tail = mapper;
 		}
-		this.#tail.setEmitListener(event => this.emit(event));
+		this.#tail.setEmitListener((event) => this.emit(event));
 	}
 }

@@ -1,4 +1,3 @@
-
 ```ts,runnable
 import { EditorSettings, Editor, KeyBinding, makeEdgeToolbar } from 'js-draw';
 import { MaterialIconProvider } from '@js-draw/material-icons';

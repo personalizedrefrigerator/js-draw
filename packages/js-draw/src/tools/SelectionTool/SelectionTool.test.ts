@@ -19,7 +19,9 @@ const getSelectionTool = (editor: Editor): SelectionTool => {
 const createSquareStroke = (size: number = 1) => {
 	const testStroke = new Stroke([
 		// A filled square
-		pathToRenderable(Path.fromString(`M0,0 L${size},0 L${size},${size} L0,${size} Z`), { fill: Color4.blue }),
+		pathToRenderable(Path.fromString(`M0,0 L${size},0 L${size},${size} L0,${size} Z`), {
+			fill: Color4.blue,
+		}),
 	]);
 	const addTestStrokeCommand = EditorImage.addElement(testStroke);
 
@@ -235,14 +237,17 @@ describe('SelectionTool', () => {
 		expect(imageStrokes).toHaveLength(1);
 
 		const transformedStroke = imageStrokes[0] as Stroke;
-		const strokePoints = transformedStroke.getPath().polylineApproximation().map(line => line.p1);
+		const strokePoints = transformedStroke
+			.getPath()
+			.polylineApproximation()
+			.map((line) => line.p1);
 
 		// One point should now be just above the center of the square:
 		//      .  ←
 		//   .     .
 		//      .
 		//
-		expect(strokePoints.filter(point => point.eq(Vec2.of(Math.hypot(25, 0), 0)))).toHaveLength(1);
+		expect(strokePoints.filter((point) => point.eq(Vec2.of(Math.hypot(25, 0), 0)))).toHaveLength(1);
 	});
 
 	it('dragCancel should return a selection to its original position', () => {
@@ -326,7 +331,7 @@ describe('SelectionTool', () => {
 		expect(updatedListener).toHaveBeenLastCalledWith({
 			kind: EditorEventType.SelectionUpdated,
 			tool: selectionTool,
-			selectedComponents: [ testStroke ]
+			selectedComponents: [testStroke],
 		});
 
 		// Selecting the same content should not re-fire the listener
@@ -350,7 +355,7 @@ describe('SelectionTool', () => {
 		expect(updatedListener).toHaveBeenLastCalledWith({
 			kind: EditorEventType.SelectionUpdated,
 			tool: selectionTool,
-			selectedComponents: [ secondStroke.testStroke ],
+			selectedComponents: [secondStroke.testStroke],
 		});
 	});
 
@@ -370,13 +375,10 @@ describe('SelectionTool', () => {
 	});
 
 	it('should make selected objects toplevel on click', () => {
-		const {
-			editor, testStroke: selectedStroke,
-		} = createEditorWithSingleObjectSelection(150);
+		const { editor, testStroke: selectedStroke } = createEditorWithSingleObjectSelection(150);
 
-		const {
-			addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke
-		} = createSquareStroke(40);
+		const { addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke } =
+			createSquareStroke(40);
 		editor.dispatch(addOtherStrokeCommand);
 
 		// otherStroke should initially be below selectedStroke
@@ -399,13 +401,14 @@ describe('SelectionTool', () => {
 
 	it('sendToBack should return a serializable command that sends the selection to the back', () => {
 		const {
-			editor, testStroke: selectedStroke, selectionTool
+			editor,
+			testStroke: selectedStroke,
+			selectionTool,
 		} = createEditorWithSingleObjectSelection(150);
 
 		// Add another stroke and send it to the back
-		const {
-			addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke
-		} = createSquareStroke(40);
+		const { addTestStrokeCommand: addOtherStrokeCommand, testStroke: otherStroke } =
+			createSquareStroke(40);
 		editor.dispatch(addOtherStrokeCommand);
 		editor.dispatch(otherStroke.setZIndex(-1));
 		expect(selectedStroke.getZIndex()).toBeGreaterThan(otherStroke.getZIndex());
