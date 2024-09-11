@@ -183,18 +183,18 @@ export default class ClipboardHandler {
 	}
 
 	private copyInternal(event: ClipboardEvent|undefined) {
-		const mimeToData: Record<string, Promise<Blob>|string> = Object.create(null);
+		const mimeToData: Map<string, Promise<Blob>|string> = new Map();
 
 		if (this.editor.toolController.dispatchInputEvent({
 			kind: InputEvtType.CopyEvent,
 			setData: (mime, data) => {
-				mimeToData[mime] = data;
+				mimeToData.set(mime, data);
 			},
 		})) {
 			event?.preventDefault();
 		}
 
-		const mimeTypes = Object.keys(mimeToData);
+		const mimeTypes = [...mimeToData.keys()];
 		const hasNonTextMimeTypes = mimeTypes.some(mime => !isTextMimeType(mime));
 
 		const copyToEvent = (reason?: unknown) => {
@@ -202,8 +202,7 @@ export default class ClipboardHandler {
 				throw new Error(`Unable to copy -- no event provided${reason ? `. Original error: ${reason}` : ''}`);
 			}
 
-			for (const key in mimeToData) {
-				const value = mimeToData[key];
+			for (const [key, value] of mimeToData.entries()) {
 				if (typeof value === 'string') {
 					event.clipboardData?.setData(key, value);
 				}
@@ -212,17 +211,20 @@ export default class ClipboardHandler {
 
 		const copyToClipboardApi = () => {
 			const mappedMimeToData: Record<string, Blob|Promise<Blob>> = Object.create(null);
-			const mimeMapping: Record<string, string> = {
-				// image/svg+xml is unsupported in Chrome.
-				'image/svg+xml': 'text/html',
-			};
-			for (const key in mimeToData) {
-				const data = mimeToData[key];
-				const mappedKey = mimeMapping[key] || key;
+			for (const [key, data] of mimeToData.entries()) {
 				if (typeof data === 'string') {
-					mappedMimeToData[mappedKey] = new Blob([new TextEncoder().encode(data)], { type: mappedKey });
+					const loadedData = new Blob([new TextEncoder().encode(data)], { type: key });
+					mappedMimeToData[key] = loadedData;
 				} else {
-					mappedMimeToData[mappedKey] = data;
+					mappedMimeToData[key] = data;
+				}
+
+				// Different platforms have varying support for different clipboard MIME types:
+				// - As of September 2024, image/svg+xml is unsupported on iOS
+				// - text/html is unsupported on Chrome/Android (and perhaps Chrome on other platforms).
+				//    - See https://issues.chromium.org/issues/40851502
+				if (key === 'image/svg+xml') {
+					mappedMimeToData['text/html'] ??= mappedMimeToData[key];
 				}
 			}
 			return navigator.clipboard.write([ new ClipboardItem(mappedMimeToData) ]);

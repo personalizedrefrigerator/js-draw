@@ -133,7 +133,7 @@ describe('ClipboardHandler', () => {
 			expect(await navigator.clipboard.read()).toHaveLength(0);
 		});
 
-		// image/svg+xml is unsupported in Chrome as of early 2024.
+		// image/svg+xml is unsupported in iOS as of mid 2024.
 		it('should copy text/html instead of image/svg+xml when copying to the Clipboard API', async () => {
 			const editor = createEditor();
 			setUpCopyPasteTool(editor, {
@@ -164,7 +164,7 @@ describe('ClipboardHandler', () => {
 
 			// Should have pasted
 			expect(copyPasteTool.lastPasteData).toMatchObject({
-				mime: 'text/html',
+				mime: 'image/svg+xml',
 				data: testData,
 			});
 		});
