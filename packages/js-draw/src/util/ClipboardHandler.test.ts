@@ -4,6 +4,11 @@ import ClipboardHandler from './ClipboardHandler';
 import { CopyEvent, PasteEvent } from '../inputEvents';
 import Editor from '../Editor';
 
+interface ExtendedClipboardItem extends ClipboardItem {
+	supports(mime: string): boolean;
+}
+declare const ClipboardItem: ExtendedClipboardItem;
+
 type ClipboardTestData = Record<string, string|Blob>;
 
 // A tool that handles all copy events
@@ -147,6 +152,26 @@ describe('ClipboardHandler', () => {
 			const clipboardItems = await navigator.clipboard.read();
 			expect(clipboardItems).toHaveLength(1);
 			expect(await (await clipboardItems[0].getType('text/html')).text()).toBe('<svg>This should be copied.</svg>');
+		});
+
+		it('should not attempt to copy MIME types explicitly marked as unsupported by the browser', async () => {
+			const editor = createEditor();
+			const disallowedType = 'image/svg+xml';
+			setUpCopyPasteTool(editor, {
+				[disallowedType]: '<svg>This should NOT be copied.</svg>',
+				'text/plain': 'This should be copied',
+			});
+
+			ClipboardItem.supports = jest.fn((mime: string) => mime !== disallowedType);
+
+			const clipboardHandler = new ClipboardHandler(editor);
+
+			await clipboardHandler.copy();
+
+			const clipboardItems = await navigator.clipboard.read();
+			expect(clipboardItems).toHaveLength(1);
+			expect(await (await clipboardItems[0].getType('text/plain')).text()).toBe('This should be copied');
+			expect(clipboardItems[0].types).not.toContain(disallowedType);
 		});
 	});
 
