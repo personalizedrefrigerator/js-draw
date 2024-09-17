@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/typedoc-extensions",
-	"version": "1.21.0",
+	"version": "1.21.1",
 	"description": "Internal extensions for TypeDoc in js-draw.",
 	"types": "./dist/mjs/index.d.ts",
 	"main": "./dist/cjs/index.js",
@@ -28,14 +28,14 @@
 		"@codemirror/lang-css": "6.2.1",
 		"@codemirror/lang-javascript": "6.2.2",
 		"@codemirror/language": "6.10.2",
-		"@js-draw/build-tool": "^1.21.0",
-		"@js-draw/material-icons": "^1.21.0",
-		"@js-draw/math": "^1.21.0",
+		"@js-draw/build-tool": "^1.21.1",
+		"@js-draw/material-icons": "^1.21.1",
+		"@js-draw/math": "^1.21.1",
 		"@lezer/highlight": "1.2.0",
 		"@types/katex": "0.16.7",
 		"@types/react": "18.3.3",
 		"codemirror": "6.0.1",
-		"js-draw": "^1.21.0"
+		"js-draw": "^1.21.1"
 	},
 	"bugs": {
 		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"

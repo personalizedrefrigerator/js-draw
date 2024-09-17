@@ -1,4 +1,4 @@
-# 1.21.0
+# 1.21.0, 1.21.1
  * Features
     * Selection popover menu with copy/paste/duplicate/delete.
     * Make selection keyboard shortcuts configurable.
