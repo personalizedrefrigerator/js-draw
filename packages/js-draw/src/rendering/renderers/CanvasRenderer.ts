@@ -1,5 +1,5 @@
 import TextComponent from '../../components/TextComponent';
-import { Mat33, Rect2, Point2, Vec2, Vec3, Color4 } from '@js-draw/math';
+import { Mat33, Rect2, Point2, Vec2, Vec3, Color4, Path } from '@js-draw/math';
 import Viewport from '../../Viewport';
 import RenderingStyle from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
@@ -223,13 +223,18 @@ export default class CanvasRenderer extends AbstractRenderer {
 		this.ctx.restore();
 	}
 
-	public drawImage(image: RenderableImage) {
+	public drawImage(image: RenderableImage, clipTo?: Path) {
 		// .drawImage can fail for zero-size images.
 		if (image.image.width === 0 || image.image.height === 0) {
 			return;
 		}
 
 		this.ctx.save();
+		if (clipTo) {
+			this.ctx.beginPath();
+			this.tracePath(clipTo.transformedBy(this.getCanvasToScreenTransform().inverse()));
+			this.ctx.clip();
+		}
 		const transform = this.getCanvasToScreenTransform().rightMul(image.transform);
 		this.transformBy(transform);
 

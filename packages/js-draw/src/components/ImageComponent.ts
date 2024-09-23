@@ -1,9 +1,12 @@
-import { Mat33Array, Rect2, Mat33, LineSegment2 } from '@js-draw/math';
+import { Mat33Array, Rect2, Mat33, LineSegment2, Path, Color4 } from '@js-draw/math';
 import AbstractRenderer, { RenderableImage } from '../rendering/renderers/AbstractRenderer';
 import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import waitForImageLoaded from '../util/waitForImageLoaded';
+import Viewport from '../Viewport';
+import Stroke from './Stroke';
+import { pathToRenderable } from '../rendering/RenderablePathSpec';
 
 /**
  * Represents a raster image.
@@ -14,6 +17,7 @@ import waitForImageLoaded from '../util/waitForImageLoaded';
 export default class ImageComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 	private image: RenderableImage;
+	private mask: Stroke[]|null = null;
 
 	public constructor(image: RenderableImage) {
 		super('image-component');
@@ -39,6 +43,17 @@ export default class ImageComponent extends AbstractComponent {
 	private recomputeBBox() {
 		this.contentBBox = this.getImageRect();
 		this.contentBBox = this.contentBBox.transformedBoundingBox(this.image.transform);
+	}
+
+	public override withRegionErased(eraserPath: Path, viewport: Viewport) {
+		let mask = this.mask ?? [new Stroke([
+			pathToRenderable(Path.fromRect(this.contentBBox), { fill: Color4.transparent }),
+		])];
+		mask = mask.flatMap(part => part.withRegionErased(eraserPath, viewport));
+
+		const result = new ImageComponent(this.image);
+		result.mask = mask;
+		return [ result ];
 	}
 
 	/**
@@ -93,7 +108,14 @@ export default class ImageComponent extends AbstractComponent {
 
 	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
 		canvas.startObject(this.contentBBox);
-		canvas.drawImage(this.image);
+		const clipPath = this.mask?.reduce((union: Path|undefined, item) => {
+			const path = item.getPath();
+			if (union) {
+				union = union.union(path);
+			}
+			return union ?? path;
+		}, undefined);
+		canvas.drawImage(this.image, clipPath);
 		canvas.endObject(this.getLoadSaveData());
 	}
 

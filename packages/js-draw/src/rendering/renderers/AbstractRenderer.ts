@@ -1,4 +1,4 @@
-import { Color4, Mat33, Point2, Vec2, Rect2, Path, PathCommandType } from '@js-draw/math';
+import { Color4, Mat33, Point2, Vec2, Rect2, Path, PathCommandType, PathCommand } from '@js-draw/math';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';
@@ -58,13 +58,36 @@ export default abstract class AbstractRenderer {
 		controlPoint: Point2, endPoint: Point2,
 	): void;
 	public abstract drawText(text: string, transform: Mat33, style: TextRenderingStyle): void;
-	public abstract drawImage(image: RenderableImage): void;
+	public abstract drawImage(image: RenderableImage, clipTo?: Path): void;
 
 	// Returns true iff the given rectangle is so small, rendering anything within
 	// it has no effect on the image.
 	public abstract isTooSmallToRender(rect: Rect2): boolean;
 
 	public setDraftMode(_draftMode: boolean) { }
+
+	protected tracePath(commands: PathCommand[]|Path) {
+		if (!Array.isArray(commands)) {
+			this.moveTo(commands.startPoint);
+			commands = commands.parts;
+		}
+
+		for (const command of commands) {
+			if (command.kind === PathCommandType.LineTo) {
+				this.lineTo(command.point);
+			} else if (command.kind === PathCommandType.MoveTo) {
+				this.moveTo(command.point);
+			} else if (command.kind === PathCommandType.CubicBezierTo) {
+				this.traceCubicBezierCurve(
+					command.controlPoint1, command.controlPoint2, command.endPoint
+				);
+			} else if (command.kind === PathCommandType.QuadraticBezierTo) {
+				this.traceQuadraticBezierCurve(
+					command.controlPoint, command.endPoint
+				);
+			}
+		}
+	}
 
 	protected objectLevel: number = 0;
 	private currentPaths: RenderablePathSpec[]|null = null;
@@ -88,21 +111,7 @@ export default abstract class AbstractRenderer {
 				this.moveTo(startPoint);
 			}
 
-			for (const command of commands) {
-				if (command.kind === PathCommandType.LineTo) {
-					this.lineTo(command.point);
-				} else if (command.kind === PathCommandType.MoveTo) {
-					this.moveTo(command.point);
-				} else if (command.kind === PathCommandType.CubicBezierTo) {
-					this.traceCubicBezierCurve(
-						command.controlPoint1, command.controlPoint2, command.endPoint
-					);
-				} else if (command.kind === PathCommandType.QuadraticBezierTo) {
-					this.traceQuadraticBezierCurve(
-						command.controlPoint, command.endPoint
-					);
-				}
-			}
+			this.tracePath(commands);
 		}
 
 		if (lastStyle) {

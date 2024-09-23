@@ -1,5 +1,5 @@
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
-import { Mat33, Rect2, Point2, Vec2, toRoundedString } from '@js-draw/math';
+import { Mat33, Rect2, Point2, Vec2, toRoundedString, Path } from '@js-draw/math';
 import { svgAttributesDataKey, svgLoaderAttributeContainerID, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader/SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';
@@ -245,7 +245,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		}
 	}
 
-	public drawImage(image: RenderableImage) {
+	public drawImage(image: RenderableImage, _clipTo?: Path) {
 		let label = image.label ?? image.image.getAttribute('aria-label') ?? '';
 		if (label === '') {
 			label = image.image.getAttribute('alt') ?? '';
