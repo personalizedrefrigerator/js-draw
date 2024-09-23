@@ -1,4 +1,4 @@
-import { RenderableImage } from 'js-draw/src/rendering/renderers/AbstractRenderer';
+import { RenderableImage } from '../../../rendering/renderers/AbstractRenderer';
 
 /** Handles filtering and other operations on an image. */
 export class ImageWrapper {
