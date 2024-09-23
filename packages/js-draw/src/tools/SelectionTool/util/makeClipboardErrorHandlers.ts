@@ -26,7 +26,31 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 
 	return {
 		async onCopyError(error: Error|unknown) {
-			makeErrorDialog(error);
+			const dialog = makeErrorDialog(error);
+
+			const textboxLabel = document.createElement('label');
+			textboxLabel.textContent = editor.localization.copyPasteError__copyRetry;
+			const copyTextbox = document.createElement('textarea');
+			textboxLabel.appendChild(copyTextbox);
+
+			const retryHandler = new ClipboardHandler(editor);
+			const handleCopy = (event: ClipboardEvent|DragEvent) => {
+				event.preventDefault();
+
+				// Use .then to ensure that .copy runs within the event handler.
+				// Copy can fail if certain logic is run async.
+				return retryHandler.copy(event).then(() => {
+					dialog.close();
+				});
+			};
+			copyTextbox.oncopy = handleCopy;
+			copyTextbox.ondragstart = handleCopy;
+			copyTextbox.value = editor.localization.copyPasteError__copyMe;
+
+			dialog.appendChild(textboxLabel);
+
+			copyTextbox.select();
+			document.execCommand('copy');
 		},
 		onPasteError(error: Error|unknown) {
 			const dialog = makeErrorDialog(error);
@@ -52,6 +76,9 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 			pasteTextbox.ondrop = handlePaste;
 
 			dialog.appendChild(textboxLabel);
+
+			pasteTextbox.focus();
+			document.execCommand('paste');
 		},
 	};
 };

@@ -113,7 +113,7 @@ export default class ClipboardHandler {
 			}
 
 			for (const file of files) {
-				const fileType = file.type.toLowerCase();
+				const fileType = file?.type?.toLowerCase();
 				if (fileType !== mime) {
 					continue;
 				}
@@ -163,7 +163,7 @@ export default class ClipboardHandler {
 	 * is to be copied. This is done because `ClipboardEvent`s seem to not support attaching
 	 * images.
 	 */
-	public copy(event?: ClipboardEvent) {
+	public copy(event?: ClipboardEvent|DragEvent) {
 		const onError = (error: Error|unknown) => {
 			if (this.callbacks?.onCopyError) {
 				this.callbacks.onCopyError(error);
@@ -182,7 +182,7 @@ export default class ClipboardHandler {
 		}
 	}
 
-	private copyInternal(event: ClipboardEvent|undefined) {
+	private copyInternal(event: ClipboardEvent|DragEvent|undefined) {
 		const mimeToData: Map<string, Promise<Blob>|string> = new Map();
 
 		if (this.editor.toolController.dispatchInputEvent({
@@ -204,7 +204,11 @@ export default class ClipboardHandler {
 
 			for (const [key, value] of mimeToData.entries()) {
 				if (typeof value === 'string') {
-					event.clipboardData?.setData(key, value);
+					if ('clipboardData' in event) {
+						event.clipboardData?.setData(key, value);
+					} else {
+						event.dataTransfer?.setData(key, value);
+					}
 				}
 			}
 		};
