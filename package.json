@@ -16,6 +16,7 @@
     "translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
     "preinstall": "git config core.hookspath .githooks",
     "postinstall": "yarn run build",
+    "bump-version": "lerna version --no-push --no-git-tag-version",
     "publish-ci": "lerna publish from-package --yes"
   },
   "workspaces": [
