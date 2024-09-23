@@ -1,3 +1,9 @@
+# 1.21.2
+ * Bug fixes
+    * Fix copy icon is small when the selection context menu is opened near the screen edge.
+    * Prevent selection from flashing when opening the context menu by long-pressing outside the selection box.
+    * Remove from-root imports (`import ... from 'js-draw/...`).
+
 # 1.21.0, 1.21.1
  * Features
     * Selection popover menu with copy/paste/duplicate/delete.
