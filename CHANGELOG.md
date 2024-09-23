@@ -1,3 +1,7 @@
+# 1.21.3
+ * Bug fixes
+    * Fix `tools/` directory incorrectly in `.npmignore`.
+
 # 1.21.2
  * Bug fixes
     * Fix copy icon is small when the selection context menu is opened near the screen edge.
