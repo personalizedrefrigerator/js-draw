@@ -158,8 +158,8 @@ export default class ClipboardHandler {
 	 * is to be copied. This is done because `ClipboardEvent`s seem to not support attaching
 	 * images.
 	 */
-	public copy(event?: ClipboardEvent|DragEvent) {
-		const onError = (error: Error|unknown) => {
+	public copy(event?: ClipboardEvent | DragEvent) {
+		const onError = (error: Error | unknown) => {
 			if (this.callbacks?.onCopyError) {
 				this.callbacks.onCopyError(error);
 				return Promise.resolve();
@@ -177,20 +177,22 @@ export default class ClipboardHandler {
 		}
 	}
 
-	private copyInternal(event: ClipboardEvent|DragEvent|undefined) {
-		const mimeToData: Map<string, Promise<Blob>|string> = new Map();
+	private copyInternal(event: ClipboardEvent | DragEvent | undefined) {
+		const mimeToData: Map<string, Promise<Blob> | string> = new Map();
 
-		if (this.editor.toolController.dispatchInputEvent({
-			kind: InputEvtType.CopyEvent,
-			setData: (mime, data) => {
-				mimeToData.set(mime, data);
-			},
-		})) {
+		if (
+			this.editor.toolController.dispatchInputEvent({
+				kind: InputEvtType.CopyEvent,
+				setData: (mime, data) => {
+					mimeToData.set(mime, data);
+				},
+			})
+		) {
 			event?.preventDefault();
 		}
 
 		const mimeTypes = [...mimeToData.keys()];
-		const hasNonTextMimeTypes = mimeTypes.some(mime => !isTextMimeType(mime));
+		const hasNonTextMimeTypes = mimeTypes.some((mime) => !isTextMimeType(mime));
 
 		const copyToEvent = (reason?: unknown) => {
 			if (!event) {
@@ -211,9 +213,11 @@ export default class ClipboardHandler {
 		};
 
 		const copyToClipboardApi = () => {
-			type DataType = Blob|Promise<Blob>;
+			type DataType = Blob | Promise<Blob>;
 
-			const mapInternalDataToBrowserData = (originalMimeToData: Map<string, string|Promise<Blob>>) => {
+			const mapInternalDataToBrowserData = (
+				originalMimeToData: Map<string, string | Promise<Blob>>,
+			) => {
 				const mappedMimeToData: Record<string, DataType> = Object.create(null);
 				for (const [key, data] of originalMimeToData.entries()) {
 					if (typeof data === 'string') {
@@ -237,11 +241,14 @@ export default class ClipboardHandler {
 
 			const removeUnsupportedMime = (originalMimeToData: Record<string, DataType>) => {
 				const filteredMimeToData: Record<string, DataType> = Object.create(null);
-				for (const [ key, data ] of Object.entries(originalMimeToData)) {
+				for (const [key, data] of Object.entries(originalMimeToData)) {
 					// Browser support for ClipboardItem.supports is limited as of mid 2024. However, some browsers
 					// that do support `.supports` throw an exception when attempting to copy an unsupported MIME type
 					// (e.g. Firefox).
-					const unsupported = 'supports' in ClipboardItem && typeof ClipboardItem.supports === 'function' && !ClipboardItem.supports(key);
+					const unsupported =
+						'supports' in ClipboardItem &&
+						typeof ClipboardItem.supports === 'function' &&
+						!ClipboardItem.supports(key);
 					if (!unsupported) {
 						filteredMimeToData[key] = data;
 					}
@@ -250,9 +257,8 @@ export default class ClipboardHandler {
 				return filteredMimeToData;
 			};
 
-
 			const browserMimeToData = removeUnsupportedMime(mapInternalDataToBrowserData(mimeToData));
-			return navigator.clipboard.write([ new ClipboardItem(browserMimeToData) ]);
+			return navigator.clipboard.write([new ClipboardItem(browserMimeToData)]);
 		};
 
 		const supportsClipboardApi =

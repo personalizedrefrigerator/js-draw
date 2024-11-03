@@ -9,7 +9,7 @@ interface ExtendedClipboardItem extends ClipboardItem {
 }
 declare const ClipboardItem: ExtendedClipboardItem;
 
-type ClipboardTestData = Record<string, string|Blob>;
+type ClipboardTestData = Record<string, string | Blob>;
 
 // A tool that handles all copy events
 class TestCopyPasteTool extends BaseTool {
@@ -179,7 +179,9 @@ describe('ClipboardHandler', () => {
 
 			const clipboardItems = await navigator.clipboard.read();
 			expect(clipboardItems).toHaveLength(1);
-			expect(await (await clipboardItems[0].getType('text/plain')).text()).toBe('This should be copied');
+			expect(await (await clipboardItems[0].getType('text/plain')).text()).toBe(
+				'This should be copied',
+			);
 			expect(clipboardItems[0].types).not.toContain(disallowedType);
 		});
 	});

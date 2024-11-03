@@ -22,7 +22,7 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 	};
 
 	return {
-		async onCopyError(error: Error|unknown) {
+		async onCopyError(error: Error | unknown) {
 			const dialog = makeErrorDialog(error);
 
 			const textboxLabel = document.createElement('label');
@@ -31,7 +31,7 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 			textboxLabel.appendChild(copyTextbox);
 
 			const retryHandler = new ClipboardHandler(editor);
-			const handleCopy = (event: ClipboardEvent|DragEvent) => {
+			const handleCopy = (event: ClipboardEvent | DragEvent) => {
 				event.preventDefault();
 
 				// Use .then to ensure that .copy runs within the event handler.
