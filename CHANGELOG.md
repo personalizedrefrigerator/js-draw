@@ -1,3 +1,24 @@
+# 1.21.3
+ * Bug fixes
+    * Fix `tools/` directory incorrectly in `.npmignore`.
+
+# 1.21.2
+ * Bug fixes
+    * Fix copy icon is small when the selection context menu is opened near the screen edge.
+    * Prevent selection from flashing when opening the context menu by long-pressing outside the selection box.
+    * Remove from-root imports (`import ... from 'js-draw/...`).
+
+# 1.21.0, 1.21.1
+ * Features
+    * Selection popover menu with copy/paste/duplicate/delete.
+    * Make selection keyboard shortcuts configurable.
+    * Add keyboard shortcuts to scale the selection in both X and Y.
+ * Changes
+    * Hide selection handles while creating selections.
+ * Bug fixes
+    * Fix drawing strokes with stylus devices not marked as primary (#71).
+    * Fix `<image>`s with an empty `href` cause rendering errors.
+
 # 1.20.3
 
 - Bug fixes

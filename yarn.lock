@@ -967,7 +967,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@js-draw/build-tool@npm:^1.19.0, @js-draw/build-tool@workspace:packages/build-tool":
+"@js-draw/build-tool@npm:^1.21.3, @js-draw/build-tool@workspace:packages/build-tool":
   version: 0.0.0-use.local
   resolution: "@js-draw/build-tool@workspace:packages/build-tool"
   dependencies:
@@ -991,8 +991,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/debug-history-visualizer@workspace:docs/debugging/undo-history-visualizer"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
@@ -1000,19 +1000,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/debug-stroke-logging@workspace:docs/debugging/stroke-logging"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    "@js-draw/debugging": "npm:^1.20.0"
-    "@js-draw/material-icons": "npm:^1.20.3"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    "@js-draw/debugging": "npm:^1.21.3"
+    "@js-draw/material-icons": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
-"@js-draw/debugging@npm:^1.20.0, @js-draw/debugging@workspace:packages/debugging":
+"@js-draw/debugging@npm:^1.21.3, @js-draw/debugging@workspace:packages/debugging":
   version: 0.0.0-use.local
   resolution: "@js-draw/debugging@workspace:packages/debugging"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    js-draw: "npm:^1.8.0"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   peerDependencies:
     js-draw: ^1.8.0
   languageName: unknown
@@ -1022,10 +1022,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/demo@workspace:docs/demo"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    "@js-draw/debugging": "npm:^1.20.0"
-    "@js-draw/material-icons": "npm:^1.20.3"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    "@js-draw/debugging": "npm:^1.21.3"
+    "@js-draw/material-icons": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
@@ -1033,8 +1033,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/example-collaborative@workspace:docs/examples/example-collaborative"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
@@ -1042,8 +1042,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/example-custom-tools@workspace:docs/examples/example-custom-tools"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
@@ -1051,9 +1051,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/example-multiple-editors@workspace:docs/examples/example-multiple-editors"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    "@js-draw/material-icons": "npm:^1.20.3"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    "@js-draw/material-icons": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
@@ -1061,8 +1061,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/example-save-restore-toolbar-state@workspace:docs/examples/example-save-restore-toolbar-state"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
@@ -1070,29 +1070,29 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/input-system-tester@workspace:docs/debugging/input-system-tester"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    "@js-draw/debugging": "npm:^1.20.0"
-    "@js-draw/material-icons": "npm:^1.20.3"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    "@js-draw/debugging": "npm:^1.21.3"
+    "@js-draw/material-icons": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
-"@js-draw/material-icons@npm:^1.20.3, @js-draw/material-icons@workspace:packages/material-icons":
+"@js-draw/material-icons@npm:^1.21.3, @js-draw/material-icons@workspace:packages/material-icons":
   version: 0.0.0-use.local
   resolution: "@js-draw/material-icons@workspace:packages/material-icons"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   peerDependencies:
     js-draw: ^1.0.1
   languageName: unknown
   linkType: soft
 
-"@js-draw/math@npm:^1.19.0, @js-draw/math@workspace:packages/math":
+"@js-draw/math@npm:^1.21.3, @js-draw/math@workspace:packages/math":
   version: 0.0.0-use.local
   resolution: "@js-draw/math@workspace:packages/math"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
+    "@js-draw/build-tool": "npm:^1.21.3"
     "@types/bezier-js": "npm:4.1.0"
     "@types/jest": "npm:29.5.5"
     "@types/jsdom": "npm:21.1.3"
@@ -1124,9 +1124,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/translation-tester@workspace:docs/debugging/translation-tester"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    "@js-draw/material-icons": "npm:^1.20.3"
-    js-draw: "npm:^1.20.3"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    "@js-draw/material-icons": "npm:^1.21.3"
+    js-draw: "npm:^1.21.3"
   languageName: unknown
   linkType: soft
 
@@ -1137,14 +1137,14 @@ __metadata:
     "@codemirror/lang-css": "npm:6.2.1"
     "@codemirror/lang-javascript": "npm:6.2.2"
     "@codemirror/language": "npm:6.10.2"
-    "@js-draw/build-tool": "npm:^1.19.0"
-    "@js-draw/material-icons": "npm:^1.20.3"
-    "@js-draw/math": "npm:^1.19.0"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    "@js-draw/material-icons": "npm:^1.21.3"
+    "@js-draw/math": "npm:^1.21.3"
     "@lezer/highlight": "npm:1.2.0"
     "@types/katex": "npm:0.16.7"
     "@types/react": "npm:18.3.3"
     codemirror: "npm:6.0.1"
-    js-draw: "npm:^1.20.3"
+    js-draw: "npm:^1.21.3"
     katex: "npm:0.16.10"
     react: "npm:18.2.0"
     typescript: "npm:5.5.4"
@@ -5952,12 +5952,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-draw@npm:^1.20.3, js-draw@npm:^1.8.0, js-draw@workspace:packages/js-draw":
+"js-draw@npm:^1.21.3, js-draw@workspace:packages/js-draw":
   version: 0.0.0-use.local
   resolution: "js-draw@workspace:packages/js-draw"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.19.0"
-    "@js-draw/math": "npm:^1.19.0"
+    "@js-draw/build-tool": "npm:^1.21.3"
+    "@js-draw/math": "npm:^1.21.3"
     "@melloware/coloris": "npm:0.22.0"
     "@types/jest": "npm:29.5.5"
     "@types/jsdom": "npm:21.1.3"

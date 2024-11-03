@@ -108,7 +108,7 @@ export default class ClipboardHandler {
 			}
 
 			for (const file of files) {
-				const fileType = file.type.toLowerCase();
+				const fileType = file?.type?.toLowerCase();
 				if (fileType !== mime) {
 					continue;
 				}
@@ -158,8 +158,8 @@ export default class ClipboardHandler {
 	 * is to be copied. This is done because `ClipboardEvent`s seem to not support attaching
 	 * images.
 	 */
-	public copy(event?: ClipboardEvent) {
-		const onError = (error: Error | unknown) => {
+	public copy(event?: ClipboardEvent|DragEvent) {
+		const onError = (error: Error|unknown) => {
 			if (this.callbacks?.onCopyError) {
 				this.callbacks.onCopyError(error);
 				return Promise.resolve();
@@ -177,22 +177,20 @@ export default class ClipboardHandler {
 		}
 	}
 
-	private copyInternal(event: ClipboardEvent | undefined) {
-		const mimeToData: Record<string, Promise<Blob> | string> = Object.create(null);
+	private copyInternal(event: ClipboardEvent|DragEvent|undefined) {
+		const mimeToData: Map<string, Promise<Blob>|string> = new Map();
 
-		if (
-			this.editor.toolController.dispatchInputEvent({
-				kind: InputEvtType.CopyEvent,
-				setData: (mime, data) => {
-					mimeToData[mime] = data;
-				},
-			})
-		) {
+		if (this.editor.toolController.dispatchInputEvent({
+			kind: InputEvtType.CopyEvent,
+			setData: (mime, data) => {
+				mimeToData.set(mime, data);
+			},
+		})) {
 			event?.preventDefault();
 		}
 
-		const mimeTypes = Object.keys(mimeToData);
-		const hasNonTextMimeTypes = mimeTypes.some((mime) => !isTextMimeType(mime));
+		const mimeTypes = [...mimeToData.keys()];
+		const hasNonTextMimeTypes = mimeTypes.some(mime => !isTextMimeType(mime));
 
 		const copyToEvent = (reason?: unknown) => {
 			if (!event) {
@@ -201,32 +199,60 @@ export default class ClipboardHandler {
 				);
 			}
 
-			for (const key in mimeToData) {
-				const value = mimeToData[key];
+			for (const [key, value] of mimeToData.entries()) {
 				if (typeof value === 'string') {
-					event.clipboardData?.setData(key, value);
+					if ('clipboardData' in event) {
+						event.clipboardData?.setData(key, value);
+					} else {
+						event.dataTransfer?.setData(key, value);
+					}
 				}
 			}
 		};
 
 		const copyToClipboardApi = () => {
-			const mappedMimeToData: Record<string, Blob | Promise<Blob>> = Object.create(null);
-			const mimeMapping: Record<string, string> = {
-				// image/svg+xml is unsupported in Chrome.
-				'image/svg+xml': 'text/html',
-			};
-			for (const key in mimeToData) {
-				const data = mimeToData[key];
-				const mappedKey = mimeMapping[key] || key;
-				if (typeof data === 'string') {
-					mappedMimeToData[mappedKey] = new Blob([new TextEncoder().encode(data)], {
-						type: mappedKey,
-					});
-				} else {
-					mappedMimeToData[mappedKey] = data;
+			type DataType = Blob|Promise<Blob>;
+
+			const mapInternalDataToBrowserData = (originalMimeToData: Map<string, string|Promise<Blob>>) => {
+				const mappedMimeToData: Record<string, DataType> = Object.create(null);
+				for (const [key, data] of originalMimeToData.entries()) {
+					if (typeof data === 'string') {
+						const loadedData = new Blob([new TextEncoder().encode(data)], { type: key });
+						mappedMimeToData[key] = loadedData;
+					} else {
+						mappedMimeToData[key] = data;
+					}
+
+					// Different platforms have varying support for different clipboard MIME types:
+					// - As of September 2024, image/svg+xml is unsupported on iOS
+					// - text/html is unsupported on Chrome/Android (and perhaps Chrome on other platforms).
+					//    - See https://issues.chromium.org/issues/40851502
+					if (key === 'image/svg+xml') {
+						mappedMimeToData['text/html'] ??= mappedMimeToData[key];
+					}
 				}
-			}
-			return navigator.clipboard.write([new ClipboardItem(mappedMimeToData)]);
+
+				return mappedMimeToData;
+			};
+
+			const removeUnsupportedMime = (originalMimeToData: Record<string, DataType>) => {
+				const filteredMimeToData: Record<string, DataType> = Object.create(null);
+				for (const [ key, data ] of Object.entries(originalMimeToData)) {
+					// Browser support for ClipboardItem.supports is limited as of mid 2024. However, some browsers
+					// that do support `.supports` throw an exception when attempting to copy an unsupported MIME type
+					// (e.g. Firefox).
+					const unsupported = 'supports' in ClipboardItem && typeof ClipboardItem.supports === 'function' && !ClipboardItem.supports(key);
+					if (!unsupported) {
+						filteredMimeToData[key] = data;
+					}
+				}
+
+				return filteredMimeToData;
+			};
+
+
+			const browserMimeToData = removeUnsupportedMime(mapInternalDataToBrowserData(mimeToData));
+			return navigator.clipboard.write([ new ClipboardItem(browserMimeToData) ]);
 		};
 
 		const supportsClipboardApi =

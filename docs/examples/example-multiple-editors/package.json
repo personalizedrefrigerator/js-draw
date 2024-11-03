@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/example-multiple-editors",
-	"version": "1.20.3",
+	"version": "1.21.3",
 	"description": "Example demonstrating multiple editors in the same document",
 	"license": "MIT",
 	"private": true,
@@ -11,10 +11,10 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"@js-draw/material-icons": "^1.20.3",
-		"js-draw": "^1.20.3"
+		"@js-draw/material-icons": "^1.21.3",
+		"js-draw": "^1.21.3"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.19.0"
+		"@js-draw/build-tool": "^1.21.3"
 	}
 }

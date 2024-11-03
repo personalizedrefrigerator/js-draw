@@ -41,7 +41,7 @@
 
 .editor-popup-menu-option {
 	display: flex;
-	justify-content: left;
+	justify-content: start;
 	cursor: pointer;
 	padding: 5px;
 
@@ -62,6 +62,10 @@
 	> :first-child {
 		width: 1em;
 		height: 1em;
-		margin-right: 0.25em;
+		flex-shrink: 0;
+
+		// RTL support:
+		margin-inline-start: 0em;
+		margin-inline-end: 0.25em;
 	}
 }

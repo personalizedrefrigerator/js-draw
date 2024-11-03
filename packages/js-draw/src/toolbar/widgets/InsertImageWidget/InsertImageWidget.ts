@@ -19,7 +19,7 @@ import makeSnappedList, {
 } from '../components/makeSnappedList';
 import { Command } from '../../../commands/lib';
 import AbstractComponent from '../../../components/AbstractComponent';
-import { RenderableImage } from 'js-draw/src/rendering/renderers/AbstractRenderer';
+import { RenderableImage } from '../../../rendering/renderers/AbstractRenderer';
 import fileToImages from './fileToImages';
 
 type ImageListItem = SnappedListItem<ImageWrapper | null>;

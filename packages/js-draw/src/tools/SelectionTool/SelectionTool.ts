@@ -46,6 +46,11 @@ export default class SelectionTool extends BaseTool {
 	private prevSelectionBox: Selection | null;
 	private selectionBox: Selection | null;
 
+	// True if clearing and recreating the selectionBox has been deferred. This is used to prevent the selection
+	// from vanishing on pointerdown events that are intended to form other gestures (e.g. long press) that would
+	// ultimately restore the selection.
+	private rebuildSelectionScheduled = false;
+
 	private startPoint: Vec2 | null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
@@ -172,8 +177,7 @@ export default class SelectionTool extends BaseTool {
 			if (!transforming) {
 				// Shift key: Combine the new and old selection boxes at the end of the gesture.
 				this.expandingSelectionBox = this.shiftKeyPressed;
-				this.makeSelectionBox(current.canvasPos);
-				this.selectionBox?.setHandlesVisible(false);
+				this.rebuildSelectionScheduled = true;
 			} else {
 				// Only autoscroll if we're transforming an existing selection
 				this.autoscroller.start();
@@ -190,6 +194,12 @@ export default class SelectionTool extends BaseTool {
 
 	private onMainPointerUpdated(currentPointer: Pointer) {
 		this.lastPointer = currentPointer;
+
+		if (this.rebuildSelectionScheduled) {
+			this.rebuildSelectionScheduled = false;
+			this.makeSelectionBox(this.startPoint ?? currentPointer.canvasPos);
+			this.selectionBox?.setHandlesVisible(false);
+		}
 
 		if (!this.selectionBox) return;
 
@@ -212,18 +222,11 @@ export default class SelectionTool extends BaseTool {
 	}
 
 	public override onPointerUp(event: PointerEvt): void {
+		this.onMainPointerUpdated(event.current);
 		this.autoscroller.stop();
 
 		if (!this.selectionBox) return;
 
-		let currentPointer = event.current;
-		if (this.snapToGrid) {
-			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
-		}
-
-		if (!this.selectionBoxHandlingEvt) {
-			this.selectionBox.setToPoint(currentPointer.canvasPos);
-		}
 		this.selectionBox.setHandlesVisible(true);
 
 		// Were we expanding the previous selection?
@@ -253,7 +256,7 @@ export default class SelectionTool extends BaseTool {
 		this.autoscroller.stop();
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox?.onDragCancel();
-		} else {
+		} else if (!this.rebuildSelectionScheduled) {
 			// Revert to the previous selection, if any.
 			this.selectionBox?.cancelSelection();
 			this.selectionBox = this.prevSelectionBox;
@@ -262,6 +265,7 @@ export default class SelectionTool extends BaseTool {
 			this.prevSelectionBox = null;
 		}
 
+		this.rebuildSelectionScheduled = false;
 		this.expandingSelectionBox = false;
 		this.lastPointer = null;
 		this.selectionBoxHandlingEvt = false;

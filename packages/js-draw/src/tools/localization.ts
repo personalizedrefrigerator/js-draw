@@ -42,6 +42,8 @@ export interface ToolLocalization {
 	copyPasteError__heading: string;
 	copyPasteError__description: string;
 	copyPasteError__pasteRetry: string;
+	copyPasteError__copyRetry: string;
+	copyPasteError__copyMe: string;
 	copyPasteError__errorDetails: string;
 
 	toolEnabledAnnouncement: (toolName: string) => string;
@@ -65,10 +67,12 @@ export const defaultToolLocalization: ToolLocalization = {
 	selectionMenu__duplicate: 'Duplicate',
 	selectionMenu__delete: 'Delete',
 	selectionMenu__paste: 'Paste',
-	copyPasteError__heading: 'Error!',
+	copyPasteError__heading: 'Copy/paste',
 	copyPasteError__description: 'Something went wrong — this tool may not have clipboard access.',
 	copyPasteError__errorDetails: 'Show error',
 	copyPasteError__pasteRetry: 'To retry, please paste into the input box below:',
+	copyPasteError__copyRetry: 'To retry, please copy the text in the input box below:',
+	copyPasteError__copyMe: 'Copy me!',
 
 	autocorrectedTo: (strokeDescription) => `Autocorrected to ${strokeDescription}`,
 	autocorrectionCanceled: 'Autocorrect cancelled',

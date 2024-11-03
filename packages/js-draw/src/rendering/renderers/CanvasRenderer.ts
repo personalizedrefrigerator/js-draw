@@ -227,6 +227,11 @@ export default class CanvasRenderer extends AbstractRenderer {
 	}
 
 	public drawImage(image: RenderableImage) {
+		// .drawImage can fail for zero-size images.
+		if (image.image.width === 0 || image.image.height === 0) {
+			return;
+		}
+
 		this.ctx.save();
 		const transform = this.getCanvasToScreenTransform().rightMul(image.transform);
 		this.transformBy(transform);
