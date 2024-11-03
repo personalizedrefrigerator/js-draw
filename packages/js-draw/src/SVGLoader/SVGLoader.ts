@@ -1,6 +1,12 @@
 import { Color4, Mat33, Path, Rect2, Vec2 } from '@js-draw/math';
 import AbstractComponent from '../components/AbstractComponent';
-import BackgroundComponent, { BackgroundType, backgroundTypeToClassNameMap, imageBackgroundCSSClassName, imageBackgroundGridSizeCSSPrefix, imageBackgroundNonAutomaticSecondaryColorCSSClassName } from '../components/BackgroundComponent';
+import BackgroundComponent, {
+	BackgroundType,
+	backgroundTypeToClassNameMap,
+	imageBackgroundCSSClassName,
+	imageBackgroundGridSizeCSSPrefix,
+	imageBackgroundNonAutomaticSecondaryColorCSSClassName,
+} from '../components/BackgroundComponent';
 import ImageComponent from '../components/ImageComponent';
 import Stroke from '../components/Stroke';
 import SVGGlobalAttributesObject from '../components/SVGGlobalAttributesObject';
@@ -8,12 +14,17 @@ import TextComponent, { TextTransformMode } from '../components/TextComponent';
 import UnknownSVGObject from '../components/UnknownSVGObject';
 import RenderingStyle from '../rendering/RenderingStyle';
 import TextRenderingStyle from '../rendering/TextRenderingStyle';
-import { ComponentAddedListener, ImageLoader, OnDetermineExportRectListener, OnProgressListener } from '../types';
+import {
+	ComponentAddedListener,
+	ImageLoader,
+	OnDetermineExportRectListener,
+	OnProgressListener,
+} from '../types';
 import RenderablePathSpec, { pathToRenderable } from '../rendering/RenderablePathSpec';
 import { renderedStylesheetId } from '../rendering/renderers/SVGRenderer';
 import determineFontSize from './utils/determineFontSize';
 
-type OnFinishListener = ()=> void;
+type OnFinishListener = () => void;
 
 // Size of a loaded image if no size is specified.
 export const defaultSVGViewRect = new Rect2(0, 0, 500, 500);
@@ -33,10 +44,10 @@ export const svgLoaderAttributeContainerID = 'svgContainerID';
 export const svgLoaderAutoresizeClassName = 'js-draw--autoresize';
 
 // [key, value]
-export type SVGLoaderUnknownAttribute = [ string, string ];
+export type SVGLoaderUnknownAttribute = [string, string];
 
 // [key, value, priority]
-export type SVGLoaderUnknownStyleAttribute = { key: string, value: string, priority?: string };
+export type SVGLoaderUnknownStyleAttribute = { key: string; value: string; priority?: string };
 
 // @internal
 export enum SVGLoaderLoadMethod {
@@ -52,17 +63,17 @@ export interface SVGLoaderOptions {
 	loadMethod?: SVGLoaderLoadMethod;
 }
 
-const supportedStrokeFillStyleAttrs = [ 'stroke', 'fill', 'stroke-width' ];
+const supportedStrokeFillStyleAttrs = ['stroke', 'fill', 'stroke-width'];
 
 // Handles loading images from SVG.
 export default class SVGLoader implements ImageLoader {
-	private onAddComponent: ComponentAddedListener|null = null;
-	private onProgress: OnProgressListener|null = null;
-	private onDetermineExportRect: OnDetermineExportRectListener|null = null;
+	private onAddComponent: ComponentAddedListener | null = null;
+	private onProgress: OnProgressListener | null = null;
+	private onDetermineExportRect: OnDetermineExportRectListener | null = null;
 
 	private processedCount: number = 0;
 	private totalToProcess: number = 0;
-	private rootViewBox: Rect2|null;
+	private rootViewBox: Rect2 | null;
 
 	// Options
 	private readonly storeUnknown: boolean;
@@ -70,7 +81,7 @@ export default class SVGLoader implements ImageLoader {
 
 	private constructor(
 		private source: Element,
-		private onFinish: OnFinishListener|null,
+		private onFinish: OnFinishListener | null,
 		options: SVGLoaderOptions,
 	) {
 		this.storeUnknown = !(options.sanitize ?? false);
@@ -94,8 +105,13 @@ export default class SVGLoader implements ImageLoader {
 			}
 		}
 
-		const strokeAttribute = node.getAttribute('stroke') ?? computedStyles?.stroke ?? node.style?.stroke ?? '';
-		const strokeWidthAttr = node.getAttribute('stroke-width') ?? computedStyles?.strokeWidth ?? node.style?.strokeWidth ?? '';
+		const strokeAttribute =
+			node.getAttribute('stroke') ?? computedStyles?.stroke ?? node.style?.stroke ?? '';
+		const strokeWidthAttr =
+			node.getAttribute('stroke-width') ??
+			computedStyles?.strokeWidth ??
+			node.style?.strokeWidth ??
+			'';
 		if (strokeAttribute && strokeWidthAttr) {
 			try {
 				let width = parseFloat(strokeWidthAttr ?? '1');
@@ -155,7 +171,7 @@ export default class SVGLoader implements ImageLoader {
 		elem: AbstractComponent,
 		node: SVGElement,
 		supportedAttrs: Set<string>,
-		supportedStyleAttrs?: Set<string>
+		supportedStyleAttrs?: Set<string>,
 	) {
 		if (!this.storeUnknown) {
 			return;
@@ -166,15 +182,16 @@ export default class SVGLoader implements ImageLoader {
 				continue;
 			}
 
-			elem.attachLoadSaveData(svgAttributesDataKey,
-				[ attr, node.getAttribute(attr) ] as SVGLoaderUnknownAttribute,
-			);
+			elem.attachLoadSaveData(svgAttributesDataKey, [
+				attr,
+				node.getAttribute(attr),
+			] as SVGLoaderUnknownAttribute);
 		}
 
 		if (supportedStyleAttrs && node.style) {
 			// Use a for loop instead of an iterator: js-dom seems to not
 			// support using node.style as an iterator.
-			for (let i = 0; i < node.style.length; i ++) {
+			for (let i = 0; i < node.style.length; i++) {
 				const attr = node.style[i];
 
 				if (attr === '' || !attr) {
@@ -186,13 +203,11 @@ export default class SVGLoader implements ImageLoader {
 				}
 
 				// TODO: Do we need special logic for !important properties?
-				elem.attachLoadSaveData(svgStyleAttributesDataKey,
-					{
-						key: attr,
-						value: node.style.getPropertyValue(attr),
-						priority: node.style.getPropertyPriority(attr)
-					} as SVGLoaderUnknownStyleAttribute
-				);
+				elem.attachLoadSaveData(svgStyleAttributesDataKey, {
+					key: attr,
+					value: node.style.getPropertyValue(attr),
+					priority: node.style.getPropertyPriority(attr),
+				} as SVGLoaderUnknownStyleAttribute);
 			}
 		}
 	}
@@ -206,16 +221,13 @@ export default class SVGLoader implements ImageLoader {
 			elem = new Stroke(strokeData);
 
 			this.attachUnrecognisedAttrs(
-				elem, node,
-				new Set([ ...supportedStrokeFillStyleAttrs, 'd' ]),
-				new Set(supportedStrokeFillStyleAttrs)
+				elem,
+				node,
+				new Set([...supportedStrokeFillStyleAttrs, 'd']),
+				new Set(supportedStrokeFillStyleAttrs),
 			);
 		} catch (e) {
-			console.error(
-				'Invalid path in node', node,
-				'\nError:', e,
-				'\nAdding as an unknown object.'
-			);
+			console.error('Invalid path in node', node, '\nError:', e, '\nAdding as an unknown object.');
 
 			if (this.storeUnknown) {
 				elem = new UnknownSVGObject(node);
@@ -229,9 +241,9 @@ export default class SVGLoader implements ImageLoader {
 	private async addBackground(node: SVGElement) {
 		// If a grid background,
 		if (node.classList.contains(backgroundTypeToClassNameMap[BackgroundType.Grid])) {
-			let foregroundStr: string|null;
-			let backgroundStr: string|null;
-			let gridStrokeWidthStr: string|null;
+			let foregroundStr: string | null;
+			let backgroundStr: string | null;
+			let gridStrokeWidthStr: string | null;
 
 			// If a group,
 			if (node.tagName.toLowerCase() === 'g') {
@@ -264,7 +276,7 @@ export default class SVGLoader implements ImageLoader {
 			}
 
 			// Extract the grid size from the class name
-			let gridSize: number|undefined = undefined;
+			let gridSize: number | undefined = undefined;
 			for (const className of node.classList) {
 				if (className.startsWith(imageBackgroundGridSizeCSSPrefix)) {
 					const sizeStr = className.substring(imageBackgroundGridSizeCSSPrefix.length);
@@ -272,13 +284,13 @@ export default class SVGLoader implements ImageLoader {
 				}
 			}
 
-			let gridStrokeWidth: number|undefined = undefined;
+			let gridStrokeWidth: number | undefined = undefined;
 			if (gridStrokeWidthStr) {
 				gridStrokeWidth = parseFloat(gridStrokeWidthStr);
 			}
 
 			const backgroundColor = Color4.fromString(backgroundStr);
-			let foregroundColor: Color4|undefined = Color4.fromString(foregroundStr);
+			let foregroundColor: Color4 | undefined = Color4.fromString(foregroundStr);
 
 			// Should the foreground color be determined automatically?
 			if (!node.classList.contains(imageBackgroundNonAutomaticSecondaryColorCSSClassName)) {
@@ -286,7 +298,10 @@ export default class SVGLoader implements ImageLoader {
 			}
 
 			const elem = BackgroundComponent.ofGrid(
-				backgroundColor, gridSize, foregroundColor, gridStrokeWidth
+				backgroundColor,
+				gridSize,
+				foregroundColor,
+				gridStrokeWidth,
 			);
 			await this.addComponent(elem);
 		}
@@ -295,8 +310,7 @@ export default class SVGLoader implements ImageLoader {
 			const fill = Color4.fromString(node.getAttribute('fill') ?? node.style.fill ?? 'black');
 			const elem = new BackgroundComponent(BackgroundType.SolidColor, fill);
 			await this.addComponent(elem);
-		}
-		else {
+		} else {
 			await this.addUnknownNode(node);
 		}
 	}
@@ -313,7 +327,11 @@ export default class SVGLoader implements ImageLoader {
 
 	// If given, 'supportedAttrs' will have x, y, etc. attributes that were used in computing the transform added to it,
 	// to prevent storing duplicate transform information when saving the component.
-	private getTransform(elem: SVGElement, supportedAttrs?: string[], computedStyles?: CSSStyleDeclaration): Mat33 {
+	private getTransform(
+		elem: SVGElement,
+		supportedAttrs?: string[],
+		computedStyles?: CSSStyleDeclaration,
+	): Mat33 {
 		// If possible, load the js-draw specific transform attribute
 		const highpTransformAttribute = 'data-highp-transform';
 		const rawTransformData = elem.getAttribute(highpTransformAttribute);
@@ -323,7 +341,10 @@ export default class SVGLoader implements ImageLoader {
 				transform = Mat33.fromCSSMatrix(rawTransformData);
 				supportedAttrs?.push(highpTransformAttribute);
 			} catch (e) {
-				console.warn(`Unable to parse raw transform data, ${rawTransformData}. Falling back to CSS data. Error:`, e);
+				console.warn(
+					`Unable to parse raw transform data, ${rawTransformData}. Falling back to CSS data. Error:`,
+					e,
+				);
 			}
 		}
 
@@ -340,7 +361,7 @@ export default class SVGLoader implements ImageLoader {
 			// can have lower precision.
 			try {
 				transform = Mat33.fromCSSMatrix(elem.style.transform);
-			} catch(_e) {
+			} catch (_e) {
 				console.warn('matrix parse error', _e);
 				transform = Mat33.fromCSSMatrix(transformProperty);
 			}
@@ -360,8 +381,8 @@ export default class SVGLoader implements ImageLoader {
 		return transform;
 	}
 
-	private makeText(elem: SVGTextElement|SVGTSpanElement): TextComponent {
-		const contentList: Array<TextComponent|string> = [];
+	private makeText(elem: SVGTextElement | SVGTSpanElement): TextComponent {
+		const contentList: Array<TextComponent | string> = [];
 		for (const child of elem.childNodes) {
 			if (child.nodeType === Node.TEXT_NODE) {
 				contentList.push(child.nodeValue ?? '');
@@ -434,7 +455,7 @@ export default class SVGLoader implements ImageLoader {
 		return result;
 	}
 
-	private async addText(elem: SVGTextElement|SVGTSpanElement) {
+	private async addText(elem: SVGTextElement | SVGTSpanElement) {
 		try {
 			const textElem = this.makeText(elem);
 			await this.addComponent(textElem);
@@ -457,7 +478,7 @@ export default class SVGLoader implements ImageLoader {
 				imageElem,
 				elem,
 				new Set(supportedAttrs),
-				new Set([ 'transform' ])
+				new Set(['transform']),
 			);
 
 			await this.addComponent(imageElem);
@@ -487,7 +508,7 @@ export default class SVGLoader implements ImageLoader {
 		let idSuffixCounter = 0;
 		let suffix = '';
 		while (this.encounteredIDs.includes(id + suffix)) {
-			idSuffixCounter ++;
+			idSuffixCounter++;
 			suffix = '--' + idSuffixCounter;
 		}
 		id += suffix;
@@ -515,10 +536,7 @@ export default class SVGLoader implements ImageLoader {
 	private async addComponent(component: AbstractComponent) {
 		// Attach the stack of container IDs
 		if (this.containerGroupIDs.length > 0) {
-			component.attachLoadSaveData(
-				svgLoaderAttributeContainerID,
-				[ ...this.containerGroupIDs ]
-			);
+			component.attachLoadSaveData(svgLoaderAttributeContainerID, [...this.containerGroupIDs]);
 		}
 
 		await this.onAddComponent?.(component);
@@ -537,7 +555,9 @@ export default class SVGLoader implements ImageLoader {
 		const height = parseFloat(components[3]);
 
 		if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
-			console.warn(`node ${node} has an unparsable viewbox. Viewbox: ${viewBoxAttr}. Match: ${components}.`);
+			console.warn(
+				`node ${node} has an unparsable viewbox. Viewbox: ${viewBoxAttr}. Match: ${components}.`,
+			);
 			return;
 		}
 
@@ -558,57 +578,60 @@ export default class SVGLoader implements ImageLoader {
 		let visitChildren = true;
 
 		switch (node.tagName.toLowerCase()) {
-		case 'g':
-			if (node.classList.contains(imageBackgroundCSSClassName)) {
-				await this.addBackground(node as SVGElement);
-				visitChildren = false;
-			} else {
-				await this.startGroup(node as SVGGElement);
-			}
-			// Otherwise, continue -- visit the node's children.
-			break;
-		case 'path':
-			if (node.classList.contains(imageBackgroundCSSClassName)) {
-				await this.addBackground(node as SVGElement);
-			} else {
-				await this.addPath(node as SVGPathElement);
-			}
-			break;
-		case 'text':
-			await this.addText(node as SVGTextElement);
-			visitChildren = false;
-			break;
-		case 'image':
-			await this.addImage(node as SVGImageElement);
-
-			// Images should not have children.
-			visitChildren = false;
-			break;
-		case 'svg':
-			this.updateViewBox(node as SVGSVGElement);
-			this.updateSVGAttrs(node as SVGSVGElement);
-			break;
-		case 'style':
-			// Keeping unnecessary style sheets can cause the browser to keep all
-			// SVG elements *referenced* by the style sheet in some browsers.
-			//
-			// Only keep the style sheet if it won't be discarded on save.
-			if (node.getAttribute('id') !== renderedStylesheetId) {
-				await this.addUnknownNode(node as SVGStyleElement);
-			}
-			break;
-		default:
-			if (!this.disableUnknownObjectWarnings) {
-				console.warn('Unknown SVG element,', node, node.tagName);
-				if (!(node instanceof SVGElement)) {
-					console.warn(
-						'Element', node, 'is not an SVGElement!', this.storeUnknown ? 'Continuing anyway.' : 'Skipping.'
-					);
+			case 'g':
+				if (node.classList.contains(imageBackgroundCSSClassName)) {
+					await this.addBackground(node as SVGElement);
+					visitChildren = false;
+				} else {
+					await this.startGroup(node as SVGGElement);
 				}
-			}
+				// Otherwise, continue -- visit the node's children.
+				break;
+			case 'path':
+				if (node.classList.contains(imageBackgroundCSSClassName)) {
+					await this.addBackground(node as SVGElement);
+				} else {
+					await this.addPath(node as SVGPathElement);
+				}
+				break;
+			case 'text':
+				await this.addText(node as SVGTextElement);
+				visitChildren = false;
+				break;
+			case 'image':
+				await this.addImage(node as SVGImageElement);
 
-			await this.addUnknownNode(node as SVGElement);
-			return;
+				// Images should not have children.
+				visitChildren = false;
+				break;
+			case 'svg':
+				this.updateViewBox(node as SVGSVGElement);
+				this.updateSVGAttrs(node as SVGSVGElement);
+				break;
+			case 'style':
+				// Keeping unnecessary style sheets can cause the browser to keep all
+				// SVG elements *referenced* by the style sheet in some browsers.
+				//
+				// Only keep the style sheet if it won't be discarded on save.
+				if (node.getAttribute('id') !== renderedStylesheetId) {
+					await this.addUnknownNode(node as SVGStyleElement);
+				}
+				break;
+			default:
+				if (!this.disableUnknownObjectWarnings) {
+					console.warn('Unknown SVG element,', node, node.tagName);
+					if (!(node instanceof SVGElement)) {
+						console.warn(
+							'Element',
+							node,
+							'is not an SVGElement!',
+							this.storeUnknown ? 'Continuing anyway.' : 'Skipping.',
+						);
+					}
+				}
+
+				await this.addUnknownNode(node as SVGElement);
+				return;
 		}
 
 		if (visitChildren) {
@@ -621,20 +644,21 @@ export default class SVGLoader implements ImageLoader {
 			}
 		}
 
-		this.processedCount ++;
+		this.processedCount++;
 		await this.onProgress?.(this.processedCount, this.totalToProcess);
 	}
 
 	// Get SVG element attributes (e.g. xlink=...)
-	private getSourceAttrs(node: SVGSVGElement): Array<[string, string|null]> {
-		return node.getAttributeNames().map(attr => {
-			return [ attr, node.getAttribute(attr) ];
+	private getSourceAttrs(node: SVGSVGElement): Array<[string, string | null]> {
+		return node.getAttributeNames().map((attr) => {
+			return [attr, node.getAttribute(attr)];
 		});
 	}
 
 	public async start(
-		onAddComponent: ComponentAddedListener, onProgress: OnProgressListener,
-		onDetermineExportRect: OnDetermineExportRectListener|null = null
+		onAddComponent: ComponentAddedListener,
+		onProgress: OnProgressListener,
+		onDetermineExportRect: OnDetermineExportRectListener | null = null,
 	): Promise<void> {
 		this.onAddComponent = onAddComponent;
 		this.onProgress = onProgress;
@@ -668,9 +692,10 @@ export default class SVGLoader implements ImageLoader {
 	 */
 	public static fromString(
 		text: string,
-		options: Partial<SVGLoaderOptions>|boolean = false
+		options: Partial<SVGLoaderOptions> | boolean = false,
 	): SVGLoader {
-		const domParserLoad = typeof options !== 'boolean' && options?.loadMethod === SVGLoaderLoadMethod.DOMParser;
+		const domParserLoad =
+			typeof options !== 'boolean' && options?.loadMethod === SVGLoaderLoadMethod.DOMParser;
 
 		const { svgElem, cleanUp } = (() => {
 			// If the user requested an iframe load (the default) try to load with an iframe.
@@ -683,7 +708,7 @@ export default class SVGLoader implements ImageLoader {
 					// allow-same-origin is necessary for how we interact with the sandbox. As such,
 					// DO NOT ENABLE ALLOW-SCRIPTS.
 					sandbox.setAttribute('sandbox', 'allow-same-origin');
-					sandbox.setAttribute('csp', 'default-src \'about:blank\'');
+					sandbox.setAttribute('csp', "default-src 'about:blank'");
 					sandbox.style.display = 'none';
 
 					// Required to access the frame's DOM. See https://stackoverflow.com/a/17777943/17055750
@@ -718,9 +743,7 @@ export default class SVGLoader implements ImageLoader {
 					`);
 					sandboxDoc.close();
 
-					const svgElem = sandboxDoc.createElementNS(
-						'http://www.w3.org/2000/svg', 'svg'
-					);
+					const svgElem = sandboxDoc.createElementNS('http://www.w3.org/2000/svg', 'svg');
 					svgElem.innerHTML = text;
 					sandboxDoc.body.appendChild(svgElem);
 
@@ -732,10 +755,10 @@ export default class SVGLoader implements ImageLoader {
 					};
 
 					return { svgElem, cleanUp };
-				} catch(error) {
+				} catch (error) {
 					console.warn(
 						'Failed loading SVG via a sandboxed iframe. Some styles may not be loaded correctly. Error: ',
-						error
+						error,
 					);
 				}
 			}
@@ -743,7 +766,8 @@ export default class SVGLoader implements ImageLoader {
 			// Fall back to creating a DOMParser
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(
-				`<svg xmlns="http://www.w3.org/2000/svg">${text}</svg>`, 'text/html'
+				`<svg xmlns="http://www.w3.org/2000/svg">${text}</svg>`,
+				'text/html',
 			);
 			const svgElem = doc.querySelector('svg')!;
 
@@ -754,7 +778,7 @@ export default class SVGLoader implements ImageLoader {
 				throw new Error('Parse error: ' + errorReportNode.textContent);
 			}
 
-			const cleanUp = () => { };
+			const cleanUp = () => {};
 
 			return { svgElem, cleanUp };
 		})();
@@ -772,7 +796,8 @@ export default class SVGLoader implements ImageLoader {
 		}
 
 		return new SVGLoader(svgElem, cleanUp, {
-			sanitize, disableUnknownObjectWarnings,
+			sanitize,
+			disableUnknownObjectWarnings,
 		});
 	}
 }

@@ -4,15 +4,15 @@ import BaseWidget from './BaseWidget';
 
 export default class ActionButtonWidget extends BaseWidget {
 	#autoDisableInReadOnlyEditors: boolean;
-	#helpText: string|undefined = undefined;
+	#helpText: string | undefined = undefined;
 
 	public constructor(
 		editor: Editor,
 		id: string,
 
-		protected makeIcon: ()=> Element|null,
+		protected makeIcon: () => Element | null,
 		protected title: string,
-		protected clickAction: ()=>void,
+		protected clickAction: () => void,
 
 		localizationTable?: ToolbarLocalization,
 		protected mustBeToplevel: boolean = false,
@@ -47,7 +47,7 @@ export default class ActionButtonWidget extends BaseWidget {
 		return this.title;
 	}
 
-	protected createIcon(): Element|null {
+	protected createIcon(): Element | null {
 		return this.makeIcon();
 	}
 

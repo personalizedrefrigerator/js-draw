@@ -5,10 +5,12 @@ import SerializableCommand from './SerializableCommand';
 
 // Returns a command that does the opposite of the given command --- `result.apply()` calls
 // `command.unapply()` and `result.unapply()` calls `command.apply()`.
-const invertCommand = <T extends Command> (command: T): T extends SerializableCommand ? SerializableCommand : Command => {
+const invertCommand = <T extends Command>(
+	command: T,
+): T extends SerializableCommand ? SerializableCommand : Command => {
 	if (command instanceof SerializableCommand) {
 		// SerializableCommand that does the inverse of [command]
-		return new class extends SerializableCommand {
+		return new (class extends SerializableCommand {
 			// For debugging
 			public _command = command;
 
@@ -27,10 +29,10 @@ const invertCommand = <T extends Command> (command: T): T extends SerializableCo
 			public description(editor: Editor, localizationTable: EditorLocalization): string {
 				return localizationTable.inverseOf(command.description(editor, localizationTable));
 			}
-		}('inverse');
+		})('inverse');
 	} else {
 		// Command that does the inverse of [command].
-		const result = new class extends Command {
+		const result = new (class extends Command {
 			public apply(editor: Editor) {
 				command.unapply(editor);
 			}
@@ -46,7 +48,7 @@ const invertCommand = <T extends Command> (command: T): T extends SerializableCo
 			public description(editor: Editor, localizationTable: EditorLocalization) {
 				return localizationTable.inverseOf(command.description(editor, localizationTable));
 			}
-		};
+		})();
 
 		// We know that T does not extend SerializableCommand, and thus returning a Command
 		// is appropriate.

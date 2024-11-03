@@ -11,7 +11,9 @@ import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 import InputStabilizer from './InputFilter/InputStabilizer';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
-import StationaryPenDetector, { defaultStationaryDetectionConfig } from './util/StationaryPenDetector';
+import StationaryPenDetector, {
+	defaultStationaryDetectionConfig,
+} from './util/StationaryPenDetector';
 import AbstractComponent from '../components/AbstractComponent';
 
 export interface PenStyle {
@@ -21,19 +23,19 @@ export interface PenStyle {
 }
 
 export default class Pen extends BaseTool {
-	protected builder: ComponentBuilder|null = null;
-	private lastPoint: StrokeDataPoint|null = null;
-	private startPoint: StrokeDataPoint|null = null;
-	private currentDeviceType: PointerDevice|null = null;
-	private currentPointerId: number|null = null;
+	protected builder: ComponentBuilder | null = null;
+	private lastPoint: StrokeDataPoint | null = null;
+	private startPoint: StrokeDataPoint | null = null;
+	private currentDeviceType: PointerDevice | null = null;
+	private currentPointerId: number | null = null;
 	private styleValue: MutableReactiveValue<PenStyle>;
 	private style: PenStyle;
 
 	private shapeAutocompletionEnabled: boolean = false;
-	private autocorrectedShape: AbstractComponent|null = null;
-	private lastAutocorrectedShape: AbstractComponent|null = null;
+	private autocorrectedShape: AbstractComponent | null = null;
+	private lastAutocorrectedShape: AbstractComponent | null = null;
 	private removedAutocorrectedShapeTime: number = 0;
-	private stationaryDetector: StationaryPenDetector|null = null;
+	private stationaryDetector: StationaryPenDetector | null = null;
 
 	public constructor(
 		private editor: Editor,
@@ -49,7 +51,7 @@ export default class Pen extends BaseTool {
 			...style,
 		});
 
-		this.styleValue.onUpdateAndNow(newValue => {
+		this.styleValue.onUpdateAndNow((newValue) => {
 			this.style = newValue;
 			this.noteUpdated();
 		});
@@ -57,7 +59,7 @@ export default class Pen extends BaseTool {
 
 	private getPressureMultiplier() {
 		const thickness = this.style.thickness;
-		return 1 / this.editor.viewport.getScaleFactor() * thickness;
+		return (1 / this.editor.viewport.getScaleFactor()) * thickness;
 	}
 
 	// Converts a `pointer` to a `StrokeDataPoint`.
@@ -129,7 +131,7 @@ export default class Pen extends BaseTool {
 				this.stationaryDetector = new StationaryPenDetector(
 					current,
 					defaultStationaryDetectionConfig,
-					pointer => this.autocorrectShape(pointer),
+					(pointer) => this.autocorrectShape(pointer),
 				);
 			} else {
 				this.stationaryDetector = null;
@@ -239,7 +241,7 @@ export default class Pen extends BaseTool {
 
 		const shapeDescription = correctedShape.description(this.editor.localization);
 		this.editor.announceForAccessibility(
-			this.editor.localization.autocorrectedTo(shapeDescription)
+			this.editor.localization.autocorrectedTo(shapeDescription),
 		);
 
 		this.autocorrectedShape = correctedShape;
@@ -261,7 +263,7 @@ export default class Pen extends BaseTool {
 			if (stroke.getBBox().area > 0) {
 				if (stroke === this.autocorrectedShape) {
 					this.editor.announceForAccessibility(
-						this.editor.localization.autocorrectedTo(stroke.description(this.editor.localization))
+						this.editor.localization.autocorrectedTo(stroke.description(this.editor.localization)),
 					);
 				}
 
@@ -343,10 +345,18 @@ export default class Pen extends BaseTool {
 		return this.shapeAutocompletionEnabled;
 	}
 
-	public getThickness() { return this.style.thickness; }
-	public getColor() { return this.style.color; }
-	public getStrokeFactory() { return this.style.factory; }
-	public getStyleValue() { return this.styleValue; }
+	public getThickness() {
+		return this.style.thickness;
+	}
+	public getColor() {
+		return this.style.color;
+	}
+	public getStrokeFactory() {
+		return this.style.factory;
+	}
+	public getStyleValue() {
+		return this.styleValue;
+	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		const shortcuts = this.editor.shortcuts;
@@ -361,11 +371,11 @@ export default class Pen extends BaseTool {
 			return false;
 		}
 
-		let newThickness: number|undefined;
+		let newThickness: number | undefined;
 		if (shortcuts.matchesShortcut(decreaseSizeKeyboardShortcutId, event)) {
-			newThickness = this.getThickness() * 2/3;
+			newThickness = (this.getThickness() * 2) / 3;
 		} else if (shortcuts.matchesShortcut(increaseSizeKeyboardShortcutId, event)) {
-			newThickness = this.getThickness() * 3/2;
+			newThickness = (this.getThickness() * 3) / 2;
 		}
 
 		if (newThickness !== undefined) {

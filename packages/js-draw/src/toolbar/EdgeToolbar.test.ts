@@ -16,7 +16,7 @@ describe('EdgeToolbar', () => {
 
 		// After, should have widgets.
 		expect(
-			editorRoot.querySelectorAll('.toolbar-edge-toolbar .toolbar-button').length
+			editorRoot.querySelectorAll('.toolbar-edge-toolbar .toolbar-button').length,
 		).toBeGreaterThan(0);
 	});
 

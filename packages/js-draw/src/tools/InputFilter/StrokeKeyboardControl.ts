@@ -17,10 +17,11 @@ export default class StrokeKeyboardControl extends InputMapper {
 
 	// The point at which the last pointerDown event happened (or null if
 	// no such event has occurred).
-	private startPointCanvas: Point2|null = null;
+	private startPointCanvas: Point2 | null = null;
 
 	public constructor(
-		private shortcuts: KeyboardShortcutManager, private viewport: Viewport
+		private shortcuts: KeyboardShortcutManager,
+		private viewport: Viewport,
 	) {
 		super();
 	}
@@ -65,7 +66,11 @@ export default class StrokeKeyboardControl extends InputMapper {
 	public override onEvent(event: InputEvt): boolean {
 		const shortcuts = this.shortcuts;
 
-		if (event.kind === InputEvtType.PointerDownEvt || event.kind === InputEvtType.PointerMoveEvt || event.kind === InputEvtType.PointerUpEvt) {
+		if (
+			event.kind === InputEvtType.PointerDownEvt ||
+			event.kind === InputEvtType.PointerMoveEvt ||
+			event.kind === InputEvtType.PointerUpEvt
+		) {
 			if (event.kind === InputEvtType.PointerDownEvt) {
 				this.startPointCanvas = event.current.canvasPos;
 			}
@@ -75,12 +80,12 @@ export default class StrokeKeyboardControl extends InputMapper {
 
 		let handled = this.emit(event);
 
-		if (// Always check keyUpEvents (in case we handled the corresponding keyDown event)
-			event.kind === InputEvtType.KeyUpEvent
-
+		if (
+			// Always check keyUpEvents (in case we handled the corresponding keyDown event)
+			event.kind === InputEvtType.KeyUpEvent ||
 			// Only handle key press events if another tool isn't handling it. We don't want
 			// snap to grid/angle lock to conflict with selection/another tool's shortcuts.
-			|| (!handled && event.kind === InputEvtType.KeyPressEvent)
+			(!handled && event.kind === InputEvtType.KeyPressEvent)
 		) {
 			const isKeyPress = event.kind === InputEvtType.KeyPressEvent;
 

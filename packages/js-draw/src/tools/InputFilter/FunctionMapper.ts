@@ -7,7 +7,7 @@ import InputMapper from './InputMapper';
  * Useful for automated testing.
  */
 export default class FunctionMapper extends InputMapper {
-	public constructor(private fn: (event: InputEvt)=>InputEvt) {
+	public constructor(private fn: (event: InputEvt) => InputEvt) {
 		super();
 	}
 

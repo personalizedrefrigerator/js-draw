@@ -47,17 +47,16 @@ export default class RectangleBuilder implements ComponentBuilder {
 		const endPoint = rotationMat.inverse().transformVec2(this.endPoint.pos);
 
 		const rect = Rect2.fromCorners(startPoint, endPoint);
-		const path = Path.fromRect(
-			rect,
-			this.filled ? null : this.endPoint.width,
-		).transformedBy(
-			// Rotate the canvas rectangle so that its rotation matches the screen
-			rotationMat
-		).mapPoints(point => this.viewport.roundPoint(point));
+		const path = Path.fromRect(rect, this.filled ? null : this.endPoint.width)
+			.transformedBy(
+				// Rotate the canvas rectangle so that its rotation matches the screen
+				rotationMat,
+			)
+			.mapPoints((point) => this.viewport.roundPoint(point));
 
 		const preview = new Stroke([
 			pathToRenderable(path, {
-				fill: this.endPoint.color
+				fill: this.endPoint.color,
 			}),
 		]);
 

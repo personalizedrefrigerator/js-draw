@@ -1,7 +1,6 @@
-
 type Options = {
-	onStart: ()=>void;
-	onEnd: ()=>void;
+	onStart: () => void;
+	onEnd: () => void;
 
 	longPressTimeout?: number;
 };
@@ -16,7 +15,7 @@ const listenForLongPressOrHover = (target: HTMLElement, options: Options) => {
 	};
 
 	const pointersInside = new Map<number, PointerRecord>();
-	let timeoutId: ReturnType<typeof setTimeout>|null = null;
+	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 	let isLongPressInProgress = false;
 
 	const updateTimeout = () => {

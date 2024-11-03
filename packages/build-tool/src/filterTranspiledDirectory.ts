@@ -1,4 +1,3 @@
-
 import { rename, readFile, writeFile, unlink } from 'fs/promises';
 import forEachFileInDirectory from './forEachFileInDirectory';
 
@@ -43,7 +42,10 @@ const filterTranspiledDirectory = async (directoryPath: string) => {
 
 		// TODO: Switch to using the TypeScript compiler API. This has the danger of changing imports
 		// in multi-line strings.
-		contents = contents.replace(/([\n]|^)(import|export)(.*)from\s+(['"])(\.*\/[^\n]+)(['"])/g, '$1$2 $3 from $4$5.mjs$6');
+		contents = contents.replace(
+			/([\n]|^)(import|export)(.*)from\s+(['"])(\.*\/[^\n]+)(['"])/g,
+			'$1$2 $3 from $4$5.mjs$6',
+		);
 
 		await writeFile(newPath, contents);
 	});

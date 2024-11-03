@@ -5,13 +5,15 @@ import { Mat33, Rect2, Point2, Vec2, Vec3 } from '@js-draw/math';
 import { StrokeDataPoint } from './types';
 
 // Returns the base type of some type of point/number
-type PointDataType<T extends Point2|StrokeDataPoint|number> = T extends Point2 ? Point2 : number;
+type PointDataType<T extends Point2 | StrokeDataPoint | number> = T extends Point2
+	? Point2
+	: number;
 
 export abstract class ViewportTransform extends Command {
 	public abstract readonly transform: Mat33;
 }
 
-type TransformChangeCallback = (oldTransform: Mat33, newTransform: Mat33)=> void;
+type TransformChangeCallback = (oldTransform: Mat33, newTransform: Mat33) => void;
 
 export class Viewport {
 	// Command that translates/scales the viewport.
@@ -45,7 +47,7 @@ export class Viewport {
 			const affineTransformedVec = this.transform.transformVec2(origVec);
 
 			const scale = linearTransformedVec.magnitude();
-			const rotation = 180 / Math.PI * linearTransformedVec.angle();
+			const rotation = (180 / Math.PI) * linearTransformedVec.angle();
 			const translation = affineTransformedVec.minus(origVec);
 
 			if (scale > 1.2) {
@@ -192,15 +194,13 @@ export class Viewport {
 			return snapped;
 		};
 
-		const snappedCanvasPos = Vec2.of(
-			snapCoordinate(canvasPos.x), snapCoordinate(canvasPos.y)
-		);
+		const snappedCanvasPos = Vec2.of(snapCoordinate(canvasPos.x), snapCoordinate(canvasPos.y));
 		return snappedCanvasPos;
 	}
 
 	/** Returns the size of one screen pixel in canvas units. */
 	public getSizeOfPixelOnCanvas(): number {
-		return 1/this.getScaleFactor();
+		return 1 / this.getScaleFactor();
 	}
 
 	/**
@@ -217,16 +217,15 @@ export class Viewport {
 	 * Rounds the given `point` to a multiple of 10 such that it is within `tolerance` of
 	 * its original location. This is useful for preparing data for base-10 conversion.
 	 */
-	public static roundPoint<T extends Point2|number>(
-		point: T, tolerance: number,
+	public static roundPoint<T extends Point2 | number>(
+		point: T,
+		tolerance: number,
 	): PointDataType<T>;
 
 	// The separate function type definition seems necessary here.
 	// See https://stackoverflow.com/a/58163623/17055750.
 	// eslint-disable-next-line no-dupe-class-members
-	public static roundPoint(
-		point: Point2|number, tolerance: number
-	): Point2|number {
+	public static roundPoint(point: Point2 | number, tolerance: number): Point2 | number {
 		const scaleFactor = 10 ** Math.floor(Math.log10(tolerance));
 		const roundComponent = (component: number): number => {
 			return Math.round(component / scaleFactor) * scaleFactor;
@@ -254,13 +253,19 @@ export class Viewport {
 		// Represent as k 10ⁿ for some n, k ∈ ℤ.
 		const decimalComponent = 10 ** Math.floor(Math.log10(Math.abs(scaleRatio)));
 		const roundAmountFactor = 2 ** roundAmount;
-		scaleRatio = Math.round(scaleRatio / decimalComponent * roundAmountFactor) / roundAmountFactor * decimalComponent;
+		scaleRatio =
+			(Math.round((scaleRatio / decimalComponent) * roundAmountFactor) / roundAmountFactor) *
+			decimalComponent;
 
 		return scaleRatio;
 	}
 
 	// Computes and returns an affine transformation that makes `toMakeVisible` visible and roughly centered on the screen.
-	public computeZoomToTransform(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Mat33 {
+	public computeZoomToTransform(
+		toMakeVisible: Rect2,
+		allowZoomIn: boolean = true,
+		allowZoomOut: boolean = true,
+	): Mat33 {
 		let transform = Mat33.identity;
 
 		// Invalid size? (Would divide by zero)
@@ -275,9 +280,7 @@ export class Viewport {
 				allowZoomOut = false;
 			}
 
-			toMakeVisible = new Rect2(
-				toMakeVisible.x, toMakeVisible.y, newSize, newSize,
-			);
+			toMakeVisible = new Rect2(toMakeVisible.x, toMakeVisible.y, newSize, newSize);
 		}
 
 		if (isNaN(toMakeVisible.size.magnitude())) {
@@ -289,19 +292,17 @@ export class Viewport {
 			// transform transforms objects on the canvas. As such, we need to invert it
 			// to transform the viewport.
 			const visibleRect = this.visibleRect.transformedBoundingBox(transform.inverse());
-			return visibleRect.transformedBoundingBox(Mat33.scaling2D(4/5, visibleRect.center));
+			return visibleRect.transformedBoundingBox(Mat33.scaling2D(4 / 5, visibleRect.center));
 		};
 
 		let targetRect = recomputeTargetRect();
 		const largerThanTarget = targetRect.w < toMakeVisible.w || targetRect.h < toMakeVisible.h;
 
 		// Ensure that toMakeVisible is at least 1/3rd of the visible region.
-		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 1/3;
+		const muchSmallerThanTarget = toMakeVisible.maxDimension / targetRect.maxDimension < 1 / 3;
 
 		if ((largerThanTarget && allowZoomOut) || (muchSmallerThanTarget && allowZoomIn)) {
-			const multiplier = Math.max(
-				toMakeVisible.w / targetRect.w, toMakeVisible.h / targetRect.h
-			);
+			const multiplier = Math.max(toMakeVisible.w / targetRect.w, toMakeVisible.h / targetRect.h);
 			const visibleRectTransform = Mat33.scaling2D(multiplier, targetRect.topLeft);
 			const viewportContentTransform = visibleRectTransform.inverse();
 
@@ -321,7 +322,13 @@ export class Viewport {
 		}
 
 		if (!transform.invertable()) {
-			console.warn('Unable to zoom to ', toMakeVisible, '! Computed transform', transform, 'is singular.');
+			console.warn(
+				'Unable to zoom to ',
+				toMakeVisible,
+				'! Computed transform',
+				transform,
+				'is singular.',
+			);
 			transform = Mat33.identity;
 		}
 
@@ -333,7 +340,11 @@ export class Viewport {
 	// Returns null if no transformation is necessary
 	//
 	// @see {@link computeZoomToTransform}
-	public zoomTo(toMakeVisible: Rect2, allowZoomIn: boolean = true, allowZoomOut: boolean = true): Command {
+	public zoomTo(
+		toMakeVisible: Rect2,
+		allowZoomIn: boolean = true,
+		allowZoomOut: boolean = true,
+	): Command {
 		const transform = this.computeZoomToTransform(toMakeVisible, allowZoomIn, allowZoomOut);
 		return new Viewport.ViewportTransform(transform);
 	}

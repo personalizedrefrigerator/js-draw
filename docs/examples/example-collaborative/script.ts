@@ -8,8 +8,7 @@ editor.addToolbar();
 // To facilitate debugging,
 (window as any).editor = editor;
 
-const clientId = `${(new Date().getTime())}-${Math.random()}`;
-
+const clientId = `${new Date().getTime()}-${Math.random()}`;
 
 let lastUpdateIdx = 0;
 const postSerializedCommand = async (data: string) => {
@@ -24,8 +23,11 @@ interface FetchResult {
 	lastCommandIdx: number;
 }
 
-type ProcessCommandCallback = (command: jsdraw.SerializableCommand)=> Promise<void>;
-const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessCommandCallback): Promise<FetchResult> => {
+type ProcessCommandCallback = (command: jsdraw.SerializableCommand) => Promise<void>;
+const fetchUpdates = async (
+	lastUpdateIndex: number,
+	processCommand: ProcessCommandCallback,
+): Promise<FetchResult> => {
 	const data = await fetch('/commandsSince/' + lastUpdateIndex);
 	const json = await data.json();
 
@@ -50,7 +52,7 @@ const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessComm
 		try {
 			const command = jsdraw.SerializableCommand.deserialize(commandJSON.data.data, editor);
 			await processCommand(command);
-		} catch(e) {
+		} catch (e) {
 			console.warn('Error parsing command', e);
 		}
 	}
@@ -60,25 +62,27 @@ const fetchUpdates = async (lastUpdateIndex: number, processCommand: ProcessComm
 	};
 };
 
-editor.notifier.on(jsdraw.EditorEventType.CommandDone, evt => {
+editor.notifier.on(jsdraw.EditorEventType.CommandDone, (evt) => {
 	// Type assertion.
 	if (evt.kind !== jsdraw.EditorEventType.CommandDone) {
 		throw new Error('Incorrect event type');
 	}
 
 	if (evt.command instanceof jsdraw.SerializableCommand) {
-		postSerializedCommand(JSON.stringify({
-			// Store the clientId so we don't apply commands we sent to the server
-			clientId,
+		postSerializedCommand(
+			JSON.stringify({
+				// Store the clientId so we don't apply commands we sent to the server
+				clientId,
 
-			data: evt.command.serialize()
-		}));
+				data: evt.command.serialize(),
+			}),
+		);
 	} else {
 		console.log('!', evt.command, 'instanceof jsdraw.SerializableCommand');
 	}
 });
 
-editor.notifier.on(jsdraw.EditorEventType.CommandUndone, evt => {
+editor.notifier.on(jsdraw.EditorEventType.CommandUndone, (evt) => {
 	if (evt.kind !== jsdraw.EditorEventType.CommandUndone) {
 		return;
 	}
@@ -88,14 +92,16 @@ editor.notifier.on(jsdraw.EditorEventType.CommandUndone, evt => {
 		return;
 	}
 
-	postSerializedCommand(JSON.stringify({
-		clientId,
-		data: jsdraw.invertCommand(evt.command).serialize()
-	}));
+	postSerializedCommand(
+		JSON.stringify({
+			clientId,
+			data: jsdraw.invertCommand(evt.command).serialize(),
+		}),
+	);
 });
 
 const timeout = (delay: number) => {
-	return new Promise(resolve => {
+	return new Promise((resolve) => {
 		setTimeout(resolve, delay);
 	});
 };
@@ -103,13 +109,13 @@ const timeout = (delay: number) => {
 (async () => {
 	for (;;) {
 		try {
-			const updates = await fetchUpdates(lastUpdateIdx, async command => {
+			const updates = await fetchUpdates(lastUpdateIdx, async (command) => {
 				console.log('Applying', command);
 				// .apply and .unapply don't dispatch CommandDone and CommandUndone events.
 				await command.apply(editor);
 			});
 			lastUpdateIdx = updates.lastCommandIdx;
-		} catch(e) {
+		} catch (e) {
 			console.warn('Error fetching updates', e);
 		}
 

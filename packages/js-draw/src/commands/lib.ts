@@ -5,12 +5,4 @@ import invertCommand from './invertCommand';
 import SerializableCommand from './SerializableCommand';
 import uniteCommands from './uniteCommands';
 
-export {
-	Command,
-	Duplicate,
-	Erase,
-	SerializableCommand,
-
-	invertCommand,
-	uniteCommands,
-};
+export { Command, Duplicate, Erase, SerializableCommand, invertCommand, uniteCommands };

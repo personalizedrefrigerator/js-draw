@@ -10,17 +10,22 @@ const convertIcons = async () => {
 
 	const dirent = await fs.readdir(iconsDir);
 
-	await Promise.all([ ...dirent ].map(async (fileName) => {
-		const filePath = resolve(iconsDir, fileName);
+	await Promise.all(
+		[...dirent].map(async (fileName) => {
+			const filePath = resolve(iconsDir, fileName);
 
-		if (filePath.endsWith('.svg')) {
-			console.log('[…] Converting', fileName);
+			if (filePath.endsWith('.svg')) {
+				console.log('[…] Converting', fileName);
 
-			const iconName = basename(fileName).replace(/\.svg$/, '').replace(/[^a-zA-Z0-9]/, '_');
-			const icon = await fs.readFile(filePath, 'utf-8');
-			const updatedIcon = icon.replace(/([<]path)(.)/ig, '$1 style="fill: var(--icon-color);"$2');
+				const iconName = basename(fileName)
+					.replace(/\.svg$/, '')
+					.replace(/[^a-zA-Z0-9]/, '_');
+				const icon = await fs.readFile(filePath, 'utf-8');
+				const updatedIcon = icon.replace(/([<]path)(.)/gi, '$1 style="fill: var(--icon-color);"$2');
 
-			await fs.writeFile(filePath + '.ts', `
+				await fs.writeFile(
+					filePath + '.ts',
+					`
 				// The following icon is part of the Material Icon pack and is licensed under
 				// the Apache 2.0 license.
 				// You should have received a copy of this license along with the software.
@@ -32,17 +37,22 @@ const convertIcons = async () => {
 
 				export const ${iconName} = ${JSON.stringify(updatedIcon)};
 				export default ${iconName};
-			`);
-		}
-	}));
+			`,
+				);
+			}
+		}),
+	);
 };
 
 const readmeToJS = async () => {
 	const readmePath = join(dirname(__dirname), 'src', 'icons', 'README.md');
 
-	await fs.writeFile(readmePath + '.ts', `
+	await fs.writeFile(
+		readmePath + '.ts',
+		`
 		export default ${JSON.stringify(await fs.readFile(readmePath, 'utf-8'))};
-	`);
+	`,
+	);
 };
 
-module.exports = { default: Promise.all([ convertIcons(), readmeToJS() ]) };
+module.exports = { default: Promise.all([convertIcons(), readmeToJS()]) };

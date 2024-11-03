@@ -13,11 +13,11 @@ const convexHull2Of = (points: Point2[]) => {
 
 	// 1. Start with a vertex on the hull
 	const lowestPoint = points.reduce(
-		(lowest, current) => current.y < lowest.y ? current : lowest,
-		points[0]
+		(lowest, current) => (current.y < lowest.y ? current : lowest),
+		points[0],
 	);
-	const vertices = [ lowestPoint ];
-	let toProcess = [...points.filter(p => !p.eq(lowestPoint))];
+	const vertices = [lowestPoint];
+	let toProcess = [...points.filter((p) => !p.eq(lowestPoint))];
 	let lastBaseDirection = Vec2.of(-1, 0);
 
 	// 2. Find the point with greatest angle from the vertex:
@@ -29,7 +29,9 @@ const convexHull2Of = (points: Point2[]) => {
 	while (toProcess.length > 0) {
 		const lastVertex = vertices[vertices.length - 1];
 
-		let smallestDotProductSoFar: number = lastBaseDirection.dot(lowestPoint.minus(lastVertex).normalizedOrZero());
+		let smallestDotProductSoFar: number = lastBaseDirection.dot(
+			lowestPoint.minus(lastVertex).normalizedOrZero(),
+		);
 		let furthestPointSoFar = lowestPoint;
 		for (const point of toProcess) {
 			// Maximizing the angle is the same as minimizing the dot product:
@@ -46,7 +48,7 @@ const convexHull2Of = (points: Point2[]) => {
 				smallestDotProductSoFar = currentDotProduct;
 			}
 		}
-		toProcess = toProcess.filter(p => !p.eq(furthestPointSoFar));
+		toProcess = toProcess.filter((p) => !p.eq(furthestPointSoFar));
 
 		const newBaseDirection = furthestPointSoFar.minus(lastVertex).normalized();
 

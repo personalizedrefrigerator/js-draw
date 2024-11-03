@@ -1,4 +1,3 @@
-
 export interface ToolbarUtilsLocalization {
 	help: string;
 	helpScreenNavigationHelp: string;

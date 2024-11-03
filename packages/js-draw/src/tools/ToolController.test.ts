@@ -1,7 +1,12 @@
-import Editor, { Color4, InputEvtType, Vec2, makeOutlinedCircleBuilder, sendPenEvent } from '../lib';
+import Editor, {
+	Color4,
+	InputEvtType,
+	Vec2,
+	makeOutlinedCircleBuilder,
+	sendPenEvent,
+} from '../lib';
 import createEditor from '../testing/createEditor';
 import { EraserTool, PenStyle, PenTool, TextTool } from './lib';
-
 
 const tryToDraw = (editor: Editor) => {
 	sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.zero);
@@ -21,7 +26,6 @@ describe('ToolController', () => {
 
 		// Drawing should add an element
 		expect(editor.image.getAllElements()).toHaveLength(1);
-
 
 		// Remove all pen tools
 		const penTools = toolController.getMatchingTools(PenTool);
@@ -79,7 +83,9 @@ describe('ToolController', () => {
 		toolController.addPrimaryTool(newPen);
 
 		// Should only be included once
-		expect(toolController.getMatchingTools(PenTool).filter(pen => pen === newPen)).toHaveLength(1);
+		expect(toolController.getMatchingTools(PenTool).filter((pen) => pen === newPen)).toHaveLength(
+			1,
+		);
 
 		// Drawing should trigger the pen
 		expect(penStyle.factory).not.toHaveBeenCalled();

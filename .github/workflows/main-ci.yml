@@ -7,7 +7,7 @@ name: Deploy static content to Pages and Firebase
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches: ['main']
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -20,7 +20,7 @@ permissions:
 
 # Allow one concurrent deployment
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
@@ -43,6 +43,8 @@ jobs:
         run: yarn run test
       - name: Lint
         run: yarn run lint-ci
+      - name: Check formatting
+        run: yarn run format-ci
       - name: Build pages
         run: bash scripts/build-website.sh
       - name: Setup Pages

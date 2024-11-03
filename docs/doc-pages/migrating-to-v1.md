@@ -1,7 +1,7 @@
 # Migrating to version 1
 
 Version 1 of the `js-draw` library introduces many new features and [several breaking changes](https://github.com/personalizedrefrigerator/js-draw/blob/main/CHANGELOG.md#100). This guide summarizes the breaking API changes and major UI adjustments.
- 
+
 ## Breaking API change: CSS variables
 
 The CSS variables used to customize `js-draw`'s theme have changed.
@@ -9,6 +9,7 @@ The CSS variables used to customize `js-draw`'s theme have changed.
 <details><summary>Comparison between old and new CSS variables</summary>
 
 **Old CSS variables**:
+
 - `--primary-background-color`: Background color of the editor, toolbar, and menus
 - `--primary-foreground-color`: Text/icon color of the content of the toolbar and menus
 - `--secondary-background-color`: Background color of selected items
@@ -16,6 +17,7 @@ The CSS variables used to customize `js-draw`'s theme have changed.
 - `--primary-shadow-color`: Color of shadows
 
 **New CSS variables**:
+
 - `--background-color-1`: Background color of the editor and some dialogs
 - `--foreground-color-1`: Text/icon color of the editor and some dialogs
 - `--background-color-2`: Background color of the main toolbar content
@@ -31,6 +33,7 @@ The CSS variables used to customize `js-draw`'s theme have changed.
 </details>
 
 Try the different CSS variables below:
+
 ```css,runnable
 :root .imageEditorContainer {
     /* Used for unselected buttons and dialog text. */
@@ -124,6 +127,7 @@ makeEditor();
 The toolbar added by `.addToolbar()` has changed. A version of the original toolbar is still available.
 
 This runnable code block shows how to specify which toolbar should be used and how to switch between them:
+
 ```ts,runnable
 import {
 	Editor, makeEdgeToolbar, makeDropdownToolbar, AbstractToolbar
@@ -187,13 +191,13 @@ to create different types of toolbars.
 
 Even in the dropdown toolbar, the behavior/appearance of many toolbar widgets are different.
 
-
 ## Breaking API change: Different `PenTool` API
 
 The constructor for the `PenTool` has changed — rather than accepting the pen's default stroke factory
 as a separate argument, the factory is a part of the `style` parameter.
 
 The following demo shows how to create a pen tool:
+
 ```ts,runnable
 import {
 	Editor, PenTool, PenStyle, Color4,
@@ -226,7 +230,6 @@ editor.addToolbar();
 Timestamps attached to events internal to the editor now use
 [`performance.now()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now) rather than
 `Date.now()`. As such, these timestamps
+
 - are relative to [`performance.timeOrigin`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/timeOrigin), not the UNIX epoch
 - are not integers (but are still in milliseconds).
-
-

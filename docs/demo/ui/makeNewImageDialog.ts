@@ -12,11 +12,11 @@ import './newImageDialog.css';
  */
 const makeNewImageDialog = (
 	localization: Localization,
-	store: AbstractStore
-): Promise<StoreEntry|null> => {
-	let dialogResult: StoreEntry|null|undefined = undefined;
+	store: AbstractStore,
+): Promise<StoreEntry | null> => {
+	let dialogResult: StoreEntry | null | undefined = undefined;
 
-	let closeDialogWithResult = (result: StoreEntry|null) => {
+	let closeDialogWithResult = (result: StoreEntry | null) => {
 		dialogResult = result;
 	};
 
@@ -25,7 +25,7 @@ const makeNewImageDialog = (
 			alert('Warning: Not saved.');
 		};
 
-		let item: StoreEntry|null = await store.createNewEntry();
+		let item: StoreEntry | null = await store.createNewEntry();
 		if (item === null) {
 			alert(localization.warningSaveTargetOnlySupportsOneImage);
 
@@ -127,13 +127,13 @@ const makeNewImageDialog = (
 		}
 
 		const reader = new FileReader();
-		reader.onload = (progress => {
+		reader.onload = (progress) => {
 			if (progress.target?.result) {
 				// The reader was started with .readAsText, so we know [result]
 				// is a string.
 				closeDialogWithStringResult(progress.target.result as string);
 			}
-		});
+		};
 		reader.readAsText(files[0]);
 	};
 
@@ -145,13 +145,13 @@ const makeNewImageDialog = (
 	};
 
 	// Return a Promise that resolves when the dialog is closed.
-	return new Promise<StoreEntry|null>((resolve, _reject) => {
+	return new Promise<StoreEntry | null>((resolve, _reject) => {
 		if (dialogResult !== undefined) {
 			background.remove();
 			resolve(dialogResult);
 		}
 
-		closeDialogWithResult = (result: StoreEntry|null) => {
+		closeDialogWithResult = (result: StoreEntry | null) => {
 			background.remove();
 			resolve(result);
 		};

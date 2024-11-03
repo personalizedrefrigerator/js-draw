@@ -16,8 +16,8 @@ describe('makeFileInput', () => {
 	});
 
 	test('should support custom file pickers', async () => {
-		const customPickerAction = jest.fn(async (): Promise<File[]|null> => {
-			return [new File([ 'test' ], 'a-test.txt')];
+		const customPickerAction = jest.fn(async (): Promise<File[] | null> => {
+			return [new File(['test'], 'a-test.txt')];
 		});
 		const input = makeFileInput('FileInputLabel:', mockContext, { customPickerAction });
 		input.addTo(document.body);
@@ -33,19 +33,23 @@ describe('makeFileInput', () => {
 		// Clicking on the label should open the picker
 		labelElem.click();
 		await input.selectedFiles.waitForNextUpdate();
-		expect(input.selectedFiles.get().map(f => f.name)).toMatchObject([ 'a-test.txt' ]);
+		expect(input.selectedFiles.get().map((f) => f.name)).toMatchObject(['a-test.txt']);
 
 		// Should show the filename
 		expect(findNodeWithText('a-test.txt', input.container)).toBeTruthy();
 
 		// Should support selecting multiple files
 		customPickerAction.mockImplementation(async () => [
-			new File([ 'test' ], 'a-test-1.txt'), new File([ 'test' ], 'a-test-2.txt'),
+			new File(['test'], 'a-test-1.txt'),
+			new File(['test'], 'a-test-2.txt'),
 		]);
 		labelElem.click();
 
 		await input.selectedFiles.waitForNextUpdate();
-		expect(input.selectedFiles.get().map(f => f.name)).toMatchObject([ 'a-test-1.txt', 'a-test-2.txt' ]);
+		expect(input.selectedFiles.get().map((f) => f.name)).toMatchObject([
+			'a-test-1.txt',
+			'a-test-2.txt',
+		]);
 		expect(findNodeWithText('a-test-1.txt\na-test-2.txt', input.container)).toBeTruthy();
 		expect(findNodeWithText('browse', input.container)).toBeFalsy();
 
@@ -57,10 +61,10 @@ describe('makeFileInput', () => {
 	test('should support cancelling custom file picker actions', async () => {
 		let cancelCounter = 0;
 		const customPickerAction = jest.fn(async ({ setOnCancelCallback }) => {
-			return new Promise<File[]>(resolve => {
+			return new Promise<File[]>((resolve) => {
 				setOnCancelCallback(() => {
 					cancelCounter++;
-					resolve([new File([ '' ], 'test-file.txt')]);
+					resolve([new File([''], 'test-file.txt')]);
 				});
 			});
 		});
@@ -86,7 +90,9 @@ describe('makeFileInput', () => {
 		expect(findNodeWithText('Cancel', labelElem)).toBeFalsy();
 
 		// Should still add files if customPickerAction returned a non-null value.
-		expect((await input.selectedFiles.waitForNextUpdate()).map(f => f.name)).toMatchObject([ 'test-file.txt' ]);
+		expect((await input.selectedFiles.waitForNextUpdate()).map((f) => f.name)).toMatchObject([
+			'test-file.txt',
+		]);
 
 		// Shouldn't allow cancelling multiple times
 		labelElem.click();

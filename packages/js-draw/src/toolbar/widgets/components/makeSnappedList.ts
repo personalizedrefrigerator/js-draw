@@ -10,13 +10,13 @@ type SnappedListItems<DataType> = Array<SnappedListItem<DataType>>;
 
 export interface SnappedListControl<DataType> {
 	container: HTMLElement;
-	visibleItem: ReactiveValue<DataType|null>;
+	visibleItem: ReactiveValue<DataType | null>;
 }
 
 /**
  * Creates a list that snaps to each item and reports the selected item.
  */
-const makeSnappedList = <DataType> (
+const makeSnappedList = <DataType>(
 	itemsValue: ReactiveValue<SnappedListItems<DataType>>,
 ): SnappedListControl<DataType> => {
 	const container = document.createElement('div');
@@ -26,7 +26,7 @@ const makeSnappedList = <DataType> (
 	scroller.classList.add('scroller');
 
 	const visibleIndex = MutableReactiveValue.fromInitialValue(0);
-	let observer: IntersectionObserver|null = null;
+	let observer: IntersectionObserver | null = null;
 
 	const makePageMarkers = () => {
 		const markerContainer = document.createElement('div');
@@ -38,7 +38,10 @@ const makeSnappedList = <DataType> (
 
 		const markers: HTMLElement[] = [];
 
-		const pairedItems = ReactiveValue.union<[number, SnappedListItems<DataType>]>([ visibleIndex, itemsValue ]);
+		const pairedItems = ReactiveValue.union<[number, SnappedListItems<DataType>]>([
+			visibleIndex,
+			itemsValue,
+		]);
 		pairedItems.onUpdateAndNow(([currentVisibleIndex, items]) => {
 			let addedOrRemovedMarkers = false;
 
@@ -49,7 +52,7 @@ const makeSnappedList = <DataType> (
 			}
 
 			let activeMarker;
-			for (let i = 0; i < items.length; i ++) {
+			for (let i = 0; i < items.length; i++) {
 				let marker;
 				if (i >= markers.length) {
 					marker = document.createElement('div');
@@ -76,7 +79,9 @@ const makeSnappedList = <DataType> (
 
 				const markerIndex = i;
 				marker.onclick = () => {
-					wrappedItems.get()[markerIndex]?.element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+					wrappedItems
+						.get()
+						[markerIndex]?.element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 				};
 			}
 
@@ -102,25 +107,28 @@ const makeSnappedList = <DataType> (
 	};
 
 	const createObserver = () => {
-		observer = new IntersectionObserver((entries) => {
-			for (const entry of entries) {
-				if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
-					const indexString = entry.target.getAttribute('data-item-index');
-					if (indexString === null) throw new Error('Could not find attribute data-item-index');
-					const index = Number(indexString);
+		observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
+						const indexString = entry.target.getAttribute('data-item-index');
+						if (indexString === null) throw new Error('Could not find attribute data-item-index');
+						const index = Number(indexString);
 
-					visibleIndex.set(index);
-					break;
+						visibleIndex.set(index);
+						break;
+					}
 				}
-			}
-		}, {
-			// Element to use as the boudning box with which to intersect.
-			// See https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
-			root: scroller,
+			},
+			{
+				// Element to use as the boudning box with which to intersect.
+				// See https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+				root: scroller,
 
-			// Fraction of an element that must be visible to trigger the callback:
-			threshold: 0.9,
-		});
+				// Fraction of an element that must be visible to trigger the callback:
+				threshold: 0.9,
+			},
+		);
 	};
 	const destroyObserver = () => {
 		if (observer) {
@@ -130,7 +138,7 @@ const makeSnappedList = <DataType> (
 		}
 	};
 
-	const wrappedItems = ReactiveValue.map(itemsValue, items => {
+	const wrappedItems = ReactiveValue.map(itemsValue, (items) => {
 		return items.map((item, index) => {
 			const wrapper = document.createElement('div');
 
@@ -148,7 +156,7 @@ const makeSnappedList = <DataType> (
 	});
 
 	const lastItems: SnappedListItems<DataType> = [];
-	wrappedItems.onUpdateAndNow(items => {
+	wrappedItems.onUpdateAndNow((items) => {
 		visibleIndex.set(-1);
 
 		for (const item of lastItems) {
@@ -183,7 +191,7 @@ const makeSnappedList = <DataType> (
 		}
 	});
 
-	const visibleItem = ReactiveValue.map(visibleIndex, index => {
+	const visibleItem = ReactiveValue.map(visibleIndex, (index) => {
 		const values = itemsValue.get();
 		if (0 <= index && index < values.length) {
 			return values[index].data;

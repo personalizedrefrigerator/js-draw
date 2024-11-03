@@ -21,17 +21,17 @@ export const defaultStationaryDetectionConfig: Config = {
 	minTimeSeconds: 0.5, // s
 };
 
-type OnStationaryCallback = (lastPointer: Pointer)=>void;
+type OnStationaryCallback = (lastPointer: Pointer) => void;
 
 export default class StationaryPenDetector {
 	// Stores the pointer of the last event or, if the pen hasn't moved
 	// significantly, the first pointer event, away from which the pen hasn't moved.
-	private stationaryStartPointer: Pointer|null;
+	private stationaryStartPointer: Pointer | null;
 	private lastPointer: Pointer;
 	private averageVelocity: Vec2;
 	private hasMovedOutOfRadius: boolean;
 
-	private timeout: ReturnType<typeof setTimeout>|null = null;
+	private timeout: ReturnType<typeof setTimeout> | null = null;
 
 	// Only handles one pen. As such, `startPointer` should be the same device/finger
 	// as `updatedPointer` in `onPointerMove`.
@@ -62,7 +62,9 @@ export default class StationaryPenDetector {
 
 		// dx: "Δx" Displacement from last.
 		const dxFromLast = currentPointer.screenPos.minus(this.lastPointer.screenPos);
-		const dxFromStationaryStart = currentPointer.screenPos.minus(this.stationaryStartPointer.screenPos);
+		const dxFromStationaryStart = currentPointer.screenPos.minus(
+			this.stationaryStartPointer.screenPos,
+		);
 
 		// dt: Delta time:
 		// /1000: Convert to s.
@@ -73,7 +75,7 @@ export default class StationaryPenDetector {
 			dtFromLast = 1;
 		}
 
-		const currentVelocity = dxFromLast.times(1/dtFromLast); // px/s
+		const currentVelocity = dxFromLast.times(1 / dtFromLast); // px/s
 
 		// Slight smoothing of the velocity to prevent input jitter from affecting the
 		// velocity too significantly.
@@ -86,9 +88,9 @@ export default class StationaryPenDetector {
 
 		// If not stationary
 		if (
-			movedOutOfRadius
-			|| this.averageVelocity.length() > this.config.maxSpeed
-			|| dtFromStart < this.config.minTimeSeconds
+			movedOutOfRadius ||
+			this.averageVelocity.length() > this.config.maxSpeed ||
+			dtFromStart < this.config.minTimeSeconds
 		) {
 			this.stationaryStartPointer = currentPointer;
 			this.lastPointer = currentPointer;

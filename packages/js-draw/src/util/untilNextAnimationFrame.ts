@@ -1,4 +1,3 @@
-
 /** @internal */
 const untilNextAnimationFrame = (): Promise<void> => {
 	return new Promise((resolve) => {

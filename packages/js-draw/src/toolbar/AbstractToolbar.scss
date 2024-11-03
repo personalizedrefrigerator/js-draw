@@ -1,4 +1,3 @@
-
 /* The *main* root toolbar element */
 .toolbar-root {
 	background-color: var(--background-color-1);
@@ -23,8 +22,10 @@
 	// multiple editors can be displayed).
 	z-index: 1;
 
-	font-family: system-ui, -apple-system, sans-serif;
-
+	font-family:
+		system-ui,
+		-apple-system,
+		sans-serif;
 
 	details > summary {
 		cursor: pointer;
@@ -50,7 +51,8 @@
 	cursor: unset;
 }
 
-.toolbar-button, .toolbar-element button {
+.toolbar-button,
+.toolbar-element button {
 	cursor: pointer;
 	text-align: center;
 	border-radius: 6px;
@@ -61,7 +63,10 @@
 	user-select: none;
 	-webkit-user-select: none;
 
-	transition: background-color 0.15s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+	transition:
+		background-color 0.15s ease,
+		box-shadow 0.25s ease,
+		opacity 0.2s ease;
 }
 
 .toolbar-button,
@@ -98,7 +103,8 @@
 	width: 6em;
 }
 
-.toolbar-button:not(.disabled):hover, .toolbar-root button:not(:disabled):hover {
+.toolbar-button:not(.disabled):hover,
+.toolbar-root button:not(:disabled):hover {
 	box-shadow: 0px 2px 4px var(--shadow-color);
 }
 
@@ -122,7 +128,9 @@
 	--icon-color: var(--selection-foreground-color);
 }
 
-.toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
+.toolbar-toolContainer:not(.selected):not(.dropdownShowable)
+	> .toolbar-button
+	> .toolbar-showHideDropdownIcon {
 	display: none;
 }
 
@@ -136,8 +144,7 @@
 }
 
 .toolbar-dropdown.hidden,
-.toolbar-toolContainer:not(.selected):not(.dropdownShowable)
-		> .toolbar-dropdown:not(.hiding) {
+.toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-dropdown:not(.hiding) {
 	display: none;
 }
 
@@ -174,7 +181,7 @@
 @keyframes dropdown-transition-out {
 	0% {
 		opacity: 1;
-		transform: scale(1, 1);	
+		transform: scale(1, 1);
 	}
 	100% {
 		opacity: 0;
@@ -207,7 +214,8 @@
 	}
 
 	/* ...and background color animation. */
-	:root .toolbar-button, .toolbar-root button {
+	:root .toolbar-button,
+	.toolbar-root button {
 		transition: none;
 	}
 }
@@ -222,7 +230,7 @@
 	color: var(--foreground-color-1);
 	font-weight: normal;
 
-	&[aria-checked=true] {
+	&[aria-checked='true'] {
 		background: var(--selection-background-color);
 		color: var(--selection-foreground-color);
 	}
