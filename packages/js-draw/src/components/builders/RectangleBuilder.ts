@@ -8,12 +8,24 @@ import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
+/**
+ * Creates filled rectangles with sharp corners.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeFilledRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new RectangleBuilder(initialPoint, true, viewport);
 	},
 );
 
+/**
+ * Creates outlined rectangles with sharp corners.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new RectangleBuilder(initialPoint, false, viewport);

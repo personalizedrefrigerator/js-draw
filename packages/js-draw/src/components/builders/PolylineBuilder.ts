@@ -17,8 +17,11 @@ import RenderingStyle from '../../rendering/RenderingStyle';
 import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
 /**
- * Creates strokes from line segments rather than Bézier curves.
+ * Creates a freehand line builder that creates strokes from line segments
+ * rather than Bézier curves.
  *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
  */
 export const makePolylineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {

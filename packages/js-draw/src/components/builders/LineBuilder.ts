@@ -8,6 +8,12 @@ import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
+/**
+ * Creates a stroke builder that generates filled lines.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeLineBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new LineBuilder(initialPoint, viewport);

@@ -9,6 +9,12 @@ import RenderingStyle from '../../rendering/RenderingStyle';
 import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
 import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
+/**
+ * Creates a stroke builder that draws freehand lines.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if

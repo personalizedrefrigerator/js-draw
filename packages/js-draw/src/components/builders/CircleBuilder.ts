@@ -8,6 +8,12 @@ import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
+/**
+ * Creates a stroke builder that generates outlined circles.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeOutlinedCircleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new CircleBuilder(initialPoint, viewport);
