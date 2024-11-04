@@ -144,10 +144,14 @@ export default class Display {
 
 		this.resizeSurfacesCallback = () => {
 			const expectedWidth = (canvas: HTMLCanvasElement): number => {
-				return Math.ceil(canvas.clientWidth * this.devicePixelRatio);
+				const widthInPixels = Math.ceil(canvas.clientWidth * this.devicePixelRatio);
+				// Avoid setting the canvas width to zero -- doing so can cause errors when attempting
+				// to use the canvas:
+				return widthInPixels || canvas.width;
 			};
 			const expectedHeight = (canvas: HTMLCanvasElement): number => {
-				return Math.ceil(canvas.clientHeight * this.devicePixelRatio);
+				const heightInPixels = Math.ceil(canvas.clientHeight * this.devicePixelRatio);
+				return heightInPixels || canvas.height; // Zero-size canvases can cause errors.
 			};
 
 			const hasSizeMismatch = (canvas: HTMLCanvasElement): boolean => {
