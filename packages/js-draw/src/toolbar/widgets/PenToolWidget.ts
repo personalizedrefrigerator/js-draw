@@ -208,16 +208,18 @@ export default class PenToolWidget extends BaseToolWidget {
 			};
 		});
 
+		const penItems = allChoices.filter((choice) => !choice.isShapeBuilder);
 		const penSelector = makeGridSelector(
 			this.localizationTable.selectPenType,
 			this.getCurrentPenTypeIdx(),
-			allChoices.filter((choice) => !choice.isShapeBuilder),
+			penItems,
 		);
 
+		const shapeItems = allChoices.filter((choice) => choice.isShapeBuilder);
 		const shapeSelector = makeGridSelector(
 			this.localizationTable.selectShape,
 			this.getCurrentPenTypeIdx(),
-			allChoices.filter((choice) => choice.isShapeBuilder),
+			shapeItems,
 		);
 
 		const onSelectorUpdate = (newPenTypeIndex: number) => {
@@ -244,8 +246,13 @@ export default class PenToolWidget extends BaseToolWidget {
 			},
 
 			addTo: (parent: HTMLElement) => {
-				penSelector.addTo(parent);
-				shapeSelector.addTo(parent);
+				if (penItems.length) {
+					penSelector.addTo(parent);
+				}
+
+				if (shapeItems.length) {
+					shapeSelector.addTo(parent);
+				}
 			},
 		};
 	}

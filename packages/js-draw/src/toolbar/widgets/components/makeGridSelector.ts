@@ -57,7 +57,7 @@ const makeGridSelector = <ChoiceIdType>(
 	stopPropagationOfScrollingWheelEvents(menuContainer);
 
 	const label = document.createElement('label');
-	label.innerText = labelText;
+	label.textContent = labelText;
 	label.htmlFor = menuContainer.id;
 	outerContainer.appendChild(label);
 
