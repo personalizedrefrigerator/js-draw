@@ -110,6 +110,15 @@ const addCodeMirrorEditor = (
 		changes: { from: 0, insert: initialText },
 	});
 
+	// Overrides the Typedoc search shortcut. Because the upstream shortcut uses the "keypress" event,
+	// we override the same event:
+	editor.dom.addEventListener('keypress', (event) => {
+		if (event.key === '/') {
+			// Prevent other event listeners from handling the event.
+			event.stopPropagation();
+		}
+	});
+
 	return {
 		getText() {
 			return editor.state.doc.toString();
