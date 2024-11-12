@@ -1,5 +1,3 @@
-# Additional documentation
-
 This directory contains additional documention like migration guides ([v0 $\to$ v1](./Additional_Documentation.MigratingToVersion1__.html))
 and examples.
 

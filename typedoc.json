@@ -1,10 +1,10 @@
 {
 	"entryPoints": [
+		"./docs/doc-pages/",
+
 		"./packages/js-draw",
 		"./packages/math",
-		"./packages/material-icons",
-
-		"./docs/doc-pages/"
+		"./packages/material-icons"
 	],
 	"entryPointStrategy": "packages",
 	"name": "js-draw",
@@ -17,13 +17,15 @@
 	"theme": "js-draw-theme",
 
 	"sidebarReplacements": {
-		"docs/doc-pages/typedoc": "More Documentation",
 		"packages/js-draw/src/lib": "js-draw - {{version}}",
 		"packages/math/src/lib": "@js-draw/math - {{version}}",
-		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}",
-		"MigratingToVersion1__": "Migrating to version 1",
-		"WritingATheme__": "Writing a theme",
-		"CustomizingTools__": "Customizing tools"
+		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}"
+	},
+
+	"redirects": {
+		"modules/Additional_Documentation.CustomizingTools__.html": "documents/Guides.Customizing_existing_tools.html",
+		"modules/Additional_Documentation.MigratingToVersion1__.html": "documents/Guides.Migrating_to_version_1.html",
+		"modules/Additional_Documentation.WritingATheme__.html": "documents/Guides.Writing_a_theme.html"
 	},
 
 	"excludePrivate": true,
@@ -31,7 +33,6 @@
 	"includeVersion": false,
 	"commentStyle": "all",
 
-	"readme": "README.md",
 	"tsconfig": "tsconfig-typedoc.json",
 
 	"validation": {

@@ -39,7 +39,7 @@
 		"lint-staged": "13.2.3",
 		"prettier": "3.3.3",
 		"ts-jest": "29.1.2",
-		"typedoc": "0.26.4",
+		"typedoc": "0.26.8",
 		"typescript": "5.5.4"
 	},
 	"packageManager": "yarn@4.2.2"

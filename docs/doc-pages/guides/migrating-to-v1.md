@@ -1,3 +1,8 @@
+---
+title: Migrating to version 1
+category: migrations
+---
+
 # Migrating to version 1
 
 Version 1 of the `js-draw` library introduces many new features and [several breaking changes](https://github.com/personalizedrefrigerator/js-draw/blob/main/CHANGELOG.md#100). This guide summarizes the breaking API changes and major UI adjustments.

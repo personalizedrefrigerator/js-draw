@@ -1,3 +1,8 @@
+---
+title: Customizing existing tools
+category: Guides
+---
+
 # Customizing existing tools
 
 ## Changing which tools are in the toolbar

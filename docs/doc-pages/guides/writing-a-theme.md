@@ -1,4 +1,9 @@
-# Writing a theme for `js-draw`
+---
+title: Writing a theme
+category: Guides
+---
+
+# Writing a theme
 
 `js-draw` derives its colors from a set of CSS variables. By default, these variables are automatically
 set based on whether the user's browser is in dark mode
@@ -101,3 +106,8 @@ makeEditor();
 
 Notice the `:root` prefix — this adds specificity to the selectors to ensure that they override
 the defaults.
+
+**See also**
+
+- **To auto-adjust theme colors to improve contrast:** {@link js-draw.adjustEditorThemeForContrast}
+- **To customize the icons used by `js-draw`**: {@link js-draw.IconProvider} and {@link "@js-draw/material-icons"}
