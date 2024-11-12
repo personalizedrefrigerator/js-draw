@@ -700,6 +700,7 @@ export default class SVGLoader implements ImageLoader {
 		const { svgElem, cleanUp } = (() => {
 			// If the user requested an iframe load (the default) try to load with an iframe.
 			// There are some cases (e.g. in a sandboxed iframe) where this doesn't work.
+			// TODO(v2): Use domParserLoad by default.
 			if (!domParserLoad) {
 				try {
 					const sandbox = document.createElement('iframe');
@@ -744,6 +745,7 @@ export default class SVGLoader implements ImageLoader {
 					sandboxDoc.close();
 
 					const svgElem = sandboxDoc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+					// eslint-disable-next-line no-unsanitized/property -- setting innerHTML in a sandboxed document.
 					svgElem.innerHTML = text;
 					sandboxDoc.body.appendChild(svgElem);
 

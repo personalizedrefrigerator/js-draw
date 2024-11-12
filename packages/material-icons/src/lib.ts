@@ -59,10 +59,18 @@ import Shapes from './icons/Shapes.svg';
 import Draw from './icons/Draw.svg';
 import InkPen from './icons/InkPen.svg';
 import ContentPaste from './icons/ContentPaste.svg';
+import { OpaqueIconType } from './types';
 
-const icon = (data: string) => {
+/**
+ * Converts an icon to an HTML element.
+ *
+ * This function accepts an "opaque" type to avoid unsafely creating icon DOM elements
+ * from untrusted strings.
+ */
+const icon = (data: OpaqueIconType) => {
 	const icon = document.createElement('div');
-	icon.innerHTML = data;
+	// eslint-disable-next-line no-unsanitized/property -- data must not be user-provided (enforced with a custom type).
+	icon.innerHTML = data as unknown as string;
 	return icon.childNodes[0] as SVGElement;
 };
 
@@ -139,7 +147,7 @@ class MaterialIconProvider extends IconProvider {
 		if (style.color.a < 1) {
 			const checkerboard = this.makeCheckerboardPattern();
 			const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-			defs.innerHTML = checkerboard.patternDef;
+			defs.appendChild(checkerboard.patternDefElement());
 			svg.appendChild(defs);
 
 			const lineBackground = line.cloneNode() as SVGPathElement;

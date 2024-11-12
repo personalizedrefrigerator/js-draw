@@ -1108,6 +1108,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:8.4.0"
     eslint: "npm:8.57.0"
     eslint-config-prettier: "npm:9.1.0"
+    eslint-plugin-no-unsanitized: "npm:4.1.2"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
     jsdom: "npm:25.0.0"
@@ -4094,6 +4095,15 @@ __metadata:
   bin:
     eslint-config-prettier: bin/cli.js
   checksum: 10c0/6d332694b36bc9ac6fdb18d3ca2f6ac42afa2ad61f0493e89226950a7091e38981b66bac2b47ba39d15b73fff2cd32c78b850a9cf9eed9ca9a96bfb2f3a2f10d
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-no-unsanitized@npm:4.1.2":
+  version: 4.1.2
+  resolution: "eslint-plugin-no-unsanitized@npm:4.1.2"
+  peerDependencies:
+    eslint: ^8 || ^9
+  checksum: 10c0/c62bbfc02e8a73adc7ff9fdbbf8131a2a843eaebc6e8eb5f311c4db8a641bb46535bd066052857c7daea6c6d2a6c38bec66e06ad5704319083a1e2c467e71a4a
   languageName: node
   linkType: hard
 

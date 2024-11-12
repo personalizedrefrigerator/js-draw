@@ -35,7 +35,9 @@ const convertIcons = async () => {
 				// modified to set the fill of the icon.
 				// The icon was downloaded from https://fonts.google.com/icons
 
-				export const ${iconName} = ${JSON.stringify(updatedIcon)};
+				import { OpaqueIconType } from '../types';
+
+				export const ${iconName} = ${JSON.stringify(updatedIcon)} as unknown as OpaqueIconType;
 				export default ${iconName};
 			`,
 				);
