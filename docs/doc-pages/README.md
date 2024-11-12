@@ -1,5 +1,5 @@
-This directory contains additional documention like migration guides ([v0 $\to$ v1](./Additional_Documentation.MigratingToVersion1__.html))
-and examples.
+This folder contains additional documention for `js-draw`, including like migration guides and examples that describe how to use specific features.
 
-Additional examples can be found in the [examples/](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples) directory on GitHub
-as well as in `js-draw`'s [`README`](../).
+Before reading these guides, it may be helpful to review the examples in `js-draw`'s [`README`](../).
+
+Additional examples can be found in the [examples/](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples) directory on GitHub. A directory of all inline runnable examples in the documentation can be found at [assets/doctest.html](/typedoc/assets/doctest.html).

@@ -22,6 +22,12 @@ export interface PenStyle {
 	readonly factory: ComponentBuilderFactory;
 }
 
+/**
+ * A tool that allows drawing shapes and freehand lines.
+ *
+ * To change the type of shape drawn by the pen (e.g. to switch to the rectangle
+ * pen type), see {@link setStrokeFactory}.
+ */
 export default class Pen extends BaseTool {
 	protected builder: ComponentBuilder | null = null;
 	private lastPoint: StrokeDataPoint | null = null;
@@ -309,6 +315,13 @@ export default class Pen extends BaseTool {
 		}
 	}
 
+	/**
+	 * Changes the type of stroke created by the pen. The given `factory` can be one of the built-in
+	 * stroke factories (e.g. {@link makeFreehandLineBuilder}) or a custom stroke factory.
+	 *
+	 * Example:
+	 * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+	 */
 	public setStrokeFactory(factory: ComponentBuilderFactory) {
 		if (factory !== this.style.factory) {
 			this.styleValue.set({
