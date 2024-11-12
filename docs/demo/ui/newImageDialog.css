@@ -14,7 +14,11 @@
 }
 
 .new-image-template-button .icon {
-	width: 95%;
+	width: 300px;
+	height: 150px;
+
+	object-position: left top;
+	object-fit: none; /* Do not resize to fit container */
 }
 
 .new-image-template-button:hover {

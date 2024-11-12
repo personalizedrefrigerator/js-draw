@@ -87,10 +87,11 @@ const makeNewImageDialog = (
 		const templateButton = document.createElement('button');
 		templateButton.classList.add('new-image-template-button');
 
-		const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-		icon.innerHTML = svgData;
+		const icon = new Image();
+		icon.classList.add('icon');
+		icon.src = `data:image/svg+xml;utf8,${encodeURIComponent(svgData)}`;
 		const label = document.createElement('div');
-		label.innerText = title;
+		label.textContent = title;
 
 		templateButton.onclick = () => {
 			closeDialogWithStringResult(svgData);

@@ -71,7 +71,9 @@ export default class SVGRenderer extends AbstractRenderer {
 		if (!this.elem.querySelector(`#${renderedStylesheetId}`)) {
 			// Default to rounded strokes.
 			const styleSheet = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-			styleSheet.innerHTML = `
+			styleSheet.appendChild(
+				document.createTextNode(
+					`
 				path {
 					stroke-linecap: round;
 					stroke-linejoin: round;
@@ -80,7 +82,9 @@ export default class SVGRenderer extends AbstractRenderer {
 				text {
 					white-space: pre;
 				}
-			`.replace(/\s+/g, '');
+			`.replace(/\s+/g, ''),
+				),
+			);
 			styleSheet.setAttribute('id', renderedStylesheetId);
 			this.elem.appendChild(styleSheet);
 		}
