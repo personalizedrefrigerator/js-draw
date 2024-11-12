@@ -1,14 +1,14 @@
 # 1.22.0
 
 - Features
-   - Improved copy/paste error handling. If copy/paste from a UI button with the clipboard API fails, `js-draw` now attempts to use `document.execCommand`. Additionally, if `document.execCommand` fails, a section that allows manually copying images has been added to the error dialog.
-   - Make rectangle, line, and arrow shape builders public. This allows selecting all built-in pen styles programmaticly.
-   - Increased selection popover menu button size.
+  - Improved copy/paste error handling. If copy/paste from a UI button with the clipboard API fails, `js-draw` now attempts to use `document.execCommand`. Additionally, if `document.execCommand` fails, a section that allows manually copying images has been added to the error dialog.
+  - Make rectangle, line, and arrow shape builders public. This allows selecting all built-in pen styles programmaticly.
+  - Increased selection popover menu button size.
 - Bug fixes
-   - Pen tool menu: Hide "shape" or "pen type" selectors when they lack content.
-   - Fix error when calling .flatten on a canvas-backed Display immediately after creating an editor.
+  - Pen tool menu: Hide "shape" or "pen type" selectors when they lack content.
+  - Fix error when calling .flatten on a canvas-backed Display immediately after creating an editor.
 - Other changes
-   - Formatted the `js-draw` codebase with `prettier`.
+  - Formatted the `js-draw` codebase with `prettier`.
 
 # 1.21.3
 
