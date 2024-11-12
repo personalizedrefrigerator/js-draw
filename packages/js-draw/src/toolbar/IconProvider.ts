@@ -962,6 +962,9 @@ export default class IconProvider {
 	 * @returns An object with both the definition of a checkerboard pattern and the syntax to
 	 * reference that pattern. The defs provided by this function should be wrapped within a
 	 * `<defs></defs>` element.
+	 *
+	 * **Note**: This function's return value includes both `patternDefElement` (which returns
+	 * an Element) and a (deprecated) `patternDef` string. Avoid using the `patternDef` result.
 	 */
 	protected makeCheckerboardPattern() {
 		return makeCheckerboardPattern();
