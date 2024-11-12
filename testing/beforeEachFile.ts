@@ -1,9 +1,11 @@
+// This file contains polyfills and must assume that built-in types are incorrect.
+/* eslint @typescript-eslint/no-unnecessary-condition: "off" */
+
 import loadExpectExtensions from './loadExpectExtensions';
 loadExpectExtensions();
 jest.useFakeTimers();
 
-// This file contains polyfills and must assume that built-in types are incorrect.
-// eslint-disable @typescript-eslint/no-unnecessary-condition
+
 
 // jsdom hides several node APIs that should be present in the browser.
 import { TextEncoder, TextDecoder } from 'node:util';
@@ -19,8 +21,6 @@ HTMLCanvasElement.prototype.getContext = () => null;
 
 // jsdom also doesn't support ResizeObserver. Mock it.
 window.ResizeObserver ??= class {
-	public constructor(_callback: ResizeObserverCallback) {}
-
 	public disconnect() {}
 
 	public observe() {}

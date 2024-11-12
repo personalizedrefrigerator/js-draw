@@ -17,7 +17,7 @@ export const loadExpectExtensions = () => {
 			return {
 				pass,
 				message: () => {
-					return `Expected ${pass ? '!' : ''}(${actual}).eq(${expected}). Options(${eqArgs})`;
+					return `Expected ${pass ? '!' : ''}(${actual as unknown}).eq(${expected}). Options(${eqArgs})`;
 				},
 			};
 		},

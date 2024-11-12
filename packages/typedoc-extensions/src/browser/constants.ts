@@ -1,3 +1,11 @@
-export const basePath: string = (window as any).basePath;
-export const assetsPath: string = (window as any).assetsURL;
-export const imagesPath: string = (window as any).imagesURL;
+interface ExtendedWindow extends Window {
+	basePath: string;
+	assetsURL: string;
+	imagesURL: string;
+}
+
+declare const window: ExtendedWindow;
+
+export const basePath: string = window.basePath;
+export const assetsPath: string = window.assetsURL;
+export const imagesPath: string = window.imagesURL;
