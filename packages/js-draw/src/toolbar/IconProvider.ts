@@ -16,28 +16,26 @@ const svgNamespace = 'http://www.w3.org/2000/svg';
 let checkerboardIdCounter = 0;
 const makeCheckerboardPattern = () => {
 	const id = `checkerboard-${checkerboardIdCounter++}`;
-	const patternDef = `
-		<pattern
-			id='${id}'
-			viewBox='0,0,10,10'
-			width='20%'
-			height='20%'
-			patternUnits='userSpaceOnUse'
-		>
-			<rect x='0' y='0' width='10' height='10' fill='white'/>
-			<rect x='0' y='0' width='5' height='5' fill='gray'/>
-			<rect x='5' y='5' width='5' height='5' fill='gray'/>
-		</pattern>
-	`;
+	const patternElement = createSvgElement('pattern', {
+		id: id,
+		viewBox: '0,0,10,10',
+		width: '20%',
+		height: '20%',
+		patternUnits: 'userSpaceOnUse',
+		children: createSvgElements('rect', [
+			{ x: 0, y: 0, width: 10, height: 10, fill: 'white' },
+			{ x: 0, y: 0, width: 5, height: 5, fill: 'gray' },
+			{ x: 5, y: 5, width: 5, height: 5, fill: 'gray' },
+		]),
+	});
 	const patternRef = `url(#${id})`;
 
 	return {
-		patternDefElement: (): SVGElement => {
-			const element = new DOMParser().parseFromString(patternDef, 'image/svg+xml');
-			return element.firstChild as SVGElement;
-		},
+		patternDefElement: patternElement as SVGElement,
 		// @deprecated use patternDefElement
-		patternDef,
+		get patternDef() {
+			return patternElement.innerHTML;
+		},
 		patternRef,
 	};
 };
@@ -572,7 +570,7 @@ export default class IconProvider {
 			children: [ink, penTip, grip].flat(),
 		});
 		const defs = createSvgElement('defs', {
-			children: [checkerboardPattern.patternDefElement()],
+			children: [checkerboardPattern.patternDefElement],
 		});
 
 		icon.replaceChildren(defs, iconMainContent);
@@ -614,7 +612,7 @@ export default class IconProvider {
 			const checkerboardPattern = makeCheckerboardPattern();
 
 			const defs = document.createElementNS(svgNamespace, 'defs');
-			defs.appendChild(checkerboardPattern.patternDefElement());
+			defs.appendChild(checkerboardPattern.patternDefElement);
 			icon.appendChild(defs);
 
 			const background = document.createElementNS(svgNamespace, 'g');
@@ -702,7 +700,7 @@ export default class IconProvider {
 			const checkerboardPattern = makeCheckerboardPattern();
 
 			const defs = document.createElementNS(svgNamespace, 'defs');
-			defs.appendChild(checkerboardPattern.patternDefElement());
+			defs.appendChild(checkerboardPattern.patternDefElement);
 			icon.appendChild(defs);
 
 			const fluidBackground = document.createElementNS(svgNamespace, 'path');

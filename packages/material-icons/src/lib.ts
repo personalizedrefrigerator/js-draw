@@ -147,7 +147,7 @@ class MaterialIconProvider extends IconProvider {
 		if (style.color.a < 1) {
 			const checkerboard = this.makeCheckerboardPattern();
 			const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-			defs.appendChild(checkerboard.patternDefElement());
+			defs.appendChild(checkerboard.patternDefElement);
 			svg.appendChild(defs);
 
 			const lineBackground = line.cloneNode() as SVGPathElement;
