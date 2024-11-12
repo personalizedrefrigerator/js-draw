@@ -1,5 +1,9 @@
 type ElementTagNames = keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap;
 
+/**
+ * Maps from known elment tag names to options that can be set with .setAttribute.
+ * New elements/properties should be added as necessary.
+ */
 interface ElementToPropertiesMap {
 	path: {
 		d: string;
@@ -29,11 +33,16 @@ type ElementProperties<Tag extends ElementTagNames> = Tag extends keyof ElementT
 	? Partial<ElementToPropertiesMap[Tag]>
 	: EmptyObject;
 
+/** Contains options for creating an element with tag = `Tag`. */
 type ElementConfig<Tag extends ElementTagNames> = ElementProperties<Tag> & {
 	id?: string;
 	children?: (HTMLElement | SVGElement)[];
 };
 
+/**
+ * Maps from element tag names (e.g. `Tag='button'`) to the corresponding element type
+ * (e.g. `HTMLButtonElement`).
+ */
 type ElementTagToType<Tag extends ElementTagNames> = Tag extends keyof HTMLElementTagNameMap
 	? HTMLElementTagNameMap[Tag]
 	: Tag extends keyof SVGElementTagNameMap
@@ -45,6 +54,12 @@ export enum ElementNamespace {
 	Svg = 'svg',
 }
 
+/**
+ * Shorthand for creating an element with `document.createElement`, then assigning properties.
+ *
+ * Non-HTML elements (e.g. `svg` elements) should use the `elementType` parameter to select
+ * the element namespace.
+ */
 const createElement = <Tag extends ElementTagNames>(
 	tag: Tag,
 	props: ElementConfig<Tag>,
@@ -80,7 +95,9 @@ const createElement = <Tag extends ElementTagNames>(
 export const createSvgElement = <Tag extends keyof SVGElementTagNameMap>(
 	tag: Tag,
 	props: ElementConfig<Tag>,
-) => createElement(tag, props, ElementNamespace.Svg);
+) => {
+	return createElement(tag, props, ElementNamespace.Svg);
+};
 
 export const createSvgElements = <Tag extends keyof SVGElementTagNameMap>(
 	tag: Tag,
