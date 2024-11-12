@@ -101,12 +101,9 @@ const loadRendererHooks = (renderer: Renderer, options: Options) => {
 	const buildRedirects = (outputBaseDir: string) => {
 		const redirects = options.getValue('redirects') as Record<string, string>;
 		for (const [fromPath, toPath] of Object.entries(redirects)) {
-			let targetPath = posixPath.join('/', toPath);
-
-			const relativeToRoot = posixPath.relative(posixPath.dirname(toPath), '/');
-			targetPath = posixPath.join(relativeToRoot, toPath);
-
+			const targetPath = posixPath.relative(posixPath.dirname(fromPath), toPath);
 			const linkTargetHtml = htmlEscape(targetPath);
+
 			const redirectPageContent = `
 				<!DOCTYPE html>
 				<html>
