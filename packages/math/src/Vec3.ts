@@ -168,7 +168,7 @@ export interface Vec3 {
 	asArray(): [number, number, number];
 
 	/**
-	 * [fuzz] The maximum difference between two components for this and [other]
+	 * @param tolerance The maximum difference between two components for this and [other]
 	 * to be considered equal.
 	 *
 	 * @example
