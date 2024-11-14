@@ -4,14 +4,34 @@ import BezierJSWrapper from './BezierJSWrapper';
 import Rect2 from './Rect2';
 
 /**
- * Represents a 2D Bézier curve.
+ * Represents a 2D [Bézier curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve).
  *
- * **Note**: Many Bézier operations use `bezier-js`'s.
+ * Example:
+ * ```ts,runnable,console
+ * import { QuadraticBezier, Vec2 } from '@js-draw/math';
+ *
+ * const startPoint = Vec2.of(4, 3);
+ * const controlPoint = Vec2.of(1, 1);
+ * const endPoint = Vec2.of(1, 3);
+ *
+ * const curve = new QuadraticBezier(
+ *   startPoint,
+ *   controlPoint,
+ *   endPoint,
+ * );
+ *
+ * console.log('Curve:', curve);
+ * ```
+ *
+ * **Note**: Some Bézier operations internally use the `bezier-js` library.
  */
 export class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
+		// Start point
 		public readonly p0: Point2,
+		// Control point
 		public readonly p1: Point2,
+		// End point
 		public readonly p2: Point2,
 	) {
 		super();

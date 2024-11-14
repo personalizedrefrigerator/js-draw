@@ -39,7 +39,7 @@ describe('Mat33 tests', () => {
 		expect(M.inverse().rightMul(M)).objEq(Mat33.identity, fuzz);
 	});
 
-	it('90 degree z-rotation matricies should rotate 90 degrees counter clockwise', () => {
+	it('90 degree z-rotation matrices should rotate 90 degrees counter clockwise', () => {
 		const fuzz = 0.001;
 
 		const M = Mat33.zRotation(Math.PI / 2);
@@ -48,7 +48,7 @@ describe('Mat33 tests', () => {
 		expect(M.transformVec2(rotated)).objEq(Vec2.unitX.times(-1), fuzz);
 	});
 
-	it('z-rotation matricies should preserve the given origin', () => {
+	it('z-rotation matrices should preserve the given origin', () => {
 		const testPairs: Array<[number, Vec2]> = [
 			[Math.PI / 2, Vec2.zero],
 			[-Math.PI / 2, Vec2.zero],
@@ -60,7 +60,7 @@ describe('Mat33 tests', () => {
 		}
 	});
 
-	it('translation matricies should translate Vec2s', () => {
+	it('translation matrices should translate Vec2s', () => {
 		const fuzz = 0.01;
 
 		const M = Mat33.translation(Vec2.of(1, -4));
@@ -68,7 +68,7 @@ describe('Mat33 tests', () => {
 		expect(M.transformVec2(Vec2.of(-1, 3))).objEq(Vec2.of(0, -1), fuzz);
 	});
 
-	it('scaling matricies should scale about the provided center', () => {
+	it('scaling matrices should scale about the provided center', () => {
 		const fuzz = 0.01;
 
 		const center = Vec2.of(1, -4);
@@ -77,14 +77,14 @@ describe('Mat33 tests', () => {
 		expect(M.transformVec2(Vec2.of(0, 0))).objEq(Vec2.of(-1, 4), fuzz);
 	});
 
-	it('calling inverse on singular matricies should result in the identity matrix', () => {
+	it('calling inverse on singular matrices should result in the identity matrix', () => {
 		const fuzz = 0.001;
 		const singularMat = Mat33.ofRows(Vec3.of(0, 0, 1), Vec3.of(0, 1, 0), Vec3.of(0, 1, 1));
 		expect(singularMat.invertable()).toBe(false);
 		expect(singularMat.inverse()).objEq(Mat33.identity, fuzz);
 	});
 
-	it('z-rotation matricies should be invertable', () => {
+	it('z-rotation matrices should be invertable', () => {
 		const fuzz = 0.01;
 		const M = Mat33.zRotation(-0.2617993877991494, Vec2.of(481, 329.5));
 		expect(M.inverse().transformVec2(M.transformVec2(Vec2.unitX))).objEq(Vec2.unitX, fuzz);

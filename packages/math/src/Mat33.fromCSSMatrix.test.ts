@@ -2,7 +2,7 @@ import Mat33 from './Mat33';
 import { Vec2 } from './Vec2';
 
 describe('Mat33.fromCSSMatrix', () => {
-	it('should convert CSS matrix(...) strings to matricies', () => {
+	it('should convert CSS matrix(...) strings to matrices', () => {
 		// From MDN:
 		// 		⎡ a c e ⎤
 		// 		⎢ b d f ⎥  =  matrix(a,b,c,d,e,f)

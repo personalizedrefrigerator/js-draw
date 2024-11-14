@@ -1,4 +1,7 @@
 /**
+ * This package contains general math utilities used by `js-draw`.
+ * These include 2D and 3D vectors, 2D paths, and 3x3 matrices.
+ *
  * ```ts,runnable,console
  * import { Vec2, Mat33, Rect2 } from '@js-draw/math';
  *

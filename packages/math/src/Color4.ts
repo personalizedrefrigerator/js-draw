@@ -37,6 +37,10 @@ export class Color4 {
 		return Color4.ofRGBA(red, green, blue, 1.0);
 	}
 
+	/**
+	 * Creates a color from red, green, blue, and transparency components. Each component should
+	 * be in the range $[0, 1]$.
+	 */
 	public static ofRGBA(red: number, green: number, blue: number, alpha: number): Color4 {
 		red = Math.max(0, Math.min(red, 1));
 		green = Math.max(0, Math.min(green, 1));
@@ -46,6 +50,16 @@ export class Color4 {
 		return new Color4(red, green, blue, alpha);
 	}
 
+	/**
+	 * Creates a `Color4` from a three or four-component hexadecimal
+	 * [color string](https://en.wikipedia.org/wiki/Web_colors#Hex_triplet).
+	 *
+	 * Example:
+	 * ```ts,runnable,console
+	 * import { Color4 } from '@js-draw/math';
+	 * console.log(Color4.fromHex('#ff0'));
+	 * ```
+	 */
 	public static fromHex(hexString: string): Color4 {
 		// Remove starting '#' (if present)
 		hexString = (hexString.match(/^[#]?(.*)$/) ?? [])[1];
@@ -82,7 +96,7 @@ export class Color4 {
 		return Color4.ofRGBA(components[0], components[1], components[2], components[3]);
 	}
 
-	/** Like fromHex, but can handle additional colors if an `HTMLCanvasElement` is available. */
+	/** Like {@link fromHex}, but can handle additional colors if an `HTMLCanvasElement` is available. */
 	public static fromString(text: string): Color4 {
 		if (text.startsWith('#')) {
 			return Color4.fromHex(text);

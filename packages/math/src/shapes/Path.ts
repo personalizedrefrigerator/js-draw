@@ -11,6 +11,7 @@ import Parameterized2DShape from './Parameterized2DShape';
 import BezierJSWrapper from './BezierJSWrapper';
 import convexHull2Of from '../utils/convexHull2Of';
 
+/** Identifiers for different path commands. These commands can make up a {@link Path}. */
 export enum PathCommandType {
 	LineTo,
 	MoveTo,
