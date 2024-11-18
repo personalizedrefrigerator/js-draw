@@ -89,6 +89,8 @@ editor.dispatch(
 );
 ```
 
+### Update loop: First try
+
 Next, let's move the viewport in a loop:
 
 ```ts,runnable
@@ -110,4 +112,59 @@ function update() {
 update();
 ```
 
-Above, the `Vec2.of(-1, 0)` gives the direction to move the viewport. Try replacing it with `Vec2.of(0, 1)`!
+Above, the `Vec2.of(-1, 0)` gives the direction to move the viewport.
+
+**Things to try**:
+
+- Try replacing `Vec2.of(-1, 0)` with `Vec2.of(0, 1)`. How is the viewport updated?
+- Instead of moving left, change the code above to zoom out.
+- Change the code above to both move left **and** zoom out.
+  - _Hint:_ Either call `.apply` twice or use {@link @js-draw/math!Mat33.rightMul | Mat33.rightMul} to combine the two transformations.
+
+### Update loop: Second try
+
+The above update loop has a problem — on some devices, the viewport moves faster than on others.
+
+To fix this, we determine the time elapsed between each animation frame and use this to **scale** the position change:
+
+```ts,runnable
+import { Editor } from 'js-draw';
+import { Color4, BackgroundComponentBackgroundType } from 'js-draw';
+
+const editor = new Editor(document.body);
+editor.addToolbar();
+
+editor.dispatch(
+  editor.setBackgroundStyle({
+    color: Color4.orange,
+    type: BackgroundComponentBackgroundType.Grid,
+	autoresize: true,
+  }),
+);
+
+---visible---
+import { Viewport } from 'js-draw';
+import { Mat33, Vec2 } from '@js-draw/math';
+
+let lastTime = performance.now();
+function update() {
+	// Get how long many milliseconds have elapsed since the last update.
+	const nowTime = performance.now();
+	const millisecondsElapsed = nowTime - lastTime;
+	const seconds = millisecondsElapsed / 1000;
+	lastTime = nowTime;
+
+	const moveLeftRate = -10; // units/second
+	const moveLeftAmount = Vec2.of(moveLeftRate * seconds, 0);
+	const moveLeftUpdate = Mat33.translation(moveLeftAmount);
+	const moveLeftCommand = Viewport.transformBy(
+		moveLeftUpdate
+	);
+	moveLeftCommand.apply(editor);
+
+	requestAnimationFrame(update);
+}
+update();
+```
+
+See also [the MDN documentation for `requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame#examples).
