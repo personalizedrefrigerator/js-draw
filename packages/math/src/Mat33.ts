@@ -440,6 +440,26 @@ export class Mat33 {
 		return new Mat33(1, 0, amount.x, 0, 1, amount.y, 0, 0, 1);
 	}
 
+	/**
+	 * Creates a matrix for rotating `Vec2`s about `center` by some number of `radians`.
+	 *
+	 * For this function, {@link Vec2}s are considered to be points in 2D space.
+	 *
+	 * For example,
+	 * ```ts,runnable,console
+	 * import { Mat33, Vec2 } from '@js-draw/math';
+	 *
+	 * const halfCircle = Math.PI; // PI radians = 180 degrees = 1/2 circle
+	 * const center = Vec2.of(1, 1); // The point (1,1)
+	 * const rotationMatrix = Mat33.zRotation(halfCircle, center);
+	 *
+	 * console.log(
+	 *   'Rotating (0,0) 180deg about', center, 'results in',
+	 *   // Rotates (0,0)
+	 *   rotationMatrix.transformVec2(Vec2.zero),
+	 * );
+	 * ```
+	 */
 	public static zRotation(radians: number, center: Point2 = Vec2.zero): Mat33 {
 		if (radians === 0) {
 			return Mat33.identity;
