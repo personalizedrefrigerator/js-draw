@@ -25,13 +25,13 @@
 		"typedoc": "0.26.x"
 	},
 	"devDependencies": {
-		"@codemirror/lang-css": "6.2.1",
+		"@codemirror/lang-css": "6.3.0",
 		"@codemirror/lang-javascript": "6.2.2",
-		"@codemirror/language": "6.10.2",
+		"@codemirror/language": "6.10.3",
 		"@js-draw/build-tool": "^1.22.0",
 		"@js-draw/material-icons": "^1.22.0",
 		"@js-draw/math": "^1.22.0",
-		"@lezer/highlight": "1.2.0",
+		"@lezer/highlight": "1.2.1",
 		"@types/katex": "0.16.7",
 		"@types/react": "18.3.3",
 		"codemirror": "6.0.1",
