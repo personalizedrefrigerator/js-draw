@@ -75,7 +75,7 @@ const icon = (data: OpaqueIconType) => {
 };
 
 /**
- * An {@link IconProvider} that uses [material icons](https://github.com/google/material-design-icons).
+ * An {@link js-draw!IconProvider} that uses [material icons](https://github.com/google/material-design-icons).
  */
 class MaterialIconProvider extends IconProvider {
 	public override makeUndoIcon(): IconElemType {

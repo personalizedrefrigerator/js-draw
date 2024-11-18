@@ -5,12 +5,12 @@ category: Guides
 
 # Updating the editor's viewport
 
-This guide demonstrates changing which part of an image is visible in an {@link Editor}.
+This guide demonstrates changing which part of an image is visible in an {@link js-draw!Editor | Editor}.
 
 Related APIs:
 
-- {@link Viewport.transformBy}: Creates a `Command` that moves/zooms/rotates the viewport.
-- {@link Editor.dispatch}: Applies a `Command`.
+- {@link js-draw!Viewport.transformBy | Viewport.transformBy}: Creates a `Command` that moves/zooms/rotates the viewport.
+- {@link js-draw!Editor.dispatch | Editor.dispatch}: Applies a `Command`.
 - {@link @js-draw/math!Mat33 | Mat33}: Can be used to tell `Viewport.transformBy` **how** to move/scale/rotate.
   - For example, `Mat33.scaling2D(2)` zooms in by a factor of 2.
 
@@ -56,7 +56,7 @@ editor.dispatch(command, false); // false: Don't add to history
 // command.apply(editor);
 ```
 
-See also {@link Editor.dispatchNoAnnounce}.
+See also {@link js-draw!Editor.dispatchNoAnnounce | Editor.dispatchNoAnnounce}.
 
 ## Example: Moving left
 
