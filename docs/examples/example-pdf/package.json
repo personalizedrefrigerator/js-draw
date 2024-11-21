@@ -6,8 +6,7 @@
 	"license": "AGPL-3.0-only",
 	"private": true,
 	"scripts": {
-		"bundle": "ts-node scripts/bundle.ts",
-		"watchBundle": "ts-node scripts/watchBundle.ts",
+		"build": "build-tool build",
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
