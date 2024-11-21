@@ -21,7 +21,7 @@ export enum AnnotationType {
 }
 
 export interface TextContentsType {
-	readonly direction: 'ltr'|'rtl';
+	readonly direction: 'ltr' | 'rtl';
 	readonly text: string;
 }
 
@@ -35,17 +35,21 @@ export interface AnnotationAPIWrapper {
 	readonly type: AnnotationType;
 	readonly bbox: Rect2;
 	readonly inkList: Point2[][];
-	readonly color: Color4|undefined;
+	readonly color: Color4 | undefined;
 	readonly borderWidth: number;
 	readonly rotate: number;
-	readonly contents: TextContentsType|undefined;
-	readonly fontAppearance: FontAppearance|undefined;
-	readonly id: string|undefined;
+	readonly contents: TextContentsType | undefined;
+	readonly fontAppearance: FontAppearance | undefined;
+	readonly id: string | undefined;
 }
 
 export interface PageAPIWrapper {
 	getBBox(): Promise<Rect2>;
-	toImagelike(visibleRect: Rect2, scale: number, showAnnotations: boolean): Promise<ImageBitmap|HTMLImageElement|HTMLCanvasElement|OffscreenCanvas>;
+	toImagelike(
+		visibleRect: Rect2,
+		scale: number,
+		showAnnotations: boolean,
+	): Promise<ImageBitmap | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas>;
 	getAnnotations(): Promise<AnnotationAPIWrapper[]>;
 
 	/**

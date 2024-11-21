@@ -1,4 +1,22 @@
-import { Color4, TextComponent, TextRenderingStyle, AbstractComponent, AbstractRenderer, CanvasRenderer, Mat33, Path, Rect2, StrokeComponent, Vec2, Viewport, PathCommand, PathCommandType, pathToRenderable, EditorImage, Point2, } from 'js-draw';
+import {
+	Color4,
+	TextComponent,
+	TextRenderingStyle,
+	AbstractComponent,
+	AbstractRenderer,
+	CanvasRenderer,
+	Mat33,
+	Path,
+	Rect2,
+	StrokeComponent,
+	Vec2,
+	Viewport,
+	PathCommand,
+	PathCommandType,
+	pathToRenderable,
+	EditorImage,
+	Point2,
+} from 'js-draw';
 import APIWrapper, { AnnotationAPIWrapper, AnnotationType, PageAPIWrapper } from './APIWrapper';
 
 interface PDFPage {
@@ -55,7 +73,7 @@ class PDFDocumentWrapper {
 	/** References to each page */
 	private pages: PDFPage[] = [];
 
-	private pageLoadListeners: Array<()=>void> = [];
+	private pageLoadListeners: Array<() => void> = [];
 
 	private constructor(private pdf: APIWrapper) {
 		this.loadPages();
@@ -104,7 +122,7 @@ class PDFDocumentWrapper {
 			this.bbox = this.bbox.union(pageRect);
 		}
 
-		this.pageLoadListeners.forEach(listener => listener());
+		this.pageLoadListeners.forEach((listener) => listener());
 		this.pageLoadListeners = [];
 		this.geometryLoaded = true;
 	}
@@ -119,11 +137,11 @@ class PDFDocumentWrapper {
 		let rendered = false;
 		let rendering = false;
 
-		let awaitingRenderComplete: Array<()=>void> = [];
+		let awaitingRenderComplete: Array<() => void> = [];
 
 		const canvasRenderer = new CanvasRenderer(ctx, new Viewport(() => {}));
 
-		const shouldRerender = (newScale: number) => 1 - newScale/lastScale < -0.25;
+		const shouldRerender = (newScale: number) => 1 - newScale / lastScale < -0.25;
 		const clampScale = (scale: number) => Math.max(0.2, Math.min(5, scale));
 
 		const result = {
@@ -136,7 +154,9 @@ class PDFDocumentWrapper {
 				}
 
 				// Translate the bounding box such that the PDF is drawn in the correct location
-				const transform = Mat33.translation(pageBBox.topLeft).rightMul(Mat33.scaling2D(1/lastScale));
+				const transform = Mat33.translation(pageBBox.topLeft).rightMul(
+					Mat33.scaling2D(1 / lastScale),
+				);
 
 				if (renderer.canRenderFromWithoutDataLoss(canvasRenderer)) {
 					renderer.renderFromOtherOfSameType(transform, canvasRenderer);
@@ -175,7 +195,7 @@ class PDFDocumentWrapper {
 				ctx.drawImage(renderedPage, 0, 0, canvas.width, canvas.height);
 
 				rendered = true;
-				awaitingRenderComplete.forEach(listener => listener());
+				awaitingRenderComplete.forEach((listener) => listener());
 				awaitingRenderComplete = [];
 
 				rendering = false;
@@ -200,7 +220,9 @@ class PDFDocumentWrapper {
 
 					if (annotationType === AnnotationType.Ink) {
 						const inkList = annotation.inkList;
-						const transform = Mat33.translation(Vec2.of(0, pageBBox.topLeft.y)).rightMul(Mat33.scaling2D(Vec2.of(1, 1)));
+						const transform = Mat33.translation(Vec2.of(0, pageBBox.topLeft.y)).rightMul(
+							Mat33.scaling2D(Vec2.of(1, 1)),
+						);
 
 						const color = annotation.color ?? Color4.black;
 						const strokeStyle = { color: color, width: annotation.borderWidth ?? 1 };
@@ -210,7 +232,7 @@ class PDFDocumentWrapper {
 							const pathCommands: PathCommand[] = [];
 
 							let i = 0;
-							for (i = 1; i < inkPart.length; i ++) {
+							for (i = 1; i < inkPart.length; i++) {
 								pathCommands.push({
 									kind: PathCommandType.LineTo,
 									point: inkPart[i],
@@ -219,7 +241,7 @@ class PDFDocumentWrapper {
 
 							const path = new Path(inkPart[0], pathCommands).transformedBy(transform);
 							const strokePart = pathToRenderable(path, renderStyle);
-							const stroke = new StrokeComponent([ strokePart ]);
+							const stroke = new StrokeComponent([strokePart]);
 							stroke.attachLoadSaveData('pdf', { id: annotation.id ?? '' } as PDFLoadSaveData);
 							annotations.push(stroke);
 						}
@@ -231,7 +253,11 @@ class PDFDocumentWrapper {
 						// );
 					} else if (annotationType === AnnotationType.FreeText) {
 						const content = annotation.contents?.text ?? '';
-						const appearance = annotation.fontAppearance ?? { size: 1, family: 'serif', color: Color4.red };
+						const appearance = annotation.fontAppearance ?? {
+							size: 1,
+							family: 'serif',
+							color: Color4.red,
+						};
 
 						// TODO: Use content.dir to handle right-to-left support
 						const style: TextRenderingStyle = {
@@ -245,85 +271,87 @@ class PDFDocumentWrapper {
 
 						let transform = Mat33.translation(rect.topLeft);
 						if (annotation.rotate) {
-							const rotationCCWRad = -annotation.rotate * Math.PI/180;
-							transform = Mat33.zRotation(rotationCCWRad, annotation.bbox.center).rightMul(transform);
+							const rotationCCWRad = (-annotation.rotate * Math.PI) / 180;
+							transform = Mat33.zRotation(rotationCCWRad, annotation.bbox.center).rightMul(
+								transform,
+							);
 						}
-						annotations.push(new TextComponent([ content ], transform, style));
-
+						annotations.push(new TextComponent([content], transform, style));
 					}
 				}
 
-				return annotations ;
+				return annotations;
 			},
 
 			updateAnnotations: async (newAnnotatons: AbstractComponent[]) => {
 				const translation = pageBBox.topLeft.times(-1);
-				const annotationData = newAnnotatons.map((annotation): AnnotationAPIWrapper|null => {
-					const originalBBox = annotation.getExactBBox();
-					const bbox = originalBBox.translatedBy(translation);
-					const loadSaveData = (annotation.getLoadSaveData().pdf ?? []) as PDFLoadSaveData[];
-					let id;
-					if (loadSaveData.length === 0) {
-						id = `newComponent-${Math.random()}`;
-						annotation.attachLoadSaveData('pdf', { id });
-					} else {
-						id = loadSaveData[0].id;
-					}
-					if (annotation instanceof TextComponent) {
-						const textStyle = annotation.getTextStyle();
-						const color = annotation.getStyle().color ?? Color4.blue;
-						const transform = annotation.getTransform();
-
-						const fontAppearance = {
-							size: textStyle.size * transform.getScaleFactor(),
-							family: textStyle.fontFamily,
-							color,
-						};
-						const text = annotation.getText();
-						// const unrotatedBBox =
-						// 	TextComponent
-						// 		.getTextDimens(text, textStyle)
-						// 		.transformedBoundingBox(Mat33.scaling2D(transform.getScaleFactor()));
-						const rotationRadians = transform.transformVec3(Vec2.unitX).angle();
-						const rotationDegrees = rotationRadians * 180 / Math.PI;
-						return {
-							type: AnnotationType.FreeText,
-							// Slightly grow the bounding box to account for font differences.
-							bbox: bbox,
-							inkList: [],
-							color,
-							borderWidth: 0,
-							contents: { text, direction: 'ltr' },
-							rotate: -rotationDegrees,
-							fontAppearance,
-							id,
-						};
-					}
-					else if (annotation instanceof StrokeComponent) {
-						const color = annotation.getStyle().color ?? Color4.blue;
-
-						let averageStrokeWidth = 0;
-						const inkList: Point2[][] = [];
-						for (const part of annotation.getParts()) {
-							inkList.push(part.path.approximateWithPoints(0.1).map(p => p.plus(translation)));
-							averageStrokeWidth += part.style.stroke?.width ?? 0;
+				const annotationData = newAnnotatons
+					.map((annotation) => {
+						const originalBBox = annotation.getExactBBox();
+						const bbox = originalBBox.translatedBy(translation);
+						const loadSaveData = (annotation.getLoadSaveData().pdf ?? []) as PDFLoadSaveData[];
+						let id;
+						if (loadSaveData.length === 0) {
+							id = `newComponent-${Math.random()}`;
+							annotation.attachLoadSaveData('pdf', { id });
+						} else {
+							id = loadSaveData[0].id;
 						}
-						averageStrokeWidth /= annotation.getParts().length || 1;
+						if (annotation instanceof TextComponent) {
+							const textStyle = annotation.getTextStyle();
+							const color = annotation.getStyle().color ?? Color4.blue;
+							const transform = annotation.getTransform();
 
-						return {
-							type: AnnotationType.Ink,
-							bbox,
-							inkList,
-							color,
-							rotate: 0,
-							borderWidth: averageStrokeWidth,
-							contents: undefined,
-							fontAppearance: undefined,
-							id,
-						};
-					}
-					return null;
-				}).filter(a => a !== null) as AnnotationAPIWrapper[];
+							const fontAppearance = {
+								size: textStyle.size * transform.getScaleFactor(),
+								family: textStyle.fontFamily,
+								color,
+							};
+							const text = annotation.getText();
+							// const unrotatedBBox =
+							// 	TextComponent
+							// 		.getTextDimens(text, textStyle)
+							// 		.transformedBoundingBox(Mat33.scaling2D(transform.getScaleFactor()));
+							const rotationRadians = transform.transformVec3(Vec2.unitX).angle();
+							const rotationDegrees = (rotationRadians * 180) / Math.PI;
+							return {
+								type: AnnotationType.FreeText,
+								// Slightly grow the bounding box to account for font differences.
+								bbox: bbox,
+								inkList: [],
+								color,
+								borderWidth: 0,
+								contents: { text, direction: 'ltr' },
+								rotate: -rotationDegrees,
+								fontAppearance,
+								id,
+							};
+						} else if (annotation instanceof StrokeComponent) {
+							const color = annotation.getStyle().color ?? Color4.blue;
+
+							let averageStrokeWidth = 0;
+							const inkList: Point2[][] = [];
+							for (const part of annotation.getParts()) {
+								inkList.push(part.path.approximateWithPoints(0.1).map((p) => p.plus(translation)));
+								averageStrokeWidth += part.style.stroke?.width ?? 0;
+							}
+							averageStrokeWidth /= annotation.getParts().length || 1;
+
+							return {
+								type: AnnotationType.Ink,
+								bbox,
+								inkList,
+								color,
+								rotate: 0,
+								borderWidth: averageStrokeWidth,
+								contents: undefined,
+								fontAppearance: undefined,
+								id,
+							};
+						}
+						return null;
+					})
+					.filter((a) => a !== null) as AnnotationAPIWrapper[];
 				pdfPage.replaceAnnotations(annotationData);
 			},
 
@@ -335,7 +363,7 @@ class PDFDocumentWrapper {
 	private getPageIdxContaining(component: AbstractComponent) {
 		let nearestDist = Infinity;
 		let nearestAtIndex = 0;
-		for (let i = 0; i < this.numPages; i ++) {
+		for (let i = 0; i < this.numPages; i++) {
 			const page = this.getPage(i);
 			const estimatedDist = Math.max(0, page.bbox.signedDistance(component.getBBox().center));
 			if (estimatedDist < nearestDist) {

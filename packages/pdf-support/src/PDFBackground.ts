@@ -1,4 +1,12 @@
-import { AbstractComponent, AbstractRenderer, Color4, EditorImage, LineSegment2, Mat33, Rect2 } from 'js-draw';
+import {
+	AbstractComponent,
+	AbstractRenderer,
+	Color4,
+	EditorImage,
+	LineSegment2,
+	Mat33,
+	Rect2,
+} from 'js-draw';
 import PDFDocumentWrapper from './PDFDocumentWrapper';
 
 // immutable
@@ -42,7 +50,7 @@ class PDFBackground extends AbstractComponent {
 	}
 
 	public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined) {
-		for (let i = 0; i < this.pdf.numPages; i ++) {
+		for (let i = 0; i < this.pdf.numPages; i++) {
 			const page = this.pdf.getPage(i);
 
 			if (!visibleRect || page.bbox.intersects(visibleRect)) {
@@ -64,8 +72,7 @@ class PDFBackground extends AbstractComponent {
 	}
 
 	override intersects(lineSegment: LineSegment2): boolean {
-		return this.contentBBox.getEdges()
-			.some(segment => segment.intersects(lineSegment));
+		return this.contentBBox.getEdges().some((segment) => segment.intersects(lineSegment));
 	}
 
 	protected override applyTransformation(_affineTransfm: Mat33) {
@@ -81,7 +88,6 @@ class PDFBackground extends AbstractComponent {
 		// PDFBackgrounds are immutable.
 		return this;
 	}
-
 
 	protected override serializeToJSON() {
 		// Return null: For now, assume that PDFs cannot be safely deserialized.

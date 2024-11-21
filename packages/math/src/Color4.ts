@@ -55,7 +55,10 @@ export class Color4 {
 	 *
 	 * If the array values instead range from 0-1, pass `maxValue` as `1`.
 	 */
-	public static fromArray(array: Uint8Array|Uint8ClampedArray|number[], maxValue: number = 255) {
+	public static fromArray(
+		array: Uint8Array | Uint8ClampedArray | number[],
+		maxValue: number = 255,
+	) {
 		const red = array[0];
 		const green = array[1] ?? red;
 		const blue = array[2] ?? red;
@@ -234,7 +237,7 @@ export class Color4 {
 	 * The return value will be in $[0,1]^4$
 	 */
 	public asRGBAArray(): [number, number, number, number] {
-		return [ this.r, this.g, this.b, this.a ];
+		return [this.r, this.g, this.b, this.a];
 	}
 
 	/**

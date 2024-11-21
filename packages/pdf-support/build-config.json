@@ -1,11 +1,11 @@
 {
-    "inDirectory": "./src",
-    "outDirectory": "./dist",
-    "bundledFiles": [
-        {
-            "name": "jsdrawPDF",
-	        "inPath": "./src/bundle.ts",
-            "outPath": "./dist/bundle.js"
-        }
-    ]
+	"inDirectory": "./src",
+	"outDirectory": "./dist",
+	"bundledFiles": [
+		{
+			"name": "jsdrawPDF",
+			"inPath": "./src/bundle.ts",
+			"outPath": "./dist/bundle.js"
+		}
+	]
 }
