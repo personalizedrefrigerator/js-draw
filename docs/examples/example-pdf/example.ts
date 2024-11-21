@@ -3,16 +3,24 @@
 // If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 
 import * as jsdraw from 'js-draw';
-import { APIWrapper, AnnotationAPIWrapper, PDFBackground, PDFDocumentWrapper, PageAPIWrapper } from '@js-draw/pdf-support';
+import {
+	APIWrapper,
+	AnnotationAPIWrapper,
+	PDFBackground,
+	PDFDocumentWrapper,
+	PageAPIWrapper,
+} from '@js-draw/pdf-support';
 import 'js-draw/styles';
 import { Color4, Rect2 } from 'js-draw';
-import { TransferrableAnnotation } from './types';
+import { ColorArray, TransferrableAnnotation } from './types.js';
 
-let workerRequest = (_method: string, ..._args: any[]): Promise<any> => { throw new Error('Worker not initialized'); };
+let workerRequest = (_method: string, ..._args: any[]): Promise<any> => {
+	throw new Error('Worker not initialized');
+};
 const initializeWorker = () => {
-	return new Promise<void>(resolve => {
-		const worker = new Worker('./worker.js', { type: 'module' });
-		const workerRequests = new Map<string, (arg: any)=>void>();
+	return new Promise<void>((resolve) => {
+		const worker = new Worker('./worker.mjs', { type: 'module' });
+		const workerRequests = new Map<string, (arg: any) => void>();
 
 		worker.onmessage = (event) => {
 			const message = event.data;
@@ -20,15 +28,14 @@ const initializeWorker = () => {
 			if (message.type === 'Respond') {
 				workerRequests.get(message.id)!(message.response);
 				workerRequests.delete(message.id);
-			}
-			else if (message.type === 'Initialized') {
+			} else if (message.type === 'Initialized') {
 				resolve();
 			}
 		};
 
 		let nextId = 0;
 		workerRequest = (method: string, ...args: any[]) => {
-			return new Promise<any>(resolve => {
+			return new Promise<any>((resolve) => {
 				const id = `request-${nextId++}`;
 				worker.postMessage({ method, args, id });
 				workerRequests.set(id, (arg) => {
@@ -45,17 +52,19 @@ const annotationToTransferrable = (annotation: AnnotationAPIWrapper): Transferra
 	return {
 		type: annotation.type,
 		bbox: annotation.bbox.xywh(),
-		inkList: annotation.inkList.map(l => l.map(p => [ p.x, p.y ])),
-		color: colorArray?.slice(0, 3),
+		inkList: annotation.inkList.map((l) => l.map((p) => [p.x, p.y])),
+		color: colorArray?.slice(0, 3) as ColorArray | undefined,
 		opacity: mainColor.a,
 		borderWidth: annotation.borderWidth,
 		contents: annotation.contents,
 		rotate: annotation.rotate,
-		fontAppearance: annotation.fontAppearance ? {
-			size: annotation.fontAppearance.size,
-			color: annotation.fontAppearance.color.asRGBAArray().slice(0, 3),
-			family: annotation.fontAppearance.family,
-		} : undefined,
+		fontAppearance: annotation.fontAppearance
+			? {
+					size: annotation.fontAppearance.size,
+					color: annotation.fontAppearance.color.asRGBAArray().slice(0, 3) as ColorArray,
+					family: annotation.fontAppearance.family,
+				}
+			: undefined,
 		id: annotation.id,
 	};
 };
@@ -64,18 +73,21 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 	const result: AnnotationAPIWrapper = {
 		type: annotation.type,
 		bbox: Rect2.of(annotation.bbox),
-		inkList: annotation.inkList.map(
-			(l: number[][]) => l.map(p => jsdraw.Vec2.of(p[0], p[1]))
-		),
+		inkList: annotation.inkList.map((l: number[][]) => l.map((p) => jsdraw.Vec2.of(p[0], p[1]))),
 		color: jsdraw.Color4.fromArray(annotation.color ?? [0], annotation.opacity ?? 1),
 		borderWidth: annotation.borderWidth,
-		contents: {text: annotation.contents?.text ?? 'no', direction: annotation.contents?.direction ?? 'ltr' },
+		contents: {
+			text: annotation.contents?.text ?? 'no',
+			direction: annotation.contents?.direction ?? 'ltr',
+		},
 		rotate: annotation.rotate,
-		fontAppearance: annotation.fontAppearance ? {
-			size: annotation.fontAppearance.size,
-			color: jsdraw.Color4.fromArray(annotation.fontAppearance.color, 1),
-			family: annotation.fontAppearance.family ?? 'sans',
-		} : undefined,
+		fontAppearance: annotation.fontAppearance
+			? {
+					size: annotation.fontAppearance.size,
+					color: jsdraw.Color4.fromArray(annotation.fontAppearance.color, 1),
+					family: annotation.fontAppearance.family ?? 'sans',
+				}
+			: undefined,
 		id: annotation.id,
 	};
 	return result;
@@ -97,7 +109,7 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 					if (buffer) {
 						resolve(buffer);
 					} else {
-						reject('No buffer found.');
+						reject(new Error('No buffer found.'));
 					}
 				}
 			};
@@ -124,7 +136,12 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 					return Rect2.of(bboxCoords);
 				},
 				async toImagelike(visibleRect: Rect2, scale: number, _showAnnotations: boolean) {
-					const bitmap = await workerRequest('page.toImagelike', pageHandle, visibleRect.xywh(), scale);
+					const bitmap = await workerRequest(
+						'page.toImagelike',
+						pageHandle,
+						visibleRect.xywh(),
+						scale,
+					);
 					return bitmap;
 				},
 				async getAnnotations() {
@@ -156,7 +173,7 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 		}
 	}
 
-	let lastObjectURL: string|undefined = undefined;
+	let lastObjectURL: string | undefined = undefined;
 	const saveButton = toolbar.addSaveButton(async () => {
 		saveButton.setDisabled(true);
 		try {
@@ -167,7 +184,7 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 			}
 
 			const buffer = await workerRequest('doc.saveToBuffer', docHandle);
-			const url = URL.createObjectURL(new Blob([buffer], {type: 'application/pdf'}));
+			const url = URL.createObjectURL(new Blob([buffer], { type: 'application/pdf' }));
 			const downloadLink = document.createElement('a');
 			downloadLink.target = '_blank';
 			downloadLink.href = url;

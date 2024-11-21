@@ -1,8 +1,13 @@
 {
-    "bundledFiles": [
-        {
-            "name": "jsdraw",
-	        "inPath": "./example.ts"
-        }
-    ]
+	"bundledFiles": [
+		{
+			"inPath": "./example.ts",
+			"outDirectory": "./dist"
+		},
+		{
+			"inPath": "./worker.ts",
+			"outDirectory": "./dist"
+		}
+	],
+	"prebuild": { "scriptPath": "./tools/prebuild.cjs" }
 }

@@ -2,18 +2,30 @@
 // You should have received a copy of the license along with this program.
 // If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 
-import * as mupdf from '../../../node_modules/mupdf/dist/mupdf.js';
+import type * as MuPDF from 'mupdf';
+import { ColorArray, TransferrableAnnotation } from './types.js';
+import { AnnotationType } from '@js-draw/pdf-support';
 
-/** @type {Map<string, mupdf.Document>} */
-const documents = new Map();
-/** @type {Map<string, [mupdf.PDFPage, mupdf.Document]>} */
-const pages = new Map();
-/** @type {Map<string, string>} */
-const pageAnnotationIds = new Map();
+interface ExtendedSelf extends WindowOrWorkerGlobalScope {
+	mupdf: typeof MuPDF;
+	postMessage: (data: unknown, transfer?: Transferable[]) => void;
+}
+declare const self: ExtendedSelf;
+
+const documents = new Map<string, MuPDF.PDFDocument>();
+const pages = new Map<string, [MuPDF.PDFPage, MuPDF.Document]>();
+const pageAnnotationIds = new Map<string, string[]>();
 
 let handleId = 0;
 
-const boundsToRect = (bounds) => {
+interface Rect {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+}
+
+const boundsToRect = (bounds: number[]) => {
 	return {
 		x: bounds[0],
 		y: bounds[1],
@@ -21,45 +33,43 @@ const boundsToRect = (bounds) => {
 		h: bounds[3] - bounds[1],
 	};
 };
-const rectToBounds = (rect) => {
+const rectToBounds = (rect: Rect): [number, number, number, number] => {
 	const x = rect.x;
 	const y = rect.y;
 	const w = rect.w;
 	const h = rect.h;
-	return [ x, y, w + x, y + h];
+	return [x, y, w + x, y + h];
 };
 
-/** @param {mupdf.PDFAnnotation} annotation */
-const getAnnotationId = (annotation) => {
+const getAnnotationId = (annotation: MuPDF.PDFAnnotation) => {
 	const object = annotation.getObject();
 	return object.toString();
 };
 
-const fontMap__mupdfToHtml = {
-	'TiRo': 'serif',
-	'Helv': 'sans-serif',
-	'Cour': 'monospace',
+const fontMap__mupdfToHtml: Record<string, string> = {
+	TiRo: 'serif',
+	Helv: 'sans-serif',
+	Cour: 'monospace',
 };
-const fontMap__htmlToMuPdf = {};
+const fontMap__htmlToMuPdf: Record<string, string> = {};
 for (const key in fontMap__mupdfToHtml) {
 	fontMap__htmlToMuPdf[fontMap__mupdfToHtml[key]] = key;
 }
 
-const htmlToMuPdfFont = (font) => {
+const htmlToMuPdfFont = (font: string) => {
 	return fontMap__htmlToMuPdf[font.toLowerCase()] ?? font;
 };
 
-const muPdfToHtmlFont = (font) => {
+const muPdfToHtmlFont = (font: string) => {
 	if (font === 'Cour') return 'Courier';
 	return fontMap__mupdfToHtml[font] ?? font;
 };
 
-
-const processPageAnnotations = (pageHandle) => {
+const processPageAnnotations = (pageHandle: string) => {
 	try {
-		const page = pages.get(pageHandle)[0];
+		const page = pages.get(pageHandle)![0];
 		const muPdfAnnotations = page.getAnnotations();
-		const transferableAnnotations = [];
+		const transferableAnnotations: TransferrableAnnotation[] = [];
 		pageAnnotationIds.set(pageHandle, []);
 
 		for (const annotation of muPdfAnnotations) {
@@ -70,16 +80,16 @@ const processPageAnnotations = (pageHandle) => {
 			console.log('c', annotation.getType());
 			const type = annotation.getType();
 			const bounds = boundsToRect(annotation.getBounds());
-			if (type === 'Ink' || type === 'FreeText') {
+			if (type === 'Ink' || type === 'FreeText' || type === 'Text') {
 				const defaultAppearance =
 					type === 'Text' || type === 'FreeText'
 						? annotation.getDefaultAppearance()
-						: { size: 5, color: [1, 0, 0], family: 'monospace' };
-				let color = [0];
+						: { size: 5, color: [1, 0, 0] as [number, number, number], family: 'monospace' };
+				let color: ColorArray = [0];
 				if (type === 'Ink') {
 					try {
 						color = annotation.getColor();
-					} catch(err) {
+					} catch (err) {
 						console.warn(err);
 						continue;
 					}
@@ -94,70 +104,76 @@ const processPageAnnotations = (pageHandle) => {
 				}
 				const id = getAnnotationId(annotation);
 				transferableAnnotations.push({
-					type,
+					type: type as AnnotationType,
 					bbox: bounds,
 					inkList: annotation.hasInkList() ? annotation.getInkList() : [],
 					color,
 					borderWidth: annotation.getBorderWidth(),
-					contents: { text: annotation.getContents() },
+					contents: { text: annotation.getContents(), direction: 'ltr' },
 					rotate: rotate,
 					fontAppearance: {
 						size: defaultAppearance.size,
 						color: defaultAppearance.color,
-						family: muPdfToHtmlFont(defaultAppearance.font),
+						family:
+							'font' in defaultAppearance ? muPdfToHtmlFont(defaultAppearance.font) : 'Courier',
 					},
 					id,
+					opacity: 1,
 				});
-				pageAnnotationIds.get(pageHandle).push(id);
+				pageAnnotationIds.get(pageHandle)!.push(id);
 			}
 		}
 		return transferableAnnotations;
-	} catch(error) {
+	} catch (error) {
 		console.error(error);
 		return [];
 	}
 };
 
-
 const api = {
-	/** @param {ArrayBuffer} buffer */
-	'openDoc': (buffer, name) => {
-		const doc = mupdf.Document.openDocument(buffer, name);
+	openDoc: (buffer: ArrayBuffer, name: string) => {
+		const doc = self.mupdf.Document.openDocument(buffer, name);
+		if (!(doc instanceof self.mupdf.PDFDocument)) {
+			throw new Error('Currently, only PDF documents are supported');
+		}
 		const handle = `doc-${handleId++}`;
 		documents.set(handle, doc);
 		return handle;
 	},
-	'pageCount': (handle) => {
-		return documents.get(handle).countPages();
+	pageCount: (handle: string) => {
+		return documents.get(handle)!.countPages();
 	},
-	'loadPage': (docHandle, pageIndex) => {
+	loadPage: (docHandle: string, pageIndex: number) => {
 		const pageHandle = `page-${handleId++}`;
-		const doc = documents.get(docHandle);
+		const doc = documents.get(docHandle)!;
 		pages.set(pageHandle, [doc.loadPage(pageIndex), doc]);
 		return pageHandle;
 	},
-	'page.getBBox': (pageHandle) => {
-		return boundsToRect(pages.get(pageHandle)[0].getBounds());
+	'page.getBBox': (pageHandle: string) => {
+		return boundsToRect(pages.get(pageHandle)![0].getBounds());
 	},
 	'page.getAnnotations': processPageAnnotations,
-	'page.setAnnotations': (pageHandle, annotations) => {
-		const page = pages.get(pageHandle)[0];
+	'page.setAnnotations': (pageHandle: string, annotations: TransferrableAnnotation[]) => {
+		const page = pages.get(pageHandle)![0];
 		const existingAnnotations = page.getAnnotations();
 
 		const lastAnnotationIds = pageAnnotationIds.get(pageHandle) ?? [];
-		const newAnnotationIds = [];
+		const newAnnotationIds: string[] = [];
 		pageAnnotationIds.set(pageHandle, newAnnotationIds);
 
 		// Remove any annotations that would be duplicated.
-		const toDelete = [];
+		const toDelete: MuPDF.PDFAnnotation[] = [];
 		for (const annotation of existingAnnotations) {
 			const existingId = getAnnotationId(annotation);
-			console.assert(!!existingId, 'existing annotation missing ID. Annot type: ' + annotation.getType());
+			console.assert(
+				!!existingId,
+				'existing annotation missing ID. Annot type: ' + annotation.getType(),
+			);
 			if (lastAnnotationIds.includes(existingId)) {
 				toDelete.push(annotation);
 			}
 		}
-		toDelete.forEach(d => page.deleteAnnotation(d));
+		toDelete.forEach((d) => page.deleteAnnotation(d));
 		page.update();
 
 		for (const jsDrawAnnotation of annotations) {
@@ -172,7 +188,7 @@ const api = {
 			}
 
 			if (type === 'Ink') {
-				muAnnotation.setColor(jsDrawAnnotation.color);
+				muAnnotation.setColor(jsDrawAnnotation.color!);
 				muAnnotation.setBorderWidth(jsDrawAnnotation.borderWidth);
 
 				for (const inkListPart of jsDrawAnnotation.inkList) {
@@ -181,14 +197,21 @@ const api = {
 						muAnnotation.addInkListStrokeVertex(point);
 					}
 				}
-			}
-			else if (type === 'FreeText') {
-				muAnnotation.setContents(jsDrawAnnotation.contents.text);
-				muAnnotation.setDefaultAppearance(
-					htmlToMuPdfFont(jsDrawAnnotation.fontAppearance.family),
-					jsDrawAnnotation.fontAppearance.size,
-					jsDrawAnnotation.fontAppearance.color,
-				);
+			} else if (type === 'FreeText') {
+				if (!('contents' in jsDrawAnnotation)) {
+					throw new Error('FreeText missing contents prop');
+				}
+				if (jsDrawAnnotation.contents) {
+					muAnnotation.setContents(jsDrawAnnotation.contents.text);
+				}
+				if (jsDrawAnnotation.fontAppearance) {
+					muAnnotation.setDefaultAppearance(
+						htmlToMuPdfFont(jsDrawAnnotation.fontAppearance.family),
+						jsDrawAnnotation.fontAppearance.size,
+						jsDrawAnnotation.fontAppearance.color,
+					);
+				}
+
 				muAnnotation.setRect(rectToBounds(jsDrawAnnotation.bbox));
 				// const matrix = doc.newArray(9);
 				// matrix.put(0, 1);
@@ -208,35 +231,49 @@ const api = {
 		page.update();
 		processPageAnnotations(pageHandle);
 	},
-	'page.toImagelike': async (pageHandle, _rect, scale) => {
-		const page = pages.get(pageHandle)[0];
+	'page.toImagelike': async (pageHandle: string, _rect: Rect, scale: number) => {
+		const page = pages.get(pageHandle)![0];
 		const pixmap = page.toPixmap(
-			[scale,0,0,scale,0,0],
-			mupdf.ColorSpace.DeviceRGB,
+			[scale, 0, 0, scale, 0, 0],
+			self.mupdf.ColorSpace.DeviceRGB,
 			true,
 			false,
-			'View'
+			'View',
 		);
-		const imageData = new ImageData(pixmap.getPixels().slice(), pixmap.getWidth(), pixmap.getHeight());
+		const imageData = new ImageData(
+			pixmap.getPixels().slice(),
+			pixmap.getWidth(),
+			pixmap.getHeight(),
+		);
 		return await createImageBitmap(imageData);
 	},
-	'doc.saveToBuffer': (docHandle) => {
-		const buffer = documents.get(docHandle).saveToBuffer().asUint8Array();
+	'doc.saveToBuffer': (docHandle: string) => {
+		const buffer = documents.get(docHandle)!.saveToBuffer().asUint8Array();
 		return buffer;
 	},
 };
 
-onmessage = async event => {
+onmessage = async (event) => {
 	const data = event.data;
-	const response = await api[data.method](...data.args);
-	const transfer = [];
+	const method = data.method;
+	if (typeof method !== 'string') {
+		throw new Error(`data.method must be a string`);
+	}
+	if (!(method in api) || !Object.prototype.hasOwnProperty.call(api, method)) {
+		throw new Error(`Unknown method ${method}`);
+	}
+	const response = await (api as any)[method](...data.args);
+	const transfer: Transferable[] = [];
 	if (response instanceof ImageBitmap) {
 		transfer.push(response);
 	}
-	postMessage({
-		type: 'Respond',
-		id: data.id,
-		response,
-	}, transfer);
+	self.postMessage(
+		{
+			type: 'Respond',
+			id: data.id,
+			response,
+		},
+		transfer,
+	);
 };
-postMessage({ type: 'Initialized'});
+postMessage({ type: 'Initialized' });

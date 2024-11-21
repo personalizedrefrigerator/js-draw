@@ -14,9 +14,10 @@ export default class BundledFile {
 	private readonly outputFilename: string;
 
 	public constructor(
-		public readonly bundleName: string|undefined,
+		public readonly bundleName: string | undefined,
 		private readonly sourceFilePath: string,
-		outputFilepath?: string,
+		private readonly target: string,
+		outputFilepath: string | undefined,
 	) {
 		this.rootFileDirectory = dirname(sourceFilePath);
 		this.bundleBaseName = basename(sourceFilePath, extname(sourceFilePath));
@@ -44,6 +45,7 @@ export default class BundledFile {
 		const config: webpack.Configuration = {
 			mode,
 			entry: this.sourceFilePath,
+			target: this.target,
 			output: {
 				path: this.outputDirectory,
 				filename: this.outputFilename,
@@ -175,7 +177,7 @@ export default class BundledFile {
 		const compiler = webpack(this.getWebpackOptions('development'));
 		const watchOptions = {
 			followSymlinks: true,
-			ignored: /^.*node_modules.*[/](?![@]?js[-]draw)/g
+			ignored: /^.*node_modules.*[/](?![@]?js[-]draw)/g,
 		};
 
 		console.info('Watching bundle: ', this.bundleName);

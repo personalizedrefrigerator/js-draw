@@ -164,8 +164,8 @@ const readConfig = (): BuildConfig => {
 };
 
 const bundleFiles = async (config: BuildConfig, buildMode: BuildMode) => {
-	for (const { name, inPath, outPath } of config.bundledFiles) {
-		const bundledFile = new BundledFile(name, inPath, outPath);
+	for (const { name, inPath, target, outPath } of config.bundledFiles) {
+		const bundledFile = new BundledFile(name, inPath, target ?? 'web', outPath);
 
 		if (buildMode === 'build') {
 			await bundledFile.build();
