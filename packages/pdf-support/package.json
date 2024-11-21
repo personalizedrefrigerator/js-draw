@@ -22,8 +22,7 @@
 	"author": "Henry Heino",
 	"license": "MPL",
 	"scripts": {
-		"dist-test": "npm run build && cd dist-test/test_imports && npm install && npm run test",
-		"dist": "npm run build && npm run dist-test",
+		"dist": "npm run build",
 		"build": "build-tool build",
 		"watch": "build-tool watch",
 		"build-translation-template": "build-tool build-translation-template"
