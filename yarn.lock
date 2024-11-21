@@ -1057,6 +1057,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@js-draw/example-pdf@workspace:docs/examples/example-pdf":
+  version: 0.0.0-use.local
+  resolution: "@js-draw/example-pdf@workspace:docs/examples/example-pdf"
+  dependencies:
+    "@js-draw/build-tool": "npm:^1.22.0"
+    "@js-draw/material-icons": "npm:^1.22.0"
+    "@js-draw/pdf-support": "npm:^1.22.0"
+    js-draw: "npm:^1.22.0"
+    mupdf: "npm:1.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@js-draw/example-save-restore-toolbar-state@workspace:docs/examples/example-save-restore-toolbar-state":
   version: 0.0.0-use.local
   resolution: "@js-draw/example-save-restore-toolbar-state@workspace:docs/examples/example-save-restore-toolbar-state"
@@ -1118,6 +1130,17 @@ __metadata:
     ts-jest: "npm:29.1.2"
     typedoc: "npm:0.26.8"
     typescript: "npm:5.5.4"
+  languageName: unknown
+  linkType: soft
+
+"@js-draw/pdf-support@npm:^1.22.0, @js-draw/pdf-support@workspace:packages/pdf-support":
+  version: 0.0.0-use.local
+  resolution: "@js-draw/pdf-support@workspace:packages/pdf-support"
+  dependencies:
+    "@js-draw/build-tool": "npm:^1.22.0"
+    "@types/jest": "npm:29.5.2"
+  peerDependencies:
+    js-draw: ^1.22.0
   languageName: unknown
   linkType: soft
 
@@ -2073,6 +2096,16 @@ __metadata:
   dependencies:
     "@types/istanbul-lib-report": "npm:*"
   checksum: 10c0/1647fd402aced5b6edac87274af14ebd6b3a85447ef9ad11853a70fd92a98d35f81a5d3ea9fcb5dbb5834e800c6e35b64475e33fcae6bfa9acc70d61497c54ee
+  languageName: node
+  linkType: hard
+
+"@types/jest@npm:29.5.2":
+  version: 29.5.2
+  resolution: "@types/jest@npm:29.5.2"
+  dependencies:
+    expect: "npm:^29.0.0"
+    pretty-format: "npm:^29.0.0"
+  checksum: 10c0/e85525fe83a0792632a31ca32968b33a0014d617442e9a515357d2aa8890052ef622b1f6fd25d48f4f1a3ab806bed94e6d9b056dea23a897464e0e35957ff654
   languageName: node
   linkType: hard
 
@@ -7174,6 +7207,13 @@ __metadata:
     arrify: "npm:^2.0.1"
     minimatch: "npm:^3.0.4"
   checksum: 10c0/252ffae6d19491c169c22fc30cf8a99f6031f94a3495f187d3430b06200e9f05a7efae90ab9d834f090834e0d9c979ab55e7ad21f61a37995d807b4b0ccdcbd1
+  languageName: node
+  linkType: hard
+
+"mupdf@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mupdf@npm:1.0.0"
+  checksum: 10c0/9f9d8f766e5f05bb2fb06ed3854ef670114c97628442856f3afd3233be691af020097b809941b0b0cd02981c03ece80934742f702697e197ecf49f2573baed3f
   languageName: node
   linkType: hard
 

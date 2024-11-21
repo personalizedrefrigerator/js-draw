@@ -8,16 +8,15 @@
 	"scripts": {
 		"bundle": "ts-node scripts/bundle.ts",
 		"watchBundle": "ts-node scripts/watchBundle.ts",
-		"build": "cp ../../../node_modules/pdfjs-dist/build/pdf.worker.mjs ./pdf.worker.js && build-tool build",
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"js-draw": "^1.18.0",
-		"mupdf": "0.2.0",
-		"@js-draw/pdf-support": "^1.16.0",
-		"@js-draw/material-icons": "^1.18.0"
+		"@js-draw/material-icons": "^1.22.0",
+		"@js-draw/pdf-support": "^1.22.0",
+		"js-draw": "^1.22.0",
+		"mupdf": "1.0.0"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.17.0"
+		"@js-draw/build-tool": "^1.22.0"
 	}
 }
