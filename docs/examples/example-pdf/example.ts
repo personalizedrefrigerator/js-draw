@@ -12,7 +12,8 @@ import {
 } from '@js-draw/pdf-support';
 import 'js-draw/styles';
 import { Color4, Rect2 } from 'js-draw';
-import { ColorArray, TransferrableAnnotation } from './types.js';
+import { ColorArray, TransferrableAnnotation } from './types';
+import { agplv3License } from './constants';
 
 let workerRequest = (_method: string, ..._args: any[]): Promise<any> => {
 	throw new Error('Worker not initialized');
@@ -119,7 +120,20 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 		});
 	};
 
-	const editor = new jsdraw.Editor(document.body);
+	const editor = new jsdraw.Editor(document.body, {
+		notices: [
+			{
+				heading: 'PDF rendering',
+				text: [
+					`This editor's PDF editing functionality is powered by MuPDF, which is licensed under the GNU AGPLv3. A copy of this license is included below:`,
+					'',
+					'',
+					agplv3License,
+				].join('\n'),
+				minimized: true,
+			},
+		],
+	});
 	const toolbar = editor.addToolbar();
 	editor.dispatchNoAnnounce(editor.image.setAutoresizeEnabled(true));
 
