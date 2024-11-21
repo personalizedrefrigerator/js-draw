@@ -1,8 +1,11 @@
 import Pointer from './Pointer';
 import { Point2, Vec3 } from '@js-draw/math';
 
-export type HTMLPointerEventName = 'pointerdown'|'pointermove'|'pointerup'|'pointercancel';
-export type HTMLPointerEventFilter = (eventName: HTMLPointerEventName, event: PointerEvent)=>boolean;
+export type HTMLPointerEventName = 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel';
+export type HTMLPointerEventFilter = (
+	eventName: HTMLPointerEventName,
+	event: PointerEvent,
+) => boolean;
 
 export interface PointerEvtListener {
 	onPointerDown(event: PointerEvt): boolean;
@@ -17,7 +20,6 @@ export interface PointerEvtListener {
 	onGestureCancel(): void;
 }
 
-
 export enum InputEvtType {
 	PointerDownEvt,
 	PointerMoveEvt,
@@ -30,6 +32,8 @@ export enum InputEvtType {
 
 	CopyEvent,
 	PasteEvent,
+
+	ContextMenu,
 }
 
 // [delta.x] is horizontal scroll,
@@ -47,13 +51,13 @@ interface BaseKeyEvent {
 	readonly code: string;
 
 	// If `ctrlKey` is undefined, that is equivalent to `ctrlKey = false`.
-	readonly ctrlKey: boolean|undefined;
+	readonly ctrlKey: boolean | undefined;
 
 	// If falsey, the `alt` key is not pressed.
-	readonly altKey: boolean|undefined;
+	readonly altKey: boolean | undefined;
 
 	// If falsey, the `shift` key is not pressed.
-	readonly shiftKey: boolean|undefined;
+	readonly shiftKey: boolean | undefined;
 }
 
 /**
@@ -80,7 +84,7 @@ export interface KeyUpEvent extends BaseKeyEvent {
 
 export interface CopyEvent {
 	readonly kind: InputEvtType.CopyEvent;
-	setData(mime: string, data: string|Promise<Blob>): void;
+	setData(mime: string, data: string | Promise<Blob>): void;
 }
 
 export interface PasteEvent {
@@ -111,6 +115,12 @@ export interface PointerUpEvt extends PointerEvtBase {
 	readonly kind: InputEvtType.PointerUpEvt;
 }
 
+export interface ContextMenuEvt {
+	readonly kind: InputEvtType.ContextMenu;
+	readonly screenPos: Point2;
+	readonly canvasPos: Point2;
+}
+
 /**
  * An internal `js-draw` pointer event type.
  *
@@ -118,17 +128,34 @@ export interface PointerUpEvt extends PointerEvtBase {
  */
 export type PointerEvt = PointerDownEvt | PointerMoveEvt | PointerUpEvt;
 
+/** The type of any internal {@link PointerEvt} record. */
+export type PointerEvtType =
+	| InputEvtType.PointerDownEvt
+	| InputEvtType.PointerMoveEvt
+	| InputEvtType.PointerUpEvt;
+
 /**
  * An internal `js-draw` input event type.
  *
  * These are not DOM events.
  */
-export type InputEvt = KeyPressEvent | KeyUpEvent | WheelEvt | GestureCancelEvt | PointerEvt | CopyEvent | PasteEvent;
+export type InputEvt =
+	| KeyPressEvent
+	| KeyUpEvent
+	| WheelEvt
+	| GestureCancelEvt
+	| PointerEvt
+	| CopyEvent
+	| PasteEvent
+	| ContextMenuEvt;
 
-type KeyEventType = InputEvtType.KeyPressEvent|InputEvtType.KeyUpEvent;
+type KeyEventType = InputEvtType.KeyPressEvent | InputEvtType.KeyUpEvent;
 
 // Constructor
-const keyEventFromHTMLEvent = (kind: KeyEventType, event: KeyboardEvent): KeyPressEvent|KeyUpEvent => {
+const keyEventFromHTMLEvent = (
+	kind: KeyEventType,
+	event: KeyboardEvent,
+): KeyPressEvent | KeyUpEvent => {
 	return {
 		kind,
 		key: event.key,
@@ -148,7 +175,9 @@ export const keyPressEventFromHTMLEvent = (event: KeyboardEvent) => {
 };
 
 export const isPointerEvt = (event: InputEvt): event is PointerEvt => {
-	return event.kind === InputEvtType.PointerDownEvt
-		|| event.kind === InputEvtType.PointerMoveEvt
-		|| event.kind === InputEvtType.PointerUpEvt;
+	return (
+		event.kind === InputEvtType.PointerDownEvt ||
+		event.kind === InputEvtType.PointerMoveEvt ||
+		event.kind === InputEvtType.PointerUpEvt
+	);
 };

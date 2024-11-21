@@ -1,14 +1,14 @@
 #!/usr/bin/env ts-node
 import { argv, exit } from 'node:process';
-import path from 'node:path';
-import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
+import path, { join, normalize } from 'node:path';
+import { existsSync, rmSync, mkdirSync, readFileSync, realpathSync, readdirSync } from 'node:fs';
 import CompiledTypeScriptDirectory from './CompiledTypeScriptDirectory';
 import BundledFile from './BundledFile';
 import buildTranslationTemplates from './buildTranslationTemplates';
 import { BuildConfig, BuildMode, BundledFileRecord, TranslationSourcePair } from './types';
 import compileSCSS from './compileSCSS';
 
-type BuildCommand = BuildMode|'build-translation-templates';
+type BuildCommand = BuildMode | 'build-translation-templates';
 
 // TODO: These currently assume that build-tool is private to js-draw.
 const scriptDir = realpathSync(path.resolve(__dirname));
@@ -24,12 +24,9 @@ const isBuildCommand = (a: string): a is BuildCommand => {
 };
 
 const printUsage = () => {
-	console.log(`Usage: ${argv[0]} build|watch`);
-	console.log();
-	console.log(
-		'Both build and watch read from a build-config.json in the ' +
-		'current directory.'
-	);
+	console.info(`Usage: ${argv[0]} build|watch`);
+	console.info();
+	console.info('Both build and watch read from a build-config.json in the ' + 'current directory.');
 };
 
 /** Reads the build configuration from `./build-config.json`. */
@@ -38,13 +35,18 @@ const readConfig = (): BuildConfig => {
 	const config = JSON.parse(configFile);
 
 	const assertIsArray = (container: any, propertyName: string, details: string = '') => {
-		if (typeof (container[propertyName]) !== 'object' || !('length' in container[propertyName])) {
+		if (typeof container[propertyName] !== 'object' || !('length' in container[propertyName])) {
 			throw new Error(`readConfig: ${propertyName} is not an array. ${details}`);
 		}
 	};
 
-	const assertPropertyHasType = (object: any, propertyName: string, expectedType: string, context: string = '') => {
-		if (typeof (object[propertyName]) !== expectedType) {
+	const assertPropertyHasType = (
+		object: any,
+		propertyName: string,
+		expectedType: string,
+		context: string = '',
+	) => {
+		if (typeof object[propertyName] !== expectedType) {
 			throw new Error(context + ` Expected ${propertyName} to have type ${expectedType}.`);
 		}
 	};
@@ -72,8 +74,8 @@ const readConfig = (): BuildConfig => {
 		}
 	}
 
-	let inDirectory: string|undefined = undefined;
-	let outDirectory: string|undefined = undefined;
+	let inDirectory: string | undefined = undefined;
+	let outDirectory: string | undefined = undefined;
 	if ('inDirectory' in config) {
 		assertPropertyHasType(config, 'inDirectory', 'string', 'readConfig');
 		if (config.outDirectory) {
@@ -118,7 +120,7 @@ const readConfig = (): BuildConfig => {
 		translationDestPath = path.resolve(config.translationDestPath);
 	}
 
-	let prebuild: { scriptPath: string }|null = null;
+	let prebuild: { scriptPath: string } | null = null;
 	if ('prebuild' in config) {
 		assertPropertyHasType(config, 'prebuild', 'object');
 		assertPropertyHasType(config.prebuild, 'scriptPath', 'string');
@@ -204,10 +206,31 @@ const main = async () => {
 
 	const config = readConfig();
 
+	const needsClean = buildMode === 'watch' || buildMode === 'build';
+	if (config.outDirectory && needsClean) {
+		if (existsSync(config.outDirectory)) {
+			console.info('Removing output directory...');
+
+			if (!normalize(config.outDirectory).startsWith(normalize(rootDir))) {
+				throw new Error('Invalid output directory -- not in project. Refusing to remove.');
+			}
+
+			const files = readdirSync(config.outDirectory);
+			for (const file of files) {
+				const toRemove = join(config.outDirectory, file);
+				console.log('  rm -r', toRemove);
+				rmSync(toRemove, { recursive: true });
+			}
+		} else {
+			console.info('Creating output directory...');
+			mkdirSync(config.outDirectory, { recursive: true });
+		}
+	}
+
 	if (config.prebuild) {
 		console.log('Prebuild: Executing ', config.prebuild.scriptPath);
 
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const scriptResult = require(path.resolve(config.prebuild.scriptPath));
 
 		if (scriptResult && scriptResult.default) {
@@ -223,13 +246,7 @@ const main = async () => {
 		console.log('Building translation templates...');
 		buildTranslationTemplates(config);
 	} else {
-		if (config.outDirectory && !existsSync(config.outDirectory)) {
-			console.log('Creating output directory...');
-			mkdirSync(config.outDirectory, { recursive: true });
-		}
-
 		void bundleFiles(config, buildMode);
-
 		void compileSCSS(config, buildMode);
 
 		if (config.inDirectory && config.outDirectory) {

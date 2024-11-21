@@ -1,12 +1,14 @@
+type Equalable = { eq: (other: unknown, ...args: any[]) => boolean };
+
 export const loadExpectExtensions = () => {
 	// Custom matchers. See
 	// https://jestjs.io/docs/expect#expectextendmatchers
 	expect.extend({
 		// Determine whether expected = actual based on the objects'
 		// .eq methods
-		objEq(actual: any, expected: any, ...eqArgs: any) {
+		objEq(actual: Equalable, expected: Equalable | undefined | null, ...eqArgs: any[]) {
 			let pass = false;
-			if ((expected ?? null) === null) {
+			if (!expected) {
 				pass = actual.eq(expected, ...eqArgs);
 			} else {
 				pass = expected.eq(actual, ...eqArgs);
@@ -24,7 +26,7 @@ export const loadExpectExtensions = () => {
 				return {
 					pass: false,
 					message: () => {
-						return `Wrong length (actual: ${actual.length}, expected: ${expected.length}) (${JSON.stringify({expected, actual})})`;
+						return `Wrong length (actual: ${actual.length}, expected: ${expected.length}) (${JSON.stringify({ expected, actual })})`;
 					},
 				};
 			}
@@ -34,12 +36,12 @@ export const loadExpectExtensions = () => {
 					return {
 						pass: false,
 						message: () =>
-							`Entry ${i}: ${expected[i]} and ${actual[i]} are not within ${tolerance}. (${JSON.stringify({expected, actual})})`,
+							`Entry ${i}: ${expected[i]} and ${actual[i]} are not within ${tolerance}. (${JSON.stringify({ expected, actual })})`,
 					};
 				}
 			}
 
-			return { pass: true, message: () => 'All entries are close', };
+			return { pass: true, message: () => 'All entries are close' };
 		},
 	});
 };

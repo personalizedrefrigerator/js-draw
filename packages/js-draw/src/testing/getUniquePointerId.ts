@@ -4,7 +4,7 @@ import Pointer from '../Pointer';
 const getUniquePointerId = (pointers: Pointer[]) => {
 	let ptrId = 0;
 
-	const pointerIds = pointers.map(ptr => ptr.id);
+	const pointerIds = pointers.map((ptr) => ptr.id);
 	pointerIds.sort();
 	for (const pointerId of pointerIds) {
 		if (ptrId === pointerId) {

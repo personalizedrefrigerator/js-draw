@@ -1,6 +1,10 @@
 {
-	"name": "Additional Documentation",
+	"name": "Guides",
 	"description": "Not a real package -- used to include markdown files in generated typedoc output",
 	"private": true,
-	"version": "0.0.0"
+	"version": "0.0.0",
+	"dependencies": {
+		"@js-draw/math": "^1.22.0",
+		"js-draw": "^1.22.0"
+	}
 }

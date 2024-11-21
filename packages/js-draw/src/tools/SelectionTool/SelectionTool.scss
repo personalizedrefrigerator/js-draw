@@ -1,3 +1,4 @@
+@use './util/makeClipboardErrorHandlers.scss';
 
 .selection-tool-selection-background {
 	background-color: var(--selection-background-color);
@@ -80,6 +81,30 @@
 	}
 }
 
+.selection-tool-selection-menu {
+	> button {
+		max-height: var(--vertical-offset);
+		background-color: var(--background-color-1);
+		font-size: 14px;
+
+		color: var(--foreground-color-1);
+		border: 0.5px solid var(--foreground-color-1);
+		border-radius: 3px;
+		padding: 3px;
+		opacity: 0.8;
+
+		&:hover,
+		&:focus-visible {
+			background-color: var(--background-color-2);
+			color: var(--foreground-color-2);
+			cursor: pointer;
+			opacity: 1;
+		}
+
+		transition: 0.2s ease opacity;
+	}
+}
+
 .overlay.handleOverlay {
 	touch-action: none;
 
@@ -96,7 +121,8 @@
 	//
 	// This is in addition to the overlay container, which needs zero height to prevent
 	// other overlay containers from being affected by its size.
-	&, .selection-tool-selection-outer-container {
+	&,
+	.selection-tool-selection-outer-container {
 		height: 0;
 		overflow: visible;
 	}
@@ -121,13 +147,23 @@
 		&.-empty {
 			opacity: 0;
 		}
+
+		&.-hide-handles .selection-tool-handle {
+			display: none;
+		}
 	}
 }
 
 @keyframes selection-duplicated-animation {
-	0% { scale: 1 1; }
-	50% { scale: 1.02 1.02; }
-	100% { scale: 1 1; }
+	0% {
+		scale: 1 1;
+	}
+	50% {
+		scale: 1.02 1.02;
+	}
+	100% {
+		scale: 1 1;
+	}
 }
 
 /* Do not run the animation when the user has disabled motion animations. */

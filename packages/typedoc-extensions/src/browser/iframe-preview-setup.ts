@@ -1,4 +1,3 @@
-
 import * as jsdraw from 'js-draw';
 import 'js-draw/styles';
 import * as jsdrawMath from '@js-draw/math';
@@ -9,11 +8,14 @@ window.addEventListener('load', () => {
 	// Update height immediately after loading
 	setTimeout(() => {
 		const height = (document.scrollingElement ?? document.body).scrollHeight;
-		parent.postMessage({
-			message: 'updateHeight',
-			height,
-			frameId: (window as any).frameId,
-		}, '*');
+		parent.postMessage(
+			{
+				message: 'updateHeight',
+				height,
+				frameId: (window as any).frameId,
+			},
+			'*',
+		);
 	}, 0);
 });
 
@@ -29,20 +31,20 @@ window.addEventListener('load', () => {
 			if (typeof part === 'string') {
 				wrapper.classList.add('text');
 				wrapper.innerText = part;
-			}
-			else if (typeof part !== 'object' || part === null) {
+			} else if (typeof part !== 'object' || part === null) {
 				wrapper.innerText = JSON.stringify(part);
 				wrapper.classList.add(typeof part);
-			}
-			else if (part instanceof jsdrawMath.Color4) {
+			} else if (part instanceof jsdrawMath.Color4) {
 				const colorSquare = document.createElement('span');
 				colorSquare.classList.add('color-square');
 				colorSquare.style.backgroundColor = part.toHexString();
 
 				wrapper.appendChild(colorSquare);
 				wrapper.appendChild(document.createTextNode(part.toString()));
-			}
-			else {
+			} else if (part instanceof jsdrawMath.Mat33) {
+				wrapper.appendChild(document.createTextNode(part.toString()));
+				wrapper.classList.add('matrix-output');
+			} else {
 				const details = document.createElement('details');
 				details.style.display = 'inline-block';
 
@@ -65,7 +67,7 @@ window.addEventListener('load', () => {
 				if (part instanceof Error) {
 					try {
 						addProperty('stack');
-					} catch (_err) {
+					} catch {
 						// May fail
 					}
 				}
@@ -123,11 +125,9 @@ window.addEventListener('load', () => {
 	(window as any).require = (path: string) => {
 		if (path === 'js-draw') {
 			return jsdraw;
-		}
-		else if (path === '@js-draw/math') {
+		} else if (path === '@js-draw/math') {
 			return jsdrawMath;
-		}
-		else if (path === '@js-draw/material-icons') {
+		} else if (path === '@js-draw/material-icons') {
 			return jsdrawMaterialIcons;
 		}
 
@@ -135,19 +135,19 @@ window.addEventListener('load', () => {
 	};
 
 	(window as any).module = { exports: {} };
-	(window as any).exports = { };
+	(window as any).exports = {};
 
-	const onError = (event: Event|Error|string) => {
+	const onError = (event: Event | Error | string) => {
 		const errorElement = createLogElementFor(['Error: ', event]);
 		errorElement.classList.add('error');
 		addLogElement(errorElement);
 	};
 
-	window.addEventListener('error', event => {
+	window.addEventListener('error', (event) => {
 		onError(event.error ?? event.message);
 	});
 
-	window.addEventListener('unhandledrejection', event => {
+	window.addEventListener('unhandledrejection', (event) => {
 		onError(event.reason ?? event);
 	});
 })();

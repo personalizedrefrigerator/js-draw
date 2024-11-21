@@ -15,8 +15,8 @@ const makeFileSaver = (fileName: string, file: FileSystemHandle): ImageSaver => 
 				const writable = await (file as any).createWritable();
 				await writable.write(svgData);
 				await writable.close();
-			} catch(e) {
-				throw `Error saving to filesystem: ${e}`;
+			} catch (e) {
+				throw new Error(`Error saving to filesystem: ${e}`);
 			}
 		},
 

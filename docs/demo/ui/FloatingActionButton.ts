@@ -1,7 +1,7 @@
 import { IconType } from '../types';
 import './FloatingActionButton.css';
 
-type OnClickListener = ()=>void;
+type OnClickListener = () => void;
 
 interface ButtonSpecifier {
 	title: string;
@@ -18,10 +18,7 @@ export default class FloatingActionButton {
 
 	private onClickListeners: Set<OnClickListener> = new Set();
 
-	public constructor(
-		{ title, icon, onClick }: ButtonSpecifier,
-		parent: HTMLElement
-	) {
+	public constructor({ title, icon, onClick }: ButtonSpecifier, parent: HTMLElement) {
 		this.container = document.createElement('div');
 
 		this.mainButton = document.createElement('button');
@@ -36,10 +33,7 @@ export default class FloatingActionButton {
 		this.iconWrapper.appendChild(icon.cloneNode(true));
 		this.titleElem.innerText = title;
 
-		this.mainButton.replaceChildren(
-			this.iconWrapper,
-			this.titleElem,
-		);
+		this.mainButton.replaceChildren(this.iconWrapper, this.titleElem);
 		this.mainButton.onclick = () => this.onClick();
 
 		if (onClick) {

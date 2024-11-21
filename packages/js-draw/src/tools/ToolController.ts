@@ -27,7 +27,7 @@ import ReactiveValue from '../util/ReactiveValue';
 
 export default class ToolController implements InputEventListener {
 	private tools: BaseTool[];
-	private activeTool: BaseTool|null = null;
+	private activeTool: BaseTool | null = null;
 	private primaryToolGroup: ToolEnabledGroup;
 
 	// Form a pipeline that allows filtering/mapping input events.
@@ -39,18 +39,34 @@ export default class ToolController implements InputEventListener {
 		this.isEditorReadOnly = editor.isReadOnlyReactiveValue();
 
 		this.inputPipeline = new InputPipeline();
-		this.inputPipeline.setEmitListener(event => this.onEventInternal(event));
+		this.inputPipeline.setEmitListener((event) => this.onEventInternal(event));
 
 		const primaryToolGroup = new ToolEnabledGroup();
 		this.primaryToolGroup = primaryToolGroup;
 
-		const panZoomTool = new PanZoom(editor, PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags, localization.touchPanTool);
-		const keyboardPanZoomTool = new PanZoom(editor, PanZoomMode.Keyboard, localization.keyboardPanZoom);
-		const primaryPenTool = new Pen(editor, localization.penTool(1), { color: Color4.purple, thickness: 8 });
-		const secondaryPenTool = new Pen(editor, localization.penTool(2), { color: Color4.clay, thickness: 4 });
+		const panZoomTool = new PanZoom(
+			editor,
+			PanZoomMode.TwoFingerTouchGestures | PanZoomMode.RightClickDrags,
+			localization.touchPanTool,
+		);
+		const keyboardPanZoomTool = new PanZoom(
+			editor,
+			PanZoomMode.Keyboard,
+			localization.keyboardPanZoom,
+		);
+		const primaryPenTool = new Pen(editor, localization.penTool(1), {
+			color: Color4.purple,
+			thickness: 8,
+		});
+		const secondaryPenTool = new Pen(editor, localization.penTool(2), {
+			color: Color4.clay,
+			thickness: 4,
+		});
 
 		// Stabilize the secondary pen tool.
 		secondaryPenTool.setInputMapper(new InputStabilizer(editor.viewport));
+
+		const eraser = new Eraser(editor, localization.eraserTool);
 
 		const primaryTools = [
 			// Three pens
@@ -58,17 +74,13 @@ export default class ToolController implements InputEventListener {
 			secondaryPenTool,
 
 			// Highlighter-like pen with width=40
-			new Pen(
-				editor,
-				localization.penTool(3),
-				{
-					color: Color4.ofRGBA(1, 1, 0, 0.5),
-					thickness: 40,
-					factory: makePressureSensitiveFreehandLineBuilder
-				}
-			),
+			new Pen(editor, localization.penTool(3), {
+				color: Color4.ofRGBA(1, 1, 0, 0.5),
+				thickness: 40,
+				factory: makePressureSensitiveFreehandLineBuilder,
+			}),
 
-			new Eraser(editor, localization.eraserTool),
+			eraser,
 			new SelectionTool(editor, localization.selectionTool),
 			new TextTool(editor, localization.textTool, localization),
 			new PanZoom(editor, PanZoomMode.SinglePointerGestures, localization.anyDevicePanning),
@@ -88,22 +100,27 @@ export default class ToolController implements InputEventListener {
 			new UndoRedoShortcut(editor),
 			new ToolbarShortcutHandler(editor),
 			new ToolSwitcherShortcut(editor),
+			eraser.makeEraserSwitcherTool(),
 			new FindTool(editor),
 			new PasteHandler(editor),
 			new SelectAllShortcutHandler(editor),
 		];
-		primaryTools.forEach(tool => tool.setToolGroup(primaryToolGroup));
+		primaryTools.forEach((tool) => tool.setToolGroup(primaryToolGroup));
 		panZoomTool.setEnabled(true);
 		primaryPenTool.setEnabled(true);
 
-		editor.notifier.on(EditorEventType.ToolEnabled, event => {
+		editor.notifier.on(EditorEventType.ToolEnabled, (event) => {
 			if (event.kind === EditorEventType.ToolEnabled) {
-				editor.announceForAccessibility(localization.toolEnabledAnnouncement(event.tool.description));
+				editor.announceForAccessibility(
+					localization.toolEnabledAnnouncement(event.tool.description),
+				);
 			}
 		});
-		editor.notifier.on(EditorEventType.ToolDisabled, event => {
+		editor.notifier.on(EditorEventType.ToolDisabled, (event) => {
 			if (event.kind === EditorEventType.ToolDisabled) {
-				editor.announceForAccessibility(localization.toolDisabledAnnouncement(event.tool.description));
+				editor.announceForAccessibility(
+					localization.toolDisabledAnnouncement(event.tool.description),
+				);
 			}
 		});
 
@@ -140,7 +157,7 @@ export default class ToolController implements InputEventListener {
 	}
 
 	public getPrimaryTools(): BaseTool[] {
-		return this.tools.filter(tool => {
+		return this.tools.filter((tool) => {
 			return tool.getToolGroup() === this.primaryToolGroup;
 		});
 	}
@@ -184,8 +201,8 @@ export default class ToolController implements InputEventListener {
 		this.tools = newTools;
 	}
 
-	private insertTools(insertNear: BaseTool, toolsToInsert: BaseTool[], mode: 'before'|'after') {
-		this.tools = this.tools.filter(tool => !toolsToInsert.includes(tool));
+	private insertTools(insertNear: BaseTool, toolsToInsert: BaseTool[], mode: 'before' | 'after') {
+		this.tools = this.tools.filter((tool) => !toolsToInsert.includes(tool));
 
 		const newTools = [];
 		for (const tool of this.tools) {
@@ -310,8 +327,8 @@ export default class ToolController implements InputEventListener {
 		this.inputPipeline.addToTail(mapper);
 	}
 
-	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[])=>Type): Type[] {
-		return this.tools.filter(tool => tool instanceof type) as Type[];
+	public getMatchingTools<Type extends BaseTool>(type: new (...args: any[]) => Type): Type[] {
+		return this.tools.filter((tool) => tool instanceof type) as Type[];
 	}
 
 	// @internal
@@ -321,4 +338,3 @@ export default class ToolController implements InputEventListener {
 		}
 	}
 }
-

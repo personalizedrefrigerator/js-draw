@@ -1,39 +1,46 @@
 {
-  "name": "@js-draw/monorepo",
-  "private": true,
-  "version": "0.0.0",
-  "scripts": {
-    "dist-test": "lerna run dist-test",
-    "build": "lerna run build",
-    "doc": "typedoc --options typedoc.json",
-    "watch-docs": "typedoc --watch --options typedoc.json",
-    "test": "jest",
-    "lint": "eslint .",
-    "linter-precommit": "eslint --max-warnings=0 --fix",
-    "lint-staged": "lint-staged",
-    "lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
-    "build-translation-templates": "lerna run build-translation-templates",
-    "translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
-    "preinstall": "git config core.hookspath .githooks",
-    "postinstall": "npm run build",
-    "publish-ci": "lerna publish from-package --yes"
-  },
-  "workspaces": [
-    "packages/*",
-    "docs/examples/*",
-    "docs/demo",
-    "docs/debugging/*"
-  ],
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "6.20.0",
-    "@typescript-eslint/parser": "6.20.0",
-    "eslint": "8.56.0",
-    "jest": "29.7.0",
-    "jest-environment-jsdom": "29.7.0",
-    "jsdom": "24.0.0",
-    "lerna": "8.1.2",
-    "lint-staged": "13.2.3",
-    "ts-jest": "29.1.2",
-    "typedoc": "0.25.8"
-  }
+	"name": "@js-draw/monorepo",
+	"private": true,
+	"version": "0.0.0",
+	"scripts": {
+		"dist-test": "lerna run dist-test",
+		"build": "lerna run build",
+		"doc": "typedoc --options typedoc.json",
+		"watch-docs": "typedoc --watch --options typedoc.json",
+		"test": "jest",
+		"lint": "eslint",
+		"format": "prettier --write",
+		"lint-staged": "lint-staged",
+		"lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
+		"format-ci": "prettier --check .",
+		"build-translation-templates": "lerna run build-translation-templates",
+		"translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
+		"preinstall": "git config core.hookspath .githooks",
+		"postinstall": "yarn run build",
+		"publish-ci": "lerna publish from-package --yes",
+		"version-bump": "lerna version --no-push --no-git-tag-version"
+	},
+	"workspaces": [
+		"packages/*",
+		"docs/examples/*",
+		"docs/demo",
+		"docs/debugging/*"
+	],
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "8.4.0",
+		"@typescript-eslint/parser": "8.4.0",
+		"eslint": "8.57.0",
+		"eslint-config-prettier": "9.1.0",
+		"eslint-plugin-no-unsanitized": "4.1.2",
+		"jest": "29.7.0",
+		"jest-environment-jsdom": "29.7.0",
+		"jsdom": "25.0.0",
+		"lerna": "8.1.8",
+		"lint-staged": "13.2.3",
+		"prettier": "3.3.3",
+		"ts-jest": "29.1.2",
+		"typedoc": "0.26.8",
+		"typescript": "5.5.4"
+	},
+	"packageManager": "yarn@4.2.2"
 }

@@ -8,8 +8,5 @@
 		"jsxFragmentFactory": "JSX.Fragment"
 	},
 
-	"include": [
-		"**/*.ts",
-		"**/*.tsx"
-	]
+	"include": ["**/*.ts", "**/*.tsx"]
 }

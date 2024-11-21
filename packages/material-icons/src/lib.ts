@@ -1,4 +1,3 @@
-
 /**
  * # `@js-draw/material-icons`
  *
@@ -59,15 +58,24 @@ import Close from './icons/Close.svg';
 import Shapes from './icons/Shapes.svg';
 import Draw from './icons/Draw.svg';
 import InkPen from './icons/InkPen.svg';
+import ContentPaste from './icons/ContentPaste.svg';
+import { OpaqueIconType } from './types';
 
-const icon = (data: string) => {
+/**
+ * Converts an icon to an HTML element.
+ *
+ * This function accepts an "opaque" type to avoid unsafely creating icon DOM elements
+ * from untrusted strings.
+ */
+const icon = (data: OpaqueIconType) => {
 	const icon = document.createElement('div');
-	icon.innerHTML = data;
+	// eslint-disable-next-line no-unsanitized/property -- data must not be user-provided (enforced with a custom type).
+	icon.innerHTML = data as unknown as string;
 	return icon.childNodes[0] as SVGElement;
 };
 
 /**
- * An {@link IconProvider} that uses [material icons](https://github.com/google/material-design-icons).
+ * An {@link js-draw!IconProvider} that uses [material icons](https://github.com/google/material-design-icons).
  */
 class MaterialIconProvider extends IconProvider {
 	public override makeUndoIcon(): IconElemType {
@@ -118,9 +126,12 @@ class MaterialIconProvider extends IconProvider {
 		svg.setAttribute('viewBox', '0 -880 960 1000');
 
 		const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-		line.setAttribute('d', `
+		line.setAttribute(
+			'd',
+			`
 			M110,-25 L850,-25
-		`);
+		`,
+		);
 		line.style.stroke = style.color.toHexString();
 		line.style.strokeWidth = `${Math.sqrt(style.thickness) * 20}`;
 
@@ -136,7 +147,7 @@ class MaterialIconProvider extends IconProvider {
 		if (style.color.a < 1) {
 			const checkerboard = this.makeCheckerboardPattern();
 			const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-			defs.innerHTML = checkerboard.patternDef;
+			defs.appendChild(checkerboard.patternDefElement);
 			svg.appendChild(defs);
 
 			const lineBackground = line.cloneNode() as SVGPathElement;
@@ -161,6 +172,12 @@ class MaterialIconProvider extends IconProvider {
 	}
 	public override makeDuplicateSelectionIcon(): IconElemType {
 		return icon(ContentCopy);
+	}
+	public override makeCopyIcon(): IconElemType {
+		return icon(ContentCopy);
+	}
+	public override makePasteIcon(): IconElemType {
+		return icon(ContentPaste);
 	}
 	public override makeDeleteSelectionIcon(): IconElemType {
 		return icon(Delete);

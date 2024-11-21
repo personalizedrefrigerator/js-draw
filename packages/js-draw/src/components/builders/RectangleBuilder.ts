@@ -8,12 +8,24 @@ import Stroke from '../Stroke';
 import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
+/**
+ * Creates filled rectangles with sharp corners.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeFilledRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new RectangleBuilder(initialPoint, true, viewport);
 	},
 );
 
+/**
+ * Creates outlined rectangles with sharp corners.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeOutlinedRectangleBuilder: ComponentBuilderFactory = makeSnapToGridAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		return new RectangleBuilder(initialPoint, false, viewport);
@@ -47,17 +59,16 @@ export default class RectangleBuilder implements ComponentBuilder {
 		const endPoint = rotationMat.inverse().transformVec2(this.endPoint.pos);
 
 		const rect = Rect2.fromCorners(startPoint, endPoint);
-		const path = Path.fromRect(
-			rect,
-			this.filled ? null : this.endPoint.width,
-		).transformedBy(
-			// Rotate the canvas rectangle so that its rotation matches the screen
-			rotationMat
-		).mapPoints(point => this.viewport.roundPoint(point));
+		const path = Path.fromRect(rect, this.filled ? null : this.endPoint.width)
+			.transformedBy(
+				// Rotate the canvas rectangle so that its rotation matches the screen
+				rotationMat,
+			)
+			.mapPoints((point) => this.viewport.roundPoint(point));
 
 		const preview = new Stroke([
 			pathToRenderable(path, {
-				fill: this.endPoint.color
+				fill: this.endPoint.color,
 			}),
 		]);
 

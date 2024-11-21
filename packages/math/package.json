@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/math",
-	"version": "1.18.0",
+	"version": "1.22.0",
 	"description": "A math library for js-draw. ",
 	"types": "./dist/mjs/lib.d.ts",
 	"main": "./dist/cjs/lib.js",
@@ -17,18 +17,17 @@
 	},
 	"author": "Henry Heino",
 	"license": "MIT",
-	"private": false,
 	"scripts": {
-		"dist-test": "cd dist-test/test_imports && npm install && npm run test",
-		"dist": "npm run build && npm run dist-test",
-		"build": "rm -rf ./dist && build-tool build",
+		"dist-test": "cd dist-test/test_imports && yarn install && yarn run test",
+		"dist": "yarn run build && yarn run dist-test",
+		"build": "build-tool build",
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
 		"bezier-js": "6.1.3"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.17.0",
+		"@js-draw/build-tool": "^1.22.0",
 		"@types/bezier-js": "4.1.0",
 		"@types/jest": "29.5.5",
 		"@types/jsdom": "21.1.3"

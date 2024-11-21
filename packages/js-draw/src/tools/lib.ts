@@ -1,3 +1,4 @@
+export { default as InputMapper } from './InputFilter/InputMapper';
 
 export { default as BaseTool } from './BaseTool';
 export { default as ToolController } from './ToolController';

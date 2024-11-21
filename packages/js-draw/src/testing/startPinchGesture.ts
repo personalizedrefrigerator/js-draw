@@ -11,33 +11,38 @@ import { InputEvtType } from '../inputEvents';
  * `initialRotation` should be in radians.
  */
 const startPinchGesture = (
-	editor: Editor, center: Point2, initialDistance: number, initialRotation: number
+	editor: Editor,
+	center: Point2,
+	initialDistance: number,
+	initialRotation: number,
 ) => {
 	const computeTouchPoints = (center: Point2, distance: number, rotation: number) => {
 		const halfDisplacement = Mat33.zRotation(rotation).transformVec2(Vec2.of(0, distance / 2));
 		const point1 = center.plus(halfDisplacement);
 		const point2 = center.minus(halfDisplacement);
 
-		return [ point1, point2 ];
+		return [point1, point2];
 	};
 
-	let [ touchPoint1, touchPoint2 ] = computeTouchPoints(center, initialDistance, initialRotation);
+	let [touchPoint1, touchPoint2] = computeTouchPoints(center, initialDistance, initialRotation);
 	let firstPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, touchPoint1);
-	let secondPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, touchPoint2, [ firstPointer ]);
+	let secondPointer = sendTouchEvent(editor, InputEvtType.PointerDownEvt, touchPoint2, [
+		firstPointer,
+	]);
 
 	return {
 		update(center: Point2, distance: number, rotation: number) {
 			const eventType = InputEvtType.PointerMoveEvt;
 
-			const [ newPoint1, newPoint2 ] = computeTouchPoints(center, distance, rotation);
+			const [newPoint1, newPoint2] = computeTouchPoints(center, distance, rotation);
 			touchPoint1 = newPoint1;
 			touchPoint2 = newPoint2;
 
-			firstPointer = sendTouchEvent(editor, eventType, newPoint1, [ secondPointer ]);
-			secondPointer = sendTouchEvent(editor, eventType, newPoint2, [ firstPointer ]);
+			firstPointer = sendTouchEvent(editor, eventType, newPoint1, [secondPointer]);
+			secondPointer = sendTouchEvent(editor, eventType, newPoint2, [firstPointer]);
 		},
 		end() {
-			sendTouchEvent(editor, InputEvtType.PointerUpEvt, touchPoint1, [ secondPointer ]);
+			sendTouchEvent(editor, InputEvtType.PointerUpEvt, touchPoint1, [secondPointer]);
 			sendTouchEvent(editor, InputEvtType.PointerUpEvt, touchPoint2);
 		},
 	};

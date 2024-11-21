@@ -1,11 +1,9 @@
-
 import { EditorView, basicSetup } from 'codemirror';
 import { indentUnit, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 import { javascript as jsLanguageSupport } from '@codemirror/lang-javascript';
 import { css as cssLanguageSupport } from '@codemirror/lang-css';
 import { HighlightStyle } from '@codemirror/language';
-
 
 // See https://codemirror.net/examples/styling/
 // and https://github.com/codemirror/theme-one-dark/blob/main/src/one-dark.ts
@@ -30,10 +28,11 @@ const codeMirrorTheme = EditorView.theme({
 		borderLeftColor: 'var(--cm-caret-color)',
 	},
 	// Needs high specificity to override the default
-	'& .cm-selectionLayer .cm-selectionBackground, &.cm-focused .cm-selectionLayer .cm-selectionBackground, ::selection': {
-		background: 'var(--cm-selection-background)',
-		backgroundColor: 'var(--cm-selection-background) !important',
-	},
+	'& .cm-selectionLayer .cm-selectionBackground, &.cm-focused .cm-selectionLayer .cm-selectionBackground, ::selection':
+		{
+			background: 'var(--cm-selection-background)',
+			backgroundColor: 'var(--cm-selection-background) !important',
+		},
 	'.cm-activeLine': {
 		// Default color
 		color: 'var(--cm-primary-text-color)',
@@ -54,8 +53,8 @@ const codeMirrorTheme = EditorView.theme({
 	'.cm-tooltip': {
 		backgroundColor: 'var(--cm-secondary-background-color)',
 		color: 'var(--cm-secondary-text-color)',
-		boxShadow: '2px 0px 0px var(--cm-shadow-color)'
-	}
+		boxShadow: '2px 0px 0px var(--cm-shadow-color)',
+	},
 });
 
 const codeMirrorHighlightStyle = HighlightStyle.define([
@@ -75,7 +74,11 @@ export enum EditorLanguage {
 	CSS,
 }
 
-const addCodeMirrorEditor = (initialText: string, parent: HTMLElement, language: EditorLanguage) => {
+const addCodeMirrorEditor = (
+	initialText: string,
+	parent: HTMLElement,
+	language: EditorLanguage,
+) => {
 	let languagePlugin;
 
 	if (language === EditorLanguage.CSS) {
@@ -105,6 +108,15 @@ const addCodeMirrorEditor = (initialText: string, parent: HTMLElement, language:
 	});
 	editor.dispatch({
 		changes: { from: 0, insert: initialText },
+	});
+
+	// Overrides the Typedoc search shortcut. Because the upstream shortcut uses the "keypress" event,
+	// we override the same event:
+	editor.dom.addEventListener('keypress', (event) => {
+		if (event.key === '/') {
+			// Prevent other event listeners from handling the event.
+			event.stopPropagation();
+		}
 	});
 
 	return {

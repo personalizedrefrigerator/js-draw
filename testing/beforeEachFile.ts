@@ -2,12 +2,15 @@ import loadExpectExtensions from './loadExpectExtensions';
 loadExpectExtensions();
 jest.useFakeTimers();
 
+// This file contains polyfills and must assume that built-in types are incorrect.
+// eslint-disable @typescript-eslint/no-unnecessary-condition
+
 // jsdom hides several node APIs that should be present in the browser.
 import { TextEncoder, TextDecoder } from 'node:util';
 import { Blob as NodeBlob } from 'node:buffer';
 window.TextEncoder = TextEncoder;
-window.TextDecoder = TextDecoder as any;
-window.Blob = NodeBlob as any;
+window.TextDecoder = TextDecoder as typeof window.TextDecoder;
+window.Blob = NodeBlob as typeof Blob;
 
 // jsdom doesn't support HTMLCanvasElement#getContext — it logs an error
 // to the console. Make it return null so we can handle a non-existent Canvas
@@ -16,13 +19,13 @@ HTMLCanvasElement.prototype.getContext = () => null;
 
 // jsdom also doesn't support ResizeObserver. Mock it.
 window.ResizeObserver ??= class {
-	public constructor(_callback: ResizeObserverCallback) { }
+	public constructor(_callback: ResizeObserverCallback) {}
 
-	public disconnect() { }
+	public disconnect() {}
 
-	public observe() { }
+	public observe() {}
 
-	public unobserve() { }
+	public unobserve() {}
 };
 
 // jsdom doesn't support PointerEvent.
@@ -38,7 +41,8 @@ window.PointerEvent ??= class extends MouseEvent {
 	public twist: number;
 
 	public constructor(
-		type: 'pointerdown'|'pointermove'|'pointerup', initDict: PointerEventInit = {},
+		type: 'pointerdown' | 'pointermove' | 'pointerup',
+		initDict: PointerEventInit = {},
 	) {
 		super(type, initDict);
 
@@ -56,18 +60,32 @@ window.PointerEvent ??= class extends MouseEvent {
 HTMLElement.prototype.setPointerCapture ??= () => {};
 // eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.releasePointerCapture ??= () => {};
+// eslint-disable-next-line @typescript-eslint/unbound-method
+HTMLElement.prototype.scrollIntoView ??= () => {};
+
+// Mock support for .innerText
+// See https://github.com/jsdom/jsdom/issues/1245
+Object.defineProperty(HTMLElement.prototype, 'innerText', {
+	get() {
+		// Not exactly equivalent to .innerText. See
+		// https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent#differences_from_innertext
+		return this.textContent;
+	},
+	set(value: string) {
+		this.replaceChildren(document.createTextNode(value));
+	},
+});
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
-HTMLDialogElement.prototype.showModal ??= function() {
+HTMLDialogElement.prototype.showModal ??= function () {
 	this.style.display = 'block';
 };
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
-HTMLDialogElement.prototype.close ??= function() {
+HTMLDialogElement.prototype.close ??= function () {
 	this.style.display = 'none';
 	this.dispatchEvent(new Event('close'));
 };
-
 
 // jsdom doesn't support the clipboard API or ClipboardEvents.
 // For now, these are mocked here:
@@ -98,10 +116,10 @@ window.ClipboardItem ??= class {
 	public readonly types: string[];
 
 	public constructor(
-		public readonly items: Record<string, string|Blob|PromiseLike<string|Blob>>,
-		public readonly options?: ClipboardItemOptions
+		public readonly items: Record<string, string | Blob | PromiseLike<string | Blob>>,
+		public readonly options?: ClipboardItemOptions,
 	) {
-		this.types = Object.keys(items).map(key => key.toLowerCase());
+		this.types = Object.keys(items).map((key) => key.toLowerCase());
 	}
 
 	public async getType(type: string) {
@@ -115,7 +133,7 @@ window.ClipboardItem ??= class {
 };
 
 window.ClipboardEvent ??= class extends Event {
-	public clipboardData: DataTransfer|null;
+	public clipboardData: DataTransfer | null;
 
 	public constructor(type: string, options?: ClipboardEventInit) {
 		super(type, options);
@@ -135,7 +153,7 @@ window.DataTransfer ??= class {
 		for (const file of this.files) {
 			types.add(file.type);
 		}
-		return [ ...types.values() ];
+		return [...types.values()];
 	}
 
 	public get items() {
@@ -154,5 +172,5 @@ window.DataTransfer ??= class {
 		this.#data.clear();
 	}
 
-	public setDragImage() { }
+	public setDragImage() {}
 } as any;

@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/typedoc-extensions",
-	"version": "1.18.0",
+	"version": "1.22.0",
 	"description": "Internal extensions for TypeDoc in js-draw.",
 	"types": "./dist/mjs/index.d.ts",
 	"main": "./dist/cjs/index.js",
@@ -12,30 +12,30 @@
 	"license": "MIT",
 	"private": true,
 	"scripts": {
-		"dist": "npm run build",
-		"build": "rm -rf ./dist && mkdir dist && build-tool build",
-		"watch": "rm -rf ./dist && mkdir dist && build-tool watch"
+		"dist": "yarn run build",
+		"build": "build-tool build",
+		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"katex": "0.16.9",
+		"katex": "0.16.10",
 		"react": "18.2.0",
-		"typescript": "5.3.3"
+		"typescript": "5.5.4"
 	},
 	"peerDependencies": {
-		"typedoc": "0.25.x"
+		"typedoc": "0.26.x"
 	},
 	"devDependencies": {
-		"@codemirror/lang-css": "6.2.1",
-		"@codemirror/lang-javascript": "6.2.1",
-		"@codemirror/language": "6.10.1",
-		"@js-draw/build-tool": "^1.17.0",
-		"@js-draw/material-icons": "^1.18.0",
-		"@js-draw/math": "^1.18.0",
-		"@lezer/highlight": "1.1.6",
-		"@types/katex": "0.16.3",
-		"@types/react": "18.2.28",
+		"@codemirror/lang-css": "6.3.0",
+		"@codemirror/lang-javascript": "6.2.2",
+		"@codemirror/language": "6.10.3",
+		"@js-draw/build-tool": "^1.22.0",
+		"@js-draw/material-icons": "^1.22.0",
+		"@js-draw/math": "^1.22.0",
+		"@lezer/highlight": "1.2.1",
+		"@types/katex": "0.16.7",
+		"@types/react": "18.3.3",
 		"codemirror": "6.0.1",
-		"js-draw": "^1.18.0"
+		"js-draw": "^1.22.0"
 	},
 	"bugs": {
 		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"

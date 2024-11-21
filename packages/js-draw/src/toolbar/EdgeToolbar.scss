@@ -1,38 +1,59 @@
-@use "./utils/labelVisibleOnHover.scss";
+@use './utils/labelVisibleOnHover.scss';
 
 @keyframes toolbar--edgemenu-transition-in {
-	from { transform: translate(0, 100%); }
-	to { transform: translate(0, 0); }
+	from {
+		transform: translate(0, 100%);
+	}
+	to {
+		transform: translate(0, 0);
+	}
 }
 
 @keyframes toolbar--edgemenu-transition-in-reduce-motion {
-	from { opacity: 0; }
-	to { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes toolbar--edgemenu-transition-out {
 	// Don't include `from { translate: 0 }` because initially,
 	// the translation might not be zero (e.g. during a drag).
-	to { transform: translate(0, 100%); }
+	to {
+		transform: translate(0, 100%);
+	}
 }
 
 @keyframes toolbar--edgemenu-transition-out-reduce-motion {
-	from { opacity: 1; }
-	to { opacity: 0; }
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
 }
 
 @keyframes toolbar--edgemenu-container-transition-in {
 	// Include overflow-y: hidden so that the bottom of the menu doesn't go below
 	// the editor.
-	from { overflow-y: hidden; }
-	to { overflow-y: hidden; }
+	from {
+		overflow-y: hidden;
+	}
+	to {
+		overflow-y: hidden;
+	}
 }
 
 @keyframes toolbar--edgemenu-container-transition-out {
-	from { overflow-y: hidden; }
-	to { overflow-y: hidden; }
+	from {
+		overflow-y: hidden;
+	}
+	to {
+		overflow-y: hidden;
+	}
 }
-
 
 // The toolbar portion (the bar along the top of the screen)
 .toolbar-edge-toolbar {
@@ -68,8 +89,12 @@
 					opacity: 0;
 
 					@keyframes hide-initially {
-						from { opacity: 0; }
-						to { opacity: 0; }
+						from {
+							opacity: 0;
+						}
+						to {
+							opacity: 0;
+						}
 					}
 
 					// Prevent labels from having an initial transition
@@ -110,7 +135,7 @@
 		&::-webkit-scrollbar-thumb {
 			background-color: var(--shadow-color);
 		}
-		
+
 		&.toolbar-tool-row {
 			overflow-x: auto;
 			overflow-y: hidden;
@@ -184,8 +209,8 @@
 
 		--button-flex-direction: row;
 
-
-		&.label-left { // Icon on the right
+		&.label-left {
+			// Icon on the right
 			justify-content: end;
 			--button-flex-direction: row-reverse;
 
@@ -198,7 +223,8 @@
 			order: 100;
 		}
 
-		&.label-right { // Icon on the left
+		&.label-right {
+			// Icon on the left
 			// Show first
 			order: -1;
 		}
@@ -222,7 +248,6 @@
 	--button-label-hover-offset-x: 0;
 
 	.toolbar-toolContainer:not(.no-icon):not(.label-inline) {
-
 		.toolbar-button {
 			width: calc(var(--toolbar-button-size) + var(--extra-left-right-padding));
 
@@ -238,7 +263,11 @@
 		}
 	}
 
-	& > div > .toolbar-toolContainer:not(.selected):not(.dropdownShowable) > .toolbar-button > .toolbar-showHideDropdownIcon {
+	&
+		> div
+		> .toolbar-toolContainer:not(.selected):not(.dropdownShowable)
+		> .toolbar-button
+		> .toolbar-showHideDropdownIcon {
 		display: block;
 		visibility: hidden;
 	}
@@ -255,7 +284,6 @@
 			padding-top: 8px;
 			padding-bottom: 0px;
 		}
-
 
 		box-shadow: none;
 	}
@@ -280,7 +308,9 @@
 	background-color: var(--background-color-transparent);
 
 	$motion-transition: 0.15s ease-in-out height;
-	$non-motion-transition: 0.15s ease-in-out background-color, 0.2s ease-in-out opacity;
+	$non-motion-transition:
+		0.15s ease-in-out background-color,
+		0.2s ease-in-out opacity;
 	transition: $motion-transition, $non-motion-transition;
 	@media (prefers-reduced-motion: reduce) {
 		transition: $non-motion-transition;
@@ -307,19 +337,24 @@
 		border: none;
 		padding: 10px;
 
-		color: var(--foreground-color-1);
-
 		transition: 0.2s ease box-shadow;
 
-		&:hover {
+		&:not(:disabled):hover {
 			box-shadow: 0 1px 2px var(--shadow-color);
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			font-weight: unset;
+			cursor: unset;
+			color: var(--foreground-color-1);
 		}
 
 		font-weight: bold;
 		color: var(--primary-action-foreground-color);
 	}
 
-	// Special styles for the enum selector 
+	// Special styles for the enum selector
 	.toolbar-grid-selector .choice-button {
 		--button-label-hover-offset-y: var(--button-size);
 		@include labelVisibleOnHover.label-visible-on-hover('label > .button-label-text');
@@ -353,9 +388,12 @@
 	border-top-left-radius: $border-radius;
 	border-top-right-radius: $border-radius;
 
-	transition: transform 0.1s ease, padding-bottom 0.1s ease;
+	transition:
+		transform 0.1s ease,
+		padding-bottom 0.1s ease;
 
-	input, textarea {
+	input,
+	textarea {
 		user-select: auto;
 		-webkit-user-select: auto;
 	}
@@ -383,9 +421,9 @@
 		box-shadow: none;
 
 		background: transparent;
-		
+
 		&::before {
-			content: "";
+			content: '';
 
 			background-color: var(--icon-color);
 			opacity: 0.2;
@@ -426,7 +464,8 @@
 			}
 
 			// No special sizing for long labels
-			label, & > label.long-label {
+			label,
+			& > label.long-label {
 				font-size: 1em;
 			}
 		}
@@ -463,14 +502,14 @@
 				box-sizing: border-box;
 			}
 
-			& > input[type="checkbox"] {
+			& > input[type='checkbox'] {
 				width: 20px;
 				height: 20px;
 				margin-left: 0;
 			}
 
 			// If checkboxes have flex-grow, the checkbox region can become centered.
-			& > input:not([type="checkbox"]) {
+			& > input:not([type='checkbox']) {
 				flex-grow: 1;
 
 				// Specify a minimum width to allow the input to shrink.

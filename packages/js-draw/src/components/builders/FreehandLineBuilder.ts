@@ -9,6 +9,12 @@ import RenderingStyle from '../../rendering/RenderingStyle';
 import { StrokeSmoother, Curve } from '../util/StrokeSmoother';
 import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
+/**
+ * Creates a stroke builder that draws freehand lines.
+ *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+ */
 export const makeFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		// Don't smooth if input is more than ± 3 pixels from the true curve, do smooth if
@@ -16,10 +22,8 @@ export const makeFreehandLineBuilder: ComponentBuilderFactory = makeShapeFitAuto
 		const maxSmoothingDist = viewport.getSizeOfPixelOnCanvas() * 3;
 		const minSmoothingDist = viewport.getSizeOfPixelOnCanvas();
 
-		return new FreehandLineBuilder(
-			initialPoint, minSmoothingDist, maxSmoothingDist, viewport
-		);
-	}
+		return new FreehandLineBuilder(initialPoint, minSmoothingDist, maxSmoothingDist, viewport);
+	},
 );
 
 // Handles stroke smoothing and creates Strokes from user/stylus input.
@@ -41,7 +45,12 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 		private viewport: Viewport,
 	) {
-		this.curveFitter = new StrokeSmoother(startPoint, minFitAllowed, maxFitAllowed, (curve: Curve|null) => this.addCurve(curve));
+		this.curveFitter = new StrokeSmoother(
+			startPoint,
+			minFitAllowed,
+			maxFitAllowed,
+			(curve: Curve | null) => this.addCurve(curve),
+		);
 
 		this.averageWidth = startPoint.width;
 		this.bbox = new Rect2(this.startPoint.pos.x, this.startPoint.pos.y, 0, 0);
@@ -57,11 +66,11 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			stroke: {
 				color: this.startPoint.color,
 				width: this.roundDistance(this.averageWidth),
-			}
+			},
 		};
 	}
 
-	protected previewCurrentPath(): RenderablePathSpec|null {
+	protected previewCurrentPath(): RenderablePathSpec | null {
 		const path = this.parts.slice();
 		const commands = [...path, ...this.curveToPathCommands(this.curveFitter.preview())];
 		const startPoint = this.startPoint.pos;
@@ -74,15 +83,15 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		};
 	}
 
-	protected previewFullPath(): RenderablePathSpec[]|null {
+	protected previewFullPath(): RenderablePathSpec[] | null {
 		const preview = this.previewCurrentPath();
 		if (preview) {
-			return [ preview ];
+			return [preview];
 		}
 		return null;
 	}
 
-	private previewStroke(): Stroke|null {
+	private previewStroke(): Stroke | null {
 		const pathPreview = this.previewFullPath();
 
 		if (pathPreview) {
@@ -128,7 +137,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		return Viewport.roundPoint(dist, minFit);
 	}
 
-	private curveToPathCommands(curve: Curve|null): PathCommand[] {
+	private curveToPathCommands(curve: Curve | null): PathCommand[] {
 		// Case where no points have been added
 		if (!curve) {
 			// Don't create a circle around the initial point if the stroke has more than one point.
@@ -137,7 +146,10 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 			}
 
 			// Make the circle small -- because of the stroke style, we'll be drawing a stroke around it.
-			const width = Viewport.roundPoint(this.averageWidth / 10, Math.min(this.minFitAllowed, this.averageWidth / 10));
+			const width = Viewport.roundPoint(
+				this.averageWidth / 10,
+				Math.min(this.minFitAllowed, this.averageWidth / 10),
+			);
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
@@ -172,7 +184,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 					kind: PathCommandType.QuadraticBezierTo,
 					controlPoint: center.plus(Vec2.of(width, -width)),
 					endPoint: center.plus(Vec2.of(width, 0)),
-				}
+				},
 			];
 		}
 
@@ -194,7 +206,7 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 		return result;
 	}
 
-	private addCurve(curve: Curve|null) {
+	private addCurve(curve: Curve | null) {
 		const parts = this.curveToPathCommands(curve);
 		this.parts.push(...parts);
 
@@ -205,9 +217,9 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 
 	public addPoint(newPoint: StrokeDataPoint) {
 		this.curveFitter.addPoint(newPoint);
-		this.widthAverageNumSamples ++;
+		this.widthAverageNumSamples++;
 		this.averageWidth =
-			this.averageWidth * (this.widthAverageNumSamples - 1) / this.widthAverageNumSamples
-				+ newPoint.width / this.widthAverageNumSamples;
+			(this.averageWidth * (this.widthAverageNumSamples - 1)) / this.widthAverageNumSamples +
+			newPoint.width / this.widthAverageNumSamples;
 	}
 }

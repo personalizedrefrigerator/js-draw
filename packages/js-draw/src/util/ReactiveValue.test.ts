@@ -24,6 +24,20 @@ describe('ReactiveValue', () => {
 		value.set(6);
 	});
 
+	it('should resolve waitForNextUpdate callbacks on update', async () => {
+		const value = ReactiveValue.fromInitialValue(3);
+		const onFirstUpdatePromise = value.waitForNextUpdate();
+
+		value.set(2);
+		expect(await onFirstUpdatePromise).toBe(2);
+
+		// Should only resolve on change.
+		const onSecondUpdatePromise = value.waitForNextUpdate();
+		value.set(2);
+		value.set(4);
+		expect(await onSecondUpdatePromise).toBe(4);
+	});
+
 	it('values from callbacks should derive values from the callback', () => {
 		const sourceValue1 = ReactiveValue.fromInitialValue('test');
 		const sourceValue2 = ReactiveValue.fromInitialValue('test2');
@@ -31,12 +45,8 @@ describe('ReactiveValue', () => {
 
 		// Create a value that is computed from the three above values.
 		const derivedValue1 = ReactiveValue.fromCallback(() => {
-			return [
-				sourceValue1.get(),
-				sourceValue2.get(),
-				sourceValue3.get(),
-			].join(',');
-		}, [ sourceValue1, sourceValue2, sourceValue3 ]);
+			return [sourceValue1.get(), sourceValue2.get(), sourceValue3.get()].join(',');
+		}, [sourceValue1, sourceValue2, sourceValue3]);
 
 		const derivedValue1Listener = jest.fn();
 		derivedValue1.onUpdate(derivedValue1Listener);
@@ -47,7 +57,7 @@ describe('ReactiveValue', () => {
 		// Create a value that is computed just from derivedValue1
 		const derivedValue2 = ReactiveValue.fromCallback(() => {
 			return derivedValue1.get() + '!';
-		}, [ derivedValue1 ]);
+		}, [derivedValue1]);
 
 		const derivedValue2Listener = jest.fn();
 		derivedValue2.onUpdate(derivedValue2Listener);
@@ -118,7 +128,9 @@ describe('ReactiveValue', () => {
 	it('mutable map should be bidirectional', () => {
 		const sourceValue = ReactiveValue.fromInitialValue(5);
 		const mappedValue = MutableReactiveValue.map(
-			sourceValue, a => a ** 2, b => Math.sqrt(b),
+			sourceValue,
+			(a) => a ** 2,
+			(b) => Math.sqrt(b),
 		);
 
 		expect(mappedValue.get()).toBeCloseTo(25);
@@ -134,8 +146,8 @@ describe('ReactiveValue', () => {
 
 	it('single-directional map should apply the given mapping function', () => {
 		const sourceValue = ReactiveValue.fromInitialValue(1);
-		const midValue = ReactiveValue.map(sourceValue, a => a * 2);
-		const destValue = ReactiveValue.map(midValue, _ => 0);
+		const midValue = ReactiveValue.map(sourceValue, (a) => a * 2);
+		const destValue = ReactiveValue.map(midValue, (_) => 0);
 
 		const sourceUpdateFn = jest.fn();
 		const midUpdateFn = jest.fn();

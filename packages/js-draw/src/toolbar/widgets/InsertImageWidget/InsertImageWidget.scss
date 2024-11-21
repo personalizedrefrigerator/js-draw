@@ -1,0 +1,46 @@
+$image-widget-selector: '.insert-image-widget-dropdown-content';
+// Repeat the selector for additional specificity.
+:root #{$image-widget-selector}#{$image-widget-selector}#{$image-widget-selector} {
+	& > div > div {
+		padding: 5px;
+	}
+
+	& > div {
+		min-height: 0;
+	}
+
+	img {
+		max-width: 100%;
+		max-height: 100%;
+
+		/* Center */
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.insert-image-image-status-view {
+		display: flex;
+		justify-content: space-between;
+		padding-bottom: 0;
+	}
+
+	.action-button-row {
+		margin-top: 4px;
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+
+		// Ensure that (on toolbars that support it), the action button
+		// is touching the bottom edge of the screen.
+		padding-bottom: 0;
+		margin-bottom: 0;
+	}
+
+	.action-button-row > button {
+		flex-grow: 1;
+		text-align: end;
+		max-width: 50%;
+		min-width: min(100%, 40px);
+	}
+}

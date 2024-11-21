@@ -2,14 +2,12 @@ import Editor from '../../Editor';
 import { ToolbarLocalization } from '../localization';
 import BaseWidget from './BaseWidget';
 
-
 export default class OverflowWidget extends BaseWidget {
 	private overflowChildren: BaseWidget[] = [];
 	private overflowContainer: HTMLElement;
 
 	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
 		super(editor, 'overflow-widget', localizationTable);
-
 
 		this.container.classList.add('toolbar-overflow-widget');
 
@@ -59,7 +57,7 @@ export default class OverflowWidget extends BaseWidget {
 	}
 
 	public getChildWidgets(): BaseWidget[] {
-		return [ ...this.overflowChildren ];
+		return [...this.overflowChildren];
 	}
 
 	public hasAsChild(widget: BaseWidget) {

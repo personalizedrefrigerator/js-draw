@@ -21,12 +21,14 @@ const makeFormatMenu = (
 ) => {
 	const container = document.createElement('div');
 	container.classList.add(
-		'selection-format-menu', `${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}indentedList`
+		'selection-format-menu',
+		`${toolbarCSSPrefix}spacedList`,
+		`${toolbarCSSPrefix}indentedList`,
 	);
 
 	const colorRow = document.createElement('div');
 	const colorLabel = document.createElement('label');
-	const colorInputControl = makeColorInput(editor, color => {
+	const colorInputControl = makeColorInput(editor, (color) => {
 		const selection = selectionTool.getSelection();
 
 		if (selection) {
@@ -78,22 +80,28 @@ const makeFormatMenu = (
 		},
 		update,
 		registerHelpText: (helpDisplay: HelpDisplay) => {
-			helpDisplay.registerTextHelpForElement(colorRow, localizationTable.selectionDropdown__changeColorHelpText);
+			helpDisplay.registerTextHelpForElement(
+				colorRow,
+				localizationTable.selectionDropdown__changeColorHelpText,
+			);
 			colorInputControl.registerWithHelpTextDisplay(helpDisplay);
 		},
 	};
 };
 
 export default class SelectionToolWidget extends BaseToolWidget {
-	private updateFormatMenu: ()=>void = () => {};
+	private updateFormatMenu: () => void = () => {};
 
 	public constructor(
-		editor: Editor, private tool: SelectionTool, localization?: ToolbarLocalization
+		editor: Editor,
+		private tool: SelectionTool,
+		localization?: ToolbarLocalization,
 	) {
 		super(editor, tool, 'selection-tool-widget', localization);
 
 		const resizeButton = new ActionButtonWidget(
-			editor, 'resize-btn',
+			editor,
+			'resize-btn',
 			() => editor.icons.makeResizeImageToSelectionIcon(),
 			this.localizationTable.resizeImageToSelection,
 			() => {
@@ -104,7 +112,8 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		resizeButton.setHelpText(this.localizationTable.selectionDropdown__resizeToHelpText);
 
 		const deleteButton = new ActionButtonWidget(
-			editor, 'delete-btn',
+			editor,
+			'delete-btn',
 			() => editor.icons.makeDeleteSelectionIcon(),
 			this.localizationTable.deleteSelection,
 			() => {
@@ -117,7 +126,8 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		deleteButton.setHelpText(this.localizationTable.selectionDropdown__deleteHelpText);
 
 		const duplicateButton = new ActionButtonWidget(
-			editor, 'duplicate-btn',
+			editor,
+			'duplicate-btn',
 			() => editor.icons.makeDuplicateSelectionIcon(),
 			this.localizationTable.duplicateSelection,
 			async () => {
@@ -141,7 +151,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		updateDisabled(true);
 
 		// Enable/disable actions based on whether items are selected
-		this.editor.notifier.on(EditorEventType.ToolUpdated, toolEvt => {
+		this.editor.notifier.on(EditorEventType.ToolUpdated, (toolEvt) => {
 			if (toolEvt.kind !== EditorEventType.ToolUpdated) {
 				throw new Error('Invalid event type!');
 			}

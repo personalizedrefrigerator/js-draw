@@ -23,12 +23,12 @@ class Dropdown implements ToolMenu {
 	private dropdownContainer: HTMLElement;
 	public readonly visible: MutableReactiveValue<boolean>;
 
-	private dropdownToggleListener: DispatcherEventListener|null = null;
+	private dropdownToggleListener: DispatcherEventListener | null = null;
 
 	public constructor(
 		public parent: ToolMenuParent,
 		private notifier: NotifierType,
-		private onDestroy: ()=>void,
+		private onDestroy: () => void,
 	) {
 		this.visible = ReactiveValue.fromInitialValue(false);
 
@@ -42,7 +42,6 @@ class Dropdown implements ToolMenu {
 		this.dropdownToggleListener = this.notifier.on(DropdownEventType.DropdownShown, (evt) => {
 			if (
 				evt.dropdown !== this &&
-
 				// Don't hide if a submenu was shown (it might be a submenu of
 				// the current menu).
 				evt.fromToplevelDropdown
@@ -71,7 +70,7 @@ class Dropdown implements ToolMenu {
 
 		// Shift the dropdown if it's off the screen, but only if doing so moves it on to the screen
 		// (prevents dropdowns from going almost completely offscreen on small screens).
-		if (dropdownBBox.bottom > screenHeight && (dropdownBBox.top - dropdownBBox.height > 0)) {
+		if (dropdownBBox.bottom > screenHeight && dropdownBBox.top - dropdownBBox.height > 0) {
 			const targetElem = this.parent.target;
 			translateY = `calc(-${targetElem.clientHeight}px - 100%)`;
 		}
@@ -85,7 +84,7 @@ class Dropdown implements ToolMenu {
 		}
 	}
 
-	private hideDropdownTimeout: any|null = null;
+	private hideDropdownTimeout: any | null = null;
 	private setVisible(visible: boolean) {
 		const currentlyVisible = this.visible.get();
 		if (currentlyVisible === visible) {
@@ -99,7 +98,6 @@ class Dropdown implements ToolMenu {
 			this.dropdownContainer.classList.remove('hiding');
 			this.repositionDropdown();
 		}
-
 
 		const animationDuration = 150; // ms
 
@@ -133,9 +131,7 @@ class Dropdown implements ToolMenu {
 		}
 
 		// Animate
-		const animationName = `var(--dropdown-${
-			visible ? 'show' : 'hide'
-		}-animation)`;
+		const animationName = `var(--dropdown-${visible ? 'show' : 'hide'}-animation)`;
 		this.dropdownContainer.style.animation = `${animationDuration}ms ease ${animationName}`;
 	}
 
@@ -171,19 +167,17 @@ export default class DropdownLayoutManager implements WidgetContentLayoutManager
 	private dropdowns: Set<Dropdown> = new Set();
 
 	public constructor(
-		announceForAccessibility: (text: string)=>void,
+		announceForAccessibility: (text: string) => void,
 		private localization: ToolbarLocalization,
 	) {
 		this.notifier = new EventDispatcher();
 		this.notifier.on(DropdownEventType.DropdownShown, ({ dropdown, fromToplevelDropdown }) => {
 			if (!dropdown) return;
 
-			announceForAccessibility(
-				this.localization.dropdownShown(dropdown.parent.getTitle())
-			);
+			announceForAccessibility(this.localization.dropdownShown(dropdown.parent.getTitle()));
 
 			// Share the event with other connected notifiers
-			this.connectedNotifiers.forEach(notifier => {
+			this.connectedNotifiers.forEach((notifier) => {
 				notifier.dispatch(EditorEventType.ToolbarDropdownShown, {
 					kind: EditorEventType.ToolbarDropdownShown,
 					fromToplevelDropdown,
@@ -195,9 +189,7 @@ export default class DropdownLayoutManager implements WidgetContentLayoutManager
 		this.notifier.on(DropdownEventType.DropdownHidden, ({ dropdown }) => {
 			if (!dropdown) return;
 
-			announceForAccessibility(
-				this.localization.dropdownHidden(dropdown.parent.getTitle())
-			);
+			announceForAccessibility(this.localization.dropdownHidden(dropdown.parent.getTitle()));
 		});
 	}
 
@@ -210,15 +202,11 @@ export default class DropdownLayoutManager implements WidgetContentLayoutManager
 
 	/** Creates a dropdown within `parent`. */
 	public createToolMenu(parent: ToolMenuParent): ToolMenu {
-		const dropdown = new Dropdown(
-			parent,
-			this.notifier,
-			() => {
-				this.dropdowns.delete(dropdown);
+		const dropdown = new Dropdown(parent, this.notifier, () => {
+			this.dropdowns.delete(dropdown);
 
-				this.refreshListeners();
-			}
-		);
+			this.refreshListeners();
+		});
 		this.dropdowns.add(dropdown);
 		this.refreshListeners();
 
@@ -234,7 +222,7 @@ export default class DropdownLayoutManager implements WidgetContentLayoutManager
 	private refreshListeners() {
 		const clearListeners = () => {
 			// Remove all listeners & resources that won't be garbage collected.
-			this.listeners.forEach(l => l.remove());
+			this.listeners.forEach((l) => l.remove());
 			this.listeners = [];
 		};
 
@@ -243,12 +231,13 @@ export default class DropdownLayoutManager implements WidgetContentLayoutManager
 		} else if (this.listeners.length !== this.connectedNotifiers.length) {
 			clearListeners();
 
-			this.listeners = this.connectedNotifiers.map(notifier => {
+			this.listeners = this.connectedNotifiers.map((notifier) => {
 				return notifier.on(EditorEventType.ToolbarDropdownShown, (evt) => {
-					if (evt.kind !== EditorEventType.ToolbarDropdownShown
-
+					if (
+						evt.kind !== EditorEventType.ToolbarDropdownShown ||
 						// Don't forward to ourselves events that we originally triggered.
-						|| evt.layoutManager === this) {
+						evt.layoutManager === this
+					) {
 						return;
 					}
 

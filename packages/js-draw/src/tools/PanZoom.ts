@@ -1,4 +1,3 @@
-
 import { Editor } from '../Editor';
 import { Mat33, Vec3, Point2, Vec2 } from '@js-draw/math';
 import Pointer, { PointerDevice } from '../Pointer';
@@ -7,7 +6,16 @@ import { KeyPressEvent, PointerEvt, WheelEvt } from '../inputEvents';
 import untilNextAnimationFrame from '../util/untilNextAnimationFrame';
 import { Viewport, ViewportTransform } from '../Viewport';
 import BaseTool from './BaseTool';
-import { moveDownKeyboardShortcutId, moveLeftKeyboardShortcutId, moveRightKeyboardShortcutId, moveUpKeyboardShortcutId, rotateClockwiseKeyboardShortcutId, rotateCounterClockwiseKeyboardShortcutId, zoomInKeyboardShortcutId, zoomOutKeyboardShortcutId } from './keybindings';
+import {
+	moveDownKeyboardShortcutId,
+	moveLeftKeyboardShortcutId,
+	moveRightKeyboardShortcutId,
+	moveUpKeyboardShortcutId,
+	rotateClockwiseKeyboardShortcutId,
+	rotateCounterClockwiseKeyboardShortcutId,
+	zoomInKeyboardShortcutId,
+	zoomOutKeyboardShortcutId,
+} from './keybindings';
 
 interface PinchData {
 	canvasCenter: Point2;
@@ -17,12 +25,17 @@ interface PinchData {
 }
 
 export enum PanZoomMode {
+	/** Touch gestures with a single pointer. Ignores non-touch gestures. */
 	OneFingerTouchGestures = 0x1,
+	/** Touch gestures with exactly two pointers. Ignores non-touch gestures. */
 	TwoFingerTouchGestures = 0x1 << 1,
 	RightClickDrags = 0x1 << 2,
+	/** Single-pointer gestures of *any* type (including touch). */
 	SinglePointerGestures = 0x1 << 3,
+	/** Keyboard navigation (e.g. LeftArrow to move left). */
 	Keyboard = 0x1 << 4,
 
+	/** If provided, prevents **this** tool from rotating the viewport (other tools may still do so). */
 	RotationLocked = 0x1 << 5,
 }
 
@@ -35,7 +48,7 @@ class InertialScroller {
 	public constructor(
 		private initialVelocity: Vec2,
 		private scrollBy: ScrollByCallback,
-		private onComplete: ()=> void
+		private onComplete: () => void,
 	) {
 		this.start();
 	}
@@ -59,7 +72,7 @@ class InertialScroller {
 			const nowTime = performance.now();
 			const dt = (nowTime - lastTime) / 1000;
 
-			this.currentVelocity = this.currentVelocity.times(Math.pow(1/8, dt));
+			this.currentVelocity = this.currentVelocity.times(Math.pow(1 / 8, dt));
 			this.scrollBy(this.currentVelocity.times(dt));
 
 			await untilNextAnimationFrame();
@@ -71,7 +84,7 @@ class InertialScroller {
 		}
 	}
 
-	public getCurrentVelocity(): Vec2|null {
+	public getCurrentVelocity(): Vec2 | null {
 		if (!this.running) {
 			return null;
 		}
@@ -87,8 +100,17 @@ class InertialScroller {
 	}
 }
 
+/**
+ * This tool moves the viewport in response to touchpad, touchscreen, mouse, and keyboard events.
+ *
+ * Which events are handled, and which are skipped, are determined by the tool's `mode`. For example,
+ * a `PanZoom` tool with `mode = PanZoomMode.TwoFingerTouchGestures|PanZoomMode.RightClickDrags` would
+ * respond to right-click drag events and two-finger touch gestures.
+ *
+ * @see {@link setModeEnabled}
+ */
 export default class PanZoom extends BaseTool {
-	private transform: ViewportTransform|null = null;
+	private transform: ViewportTransform | null = null;
 
 	// Constants
 	// initialRotationSnapAngle is larger than afterRotationStartSnapAngle to
@@ -122,10 +144,14 @@ export default class PanZoom extends BaseTool {
 	private isScaling: boolean = false;
 	private isRotating: boolean = false;
 
-	private inertialScroller: InertialScroller|null = null;
-	private velocity: Vec2|null = null;
+	private inertialScroller: InertialScroller | null = null;
+	private velocity: Vec2 | null = null;
 
-	public constructor(private editor: Editor, private mode: PanZoomMode, description: string) {
+	public constructor(
+		private editor: Editor,
+		private mode: PanZoomMode,
+		description: string,
+	) {
 		super(editor.notifier, description);
 	}
 
@@ -153,10 +179,13 @@ export default class PanZoom extends BaseTool {
 	}
 
 	private allPointersAreOfType(pointers: Pointer[], kind: PointerDevice) {
-		return pointers.every(pointer => pointer.device === kind);
+		return pointers.every((pointer) => pointer.device === kind);
 	}
 
-	public override onPointerDown({ allPointers: pointers, current: currentPointer }: PointerEvt): boolean {
+	public override onPointerDown({
+		allPointers: pointers,
+		current: currentPointer,
+	}: PointerEvt): boolean {
 		let handlingGesture = false;
 
 		const inertialScrollerVelocity = this.inertialScroller?.getCurrentVelocity() ?? Vec2.zero;
@@ -183,11 +212,12 @@ export default class PanZoom extends BaseTool {
 			this.isRotating = Math.abs(Math.sin(this.initialViewportRotation * 2)) > 1e-3;
 
 			handlingGesture = true;
-		} else if (pointers.length === 1 && (
-			(this.mode & PanZoomMode.OneFingerTouchGestures && allAreTouch)
-			|| (isRightClick && this.mode & PanZoomMode.RightClickDrags)
-			|| (this.mode & PanZoomMode.SinglePointerGestures)
-		)) {
+		} else if (
+			pointers.length === 1 &&
+			((this.mode & PanZoomMode.OneFingerTouchGestures && allAreTouch) ||
+				(isRightClick && this.mode & PanZoomMode.RightClickDrags) ||
+				this.mode & PanZoomMode.SinglePointerGestures)
+		) {
 			this.lastScreenCenter = pointers[0].screenPos;
 			this.isScaling = false;
 
@@ -233,7 +263,9 @@ export default class PanZoom extends BaseTool {
 	// Assumes this.lastScreenCenter has been set appropriately.
 	private getCenterDelta(screenCenter: Point2): Vec2 {
 		// Use transformVec3 to avoid translating the delta
-		const delta = this.editor.viewport.screenToCanvasTransform.transformVec3(screenCenter.minus(this.lastScreenCenter));
+		const delta = this.editor.viewport.screenToCanvasTransform.transformVec3(
+			screenCenter.minus(this.lastScreenCenter),
+		);
 		return delta;
 	}
 
@@ -254,8 +286,9 @@ export default class PanZoom extends BaseTool {
 		// `snapToMultipleOf`.
 		// Use a smaller snap angle if already rotated (to avoid pinch zoom gestures from
 		// starting rotation).
-		const maxSnapAngle =
-			this.isRotating ? this.afterRotationStartSnapAngle : this.initialRotationSnapAngle;
+		const maxSnapAngle = this.isRotating
+			? this.afterRotationStartSnapAngle
+			: this.initialRotationSnapAngle;
 
 		// Snap the rotation
 		if (Math.abs(fullRotation - roundedFullRotation) < maxSnapAngle) {
@@ -278,7 +311,7 @@ export default class PanZoom extends BaseTool {
 	 */
 	private toSnappedScaleFactor(touchDist: number) {
 		// scaleFactor is applied to the current transformation of the viewport.
-		const newScale = this.initialViewportScale * touchDist / this.startTouchDist;
+		const newScale = (this.initialViewportScale * touchDist) / this.startTouchDist;
 		const currentScale = this.editor.viewport.getScaleFactor();
 
 		const logNewScale = Math.log(newScale) / Math.log(10);
@@ -293,7 +326,10 @@ export default class PanZoom extends BaseTool {
 	}
 
 	private handleTwoFingerMove(allPointers: Pointer[]) {
-		const { screenCenter, canvasCenter, angle, dist } = this.computePinchData(allPointers[0], allPointers[1]);
+		const { screenCenter, canvasCenter, angle, dist } = this.computePinchData(
+			allPointers[0],
+			allPointers[1],
+		);
 
 		const delta = this.getCenterDelta(screenCenter);
 		let deltaRotation;
@@ -317,7 +353,7 @@ export default class PanZoom extends BaseTool {
 
 			// Only start scaling if scaling done so far exceeds some threshold.
 			const upperBound = this.pinchZoomStartThreshold;
-			const lowerBound = 1/this.pinchZoomStartThreshold;
+			const lowerBound = 1 / this.pinchZoomStartThreshold;
 			if (initialScaleFactor > upperBound || initialScaleFactor < lowerBound) {
 				this.isScaling = true;
 			}
@@ -336,20 +372,14 @@ export default class PanZoom extends BaseTool {
 			.rightMul(Mat33.zRotation(deltaRotation, canvasCenter));
 
 		this.lastScreenCenter = screenCenter;
-		this.transform = Viewport.transformBy(
-			this.transform!.transform.rightMul(transformUpdate)
-		);
+		this.transform = Viewport.transformBy(this.transform!.transform.rightMul(transformUpdate));
 		return transformUpdate;
 	}
 
 	private handleOneFingerMove(pointer: Pointer) {
 		const delta = this.getCenterDelta(pointer.screenPos);
 		const transformUpdate = Mat33.translation(delta);
-		this.transform = Viewport.transformBy(
-			this.transform!.transform.rightMul(
-				transformUpdate,
-			),
-		);
+		this.transform = Viewport.transformBy(this.transform!.transform.rightMul(transformUpdate));
 		this.updateVelocity(pointer.screenPos);
 		this.lastScreenCenter = pointer.screenPos;
 
@@ -384,10 +414,10 @@ export default class PanZoom extends BaseTool {
 
 		const minInertialScrollDt = 30;
 		const shouldInertialScroll =
-				event.current.device === PointerDevice.Touch
-				&& event.allPointers.length === 1
-				&& this.velocity !== null
-				&& event.current.timeStamp - this.lastPointerDownTimestamp > minInertialScrollDt;
+			event.current.device === PointerDevice.Touch &&
+			event.allPointers.length === 1 &&
+			this.velocity !== null &&
+			event.current.timeStamp - this.lastPointerDownTimestamp > minInertialScrollDt;
 
 		if (shouldInertialScroll && this.velocity !== null) {
 			const oldVelocity = this.velocity;
@@ -410,22 +440,25 @@ export default class PanZoom extends BaseTool {
 			// Cancel any ongoing inertial scrolling.
 			this.inertialScroller?.stop();
 
-			this.inertialScroller = new InertialScroller(this.velocity, (scrollDelta: Vec2) => {
-				if (!this.transform) {
-					return;
-				}
+			this.inertialScroller = new InertialScroller(
+				this.velocity,
+				(scrollDelta: Vec2) => {
+					if (!this.transform) {
+						return;
+					}
 
-				const canvasDelta = this.editor.viewport.screenToCanvasTransform.transformVec3(scrollDelta);
+					const canvasDelta =
+						this.editor.viewport.screenToCanvasTransform.transformVec3(scrollDelta);
 
-				// Scroll by scrollDelta
-				this.transform.unapply(this.editor);
-				this.transform = Viewport.transformBy(
-					this.transform.transform.rightMul(
-						Mat33.translation(canvasDelta)
-					)
-				);
-				this.transform.apply(this.editor);
-			}, onComplete);
+					// Scroll by scrollDelta
+					this.transform.unapply(this.editor);
+					this.transform = Viewport.transformBy(
+						this.transform.transform.rightMul(Mat33.translation(canvasDelta)),
+					);
+					this.transform.apply(this.editor);
+				},
+				onComplete,
+			);
 		} else {
 			onComplete();
 		}
@@ -452,8 +485,20 @@ export default class PanZoom extends BaseTool {
 		this.transform.apply(this.editor);
 
 		if (announce) {
-			this.editor.announceForAccessibility(this.transform.description(this.editor, this.editor.localization));
+			this.editor.announceForAccessibility(
+				this.transform.description(this.editor, this.editor.localization),
+			);
 		}
+	}
+
+	/**
+	 * Updates the current transform and clears it. Use this method for events that are not part of
+	 * a larger gesture (i.e. have no start and end event). For example, this would be used for `onwheel`
+	 * events, but not for `onpointer` events.
+	 */
+	private applyAndFinalizeTransform(transformUpdate: Mat33) {
+		this.updateTransform(transformUpdate, true);
+		this.transform = null;
 	}
 
 	public override onWheel({ delta, screenPos }: WheelEvt): boolean {
@@ -467,10 +512,7 @@ export default class PanZoom extends BaseTool {
 		const toCanvas = this.editor.viewport.screenToCanvasTransform;
 
 		// Transform without including translation
-		const translation =
-			toCanvas.transformVec3(
-				Vec3.of(-delta.x, -delta.y, 0)
-			);
+		const translation = toCanvas.transformVec3(Vec3.of(-delta.x, -delta.y, 0));
 
 		let pinchAmount = delta.z;
 
@@ -479,11 +521,10 @@ export default class PanZoom extends BaseTool {
 
 		const pinchZoomScaleFactor = 1.04;
 		const transformUpdate = Mat33.scaling2D(
-			Math.max(0.4, Math.min(Math.pow(pinchZoomScaleFactor, -pinchAmount), 4)), canvasPos
-		).rightMul(
-			Mat33.translation(translation)
-		);
-		this.updateTransform(transformUpdate, true);
+			Math.max(0.4, Math.min(Math.pow(pinchZoomScaleFactor, -pinchAmount), 4)),
+			canvasPos,
+		).rightMul(Mat33.translation(translation));
+		this.applyAndFinalizeTransform(transformUpdate);
 
 		return true;
 	}
@@ -513,7 +554,7 @@ export default class PanZoom extends BaseTool {
 		} else if (shortcucts.matchesShortcut(moveDownKeyboardShortcutId, event)) {
 			translation = Vec2.of(0, 1);
 		} else if (shortcucts.matchesShortcut(zoomInKeyboardShortcutId, event)) {
-			scale = 1/2;
+			scale = 1 / 2;
 		} else if (shortcucts.matchesShortcut(zoomOutKeyboardShortcutId, event)) {
 			scale = 2;
 		} else if (shortcucts.matchesShortcut(rotateClockwiseKeyboardShortcutId, event)) {
@@ -533,7 +574,7 @@ export default class PanZoom extends BaseTool {
 		rotation = rotation * -1;
 		scale = 1 / scale;
 
-		// Work around an issue that seems to be related to rotation matricies losing precision on inversion.
+		// Work around an issue that seems to be related to rotation matrices losing precision on inversion.
 		// TODO: Figure out why and implement a better solution.
 		if (rotation !== 0) {
 			rotation += 0.0001;
@@ -551,14 +592,10 @@ export default class PanZoom extends BaseTool {
 
 		// Rotate/scale about the center of the canvas
 		const transformCenter = this.editor.viewport.visibleRect.center;
-		const transformUpdate = Mat33.scaling2D(
-			scale, transformCenter
-		).rightMul(Mat33.zRotation(
-			rotation, transformCenter
-		)).rightMul(Mat33.translation(
-			translation
-		));
-		this.updateTransform(transformUpdate, true);
+		const transformUpdate = Mat33.scaling2D(scale, transformCenter)
+			.rightMul(Mat33.zRotation(rotation, transformCenter))
+			.rightMul(Mat33.translation(translation));
+		this.applyAndFinalizeTransform(transformUpdate);
 
 		return true;
 	}
@@ -567,8 +604,32 @@ export default class PanZoom extends BaseTool {
 		return !!(this.mode & PanZoomMode.RotationLocked);
 	}
 
-	// Sets whether the given `mode` is enabled. `mode` should be a single
-	// mode from the `PanZoomMode` enum.
+	/**
+	 * Changes the types of gestures used by this pan/zoom tool.
+	 *
+	 * @see {@link PanZoomMode} {@link setMode}
+	 *
+	 * @example
+	 * ```ts,runnable
+	 * import { Editor, PanZoomTool, PanZoomMode } from 'js-draw';
+	 *
+	 * const editor = new Editor(document.body);
+	 *
+	 * // By default, there are multiple PanZoom tools that handle different events.
+	 * // This gets all PanZoomTools.
+	 * const panZoomToolList = editor.toolController.getMatchingTools(PanZoomTool);
+	 *
+	 * // The first PanZoomTool is the highest priority -- by default,
+	 * // this tool is responsible for handling multi-finger touch gestures.
+	 * //
+	 * // Lower-priority PanZoomTools handle one-finger touch gestures and
+	 * // key-presses.
+	 * const panZoomTool = panZoomToolList[0];
+	 *
+	 * // Lock rotation for multi-finger touch gestures.
+	 * panZoomTool.setModeEnabled(PanZoomMode.RotationLocked, true);
+	 * ```
+	 */
 	public setModeEnabled(mode: PanZoomMode, enabled: boolean) {
 		let newMode = this.mode;
 		if (enabled) {
@@ -579,6 +640,16 @@ export default class PanZoom extends BaseTool {
 		this.setMode(newMode);
 	}
 
+	/**
+	 * Sets all modes for this tool using a bitmask.
+	 *
+	 * @see {@link setModeEnabled}
+	 *
+	 * @example
+	 * ```ts
+	 * tool.setMode(PanZoomMode.RotationLocked|PanZoomMode.TwoFingerTouchGestures);
+	 * ```
+	 */
 	public setMode(mode: PanZoomMode) {
 		if (mode !== this.mode) {
 			this.mode = mode;
@@ -590,6 +661,10 @@ export default class PanZoom extends BaseTool {
 		}
 	}
 
+	/**
+	 * Returns a bitmask indicating the currently-enabled modes.
+	 * @see {@link setModeEnabled}
+	 */
 	public getMode(): PanZoomMode {
 		return this.mode;
 	}

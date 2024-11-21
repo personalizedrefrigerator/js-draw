@@ -1,4 +1,3 @@
-
 import * as fs from 'fs';
 import * as path from 'path';
 import { BuildConfig, TranslationSourcePair as TranslationSource } from './types';
@@ -44,7 +43,7 @@ const generateTranslationTemplate = (
 	defaultLocaleStrings: any,
 
 	// A map from translation keys to comments
-	translationComments?: Record<string, string|string[]>,
+	translationComments?: Record<string, string | string[]>,
 
 	// The locale the user will be translating into
 	destLocale?: string,
@@ -57,7 +56,10 @@ const generateTranslationTemplate = (
 	const bodyContentLines: string[] = [];
 
 	const addInput = (
-		type: string, id: string, attrs: Record<string, string|undefined>, required: boolean = false
+		type: string,
+		id: string,
+		attrs: Record<string, string | undefined>,
+		required: boolean = false,
 	) => {
 		const lines: string[] = [];
 		lines.push(`  - type: ${type}`);
@@ -71,8 +73,14 @@ const generateTranslationTemplate = (
 
 			const value = `${attrs[key]}`;
 
-			const escapedValue = value.replace(/[\\]/g, '\\\\').replace(/"/g, '\\"');
-			lines.push(`      ${key}: "${escapedValue}"`);
+			if (value.includes('\n')) {
+				const indentation = '        ';
+				const indentedValue = indentation + value.replace(/(^|[\n])/g, `\n${indentation}`).trim();
+				lines.push(`      ${key}: |\n${indentedValue}`);
+			} else {
+				const escapedValue = value.replace(/[\\]/g, '\\\\').replace(/"/g, '\\"');
+				lines.push(`      ${key}: "${escapedValue}"`);
+			}
 		}
 
 		lines.push('    validations:');
@@ -88,29 +96,40 @@ const generateTranslationTemplate = (
 		bodyContentLines.push('        ' + text);
 	};
 
-	addLabel(collapseSpaces(`
+	addLabel(
+		collapseSpaces(`
 		Thank you for taking the time to translate \`js-draw\`! If you don't have time to translate
 		all of the strings below, feel free to submit an incomplete translation and edit it later.
 		Use this template to update an existing translation or to create a new translation.
-	`));
+	`),
+	);
 
-	addLabel(collapseSpaces(`
+	addLabel(
+		collapseSpaces(`
 		If you would like to test the translation, **after publishing this issue**, select everything
 		from the first "Language" heading to just above the "Additional information" heading and paste
 		into [the translation testing tool](https://js-draw.web.app/debugging/translation-tester/).
-	`));
+	`),
+	);
 
-	addLabel(collapseSpaces(`
+	addLabel(
+		collapseSpaces(`
 		(Optional) If you would like to submit a pull request that applies this translation, 
 		note that existing translations are present in
 		[packages/js-draw/src/localizations/](https://github.com/personalizedrefrigerator/js-draw/tree/main/packages/js-draw/src/localizations).
-	`));
+	`),
+	);
 
-	addInput('input', 'language-name', {
-		label: 'Language',
-		description: 'The name of the language to translate to in English (e.g. Spanish)',
-		value: destLocale,
-	}, true);
+	addInput(
+		'input',
+		'language-name',
+		{
+			label: 'Language',
+			description: 'The name of the language to translate to in English (e.g. Spanish)',
+			value: destLocale,
+		},
+		true,
+	);
 
 	for (const key in defaultLocaleStrings) {
 		const englishTranslation = `${defaultLocaleStrings[key]}`;
@@ -121,16 +140,13 @@ const generateTranslationTemplate = (
 			currentTranslation = undefined;
 		}
 
-		let comments: string|string[] = translationComments[key] ?? [];
+		let comments: string | string[] = translationComments[key] ?? [];
 		if (typeof comments === 'string') {
-			comments = [ comments ];
+			comments = [comments];
 		}
-		comments = comments.map(comment => `> **Note**\n> ${comment.replace(/\n/g, '\n> ')}`);
+		comments = comments.map((comment) => `> **Note**\n> ${comment.replace(/\n/g, '\n> ')}`);
 
-		const description = [
-			`Translate ${codeFormat(englishTranslation)}.`,
-			...comments,
-		].join('\n\n');
+		const description = [`Translate ${codeFormat(englishTranslation)}.`, ...comments].join('\n\n');
 
 		addInput('textarea', `translation-${key}`, {
 			label: `${key}`,
@@ -165,7 +181,7 @@ ${bodyContentLines.join('\n')}`;
 const buildTranslationTemplate = async (source: TranslationSource, destFolder: string) => {
 	const projName = source.name;
 
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	const translationData = require(source.path);
 
 	const locales = translationData.default ?? translationData.locales;
@@ -192,7 +208,10 @@ const buildTranslationTemplate = async (source: TranslationSource, destFolder: s
 		// According to https://stackoverflow.com/a/13650454, fs should
 		// be able to handle forward and back slashes (both) on Windows (so extra
 		// path logic shouldn't be needed here.)
-		const translationTempaltePath = path.join(destFolder, `translation-${projName}-${locale ?? 'new'}.yml`);
+		const translationTempaltePath = path.join(
+			destFolder,
+			`translation-${projName}-${locale ?? 'new'}.yml`,
+		);
 
 		fs.writeFileSync(translationTempaltePath, template);
 	};

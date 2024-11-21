@@ -10,7 +10,7 @@ class SaveActionWidget extends ActionButtonWidget {
 	public constructor(
 		editor: Editor,
 		localization: ToolbarLocalization,
-		saveCallback: ()=>void,
+		saveCallback: () => void,
 		labelOverride: Partial<ActionButtonIcon> = {},
 	) {
 		super(
@@ -21,9 +21,9 @@ class SaveActionWidget extends ActionButtonWidget {
 				return labelOverride.icon ?? editor.icons.makeSaveIcon();
 			},
 			labelOverride.label ?? localization.save,
-			saveCallback
+			saveCallback,
 		);
-		this.setTags([ ToolbarWidgetTag.Save ]);
+		this.setTags([ToolbarWidgetTag.Save]);
 	}
 
 	protected override shouldAutoDisableInReadOnlyEditor() {

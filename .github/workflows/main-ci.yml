@@ -7,7 +7,7 @@ name: Deploy static content to Pages and Firebase
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches: ['main']
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -20,7 +20,7 @@ permissions:
 
 # Allow one concurrent deployment
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
@@ -32,27 +32,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Prepare yarn
+        run: corepack enable
       - name: Install dependencies
-        run: npm install
+        run: yarn install
       - name: Test imports
-        run: npm run dist-test
+        run: yarn run dist-test
       - name: Run tests
-        run: npm run test
+        run: yarn run test
       - name: Lint
-        run: npm run lint-ci
+        run: yarn run lint-ci
+      - name: Check formatting
+        run: yarn run format-ci
       - name: Build pages
         run: bash scripts/build-website.sh
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v5
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           # Upload just the docs folder
           path: './docs/'
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
       - name: Deploy to Firebase hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

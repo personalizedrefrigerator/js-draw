@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-loss-of-precision */
 
+// prettier-ignore
 export const touchWritingSample = [
 	{'eventType':'pointerup','currentTime':1703367898766,'timeStamp':22141,'x':839,'y':214,'isPrimary':true,'pointerType':'touch','pointerId':62,'buttons':0,'pressure':0},
 	{'eventType':'commandDone','description':'Added Stroke','serialized':{'data':{'elemData':{'name':'stroke','zIndex':92,'id':'1703367898766-0.6249182461877415','loadSaveData':{},'data':[{'style':{'fill':'#00000000','stroke':{'color':'#803380','width':2.4000000000000004}},'path':'M820,69q10.5-1.7 19-3'}]}},'commandType':'add-element'}},
@@ -615,6 +616,7 @@ export const touchWritingSample = [
 ];
 touchWritingSample.reverse();
 
+// prettier-ignore
 const penWritingSample = [
 	{'eventType':'pointerup','currentTime':1703368495772,'timeStamp':40641.60000000149,'x':170.9896697998047,'y':147.73423767089844,'isPrimary':true,'pointerType':'pen','pointerId':61,'buttons':0,'pressure':0},
 	{'eventType':'commandDone','description':'Added Stroke','serialized':{'data':{'elemData':{'name':'stroke','zIndex':126,'id':'1703368495771-0.02345458130376543','loadSaveData':{},'data':[{'style':{'fill':'#00000000','stroke':{'color':'#803380','width':1.3}},'path':'M167,85q.8,.2 4,1'}]}},'commandType':'add-element'}},
@@ -2685,6 +2687,7 @@ const penWritingSample = [
 ];
 penWritingSample.reverse();
 
+// prettier-ignore
 const penDrawingSample = [
 	{'eventType':'pointerdown','currentTime':1703378587783,'timeStamp':77146.39999999851,'x':152.28346252441406,'y':422.0298767089844,'isPrimary':true,'pointerType':'pen','pointerId':122,'buttons':1,'pressure':0.2400488555431366},
 	{'eventType':'pointermove','currentTime':1703378587781,'timeStamp':77142.29999999702,'x':152.28346252441406,'y':422.0298767089844,'isPrimary':true,'pointerType':'pen','pointerId':122,'buttons':0,'pressure':0},
@@ -6784,4 +6787,4 @@ const penDrawingSample = [
 ];
 penDrawingSample.reverse();
 
-export default { penWritingSample, touchWritingSample, penDrawingSample, };
+export default { penWritingSample, touchWritingSample, penDrawingSample };

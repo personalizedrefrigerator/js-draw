@@ -7,24 +7,24 @@ import { toolbarCSSPrefix } from '../../constants';
 interface GridSelectChoice<ChoiceIdType> {
 	// `id` should be unique in all choices
 	id: ChoiceIdType;
-	makeIcon: ()=>IconElemType;
+	makeIcon: () => IconElemType;
 	title: string;
 }
 
 interface GridSelector<ChoiceIdType> {
-	value: MutableReactiveValue<ChoiceIdType>,
+	value: MutableReactiveValue<ChoiceIdType>;
 
 	/**
 	 * Connects this grid selector with `other` such that only one item in
 	 * either this or `other` can be selected at a time.
 	 */
-	linkWith: (other: GridSelector<ChoiceIdType>)=>void;
+	linkWith: (other: GridSelector<ChoiceIdType>) => void;
 
 	/** Re-builds the icons shown in the grid selector. */
-	updateIcons: ()=>void;
+	updateIcons: () => void;
 
-	getRootElement: ()=>HTMLElement;
-	addTo: (parent: HTMLElement)=>void;
+	getRootElement: () => HTMLElement;
+	addTo: (parent: HTMLElement) => void;
 
 	/** Used internally @internal */
 	_radiogroupName: string;
@@ -39,7 +39,7 @@ let idCounter = 0;
  *
  * If this input is set to an ID that is not in `choices`, no item is selected.
  */
-const makeGridSelector = <ChoiceIdType> (
+const makeGridSelector = <ChoiceIdType>(
 	// Text before the grid selector used as a label
 	labelText: string,
 	defaultId: ChoiceIdType,
@@ -57,7 +57,7 @@ const makeGridSelector = <ChoiceIdType> (
 	stopPropagationOfScrollingWheelEvents(menuContainer);
 
 	const label = document.createElement('label');
-	label.innerText = labelText;
+	label.textContent = labelText;
 	label.htmlFor = menuContainer.id;
 	outerContainer.appendChild(label);
 
@@ -138,7 +138,7 @@ const makeGridSelector = <ChoiceIdType> (
 		// Prevent the right-click menu from being shown on long-press
 		// (important for some toolbars that use long-press gestures to
 		// show grid selector labels).
-		buttonContainer.oncontextmenu = event => {
+		buttonContainer.oncontextmenu = (event) => {
 			event.preventDefault();
 		};
 
@@ -161,7 +161,7 @@ const makeGridSelector = <ChoiceIdType> (
 			choiceRecord: record,
 			setChecked,
 			updateIcon,
-			updateButtonRadiogroupName
+			updateButtonRadiogroupName,
 		};
 	};
 
@@ -175,7 +175,7 @@ const makeGridSelector = <ChoiceIdType> (
 
 	outerContainer.appendChild(menuContainer);
 
-	selectedValue.onUpdateAndNow(choiceId => {
+	selectedValue.onUpdateAndNow((choiceId) => {
 		for (let i = 0; i < buttons.length; i++) {
 			buttons[i].setChecked(buttons[i].choiceRecord.id === choiceId);
 		}
@@ -196,7 +196,7 @@ const makeGridSelector = <ChoiceIdType> (
 		},
 
 		updateIcons: () => {
-			buttons.forEach(button => button.updateIcon());
+			buttons.forEach((button) => button.updateIcon());
 		},
 
 		getRootElement() {

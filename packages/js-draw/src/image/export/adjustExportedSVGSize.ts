@@ -4,9 +4,7 @@ import { Rect2, toRoundedString } from '@js-draw/math';
 export type SVGSizingOptions = { minDimension?: number };
 
 // @internal
-const adjustExportedSVGSize = (
-	svg: SVGElement, exportRect: Rect2, options: SVGSizingOptions
-) => {
+const adjustExportedSVGSize = (svg: SVGElement, exportRect: Rect2, options: SVGSizingOptions) => {
 	// Adjust the width/height as necessary
 	let width = exportRect.w;
 	let height = exportRect.h;
@@ -28,4 +26,3 @@ const adjustExportedSVGSize = (
 };
 
 export default adjustExportedSVGSize;
-

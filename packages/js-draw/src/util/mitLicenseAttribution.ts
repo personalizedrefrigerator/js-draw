@@ -1,4 +1,3 @@
-
 const mitLicenseAttribution = (copyright: string) => {
 	const removeSingleLineBreaks = (text: string) => text.replace(/([^\n])[\n]([^\n])/g, '$1 $2');
 

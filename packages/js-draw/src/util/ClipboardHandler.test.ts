@@ -4,11 +4,19 @@ import ClipboardHandler from './ClipboardHandler';
 import { CopyEvent, PasteEvent } from '../inputEvents';
 import Editor from '../Editor';
 
-type ClipboardTestData = Record<string, string|Blob>;
+interface ExtendedClipboardItem extends ClipboardItem {
+	supports(mime: string): boolean;
+}
+declare const ClipboardItem: ExtendedClipboardItem;
+
+type ClipboardTestData = Record<string, string | Blob>;
 
 // A tool that handles all copy events
 class TestCopyPasteTool extends BaseTool {
-	public constructor(editor: Editor, private data: ClipboardTestData) {
+	public constructor(
+		editor: Editor,
+		private data: ClipboardTestData,
+	) {
 		super(editor.notifier, 'copy tool');
 	}
 
@@ -85,24 +93,28 @@ describe('ClipboardHandler', () => {
 
 			// Should have written to navigator.clipboard
 			const clipboardItems = await navigator.clipboard.read();
-			const itemTypes = clipboardItems.map(item => item.types).flat();
+			const itemTypes = clipboardItems.map((item) => item.types).flat();
 			expect(itemTypes).toContain('image/png');
 			expect(itemTypes).toContain('text/plain');
 			expect(itemTypes).toContain('text/html');
 		});
 
 		it.each([
-			[{
-				'text/plain': 'Testing!',
-				'text/html': '<i>Testing!</i>',
-			}],
-			[{
-				'text/plain': 'Test 2',
-				'text/html': '<i>...</i>',
+			[
+				{
+					'text/plain': 'Testing!',
+					'text/html': '<i>Testing!</i>',
+				},
+			],
+			[
+				{
+					'text/plain': 'Test 2',
+					'text/html': '<i>...</i>',
 
-				// image/svg+xml is a text format, so shouldn't cause navigator.clipboard to be used
-				'image/svg+xml': 'test',
-			}]
+					// image/svg+xml is a text format, so shouldn't cause navigator.clipboard to be used
+					'image/svg+xml': 'test',
+				},
+			],
 		])('should use event.dataTransfer when no images are to be copied (case %#)', async (data) => {
 			const editor = createEditor();
 			setUpCopyPasteTool(editor, data);
@@ -133,7 +145,7 @@ describe('ClipboardHandler', () => {
 			expect(await navigator.clipboard.read()).toHaveLength(0);
 		});
 
-		// image/svg+xml is unsupported in Chrome as of early 2024.
+		// image/svg+xml is unsupported in iOS as of mid 2024.
 		it('should copy text/html instead of image/svg+xml when copying to the Clipboard API', async () => {
 			const editor = createEditor();
 			setUpCopyPasteTool(editor, {
@@ -146,7 +158,31 @@ describe('ClipboardHandler', () => {
 
 			const clipboardItems = await navigator.clipboard.read();
 			expect(clipboardItems).toHaveLength(1);
-			expect(await (await clipboardItems[0].getType('text/html')).text()).toBe('<svg>This should be copied.</svg>');
+			expect(await (await clipboardItems[0].getType('text/html')).text()).toBe(
+				'<svg>This should be copied.</svg>',
+			);
+		});
+
+		it('should not attempt to copy MIME types explicitly marked as unsupported by the browser', async () => {
+			const editor = createEditor();
+			const disallowedType = 'image/svg+xml';
+			setUpCopyPasteTool(editor, {
+				[disallowedType]: '<svg>This should NOT be copied.</svg>',
+				'text/plain': 'This should be copied',
+			});
+
+			ClipboardItem.supports = jest.fn((mime: string) => mime !== disallowedType);
+
+			const clipboardHandler = new ClipboardHandler(editor);
+
+			await clipboardHandler.copy();
+
+			const clipboardItems = await navigator.clipboard.read();
+			expect(clipboardItems).toHaveLength(1);
+			expect(await (await clipboardItems[0].getType('text/plain')).text()).toBe(
+				'This should be copied',
+			);
+			expect(clipboardItems[0].types).not.toContain(disallowedType);
 		});
 	});
 
@@ -164,7 +200,7 @@ describe('ClipboardHandler', () => {
 
 			// Should have pasted
 			expect(copyPasteTool.lastPasteData).toMatchObject({
-				mime: 'text/html',
+				mime: 'image/svg+xml',
 				data: testData,
 			});
 		});

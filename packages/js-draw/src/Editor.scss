@@ -1,4 +1,3 @@
-
 @use './toolbar/toolbar.scss';
 @use './tools/tools.scss';
 @use './dialogs/dialogs.scss';
@@ -64,9 +63,12 @@
 
 .imageEditorContainer {
 	color: var(--foreground-color-1);
-	font-family: system-ui, -apple-system, sans-serif;
+	font-family:
+		system-ui,
+		-apple-system,
+		sans-serif;
 	background-color: var(--background-color-1);
-	
+
 	// Set the width/height to a value that's independent of its content -- avoids
 	// ResizeObserver errors: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
 	width: 100%;
@@ -99,7 +101,7 @@
 	min-height: 100px;
 	min-width: 0;
 	width: 100%;
-	height:	100%;
+	height: 100%;
 }
 
 .imageEditorContainer .imageEditorRenderArea canvas {

@@ -4,15 +4,35 @@ import BezierJSWrapper from './BezierJSWrapper';
 import Rect2 from './Rect2';
 
 /**
- * Represents a 2D Bézier curve.
+ * Represents a 2D [Bézier curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve).
  *
- * **Note**: Many Bézier operations use `bezier-js`'s.
+ * Example:
+ * ```ts,runnable,console
+ * import { QuadraticBezier, Vec2 } from '@js-draw/math';
+ *
+ * const startPoint = Vec2.of(4, 3);
+ * const controlPoint = Vec2.of(1, 1);
+ * const endPoint = Vec2.of(1, 3);
+ *
+ * const curve = new QuadraticBezier(
+ *   startPoint,
+ *   controlPoint,
+ *   endPoint,
+ * );
+ *
+ * console.log('Curve:', curve);
+ * ```
+ *
+ * **Note**: Some Bézier operations internally use the `bezier-js` library.
  */
 export class QuadraticBezier extends BezierJSWrapper {
 	public constructor(
+		// Start point
 		public readonly p0: Point2,
+		// Control point
 		public readonly p1: Point2,
-		public readonly p2: Point2
+		// End point
+		public readonly p2: Point2,
 	) {
 		super();
 	}
@@ -78,7 +98,7 @@ export class QuadraticBezier extends BezierJSWrapper {
 
 	/** @returns an overestimate of this shape's bounding box. */
 	public override getLooseBoundingBox(): Rect2 {
-		return Rect2.bboxOf([ this.p0, this.p1, this.p2 ]);
+		return Rect2.bboxOf([this.p0, this.p1, this.p2]);
 	}
 
 	/**
@@ -124,14 +144,9 @@ export class QuadraticBezier extends BezierJSWrapper {
 		const f2ndDerivAtZero = b;
 		const f3rdDerivAtZero = 2 * c;
 
-
 		// Using the first few terms of a Maclaurin series to approximate f'(t),
 		// f'(t) ≈ f'(0) + t f''(0) + t² f'''(0) / 2
-		let [ min1, min2 ] = solveQuadratic(
-			f3rdDerivAtZero / 2,
-			f2ndDerivAtZero,
-			fDerivAtZero,
-		);
+		let [min1, min2] = solveQuadratic(f3rdDerivAtZero / 2, f2ndDerivAtZero, fDerivAtZero);
 
 		// If the quadratic has no solutions, approximate.
 		if (isNaN(min1)) {
@@ -153,7 +168,7 @@ export class QuadraticBezier extends BezierJSWrapper {
 	}
 
 	public override getPoints() {
-		return [ this.p0, this.p1, this.p2 ];
+		return [this.p0, this.p1, this.p2];
 	}
 }
 export default QuadraticBezier;

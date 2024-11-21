@@ -2,8 +2,8 @@ import Editor from './Editor';
 import Command from './commands/Command';
 import { EditorEventType, UndoEventType } from './types';
 
-type AnnounceRedoCallback = (command: Command)=>void;
-type AnnounceUndoCallback = (command: Command)=>void;
+type AnnounceRedoCallback = (command: Command) => void;
+type AnnounceUndoCallback = (command: Command) => void;
 
 class UndoRedoHistory {
 	#undoStack: Command[];
@@ -21,9 +21,7 @@ class UndoRedoHistory {
 		this.#redoStack = [];
 	}
 
-	private fireUpdateEvent(
-		stackUpdateType: UndoEventType, triggeringCommand: Command
-	) {
+	private fireUpdateEvent(stackUpdateType: UndoEventType, triggeringCommand: Command) {
 		this.editor.notifier.dispatch(EditorEventType.UndoRedoStackUpdated, {
 			kind: EditorEventType.UndoRedoStackUpdated,
 			undoStackSize: this.#undoStack.length,
@@ -49,7 +47,7 @@ class UndoRedoHistory {
 		if (this.#undoStack.length > this.maxUndoRedoStackSize) {
 			const removeAtOnceCount = Math.ceil(this.maxUndoRedoStackSize / 100);
 			const removedElements = this.#undoStack.splice(0, removeAtOnceCount);
-			removedElements.forEach(elem => elem.onDrop(this.editor));
+			removedElements.forEach((elem) => elem.onDrop(this.editor));
 		}
 
 		this.fireUpdateEvent(UndoEventType.CommandDone, command);
@@ -60,7 +58,7 @@ class UndoRedoHistory {
 	}
 
 	// Remove the last command from this' undo stack and apply it.
-	public undo(): void|Promise<void> {
+	public undo(): void | Promise<void> {
 		const command = this.#undoStack.pop();
 		if (command) {
 			this.#redoStack.push(command);
@@ -77,7 +75,7 @@ class UndoRedoHistory {
 		}
 	}
 
-	public redo(): void|Promise<void> {
+	public redo(): void | Promise<void> {
 		const command = this.#redoStack.pop();
 		if (command) {
 			this.#undoStack.push(command);
