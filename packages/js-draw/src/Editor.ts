@@ -346,7 +346,7 @@ export class Editor {
 			maxZoom: settings.maxZoom ?? 1e12,
 			keyboardShortcutOverrides: settings.keyboardShortcutOverrides ?? {},
 			iconProvider: settings.iconProvider ?? new IconProvider(),
-			notices: [],
+			notices: settings.notices ?? [],
 			appInfo: settings.appInfo ? { ...settings.appInfo } : null,
 			pens: {
 				additionalPenTypes: settings.pens?.additionalPenTypes ?? [],
