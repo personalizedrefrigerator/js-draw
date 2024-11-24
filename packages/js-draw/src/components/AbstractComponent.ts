@@ -1,7 +1,7 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import EditorImage from '../image/EditorImage';
-import { LineSegment2, Mat33, Mat33Array, Path, Rect2 } from '@js-draw/math';
+import { LineSegment2, Mat33, Mat33Array, Path, Point2, Rect2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
@@ -415,6 +415,17 @@ export default abstract class AbstractComponent {
 	 * `viewport` should be provided to determine how newly-added points should be rounded.
 	 */
 	public withRegionErased?(shape: Path, viewport: Viewport): AbstractComponent[];
+
+	/**
+	 * Returns a copy of this component, but translated to have a bounding box with
+	 * the given top left.
+	 */
+	public withTopLeft(topLeft: Point2) {
+		const bbox = this.contentBBox;
+		const clone = this.createClone();
+		clone.applyTransformation(Mat33.translation(topLeft.minus(bbox.topLeft)));
+		return clone;
+	}
 
 	// Return null iff this object cannot be safely serialized/deserialized.
 	protected abstract serializeToJSON(): any[] | Record<string, any> | number | string | null;

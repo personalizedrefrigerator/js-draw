@@ -269,14 +269,18 @@ class PDFDocumentWrapper {
 							},
 						};
 
-						let transform = Mat33.translation(rect.topLeft);
+						let transform = Mat33.identity;
 						if (annotation.rotate) {
 							const rotationCCWRad = (-annotation.rotate * Math.PI) / 180;
 							transform = Mat33.zRotation(rotationCCWRad, annotation.bbox.center).rightMul(
 								transform,
 							);
 						}
-						annotations.push(new TextComponent([content], transform, style));
+						annotations.push(
+							TextComponent.fromLines(content.split('\n'), transform, style).withTopLeft(
+								rect.topLeft,
+							),
+						);
 					}
 				}
 
