@@ -8,7 +8,7 @@ import { ComponentBuilder, ComponentBuilderFactory } from './types';
 import makeSnapToGridAutocorrect from './autocorrect/makeSnapToGridAutocorrect';
 
 /**
- * Creates a stroke builder that generates arrows circles.
+ * Creates a stroke builder that generates arrows.
  *
  * Example:
  * [[include:doc-pages/inline-examples/changing-pen-types.md]]
