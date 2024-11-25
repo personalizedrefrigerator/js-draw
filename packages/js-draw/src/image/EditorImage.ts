@@ -46,7 +46,7 @@ let debugMode = false;
  * Here's how to do a few common operations:
  * - **Get all components in a {@link @js-draw/math!Rect2 | Rect2}**:
  *    {@link EditorImage.getElementsIntersectingRegion}.
- * - **Draw everything that's visible onto a canvas/SVG**: {@link EditorImage.render}.
+ * - **Draw an `EditorImage` onto a canvas/SVG**: {@link EditorImage.render}.
  * - **Adding a new component**: {@link EditorImage.addElement}.
  *
  * **Example**:
@@ -136,10 +136,10 @@ export default class EditorImage {
 	}
 
 	/**
-	 * Renders all nodes visible from `viewport` (or all nodes if `viewport = null`).
+	 * Renders this image to the given `renderer`.
 	 *
-	 * `viewport` is used to improve rendering performance. If given, it must match
-	 * the viewport used by the `renderer` (if any).
+	 * If `viewport` is non-null, only components that can be seen from that viewport
+	 * will be rendered. If `viewport` is `null`, **all** components are rendered.
 	 *
 	 * **Example**:
 	 * [[include:doc-pages/inline-examples/canvas-renderer.md]]
@@ -181,9 +181,12 @@ export default class EditorImage {
 	}
 
 	/**
-	 * @returns all elements in the image, sorted by z-index. This can be slow for large images.
+	 * @returns all elements in the image, sorted by z-index (low to high).
 	 *
-	 * Does not include background elements. See {@link getBackgroundComponents}.
+	 * This can be slow for large images. If you only need all elemenst in part of the image,
+	 * consider using {@link getElementsIntersectingRegion} instead.
+	 *
+	 * **Note**: The result does not include background elements. See {@link getBackgroundComponents}.
 	 */
 	public getAllElements() {
 		const leaves = this.root.getLeaves();
