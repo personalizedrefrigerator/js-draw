@@ -37,7 +37,20 @@ export type PreRenderComponentCallback = (
 let debugMode = false;
 
 /**
- * Handles lookup/storage of elements in the image.
+ * @summary Handles lookup/storage of elements in the image.
+ *
+ * `js-draw` images are made up of a collection of {@link AbstractComponent}s (which
+ * includes {@link Stroke}s, {@link TextComponent}s, etc.). An `EditorImage`
+ * is the data structure that stores these components.
+ *
+ * Here's how to do a few common operations:
+ * - **Get all components in a {@link @js-draw/math!Rect2 | Rect2}**:
+ *    {@link EditorImage.getElementsIntersectingRegion}.
+ * - **Draw everything that's visible onto a canvas/SVG**: {@link EditorImage.render}.
+ * - **Adding a new component**: {@link EditorImage.addElement}.
+ *
+ * **Example**:
+ * [[include:doc-pages/inline-examples/image-add-and-lookup.md]]
  */
 export default class EditorImage {
 	private root: ImageNode;
@@ -127,6 +140,9 @@ export default class EditorImage {
 	 *
 	 * `viewport` is used to improve rendering performance. If given, it must match
 	 * the viewport used by the `renderer` (if any).
+	 *
+	 * **Example**:
+	 * [[include:doc-pages/inline-examples/canvas-renderer.md]]
 	 */
 	public render(renderer: AbstractRenderer, viewport: Viewport | null) {
 		this.background.render(renderer, viewport?.visibleRect);
@@ -181,7 +197,11 @@ export default class EditorImage {
 		return this.componentCount;
 	}
 
-	/** @returns a list of `AbstractComponent`s intersecting `region`, sorted by z-index. */
+	/**
+	 * @returns a list of `AbstractComponent`s intersecting `region`, sorted by increasing z-index.
+	 *
+	 * Components in the background layer are only included if `includeBackground` is `true`.
+	 */
 	public getElementsIntersectingRegion(
 		region: Rect2,
 		includeBackground: boolean = false,
