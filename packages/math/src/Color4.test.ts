@@ -86,4 +86,9 @@ describe('Color4', () => {
 			expect(Color4.contrastRatio(colorA, colorB)).toBeCloseTo(expectedContrast, 1);
 		}
 	});
+
+	it('should support creating colors from an RGBA array', () => {
+		expect(Color4.fromRGBArray([255, 0, 0])).objEq(Color4.ofRGB(1, 0, 0));
+		expect(Color4.fromRGBArray([255, 0, 0, 128])).objEq(Color4.ofRGBA(1, 0, 0, 0.5));
+	});
 });
