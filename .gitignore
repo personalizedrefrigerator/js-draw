@@ -88,5 +88,4 @@ node_modules/
 
 # Package-specific files -- include these here to cause prettier (and perhaps other
 # tools) to ignore them as well.
-packages/material-icons/src/icons/*.svg.ts
-packages/material-icons/src/icons/*.md.ts
+packages/material-icons/src/icons/*.ts
