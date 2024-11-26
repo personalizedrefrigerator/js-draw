@@ -1,3 +1,14 @@
+# 1.23.0
+
+- Features
+  - `@js-draw/math`: Added `Color4.fromRGBArray`.
+  - `@js-draw/material-icons`: Added option to create material icons for a specific instance/version of `js-draw`. This should allow including `@js-draw/material-icons` as a bundle directly from a CDN.
+- Bug fixes
+  - Fix notices specified in editor settings were not shown in the about dialog ([commit](https://github.com/personalizedrefrigerator/js-draw/commit/5a823f00791848a020df941bcbb77c4b43169127))
+- Other changes
+  - Rename "touchscreen panning" to "scroll with touch" in the default localization ([commit](https://github.com/personalizedrefrigerator/js-draw/commit/ecf23f24ea8b39b9970db87f71b9077e301f337d)).
+  - Replace several instances of `.innerHTML` with calls to `.createElement` ([commit](https://github.com/personalizedrefrigerator/js-draw/commit/0970ab8bed05c4996e388b0730619f5053ea552f)).
+
 # 1.22.0
 
 - Features
