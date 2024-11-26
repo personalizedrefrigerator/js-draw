@@ -71,6 +71,8 @@ const icon = (data: OpaqueIconType) => {
  *
  * If you only have one instance of `js-draw` (which is almost always the case), prefer
  * `new` {@link MaterialIconProvider}.
+ *
+ * @returns an uninstantiated subclass of {@link js-draw!IconProvider | IconProvider}.
  */
 const makeMaterialIconProviderClass = ({
 	IconProvider,

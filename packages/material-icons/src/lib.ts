@@ -35,7 +35,7 @@ import { EraserMode, IconProvider } from 'js-draw';
 import makeMaterialIconProviderClass from './makeMaterialIconProvider';
 
 /**
- * An {@link js-draw!IconProvider} that uses [material icons](https://github.com/google/material-design-icons).
+ * An {@link js-draw!IconProvider | IconProvider} that uses [material icons](https://github.com/google/material-design-icons).
  */
 const MaterialIconProvider = makeMaterialIconProviderClass({
 	IconProvider,
