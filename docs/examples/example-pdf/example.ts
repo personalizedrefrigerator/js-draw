@@ -75,7 +75,7 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 		type: annotation.type,
 		bbox: Rect2.of(annotation.bbox),
 		inkList: annotation.inkList.map((l: number[][]) => l.map((p) => jsdraw.Vec2.of(p[0], p[1]))),
-		color: jsdraw.Color4.fromArray(annotation.color ?? [0], annotation.opacity ?? 1),
+		color: jsdraw.Color4.fromRGBArray(annotation.color ?? [0], annotation.opacity ?? 1),
 		borderWidth: annotation.borderWidth,
 		contents: {
 			text: annotation.contents?.text ?? 'no',
@@ -85,7 +85,7 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 		fontAppearance: annotation.fontAppearance
 			? {
 					size: annotation.fontAppearance.size,
-					color: jsdraw.Color4.fromArray(annotation.fontAppearance.color, 1),
+					color: jsdraw.Color4.fromRGBArray(annotation.fontAppearance.color, 1),
 					family: annotation.fontAppearance.family ?? 'sans',
 				}
 			: undefined,
