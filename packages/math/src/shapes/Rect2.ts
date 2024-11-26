@@ -17,6 +17,18 @@ export interface RectTemplate {
 /**
  * Represents a rectangle in 2D space, parallel to the XY axes.
  *
+ * **Example**:
+ * ```ts,runnable,console
+ * import { Rect2, Vec2 } from '@js-draw/math';
+ *
+ * const rect = Rect2.fromCorners(
+ *   Vec2.of(0, 0),
+ *   Vec2.of(10, 10),
+ * );
+ * console.log('area', rect.area);
+ * console.log('topLeft', rect.topLeft);
+ * ```
+ *
  * `invariant: w ≥ 0, h ≥ 0, immutable`
  */
 export class Rect2 extends Abstract2DShape {
@@ -28,9 +40,13 @@ export class Rect2 extends Abstract2DShape {
 	public readonly area: number;
 
 	public constructor(
+		// Top left x coordinate
 		public readonly x: number,
+		// Top left y coordinate
 		public readonly y: number,
+		// Width
 		public readonly w: number,
+		// Height
 		public readonly h: number,
 	) {
 		super();
@@ -69,6 +85,7 @@ export class Rect2 extends Abstract2DShape {
 		);
 	}
 
+	/** @returns true iff `other` is completely within this `Rect2`. */
 	public containsRect(other: Rect2): boolean {
 		return (
 			this.x <= other.x &&

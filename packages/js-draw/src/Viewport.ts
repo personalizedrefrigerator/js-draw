@@ -182,7 +182,7 @@ export class Viewport {
 	/**
 	 * Snaps `canvasPos` to the nearest grid cell corner.
 	 *
-	 * @see {@link getGridSize} and {@link getScaleFactorToNearestPowerOf}.
+	 * @see {@link getGridSize}.
 	 */
 	public snapToGrid(canvasPos: Point2) {
 		const scaleFactor = this.getScaleFactorToNearestPowerOf(2);

@@ -159,7 +159,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	inputStabilization: 'Stabilization',
 	strokeAutocorrect: 'Autocorrect',
 
-	touchPanning: 'Touchscreen panning',
+	touchPanning: 'Scroll with touch',
 
 	roundedTipPen: 'Round',
 	roundedTipPen2: 'Polyline',
@@ -197,7 +197,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	handDropdown__zoomDisplayHelpText:
 		'Shows the current zoom level. 100% shows the image at its actual size.',
 	handDropdown__touchPanningHelpText:
-		'When enabled, touch gestures move the image rather than select or draw.',
+		'When enabled, touchscreen gestures move the image rather than select or draw.',
 	handDropdown__lockRotationHelpText:
 		'When enabled, prevents touch gestures from rotating the screen.',
 	eraserDropdown__baseHelpText: 'This tool removes strokes, images, and text under the cursor.',

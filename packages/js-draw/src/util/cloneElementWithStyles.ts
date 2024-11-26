@@ -12,7 +12,7 @@ const cloneElementWithStyles = (element: HTMLElement) => {
 			const propertyName = originalComputedStyle.item(index);
 
 			const propertyValue = originalComputedStyle.getPropertyValue(propertyName);
-			clonedElement.style.setProperty(propertyName, propertyValue);
+			clonedElement.style?.setProperty(propertyName, propertyValue);
 		}
 
 		for (let i = 0; i < originalElement.children.length; i++) {

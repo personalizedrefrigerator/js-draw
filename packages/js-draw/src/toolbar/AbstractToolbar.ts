@@ -388,6 +388,25 @@ export default abstract class AbstractToolbar {
 	 * as being the value of `mustBeToplevel`.
 	 *
 	 * @return The added button.
+	 *
+	 * **Example**:
+	 * ```ts,runnable
+	 * import { Editor } from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 * const toolbar = editor.addToolbar();
+	 *
+	 * function makeTrashIcon() {
+	 *   const container = document.createElement('div');
+	 *   container.textContent = '🗑️';
+	 *   return container;
+	 * }
+	 *
+	 * toolbar.addActionButton({
+	 *   icon: makeTrashIcon(), // can be any Element not in the DOM
+	 *   label: 'Delete all',
+	 * }, () => {
+	 *   alert('to-do!');
+	 * });
 	 */
 	public addActionButton(
 		title: string | ActionButtonIcon,

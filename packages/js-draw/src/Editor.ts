@@ -346,7 +346,7 @@ export class Editor {
 			maxZoom: settings.maxZoom ?? 1e12,
 			keyboardShortcutOverrides: settings.keyboardShortcutOverrides ?? {},
 			iconProvider: settings.iconProvider ?? new IconProvider(),
-			notices: [],
+			notices: settings.notices ?? [],
 			appInfo: settings.appInfo ? { ...settings.appInfo } : null,
 			pens: {
 				additionalPenTypes: settings.pens?.additionalPenTypes ?? [],
@@ -1118,9 +1118,7 @@ export class Editor {
 	 * Use this to show finalized commands that don't need to have `announceForAccessibility`
 	 * called.
 	 *
-	 * Prefer `command.apply(editor)` for incomplete commands. `dispatchNoAnnounce` may allow
-	 * clients to listen for the application of commands (e.g. `SerializableCommand`s so they can
-	 * be sent across the network), while `apply` does not.
+	 * If `addToHistory` is `false`, this is equivalent to `command.apply(editor)`.
 	 *
 	 * @example
 	 * ```

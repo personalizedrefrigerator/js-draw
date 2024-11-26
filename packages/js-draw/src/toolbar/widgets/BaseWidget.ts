@@ -424,7 +424,7 @@ export default abstract class BaseWidget {
 
 	/**
 	 * Remove this. This allows the widget to be added to a toolbar again
-	 * in the future using {@link addTo}.
+	 * in the future using `addTo`.
 	 */
 	public remove() {
 		this.container.remove();

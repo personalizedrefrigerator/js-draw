@@ -574,7 +574,7 @@ export default class PanZoom extends BaseTool {
 		rotation = rotation * -1;
 		scale = 1 / scale;
 
-		// Work around an issue that seems to be related to rotation matricies losing precision on inversion.
+		// Work around an issue that seems to be related to rotation matrices losing precision on inversion.
 		// TODO: Figure out why and implement a better solution.
 		if (rotation !== 0) {
 			rotation += 0.0001;

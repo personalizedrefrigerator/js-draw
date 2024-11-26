@@ -232,7 +232,7 @@ export default abstract class AbstractComponent {
 	 * updates the editor.
 	 *
 	 * The transformed component is also moved to the top (use
-	 * {@link AbstractComponent.setZIndexAndTransformBy} to avoid this behavior).
+	 * {@link AbstractComponent#setZIndexAndTransformBy} to avoid this behavior).
 	 */
 	public transformBy(affineTransfm: Mat33): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);

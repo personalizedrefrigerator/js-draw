@@ -56,6 +56,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 		return Vec2.ofXY(this.getBezier().get(t));
 	}
 
+	/** @returns the curve's directional derivative at `t`. */
 	public derivativeAt(t: number): Point2 {
 		return Vec2.ofXY(this.getBezier().derivative(t));
 	}
@@ -64,6 +65,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 		return Vec2.ofXY((this.getBezier() as any).dderivative(t));
 	}
 
+	/** @returns the [normal vector](https://en.wikipedia.org/wiki/Normal_(geometry)) to this curve at `t`. */
 	public normal(t: number): Vec2 {
 		return Vec2.ofXY(this.getBezier().normal(t));
 	}

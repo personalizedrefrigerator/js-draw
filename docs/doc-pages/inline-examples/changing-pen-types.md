@@ -16,7 +16,8 @@ import { Color4, Vec2 } from '@js-draw/math';
 const editor = new Editor(document.body);
 editor.addToolbar();
 
-// Different pen types that build strokes in different ways:
+// Different pen types that build strokes in different ways. This is a list of some of the
+// default ones:
 const strokeBuilders = [
 	makePolylineBuilder,
 	makeOutlinedCircleBuilder,
@@ -33,7 +34,10 @@ const pen = editor.toolController.getMatchingTools(PenTool)[0];
 
 // Draw something with each style
 for (const factory of strokeBuilders) {
+	// Make the pen use a certain style.
 	pen.setStrokeFactory(factory);
+	// What happens if the following line is uncommented?
+	// pen.setStrokeFactory(makeArrowBuilder);
 
 	// Select a random pen color
 	const penColor = Color4.ofRGB(Math.random(), Math.random(), Math.random());

@@ -168,7 +168,7 @@ export interface Vec3 {
 	asArray(): [number, number, number];
 
 	/**
-	 * [fuzz] The maximum difference between two components for this and [other]
+	 * @param tolerance The maximum difference between two components for this and [other]
 	 * to be considered equal.
 	 *
 	 * @example
@@ -481,12 +481,16 @@ class Vec2Impl implements Vec3 {
 }
 
 /**
- * A `Vec2` is a `Vec3` optimized for working in a plane. As such, they have an
+ * A `Vec2` is a {@link Vec3} optimized for working in a plane. `Vec2`s have an
  * always-zero `z` component.
  *
  * ```ts,runnable,console
  * import { Vec2 } from '@js-draw/math';
- * console.log(Vec2.of(1, 2));
+ *
+ * const v = Vec2.of(1, 2);
+ * console.log('a Vec2:', v);
+ * console.log('x component:', v.x);
+ * console.log('z component:', v.z);
  * ```
  */
 export namespace Vec2 {
@@ -527,6 +531,7 @@ export namespace Vec2 {
 	export const zero = Vec2.of(0, 0);
 }
 
+/** Contains static methods for constructing a {@link Vec3}. */
 export namespace Vec3 {
 	/**
 	 * Construct a vector from three components.
@@ -535,6 +540,7 @@ export namespace Vec3 {
 	 * ```ts,runnable,console
 	 * import { Vec3 } from '@js-draw/math';
 	 * const v1 = Vec3.of(1, 2, 3);
+	 * console.log(v1.plus(Vec3.of(0, 100, 0)));
 	 * ```
 	 */
 	export const of = (x: number, y: number, z: number): Vec3 => {
@@ -545,8 +551,11 @@ export namespace Vec3 {
 		}
 	};
 
+	/** A unit vector in the x direction (`[1, 0, 0]`). */
 	export const unitX = Vec2.unitX;
+	/** A unit vector in the y direction (`[0, 1, 0]`). */
 	export const unitY = Vec2.unitY;
+	/** The zero vector (`[0, 0, 0]`). */
 	export const zero = Vec2.zero;
 
 	/** A vector of length 1 in the z direction. */

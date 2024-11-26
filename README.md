@@ -414,4 +414,4 @@ See also [adjustEditorThemeForContrast](https://personalizedrefrigerator.github.
 - [Examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md)
 - [How to add a custom pen type](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/Additional_Documentation.CustomizingTools__.html#md:adding-a-new-pen-type)
 - [A material icon theme for js-draw](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/_js_draw_material_icons.html#md:js-drawmaterial-icons)
-- [More documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/Additional_Documentation.html)
+- [More documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/Guides.html)

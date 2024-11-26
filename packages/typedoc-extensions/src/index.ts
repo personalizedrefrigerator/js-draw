@@ -14,11 +14,17 @@ export const load = (app: Application) => {
 		help: 'base directory for all [[include:]] directives',
 		defaultValue: undefined,
 	});
+	app.options.addDeclaration({
+		name: 'redirects',
+		type: ParameterType.Object,
+		help: 'map from source paths to redirect paths',
+		defaultValue: {},
+	});
 
 	app.renderer.defineTheme('js-draw-theme', CustomTheme);
 
 	// Work around TypeDoc being unable to resolve symbols in different packages in
-	// a terribly fragile way.
+	// a fragile way.
 	app.converter.addUnknownSymbolResolver((declaration) => {
 		// Ref https://github.com/Gerrit0/typedoc-plugin-mdn-links/blob/main/src/index.ts
 		const moduleSource = declaration.moduleSource ?? '';

@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		<meta charset="utf-8" />
+		<title>Editor from a bundle</title>
+	</head>
+	<body>
+		<p>
+			This file tests the bundled version of <code>js-draw</code>. Be sure to run
+			<code>yarn run build</code> before opening this!
+		</p>
+		<script src="../packages/js-draw/dist/bundle.js"></script>
+		<script src="../packages/material-icons/dist/bundle.js"></script>
+		<script>
+			const MaterialIconProvider = jsdrawMaterialIcons.makeMaterialIconProviderClass(jsdraw);
+
+			const editor = new jsdraw.Editor(document.body, { iconProvider: new MaterialIconProvider() });
+			editor.addToolbar();
+		</script>
+	</body>
+</html>

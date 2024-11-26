@@ -24,7 +24,7 @@ const convertIcons = async () => {
 				const updatedIcon = icon.replace(/([<]path)(.)/gi, '$1 style="fill: var(--icon-color);"$2');
 
 				await fs.writeFile(
-					filePath + '.ts',
+					filePath.replace(/\.svg$/, '') + '.ts',
 					`
 				// The following icon is part of the Material Icon pack and is licensed under
 				// the Apache 2.0 license.
@@ -50,7 +50,7 @@ const readmeToJS = async () => {
 	const readmePath = join(dirname(__dirname), 'src', 'icons', 'README.md');
 
 	await fs.writeFile(
-		readmePath + '.ts',
+		readmePath.replace(/\.md$/, '') + '.ts',
 		`
 		export default ${JSON.stringify(await fs.readFile(readmePath, 'utf-8'))};
 	`,

@@ -20,6 +20,12 @@ interface ElementToPropertiesMap {
 		height: number;
 		transform: string;
 	};
+	pattern: {
+		viewBox: string;
+		width: string;
+		height: string;
+		patternUnits: 'userSpaceOnUse';
+	};
 	stop: {
 		offset: string;
 		'stop-color': string;

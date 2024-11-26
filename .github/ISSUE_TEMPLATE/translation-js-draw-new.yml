@@ -492,8 +492,8 @@ body:
     id: translation-touchPanning
     attributes:
       label: 'touchPanning'
-      description: 'Translate `Touchscreen panning`.'
-      placeholder: 'Touchscreen panning'
+      description: 'Translate `Scroll with touch`.'
+      placeholder: 'Scroll with touch'
       render: 'shell'
     validations:
       required: false
@@ -744,8 +744,8 @@ body:
     id: translation-handDropdown__touchPanningHelpText
     attributes:
       label: 'handDropdown__touchPanningHelpText'
-      description: 'Translate `When enabled, touch gestures move the image rather than select or draw.`.'
-      placeholder: 'When enabled, touch gestures move the image rather than select or draw.'
+      description: 'Translate `When enabled, touchscreen gestures move the image rather than select or draw.`.'
+      placeholder: 'When enabled, touchscreen gestures move the image rather than select or draw.'
       render: 'shell'
     validations:
       required: false
@@ -1065,6 +1065,105 @@ body:
       label: 'keyboardPanZoom'
       description: 'Translate `Keyboard pan/zoom shortcuts`.'
       placeholder: 'Keyboard pan/zoom shortcuts'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionMenu__show
+    attributes:
+      label: 'selectionMenu__show'
+      description: 'Translate `Show selection menu`.'
+      placeholder: 'Show selection menu'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionMenu__copyToClipboard
+    attributes:
+      label: 'selectionMenu__copyToClipboard'
+      description: 'Translate `Copy to clipboard`.'
+      placeholder: 'Copy to clipboard'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionMenu__duplicate
+    attributes:
+      label: 'selectionMenu__duplicate'
+      description: 'Translate `Duplicate`.'
+      placeholder: 'Duplicate'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionMenu__delete
+    attributes:
+      label: 'selectionMenu__delete'
+      description: 'Translate `Delete`.'
+      placeholder: 'Delete'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionMenu__paste
+    attributes:
+      label: 'selectionMenu__paste'
+      description: 'Translate `Paste`.'
+      placeholder: 'Paste'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-copyPasteError__heading
+    attributes:
+      label: 'copyPasteError__heading'
+      description: 'Translate `Copy/paste`.'
+      placeholder: 'Copy/paste'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-copyPasteError__description
+    attributes:
+      label: 'copyPasteError__description'
+      description: 'Translate `Something went wrong — this tool may not have clipboard access.`.'
+      placeholder: 'Something went wrong — this tool may not have clipboard access.'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-copyPasteError__errorDetails
+    attributes:
+      label: 'copyPasteError__errorDetails'
+      description: 'Translate `Show error`.'
+      placeholder: 'Show error'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-copyPasteError__pasteRetry
+    attributes:
+      label: 'copyPasteError__pasteRetry'
+      description: 'Translate `To retry, please paste into the input box below:`.'
+      placeholder: 'To retry, please paste into the input box below:'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-copyPasteError__copyRetry
+    attributes:
+      label: 'copyPasteError__copyRetry'
+      description: 'Translate `To retry, please copy the text in the input box below:`.'
+      placeholder: 'To retry, please copy the text in the input box below:'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-copyPasteError__copyMe
+    attributes:
+      label: 'copyPasteError__copyMe'
+      description: 'Translate `Copy me!`.'
+      placeholder: 'Copy me!'
       render: 'shell'
     validations:
       required: false
