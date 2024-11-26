@@ -18,7 +18,7 @@
 		"preinstall": "git config core.hookspath .githooks",
 		"postinstall": "yarn run build",
 		"publish-ci": "lerna publish from-package --yes",
-		"version-bump": "lerna version --no-push --no-git-tag-version"
+		"version-bump": "lerna version --no-push --no-git-tag-version && yarn"
 	},
 	"workspaces": [
 		"packages/*",

@@ -51,11 +51,14 @@ export class Color4 {
 	}
 
 	/**
-	 * Creates a color from an RGBA (or RGB) array where each value ranges from 0-255.
+	 * Creates a color from an RGB (or RGBA) array.
+	 *
+	 * This is similar to {@link ofRGB} and {@link ofRGBA}, but, by default, takes values
+	 * that range from 0 to 255.
 	 *
 	 * If the array values instead range from 0-1, pass `maxValue` as `1`.
 	 */
-	public static fromArray(
+	public static fromRGBArray(
 		array: Uint8Array | Uint8ClampedArray | number[],
 		maxValue: number = 255,
 	) {

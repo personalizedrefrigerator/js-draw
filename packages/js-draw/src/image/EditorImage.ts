@@ -37,7 +37,20 @@ export type PreRenderComponentCallback = (
 let debugMode = false;
 
 /**
- * Handles lookup/storage of elements in the image.
+ * @summary Handles lookup/storage of elements in the image.
+ *
+ * `js-draw` images are made up of a collection of {@link AbstractComponent}s (which
+ * includes {@link Stroke}s, {@link TextComponent}s, etc.). An `EditorImage`
+ * is the data structure that stores these components.
+ *
+ * Here's how to do a few common operations:
+ * - **Get all components in a {@link @js-draw/math!Rect2 | Rect2}**:
+ *    {@link EditorImage.getElementsIntersectingRegion}.
+ * - **Draw an `EditorImage` onto a canvas/SVG**: {@link EditorImage.render}.
+ * - **Adding a new component**: {@link EditorImage.addElement}.
+ *
+ * **Example**:
+ * [[include:doc-pages/inline-examples/image-add-and-lookup.md]]
  */
 export default class EditorImage {
 	private root: ImageNode;
@@ -123,10 +136,13 @@ export default class EditorImage {
 	}
 
 	/**
-	 * Renders all nodes visible from `viewport` (or all nodes if `viewport = null`).
+	 * Renders this image to the given `renderer`.
 	 *
-	 * `viewport` is used to improve rendering performance. If given, it must match
-	 * the viewport used by the `renderer` (if any).
+	 * If `viewport` is non-null, only components that can be seen from that viewport
+	 * will be rendered. If `viewport` is `null`, **all** components are rendered.
+	 *
+	 * **Example**:
+	 * [[include:doc-pages/inline-examples/canvas-renderer.md]]
 	 */
 	public render(renderer: AbstractRenderer, viewport: Viewport | null) {
 		this.background.render(renderer, viewport?.visibleRect);
@@ -165,9 +181,12 @@ export default class EditorImage {
 	}
 
 	/**
-	 * @returns all elements in the image, sorted by z-index. This can be slow for large images.
+	 * @returns all elements in the image, sorted by z-index (low to high).
 	 *
-	 * Does not include background elements. See {@link getBackgroundComponents}.
+	 * This can be slow for large images. If you only need all elemenst in part of the image,
+	 * consider using {@link getElementsIntersectingRegion} instead.
+	 *
+	 * **Note**: The result does not include background elements. See {@link getBackgroundComponents}.
 	 */
 	public getAllElements() {
 		const leaves = this.root.getLeaves();
@@ -181,7 +200,11 @@ export default class EditorImage {
 		return this.componentCount;
 	}
 
-	/** @returns a list of `AbstractComponent`s intersecting `region`, sorted by z-index. */
+	/**
+	 * @returns a list of `AbstractComponent`s intersecting `region`, sorted by increasing z-index.
+	 *
+	 * Components in the background layer are only included if `includeBackground` is `true`.
+	 */
 	public getElementsIntersectingRegion(
 		region: Rect2,
 		includeBackground: boolean = false,
