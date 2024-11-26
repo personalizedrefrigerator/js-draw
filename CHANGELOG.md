@@ -1,4 +1,4 @@
-# 1.23.0
+# 1.23.0, 1.23.1
 
 - Features
   - `@js-draw/math`: Added `Color4.fromRGBArray`.
