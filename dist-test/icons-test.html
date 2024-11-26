@@ -15,9 +15,7 @@
 		<script>
 			const MaterialIconProvider = jsdrawMaterialIcons.makeMaterialIconProviderClass(jsdraw);
 
-			const editor = new jsdraw.Editor(
-				document.body, { iconProvider: new MaterialIconProvider() },
-			);
+			const editor = new jsdraw.Editor(document.body, { iconProvider: new MaterialIconProvider() });
 			editor.addToolbar();
 		</script>
 	</body>
