@@ -11,7 +11,7 @@
 			"require": "./dist/cjs/lib.js"
 		},
 		"./bundle": {
-			"types": "./dist/mjs/bundle/bundled.d.ts",
+			"types": "./dist/mjs/bundle.d.ts",
 			"default": "./dist/bundle.js"
 		}
 	},
