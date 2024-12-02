@@ -1324,6 +1324,74 @@ export class Editor {
 	}
 
 	/**
+	 * Anchors the given `element` to the canvas with a given position/transformation in canvas space.
+	 */
+	public anchorElementToCanvas(
+		element: HTMLElement,
+		canvasTransform: Mat33 | ReactiveValue<Mat33>,
+	) {
+		if (canvasTransform instanceof Mat33) {
+			canvasTransform = ReactiveValue.fromImmutable(canvasTransform);
+		}
+
+		// The element hierarchy looks like this:
+		//   overlay > contentWrapper > content
+		//
+		// Both contentWrapper and overlay are present to:
+		// 1. overlay: Positions the content at the top left of the viewport. The overlay
+		//    has `height: 0` to allow other overlays to also be aligned with the viewport's
+		//    top left.
+		// 2. contentWrapper: Has the same width/height as the editor's visible region and
+		//    has `overflow: hidden`. This prevents the anchored element from being visible
+		//    when not in the visible region of the canvas.
+
+		const overlay = document.createElement('div');
+		overlay.classList.add('anchored-element-overlay');
+
+		const contentWrapper = document.createElement('div');
+		contentWrapper.classList.add('content-wrapper');
+		element.classList.add('content');
+
+		// Updates CSS variables that specify the position/rotation/scale of the content.
+		const updateElementPositioning = () => {
+			const transform = canvasTransform.get();
+			const canvasRotation = transform.transformVec3(Vec2.unitX).angle();
+			const screenRotation = canvasRotation + this.viewport.getRotationAngle();
+			const screenTransform = this.viewport.canvasToScreenTransform.rightMul(canvasTransform.get());
+			overlay.style.setProperty('--full-transform', screenTransform.toCSSMatrix());
+
+			const translation = screenTransform.transformVec2(Vec2.zero);
+			overlay.style.setProperty('--position-x', `${translation.x}px`);
+			overlay.style.setProperty('--position-y', `${translation.y}px`);
+
+			overlay.style.setProperty('--rotation', `${(screenRotation * 180) / Math.PI}deg`);
+			overlay.style.setProperty('--scale', `${screenTransform.getScaleFactor()}`);
+		};
+		updateElementPositioning();
+
+		// The anchored element needs to be updated both when the user moves the canvas
+		// and when the anchored element's transform changes.
+		const updateListener = canvasTransform.onUpdate(updateElementPositioning);
+		const viewportListener = this.notifier.on(
+			EditorEventType.ViewportChanged,
+			updateElementPositioning,
+		);
+
+		contentWrapper.appendChild(element);
+		overlay.appendChild(contentWrapper);
+		overlay.classList.add('overlay', 'js-draw-editor-overlay');
+		this.renderingRegion.insertAdjacentElement('afterend', overlay);
+
+		return {
+			remove: () => {
+				overlay.remove();
+				updateListener.remove();
+				viewportListener.remove();
+			},
+		};
+	}
+
+	/**
 	 * Creates a CSS stylesheet with `content` and applies it to the document
 	 * (and thus, to this editor).
 	 */

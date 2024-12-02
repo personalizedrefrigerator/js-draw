@@ -165,6 +165,37 @@
 	z-index: 5;
 }
 
+// See Editor.anchorElementToCanvas
+.imageEditorContainer .anchored-element-overlay {
+	overflow: visible;
+	height: 0;
+
+	> .content-wrapper {
+		width: var(--editor-current-display-width-px);
+		height: var(--editor-current-display-height-px);
+		overflow: hidden;
+		// Display 'position: absolute' children relative to this.
+		position: relative;
+
+		// Disable pointer events: If the parent (or the container) has
+		// captured pointers and the container is removed, this prevents
+		// us from receiving the following events (e.g. in Firefox).
+		pointer-events: none;
+
+		> .content {
+			position: absolute;
+			left: var(--position-x);
+			top: var(--position-y);
+			transform: scale(var(--scale)) rotate(var(--rotation));
+			transform-origin: left top;
+			margin: 0;
+			
+			// We *do* want pointer events for the positioned content.
+			pointer-events: all;
+		}
+	}
+}
+
 // TODO: Apply this change during a future major release.
 // So as not to change the position of other overlays, all overlays should have
 // 0 height.
