@@ -103,29 +103,35 @@ export default class TextTool extends BaseTool {
 	// If [removeInput], the HTML input element is removed. Otherwise, its value
 	// is cleared.
 	private flushInput(removeInput: boolean = true) {
-		if (this.textInputElem) {
-			const scrollingRegion = this.textEditOverlay.parentElement;
-			const containerScroll = Vec2.of(
-				scrollingRegion?.scrollLeft ?? 0,
-				scrollingRegion?.scrollTop ?? 0,
-			);
-			const content = this.textInputElem.value.trimEnd();
+		if (!this.textInputElem) return;
 
-			this.textInputElem.value = '';
+		// Determine the scroll first -- removing the input (and other DOM changes)
+		// also change the scroll.
+		const scrollingRegion = this.textEditOverlay.parentElement;
+		const containerScroll = Vec2.of(
+			scrollingRegion?.scrollLeft ?? 0,
+			scrollingRegion?.scrollTop ?? 0,
+		);
 
-			if (removeInput) {
-				// In some browsers, .remove() triggers a .blur event (synchronously).
-				// Clear this.textInputElem before removal
-				const input = this.textInputElem;
-				this.textInputElem = null;
-				input.remove();
-			}
+		const content = this.textInputElem.value.trimEnd();
 
-			if (content === '') {
-				return;
-			}
+		this.textInputElem.value = '';
 
+		if (removeInput) {
+			// In some browsers, .remove() triggers a .blur event (synchronously).
+			// Clear this.textInputElem before removal
+			const input = this.textInputElem;
+			this.textInputElem = null;
+			input.remove();
+		}
+
+		if (content !== '') {
+			// When the text is long, it can cause its container to scroll so that the
+			// editing caret is in view.
+			// So that the text added to the document is in the same position as the text
+			// shown in the editor, account for this scroll when computing the transform:
 			const scrollTransform = Mat33.translation(containerScroll.times(-1));
+
 			const textComponent = TextComponent.fromLines(
 				content.split('\n'),
 				this.contentTransform.get().rightMul(scrollTransform),
