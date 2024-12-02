@@ -147,7 +147,6 @@ export default class TextTool extends BaseTool {
 
 	private updateTextInput() {
 		if (!this.textInputElem) {
-			// this.textInputElem?.remove();
 			return;
 		}
 
