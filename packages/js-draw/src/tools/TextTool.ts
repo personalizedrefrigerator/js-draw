@@ -130,11 +130,16 @@ export default class TextTool extends BaseTool {
 			// editing caret is in view.
 			// So that the text added to the document is in the same position as the text
 			// shown in the editor, account for this scroll when computing the transform:
-			const scrollTransform = Mat33.translation(containerScroll.times(-1));
+			const scrollCorrectionScreen = containerScroll.times(-1);
+			// Uses .transformVec3 to avoid also translating the scroll correction (treating
+			// it as a point):
+			const scrollCorrectionCanvas =
+				this.editor.viewport.screenToCanvasTransform.transformVec3(scrollCorrectionScreen);
+			const scrollTransform = Mat33.translation(scrollCorrectionCanvas);
 
 			const textComponent = TextComponent.fromLines(
 				content.split('\n'),
-				this.contentTransform.get().rightMul(scrollTransform),
+				scrollTransform.rightMul(this.contentTransform.get()),
 				this.textStyle,
 			);
 
