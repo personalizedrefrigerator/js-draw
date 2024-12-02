@@ -189,7 +189,7 @@
 			transform: scale(var(--scale)) rotate(var(--rotation));
 			transform-origin: left top;
 			margin: 0;
-			
+
 			// We *do* want pointer events for the positioned content.
 			pointer-events: all;
 		}
