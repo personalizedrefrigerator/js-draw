@@ -12,7 +12,8 @@ const loadRendererHooks = (renderer: Renderer, options: Options) => {
 			? __filename
 			: // Currently, TypeScript is configured to compile this file as both CommonJS, which is then converted to ESM.
 				// This is done in part to avoid the requirement that imports end in `.js` (as of Mar 2024 -- it may no longer be a requirement).
-				// @ts-expect-error -- To allow accessing the ESM equivalent of __dirname, a ts-ignore seems required.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- This needs to be a ts-ignore
+				// @ts-ignore -- To allow accessing the ESM equivalent of __dirname, a ts-ignore seems required.
 				new URL(import.meta.url).pathname;
 	const distDir = path.dirname(path.dirname(containerDirectory));
 
