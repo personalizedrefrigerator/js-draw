@@ -114,6 +114,7 @@ Navigator.prototype.clipboard.write = async (data: ClipboardItems): Promise<void
 
 window.ClipboardItem ??= class {
 	public readonly types: string[];
+	public readonly presentationStyle = 'unspecified';
 
 	public constructor(
 		public readonly items: Record<string, string | Blob | PromiseLike<string | Blob>>,
@@ -129,6 +130,10 @@ window.ClipboardItem ??= class {
 		} else {
 			return value;
 		}
+	}
+
+	public static supports(type: string) {
+		return type === 'text/plain' || type === 'text/html' || type.startsWith('image/');
 	}
 };
 
