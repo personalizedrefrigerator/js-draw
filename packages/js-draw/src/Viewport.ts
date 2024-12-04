@@ -77,7 +77,9 @@ export class Viewport {
 		}
 	};
 
+	/** Converts from canvas to screen coordinates */
 	private transform: Mat33;
+	/** Converts from screen to canvas coordinates */
 	private inverseTransform: Mat33;
 	private screenRect: Rect2;
 
