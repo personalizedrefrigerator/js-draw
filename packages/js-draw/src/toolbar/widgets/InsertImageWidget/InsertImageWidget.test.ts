@@ -16,7 +16,7 @@ class TestInsertImageWidget extends InsertImageWidget {
 }
 
 describe('InsertImageWidget/index', () => {
-	test('should display the correct ALT text for a selected image', async () => {
+	test('should display the correct ALT text for a selected image', () => {
 		const editor = createEditor();
 
 		// Image setup

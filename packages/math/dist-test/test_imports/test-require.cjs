@@ -1,5 +1,6 @@
 console.log('Testing require()...');
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- This is a .cjs file
 const { Vec2, Color4, Mat33 } = require('@js-draw/math');
 
 if (Vec2.of(1, 1).x !== 1) {

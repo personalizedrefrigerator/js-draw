@@ -312,7 +312,7 @@ describe('Editor', () => {
 			},
 		])(
 			'should support setting the background style of an image with no default background (style: %j)',
-			async ({ style, expectedBackgroundCount, expectedStyle }) => {
+			({ style, expectedBackgroundCount, expectedStyle }) => {
 				const editor = createEditor();
 				expect(editor.estimateBackgroundColor()).objEq(Color4.transparent);
 

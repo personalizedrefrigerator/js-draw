@@ -108,7 +108,7 @@ class SoundFeedback {
 	}
 
 	public close() {
-		this.ctx.close();
+		void this.ctx.close();
 		this.closed = true;
 	}
 }

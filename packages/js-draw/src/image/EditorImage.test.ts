@@ -28,7 +28,7 @@ abstract class BaseTestComponent extends AbstractComponent {
 		super(componentKind);
 		this.contentBBox = bbox;
 	}
-	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2 | undefined) {
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2) {
 		canvas.startObject(this.contentBBox);
 		canvas.fillRect(this.contentBBox, Color4.red);
 		canvas.endObject();
@@ -293,7 +293,7 @@ describe('EditorImage', () => {
 					super(bbox, 'test-component');
 					this.positioning = positioning;
 				}
-				public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined): void {
+				public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 					renderMock(canvas, visibleRect);
 					super.render(canvas, visibleRect);
 				}

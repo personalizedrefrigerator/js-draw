@@ -216,7 +216,7 @@ const playBackLog = async (rate: number) => {
 	const data = JSON.parse('[' + log.value + ']');
 	data.reverse();
 
-	playInputLog(editor, data, rate);
+	await playInputLog(editor, data, rate);
 };
 playbackButton.onclick = () => playBackLog(1);
 

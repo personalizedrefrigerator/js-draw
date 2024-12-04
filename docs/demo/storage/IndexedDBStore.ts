@@ -59,7 +59,7 @@ export class IndexedDBStore implements AbstractStore {
 			};
 
 			dbFactory.onerror = () => {
-				console.log('reject: ' + dbFactory.error);
+				console.log(`reject: ${dbFactory.error}`);
 
 				// TODO: Use dbFactory.errorCode to provide a better error message.
 				reject(new Error(localization.databaseLoadError));
@@ -102,9 +102,9 @@ export class IndexedDBStore implements AbstractStore {
 				.delete(id);
 
 			deleteDataRequest.onerror = () =>
-				reject(new Error('Error deleting image data: ' + deleteDataRequest.error));
+				reject(new Error(`Error deleting image data: ${deleteDataRequest.error}`));
 			deleteMetadataRequest.onerror = () =>
-				reject(new Error('Error deleting image metadata: ' + deleteMetadataRequest.error));
+				reject(new Error(`Error deleting image metadata: ${deleteMetadataRequest.error}`));
 
 			let nextSuccessCallback = () => {
 				nextSuccessCallback = resolve;
@@ -138,7 +138,7 @@ export class IndexedDBStore implements AbstractStore {
 				resolve(data ?? null);
 			};
 
-			readRequest.onerror = () => reject(new Error('Error reading image: ' + readRequest.error));
+			readRequest.onerror = () => reject(new Error(`Error reading image: ${readRequest.error}`));
 		});
 	}
 
@@ -154,7 +154,7 @@ export class IndexedDBStore implements AbstractStore {
 
 			writeDataRequest.onsuccess = () => resolve();
 			writeDataRequest.onerror = () =>
-				reject(new Error('Error saving metadata: ' + writeDataRequest.error));
+				reject(new Error('Error saving metadata: ' + String(writeDataRequest.error)));
 		});
 	}
 
@@ -203,7 +203,7 @@ export class IndexedDBStore implements AbstractStore {
 
 			writeDataRequest.onsuccess = () => resolve();
 			writeDataRequest.onerror = () =>
-				reject(new Error('Error saving data: ' + writeDataRequest.error));
+				reject(new Error('Error saving data: ' + String(writeDataRequest.error)));
 		});
 
 		await this.updateStoreEntryModifyTime(id);
@@ -229,7 +229,7 @@ export class IndexedDBStore implements AbstractStore {
 			};
 
 			readDataRequest.onerror = () =>
-				reject(new Error('Error reading image: ' + readDataRequest.error));
+				reject(new Error('Error reading image: ' + String(readDataRequest.error)));
 		});
 	}
 
@@ -321,9 +321,9 @@ export class IndexedDBStore implements AbstractStore {
 			const addImageRequest = transaction.objectStore(imageDataStoreName).add({ data: '' });
 
 			addMetadataRequest.onerror = () =>
-				reject(new Error('Error adding image metadata: ' + addMetadataRequest.error));
+				reject(new Error(`Error adding image metadata: ${addMetadataRequest.error}`));
 			addImageRequest.onerror = () =>
-				reject(new Error('Error adding image data: ' + addImageRequest.error));
+				reject(new Error(`Error adding image data: ${addImageRequest.error}`));
 
 			const eventToId = (event: any) => parseInt(event.target.result);
 

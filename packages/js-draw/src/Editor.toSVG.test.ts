@@ -15,7 +15,7 @@ import SVGLoader from './SVGLoader/SVGLoader';
 import createEditor from './testing/createEditor';
 
 describe('Editor.toSVG', () => {
-	it('should correctly nest text objects', async () => {
+	it('should correctly nest text objects', () => {
 		const editor = createEditor();
 		const textStyle: TextRenderingStyle = {
 			fontFamily: 'sans',

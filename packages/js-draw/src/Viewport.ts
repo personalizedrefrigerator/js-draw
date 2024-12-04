@@ -224,7 +224,6 @@ export class Viewport {
 
 	// The separate function type definition seems necessary here.
 	// See https://stackoverflow.com/a/58163623/17055750.
-	// eslint-disable-next-line no-dupe-class-members
 	public static roundPoint(point: Point2 | number, tolerance: number): Point2 | number {
 		const scaleFactor = 10 ** Math.floor(Math.log10(tolerance));
 		const roundComponent = (component: number): number => {

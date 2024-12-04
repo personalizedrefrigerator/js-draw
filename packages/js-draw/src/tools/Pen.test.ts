@@ -157,7 +157,7 @@ describe('Pen', () => {
 		expect(elems[0].getBBox().bottomRight).objEq(Vec2.of(420, 340), 25); // ± 25
 	});
 
-	it('should finalize strokes even if drawn with a nonprimary stylus', async () => {
+	it('should finalize strokes even if drawn with a nonprimary stylus', () => {
 		const editor = createEditor();
 
 		// See https://github.com/personalizedrefrigerator/js-draw/issues/71
@@ -293,7 +293,7 @@ describe('Pen', () => {
 		testEventCancelation(false);
 	});
 
-	it('ctrl+z should finalize then undo the current stroke', async () => {
+	it('ctrl+z should finalize then undo the current stroke', () => {
 		const editor = createEditor();
 
 		expect(editor.history.undoStackSize).toBe(0);
