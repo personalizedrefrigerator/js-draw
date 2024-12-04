@@ -611,7 +611,7 @@ export class Mat33 {
 
 		// A command (\w+)
 		// followed by a set of arguments ([ \t\n0-9eE.,\-%]+)
-		const partRegex = /\s?(\w+)\s?\(([^)]*)\)/gi;
+		const partRegex = /(\w+)\s?\(([^)]*)\)/gi;
 		let match;
 		let matrix: Mat33 | null = null;
 
