@@ -25,7 +25,8 @@
 	"redirects": {
 		"modules/Additional_Documentation.CustomizingTools__.html": "documents/Guides.Customizing_existing_tools.html",
 		"modules/Additional_Documentation.MigratingToVersion1__.html": "documents/Guides.Migrating_to_version_1.html",
-		"modules/Additional_Documentation.WritingATheme__.html": "documents/Guides.Writing_a_theme.html"
+		"modules/Additional_Documentation.WritingATheme__.html": "documents/Guides.Writing_a_theme.html",
+		"modules/js_draw.html": "modules/js-draw.html"
 	},
 
 	"sort": ["source-order"],
