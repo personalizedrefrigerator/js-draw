@@ -1,4 +1,4 @@
-# 1.24.0
+# 1.24.0, 1.24.1
 
 - New APIs:
   - Simplified API for positioning HTML elements above a canvas (https://github.com/personalizedrefrigerator/js-draw/commit/6bac2a3e9d5d72d4af92a46ea9dfbc3ef39e36df).

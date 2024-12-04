@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/example-save-restore-toolbar-state",
-	"version": "1.24.0",
+	"version": "1.24.1",
 	"description": "Example demonstrating saving and restoring toolbar state",
 	"license": "MIT",
 	"private": true,
@@ -11,9 +11,9 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"js-draw": "^1.24.0"
+		"js-draw": "^1.24.1"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.24.0"
+		"@js-draw/build-tool": "^1.24.1"
 	}
 }
