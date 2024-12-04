@@ -516,6 +516,8 @@ export class Mat33 {
 		if (cssString === '' || cssString === 'none') {
 			return Mat33.identity;
 		}
+		// Normalize spacing
+		cssString = cssString.trim().replace(/\s+/g, ' ');
 
 		const parseArguments = (argumentString: string): number[] => {
 			const parsed = argumentString.split(/[, \t\n]+/g).map((argString) => {
@@ -609,7 +611,7 @@ export class Mat33 {
 
 		// A command (\w+)
 		// followed by a set of arguments ([ \t\n0-9eE.,\-%]+)
-		const partRegex = /\s*(\w+)\s*\(([^)]*)\)/gi;
+		const partRegex = /\s?(\w+)\s?\(([^)]*)\)/gi;
 		let match;
 		let matrix: Mat33 | null = null;
 

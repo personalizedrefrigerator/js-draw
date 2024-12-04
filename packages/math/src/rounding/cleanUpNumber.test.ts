@@ -11,5 +11,7 @@ it('cleanUpNumber', () => {
 	expect(cleanUpNumber('1234')).toBe('1234');
 	expect(cleanUpNumber('1234.5')).toBe('1234.5');
 	expect(cleanUpNumber('1234.500')).toBe('1234.5');
+	expect(cleanUpNumber('1234.00500')).toBe('1234.005');
+	expect(cleanUpNumber('1234.001234500')).toBe('1234.0012345');
 	expect(cleanUpNumber('1.1368683772161603e-13')).toBe('0');
 });
