@@ -1,3 +1,9 @@
+# 1.24.2
+
+- Bug fixes
+  - Fixed: Nested text components were not rendered near the default maximum zoom level.
+  - Optimized regular expression in `Mat33`.
+
 # 1.24.0, 1.24.1
 
 - New APIs:
