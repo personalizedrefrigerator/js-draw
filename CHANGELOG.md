@@ -1,3 +1,11 @@
+# 1.24.0
+
+- New APIs:
+  - Simplified API for positioning HTML elements above a canvas (https://github.com/personalizedrefrigerator/js-draw/commit/6bac2a3e9d5d72d4af92a46ea9dfbc3ef39e36df).
+- Bug fixes
+  - Optimized regular expressions (https://github.com/personalizedrefrigerator/js-draw/commit/c0d807be8689896bed5a935f780ddaed7885bb97).
+  - Fix long lines in text editors can push the cursor out of the editor (https://github.com/personalizedrefrigerator/js-draw/commit/6bac2a3e9d5d72d4af92a46ea9dfbc3ef39e36df).
+
 # 1.23.0, 1.23.1
 
 - Features
