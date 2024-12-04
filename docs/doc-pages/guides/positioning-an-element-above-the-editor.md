@@ -9,7 +9,7 @@ The built-in `TextTool` tool renders a `<textarea>` above the editor at a partic
 
 Related APIs:
 
-- {@link js-draw!Editor.anchorElementToCanvas | Editor.anchorElementToCanvas}: Used to listen for changes in the viewport.
+- {@link js-draw!Editor.anchorElementToCanvas | Editor.anchorElementToCanvas}: Attaches the element at a specific location.
 - {@link @js-draw/math!Mat33.translation | Mat33.translation}: Lets us specify where to put the element.
 
 ## Getting started: Creating the editor
@@ -51,6 +51,8 @@ const positioning = Mat33.translation(Vec2.of(10, 20));
 const anchor = editor.anchorElementToCanvas(button, positioning);
 ```
 
+Above, a {@link @js-draw/math!Mat33 | Mat33} is used to specify where to place the `button`. See the {@link @js-draw/math!Mat33 | Mat33} documentation for how to display the button with a different position/rotation.
+
 ## Unattaching the element
 
 Later, the element can be removed from the editor with `anchor.remove()`. Let's do this when the button is clicked:
@@ -58,8 +60,6 @@ Later, the element can be removed from the editor with `anchor.remove()`. Let's 
 ```ts,runnable
 ---use-previous---
 ---visible---
-import { Mat33, Vec2 } from '@js-draw/math';
-
 button.onclick = () => {
 	anchor.remove();
 };
