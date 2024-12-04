@@ -39,8 +39,8 @@ export default [
 				'@typescript-eslint/no-unused-vars': [
 					'error',
 					{
-						'argsIgnorePattern': '^_',
-					}
+						argsIgnorePattern: '^_',
+					},
 				],
 				// The no-base-to-string rule seems to fail even in some cases where a toString is defined.
 				'@typescript-eslint/no-base-to-string': 'off',
@@ -58,8 +58,8 @@ export default [
 				'@typescript-eslint/no-misused-promises': 'off',
 				'@typescript-eslint/no-unsafe-return': 'off',
 				'@typescript-eslint/require-await': 'off',
-			}
-		}
+			},
+		},
 	),
 	nounsanitized.configs.recommended,
 	eslintConfigPrettier,
