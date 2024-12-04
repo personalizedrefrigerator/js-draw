@@ -294,7 +294,7 @@ export default class EditorImage {
 
 	// A Command that can access private [EditorImage] functionality
 	private static AddElementCommand = class extends SerializableCommand {
-		private serializedElem: any | null = null;
+		private serializedElem: any = null;
 
 		// If [applyByFlattening], then the rendered content of this element
 		// is present on the display's wet ink canvas. As such, no re-render is necessary

@@ -29,7 +29,7 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		this.element.classList.add(`${cssPrefix}handle`, `${cssPrefix}selection-menu`);
 		this.element.style.setProperty('--vertical-offset', `${verticalOffset}px`);
 
-		this.onClick = async () => {
+		this.onClick = () => {
 			const anchor = this.getBBoxCanvasCoords().center;
 			showContextMenu(anchor);
 		};

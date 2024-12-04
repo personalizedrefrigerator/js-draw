@@ -4,6 +4,11 @@ import LineSegment2 from './LineSegment2';
 import Rect2 from './Rect2';
 import Parameterized2DShape from './Parameterized2DShape';
 
+// The typings for Bezier are incorrect in some cases:
+interface CorrectedBezierType extends Bezier {
+	dderivative(t: number): { x: number; y: number };
+}
+
 /**
  * A lazy-initializing wrapper around Bezier-js.
  *
@@ -14,13 +19,13 @@ import Parameterized2DShape from './Parameterized2DShape';
  * @internal
  */
 export abstract class BezierJSWrapper extends Parameterized2DShape {
-	#bezierJs: Bezier | null = null;
+	#bezierJs: CorrectedBezierType | null = null;
 
 	protected constructor(bezierJsBezier?: Bezier) {
 		super();
 
 		if (bezierJsBezier) {
-			this.#bezierJs = bezierJsBezier;
+			this.#bezierJs = bezierJsBezier as CorrectedBezierType;
 		}
 	}
 
@@ -29,7 +34,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 
 	protected getBezier() {
 		if (!this.#bezierJs) {
-			this.#bezierJs = new Bezier(this.getPoints().map((p) => p.xy));
+			this.#bezierJs = new Bezier(this.getPoints().map((p) => p.xy)) as CorrectedBezierType;
 		}
 		return this.#bezierJs;
 	}
@@ -62,7 +67,7 @@ export abstract class BezierJSWrapper extends Parameterized2DShape {
 	}
 
 	public secondDerivativeAt(t: number): Point2 {
-		return Vec2.ofXY((this.getBezier() as any).dderivative(t));
+		return Vec2.ofXY(this.getBezier().dderivative(t));
 	}
 
 	/** @returns the [normal vector](https://en.wikipedia.org/wiki/Normal_(geometry)) to this curve at `t`. */

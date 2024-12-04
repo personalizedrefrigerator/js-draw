@@ -797,7 +797,7 @@ export class Editor {
 	/** @internal */
 	protected async handleDrop(evt: DragEvent | ClipboardEvent) {
 		evt.preventDefault();
-		this.handlePaste(evt);
+		await this.handlePaste(evt);
 	}
 
 	/** @internal */

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents -- Used for clarity */
+
 import { Editor } from '../Editor';
 import { InputEvtType } from '../inputEvents';
 import fileToBase64Url from './fileToBase64Url';
@@ -159,7 +161,7 @@ export default class ClipboardHandler {
 	 * images.
 	 */
 	public copy(event?: ClipboardEvent | DragEvent) {
-		const onError = (error: Error | unknown) => {
+		const onError = (error: unknown) => {
 			if (this.callbacks?.onCopyError) {
 				this.callbacks.onCopyError(error);
 				return Promise.resolve();

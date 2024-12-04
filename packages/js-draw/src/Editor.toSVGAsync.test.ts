@@ -31,8 +31,8 @@ describe('Editor.toSVGAsync', () => {
 		await loadTestImage(editor, numTotalPaths);
 
 		const svg = await editor.toSVGAsync({
-			onProgress: async (componentIndex) => {
-				return componentIndex <= 250;
+			onProgress: (componentIndex) => {
+				return Promise.resolve(componentIndex <= 250);
 			},
 		});
 

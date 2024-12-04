@@ -3,7 +3,7 @@ import Editor from '../../../Editor';
 import ClipboardHandler from '../../../util/ClipboardHandler';
 
 const makeClipboardErrorHandlers = (editor: Editor) => {
-	const makeErrorDialog = (error: Error | unknown) => {
+	const makeErrorDialog = (error: unknown) => {
 		const dialog = makeMessageDialog(editor, {
 			title: editor.localization.copyPasteError__heading,
 			classNames: ['clipboard-error-dialog'],
@@ -22,7 +22,7 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 	};
 
 	return {
-		async onCopyError(error: Error | unknown) {
+		onCopyError(error: unknown) {
 			const dialog = makeErrorDialog(error);
 
 			const textboxLabel = document.createElement('label');
@@ -49,7 +49,7 @@ const makeClipboardErrorHandlers = (editor: Editor) => {
 			copyTextbox.select();
 			document.execCommand('copy');
 		},
-		onPasteError(error: Error | unknown) {
+		onPasteError(error: unknown) {
 			const dialog = makeErrorDialog(error);
 
 			const textboxLabel = document.createElement('label');

@@ -294,7 +294,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 		}
 	}
 
-	public override addSpacer(_options?: Partial<SpacerOptions> | undefined): void {
+	public override addSpacer(_options?: Partial<SpacerOptions>): void {
 		//throw new Error('Method not implemented.');
 		// Unused for this toolbar.
 	}

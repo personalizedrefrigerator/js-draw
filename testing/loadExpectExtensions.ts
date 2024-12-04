@@ -1,4 +1,6 @@
-type Equalable = { eq: (other: unknown, ...args: any[]) => boolean };
+interface Equalable<Args extends unknown[]> {
+	eq: (other: unknown, ...args: Args) => boolean;
+}
 
 export const loadExpectExtensions = () => {
 	// Custom matchers. See
@@ -6,7 +8,11 @@ export const loadExpectExtensions = () => {
 	expect.extend({
 		// Determine whether expected = actual based on the objects'
 		// .eq methods
-		objEq(actual: Equalable, expected: Equalable | undefined | null, ...eqArgs: any[]) {
+		objEq<Args extends unknown[]>(
+			actual: Equalable<Args>,
+			expected: Equalable<Args> | undefined | null,
+			...eqArgs: Args
+		) {
 			let pass = false;
 			if (!expected) {
 				pass = actual.eq(expected, ...eqArgs);
@@ -17,7 +23,7 @@ export const loadExpectExtensions = () => {
 			return {
 				pass,
 				message: () => {
-					return `Expected ${pass ? '!' : ''}(${actual as unknown}).eq(${expected}). Options(${eqArgs})`;
+					return `Expected ${pass ? '!' : ''}(${String(actual)}).eq(${String(expected)}). Options(${String(eqArgs)})`;
 				},
 			};
 		},

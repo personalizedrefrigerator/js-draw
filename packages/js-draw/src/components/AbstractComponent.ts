@@ -442,7 +442,7 @@ export default abstract class AbstractComponent {
 
 	// Returns true if `data` is not deserializable. May return false even if [data]
 	// is not deserializable.
-	private static isNotDeserializable(json: any | string) {
+	private static isNotDeserializable(json: any) {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}
@@ -463,7 +463,7 @@ export default abstract class AbstractComponent {
 	}
 
 	// Convert a string or an object produced by `JSON.parse` into an `AbstractComponent`.
-	public static deserialize(json: string | any): AbstractComponent {
+	public static deserialize(json: any): AbstractComponent {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}
