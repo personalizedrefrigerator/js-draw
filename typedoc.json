@@ -28,6 +28,8 @@
 		"modules/Additional_Documentation.WritingATheme__.html": "documents/Guides.Writing_a_theme.html"
 	},
 
+	"sort": ["source-order"],
+
 	"excludePrivate": true,
 	"excludeInternal": true,
 	"includeVersion": false,

@@ -3,7 +3,13 @@
 	"version": "1.23.1",
 	"description": "Internal extensions for TypeDoc in js-draw.",
 	"types": "./dist/mjs/index.d.ts",
-	"main": "./dist/cjs/index.js",
+	"main": "./dist/mjs/index.mjs",
+	"exports": {
+		".": {
+			"import": "./dist/mjs/index.mjs",
+			"require": "./dist/cjs/index.js"
+		}
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/personalizedrefrigerator/js-draw.git"
@@ -19,7 +25,7 @@
 	"dependencies": {
 		"katex": "0.16.10",
 		"react": "18.2.0",
-		"typescript": "5.5.4"
+		"typescript": "5.7.2"
 	},
 	"peerDependencies": {
 		"typedoc": "0.26.x"
