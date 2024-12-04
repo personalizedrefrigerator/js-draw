@@ -310,6 +310,11 @@ export class Rect2 extends Abstract2DShape {
 	// [affineTransform] is a transformation matrix that both scales and **translates**.
 	// the bounding box of this' four corners after transformed by the given affine transformation.
 	public transformedBoundingBox(affineTransform: Mat33): Rect2 {
+		// Optimize transforming by the identity matrix (a common case).
+		if (affineTransform === Mat33.identity) {
+			return this;
+		}
+
 		return Rect2.bboxOf(this.corners.map((corner) => affineTransform.transformVec2(corner)));
 	}
 

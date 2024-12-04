@@ -114,6 +114,10 @@ describe('Rect2', () => {
 	});
 
 	it('A transformed bounding box', () => {
+		expect(Rect2.unitSquare.transformedBoundingBox(Mat33.scaling2D(2))).objEq(
+			new Rect2(0, 0, 2, 2),
+		);
+
 		const rotationMat = Mat33.zRotation(Math.PI / 4);
 		const rect = Rect2.unitSquare.translatedBy(Vec2.of(-0.5, -0.5));
 		const transformedBBox = rect.transformedBoundingBox(rotationMat);

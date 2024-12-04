@@ -194,13 +194,28 @@ export default class TextComponent extends AbstractComponent implements Restylea
 		this.contentBBox = bbox ?? Rect2.empty;
 	}
 
-	private renderInternal(canvas: AbstractRenderer, visibleRect?: Rect2) {
+	/**
+	 * Renders a TextComponent or a TextComponent child onto a `canvas`.
+	 *
+	 * `visibleRect` can be provided as a performance optimization. If not the top-level
+	 * text node, `baseTransform` (specifies the transformation of the parent text component
+	 * in canvas space) should also be provided.
+	 *
+	 * Note that passing a `baseTransform` is preferable to transforming `visibleRect`. At high
+	 * zoom levels, transforming `visibleRect` by the inverse of the parent transform can lead to
+	 * inaccuracy due to precision loss.
+	 */
+	private renderInternal(
+		canvas: AbstractRenderer,
+		visibleRect?: Rect2,
+		baseTransform: Mat33 = Mat33.identity,
+	) {
 		const cursor = new TextComponent.TextCursor(this.transform, this.style);
 
 		for (const textObject of this.textObjects) {
 			const { transform, bbox } = cursor.update(textObject);
 
-			if (visibleRect && !visibleRect.intersects(bbox)) {
+			if (visibleRect && !visibleRect.intersects(bbox.transformedBoundingBox(baseTransform))) {
 				continue;
 			}
 
@@ -209,7 +224,7 @@ export default class TextComponent extends AbstractComponent implements Restylea
 			} else {
 				canvas.pushTransform(transform);
 
-				textObject.renderInternal(canvas, visibleRect?.transformedBoundingBox(transform.inverse()));
+				textObject.renderInternal(canvas, visibleRect, baseTransform.rightMul(transform));
 				canvas.popTransform();
 			}
 		}
