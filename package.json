@@ -11,7 +11,7 @@
 		"lint": "eslint",
 		"format": "prettier --write",
 		"lint-staged": "lint-staged",
-		"lint-ci": "eslint . --max-warnings=0 --ext .js --ext .ts",
+		"lint-ci": "eslint . --max-warnings=0",
 		"format-ci": "prettier --check .",
 		"build-translation-templates": "lerna run build-translation-templates",
 		"translation-template-to-ts": "ts-node scripts/markdownTranslationFormToTs.ts",
