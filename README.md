@@ -5,7 +5,7 @@
 <h1 align="center">js-draw</h1>
 <div align="center">
 
-[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/js_draw.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
+[NPM package](https://www.npmjs.com/package/js-draw) | [GitHub](https://github.com/personalizedrefrigerator/js-draw) | [Documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/js-draw.html) | [Try it!](https://personalizedrefrigerator.github.io/js-draw/example/example.html)
 
 </div>
 
@@ -17,7 +17,7 @@ For example usage, see [one of the examples](https://github.com/personalizedrefr
 
 ## Very large zoom range
 
-A core feature of `js-draw` is its [large zoom range](https://personalizedrefrigerator.github.io/js-draw/typedoc/interfaces/js_draw.EditorSettings.html#maxZoom) (from roughly 10⁻¹⁰x to 10¹⁰x).
+A core feature of `js-draw` is its [large zoom range](https://personalizedrefrigerator.github.io/js-draw/typedoc/interfaces/js-draw.EditorSettings.html#maxZoom) (from roughly 10⁻¹⁰x to 10¹⁰x).
 
 <details open><summary><strong>Demo</strong></summary>
 
@@ -25,7 +25,7 @@ A core feature of `js-draw` is its [large zoom range](https://personalizedrefrig
 
 </details>
 
-Applications using `js-draw` can adjust this zoom range with custom [EditorSettings](https://personalizedrefrigerator.github.io/js-draw/typedoc/interfaces/js_draw.EditorSettings.html).
+Applications using `js-draw` can adjust this zoom range with custom [EditorSettings](https://personalizedrefrigerator.github.io/js-draw/typedoc/interfaces/js-draw.EditorSettings.html).
 
 ## Touchscreen and stylus support
 
@@ -37,7 +37,7 @@ Applications using `js-draw` can adjust this zoom range with custom [EditorSetti
 
 </details>
 
-It's also possible to disable touch drawing. This can be useful when drawing with a stylus and can be done with either [PanZoomTool.setMode](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.PanZoomTool.html#setMode) or, by a user, with the "hand" tool menu:
+It's also possible to disable touch drawing. This can be useful when drawing with a stylus and can be done with either [PanZoomTool.setMode](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.PanZoomTool.html#setMode) or, by a user, with the "hand" tool menu:
 
 <img alt="screenshot: Hand tool menu at the bottom of the screen includes 'lock rotation' and 'touchscreen panning'. 'Touchscreen panning' is highlighted." src="https://github.com/personalizedrefrigerator/js-draw/assets/46334387/d96e2df5-6132-4122-954d-d25402754bc2" width="400"/>
 
@@ -68,7 +68,7 @@ It's possible for applications using `js-draw` to [add custom pen types](https:/
 
 ### With a bundler that supports importing `.css` files
 
-To create a new `Editor` and add it as a child of `document.body`, use the [Editor](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#constructor) constructor:
+To create a new `Editor` and add it as a child of `document.body`, use the [Editor](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#constructor) constructor:
 
 ```ts
 import Editor from 'js-draw';
@@ -116,7 +116,7 @@ To create a toolbar with buttons for the default tools:
 const toolbar = editor.addToolbar();
 ```
 
-Save and exit buttons can be added with the [`.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addSaveButton) and [`.addExitButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addExitButton) methods:
+Save and exit buttons can be added with the [`.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.AbstractToolbar.html#addSaveButton) and [`.addExitButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.AbstractToolbar.html#addExitButton) methods:
 
 ```ts
 toolbar.addSaveButton(() => {
@@ -195,7 +195,7 @@ which **does** contain the `<circle/>` element.
 
 ## Customizing the background
 
-The background color and style can be customized with [editor.setBackgroundStyle](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#setBackgroundStyle). For example,
+The background color and style can be customized with [editor.setBackgroundStyle](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#setBackgroundStyle). For example,
 
 ```ts
 import { Editor, Color4, BackgroundComponentBackgroundType } from 'js-draw';
@@ -209,9 +209,9 @@ editor.dispatch(
 );
 ```
 
-Above, we use `editor.dispatch` because `setBackgroundStyle` returns a [`Command`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Command.html), rather than changing the background style directly. `js-draw` uses `Command`s to track actions that can be undone and redone.
+Above, we use `editor.dispatch` because `setBackgroundStyle` returns a [`Command`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Command.html), rather than changing the background style directly. `js-draw` uses `Command`s to track actions that can be undone and redone.
 
-By default, `.dispatch` adds `Command`s to the undo stack. To avoid this, pass `false` for the second parameter to [`.dispatch`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#dispatch):
+By default, `.dispatch` adds `Command`s to the undo stack. To avoid this, pass `false` for the second parameter to [`.dispatch`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#dispatch):
 
 ```ts
 const addToHistory = false;
@@ -226,7 +226,7 @@ editor.dispatch(
 
 ### Making the background fill the screen
 
-By default, the background has a fixed size and marks the region that will be saved by [`.toSVG`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toSVG) or [`.toDataURL`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toDataURL). It's possible to make the background auto-resize to the content of the image with [`editor.image.setAutoresizeEnabled(true)`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.EditorImage.html#setAutoresizeEnabled):
+By default, the background has a fixed size and marks the region that will be saved by [`.toSVG`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#toSVG) or [`.toDataURL`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#toDataURL). It's possible to make the background auto-resize to the content of the image with [`editor.image.setAutoresizeEnabled(true)`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.EditorImage.html#setAutoresizeEnabled):
 
 ```ts
 const editor = new Editor(document.body);
@@ -240,11 +240,11 @@ editor.dispatch(editor.setBackgroundStyle({ autoresize: true }), addToHistory);
 
 ## Saving
 
-To save as an SVG, use [`editor.toSVG()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toSVG), which returns an `HTMLSVGElement`. Alternatively, if working with very large images that need to be saved in the background, consider using [`editor.toSVGAsync()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toSVG).
+To save as an SVG, use [`editor.toSVG()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#toSVG), which returns an `HTMLSVGElement`. Alternatively, if working with very large images that need to be saved in the background, consider using [`editor.toSVGAsync()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#toSVG).
 
-It's also possible to render the editor to a PNG or JPEG data URL. This can be done with [`editor.toDataURL()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#toDataURL).
+It's also possible to render the editor to a PNG or JPEG data URL. This can be done with [`editor.toDataURL()`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#toDataURL).
 
-The region of the image that will be saved can be changed by calling [`editor.image.setImportExportRect`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.Editor.html#setImportExportRect) or
+The region of the image that will be saved can be changed by calling [`editor.image.setImportExportRect`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.Editor.html#setImportExportRect) or
 
 ## Settings/configuration
 
@@ -407,11 +407,11 @@ body .imageEditorContainer {
 
 disables the dark theme and creates a theme that primarily uses yellow/green colors.
 
-See also [adjustEditorThemeForContrast](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.adjustEditorThemeForContrast.html).
+See also [adjustEditorThemeForContrast](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js-draw.adjustEditorThemeForContrast.html).
 
 # Examples and resources
 
 - [Examples](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples.md)
 - [How to add a custom pen type](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/Additional_Documentation.CustomizingTools__.html#md:adding-a-new-pen-type)
-- [A material icon theme for js-draw](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/_js_draw_material_icons.html#md:js-drawmaterial-icons)
+- [A material icon theme for js-draw](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/_js-draw_material-icons.html#md:js-drawmaterial-icons)
 - [More documentation](https://personalizedrefrigerator.github.io/js-draw/typedoc/modules/Guides.html)
