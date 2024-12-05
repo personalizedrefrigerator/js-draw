@@ -1,0 +1,21 @@
+{
+	"name": "@js-draw/example-pdf",
+	"version": "1.2.2",
+	"type": "module",
+	"description": "Shows loading a PDF",
+	"license": "AGPL-3.0-only",
+	"private": true,
+	"scripts": {
+		"build": "build-tool build",
+		"watch": "build-tool watch"
+	},
+	"dependencies": {
+		"@js-draw/material-icons": "^1.23.1",
+		"@js-draw/pdf-support": "^1.23.1",
+		"js-draw": "^1.23.1",
+		"mupdf": "1.0.0"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^1.23.1"
+	}
+}
