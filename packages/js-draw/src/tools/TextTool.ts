@@ -227,6 +227,10 @@ export default class TextTool extends BaseTool {
 			}, 0);
 		};
 		this.textInputElem.onkeyup = (evt) => {
+			// In certain input modes, the <enter> key is used to select characters.
+			// When in this mode, prevent <enter> from submitting:
+			if (evt.isComposing) return;
+
 			if (evt.key === 'Enter' && !evt.shiftKey) {
 				this.flushInput();
 				this.editor.focus();
