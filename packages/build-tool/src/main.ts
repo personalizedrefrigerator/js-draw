@@ -62,7 +62,9 @@ const readConfig = (): BuildConfig => {
 			if ('outPath' in filePair) {
 				assertPropertyHasType(filePair, 'outPath', 'string', errorContext);
 			}
-			assertPropertyHasType(filePair, 'name', 'string', errorContext);
+			if ('name' in filePair) {
+				assertPropertyHasType(filePair, 'name', 'string', errorContext);
+			}
 
 			bundledFiles.push({
 				inPath: path.resolve(filePair.inPath),
@@ -162,8 +164,8 @@ const readConfig = (): BuildConfig => {
 };
 
 const bundleFiles = async (config: BuildConfig, buildMode: BuildMode) => {
-	for (const { name, inPath, outPath } of config.bundledFiles) {
-		const bundledFile = new BundledFile(name, inPath, outPath);
+	for (const { name, inPath, target, outPath } of config.bundledFiles) {
+		const bundledFile = new BundledFile(name, inPath, target ?? 'web', outPath);
 
 		if (buildMode === 'build') {
 			await bundledFile.build();

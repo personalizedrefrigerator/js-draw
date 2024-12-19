@@ -1,0 +1,51 @@
+{
+	"name": "@js-draw/pdf-support",
+	"version": "1.23.1",
+	"description": "PDF support for js-draw.",
+	"types": "./dist/mjs/lib.d.ts",
+	"main": "./dist/cjs/lib.js",
+	"exports": {
+		".": {
+			"types": "./dist/mjs/lib.d.ts",
+			"import": "./dist/mjs/lib.mjs",
+			"require": "./dist/cjs/lib.js"
+		},
+		"./bundle": {
+			"types": "./dist/mjs/bundle.d.ts",
+			"default": "./dist/bundle.js"
+		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/personalizedrefrigerator/js-draw.git"
+	},
+	"author": "Henry Heino",
+	"license": "MPL",
+	"scripts": {
+		"dist": "npm run build",
+		"build": "build-tool build",
+		"watch": "build-tool watch",
+		"build-translation-template": "build-tool build-translation-template"
+	},
+	"devDependencies": {
+		"@js-draw/build-tool": "^1.23.1",
+		"@types/jest": "29.5.2"
+	},
+	"peerDependencies": {
+		"js-draw": "^1.23.1"
+	},
+	"bugs": {
+		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"
+	},
+	"homepage": "https://github.com/personalizedrefrigerator/js-draw#readme",
+	"directories": {
+		"doc": "docs"
+	},
+	"keywords": [
+		"ink",
+		"drawing",
+		"pen",
+		"freehand",
+		"svg"
+	]
+}

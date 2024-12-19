@@ -4,6 +4,8 @@ export interface BundledFileRecord {
 	name: string;
 	inPath: string;
 
+	target?: 'web' | 'webworker';
+
 	// outPath defaults to a path based on inPath
 	outPath?: string;
 }
