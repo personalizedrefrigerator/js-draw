@@ -10,6 +10,7 @@ import { Color4, Point2, Vec2 } from '@js-draw/math';
 import Editor from './Editor';
 import createEditor from './testing/createEditor';
 import { BackgroundType } from './components/BackgroundComponent';
+import findNodeWithText from './testing/findNodeWithText';
 
 describe('Editor', () => {
 	it('should fire keyup events when the editor loses focus', () => {
@@ -345,5 +346,25 @@ describe('Editor', () => {
 			expect(editor.image.getImportExportRect().minDimension).toBeGreaterThan(10);
 			expect(editor.image.getImportExportRect().minDimension).toBeLessThan(1000);
 		});
+	});
+
+	test('.showAboutDialog should show an about dialog', () => {
+		const editor = createEditor({
+			appInfo: {
+				name: 'This should be shown in the dialog.',
+			},
+		});
+		editor.showAboutDialog();
+
+		const dialog = editor.getRootElement().querySelector('dialog:has(.about-dialog-content)');
+		if (!dialog) throw new Error('Did not open about dialog');
+
+		expect(findNodeWithText('This should be shown in the dialog.', dialog)).toBeTruthy();
+
+		const closeButton = findNodeWithText('Close', dialog, {
+			tag: 'button',
+		}) as HTMLButtonElement | null;
+		if (!closeButton) throw new Error('Did not find close button.');
+		closeButton.click();
 	});
 });
