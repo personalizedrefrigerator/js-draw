@@ -112,6 +112,11 @@ Navigator.prototype.clipboard.write = (data: ClipboardItems): Promise<void> => {
 	return Promise.resolve();
 };
 
+Navigator.prototype.clipboard.writeText = (text: string): Promise<void> => {
+	clipboardData = [new ClipboardItem({ 'text/plain': text })];
+	return Promise.resolve();
+};
+
 window.ClipboardItem ??= class {
 	public readonly types: string[];
 	public readonly presentationStyle = 'unspecified';

@@ -164,6 +164,19 @@ export interface EditorSettings {
 		 */
 		showImagePicker?: ShowCustomFilePickerCallback;
 	} | null;
+
+	/**
+	 * Allows changing how js-draw interacts with the clipboard.
+	 *
+	 * **Note**: Even when a custom `clipboardApi` is specified, if a `ClipboardEvent` is available
+	 * (e.g. from when a user pastes with ctrl+v), the `ClipboardEvent` will be preferred.
+	 */
+	clipboardApi: {
+		/** Called to read data to the clipboard. Keys in the result are MIME types. Values are the data associated with that type. */
+		read(): Promise<Map<string, Blob | string>>;
+		/** Called to write data to the clipboard. Keys in `data` are MIME types. Values are the data associated with that type. */
+		write(data: Map<string, Blob | Promise<Blob> | string>): void | Promise<void>;
+	} | null;
 }
 
 /**
@@ -358,6 +371,7 @@ export class Editor {
 			image: {
 				showImagePicker: settings.image?.showImagePicker ?? undefined,
 			},
+			clipboardApi: settings.clipboardApi ?? null,
 		};
 
 		// Validate settings
