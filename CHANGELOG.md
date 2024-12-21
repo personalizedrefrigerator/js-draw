@@ -1,3 +1,12 @@
+# 1.25.0
+
+- New APIs
+  - Allow overriding the default global clipboard API using `EditorSettings`.
+- Bug fixes
+  - Prevent <kbd>enter</kbd> from finalizing `TextComponent`s if composing.
+- Other changes
+  - Allow `text/plain` clipboard data to be auto-detected as SVG when pasting.
+
 # 1.24.2
 
 - Bug fixes
