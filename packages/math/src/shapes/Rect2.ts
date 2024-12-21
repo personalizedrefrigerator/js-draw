@@ -200,6 +200,28 @@ export class Rect2 extends Abstract2DShape {
 		return new Rect2(this.x - margin, this.y - margin, this.w + margin * 2, this.h + margin * 2);
 	}
 
+	/**
+	 * If this rectangle is smaller than `minSize`, returns a copy of this
+	 * with a larger width/height.
+	 *
+	 * If smaller than `minSize`, padding is applied on both sides.
+	 */
+	public grownToSize(minSize: Vec2) {
+		if (this.width >= minSize.x && this.height >= minSize.y) {
+			return this;
+		}
+
+		const deltaWidth = Math.max(0, minSize.x - this.width);
+		const deltaHeight = Math.max(0, minSize.y - this.height);
+
+		return new Rect2(
+			this.x - deltaWidth / 2,
+			this.y - deltaHeight / 2,
+			this.width + deltaWidth,
+			this.height + deltaHeight,
+		);
+	}
+
 	public getClosestPointOnBoundaryTo(target: Point2) {
 		const closestEdgePoints = this.getEdges().map((edge) => {
 			return edge.closestPointTo(target);

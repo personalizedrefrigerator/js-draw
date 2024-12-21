@@ -89,7 +89,11 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		const handleSizeCanvas = verticalOffset / this.viewport.getScaleFactor();
 
 		const topLeft = Vec2.of(parentCanvasRect.x, parentCanvasRect.y - handleSizeCanvas);
-		return new Rect2(topLeft.x, topLeft.y, contentCanvasSize.x, contentCanvasSize.y);
+		const minSize = Vec2.of(48, 48).times(toCanvasScale);
+
+		return new Rect2(topLeft.x, topLeft.y, contentCanvasSize.x, contentCanvasSize.y).grownToSize(
+			minSize,
+		);
 	}
 
 	public updatePosition() {

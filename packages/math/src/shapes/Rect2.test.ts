@@ -138,6 +138,14 @@ describe('Rect2', () => {
 		expect(new Rect2(1, 2, 2, 8).grownBy(-2)).objEq(new Rect2(2, 4, 0, 4));
 	});
 
+	it('.grownToSize should grow the rectangle to the given minimum size', () => {
+		expect(Rect2.empty.grownToSize(Vec2.of(10, 10))).objEq(new Rect2(-5, -5, 10, 10));
+		expect(Rect2.empty.grownToSize(Vec2.of(10, 4))).objEq(new Rect2(-5, -2, 10, 4));
+
+		expect(Rect2.unitSquare.grownToSize(Vec2.of(0.5, 0.5))).toBe(Rect2.unitSquare);
+		expect(new Rect2(0, 0, 2, 2).grownToSize(Vec2.of(4, 0.5))).objEq(new Rect2(-1, 0, 4, 2));
+	});
+
 	describe('should correctly expand to include a given point', () => {
 		it('Growing an empty rectange to include (1, 0)', () => {
 			const originalRect = Rect2.empty;
