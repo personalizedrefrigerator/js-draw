@@ -28,7 +28,7 @@ const serializeComponentStyle = (style: ComponentStyle) => {
 	return result;
 };
 
-const deserializeComponentStyle = (json: Record<string, any> | any): ComponentStyle => {
+const deserializeComponentStyle = (json: Record<string, any>): ComponentStyle => {
 	const color = json.color ? Color4.fromHex(json.color) : undefined;
 	const textStyle = json.textStyle ? textStyleFromJSON(json.textStyle) : undefined;
 

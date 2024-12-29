@@ -72,8 +72,8 @@ export interface Vec3 {
 	 *
 	 * This is equivalent to `Math.atan2(vec.y, vec.x)`.
 	 *
-	 * As such, observing that `Math.atan2(-0, -1)` $\approx -\pi$ and `Math.atan2(0, -1)`$\approx \pi$
-	 * the resultant angle is in the range $[-\pi, pi]$.
+	 * As such, observing that `Math.atan2(-0, -1)` $\approx -\pi$ and `Math.atan2(0, -1)` $\approx \pi$
+	 * the resultant angle is in the range $[-\pi, \pi]$.
 	 *
 	 * **Example**:
 	 * ```ts,runnable,console

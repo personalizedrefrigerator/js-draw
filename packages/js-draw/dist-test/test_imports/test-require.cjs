@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 console.log('Testing require()...');
 
 // TODO: Test require('js-draw') (requires removing Coloris because

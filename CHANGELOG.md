@@ -1,3 +1,26 @@
+# 1.25.0
+
+- New APIs
+  - Allow overriding the default global clipboard API using `EditorSettings`.
+- Bug fixes
+  - Prevent <kbd>enter</kbd> from finalizing `TextComponent`s if composing.
+- Other changes
+  - Allow `text/plain` clipboard data to be auto-detected as SVG when pasting.
+
+# 1.24.2
+
+- Bug fixes
+  - Fixed: Nested text components were not rendered near the default maximum zoom level.
+  - Optimized regular expression in `Mat33`.
+
+# 1.24.0, 1.24.1
+
+- New APIs:
+  - Simplified API for positioning HTML elements above a canvas (https://github.com/personalizedrefrigerator/js-draw/commit/6bac2a3e9d5d72d4af92a46ea9dfbc3ef39e36df).
+- Bug fixes
+  - Optimized regular expressions (https://github.com/personalizedrefrigerator/js-draw/commit/c0d807be8689896bed5a935f780ddaed7885bb97).
+  - Fix long lines in text editors can push the cursor out of the editor (https://github.com/personalizedrefrigerator/js-draw/commit/6bac2a3e9d5d72d4af92a46ea9dfbc3ef39e36df).
+
 # 1.23.0, 1.23.1
 
 - Features
@@ -326,15 +349,15 @@
 # 1.2.0
 
 - Features
-  - Added additional `Color4` utility functions ([`fromHSV`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromHSV), [`fromRGBVector`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#fromRGBVector), [`contrastRatio`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#contrastRatio), and [`.rgb`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js_draw_math.Color4.html#rgb)).
-  - Added [`adjustEditorThemeForContrast`](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.adjustEditorThemeForContrast.html) function.
+  - Added additional `Color4` utility functions ([`fromHSV`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js-draw_math.Color4.html#fromHSV), [`fromRGBVector`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js-draw_math.Color4.html#fromRGBVector), [`contrastRatio`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js-draw_math.Color4.html#contrastRatio), and [`.rgb`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/_js-draw_math.Color4.html#rgb)).
+  - Added [`adjustEditorThemeForContrast`](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js-draw.adjustEditorThemeForContrast.html) function.
 - Other changes
   - Prefers `transform` to `translation` when setting the position of the edge toolbar for compatibility with older browsers.
 
 # 1.1.0
 
 - Features
-  - Bind `ctrl+s` (or `meta+s`) to the save action, if added with [`AbstractToolbar.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js_draw.AbstractToolbar.html#addSaveButton).
+  - Bind `ctrl+s` (or `meta+s`) to the save action, if added with [`AbstractToolbar.addSaveButton`](https://personalizedrefrigerator.github.io/js-draw/typedoc/classes/js-draw.AbstractToolbar.html#addSaveButton).
 - Bug fixes
   - Edge toolbar: Fix edge menu text using incorrect CSS variable (it should use `--foreground-color-2` to match `--background-color-2`).
 
@@ -364,7 +387,7 @@ Breaking changes (see [the migration guide](https://js-draw.web.app/typedoc/modu
 
 Other changes
 
-- New default toolbar (see [makeEdgeToolbar](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js_draw.makeEdgeToolbar.html)).
+- New default toolbar (see [makeEdgeToolbar](https://personalizedrefrigerator.github.io/js-draw/typedoc/functions/js-draw.makeEdgeToolbar.html)).
 - New material icon pack
 - Preserve `<g>` element parents when writing SVGs.
 - Fix: Editor thinks control key is still pressed after shortcuts like `ctrl+Tab` that defocus the editor before a keyup event is sent for `ctrl`.

@@ -33,7 +33,7 @@ export const load = (app: Application) => {
 
 			// We can't find the symbol if it's name is "default"
 			if (name && name !== 'default') {
-				const toTypeDocName = (s: string) => s.replace(/[^a-zA-Z0-9]/g, '_');
+				const toTypeDocName = (s: string) => s.replace(/[^a-zA-Z0-9-]/g, '_');
 				const moduleValue = toTypeDocName(moduleSource);
 				const nameValue = toTypeDocName(name);
 

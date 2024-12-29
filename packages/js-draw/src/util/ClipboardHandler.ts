@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents -- Used for clarity */
+
 import { Editor } from '../Editor';
 import { InputEvtType } from '../inputEvents';
 import fileToBase64Url from './fileToBase64Url';
@@ -75,6 +77,8 @@ export default class ClipboardHandler {
 
 		let files: Blob[] = [];
 		const textData: Map<string, string> = new Map<string, string>();
+
+		const editorSettings = editor.getCurrentSettings();
 		if (hasEvent) {
 			// NOTE: On some browsers, .getData and .files must be used before any async operations.
 			files = [...clipboardData.files];
@@ -82,6 +86,20 @@ export default class ClipboardHandler {
 				const data = clipboardData.getData(mime);
 				if (data) {
 					textData.set(mime, data);
+				}
+			}
+		} else if (editorSettings.clipboardApi) {
+			const clipboardData: Map<string, Blob | string> = await editorSettings.clipboardApi.read();
+
+			for (const [type, data] of clipboardData.entries()) {
+				if (typeof data === 'string') {
+					textData.set(type, data);
+				} else {
+					let blob = data;
+					if (blob.type !== type) {
+						blob = new Blob([blob], { type });
+					}
+					files.push(blob);
 				}
 			}
 		} else {
@@ -159,7 +177,7 @@ export default class ClipboardHandler {
 	 * images.
 	 */
 	public copy(event?: ClipboardEvent | DragEvent) {
-		const onError = (error: Error | unknown) => {
+		const onError = (error: unknown) => {
 			if (this.callbacks?.onCopyError) {
 				this.callbacks.onCopyError(error);
 				return Promise.resolve();
@@ -263,7 +281,14 @@ export default class ClipboardHandler {
 
 		const supportsClipboardApi =
 			typeof ClipboardItem !== 'undefined' && typeof navigator?.clipboard?.write !== 'undefined';
-		if (!this.#preferClipboardEvents && supportsClipboardApi && (hasNonTextMimeTypes || !event)) {
+		const prefersClipboardApi =
+			!this.#preferClipboardEvents && supportsClipboardApi && (hasNonTextMimeTypes || !event);
+
+		const editorSettings = this.editor.getCurrentSettings();
+		if (prefersClipboardApi && editorSettings.clipboardApi) {
+			const writeResult = editorSettings.clipboardApi.write(mimeToData);
+			return writeResult ?? Promise.resolve();
+		} else if (prefersClipboardApi) {
 			let clipboardApiPromise: Promise<void> | null = null;
 
 			const fallBackToCopyEvent = (reason: unknown) => {

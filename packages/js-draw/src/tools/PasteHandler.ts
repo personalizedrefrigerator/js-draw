@@ -26,12 +26,21 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	// @internal
-	public override onPaste(event: PasteEvent): boolean {
+	public override onPaste(event: PasteEvent, onComplete?: () => void): boolean {
 		const mime = event.mime.toLowerCase();
 
 		const svgData = (() => {
 			if (mime === 'image/svg+xml') {
 				return event.data;
+			}
+
+			// In some environments, it isn't possible to write non-text data to the
+			// clipboard. To support these cases, auto-detect text/plain SVG data.
+			if (mime === 'text/plain') {
+				const trimmedData = event.data.trim();
+				if (trimmedData.startsWith('<svg') && trimmedData.endsWith('</svg>')) {
+					return trimmedData;
+				}
 			}
 
 			if (mime !== 'text/html') {
@@ -53,13 +62,13 @@ export default class PasteHandler extends BaseTool {
 		})();
 
 		if (svgData) {
-			void this.doSVGPaste(svgData);
+			void this.doSVGPaste(svgData).then(onComplete);
 			return true;
 		} else if (mime === 'text/plain') {
-			void this.doTextPaste(event.data);
+			void this.doTextPaste(event.data).then(onComplete);
 			return true;
 		} else if (mime === 'image/png' || mime === 'image/jpeg') {
-			void this.doImagePaste(event.data);
+			void this.doImagePaste(event.data).then(onComplete);
 			return true;
 		}
 

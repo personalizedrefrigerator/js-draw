@@ -27,7 +27,7 @@ editor.addToolbar();
 
 ### From a CDN
 
-It's also possible to include `js-draw` and `@js-draw/material-icons` can from a CDN.
+It's also possible to include `js-draw` and `@js-draw/material-icons` from a CDN.
 
 For example, with JSDelivr,
 

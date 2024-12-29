@@ -30,6 +30,9 @@ describe('Mat33.fromCSSMatrix', () => {
 		expect(Mat33.fromCSSMatrix('matrix(-1, 2e6,	3E-2,-5.123, -6.5e-1, 0.01)')).objEq(
 			new Mat33(-1, 3e-2, -6.5e-1, 2e6, -5.123, 0.01, 0, 0, 1),
 		);
+		expect(Mat33.fromCSSMatrix('matrix(-1,\t2e6,3E-2,-5.123,  -6.5e-1,\n0.01\n)')).objEq(
+			new Mat33(-1, 3e-2, -6.5e-1, 2e6, -5.123, 0.01, 0, 0, 1),
+		);
 	});
 
 	it('should convert multi-matrix arguments into a single CSS matrix', () => {

@@ -200,6 +200,28 @@ export class Rect2 extends Abstract2DShape {
 		return new Rect2(this.x - margin, this.y - margin, this.w + margin * 2, this.h + margin * 2);
 	}
 
+	/**
+	 * If this rectangle is smaller than `minSize`, returns a copy of this
+	 * with a larger width/height.
+	 *
+	 * If smaller than `minSize`, padding is applied on both sides.
+	 */
+	public grownToSize(minSize: Vec2) {
+		if (this.width >= minSize.x && this.height >= minSize.y) {
+			return this;
+		}
+
+		const deltaWidth = Math.max(0, minSize.x - this.width);
+		const deltaHeight = Math.max(0, minSize.y - this.height);
+
+		return new Rect2(
+			this.x - deltaWidth / 2,
+			this.y - deltaHeight / 2,
+			this.width + deltaWidth,
+			this.height + deltaHeight,
+		);
+	}
+
 	public getClosestPointOnBoundaryTo(target: Point2) {
 		const closestEdgePoints = this.getEdges().map((edge) => {
 			return edge.closestPointTo(target);
@@ -314,6 +336,11 @@ export class Rect2 extends Abstract2DShape {
 	// [affineTransform] is a transformation matrix that both scales and **translates**.
 	// the bounding box of this' four corners after transformed by the given affine transformation.
 	public transformedBoundingBox(affineTransform: Mat33): Rect2 {
+		// Optimize transforming by the identity matrix (a common case).
+		if (affineTransform === Mat33.identity) {
+			return this;
+		}
+
 		return Rect2.bboxOf(this.corners.map((corner) => affineTransform.transformVec2(corner)));
 	}
 

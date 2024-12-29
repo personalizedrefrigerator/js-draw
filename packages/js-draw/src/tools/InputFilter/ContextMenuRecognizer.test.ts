@@ -31,13 +31,13 @@ const setUpPipeline = () => {
 		pipeline,
 		emitListener,
 		getAllEventTypes: (): InputEvtType[] => {
-			return emitListener.mock.calls.map((args) => args[0]?.kind);
+			return emitListener.mock.calls.map((args): InputEvtType => args[0]?.kind);
 		},
 	};
 };
 
 describe('ContextMenuRecognizer', () => {
-	test('should send contextmenu events for right-clicks', async () => {
+	test('should send contextmenu events for right-clicks', () => {
 		const { pipeline, getAllEventTypes } = setUpPipeline();
 
 		pipeline.onEvent(

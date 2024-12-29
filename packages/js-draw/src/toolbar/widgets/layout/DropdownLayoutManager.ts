@@ -84,7 +84,7 @@ class Dropdown implements ToolMenu {
 		}
 	}
 
-	private hideDropdownTimeout: any | null = null;
+	private hideDropdownTimeout: ReturnType<typeof setTimeout> | null = null;
 	private setVisible(visible: boolean) {
 		const currentlyVisible = this.visible.get();
 		if (currentlyVisible === visible) {

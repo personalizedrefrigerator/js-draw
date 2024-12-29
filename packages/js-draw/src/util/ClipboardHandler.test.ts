@@ -3,6 +3,7 @@ import createEditor from '../testing/createEditor';
 import ClipboardHandler from './ClipboardHandler';
 import { CopyEvent, PasteEvent } from '../inputEvents';
 import Editor from '../Editor';
+import TextComponent from '../components/TextComponent';
 
 interface ExtendedClipboardItem extends ClipboardItem {
 	supports(mime: string): boolean;
@@ -53,6 +54,11 @@ const setClipboardApiSupported = (supported: boolean) => {
 	} else {
 		window.ClipboardItem = undefined as any;
 	}
+};
+
+const getAllTextInImage = (editor: Editor) => {
+	const textObjects = editor.image.getAllElements().filter((elem) => elem instanceof TextComponent);
+	return textObjects.map((o) => o.getText()).join('\n');
 };
 
 describe('ClipboardHandler', () => {
@@ -184,6 +190,55 @@ describe('ClipboardHandler', () => {
 			);
 			expect(clipboardItems[0].types).not.toContain(disallowedType);
 		});
+
+		it('should prefer editorSettings.clipboardApi (if provided) to the native clipboard API', async () => {
+			const clipboardWrite = jest.fn((_data: Map<string, string>) => {});
+			const editor = createEditor({
+				clipboardApi: {
+					write: clipboardWrite,
+					read: async () => new Map(),
+				},
+			});
+
+			setUpCopyPasteTool(editor, {
+				'text/plain': 'This should be copied',
+				'text/html': '<strong>test!</strong>',
+			});
+
+			const clipboardHandler = new ClipboardHandler(editor);
+			await clipboardHandler.copy();
+
+			expect(clipboardWrite.mock.calls).toEqual([
+				[
+					new Map([
+						['text/plain', 'This should be copied'],
+						['text/html', '<strong>test!</strong>'],
+					]),
+				],
+			]);
+		});
+
+		it('should prefer ClipboardEvents to editorSettings.clipboardApi', async () => {
+			const clipboardWrite = jest.fn(() => {});
+			const editor = createEditor({
+				clipboardApi: {
+					write: clipboardWrite,
+					read: async () => new Map(),
+				},
+			});
+			setUpCopyPasteTool(editor, {
+				'text/plain': 'This is the content to copy.',
+			});
+
+			const clipboardHandler = new ClipboardHandler(editor);
+
+			const event = new ClipboardEvent('copy', { clipboardData: new DataTransfer() });
+			await clipboardHandler.copy(event);
+
+			// Should write the data to the event, rather than calling api.clipboardWrite.
+			expect(clipboardWrite).not.toHaveBeenCalled();
+			expect(event.clipboardData?.getData('text/plain')).toBe('This is the content to copy.');
+		});
 	});
 
 	describe('paste', () => {
@@ -203,6 +258,68 @@ describe('ClipboardHandler', () => {
 				mime: 'image/svg+xml',
 				data: testData,
 			});
+		});
+
+		it('should support pasting Blobs from editorSettings.clipboardApi', async () => {
+			const clipboardRead = jest.fn(
+				async () => new Map([['text/plain', new Blob(['This should be pasted'])]]),
+			);
+			const editor = createEditor({
+				clipboardApi: {
+					write: () => {},
+					read: clipboardRead,
+				},
+			});
+
+			setUpCopyPasteTool(editor, {});
+
+			const clipboardHandler = new ClipboardHandler(editor);
+			await clipboardHandler.paste();
+
+			expect(getAllTextInImage(editor)).toBe('This should be pasted');
+		});
+
+		it('should prefer editorSettings.clipboardApi (if provided) to the native clipboard API', async () => {
+			const clipboardRead = jest.fn(async () => new Map([['text/plain', 'This SHOULD be pasted']]));
+			const editor = createEditor({
+				clipboardApi: {
+					write: () => {},
+					read: clipboardRead,
+				},
+			});
+
+			await navigator.clipboard.writeText('Test!');
+
+			setUpCopyPasteTool(editor, {});
+
+			const clipboardHandler = new ClipboardHandler(editor);
+			await clipboardHandler.paste();
+
+			expect(clipboardRead).toHaveBeenCalled();
+			expect(getAllTextInImage(editor)).toBe('This SHOULD be pasted');
+		});
+
+		it('should prefer ClipboardEvents to editorSettings.clipboardApi', async () => {
+			const clipboardRead = jest.fn(async () => {
+				return new Map([['text/plain', 'This should NOT be pasted']]);
+			});
+			const editor = createEditor({
+				clipboardApi: {
+					write: () => {},
+					read: clipboardRead,
+				},
+			});
+			setUpCopyPasteTool(editor, {});
+
+			const clipboardHandler = new ClipboardHandler(editor);
+
+			const event = new ClipboardEvent('paste', { clipboardData: new DataTransfer() });
+			event.clipboardData?.setData('text/plain', 'This SHOULD be pasted!');
+			await clipboardHandler.paste(event);
+
+			// Should read from the event, rather than the API
+			expect(clipboardRead).not.toHaveBeenCalled();
+			expect(getAllTextInImage(editor)).toBe('This SHOULD be pasted!');
 		});
 	});
 });

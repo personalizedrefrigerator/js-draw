@@ -13,7 +13,7 @@ export const cleanUpNumber = (text: string) => {
 	const lastChar = text.charAt(text.length - 1);
 	if (lastChar === '0' || lastChar === '.') {
 		// Remove trailing zeroes
-		text = text.replace(/([.]\d*[^0]+)0+$/, '$1');
+		text = text.replace(/([.]\d*[^0])0+$/, '$1');
 		text = text.replace(/[.]0+$/, '.');
 
 		// Remove trailing period

@@ -67,7 +67,7 @@ describe('uniteCommands', () => {
 		expect(deserialized.description(editor, editor.localization)).toBe('Bar');
 	});
 
-	it('should ignore applyChunkSize when fewer than that many commands are present', async () => {
+	it('should ignore applyChunkSize when fewer than that many commands are present', () => {
 		const editor = createEditor();
 		const command = uniteCommands(
 			[EditorImage.addElement(new StrokeComponent([])), editor.setBackgroundColor(Color4.red)],

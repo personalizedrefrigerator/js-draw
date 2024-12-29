@@ -77,7 +77,9 @@ export class Viewport {
 		}
 	};
 
+	/** Converts from canvas to screen coordinates */
 	private transform: Mat33;
+	/** Converts from screen to canvas coordinates */
 	private inverseTransform: Mat33;
 	private screenRect: Rect2;
 
@@ -224,7 +226,6 @@ export class Viewport {
 
 	// The separate function type definition seems necessary here.
 	// See https://stackoverflow.com/a/58163623/17055750.
-	// eslint-disable-next-line no-dupe-class-members
 	public static roundPoint(point: Point2 | number, tolerance: number): Point2 | number {
 		const scaleFactor = 10 ** Math.floor(Math.log10(tolerance));
 		const roundComponent = (component: number): number => {

@@ -2,11 +2,11 @@
 
 // Type declarations for custom matchers
 interface CustomMatchers<R = unknown> {
-	objEq(
+	objEq<Args extends unknown[]>(
 		expected: {
-			eq: (other: any, ...args: any) => boolean;
+			eq: (other: any, ...args: Args) => boolean;
 		},
-		...opts: any
+		...opts: unknown[]
 	): R;
 
 	toHaveEntriesCloseTo(expected: number[], tolerance?: number): R;

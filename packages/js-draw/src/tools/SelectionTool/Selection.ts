@@ -120,11 +120,11 @@ export default class Selection {
 		);
 
 		this.childwidgets = [
+			menuToggleButton,
 			resizeBothHandle,
 			...resizeHorizontalHandles,
 			resizeVerticalHandle,
 			rotationHandle,
-			menuToggleButton,
 		];
 
 		for (const widget of this.childwidgets) {
