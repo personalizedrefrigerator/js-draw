@@ -12,7 +12,14 @@ import Command from '../commands/Command';
 
 // @internal Sort by z-index, low to high
 export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
-	leaves.sort((a, b) => a.getContent()!.getZIndex() - b.getContent()!.getZIndex());
+	leaves.sort((a, b) => {
+		const aContent = a.getContent()!;
+		const bContent = b.getContent()!;
+		const aLayer = aContent.getLayer();
+		const bLayer = bContent.getLayer();
+		if (aLayer === bLayer) return aContent.getZIndex() - bContent.getZIndex();
+		return aLayer - bLayer;
+	});
 };
 
 export enum EditorImageEventType {

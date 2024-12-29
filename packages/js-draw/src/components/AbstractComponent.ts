@@ -126,6 +126,14 @@ export default abstract class AbstractComponent {
 	}
 
 	/**
+	 * Returns the current layer of the component. Elements in higher layers are placed
+	 * on top of elements on lower layers.
+	 */
+	public getLayer(): number {
+		return 0;
+	}
+
+	/**
 	 * @returns the bounding box of this. This can be a slight overestimate if doing so
 	 * 			significantly improves performance.
 	 */
