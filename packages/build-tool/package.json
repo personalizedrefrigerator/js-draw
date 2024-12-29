@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"css-loader": "6.10.0",
+		"esbuild": "0.24.2",
 		"path-browserify": "1.0.1",
 		"sass": "1.70.0",
 		"sass-loader": "14.1.0",
@@ -19,8 +20,7 @@
 		"terser-webpack-plugin": "5.3.9",
 		"ts-loader": "9.5.1",
 		"ts-node": "10.9.2",
-		"typescript": "5.7.2",
-		"webpack": "5.94.0"
+		"typescript": "5.7.2"
 	},
 	"devDependencies": {
 		"@types/node": "20.8.6"

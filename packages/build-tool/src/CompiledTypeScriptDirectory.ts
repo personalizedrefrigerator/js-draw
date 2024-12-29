@@ -29,7 +29,7 @@ class CompiledTypeScriptDirectory {
 	private rootConfig: TSConfigData;
 	public constructor(
 		private inDir: string,
-		private outDir: string,
+		private outDir: string | undefined,
 	) {
 		this.rootConfig = this.getCompilerOptionsFromConfig();
 	}
@@ -55,6 +55,7 @@ class CompiledTypeScriptDirectory {
 		}
 
 		const defaultConfig = {};
+		const overrides = this.outDir === undefined ? { noEmit: true } : {};
 
 		if (path) {
 			const config = ts.readConfigFile(path, ts.sys.readFile.bind(ts.sys));
@@ -74,7 +75,10 @@ class CompiledTypeScriptDirectory {
 			const fileNames = compilerOpts.fileNames;
 
 			return {
-				compilerOptions: compilerOpts.options,
+				compilerOptions: {
+					...compilerOpts.options,
+					...overrides,
+				},
 
 				// null ⟹ All .ts files in the current directory
 				fileNames: fileNames.length > 0 ? fileNames : null,
@@ -82,7 +86,10 @@ class CompiledTypeScriptDirectory {
 		} else {
 			console.warn('[⚠️] No tsconfig.json file found!');
 			return {
-				compilerOptions: defaultConfig,
+				compilerOptions: {
+					...defaultConfig,
+					...overrides,
+				},
 				fileNames: null,
 			};
 		}
@@ -168,11 +175,11 @@ class CompiledTypeScriptDirectory {
 		const langServices: Record<ModuleType, ts.LanguageService> = {
 			mjs: makeLanguageService({
 				module: ts.ModuleKind.ES2020,
-				outDir: path.join(this.outDir, 'mjs'),
+				outDir: this.outDir ? path.join(this.outDir, 'mjs') : undefined,
 			}),
 			cjs: makeLanguageService({
 				module: ts.ModuleKind.CommonJS,
-				outDir: path.join(this.outDir, 'cjs'),
+				outDir: this.outDir ? path.join(this.outDir, 'cjs') : undefined,
 			}),
 		};
 
@@ -189,10 +196,23 @@ class CompiledTypeScriptDirectory {
 				.concat(languageService.getSemanticDiagnostics(fileName));
 
 			// Errors?
-			if (diagnostics.length > 0 || output.emitSkipped) {
+			if (diagnostics.length > 0) {
 				console.error(`[💥] Failed to compile ${fileName}`);
-				diagnostics.forEach(this.reportDiagnostic.bind(this));
+				for (const diagnostic of diagnostics) {
+					this.reportDiagnostic(diagnostic);
+				}
 				return false;
+			}
+
+			if (output.emitSkipped && this.outDir) {
+				console.error(
+					`[ERROR] Assertion failed: Emit skipped for file ${fileName} even though outDir is defined.`,
+				);
+				return false;
+			}
+
+			if (this.outDir === null) {
+				return true;
 			}
 
 			const writeFilePromises = output.outputFiles.map(async (outFile) => {
