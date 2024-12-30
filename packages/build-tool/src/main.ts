@@ -1,10 +1,10 @@
 #!/usr/bin/env ts-node
 import { argv, exit } from 'node:process';
-import path, { join, normalize } from 'node:path';
+import path, { dirname, join, normalize } from 'node:path';
 import { existsSync, rmSync, mkdirSync, readFileSync, realpathSync, readdirSync } from 'node:fs';
 import CompiledTypeScriptDirectory from './CompiledTypeScriptDirectory';
 import BundledFile from './BundledFile';
-import buildTranslationTemplates from './buildTranslationTemplates';
+import buildTranslationTemplates from './utils/buildTranslationTemplates';
 import { BuildConfig, BuildMode, BundledFileRecord, TranslationSourcePair } from './types';
 import ScssCompiler from './ScssCompiler';
 
@@ -261,7 +261,11 @@ const main = async () => {
 			void transpileDirectory(config.inDirectory, config.outDirectory, buildMode);
 		} else {
 			// Just type check
-			const inDirectories = new Set(config.bundledFiles.map((f) => f.inPath));
+			const inDirectories = new Set(
+				config.bundledFiles.map((bundledFile) => {
+					return dirname(bundledFile.inPath);
+				}),
+			);
 			for (const dir of inDirectories) {
 				void transpileDirectory(dir, undefined, buildMode);
 			}

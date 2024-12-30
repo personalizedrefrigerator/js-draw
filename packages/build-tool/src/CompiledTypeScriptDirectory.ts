@@ -4,7 +4,7 @@ import path, { dirname } from 'path';
 import ts from 'typescript';
 import * as fs from 'fs';
 
-import forEachFileInDirectory from './forEachFileInDirectory';
+import forEachFileInDirectory from './utils/forEachFileInDirectory';
 import { mkdir, writeFile } from 'fs/promises';
 
 const scriptDir = dirname(__dirname);
@@ -34,6 +34,10 @@ class CompiledTypeScriptDirectory {
 		this.rootConfig = this.getCompilerOptionsFromConfig();
 	}
 
+	private get noEmit() {
+		return this.outDir === undefined;
+	}
+
 	private async getTargetFiles() {
 		// Find all TypeScript files in this.inDir
 		const tsFiles: string[] = [];
@@ -55,7 +59,7 @@ class CompiledTypeScriptDirectory {
 		}
 
 		const defaultConfig = {};
-		const overrides = this.outDir === undefined ? { noEmit: true } : {};
+		const overrides = this.noEmit ? { noEmit: true } : {};
 
 		if (path) {
 			const config = ts.readConfigFile(path, ts.sys.readFile.bind(ts.sys));
@@ -197,7 +201,7 @@ class CompiledTypeScriptDirectory {
 
 			// Errors?
 			if (diagnostics.length > 0) {
-				console.error(`[💥] Failed to compile ${fileName}`);
+				console.error(`[💥] Failed to compile ${fileName} (target: ${moduleType})`);
 				for (const diagnostic of diagnostics) {
 					this.reportDiagnostic(diagnostic);
 				}
@@ -206,7 +210,7 @@ class CompiledTypeScriptDirectory {
 
 			if (output.emitSkipped && this.outDir) {
 				console.error(
-					`[ERROR] Assertion failed: Emit skipped for file ${fileName} even though outDir is defined.`,
+					`[🛑] Assertion failed: Emit skipped for file ${fileName} even though outDir is defined.`,
 				);
 				return false;
 			}
@@ -249,7 +253,7 @@ class CompiledTypeScriptDirectory {
 
 		// If there were any errors emitting,
 		if (!(await Promise.all(emitFilePromises)).every((v) => v)) {
-			throw new Error('[😱] There were transpilation errors!');
+			throw new Error('[💥] There were TypeScript compilation errors!');
 		}
 
 		if (watch) {
@@ -276,7 +280,7 @@ class CompiledTypeScriptDirectory {
 				const watcher = ts.sys.watchFile(
 					filePath,
 					() => {
-						console.log(`[ ] Watcher: ${filePath} updated`);
+						console.log(`[...] Watcher: ${filePath} updated`);
 						fileVersions[absolutePath]++;
 
 						const updateFile = async () => {
@@ -287,7 +291,7 @@ class CompiledTypeScriptDirectory {
 									await emitFile('cjs', filePath);
 									await emitFile('mjs', filePath);
 
-									console.log(`[✅] Emitted ${filePath}`);
+									console.log(`[✅] ${this.noEmit ? 'Typechecked' : 'Emitted'} ${filePath}`);
 								} finally {
 									updatingFile[filePath] = false;
 								}
@@ -316,11 +320,13 @@ class CompiledTypeScriptDirectory {
 
 			return {
 				stop() {
-					watchers.forEach((watcher) => watcher.close());
+					for (const watcher of watchers) {
+						watcher.close();
+					}
 				},
 			};
 		} else {
-			console.info('[✅] Transpiled successfully!');
+			console.info('[✅] Compiled successfully!');
 		}
 
 		return null;

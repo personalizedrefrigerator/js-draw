@@ -22,8 +22,8 @@
 
 		"baseUrl": "packages/",
 		"paths": {
-			"js-draw": ["js-draw/src"],
-			"@js-draw/*": ["*/src"]
+			"js-draw": ["js-draw/src/lib.ts"],
+			"@js-draw/*": ["*/src/lib.ts"]
 		}
 	},
 	"exclude": [
