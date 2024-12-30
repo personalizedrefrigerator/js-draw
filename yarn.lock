@@ -5553,7 +5553,7 @@ __metadata:
     "@types/node": "npm:*"
     jest-mock: "npm:^29.7.0"
     jest-util: "npm:^29.7.0"
-    jsdom: "npm:^25.0.0"
+    jsdom: "npm:^20.0.0"
   peerDependencies:
     canvas: ^2.5.0
   peerDependenciesMeta:
@@ -5914,7 +5914,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsdom@npm:25.0.1, jsdom@npm:^25.0.0":
+"jsdom@npm:25.0.1":
   version: 25.0.1
   resolution: "jsdom@npm:25.0.1"
   dependencies:
