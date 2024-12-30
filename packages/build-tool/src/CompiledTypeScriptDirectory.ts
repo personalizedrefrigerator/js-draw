@@ -58,8 +58,35 @@ class CompiledTypeScriptDirectory {
 			path = ts.findConfigFile(rootDir, (path) => ts.sys.fileExists(path), 'tsconfig.json');
 		}
 
-		const defaultConfig = {};
-		const overrides = this.noEmit ? { noEmit: true } : {};
+		const defaultConfig: ts.CompilerOptions = {};
+		const overrides: ts.CompilerOptions = {};
+		if (this.noEmit) {
+			overrides.noEmit = true;
+		} else {
+			// Disable monorepo path overrides and explicitly set the root directory when emitting.
+			// In js-draw, path overrides are present for developent puroposes -- they allow `yarn watch` to
+			// recreate development bundles when files in monorepo dependencies change.
+			// However, when enabled and emitting, these add additional unwanted container directories to the output.
+			// For example, with `paths: { '@js-draw/math': './packages/math/src/lib.ts' }`, running `tsc` in
+			// `packages/js-draw` outputs:
+			//
+			// pacakges/js-draw/dist/
+			// | cjs/js-draw/src/
+			// | | ...output files...
+			// | mjs/js-draw/src/
+			// | | ...output files...
+			//
+			// instead of
+			//
+			// pacakges/js-draw/dist/
+			// | cjs/
+			// | | ...output files...
+			// | mjs/
+			// | | ...output files...
+			//
+			overrides.paths = {}; // monorepo overrides
+			defaultConfig.rootDir = this.inDir;
+		}
 
 		if (path) {
 			const config = ts.readConfigFile(path, ts.sys.readFile.bind(ts.sys));
@@ -80,6 +107,7 @@ class CompiledTypeScriptDirectory {
 
 			return {
 				compilerOptions: {
+					...defaultConfig,
 					...compilerOpts.options,
 					...overrides,
 				},
@@ -147,6 +175,7 @@ class CompiledTypeScriptDirectory {
 		const makeLanguageService = (additionalOptions: ts.CompilerOptions) => {
 			const options: ts.CompilerOptions = {
 				declaration: true,
+				paths: {},
 				...this.rootConfig.compilerOptions,
 				...additionalOptions,
 			};
