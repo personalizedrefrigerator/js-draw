@@ -1,4 +1,5 @@
-// Main entrypoint for Webpack when building a bundle for release.
+// Main entrypoint for the bundler (ESBuild/Webpack/etc.) when creating the bundled
+// portion of a release.
 
 import '../styles';
 import Editor from '../Editor';
