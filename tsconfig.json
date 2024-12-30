@@ -20,10 +20,10 @@
 		"moduleResolution": "Node",
 		"declaration": true,
 
-		"baseUrl": "packages/",
+		"baseUrl": "/",
 		"paths": {
-			"js-draw": ["js-draw/src/lib.ts"],
-			"@js-draw/*": ["*/src/lib.ts"]
+			"js-draw": ["packages/js-draw/src/lib.ts"],
+			"@js-draw/*": ["packages/*/src/lib.ts"]
 		}
 	},
 	"exclude": [
