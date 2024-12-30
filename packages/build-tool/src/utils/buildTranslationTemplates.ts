@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BuildConfig, TranslationSourcePair as TranslationSource } from './types';
+import { BuildConfig, TranslationSourcePair as TranslationSource } from '../types';
 
 // Adds markdown formatting to format text like code.
 const codeFormat = (text: string) => {

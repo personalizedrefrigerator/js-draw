@@ -4,7 +4,7 @@ import path, { dirname } from 'path';
 import ts from 'typescript';
 import * as fs from 'fs';
 
-import forEachFileInDirectory from './forEachFileInDirectory';
+import forEachFileInDirectory from './utils/forEachFileInDirectory';
 import { mkdir, writeFile } from 'fs/promises';
 
 const scriptDir = dirname(__dirname);
@@ -29,9 +29,13 @@ class CompiledTypeScriptDirectory {
 	private rootConfig: TSConfigData;
 	public constructor(
 		private inDir: string,
-		private outDir: string,
+		private outDir: string | undefined,
 	) {
 		this.rootConfig = this.getCompilerOptionsFromConfig();
+	}
+
+	private get noEmit() {
+		return this.outDir === undefined;
 	}
 
 	private async getTargetFiles() {
@@ -54,7 +58,35 @@ class CompiledTypeScriptDirectory {
 			path = ts.findConfigFile(rootDir, (path) => ts.sys.fileExists(path), 'tsconfig.json');
 		}
 
-		const defaultConfig = {};
+		const defaultConfig: ts.CompilerOptions = {};
+		const overrides: ts.CompilerOptions = {};
+		if (this.noEmit) {
+			overrides.noEmit = true;
+		} else {
+			// Disable monorepo path overrides and explicitly set the root directory when emitting.
+			// In js-draw, path overrides are present for developent puroposes -- they allow `yarn watch` to
+			// recreate development bundles when files in monorepo dependencies change.
+			// However, when enabled and emitting, these add additional unwanted container directories to the output.
+			// For example, with `paths: { '@js-draw/math': './packages/math/src/lib.ts' }`, running `tsc` in
+			// `packages/js-draw` outputs:
+			//
+			// pacakges/js-draw/dist/
+			// | cjs/js-draw/src/
+			// | | ...output files...
+			// | mjs/js-draw/src/
+			// | | ...output files...
+			//
+			// instead of
+			//
+			// pacakges/js-draw/dist/
+			// | cjs/
+			// | | ...output files...
+			// | mjs/
+			// | | ...output files...
+			//
+			overrides.paths = {}; // monorepo overrides
+			defaultConfig.rootDir = this.inDir;
+		}
 
 		if (path) {
 			const config = ts.readConfigFile(path, ts.sys.readFile.bind(ts.sys));
@@ -74,7 +106,11 @@ class CompiledTypeScriptDirectory {
 			const fileNames = compilerOpts.fileNames;
 
 			return {
-				compilerOptions: compilerOpts.options,
+				compilerOptions: {
+					...defaultConfig,
+					...compilerOpts.options,
+					...overrides,
+				},
 
 				// null ⟹ All .ts files in the current directory
 				fileNames: fileNames.length > 0 ? fileNames : null,
@@ -82,7 +118,10 @@ class CompiledTypeScriptDirectory {
 		} else {
 			console.warn('[⚠️] No tsconfig.json file found!');
 			return {
-				compilerOptions: defaultConfig,
+				compilerOptions: {
+					...defaultConfig,
+					...overrides,
+				},
 				fileNames: null,
 			};
 		}
@@ -136,6 +175,7 @@ class CompiledTypeScriptDirectory {
 		const makeLanguageService = (additionalOptions: ts.CompilerOptions) => {
 			const options: ts.CompilerOptions = {
 				declaration: true,
+				paths: {},
 				...this.rootConfig.compilerOptions,
 				...additionalOptions,
 			};
@@ -168,11 +208,11 @@ class CompiledTypeScriptDirectory {
 		const langServices: Record<ModuleType, ts.LanguageService> = {
 			mjs: makeLanguageService({
 				module: ts.ModuleKind.ES2020,
-				outDir: path.join(this.outDir, 'mjs'),
+				outDir: this.outDir ? path.join(this.outDir, 'mjs') : undefined,
 			}),
 			cjs: makeLanguageService({
 				module: ts.ModuleKind.CommonJS,
-				outDir: path.join(this.outDir, 'cjs'),
+				outDir: this.outDir ? path.join(this.outDir, 'cjs') : undefined,
 			}),
 		};
 
@@ -189,10 +229,23 @@ class CompiledTypeScriptDirectory {
 				.concat(languageService.getSemanticDiagnostics(fileName));
 
 			// Errors?
-			if (diagnostics.length > 0 || output.emitSkipped) {
-				console.error(`[💥] Failed to compile ${fileName}`);
-				diagnostics.forEach(this.reportDiagnostic.bind(this));
+			if (diagnostics.length > 0) {
+				console.error(`[💥] Failed to compile ${fileName} (target: ${moduleType})`);
+				for (const diagnostic of diagnostics) {
+					this.reportDiagnostic(diagnostic);
+				}
 				return false;
+			}
+
+			if (output.emitSkipped && this.outDir) {
+				console.error(
+					`[🛑] Assertion failed: Emit skipped for file ${fileName} even though outDir is defined.`,
+				);
+				return false;
+			}
+
+			if (this.outDir === null) {
+				return true;
 			}
 
 			const writeFilePromises = output.outputFiles.map(async (outFile) => {
@@ -229,7 +282,7 @@ class CompiledTypeScriptDirectory {
 
 		// If there were any errors emitting,
 		if (!(await Promise.all(emitFilePromises)).every((v) => v)) {
-			throw new Error('[😱] There were transpilation errors!');
+			throw new Error('[💥] There were TypeScript compilation errors!');
 		}
 
 		if (watch) {
@@ -256,7 +309,7 @@ class CompiledTypeScriptDirectory {
 				const watcher = ts.sys.watchFile(
 					filePath,
 					() => {
-						console.log(`[ ] Watcher: ${filePath} updated`);
+						console.log(`[...] Watcher: ${filePath} updated`);
 						fileVersions[absolutePath]++;
 
 						const updateFile = async () => {
@@ -267,7 +320,7 @@ class CompiledTypeScriptDirectory {
 									await emitFile('cjs', filePath);
 									await emitFile('mjs', filePath);
 
-									console.log(`[✅] Emitted ${filePath}`);
+									console.log(`[✅] ${this.noEmit ? 'Typechecked' : 'Emitted'} ${filePath}`);
 								} finally {
 									updatingFile[filePath] = false;
 								}
@@ -296,11 +349,13 @@ class CompiledTypeScriptDirectory {
 
 			return {
 				stop() {
-					watchers.forEach((watcher) => watcher.close());
+					for (const watcher of watchers) {
+						watcher.close();
+					}
 				},
 			};
 		} else {
-			console.info('[✅] Transpiled successfully!');
+			console.info('[✅] Compiled successfully!');
 		}
 
 		return null;
