@@ -331,7 +331,9 @@ class CompiledTypeScriptDirectory {
 								}
 							} else {
 								for (const path of associatedFiles[filePath] ?? []) {
-									fs.unlinkSync(path);
+									if (fs.existsSync(path)) {
+										fs.unlinkSync(path);
+									}
 								}
 							}
 						};
