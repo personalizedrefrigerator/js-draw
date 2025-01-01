@@ -1290,7 +1290,7 @@ __metadata:
     "@js-draw/material-icons": "npm:^1.23.1"
     "@js-draw/pdf-support": "npm:^1.23.1"
     js-draw: "npm:^1.23.1"
-    mupdf: "npm:1.0.0"
+    mupdf: "npm:1.1.0"
   languageName: unknown
   linkType: soft
 
@@ -6870,10 +6870,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mupdf@npm:1.0.0":
-  version: 1.0.0
-  resolution: "mupdf@npm:1.0.0"
-  checksum: 10c0/9f9d8f766e5f05bb2fb06ed3854ef670114c97628442856f3afd3233be691af020097b809941b0b0cd02981c03ece80934742f702697e197ecf49f2573baed3f
+"mupdf@npm:1.1.0":
+  version: 1.1.0
+  resolution: "mupdf@npm:1.1.0"
+  checksum: 10c0/743744fba9b0350c9ff1d0e2484dd588085d5726ba649573e80076171f8fbe126208463cdef3a3fd839366e2d20a0be5a5ba18a6152b8ae7c29fe4612c5279a9
   languageName: node
   linkType: hard
 

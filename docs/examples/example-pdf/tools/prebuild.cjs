@@ -4,7 +4,19 @@ const fs = require('node:fs/promises');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { dirname, join } = require('node:path');
 
-// Converts all SVG icons in src/icons into importable .ts files.
+const patchMuPDF = async (targetDir) => {
+	const missingTypeDefsFile = join(targetDir, 'mupdf-wasm.d.ts');
+	await fs.writeFile(
+		missingTypeDefsFile,
+		`
+		// PATCH:
+		// This change allows mupdf to build with the current TypeScript settings.
+		export type Pointer<T> = any;
+	`,
+		'utf-8',
+	);
+};
+
 const copyMuPDF = async () => {
 	let sourceDir = require.resolve('mupdf');
 	if (sourceDir.endsWith('.js')) {
@@ -15,6 +27,8 @@ const copyMuPDF = async () => {
 
 	console.log('cp', sourceDir, targetDir);
 	await fs.cp(sourceDir, targetDir, { recursive: true });
+
+	await patchMuPDF(targetDir);
 };
 
 module.exports = { default: copyMuPDF() };
