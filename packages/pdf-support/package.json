@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/pdf-support",
-	"version": "1.23.1",
+	"version": "1.24.0",
 	"description": "PDF support for js-draw.",
 	"types": "./dist/mjs/lib.d.ts",
 	"main": "./dist/cjs/lib.js",
@@ -28,11 +28,11 @@
 		"build-translation-template": "build-tool build-translation-template"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.23.1",
+		"@js-draw/build-tool": "^1.24.0",
 		"@types/jest": "29.5.2"
 	},
 	"peerDependencies": {
-		"js-draw": "^1.23.1"
+		"js-draw": "^1.24.0"
 	},
 	"bugs": {
 		"url": "https://github.com/personalizedrefrigerator/js-draw/issues"

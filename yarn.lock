@@ -1197,7 +1197,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@js-draw/build-tool@npm:^1.25.0, @js-draw/build-tool@workspace:packages/build-tool":
+"@js-draw/build-tool@npm:^1.23.1, @js-draw/build-tool@npm:^1.24.0, @js-draw/build-tool@npm:^1.25.0, @js-draw/build-tool@workspace:packages/build-tool":
   version: 0.0.0-use.local
   resolution: "@js-draw/build-tool@workspace:packages/build-tool"
   dependencies:
@@ -1314,7 +1314,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@js-draw/material-icons@npm:^1.25.0, @js-draw/material-icons@workspace:packages/material-icons":
+"@js-draw/material-icons@npm:^1.23.1, @js-draw/material-icons@npm:^1.25.0, @js-draw/material-icons@workspace:packages/material-icons":
   version: 0.0.0-use.local
   resolution: "@js-draw/material-icons@workspace:packages/material-icons"
   dependencies:
@@ -1362,10 +1362,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/pdf-support@workspace:packages/pdf-support"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.23.1"
+    "@js-draw/build-tool": "npm:^1.24.0"
     "@types/jest": "npm:29.5.2"
   peerDependencies:
-    js-draw: ^1.23.1
+    js-draw: ^1.24.0
   languageName: unknown
   linkType: soft
 
@@ -5898,7 +5898,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-draw@npm:^1.25.0, js-draw@workspace:packages/js-draw":
+"js-draw@npm:^1.23.1, js-draw@npm:^1.25.0, js-draw@workspace:packages/js-draw":
   version: 0.0.0-use.local
   resolution: "js-draw@workspace:packages/js-draw"
   dependencies:
