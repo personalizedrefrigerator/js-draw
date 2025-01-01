@@ -40,12 +40,9 @@ bash$ yarn install
 
 # Re-build when files change
 bash$ yarn run watch
-
-# If you're making changes to packages/js-draw, you may also want to run
-# yarn run watch in the packages/js-draw directory.
 ```
 
-In a separate terminal, run a local web-server. Use the web-server to open the `example.html` file.
+In a separate terminal, run a local webserver:
 
 ```bash
 bash$ python3 -m http.server

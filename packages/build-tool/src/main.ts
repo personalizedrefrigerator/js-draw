@@ -1,12 +1,12 @@
 #!/usr/bin/env ts-node
 import { argv, exit } from 'node:process';
-import path, { join, normalize } from 'node:path';
+import path, { dirname, join, normalize } from 'node:path';
 import { existsSync, rmSync, mkdirSync, readFileSync, realpathSync, readdirSync } from 'node:fs';
 import CompiledTypeScriptDirectory from './CompiledTypeScriptDirectory';
 import BundledFile from './BundledFile';
-import buildTranslationTemplates from './buildTranslationTemplates';
+import buildTranslationTemplates from './utils/buildTranslationTemplates';
 import { BuildConfig, BuildMode, BundledFileRecord, TranslationSourcePair } from './types';
-import compileSCSS from './compileSCSS';
+import ScssCompiler from './ScssCompiler';
 
 type BuildCommand = BuildMode | 'build-translation-templates';
 
@@ -163,9 +163,13 @@ const readConfig = (): BuildConfig => {
 	};
 };
 
-const bundleFiles = async (config: BuildConfig, buildMode: BuildMode) => {
-	for (const { name, inPath, target, outPath } of config.bundledFiles) {
-		const bundledFile = new BundledFile(name, inPath, target ?? 'web', outPath);
+const bundleFiles = async (
+	config: BuildConfig,
+	buildMode: BuildMode,
+	scssCompiler: ScssCompiler,
+) => {
+	for (const { name, inPath, outPath } of config.bundledFiles) {
+		const bundledFile = new BundledFile(name, inPath, outPath, scssCompiler);
 
 		if (buildMode === 'build') {
 			await bundledFile.build();
@@ -175,7 +179,11 @@ const bundleFiles = async (config: BuildConfig, buildMode: BuildMode) => {
 	}
 };
 
-const transpileDirectory = async (inDir: string, outDir: string, buildMode: BuildMode) => {
+const transpileDirectory = async (
+	inDir: string,
+	outDir: string | undefined,
+	buildMode: BuildMode,
+) => {
 	const tsCompiler = new CompiledTypeScriptDirectory(inDir, outDir);
 
 	if (buildMode === 'build') {
@@ -246,11 +254,23 @@ const main = async () => {
 		console.log('Building translation templates...');
 		buildTranslationTemplates(config);
 	} else {
-		void bundleFiles(config, buildMode);
-		void compileSCSS(config, buildMode);
+		const scssCompiler = new ScssCompiler(config, buildMode);
+		void bundleFiles(config, buildMode, scssCompiler);
+		void scssCompiler.start();
 
 		if (config.inDirectory && config.outDirectory) {
+			// Output
 			void transpileDirectory(config.inDirectory, config.outDirectory, buildMode);
+		} else {
+			// Just type check
+			const inDirectories = new Set(
+				config.bundledFiles.map((bundledFile) => {
+					return dirname(bundledFile.inPath);
+				}),
+			);
+			for (const dir of inDirectories) {
+				void transpileDirectory(dir, undefined, buildMode);
+			}
 		}
 	}
 };

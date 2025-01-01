@@ -42,5 +42,9 @@
 		"typescript": "5.7.2",
 		"typescript-eslint": "8.17.0"
 	},
+	"//": "jest-environment-jsdom currently uses jsdom v20. To prevent deprecation warnings in CI, use v25 instead.",
+	"resolutions": {
+		"jsdom": "25.0.1"
+	},
 	"packageManager": "yarn@4.2.2"
 }

@@ -12,7 +12,7 @@ const config = {
 	// Mocks.
 	// See https://jestjs.io/docs/webpack#handling-static-assets
 	moduleNameMapper: {
-		// Webpack allows importing CSS files. Mock it.
+		// Webpack/ESBuild allows importing CSS files. Mock it.
 		'\\.(css|lessc)': '<rootDir>/testing/mocks/styleMock.js',
 		'@melloware/coloris': '<rootDir>/testing/mocks/coloris.ts',
 	},
