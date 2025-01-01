@@ -215,13 +215,19 @@ export default class TextTool extends BaseTool {
 			}
 		};
 		this.textInputElem.onblur = () => {
+			const input = this.textInputElem;
+
 			// Delay removing the input -- flushInput may be called within a blur()
 			// event handler
 			const removeInput = false;
-			const input = this.textInputElem;
-
 			this.flushInput(removeInput);
+
 			this.textInputElem = null;
+
+			if (input) {
+				input.classList.add('-hiding');
+			}
+
 			setTimeout(() => {
 				input?.remove();
 			}, 0);
@@ -267,9 +273,7 @@ export default class TextTool extends BaseTool {
 		if (allPointers.length === 1) {
 			// Are we clicking on a text node?
 			const canvasPos = current.canvasPos;
-			const halfTestRegionSize = Vec2.of(2.5, 2.5).times(
-				this.editor.viewport.getSizeOfPixelOnCanvas(),
-			);
+			const halfTestRegionSize = Vec2.of(4, 4).times(this.editor.viewport.getSizeOfPixelOnCanvas());
 			const testRegion = Rect2.fromCorners(
 				canvasPos.minus(halfTestRegionSize),
 				canvasPos.plus(halfTestRegionSize),

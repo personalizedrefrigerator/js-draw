@@ -712,7 +712,7 @@ export class ImageNode {
 
 		while (workList.length > 0) {
 			const current = workList.pop()!;
-			if (current.content !== null) {
+			if (current.content !== null && region.intersects(current.getBBox())) {
 				result.push(current);
 			}
 
