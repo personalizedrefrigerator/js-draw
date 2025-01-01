@@ -1,0 +1,11 @@
+{
+	"bundledFiles": [
+		{
+			"inPath": "./example.ts"
+		},
+		{
+			"inPath": "./worker.ts"
+		}
+	],
+	"prebuild": { "scriptPath": "./tools/prebuild.cjs" }
+}

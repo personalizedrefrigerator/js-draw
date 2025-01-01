@@ -16,7 +16,7 @@ export default class BundledFile {
 	private readonly outputFilepath: string;
 
 	public constructor(
-		public readonly bundleName: string,
+		public readonly bundleName: string | undefined,
 		private readonly sourceFilePath: string,
 		outputFilepath: string | undefined,
 		private readonly scssCompiler: ScssCompiler,

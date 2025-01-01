@@ -235,6 +235,15 @@ export class Color4 {
 	}
 
 	/**
+	 * Returns an array with four components, each from 0 to 1.
+	 *
+	 * The return value will be in $[0,1]^4$
+	 */
+	public asRGBAArray(): [number, number, number, number] {
+		return [this.r, this.g, this.b, this.a];
+	}
+
+	/**
 	 * Returns the [relative luminance](https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef)
 	 * of this color in the sRGB color space.
 	 *
