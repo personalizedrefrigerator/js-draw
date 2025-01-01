@@ -10,7 +10,7 @@ import { mkdir, writeFile } from 'fs/promises';
 const scriptDir = dirname(__dirname);
 const rootDir = dirname(dirname(scriptDir));
 
-type ModuleType = 'mjs' | 'cjs';
+type ModuleType = 'mjs' | 'cjs' | 'default';
 
 // Used by TypeScript to format diagnostic messages.
 // See https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#writing-an-incremental-program-watcher
@@ -205,22 +205,31 @@ class CompiledTypeScriptDirectory {
 			return services;
 		};
 
-		const langServices: Record<ModuleType, ts.LanguageService> = {
-			mjs: makeLanguageService({
-				module: ts.ModuleKind.ES2020,
-				outDir: this.outDir ? path.join(this.outDir, 'mjs') : undefined,
-			}),
-			cjs: makeLanguageService({
-				module: ts.ModuleKind.CommonJS,
-				outDir: this.outDir ? path.join(this.outDir, 'cjs') : undefined,
-			}),
-		};
+		const langServices: Partial<Record<ModuleType, ts.LanguageService>> = this.outDir
+			? {
+					mjs: makeLanguageService({
+						module: ts.ModuleKind.ES2020,
+						outDir: path.join(this.outDir, 'mjs'),
+					}),
+					cjs: makeLanguageService({
+						module: ts.ModuleKind.CommonJS,
+						outDir: path.join(this.outDir, 'cjs'),
+					}),
+				}
+			: {
+					default: makeLanguageService({ outDir: undefined }),
+				};
 
 		// Maps from source files to output files
 		const associatedFiles: Record<string, string[]> = {};
 
 		const emitFile = async (moduleType: ModuleType, fileName: string) => {
 			const languageService = langServices[moduleType];
+			if (!languageService) {
+				console.warn('Language service not created for module type', moduleType);
+				return false;
+			}
+
 			const output = languageService.getEmitOutput(fileName);
 
 			const diagnostics = languageService
@@ -276,8 +285,10 @@ class CompiledTypeScriptDirectory {
 		const emitFilePromises = [];
 		for (const fileName of targetFiles) {
 			associatedFiles[fileName] = [];
-			emitFilePromises.push(emitFile('cjs', fileName));
-			emitFilePromises.push(emitFile('mjs', fileName));
+			for (const key in langServices) {
+				const outputType = key as keyof typeof langServices;
+				emitFilePromises.push(emitFile(outputType, fileName));
+			}
 		}
 
 		// If there were any errors emitting,
