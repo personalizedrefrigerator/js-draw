@@ -49,7 +49,7 @@ class PDFBackground extends AbstractComponent {
 		return true;
 	}
 
-	public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined) {
+	public override render(canvas: AbstractRenderer, visibleRect?: Rect2) {
 		for (let i = 0; i < this.pdf.numPages; i++) {
 			const page = this.pdf.getPage(i);
 

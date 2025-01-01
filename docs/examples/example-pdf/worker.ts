@@ -187,7 +187,7 @@ const api = {
 				muAnnotation.getObject().resolve().put('Rotate', jsDrawAnnotation.rotate);
 			}
 
-			if (type === 'Ink') {
+			if (type === AnnotationType.Ink) {
 				muAnnotation.setColor(jsDrawAnnotation.color!);
 				muAnnotation.setBorderWidth(jsDrawAnnotation.borderWidth);
 
@@ -197,7 +197,7 @@ const api = {
 						muAnnotation.addInkListStrokeVertex(point);
 					}
 				}
-			} else if (type === 'FreeText') {
+			} else if (type === AnnotationType.FreeText) {
 				if (!('contents' in jsDrawAnnotation)) {
 					throw new Error('FreeText missing contents prop');
 				}
