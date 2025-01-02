@@ -13,7 +13,7 @@ import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
 import { toolbarCSSPrefix } from '../constants';
 import HelpDisplay from '../utils/HelpDisplay';
-import BaseWidget from './BaseWidget';
+import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 
 const makeFormatMenu = (
 	editor: Editor,
@@ -273,5 +273,21 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		formatMenu.update();
 
 		return true;
+	}
+
+	public override serializeState(): SavedToolbuttonState {
+		return {
+			...super.serializeState(),
+			selectionMode: this.tool.modeValue.get(),
+		};
+	}
+
+	public override deserializeFrom(state: SavedToolbuttonState): void {
+		super.deserializeFrom(state);
+
+		const isValidSelectionMode = Object.values(SelectionMode).includes(state.selectionMode);
+		if (isValidSelectionMode) {
+			this.tool.modeValue.set(state.selectionMode);
+		}
 	}
 }
