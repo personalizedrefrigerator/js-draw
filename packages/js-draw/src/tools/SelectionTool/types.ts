@@ -1,6 +1,11 @@
 import type { Rect2, Point2 } from '@js-draw/math';
 import Pointer from '../../Pointer';
 
+export enum SelectionMode {
+	Lasso = 'lasso',
+	Sqare = 'square',
+}
+
 export enum ResizeMode {
 	Both,
 	HorizontalOnly,

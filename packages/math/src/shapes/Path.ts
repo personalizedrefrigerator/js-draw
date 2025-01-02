@@ -984,6 +984,19 @@ export class Path {
 		return asClosed.intersection(lineToOutside).length % 2 === 1;
 	}
 
+	public closedContainsRect(rect: Rect2) {
+		if (!this.bbox.containsRect(rect)) return false;
+		if (!rect.corners.every((corner) => this.closedContainsPoint(corner))) return false;
+
+		for (const edge of rect.getEdges()) {
+			if (this.intersection(edge).length) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	// Creates a new path by joining [other] to the end of this path
 	public union(
 		other: Path | PathCommand[] | null,

@@ -7,6 +7,7 @@ import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Viewport from '../Viewport';
+import { Point2 } from '@js-draw/math';
 
 export type LoadSaveData = string[] | Record<symbol, string | number>;
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
@@ -204,6 +205,16 @@ export default abstract class AbstractComponent {
 		// Otherwise check if it intersects one of the rectangle's edges.
 		const testLines = rect.getEdges();
 		return testLines.some((edge) => this.intersects(edge));
+	}
+
+	/**
+	 * **Override me!**
+	 *
+	 * Returns a selection of points within this object. Each contiguous section
+	 * of this object should have a point in the returned array.
+	 */
+	public keyPoints(): Point2[] {
+		return [this.getBBox().center];
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
