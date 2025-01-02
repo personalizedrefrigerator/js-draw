@@ -20,8 +20,6 @@ export function assertUnreachable(key: never): never {
  *
  * assertIsNumber('hello, world'); // throws an Error.
  * ```
- *
- *
  */
 export function assertIsNumber(value: unknown, allowNaN: boolean = false): asserts value is number {
 	if (typeof value !== 'number' || (!allowNaN && isNaN(value))) {
@@ -29,17 +27,20 @@ export function assertIsNumber(value: unknown, allowNaN: boolean = false): asser
 	}
 }
 
+export function assertIsArray(values: unknown): asserts values is unknown[] {
+	if (!Array.isArray(values)) {
+		throw new Error('Asserting isArray: Given entity is not an array');
+	}
+}
+
 /**
  * Throws if any of `values` is not of type number.
  */
 export function assertIsNumberArray(
-	values: unknown[],
+	values: unknown,
 	allowNaN: boolean = false,
 ): asserts values is number[] {
-	if (typeof values !== 'object') {
-		throw new Error('Asserting isNumberArray: Given entity is not an array');
-	}
-
+	assertIsArray(values);
 	assertIsNumber(values.length);
 
 	for (const value of values) {
@@ -59,5 +60,11 @@ export function assertIsBoolean(value: unknown): asserts value is boolean {
 export function assertTruthy<T>(value: T | null | undefined | false | 0): asserts value is T {
 	if (!value) {
 		throw new Error(`${JSON.stringify(value)} is not truthy`);
+	}
+}
+
+export function assertIsObject(value: unknown): asserts value is Record<string, unknown> {
+	if (typeof value !== 'object') {
+		throw new Error(`AssertIsObject: Given entity is not an object (type = ${typeof value})`);
 	}
 }

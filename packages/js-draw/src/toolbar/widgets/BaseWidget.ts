@@ -11,6 +11,7 @@ import DropdownLayoutManager from './layout/DropdownLayoutManager';
 import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
 import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
 import HelpDisplay from '../utils/HelpDisplay';
+import { assertIsObject } from '../../util/assertions';
 
 export type SavedToolbuttonState = Record<string, any>;
 
@@ -593,10 +594,15 @@ export default abstract class BaseWidget {
 	 */
 	public deserializeFrom(state: SavedToolbuttonState): void {
 		if (state.subwidgetState) {
+			assertIsObject(state.subwidgetState);
 			// Deserialize all subwidgets.
 			for (const subwidgetId in state.subwidgetState) {
 				if (subwidgetId in this.subWidgets) {
-					this.subWidgets[subwidgetId].deserializeFrom(state.subwidgetState[subwidgetId]);
+					const serializedSubwidgetState = state.subwidgetState[subwidgetId];
+
+					if (serializedSubwidgetState) {
+						this.subWidgets[subwidgetId].deserializeFrom(serializedSubwidgetState);
+					}
 				}
 			}
 		}
