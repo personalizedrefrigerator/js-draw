@@ -2,7 +2,7 @@ import { Color4, Path, Point2 } from '@js-draw/math';
 import AbstractRenderer from '../../../rendering/renderers/AbstractRenderer';
 import EditorImage from '../../../image/EditorImage';
 import AbstractComponent from '../../../components/AbstractComponent';
-import { pathToRenderable } from '../../../lib';
+import { pathToRenderable } from '../../../rendering/RenderablePathSpec';
 
 export default abstract class SelectionBuilder {
 	public abstract onPointerMove(canvasPoint: Point2): void;
