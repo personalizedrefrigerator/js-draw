@@ -76,7 +76,7 @@ export default class SelectionTool extends BaseTool {
 	) {
 		super(editor.notifier, description);
 
-		this.modeValue = MutableReactiveValue.fromInitialValue(SelectionMode.Sqare);
+		this.modeValue = MutableReactiveValue.fromInitialValue(SelectionMode.Rectangle);
 		this.modeValue.onUpdate(() => {
 			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
 				kind: EditorEventType.ToolUpdated,

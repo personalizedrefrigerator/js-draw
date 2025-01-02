@@ -3,7 +3,7 @@ import Pointer from '../../Pointer';
 
 export enum SelectionMode {
 	Lasso = 'lasso',
-	Sqare = 'square',
+	Rectangle = 'rect',
 }
 
 export enum ResizeMode {

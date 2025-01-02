@@ -2,7 +2,7 @@ import { Color4 } from '@js-draw/math';
 import { isRestylableComponent } from '../../components/RestylableComponent';
 import Editor from '../../Editor';
 import uniteCommands from '../../commands/uniteCommands';
-import SelectionTool from '../../tools/SelectionTool/SelectionTool';
+import SelectionTool, { SelectionMode } from '../../tools/SelectionTool/SelectionTool';
 import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
@@ -13,6 +13,7 @@ import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
 import { toolbarCSSPrefix } from '../constants';
 import HelpDisplay from '../utils/HelpDisplay';
+import makeGridSelector from './components/makeGridSelector';
 
 const makeFormatMenu = (
 	editor: Editor,
@@ -208,6 +209,24 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		const controlsContainer = document.createElement('div');
 		controlsContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
 		dropdown.appendChild(controlsContainer);
+
+		const selectionTypeSelector = makeGridSelector(
+			this.localizationTable.selectionTool__selectionType,
+			this.tool.modeValue.get(),
+			[
+				{
+					id: SelectionMode.Rectangle,
+					title: this.localizationTable.selectionTool__selectionType__rectangle,
+					makeIcon: () => this.editor.icons.makeSelectionIcon(SelectionMode.Rectangle),
+				},
+				{
+					id: SelectionMode.Lasso,
+					title: this.localizationTable.selectionTool__selectionType__lasso,
+					makeIcon: () => this.editor.icons.makeSelectionIcon(SelectionMode.Lasso),
+				},
+			],
+		);
+		selectionTypeSelector.addTo(controlsContainer);
 
 		makeSeparator(this.localizationTable.reformatSelection).addTo(controlsContainer);
 
