@@ -158,43 +158,11 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		resizeButton.setHelpText(this.localizationTable.selectionDropdown__resizeToHelpText);
 
-		const deleteButton = new ActionButtonWidget(
-			editor,
-			'delete-btn',
-			() => editor.icons.makeDeleteSelectionIcon(),
-			this.localizationTable.deleteSelection,
-			() => {
-				const selection = this.tool.getSelection();
-				this.editor.dispatch(selection!.deleteSelectedObjects());
-				this.tool.clearSelection();
-			},
-			localization,
-		);
-		deleteButton.setHelpText(this.localizationTable.selectionDropdown__deleteHelpText);
-
-		const duplicateButton = new ActionButtonWidget(
-			editor,
-			'duplicate-btn',
-			() => editor.icons.makeDuplicateSelectionIcon(),
-			this.localizationTable.duplicateSelection,
-			async () => {
-				const selection = this.tool.getSelection();
-				this.editor.dispatch(await selection!.duplicateSelectedObjects());
-				this.setDropdownVisible(false);
-			},
-			localization,
-		);
-		duplicateButton.setHelpText(this.localizationTable.selectionDropdown__duplicateHelpText);
-
 		this.addSubWidget(new LassoSelectToggle(editor, tool, this.localizationTable));
 		this.addSubWidget(resizeButton);
-		this.addSubWidget(deleteButton);
-		this.addSubWidget(duplicateButton);
 
 		const updateDisabled = (disabled: boolean) => {
 			resizeButton.setDisabled(disabled);
-			deleteButton.setDisabled(disabled);
-			duplicateButton.setDisabled(disabled);
 		};
 		updateDisabled(true);
 
