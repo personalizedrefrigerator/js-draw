@@ -87,6 +87,7 @@
 		background-color: var(--background-color-1);
 		font-size: 14px;
 		user-select: none;
+		-webkit-user-select: none;
 
 		color: var(--foreground-color-1);
 		border: 0.5px solid var(--foreground-color-1);
