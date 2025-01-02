@@ -254,10 +254,7 @@ export default class SelectionTool extends BaseTool {
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox?.onDragEnd();
 		} else if (this.selectionBuilder) {
-			const newSelection = this.selectionBuilder.resolve(
-				this.editor.image,
-				this.editor.viewport.getSizeOfPixelOnCanvas() * 2,
-			);
+			const newSelection = this.selectionBuilder.resolve(this.editor.image, this.editor.viewport);
 			this.selectionBuilder = null;
 			this.editor.clearWetInk();
 

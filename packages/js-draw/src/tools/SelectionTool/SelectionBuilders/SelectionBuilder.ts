@@ -3,6 +3,7 @@ import AbstractRenderer from '../../../rendering/renderers/AbstractRenderer';
 import EditorImage from '../../../image/EditorImage';
 import AbstractComponent from '../../../components/AbstractComponent';
 import { pathToRenderable } from '../../../rendering/RenderablePathSpec';
+import Viewport from '../../../Viewport';
 
 export default abstract class SelectionBuilder {
 	public abstract onPointerMove(canvasPoint: Point2): void;
@@ -15,7 +16,7 @@ export default abstract class SelectionBuilder {
 	}
 
 	/** Converts the selection preview into a set of selected elements */
-	public resolve(image: EditorImage, minSize: number) {
+	public resolve(image: EditorImage, viewport: Viewport) {
 		const path = this.previewPath();
 
 		const filterComponents = (components: AbstractComponent[]) => {
@@ -25,11 +26,18 @@ export default abstract class SelectionBuilder {
 		};
 
 		let components;
-		if (path.bbox.maxDimension <= minSize) {
-			// Single-item selection mode
-			const minSizeBox = path.bbox.grownBy(minSize);
 
-			components = image.getElementsIntersectingRegion(minSizeBox);
+		// If the bounding box is very small, search for items **near** the bounding box,
+		// rather than in the bounding box.
+		const clickSize = viewport.getSizeOfPixelOnCanvas() * 3;
+		const isClick = path.bbox.maxDimension <= clickSize;
+		if (isClick) {
+			const searchRegionSize = viewport.visibleRect.maxDimension / 200;
+			const minSizeBox = path.bbox.grownBy(searchRegionSize);
+
+			components = image.getElementsIntersectingRegion(minSizeBox).filter((component) => {
+				return minSizeBox.containsRect(component.getBBox()) || component.intersectsRect(minSizeBox);
+			});
 			components = filterComponents(components);
 
 			if (components.length > 1) {
