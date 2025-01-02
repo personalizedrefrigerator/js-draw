@@ -48,9 +48,8 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	resetView: string;
 	reformatSelection: string;
 	selectionToolKeyboardShortcuts: string;
-	selectionTool__selectionType: string;
-	selectionTool__selectionType__rectangle: string;
-	selectionTool__selectionType__lasso: string;
+	selectionTool__lassoSelect: string;
+	selectionTool__lassoSelect__help: string;
 	paste: string;
 	documentProperties: string;
 	backgroundColor: string;
@@ -149,9 +148,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	pickColorFromScreen: 'Pick color from screen',
 	clickToPickColorAnnouncement: 'Click on the screen to pick a color',
 	colorSelectionCanceledAnnouncement: 'Color selection canceled',
-	selectionTool__selectionType: 'Selection type',
-	selectionTool__selectionType__lasso: 'Lasso',
-	selectionTool__selectionType__rectangle: 'Rectangle',
+	selectionTool__lassoSelect: 'Freeform selection',
+	selectionTool__lassoSelect__help: 'When enabled, dragging creates a freeform (lasso) selection.',
 	selectionToolKeyboardShortcuts:
 		'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.',
 	documentProperties: 'Page',

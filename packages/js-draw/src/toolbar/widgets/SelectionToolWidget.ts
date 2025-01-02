@@ -13,7 +13,7 @@ import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
 import { toolbarCSSPrefix } from '../constants';
 import HelpDisplay from '../utils/HelpDisplay';
-import makeGridSelector from './components/makeGridSelector';
+import BaseWidget from './BaseWidget';
 
 const makeFormatMenu = (
 	editor: Editor,
@@ -90,6 +90,52 @@ const makeFormatMenu = (
 	};
 };
 
+class LassoSelectToggle extends BaseWidget {
+	public constructor(
+		editor: Editor,
+		protected tool: SelectionTool,
+
+		localizationTable?: ToolbarLocalization,
+	) {
+		super(editor, 'selection-mode-toggle', localizationTable);
+
+		editor.notifier.on(EditorEventType.ToolUpdated, (toolEvt) => {
+			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === tool) {
+				this.setSelected(tool.modeValue.get() === SelectionMode.Lasso);
+			}
+		});
+		this.setSelected(false);
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
+	}
+
+	private setModeFlag(enabled: boolean) {
+		this.tool.modeValue.set(enabled ? SelectionMode.Lasso : SelectionMode.Rectangle);
+	}
+
+	protected handleClick() {
+		this.setModeFlag(!this.isSelected());
+	}
+
+	protected getTitle(): string {
+		return this.localizationTable.selectionTool__lassoSelect;
+	}
+
+	protected createIcon(): Element {
+		return this.editor.icons.makeSelectionIcon(SelectionMode.Lasso);
+	}
+
+	protected override fillDropdown(_dropdown: HTMLElement): boolean {
+		return false;
+	}
+
+	protected override getHelpText() {
+		return this.localizationTable.selectionTool__lassoSelect__help;
+	}
+}
+
 export default class SelectionToolWidget extends BaseToolWidget {
 	private updateFormatMenu: () => void = () => {};
 
@@ -140,6 +186,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		duplicateButton.setHelpText(this.localizationTable.selectionDropdown__duplicateHelpText);
 
+		this.addSubWidget(new LassoSelectToggle(editor, tool, this.localizationTable));
 		this.addSubWidget(resizeButton);
 		this.addSubWidget(deleteButton);
 		this.addSubWidget(duplicateButton);
@@ -164,6 +211,9 @@ export default class SelectionToolWidget extends BaseToolWidget {
 				updateDisabled(!hasSelection);
 				this.updateFormatMenu();
 			}
+		});
+		tool.modeValue.onUpdate(() => {
+			this.updateIcon();
 		});
 	}
 
@@ -196,7 +246,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 	}
 
 	protected createIcon(): Element {
-		return this.editor.icons.makeSelectionIcon();
+		return this.editor.icons.makeSelectionIcon(this.tool.modeValue.get());
 	}
 
 	protected override getHelpText(): string {
@@ -209,24 +259,6 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		const controlsContainer = document.createElement('div');
 		controlsContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
 		dropdown.appendChild(controlsContainer);
-
-		const selectionTypeSelector = makeGridSelector(
-			this.localizationTable.selectionTool__selectionType,
-			this.tool.modeValue.get(),
-			[
-				{
-					id: SelectionMode.Rectangle,
-					title: this.localizationTable.selectionTool__selectionType__rectangle,
-					makeIcon: () => this.editor.icons.makeSelectionIcon(SelectionMode.Rectangle),
-				},
-				{
-					id: SelectionMode.Lasso,
-					title: this.localizationTable.selectionTool__selectionType__lasso,
-					makeIcon: () => this.editor.icons.makeSelectionIcon(SelectionMode.Lasso),
-				},
-			],
-		);
-		selectionTypeSelector.addTo(controlsContainer);
 
 		makeSeparator(this.localizationTable.reformatSelection).addTo(controlsContainer);
 
