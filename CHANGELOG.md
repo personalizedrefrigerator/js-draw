@@ -1,3 +1,16 @@
+# 1.26.0
+
+- Bug fixes and improvements
+  - **Selection tool**: Improved keyboard focus behavior when opening and closing the selection menu.
+  - **Selection tool**: Increased touch target size for the selection menu button.
+  - **Text tool**: Fixed text tool edits existing text in some cases when it shouldn't.
+  - **API**: Fixed `EditorImage.getLeavesIntersectingRegion` sometimes included items with bounding boxes that do not intersect the target region.
+  - **Collaborative editing**: Selection tool: Fix duplications created with <kbd>ctrl</kbd>+<kbd>d</kbd> while moving the selection failed to properly sync.
+- Other changes
+  - Updated the selection overflow menu icon to use IconProvider as the icon source.
+  - Update license year
+  - Migrated from Webpack to ESBuild.
+
 # 1.25.0
 
 - New APIs
