@@ -738,6 +738,7 @@ export default class Selection {
 			this.runSelectionDuplicatedAnimation();
 		}
 
+		let command;
 		if (wasTransforming) {
 			// Don't update the selection's focus when redoing/undoing
 			const selectionToUpdate: Selection | null = null;
@@ -754,20 +755,25 @@ export default class Selection {
 
 			// Show items again
 			this.addRemoveSelectionFromImage(true);
-		}
 
-		const duplicateCommand = new Duplicate(this.selectedElems);
+			// With the transformation applied, create the duplicates
+			command = uniteCommands(
+				this.selectedElems.map((elem) => {
+					return EditorImage.addElement(elem.clone());
+				}),
+			);
 
-		if (wasTransforming) {
 			// Move the selected objects back to the correct location.
 			await tmpApplyCommand?.unapply(this.editor);
 			this.addRemoveSelectionFromImage(false);
 
 			this.previewTransformCmds();
 			this.updateUI();
+		} else {
+			command = new Duplicate(this.selectedElems);
 		}
 
-		return duplicateCommand;
+		return command;
 	}
 
 	public setHandlesVisible(showHandles: boolean) {
