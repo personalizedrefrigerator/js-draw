@@ -2,7 +2,7 @@ import { Color4 } from '@js-draw/math';
 import { isRestylableComponent } from '../../components/RestylableComponent';
 import Editor from '../../Editor';
 import uniteCommands from '../../commands/uniteCommands';
-import SelectionTool from '../../tools/SelectionTool/SelectionTool';
+import SelectionTool, { SelectionMode } from '../../tools/SelectionTool/SelectionTool';
 import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
@@ -13,6 +13,7 @@ import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
 import { toolbarCSSPrefix } from '../constants';
 import HelpDisplay from '../utils/HelpDisplay';
+import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 
 const makeFormatMenu = (
 	editor: Editor,
@@ -89,6 +90,52 @@ const makeFormatMenu = (
 	};
 };
 
+class LassoSelectToggle extends BaseWidget {
+	public constructor(
+		editor: Editor,
+		protected tool: SelectionTool,
+
+		localizationTable?: ToolbarLocalization,
+	) {
+		super(editor, 'selection-mode-toggle', localizationTable);
+
+		editor.notifier.on(EditorEventType.ToolUpdated, (toolEvt) => {
+			if (toolEvt.kind === EditorEventType.ToolUpdated && toolEvt.tool === tool) {
+				this.setSelected(tool.modeValue.get() === SelectionMode.Lasso);
+			}
+		});
+		this.setSelected(false);
+	}
+
+	protected override shouldAutoDisableInReadOnlyEditor(): boolean {
+		return false;
+	}
+
+	private setModeFlag(enabled: boolean) {
+		this.tool.modeValue.set(enabled ? SelectionMode.Lasso : SelectionMode.Rectangle);
+	}
+
+	protected handleClick() {
+		this.setModeFlag(!this.isSelected());
+	}
+
+	protected getTitle(): string {
+		return this.localizationTable.selectionTool__lassoSelect;
+	}
+
+	protected createIcon(): Element {
+		return this.editor.icons.makeSelectionIcon(SelectionMode.Lasso);
+	}
+
+	protected override fillDropdown(_dropdown: HTMLElement): boolean {
+		return false;
+	}
+
+	protected override getHelpText() {
+		return this.localizationTable.selectionTool__lassoSelect__help;
+	}
+}
+
 export default class SelectionToolWidget extends BaseToolWidget {
 	private updateFormatMenu: () => void = () => {};
 
@@ -111,42 +158,11 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		);
 		resizeButton.setHelpText(this.localizationTable.selectionDropdown__resizeToHelpText);
 
-		const deleteButton = new ActionButtonWidget(
-			editor,
-			'delete-btn',
-			() => editor.icons.makeDeleteSelectionIcon(),
-			this.localizationTable.deleteSelection,
-			() => {
-				const selection = this.tool.getSelection();
-				this.editor.dispatch(selection!.deleteSelectedObjects());
-				this.tool.clearSelection();
-			},
-			localization,
-		);
-		deleteButton.setHelpText(this.localizationTable.selectionDropdown__deleteHelpText);
-
-		const duplicateButton = new ActionButtonWidget(
-			editor,
-			'duplicate-btn',
-			() => editor.icons.makeDuplicateSelectionIcon(),
-			this.localizationTable.duplicateSelection,
-			async () => {
-				const selection = this.tool.getSelection();
-				this.editor.dispatch(await selection!.duplicateSelectedObjects());
-				this.setDropdownVisible(false);
-			},
-			localization,
-		);
-		duplicateButton.setHelpText(this.localizationTable.selectionDropdown__duplicateHelpText);
-
+		this.addSubWidget(new LassoSelectToggle(editor, tool, this.localizationTable));
 		this.addSubWidget(resizeButton);
-		this.addSubWidget(deleteButton);
-		this.addSubWidget(duplicateButton);
 
 		const updateDisabled = (disabled: boolean) => {
 			resizeButton.setDisabled(disabled);
-			deleteButton.setDisabled(disabled);
-			duplicateButton.setDisabled(disabled);
 		};
 		updateDisabled(true);
 
@@ -163,6 +179,9 @@ export default class SelectionToolWidget extends BaseToolWidget {
 				updateDisabled(!hasSelection);
 				this.updateFormatMenu();
 			}
+		});
+		tool.modeValue.onUpdate(() => {
+			this.updateIcon();
 		});
 	}
 
@@ -195,7 +214,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 	}
 
 	protected createIcon(): Element {
-		return this.editor.icons.makeSelectionIcon();
+		return this.editor.icons.makeSelectionIcon(this.tool.modeValue.get());
 	}
 
 	protected override getHelpText(): string {
@@ -222,5 +241,21 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		formatMenu.update();
 
 		return true;
+	}
+
+	public override serializeState(): SavedToolbuttonState {
+		return {
+			...super.serializeState(),
+			selectionMode: this.tool.modeValue.get(),
+		};
+	}
+
+	public override deserializeFrom(state: SavedToolbuttonState): void {
+		super.deserializeFrom(state);
+
+		const isValidSelectionMode = Object.values(SelectionMode).includes(state.selectionMode);
+		if (isValidSelectionMode) {
+			this.tool.modeValue.set(state.selectionMode);
+		}
 	}
 }

@@ -375,6 +375,14 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return false;
 	}
 
+	public override keyPoints() {
+		return this.parts
+			.map((part) => {
+				return part.startPoint;
+			})
+			.flat();
+	}
+
 	public override intersectsRect(rect: Rect2): boolean {
 		// AbstractComponent::intersectsRect can be inexact for strokes with non-zero
 		// stroke radius (has many false negatives). As such, additional checks are

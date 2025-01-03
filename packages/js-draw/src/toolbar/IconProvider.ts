@@ -8,6 +8,7 @@ import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuil
 import { makePolylineBuilder } from '../components/builders/PolylineBuilder';
 import { EraserMode } from '../tools/Eraser';
 import { createSvgElement, createSvgElements, createSvgPaths } from '../util/createElement';
+import { SelectionMode } from '../tools/SelectionTool/types';
 
 export type IconElemType = HTMLImageElement | SVGElement;
 
@@ -173,16 +174,24 @@ export default class IconProvider {
 		return icon;
 	}
 
-	public makeSelectionIcon(): IconElemType {
+	public makeSelectionIcon(mode: SelectionMode = SelectionMode.Rectangle): IconElemType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 
-		// Draw a cursor-like shape
-		icon.innerHTML = `
-		<g>
-			<rect x="10" y="10" width="70" height="70" fill="pink" stroke="black"/>
-			<rect x="75" y="75" width="10" height="10" fill="white" stroke="black"/>
-		</g>
-		`;
+		if (mode === SelectionMode.Rectangle) {
+			icon.innerHTML = `
+			<g>
+				<rect x="10" y="10" width="70" height="70" fill="pink" stroke="black" stroke-dasharray="4"/>
+				<rect x="75" y="75" width="10" height="10" fill="white" stroke="black"/>
+			</g>
+			`;
+		} else {
+			icon.innerHTML = `
+			<g>
+				<rect x="10" y="10" width="76" height="76" rx="50" stroke-dasharray="4" fill="pink" stroke="black"/>
+				<rect x="71" y="71" width="10" height="10" fill="white" stroke="black"/>
+			</g>
+			`;
+		}
 		icon.setAttribute('viewBox', '0 0 100 100');
 
 		return icon;

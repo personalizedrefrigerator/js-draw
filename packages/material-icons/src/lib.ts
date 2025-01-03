@@ -31,7 +31,7 @@
  * @packageDocumentation
  */
 
-import { EraserMode, IconProvider } from 'js-draw';
+import { EraserMode, IconProvider, SelectionMode } from 'js-draw';
 import makeMaterialIconProviderClass from './makeMaterialIconProvider';
 
 /**
@@ -40,6 +40,7 @@ import makeMaterialIconProviderClass from './makeMaterialIconProvider';
 const MaterialIconProvider = makeMaterialIconProviderClass({
 	IconProvider,
 	EraserMode,
+	SelectionMode,
 });
 
 export { MaterialIconProvider, makeMaterialIconProviderClass };

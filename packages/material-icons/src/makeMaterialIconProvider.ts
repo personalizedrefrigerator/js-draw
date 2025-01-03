@@ -1,4 +1,11 @@
-import type { IconProvider, IconElemType, TextRenderingStyle, PenStyle, EraserMode } from 'js-draw';
+import {
+	IconProvider,
+	IconElemType,
+	TextRenderingStyle,
+	PenStyle,
+	EraserMode,
+	SelectionMode,
+} from 'js-draw';
 
 import README from './icons/README';
 import ExpandMore from './icons/ExpandMore';
@@ -27,6 +34,7 @@ import Draw from './icons/Draw';
 import InkPen from './icons/InkPen';
 import ContentPaste from './icons/ContentPaste';
 import { OpaqueIconType } from './types';
+import LassoSelect from './icons/LassoSelect';
 
 /**
  * Parts of the js-draw library required by this package.
@@ -39,6 +47,7 @@ import { OpaqueIconType } from './types';
 export type JsDrawSlice = {
 	IconProvider: typeof IconProvider;
 	EraserMode: typeof EraserMode;
+	SelectionMode: typeof SelectionMode;
 };
 
 /**
@@ -91,8 +100,8 @@ const makeMaterialIconProviderClass = ({
 		public override makeEraserIcon(_eraserSize?: number, mode?: EraserMode): IconElemType {
 			return icon(mode === EraserMode.PartialStroke ? InkEraserOff : InkEraser);
 		}
-		public override makeSelectionIcon(): IconElemType {
-			return icon(Select);
+		public override makeSelectionIcon(mode: SelectionMode): IconElemType {
+			return icon(mode === SelectionMode.Lasso ? LassoSelect : Select);
 		}
 		public override makeRotateIcon(): IconElemType {
 			return icon(RotateLeft);
