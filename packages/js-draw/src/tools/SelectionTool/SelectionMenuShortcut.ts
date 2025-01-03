@@ -17,6 +17,7 @@ type OnShowContextMenu = (anchor: Point2) => void;
 
 export default class SelectionMenuShortcut implements SelectionBoxChild {
 	private element: HTMLElement;
+	private button: HTMLButtonElement;
 	private onClick: () => void;
 
 	public constructor(
@@ -31,6 +32,7 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		this.element.style.setProperty('--vertical-offset', `${verticalOffset}px`);
 
 		this.onClick = () => {
+			this.button?.focus({ preventScroll: true });
 			const anchor = this.getBBoxCanvasCoords().center;
 			showContextMenu(anchor);
 		};
@@ -45,13 +47,19 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 		button.replaceChildren(this.icon);
 		button.ariaLabel = this.localization.selectionMenu__show;
 		button.title = button.ariaLabel;
+		this.button = button;
 
 		// To prevent editor event handlers from conflicting with those for the button,
 		// don't register a [click] handler. An onclick handler can be fired incorrectly
 		// in this case (in Chrome) after onClick is fired in onDragEnd, leading to a double
 		// on-click action.
 		button.onkeydown = (event) => {
-			if (event.key === 'Enter') this.onClick();
+			if (event.key === 'Enter') {
+				// .preventDefault prevents [Enter] from activating the first item in the
+				// selection menu.
+				event.preventDefault();
+				this.onClick();
+			}
 		};
 		this.element.appendChild(button);
 
