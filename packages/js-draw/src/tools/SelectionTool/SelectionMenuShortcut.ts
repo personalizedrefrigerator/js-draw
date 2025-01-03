@@ -22,6 +22,7 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 	public constructor(
 		private readonly parent: Selection,
 		private readonly viewport: Viewport,
+		private readonly icon: Element,
 		showContextMenu: OnShowContextMenu,
 		private localization: ToolLocalization,
 	) {
@@ -40,7 +41,8 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 
 	private initUI() {
 		const button = document.createElement('button');
-		button.textContent = '...';
+		this.icon.classList.add('icon');
+		button.replaceChildren(this.icon);
 		button.ariaLabel = this.localization.selectionMenu__show;
 		button.title = button.ariaLabel;
 
