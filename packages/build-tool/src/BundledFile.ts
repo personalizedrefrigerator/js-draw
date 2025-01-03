@@ -126,6 +126,9 @@ export default class BundledFile {
 										}
 									})();
 								`,
+								watchFiles: result.loadedUrls
+									.filter((url) => url.protocol === 'file:' && url.pathname)
+									.map((url) => url.pathname),
 								loader: 'js',
 							};
 						});

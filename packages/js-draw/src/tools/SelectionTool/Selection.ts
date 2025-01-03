@@ -119,6 +119,7 @@ export default class Selection {
 		const menuToggleButton = new SelectionMenuShortcut(
 			this,
 			this.editor.viewport,
+			this.editor.icons.makeOverflowIcon(),
 			showContextMenu,
 			this.editor.localization,
 		);

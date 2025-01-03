@@ -4,24 +4,28 @@ import * as fs from 'node:fs/promises';
 import sass from 'sass';
 
 interface CacheEntry {
-	mtime: number;
 	result: Promise<sass.CompileResult>;
 }
 
 export default class ScssCompiler {
 	private cache: Map<string, CacheEntry> = new Map();
+	private cacheEnabled: boolean = false;
 
 	public constructor(
 		private config: BuildConfig,
 		private buildMode: BuildMode,
-	) {}
+	) {
+		// In build mode, we expect file content to be constant. In this case,
+		// it's okay to cache file content. In watch mode, files can change, which
+		// is not properly handled by the current caching logic.
+		this.cacheEnabled = buildMode === 'build';
+	}
 
 	public async compile(sourcePath: string) {
 		sourcePath = path.resolve(sourcePath);
 
 		const cacheEntry = this.cache.get(sourcePath);
-		const sourceMtime = (await fs.stat(sourcePath)).mtime.getTime();
-		if (cacheEntry && cacheEntry.mtime === sourceMtime) {
+		if (this.cacheEnabled && cacheEntry) {
 			return cacheEntry.result;
 		}
 
@@ -29,7 +33,6 @@ export default class ScssCompiler {
 			style: this.buildMode === 'watch' ? 'expanded' : 'compressed',
 		});
 		this.cache.set(sourcePath, {
-			mtime: sourceMtime,
 			result,
 		});
 		return result;

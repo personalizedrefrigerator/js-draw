@@ -41,7 +41,7 @@ const makeZoomControl = (
 		}
 
 		if (zoomLevel !== lastZoom) {
-			zoomLevelDisplay.innerText = localizationTable.zoomLevel(zoomLevel);
+			zoomLevelDisplay.textContent = localizationTable.zoomLevel(zoomLevel);
 			lastZoom = zoomLevel;
 		}
 	};
