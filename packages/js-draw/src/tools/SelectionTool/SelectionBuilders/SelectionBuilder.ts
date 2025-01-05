@@ -8,6 +8,8 @@ import Viewport from '../../../Viewport';
 export default abstract class SelectionBuilder {
 	public abstract onPointerMove(canvasPoint: Point2): void;
 	public abstract previewPath(): Path;
+
+	/** Returns the components currently in the selection bounds. Used by {@link resolve}. */
 	protected abstract resolveInternal(image: EditorImage): AbstractComponent[];
 
 	/** Renders a preview of the selection bounds */

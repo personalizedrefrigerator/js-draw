@@ -7,7 +7,7 @@ import AbstractComponent from '../../../components/AbstractComponent';
 import SelectionBuilder from './SelectionBuilder';
 
 /**
- * Renders a preview of the current selection.
+ * Creates lasso selections.
  */
 export default class LassoSelectionBuilder extends SelectionBuilder {
 	private boundaryPoints: Point2[] = [];
@@ -25,7 +25,7 @@ export default class LassoSelectionBuilder extends SelectionBuilder {
 	public onPointerMove(canvasPoint: Point2) {
 		const lastBoundaryPoint = this.boundaryPoints[this.boundaryPoints.length - 1];
 
-		const minBoundaryDist = this.viewport.getSizeOfPixelOnCanvas() * 15;
+		const minBoundaryDist = this.viewport.getSizeOfPixelOnCanvas() * 8;
 		if (lastBoundaryPoint.distanceTo(canvasPoint) >= minBoundaryDist) {
 			this.boundaryPoints.push(canvasPoint);
 		}

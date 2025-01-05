@@ -3,7 +3,7 @@ import EditorImage from '../../../image/EditorImage';
 import SelectionBuilder from './SelectionBuilder';
 
 /**
- * Renders a preview of the in-progress rectangular selection.
+ * Creates rectangle selections
  */
 export default class RectSelectionBuilder extends SelectionBuilder {
 	private rect: Rect2;
