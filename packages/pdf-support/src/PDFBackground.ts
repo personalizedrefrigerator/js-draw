@@ -1,12 +1,5 @@
-import {
-	AbstractComponent,
-	AbstractRenderer,
-	Color4,
-	EditorImage,
-	LineSegment2,
-	Mat33,
-	Rect2,
-} from 'js-draw';
+import { AbstractComponent, AbstractRenderer, EditorImage } from 'js-draw';
+import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
 import PDFDocumentWrapper from './PDFDocumentWrapper';
 
 // immutable

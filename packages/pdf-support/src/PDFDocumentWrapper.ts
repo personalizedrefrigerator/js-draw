@@ -1,22 +1,24 @@
 import {
-	Color4,
 	TextComponent,
 	TextRenderingStyle,
 	AbstractComponent,
 	AbstractRenderer,
 	CanvasRenderer,
+	StrokeComponent,
+	Viewport,
+	pathToRenderable,
+	EditorImage,
+} from 'js-draw';
+import {
+	Color4,
 	Mat33,
 	Path,
 	Rect2,
-	StrokeComponent,
 	Vec2,
-	Viewport,
 	PathCommand,
 	PathCommandType,
-	pathToRenderable,
-	EditorImage,
 	Point2,
-} from 'js-draw';
+} from '@js-draw/math';
 import APIWrapper, { AnnotationAPIWrapper, AnnotationType, PageAPIWrapper } from './APIWrapper';
 
 interface PDFPage {

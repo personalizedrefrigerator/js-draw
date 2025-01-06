@@ -4,7 +4,7 @@
 
 import type * as MuPDF from 'mupdf';
 import { ColorArray, TransferrableAnnotation } from './types.js';
-import { AnnotationType } from '@js-draw/pdf-support';
+import { AnnotationType } from '@js-draw/pdf-support/APIWrapper';
 
 interface ExtendedSelf extends WindowOrWorkerGlobalScope {
 	mupdf: typeof MuPDF;

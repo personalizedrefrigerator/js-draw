@@ -13,6 +13,12 @@
 		"./bundle": {
 			"types": "./dist/mjs/bundle.d.ts",
 			"default": "./dist/bundle.js"
+		},
+		"./APIWrapper": {
+			"types": "./dist/mjs/APIWrapper.d.ts",
+			"import": "./dist/mjs/APIWrapper.mjs",
+			"require": "./dist/cjs/APIWrapper.js",
+			"default": "./dist/mjs/APIWrapper.mjs"
 		}
 	},
 	"repository": {

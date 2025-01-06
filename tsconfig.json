@@ -22,7 +22,9 @@
 
 		"paths": {
 			"js-draw": ["./packages/js-draw/src/lib.ts"],
-			"@js-draw/*": ["./packages/*/src/lib.ts"]
+			"js-draw/*": ["./packages/js-draw/src/*"],
+			"@js-draw/*": ["./packages/*/src/lib.ts"],
+			"@js-draw/pdf-support/*": ["./packages/pdf-support/src/*"]
 		}
 	},
 	"exclude": [

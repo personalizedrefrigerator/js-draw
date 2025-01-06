@@ -1,4 +1,4 @@
-import { Color4, Point2, Rect2 } from 'js-draw';
+import { Color4, Point2, Rect2 } from '@js-draw/math';
 
 export enum AnnotationType {
 	Link = 'Link',
