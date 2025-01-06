@@ -1286,10 +1286,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@js-draw/example-pdf@workspace:docs/examples/example-pdf"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.23.1"
-    "@js-draw/material-icons": "npm:^1.23.1"
-    "@js-draw/pdf-support": "npm:^1.23.1"
-    js-draw: "npm:^1.23.1"
+    "@js-draw/build-tool": "npm:^1.26.0"
+    "@js-draw/material-icons": "npm:^1.26.0"
+    "@js-draw/pdf-support": "npm:^1.26.0"
+    js-draw: "npm:^1.26.0"
     mupdf: "npm:1.1.0"
   languageName: unknown
   linkType: soft
@@ -1358,14 +1358,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@js-draw/pdf-support@npm:^1.23.1, @js-draw/pdf-support@workspace:packages/pdf-support":
+"@js-draw/pdf-support@npm:^1.26.0, @js-draw/pdf-support@workspace:packages/pdf-support":
   version: 0.0.0-use.local
   resolution: "@js-draw/pdf-support@workspace:packages/pdf-support"
   dependencies:
-    "@js-draw/build-tool": "npm:^1.24.0"
+    "@js-draw/build-tool": "npm:^1.26.0"
     "@types/jest": "npm:29.5.2"
   peerDependencies:
-    js-draw: ^1.24.0
+    js-draw: ^1.26.0
   languageName: unknown
   linkType: soft
 

@@ -10,12 +10,12 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"@js-draw/material-icons": "^1.23.1",
-		"@js-draw/pdf-support": "^1.23.1",
-		"js-draw": "^1.23.1",
+		"@js-draw/material-icons": "^1.26.0",
+		"@js-draw/pdf-support": "^1.26.0",
+		"js-draw": "^1.26.0",
 		"mupdf": "1.1.0"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.23.1"
+		"@js-draw/build-tool": "^1.26.0"
 	}
 }
