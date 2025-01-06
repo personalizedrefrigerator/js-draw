@@ -63,10 +63,6 @@ export default class BundledFile {
 
 	private async makeBuildContext(mode: Mode) {
 		const tsAliases = await this.createTsImportAliases(mode);
-		if (tsAliases.size > 0) {
-			console.info('Bundler: Aliases:', [...tsAliases.keys()]);
-		}
-
 		const productionMode = mode === Mode.Production;
 
 		return esbuild.context({
@@ -130,6 +126,9 @@ export default class BundledFile {
 										}
 									})();
 								`,
+								watchFiles: result.loadedUrls
+									.filter((url) => url.protocol === 'file:' && url.pathname)
+									.map((url) => url.pathname),
 								loader: 'js',
 							};
 						});
@@ -149,6 +148,7 @@ export default class BundledFile {
 	}
 
 	public async startWatching() {
+		console.info(`Watching bundle: ${this.bundleName}...`);
 		const compiler = await this.makeBuildContext(Mode.Development);
 		await compiler.watch();
 	}

@@ -24,6 +24,7 @@ import { toolbarCSSPrefix } from './constants';
 import SaveActionWidget from './widgets/SaveActionWidget';
 import { BaseTool } from '../lib';
 import ExitActionWidget from './widgets/ExitActionWidget';
+import { assertIsObject, assertTruthy } from '../util/assertions';
 
 type UpdateColorisCallback = () => void;
 type WidgetByIdMap = Record<string, BaseWidget>;
@@ -303,9 +304,13 @@ export default abstract class AbstractToolbar {
 	 */
 	public deserializeState(state: string) {
 		const data = JSON.parse(state);
+		assertIsObject(data);
+		assertTruthy(data);
 
 		const rootId = AbstractToolbar.rootToolbarId;
-		this.deserializeInternal(data[rootId]);
+		if (rootId in data && typeof data[rootId] !== 'undefined') {
+			this.deserializeInternal(data[rootId]);
+		}
 
 		for (const widgetId in data) {
 			if (widgetId === rootId) {
@@ -317,7 +322,9 @@ export default abstract class AbstractToolbar {
 				continue;
 			}
 
-			this.#widgetsById[widgetId].deserializeFrom(data[widgetId]);
+			if (typeof data[widgetId] === 'object' && data[widgetId]) {
+				this.#widgetsById[widgetId].deserializeFrom(data[widgetId]);
+			}
 		}
 	}
 

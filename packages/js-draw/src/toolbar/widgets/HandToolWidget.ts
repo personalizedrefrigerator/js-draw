@@ -41,7 +41,7 @@ const makeZoomControl = (
 		}
 
 		if (zoomLevel !== lastZoom) {
-			zoomLevelDisplay.innerText = localizationTable.zoomLevel(zoomLevel);
+			zoomLevelDisplay.textContent = localizationTable.zoomLevel(zoomLevel);
 			lastZoom = zoomLevel;
 		}
 	};
@@ -296,12 +296,12 @@ export default class HandToolWidget extends BaseToolWidget {
 		if (state.touchPanning !== undefined) {
 			this.overridePanZoomTool.setModeEnabled(
 				PanZoomMode.OneFingerTouchGestures,
-				state.touchPanning,
+				!!state.touchPanning,
 			);
 		}
 
 		if (state.rotationLocked !== undefined) {
-			this.overridePanZoomTool.setModeEnabled(PanZoomMode.RotationLocked, state.rotationLocked);
+			this.overridePanZoomTool.setModeEnabled(PanZoomMode.RotationLocked, !!state.rotationLocked);
 		}
 
 		super.deserializeFrom(state);

@@ -684,11 +684,14 @@ export class ImageNode {
 		});
 	}
 
-	public getChildrenOrSelfIntersectingRegion(region: Rect2): ImageNode[] {
-		if (this.content) {
+	public getChildrenOrSelfIntersectingRegion(
+		region: Rect2,
+		isTooSmall?: TooSmallToRenderCheck,
+	): ImageNode[] {
+		if (this.content && this.bbox.intersects(region) && !isTooSmall?.(this.bbox)) {
 			return [this];
 		}
-		return this.getChildrenIntersectingRegion(region);
+		return this.getChildrenIntersectingRegion(region, isTooSmall);
 	}
 
 	/**
@@ -712,11 +715,17 @@ export class ImageNode {
 
 		while (workList.length > 0) {
 			const current = workList.pop()!;
-			if (current.content !== null) {
-				result.push(current);
-			}
 
-			workList.push(...current.getChildrenIntersectingRegion(region, isTooSmall));
+			// Split the children into leaves and non-leaves
+			const processed = current.getChildrenOrSelfIntersectingRegion(region, isTooSmall);
+			for (const item of processed) {
+				if (item.content) {
+					result.push(item);
+				} else {
+					// Non-leaves need to be processed
+					workList.push(item);
+				}
+			}
 		}
 
 		return result;
@@ -1157,6 +1166,19 @@ export class RootImageNode extends ImageNode {
 		}
 
 		return result;
+	}
+
+	public override getChildrenOrSelfIntersectingRegion(
+		region: Rect2,
+		_isTooSmall?: TooSmallToRenderCheck,
+	): ImageNode[] {
+		const content = this.getContent();
+		// Fullscreen components always intersect/contain
+		if (content && content.getSizingMode() === ComponentSizingMode.FillScreen) {
+			return [this];
+		}
+
+		return super.getChildrenOrSelfIntersectingRegion(region, _isTooSmall);
 	}
 
 	public override getLeaves(): ImageNode[] {

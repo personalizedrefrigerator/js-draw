@@ -1,11 +1,14 @@
+// Note: Arrow functions cannot be used for type assertions. See
+// https://github.com/microsoft/TypeScript/issues/34523
+
 /**
  * Compile-time assertion that a branch of code is unreachable.
  * @internal
  */
-export const assertUnreachable = (key: never): never => {
+export function assertUnreachable(key: never): never {
 	// See https://stackoverflow.com/a/39419171/17055750
 	throw new Error(`Should be unreachable. Key: ${key}.`);
-};
+}
 
 /**
  * Throws an exception if the typeof given value is not a number or `value` is NaN.
@@ -17,50 +20,51 @@ export const assertUnreachable = (key: never): never => {
  *
  * assertIsNumber('hello, world'); // throws an Error.
  * ```
- *
- *
  */
-export const assertIsNumber = (value: any, allowNaN: boolean = false): value is number => {
+export function assertIsNumber(value: unknown, allowNaN: boolean = false): asserts value is number {
 	if (typeof value !== 'number' || (!allowNaN && isNaN(value))) {
 		throw new Error('Given value is not a number');
-		// return false;
 	}
+}
 
-	return true;
-};
+export function assertIsArray(values: unknown): asserts values is unknown[] {
+	if (!Array.isArray(values)) {
+		throw new Error('Asserting isArray: Given entity is not an array');
+	}
+}
 
 /**
  * Throws if any of `values` is not of type number.
  */
-export const assertIsNumberArray = (
-	values: any[],
+export function assertIsNumberArray(
+	values: unknown,
 	allowNaN: boolean = false,
-): values is number[] => {
-	if (typeof values !== 'object') {
-		throw new Error('Asserting isNumberArray: Given entity is not an array');
-	}
-
-	if (!assertIsNumber(values['length'])) {
-		return false;
-	}
+): asserts values is number[] {
+	assertIsArray(values);
+	assertIsNumber(values.length);
 
 	for (const value of values) {
-		if (!assertIsNumber(value, allowNaN)) {
-			return false;
-		}
+		assertIsNumber(value, allowNaN);
 	}
-
-	return true;
-};
+}
 
 /**
  * Throws an exception if `typeof value` is not a boolean.
  */
-export const assertIsBoolean = (value: any): value is boolean => {
+export function assertIsBoolean(value: unknown): asserts value is boolean {
 	if (typeof value !== 'boolean') {
 		throw new Error('Given value is not a boolean');
-		// return false;
 	}
+}
 
-	return true;
-};
+export function assertTruthy<T>(value: T | null | undefined | false | 0): asserts value is T {
+	if (!value) {
+		throw new Error(`${JSON.stringify(value)} is not truthy`);
+	}
+}
+
+export function assertIsObject(value: unknown): asserts value is Record<string, unknown> {
+	if (typeof value !== 'object') {
+		throw new Error(`AssertIsObject: Given entity is not an object (type = ${typeof value})`);
+	}
+}
