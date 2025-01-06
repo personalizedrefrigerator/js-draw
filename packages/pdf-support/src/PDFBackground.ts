@@ -11,7 +11,6 @@ class PDFBackground extends AbstractComponent {
 
 	public constructor(private pdf: PDFDocumentWrapper) {
 		super('pdf-background');
-		console.log('pdfbg');
 		this.contentBBox = Rect2.empty;
 		void this.recomputeBBox();
 	}
@@ -28,7 +27,6 @@ class PDFBackground extends AbstractComponent {
 		const bbox = this.pdf.getBBox();
 
 		if (!this.contentBBox.eq(bbox)) {
-			console.log('update bbox', bbox);
 			this.contentBBox = bbox;
 			this.containerImage?.queueRerenderOf(this);
 		}
@@ -48,6 +46,7 @@ class PDFBackground extends AbstractComponent {
 
 			if (!visibleRect || page.bbox.intersects(visibleRect)) {
 				canvas.drawRect(page.bbox, 2, { fill: Color4.red });
+				canvas.fillRect(page.bbox, Color4.white);
 
 				// TODO: page.bbox is an approximation.
 				const renderRect = visibleRect ?? page.bbox;
