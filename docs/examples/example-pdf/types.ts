@@ -6,6 +6,7 @@ export interface TransferrableAnnotation {
 	type: AnnotationType;
 	bbox: { x: number; y: number; w: number; h: number };
 	inkList: [number, number][][];
+	vertices: [number, number][] | undefined;
 	color: ColorArray | undefined;
 	opacity: number;
 	borderWidth: number;

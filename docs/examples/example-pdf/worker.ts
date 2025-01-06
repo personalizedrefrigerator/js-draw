@@ -80,7 +80,7 @@ const processPageAnnotations = (pageHandle: string) => {
 			console.log('c', annotation.getType());
 			const type = annotation.getType();
 			const bounds = boundsToRect(annotation.getBounds());
-			if (type === 'Ink' || type === 'FreeText' || type === 'Text') {
+			if (type === 'Ink' || type === 'Polygon' || type === 'FreeText' || type === 'Text') {
 				const defaultAppearance =
 					type === 'Text' || type === 'FreeText'
 						? annotation.getDefaultAppearance()
@@ -93,6 +93,8 @@ const processPageAnnotations = (pageHandle: string) => {
 						console.warn(err);
 						continue;
 					}
+				} else {
+					color = annotation.hasInteriorColor() ? annotation.getInteriorColor() : [0, 0, 0];
 				}
 				const opacity = annotation.getOpacity();
 				if (opacity !== 1) {
@@ -107,6 +109,7 @@ const processPageAnnotations = (pageHandle: string) => {
 					type: type as AnnotationType,
 					bbox: bounds,
 					inkList: annotation.hasInkList() ? annotation.getInkList() : [],
+					vertices: annotation.hasVertices() ? annotation.getVertices() : [],
 					color,
 					borderWidth: annotation.getBorderWidth(),
 					contents: { text: annotation.getContents(), direction: 'ltr' },
@@ -197,6 +200,10 @@ const api = {
 						muAnnotation.addInkListStrokeVertex(point);
 					}
 				}
+			} else if (type === AnnotationType.Polygon) {
+				muAnnotation.setInteriorColor(jsDrawAnnotation.color!);
+				muAnnotation.setColor(jsDrawAnnotation.color!);
+				muAnnotation.setVertices(jsDrawAnnotation.vertices!);
 			} else if (type === AnnotationType.FreeText) {
 				if (!('contents' in jsDrawAnnotation)) {
 					throw new Error('FreeText missing contents prop');

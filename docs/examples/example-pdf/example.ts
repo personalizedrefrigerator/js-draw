@@ -54,6 +54,7 @@ const annotationToTransferrable = (annotation: AnnotationAPIWrapper): Transferra
 		type: annotation.type,
 		bbox: annotation.bbox.xywh(),
 		inkList: annotation.inkList.map((l) => l.map((p) => [p.x, p.y])),
+		vertices: annotation.vertices?.map((v) => [v.x, v.y]),
 		color: colorArray?.slice(0, 3) as ColorArray | undefined,
 		opacity: mainColor.a,
 		borderWidth: annotation.borderWidth,
@@ -75,6 +76,7 @@ const annotationFromTransferrable = (annotation: TransferrableAnnotation) => {
 		type: annotation.type,
 		bbox: Rect2.of(annotation.bbox),
 		inkList: annotation.inkList.map((l: number[][]) => l.map((p) => jsdraw.Vec2.of(p[0], p[1]))),
+		vertices: annotation.vertices?.map((v) => jsdraw.Vec2.of(v[0], v[1])) ?? [],
 		color: jsdraw.Color4.fromRGBArray(annotation.color ?? [0], annotation.opacity ?? 1),
 		borderWidth: annotation.borderWidth,
 		contents: {

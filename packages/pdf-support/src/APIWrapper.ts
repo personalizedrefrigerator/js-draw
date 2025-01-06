@@ -34,7 +34,10 @@ export interface FontAppearance {
 export interface AnnotationAPIWrapper {
 	readonly type: AnnotationType;
 	readonly bbox: Rect2;
+	// Used by Ink annotations
 	readonly inkList: Point2[][];
+	// Used by Polygon annotations
+	readonly vertices: Point2[];
 	readonly color: Color4 | undefined;
 	readonly borderWidth: number;
 	readonly rotate: number;

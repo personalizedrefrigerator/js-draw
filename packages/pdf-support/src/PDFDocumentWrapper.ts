@@ -211,7 +211,11 @@ class PDFDocumentWrapper {
 
 				for (const annotation of pdfjsAnnotations) {
 					const annotationType = annotation.type;
-					if (annotationType !== AnnotationType.Ink && annotationType !== AnnotationType.FreeText) {
+					if (
+						annotationType !== AnnotationType.Ink &&
+						annotationType !== AnnotationType.FreeText &&
+						annotationType !== AnnotationType.Polygon
+					) {
 						if (annotationType !== AnnotationType.Link) {
 							console.warn('Unknown annotation type: ' + annotationType);
 						}
@@ -220,15 +224,18 @@ class PDFDocumentWrapper {
 
 					const rect = annotation.bbox.translatedBy(pageBBox.topLeft);
 
-					if (annotationType === AnnotationType.Ink) {
-						const inkList = annotation.inkList;
+					if (annotationType === AnnotationType.Ink || annotationType === AnnotationType.Polygon) {
+						const hasVertices = !!annotation.vertices?.length;
+						const inkList = hasVertices ? [annotation.vertices] : annotation.inkList;
 						const transform = Mat33.translation(Vec2.of(0, pageBBox.topLeft.y)).rightMul(
 							Mat33.scaling2D(Vec2.of(1, 1)),
 						);
 
 						const color = annotation.color ?? Color4.black;
 						const strokeStyle = { color: color, width: annotation.borderWidth ?? 1 };
-						const renderStyle = { fill: Color4.transparent, stroke: strokeStyle };
+						const renderStyle = hasVertices
+							? { fill: color }
+							: { fill: Color4.transparent, stroke: strokeStyle };
 
 						for (const inkPart of inkList) {
 							const pathCommands: PathCommand[] = [];
@@ -336,24 +343,43 @@ class PDFDocumentWrapper {
 							const color = annotation.getStyle().color ?? Color4.blue;
 
 							let averageStrokeWidth = 0;
+							let lastFill = Color4.transparent;
 							const inkList: Point2[][] = [];
 							for (const part of annotation.getParts()) {
 								inkList.push(part.path.approximateWithPoints(0.1).map((p) => p.plus(translation)));
 								averageStrokeWidth += part.style.stroke?.width ?? 0;
+								lastFill = part.style.fill;
 							}
 							averageStrokeWidth /= annotation.getParts().length || 1;
 
-							return {
-								type: AnnotationType.Ink,
-								bbox,
-								inkList,
-								color,
-								rotate: 0,
-								borderWidth: averageStrokeWidth,
-								contents: undefined,
-								fontAppearance: undefined,
-								id,
-							};
+							if (lastFill.a > 0) {
+								// Polygon annotations are filled, Ink annotations are stroked.
+								const result: AnnotationAPIWrapper = {
+									type: AnnotationType.Polygon,
+									bbox,
+									vertices: inkList.flat(),
+									inkList: [],
+									color: lastFill,
+									borderWidth: 0,
+									rotate: 0,
+									contents: undefined,
+									fontAppearance: undefined,
+									id,
+								};
+								return result;
+							} else {
+								return {
+									type: AnnotationType.Ink,
+									bbox,
+									inkList,
+									color,
+									rotate: 0,
+									borderWidth: averageStrokeWidth,
+									contents: undefined,
+									fontAppearance: undefined,
+									id,
+								};
+							}
 						}
 						return null;
 					})
