@@ -159,8 +159,6 @@ export interface EditorSettings {
 		 *
 		 * If not given, the default file picker shown by a [file input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file)
 		 * is shown.
-		 *
-		 * @beta -- API may change between minor releases.
 		 */
 		showImagePicker?: ShowCustomFilePickerCallback;
 	} | null;
