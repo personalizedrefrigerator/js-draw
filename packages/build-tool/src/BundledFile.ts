@@ -74,7 +74,9 @@ export default class BundledFile {
 			bundle: true,
 			outfile: this.outputFilepath,
 			alias: {
+				// Mocks for NodeJS imports:
 				path: require.resolve('path-browserify'),
+				module: require.resolve('./bundlerMocks/module'),
 			},
 			plugins: [
 				{
