@@ -877,9 +877,9 @@ describe('SelectionTool.selecting', () => {
 		// its bounding box intersects all three:
 		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-1, -1));
 		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(-1, 13));
-		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10, 16));
-		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10, -1));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(10, -1));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(11, 16));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(11, -1));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(11, -1));
 
 		// Should have only selected two of the three paths:
 		expect(selectionTool.getSelectedObjects()).toHaveLength(2);

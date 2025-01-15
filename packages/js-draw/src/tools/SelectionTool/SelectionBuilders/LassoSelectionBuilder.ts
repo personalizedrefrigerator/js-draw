@@ -53,17 +53,24 @@ export default class LassoSelectionBuilder extends SelectionBuilder {
 			if (path.closedContainsRect(component.getExactBBox())) {
 				return true;
 			}
-			for (const line of lines) {
-				if (component.intersects(line)) {
-					return true;
-				}
-			}
+			let hasKeyPoint = false;
 			for (const point of component.keyPoints()) {
 				if (path.closedContainsPoint(point)) {
-					return true;
+					hasKeyPoint = true;
+					break;
 				}
 			}
-			return false;
+			if (!hasKeyPoint) {
+				return false;
+			}
+
+			// Only select if completely contained within the lasso
+			for (const line of lines) {
+				if (component.intersects(line)) {
+					return false;
+				}
+			}
+			return true;
 		};
 
 		return candidates.filter(componentIsInSelection);
