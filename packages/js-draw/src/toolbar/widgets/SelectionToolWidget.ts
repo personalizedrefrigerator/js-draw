@@ -14,7 +14,7 @@ import { toolbarCSSPrefix } from '../constants';
 import HelpDisplay from '../utils/HelpDisplay';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 import makeButtonGrid from './components/makeButtonGrid';
-import { MutableReactiveValue } from '../../lib';
+import { MutableReactiveValue } from '../../util/ReactiveValue';
 
 const makeFormatMenu = (
 	editor: Editor,
