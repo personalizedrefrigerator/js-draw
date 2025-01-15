@@ -37,6 +37,12 @@ export enum ComponentSizingMode {
 
 /**
  * A base class for everything that can be added to an {@link EditorImage}.
+ *
+ * In addition to the `abstract` methods, there are a few methods that should be
+ * overridden when creating a selectable/erasable subclass:
+ * - {@link keyPoints}: Overriding this may improve how the component interacts with the selection tool.
+ * - {@link withRegionErased}: Override/implement this to allow the component to be partially erased
+ *    by the partial stroke eraser.
  */
 export default abstract class AbstractComponent {
 	// The timestamp (milliseconds) at which the component was
@@ -208,10 +214,11 @@ export default abstract class AbstractComponent {
 	}
 
 	/**
-	 * **Override me!**
-	 *
 	 * Returns a selection of points within this object. Each contiguous section
 	 * of this object should have a point in the returned array.
+	 *
+	 * Subclasses should override this method if the center of the bounding box is
+	 * not contained within the object.
 	 */
 	public keyPoints(): Point2[] {
 		return [this.getBBox().center];
