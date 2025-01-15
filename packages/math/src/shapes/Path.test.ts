@@ -536,4 +536,21 @@ describe('Path', () => {
 			expect(path.tangentAt(at)).objEq(expected);
 		},
 	);
+
+	it.each([
+		// A rectangle completely contained
+		['m0,0 l10,0 l0,10 l-10,0', new Rect2(3, 3, 3, 3), true],
+		// A rectangle partially contained
+		['m0,0 l10,0 l0,10 l-10,0', new Rect2(3, 3, 33, 3), false],
+		// A rectangle not contained
+		['m0,0 l10,0 l0,10 l-10,0', new Rect2(13, 3, 1, 1), false],
+		// More complicated path containing a rectangle
+		['M0,0 Q10,15 10,5', new Rect2(5, 5, 1, 1), true],
+		['M0,0 Q10,15 10,5', new Rect2(15, 5, 1, 1), false],
+	])(
+		'.closedContainsRect should return whether a rectangle is contained within a path (case %#: path(%s), rect(%s))',
+		(pathString, rect, expected) => {
+			expect(Path.fromString(pathString).closedContainsRect(rect)).toBe(expected);
+		},
+	);
 });
