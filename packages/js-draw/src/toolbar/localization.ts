@@ -31,6 +31,8 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	handTool: string;
 	thicknessLabel: string;
 	resizeImageToSelection: string;
+	deleteSelection: string;
+	duplicateSelection: string;
 	fullStrokeEraser: string;
 
 	pickColorFromScreen: string;
@@ -86,6 +88,8 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	eraserDropdown__thicknessHelpText: string;
 	selectionDropdown__baseHelpText: string;
 	selectionDropdown__resizeToHelpText: string;
+	selectionDropdown__deleteHelpText: string;
+	selectionDropdown__duplicateHelpText: string;
 	selectionDropdown__changeColorHelpText: string;
 	pageDropdown__baseHelpText: string;
 	pageDropdown__backgroundColorHelpText: string;
@@ -130,6 +134,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	fontLabel: 'Font',
 	textSize: 'Size',
 	resizeImageToSelection: 'Resize image to selection',
+	deleteSelection: 'Delete selection',
+	duplicateSelection: 'Duplicate selection',
 
 	exit: 'Exit',
 	save: 'Save',
@@ -205,6 +211,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	selectionDropdown__baseHelpText: 'Selects content and manipulates the selection',
 	selectionDropdown__resizeToHelpText:
 		"Crops the drawing to the size of what's currently selected.\n\nIf auto-resize is enabled, it will be disabled.",
+	selectionDropdown__deleteHelpText: 'Erases selected items.',
+	selectionDropdown__duplicateHelpText: 'Makes a copy of selected items.',
 	selectionDropdown__changeColorHelpText: 'Changes the color of selected items.',
 	pageDropdown__baseHelpText: "Controls the drawing canvas' background color, pattern, and size.",
 	pageDropdown__backgroundColorHelpText: 'Changes the background color of the drawing canvas.',

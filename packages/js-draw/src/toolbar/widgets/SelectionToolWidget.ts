@@ -7,13 +7,14 @@ import { EditorEventType } from '../../types';
 import { KeyPressEvent } from '../../inputEvents';
 import { ToolbarLocalization } from '../localization';
 import makeColorInput from './components/makeColorInput';
-import ActionButtonWidget from './ActionButtonWidget';
 import BaseToolWidget from './BaseToolWidget';
 import { resizeImageToSelectionKeyboardShortcut } from './keybindings';
 import makeSeparator from './components/makeSeparator';
 import { toolbarCSSPrefix } from '../constants';
 import HelpDisplay from '../utils/HelpDisplay';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
+import makeButtonGrid from './components/makeButtonGrid';
+import { MutableReactiveValue } from '../../lib';
 
 const makeFormatMenu = (
 	editor: Editor,
@@ -138,6 +139,7 @@ class LassoSelectToggle extends BaseWidget {
 
 export default class SelectionToolWidget extends BaseToolWidget {
 	private updateFormatMenu: () => void = () => {};
+	private hasSelectionValue: MutableReactiveValue<boolean>;
 
 	public constructor(
 		editor: Editor,
@@ -146,25 +148,13 @@ export default class SelectionToolWidget extends BaseToolWidget {
 	) {
 		super(editor, tool, 'selection-tool-widget', localization);
 
-		const resizeButton = new ActionButtonWidget(
-			editor,
-			'resize-btn',
-			() => editor.icons.makeResizeImageToSelectionIcon(),
-			this.localizationTable.resizeImageToSelection,
-			() => {
-				this.resizeImageToSelection();
-			},
-			localization,
-		);
-		resizeButton.setHelpText(this.localizationTable.selectionDropdown__resizeToHelpText);
-
 		this.addSubWidget(new LassoSelectToggle(editor, tool, this.localizationTable));
-		this.addSubWidget(resizeButton);
 
-		const updateDisabled = (disabled: boolean) => {
-			resizeButton.setDisabled(disabled);
+		const hasSelection = () => {
+			const selection = this.tool.getSelection();
+			return !!selection && selection.getSelectedItemCount() > 0;
 		};
-		updateDisabled(true);
+		this.hasSelectionValue = MutableReactiveValue.fromInitialValue(hasSelection());
 
 		// Enable/disable actions based on whether items are selected
 		this.editor.notifier.on(EditorEventType.ToolUpdated, (toolEvt) => {
@@ -173,10 +163,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 			}
 
 			if (toolEvt.tool === this.tool) {
-				const selection = this.tool.getSelection();
-				const hasSelection = selection && selection.getSelectedItemCount() > 0;
-
-				updateDisabled(!hasSelection);
+				this.hasSelectionValue.set(hasSelection());
 				this.updateFormatMenu();
 			}
 		});
@@ -221,6 +208,65 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		return this.localizationTable.selectionDropdown__baseHelpText;
 	}
 
+	protected createSelectionActions(helpDisplay?: HelpDisplay) {
+		const icons = this.editor.icons;
+		const grid = makeButtonGrid(
+			[
+				{
+					icon: () => icons.makeDeleteSelectionIcon(),
+					label: this.localizationTable.deleteSelection,
+					onCreated: (button) => {
+						helpDisplay?.registerTextHelpForElement(
+							button,
+							this.localizationTable.selectionDropdown__deleteHelpText,
+						);
+					},
+					onClick: () => {
+						const selection = this.tool.getSelection();
+						this.editor.dispatch(selection!.deleteSelectedObjects());
+						this.tool.clearSelection();
+					},
+					enabled: this.hasSelectionValue,
+				},
+				{
+					icon: () => icons.makeDuplicateSelectionIcon(),
+					label: this.localizationTable.duplicateSelection,
+					onCreated: (button) => {
+						helpDisplay?.registerTextHelpForElement(
+							button,
+							this.localizationTable.selectionDropdown__duplicateHelpText,
+						);
+					},
+					onClick: async () => {
+						const selection = this.tool.getSelection();
+						const command = await selection?.duplicateSelectedObjects();
+						if (command) {
+							this.editor.dispatch(command);
+						}
+					},
+					enabled: this.hasSelectionValue,
+				},
+				{
+					icon: () => icons.makeResizeImageToSelectionIcon(),
+					label: this.localizationTable.resizeImageToSelection,
+					onCreated: (button) => {
+						helpDisplay?.registerTextHelpForElement(
+							button,
+							this.localizationTable.selectionDropdown__resizeToHelpText,
+						);
+					},
+					onClick: () => {
+						this.resizeImageToSelection();
+					},
+					enabled: this.hasSelectionValue,
+				},
+			],
+			3,
+		);
+
+		return { container: grid.container };
+	}
+
 	protected override fillDropdown(dropdown: HTMLElement, helpDisplay?: HelpDisplay): boolean {
 		super.fillDropdown(dropdown, helpDisplay);
 
@@ -228,8 +274,12 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		controlsContainer.classList.add(`${toolbarCSSPrefix}nonbutton-controls-main-list`);
 		dropdown.appendChild(controlsContainer);
 
-		makeSeparator(this.localizationTable.reformatSelection).addTo(controlsContainer);
+		// Actions (duplicate, delete, etc.)
+		const actions = this.createSelectionActions(helpDisplay);
+		controlsContainer.appendChild(actions.container);
 
+		// Formatting
+		makeSeparator(this.localizationTable.reformatSelection).addTo(controlsContainer);
 		const formatMenu = makeFormatMenu(this.editor, this.tool, this.localizationTable);
 		formatMenu.addTo(controlsContainer);
 		this.updateFormatMenu = () => formatMenu.update();

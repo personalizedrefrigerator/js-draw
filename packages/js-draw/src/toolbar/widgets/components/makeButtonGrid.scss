@@ -1,0 +1,19 @@
+.toolbar-button-grid {
+	display: grid;
+	grid-template-columns: repeat(var(--column-count), 1fr);
+	--button-size: 30px;
+
+	> button {
+		font-size: 1em;
+
+		> .icon {
+			width: var(--button-size);
+			height: var(--button-size);
+		}
+
+		> label {
+			display: block;
+			font-weight: normal;
+		}
+	}
+}
