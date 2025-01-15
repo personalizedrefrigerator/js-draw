@@ -360,6 +360,11 @@
 		@include labelVisibleOnHover.label-visible-on-hover('label > .button-label-text');
 	}
 
+	.toolbar-button-grid button {
+		--button-label-hover-offset-y: 0;
+		@include labelVisibleOnHover.label-visible-on-hover('label');
+	}
+
 	.toolbar-help-overlay-button {
 		align-items: last baseline;
 	}

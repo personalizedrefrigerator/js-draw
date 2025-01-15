@@ -224,6 +224,11 @@ export class Color4 {
 		);
 	}
 
+	/** Returns a new color with a different opacity. */
+	public withAlpha(a: number) {
+		return new Color4(this.r, this.g, this.b, a);
+	}
+
 	/**
 	 * Ignoring this color's alpha component, returns a vector with components,
 	 * $$

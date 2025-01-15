@@ -969,7 +969,7 @@ export class Path {
 	}
 
 	/**
-	 * @internal
+	 * @internal -- TODO: This method may have incorrect output in some cases.
 	 */
 	public closedContainsPoint(point: Point2) {
 		const bbox = this.getExactBBox();
@@ -981,7 +981,32 @@ export class Path {
 		const asClosed = this.asClosed();
 
 		const lineToOutside = new LineSegment2(point, pointOutside);
-		return asClosed.intersection(lineToOutside).length % 2 === 1;
+
+		const intersections = asClosed.intersection(lineToOutside);
+		const filteredIntersections = intersections.filter((intersection, index) => {
+			if (index === 0) return true; // No previous
+			const previousIntersection = intersections[index - 1];
+			const isRepeatedIntersection =
+				previousIntersection.parameterValue >= 1 && intersection.parameterValue <= 0;
+			return !isRepeatedIntersection;
+		});
+		return filteredIntersections.length % 2 === 1;
+	}
+
+	/**
+	 * @returns `true` if this path (interpreted as a closed path) contains the given rectangle.
+	 */
+	public closedContainsRect(rect: Rect2) {
+		if (!this.bbox.containsRect(rect)) return false;
+		if (!rect.corners.every((corner) => this.closedContainsPoint(corner))) return false;
+
+		for (const edge of rect.getEdges()) {
+			if (this.intersection(edge).length) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	// Creates a new path by joining [other] to the end of this path

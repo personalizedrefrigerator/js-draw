@@ -7,6 +7,7 @@ import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Viewport from '../Viewport';
+import { Point2 } from '@js-draw/math';
 
 export type LoadSaveData = string[] | Record<symbol, string | number>;
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
@@ -36,6 +37,12 @@ export enum ComponentSizingMode {
 
 /**
  * A base class for everything that can be added to an {@link EditorImage}.
+ *
+ * In addition to the `abstract` methods, there are a few methods that should be
+ * overridden when creating a selectable/erasable subclass:
+ * - {@link keyPoints}: Overriding this may improve how the component interacts with the selection tool.
+ * - {@link withRegionErased}: Override/implement this to allow the component to be partially erased
+ *    by the partial stroke eraser.
  */
 export default abstract class AbstractComponent {
 	// The timestamp (milliseconds) at which the component was
@@ -204,6 +211,17 @@ export default abstract class AbstractComponent {
 		// Otherwise check if it intersects one of the rectangle's edges.
 		const testLines = rect.getEdges();
 		return testLines.some((edge) => this.intersects(edge));
+	}
+
+	/**
+	 * Returns a selection of points within this object. Each contiguous section
+	 * of this object should have a point in the returned array.
+	 *
+	 * Subclasses should override this method if the center of the bounding box is
+	 * not contained within the object.
+	 */
+	public keyPoints(): Point2[] {
+		return [this.getBBox().center];
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)

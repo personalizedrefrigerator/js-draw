@@ -8,6 +8,7 @@ import SelectionTool from './SelectionTool';
 import { pathToRenderable, Stroke } from '../../lib';
 import sendPenEvent from '../../testing/sendPenEvent';
 import sendTouchEvent from '../../testing/sendTouchEvent';
+import { SelectionMode } from './types';
 
 describe('SelectionTool.selecting', () => {
 	it('should select strokes that intersect the selection box', async () => {
@@ -758,7 +759,7 @@ describe('SelectionTool.selecting', () => {
 			pathToRenderable(Path.fromString('m100,100 l10,0'), {
 				fill: Color4.transparent,
 				stroke: {
-					width: 10,
+					width: 12,
 					color: Color4.red,
 				},
 			}),
@@ -770,9 +771,9 @@ describe('SelectionTool.selecting', () => {
 		selectionTool.setEnabled(true);
 
 		// Select the start point of the stroke, but within the stroke width
-		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(99, 99));
-		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(100, 100));
-		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(100, 100));
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(96, 96));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(104, 104));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(104, 104));
 
 		// Because the selection is within the stroke width, nothing should be selected
 		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
@@ -842,7 +843,7 @@ describe('SelectionTool.selecting', () => {
 		let pointer1 = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.zero);
 		pointer1 = sendTouchEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3, 3));
 
-		expect(selectionTool.getSelection()!.getScreenRegion()).objEq(new Rect2(0, 0, 3, 3), 1e-6);
+		expect(selectionTool.isSelecting()).toBe(true);
 
 		// Second pointer -- cancel the selection
 		let pointer2 = sendTouchEvent(editor, InputEvtType.PointerDownEvt, Vec2.unitX, [pointer1]);
@@ -850,9 +851,37 @@ describe('SelectionTool.selecting', () => {
 
 		// Should be cancelled.
 		expect(selectionTool.getSelection()).toBeNull();
+		expect(selectionTool.isSelecting()).toBe(false);
 
 		// Should stay cancelled.
 		pointer1 = sendTouchEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(3, -4), [pointer2]);
+		expect(selectionTool.isSelecting()).toBe(false);
 		expect(selectionTool.getSelection()).toBeNull();
+	});
+
+	it('in lasso select mode, should only select strokes within the lasso', async () => {
+		const editor = createEditor();
+		await editor.loadFromSVG(`
+			<svg width="10" height="10">
+				<path d="m0,0 l10,10 l-1,0" fill="red"/>
+				<path d="m0,5 l10,10 l-1,0" fill="blue"/>
+				<path d="m0,15 l10,10 l-1,0" fill="orange"/>
+			</svg>
+		`);
+
+		const selectionTool = editor.toolController.getMatchingTools(SelectionTool)[0];
+		selectionTool.setEnabled(true);
+		selectionTool.modeValue.set(SelectionMode.Lasso);
+
+		// Trace a path that only contains two of the three strokes, even though
+		// its bounding box intersects all three:
+		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-1, -1));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(-1, 13));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(11, 16));
+		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(11, -1));
+		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(11, -1));
+
+		// Should have only selected two of the three paths:
+		expect(selectionTool.getSelectedObjects()).toHaveLength(2);
 	});
 });

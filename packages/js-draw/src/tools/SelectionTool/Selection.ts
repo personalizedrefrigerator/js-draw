@@ -47,11 +47,15 @@ export default class Selection {
 	private hasParent: boolean = true;
 
 	public constructor(
-		startPoint: Point2,
+		selectedElems: AbstractComponent[],
 		private editor: Editor,
 		showContextMenu: (anchor: Point2) => void,
 	) {
-		this.originalRegion = new Rect2(startPoint.x, startPoint.y, 0, 0);
+		selectedElems = [...selectedElems];
+		this.selectedElems = selectedElems;
+
+		this.originalRegion = Rect2.empty;
+
 		this.transformers = {
 			drag: new DragTransformer(editor, this),
 			resize: new ResizeTransformer(editor, this),
@@ -132,6 +136,7 @@ export default class Selection {
 			widget.addTo(this.backgroundElem);
 		}
 
+		this.recomputeRegion();
 		this.updateUI();
 	}
 
@@ -421,41 +426,6 @@ export default class Selection {
 		this.updateUI();
 	}
 
-	// Find the objects corresponding to this in the document,
-	// select them.
-	// Returns false iff nothing was selected.
-	public resolveToObjects(): boolean {
-		let singleItemSelectionMode = false;
-		this.transform = Mat33.identity;
-
-		// Grow the rectangle, if necessary
-		if (this.region.w === 0 || this.region.h === 0) {
-			const padding = this.editor.viewport.visibleRect.maxDimension / 200;
-			this.originalRegion = Rect2.bboxOf(this.region.corners, padding);
-
-			// Only select one item if the rectangle was very small.
-			singleItemSelectionMode = true;
-		}
-
-		this.selectedElems = this.editor.image
-			.getElementsIntersectingRegion(this.region)
-			.filter((elem) => {
-				return elem.intersectsRect(this.region) && elem.isSelectable();
-			});
-
-		if (singleItemSelectionMode && this.selectedElems.length > 0) {
-			this.selectedElems = [this.selectedElems[this.selectedElems.length - 1]];
-		}
-
-		// Find the bounding box of all selected elements.
-		if (!this.recomputeRegion()) {
-			return false;
-		}
-		this.updateUI();
-
-		return true;
-	}
-
 	// Recompute this' region from the selected elements.
 	// Returns false if the selection is empty.
 	public recomputeRegion(): boolean {
@@ -603,6 +573,11 @@ export default class Selection {
 	private activeHandle: SelectionBoxChild | null = null;
 	private backgroundDragging: boolean = false;
 	public onDragStart(pointer: Pointer): boolean {
+		// If empty, it isn't possible to drag
+		if (this.selectedElems.length === 0) {
+			return false;
+		}
+
 		// Clear the HTML selection (prevent HTML drag and drop being triggered by this drag)
 		document.getSelection()?.removeAllRanges();
 
@@ -776,6 +751,19 @@ export default class Selection {
 		return command;
 	}
 
+	public snapSelectedObjectsToGrid() {
+		const viewport = this.editor.viewport;
+
+		// Snap the top left corner of what we have selected.
+		const topLeftOfBBox = this.computeTightBoundingBox().topLeft;
+		const snappedTopLeft = viewport.snapToGrid(topLeftOfBBox);
+		const snapDelta = snappedTopLeft.minus(topLeftOfBBox);
+
+		const oldTransform = this.getTransform();
+		this.setTransform(oldTransform.rightMul(Mat33.translation(snapDelta)));
+		this.finalizeTransform();
+	}
+
 	public setHandlesVisible(showHandles: boolean) {
 		if (!showHandles) {
 			this.innerContainer.classList.add('-hide-handles');
@@ -807,19 +795,6 @@ export default class Selection {
 		this.originalRegion = Rect2.empty;
 		this.selectionTightBoundingBox = null;
 		this.hasParent = false;
-	}
-
-	public setSelectedObjects(objects: AbstractComponent[], bbox: Rect2) {
-		this.addRemoveSelectionFromImage(true);
-		this.originalRegion = bbox;
-		this.selectionTightBoundingBox = bbox;
-
-		this.selectedElems = objects.filter((object) => object.isSelectable());
-		// Enforce increasing z-index invariant
-		this.selectedElems.sort((a, b) => a.getZIndex() - b.getZIndex());
-
-		this.padRegion();
-		this.updateUI();
 	}
 
 	public getSelectedObjects(): AbstractComponent[] {
