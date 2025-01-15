@@ -275,6 +275,7 @@ export default class SelectionToolWidget extends BaseToolWidget {
 		dropdown.appendChild(controlsContainer);
 
 		// Actions (duplicate, delete, etc.)
+		makeSeparator().addTo(controlsContainer);
 		const actions = this.createSelectionActions(helpDisplay);
 		controlsContainer.appendChild(actions.container);
 

@@ -1,14 +1,16 @@
 .toolbar-button-grid {
 	display: grid;
 	grid-template-columns: repeat(var(--column-count), 1fr);
+	justify-items: center;
 	--button-size: 30px;
 
-	> button {
+	> .button {
 		font-size: 1em;
+		width: min-content;
 
 		> .icon {
-			width: var(--button-size);
-			height: var(--button-size);
+			max-width: var(--button-size);
+			max-height: var(--button-size);
 		}
 
 		> label {

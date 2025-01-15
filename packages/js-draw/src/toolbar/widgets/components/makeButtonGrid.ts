@@ -11,7 +11,8 @@ interface Button {
 }
 
 /**
- * Adds the `buttons` to a container in a grid.
+ * Creates HTML `button` elements from `buttonSpecs` and displays them in a
+ * grid with `columnCount` columns.
  */
 const makeButtonGrid = (buttonSpecs: Button[], columnCount: number) => {
 	const container = document.createElement('div');
@@ -21,6 +22,7 @@ const makeButtonGrid = (buttonSpecs: Button[], columnCount: number) => {
 
 	const makeButton = (buttonSpec: Button) => {
 		const buttonElement = document.createElement('button');
+		buttonElement.classList.add('button');
 
 		const iconElement = buttonSpec.icon();
 		iconElement.classList.add('icon');
