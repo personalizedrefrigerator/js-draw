@@ -17,6 +17,8 @@ const localization: EditorLocalization = {
 	fontLabel: 'Fuente:',
 	textSize: 'Tamaño',
 	resizeImageToSelection: 'Redimensionar la imagen a lo que está seleccionado',
+	deleteSelection: 'Borra la selección',
+	duplicateSelection: 'Duplica la selección',
 	exit: 'Salir',
 	save: 'Guardar',
 	undo: 'Deshace',

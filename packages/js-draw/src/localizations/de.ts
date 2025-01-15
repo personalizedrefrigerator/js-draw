@@ -25,6 +25,8 @@ const localization: EditorLocalization = {
 	textSize: 'Größe: ',
 
 	resizeImageToSelection: 'Bildgröße an Auswahl anpassen',
+	deleteSelection: 'Auswahl löschen',
+	duplicateSelection: 'Auswahl duplizieren',
 
 	undo: 'Rückgängig',
 	redo: 'Wiederholen',
