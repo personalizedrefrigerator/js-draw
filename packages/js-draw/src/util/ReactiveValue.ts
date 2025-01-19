@@ -91,9 +91,8 @@ export abstract class ReactiveValue<T> {
 		sourceValues: ReactiveValue<any>[],
 	): ReactiveValue<T> {
 		const result = new ReactiveValueImpl(callback());
-		const resultRef = (window as any).WeakRef
-			? new (window as any).WeakRef(result)
-			: { deref: () => result };
+		const resultRef =
+			typeof WeakRef !== 'undefined' ? new WeakRef(result) : { deref: () => result };
 
 		for (const value of sourceValues) {
 			const listener = value.onUpdate(() => {
@@ -179,9 +178,7 @@ export abstract class MutableReactiveValue<T> extends ReactiveValue<T> {
 		propertyName: Name,
 	): MutableReactiveValue<SourceType[Name]> {
 		const child = ReactiveValue.fromInitialValue(sourceValue.get()[propertyName]);
-		const childRef = (window as any).WeakRef
-			? new (window as any).WeakRef(child)
-			: { deref: () => child };
+		const childRef = typeof WeakRef !== 'undefined' ? new WeakRef(child) : { deref: () => child };
 
 		// When the source is updated...
 		const sourceListener = sourceValue.onUpdate((newValue) => {
