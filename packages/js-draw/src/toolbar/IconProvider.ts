@@ -180,14 +180,14 @@ export default class IconProvider {
 		if (mode === SelectionMode.Rectangle) {
 			icon.innerHTML = `
 			<g>
-				<rect x="10" y="10" width="70" height="70" fill="pink" stroke="black" stroke-dasharray="4"/>
+				<rect x="10" y="10" width="70" height="70" fill="pink" stroke="black" stroke-dasharray="32 9"/>
 				<rect x="75" y="75" width="10" height="10" fill="white" stroke="black"/>
 			</g>
 			`;
 		} else {
 			icon.innerHTML = `
 			<g>
-				<rect x="10" y="10" width="76" height="76" rx="50" stroke-dasharray="4" fill="pink" stroke="black"/>
+				<rect x="10" y="10" width="76" height="76" rx="50" stroke-dasharray="32 9" fill="pink" stroke="black"/>
 				<rect x="71" y="71" width="10" height="10" fill="white" stroke="black"/>
 			</g>
 			`;
