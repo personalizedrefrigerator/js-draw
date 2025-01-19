@@ -1,3 +1,13 @@
+# 1.27.0
+
+- Features:
+  - Lasso selection ([#96](https://github.com/personalizedrefrigerator/js-draw/pull/96))
+- Bug fixes:
+  - Fix feature test for `WeakRef` fails within a browser extension ([#97](https://github.com/personalizedrefrigerator/js-draw/issues/97)).
+- Stylistic changes:
+  - Center box shadows in the default toolbar.
+  - Vertically center icons for the right click menu.
+
 # 1.26.0
 
 - Bug fixes and improvements
