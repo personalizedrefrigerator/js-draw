@@ -1,4 +1,4 @@
-# 1.27.0
+# 1.27.0 and 1.27.1
 
 - Features:
   - Lasso selection ([#96](https://github.com/personalizedrefrigerator/js-draw/pull/96))
