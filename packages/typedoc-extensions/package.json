@@ -23,7 +23,7 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"katex": "0.16.10",
+		"katex": "0.16.21",
 		"react": "18.2.0",
 		"typescript": "5.7.2"
 	},
