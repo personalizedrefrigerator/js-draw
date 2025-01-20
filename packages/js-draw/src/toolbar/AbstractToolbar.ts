@@ -2,7 +2,7 @@ import Editor from '../Editor';
 import { EditorEventType } from '../types';
 
 import { coloris, close as closeColoris, init as colorisInit } from '@melloware/coloris';
-import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
+import { ToolbarLocalization } from './localization';
 import { ActionButtonIcon } from './types';
 import SelectionTool from '../tools/SelectionTool/SelectionTool';
 import PanZoomTool from '../tools/PanZoom';
@@ -64,12 +64,15 @@ export default abstract class AbstractToolbar {
 
 	private static colorisStarted: boolean = false;
 	#updateColoris: UpdateColorisCallback | null = null;
+	protected localizationTable: ToolbarLocalization;
 
 	/** @internal */
 	public constructor(
 		protected editor: Editor,
-		protected localizationTable: ToolbarLocalization = defaultToolbarLocalization,
+		localizationTable: ToolbarLocalization,
 	) {
+		this.localizationTable = localizationTable ?? editor.localization;
+
 		if (!AbstractToolbar.colorisStarted) {
 			colorisInit();
 			AbstractToolbar.colorisStarted = true;

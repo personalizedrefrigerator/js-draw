@@ -1,5 +1,5 @@
 import Editor from '../Editor';
-import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
+import { ToolbarLocalization } from './localization';
 import BaseWidget from './widgets/BaseWidget';
 import OverflowWidget from './widgets/OverflowWidget';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
@@ -32,7 +32,7 @@ import { toolbarCSSPrefix } from './constants';
  * - {@link AbstractToolbar.addExitButton}
  */
 export const makeDropdownToolbar = (editor: Editor): DropdownToolbar => {
-	return new DropdownToolbar(editor, editor.getRootElement());
+	return new DropdownToolbar(editor, editor.getRootElement(), editor.localization);
 };
 
 export default class DropdownToolbar extends AbstractToolbar {
@@ -46,11 +46,7 @@ export default class DropdownToolbar extends AbstractToolbar {
 	private overflowWidget: OverflowWidget | null = null;
 
 	/** @internal */
-	public constructor(
-		editor: Editor,
-		parent: HTMLElement,
-		localizationTable: ToolbarLocalization = defaultToolbarLocalization,
-	) {
+	public constructor(editor: Editor, parent: HTMLElement, localizationTable: ToolbarLocalization) {
 		super(editor, localizationTable);
 
 		this.container = document.createElement('div');
