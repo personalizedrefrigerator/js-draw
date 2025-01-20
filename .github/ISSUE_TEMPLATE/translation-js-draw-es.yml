@@ -302,7 +302,6 @@ body:
       label: 'deleteSelection'
       description: 'Translate `Delete selection`.'
       placeholder: 'Delete selection'
-      value: 'Borra la selección'
       render: 'shell'
     validations:
       required: false
@@ -312,7 +311,6 @@ body:
       label: 'duplicateSelection'
       description: 'Translate `Duplicate selection`.'
       placeholder: 'Duplicate selection'
-      value: 'Duplica la selección'
       render: 'shell'
     validations:
       required: false
@@ -411,6 +409,24 @@ body:
       label: 'colorSelectionCanceledAnnouncement'
       description: 'Translate `Color selection canceled`.'
       placeholder: 'Color selection canceled'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionTool__lassoSelect
+    attributes:
+      label: 'selectionTool__lassoSelect'
+      description: 'Translate `Freeform selection`.'
+      placeholder: 'Freeform selection'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionTool__lassoSelect__help
+    attributes:
+      label: 'selectionTool__lassoSelect__help'
+      description: 'Translate `When enabled, dragging creates a freeform (lasso) selection.`.'
+      placeholder: 'When enabled, dragging creates a freeform (lasso) selection.'
       render: 'shell'
     validations:
       required: false

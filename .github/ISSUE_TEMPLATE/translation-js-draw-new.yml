@@ -390,6 +390,24 @@ body:
     validations:
       required: false
   - type: textarea
+    id: translation-selectionTool__lassoSelect
+    attributes:
+      label: 'selectionTool__lassoSelect'
+      description: 'Translate `Freeform selection`.'
+      placeholder: 'Freeform selection'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-selectionTool__lassoSelect__help
+    attributes:
+      label: 'selectionTool__lassoSelect__help'
+      description: 'Translate `When enabled, dragging creates a freeform (lasso) selection.`.'
+      placeholder: 'When enabled, dragging creates a freeform (lasso) selection.'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
     id: translation-selectionToolKeyboardShortcuts
     attributes:
       label: 'selectionToolKeyboardShortcuts'
