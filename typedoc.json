@@ -1,11 +1,5 @@
 {
-	"entryPoints": [
-		"./docs/doc-pages/",
-
-		"./packages/js-draw",
-		"./packages/math",
-		"./packages/material-icons"
-	],
+	"entryPoints": ["./packages/js-draw", "./packages/math", "./packages/material-icons"],
 	"entryPointStrategy": "packages",
 	"name": "js-draw",
 	"out": "docs/typedoc/",

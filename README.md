@@ -90,7 +90,7 @@ import 'js-draw/bundledStyles';
 const editor = new Editor(document.body);
 ```
 
-`js-draw/bundledStyles` is a version of the editor's stylesheets pre-processed by `Webpack`. As such, `import`ing or including it with a `<script src="..."></script>` tag applies editor-specific CSS to the document.
+`js-draw/bundledStyles` is a version of the editor's stylesheets pre-processed by `es-build`. As such, `import`ing or including it with a `<script src="..."></script>` tag applies editor-specific CSS to the document.
 
 ### Without a bundler
 
