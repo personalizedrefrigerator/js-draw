@@ -20,5 +20,6 @@
 			"path": "./tools/allLocales.js",
 			"defaultLocale": "en"
 		}
-	]
+	],
+	"prebuild": { "scriptPath": "./tools/prebuild.js" }
 }

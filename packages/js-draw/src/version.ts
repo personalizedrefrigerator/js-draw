@@ -4,5 +4,6 @@
  * @internal
  */
 export default {
+	// Note: Auto-updated by prebuild.js:
 	number: '1.27.1',
 };
