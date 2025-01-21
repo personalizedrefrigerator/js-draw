@@ -1,3 +1,10 @@
+# 1.27.2
+
+- Changes
+  - Made lines produced by the `PolylineBuilder` pen slightly less jagged at some zoom levels.
+- Bug fixes
+  - Fixed translations not applied to the dropdown toolbar ([#100](https://github.com/personalizedrefrigerator/js-draw/issues/100)).
+
 # 1.27.0 and 1.27.1
 
 - Features:

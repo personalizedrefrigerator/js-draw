@@ -27,7 +27,7 @@ export const makePolylineBuilder: ComponentBuilderFactory = makeShapeFitAutocorr
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
 		// Fit to a value slightly smaller than the pixel size. A larger value can
 		// cause the stroke to appear jagged at some zoom levels.
-		const minFit = viewport.getSizeOfPixelOnCanvas() * 0.75;
+		const minFit = viewport.getSizeOfPixelOnCanvas() * 0.65;
 		return new PolylineBuilder(initialPoint, minFit, viewport);
 	},
 );
