@@ -1373,7 +1373,7 @@ __metadata:
     "@codemirror/lang-css": "npm:6.3.1"
     "@codemirror/lang-html": "npm:6.4.9"
     "@codemirror/lang-javascript": "npm:6.2.2"
-    "@codemirror/language": "npm:6.10.3"
+    "@codemirror/language": "npm:6.10.8"
     "@js-draw/build-tool": "npm:^1.27.2"
     "@js-draw/material-icons": "npm:^1.27.2"
     "@js-draw/math": "npm:^1.27.2"
