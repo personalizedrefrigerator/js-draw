@@ -1,6 +1,6 @@
 {
 	"extends": ["../../typedoc.base.json"],
 	"entryPoints": [],
-	"projectDocuments": ["./pages/*.md"],
+	"projectDocuments": [],
 	"includeVersion": false
 }

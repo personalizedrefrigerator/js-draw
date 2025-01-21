@@ -1,7 +1,7 @@
-# Guides
+# doc-pages
 
-This folder contains additional documention for `js-draw`, including like migration guides and examples that describe how to use specific features.
+This folder includes Markdown documents that are rendered as a part of the documentation.
 
-Before reading these guides, it may be helpful to review the examples in `js-draw`'s [`README`](../).
+`inline-examples/` includes files that can be `[include:...]`ed in other documents.
 
-Additional examples can be found in the [examples/](https://github.com/personalizedrefrigerator/js-draw/tree/main/docs/examples) directory on GitHub. A directory of all inline runnable examples in the documentation can be found at [assets/doctest.html](../assets/doctest.html).
+`guides/` includes tutorials and migration guides.
