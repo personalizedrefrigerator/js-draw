@@ -11,7 +11,7 @@ There are two main ways of adding `js-draw` to a project:
 
 > [!NOTE]
 >
-> Similar information can also be found in the [README](../../../../README.md)
+> Similar information can also be found in the [README](../).
 
 ## With a bundler
 
