@@ -1,6 +1,5 @@
 ---
 title: Customizing existing tools
-category: Guides
 ---
 
 # Customizing existing tools

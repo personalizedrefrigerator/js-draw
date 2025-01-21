@@ -1,6 +1,5 @@
 ---
 title: Updating the viewport
-category: Guides
 ---
 
 # Updating the editor's viewport

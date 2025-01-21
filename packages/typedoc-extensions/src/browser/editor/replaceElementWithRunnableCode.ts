@@ -23,6 +23,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		css: EditorLanguage.CSS,
 		js: EditorLanguage.JavaScript,
 		ts: EditorLanguage.TypeScript,
+		html: EditorLanguage.HTML,
 	};
 	const language = languageCodeToLanguage[languageCode] ?? EditorLanguage.TypeScript;
 
@@ -93,6 +94,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		let js = '';
 		let css = '';
+		let html = '';
 
 		if (language === EditorLanguage.TypeScript) {
 			js = typeScriptToJS(editorText);
@@ -101,12 +103,14 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 		} else if (language === EditorLanguage.CSS) {
 			css = editorText;
 			js = defaultJS;
+		} else if (language === EditorLanguage.HTML) {
+			html = editorText;
 		} else {
 			const exhaustivenessCheck: never = language;
 			return exhaustivenessCheck;
 		}
 
-		return { js, css };
+		return { js, css, html };
 	};
 
 	let removeMessageListener: (() => void) | null = null;
@@ -131,7 +135,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		const iframePreviewSetup = await loadIframePreviewScript();
 
-		const { js, css } = getContentToRun();
+		const { js, css, html } = getContentToRun();
 
 		previewFrame = document.createElement('iframe');
 		previewFrame.src = 'about:blank';
@@ -160,7 +164,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					</script>
 				</head>
 				<body>
-					${bodyHTML}
+					${bodyHTML}${html}
 				</body>
 				<script>
 					"use strict";

@@ -37,7 +37,7 @@ export type PreRenderComponentCallback = (
 let debugMode = false;
 
 /**
- * @summary Handles lookup/storage of elements in the image.
+ * Handles lookup/storage of elements in the image.
  *
  * `js-draw` images are made up of a collection of {@link AbstractComponent}s (which
  * includes {@link Stroke}s, {@link TextComponent}s, etc.). An `EditorImage`

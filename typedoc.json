@@ -1,11 +1,5 @@
 {
-	"entryPoints": [
-		"./docs/doc-pages/",
-
-		"./packages/js-draw",
-		"./packages/math",
-		"./packages/material-icons"
-	],
+	"entryPoints": ["./packages/js-draw", "./packages/math", "./packages/material-icons"],
 	"entryPointStrategy": "packages",
 	"name": "js-draw",
 	"out": "docs/typedoc/",
@@ -22,10 +16,14 @@
 		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}"
 	},
 
+	"projectDocuments": ["./docs/doc-pages/pages/*.md"],
+
 	"redirects": {
 		"modules/Additional_Documentation.CustomizingTools__.html": "documents/Guides.Customizing_existing_tools.html",
 		"modules/Additional_Documentation.MigratingToVersion1__.html": "documents/Guides.Migrating_to_version_1.html",
 		"modules/Additional_Documentation.WritingATheme__.html": "documents/Guides.Writing_a_theme.html",
+		"modules/Guides.html": "documents/Guides.html",
+		"documents/Guides.Migrating_to_version_1.html": "documents/Migrations.Migrating_to_version_1.html",
 		"modules/js_draw.html": "modules/js-draw.html",
 		"modules/_js_draw_material_icons.html": "modules/_js-draw_material-icons.html"
 	},

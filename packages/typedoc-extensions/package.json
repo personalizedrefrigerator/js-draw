@@ -31,9 +31,10 @@
 		"typedoc": "0.26.x"
 	},
 	"devDependencies": {
-		"@codemirror/lang-css": "6.3.0",
+		"@codemirror/lang-css": "6.3.1",
+		"@codemirror/lang-html": "6.4.9",
 		"@codemirror/lang-javascript": "6.2.2",
-		"@codemirror/language": "6.10.3",
+		"@codemirror/language": "6.10.8",
 		"@js-draw/build-tool": "^1.27.2",
 		"@js-draw/material-icons": "^1.27.2",
 		"@js-draw/math": "^1.27.2",
