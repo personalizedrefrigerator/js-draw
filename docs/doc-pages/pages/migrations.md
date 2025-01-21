@@ -13,4 +13,4 @@ In general, `js-draw` releases follow [Semantic Versioning (semver)](https://git
 - The minor version (e.g. 1 in 2.**1**.0).
 - The patch version (e.g. 0 in 2.1.**0**).
 
-In general, only major version updates should include breaking changes. When a new major version is released, a new document should be added under this "Migrations" section.
+Only major version updates should include breaking changes. When a new major version is released, a new document should be added under this "Migrations" section.
