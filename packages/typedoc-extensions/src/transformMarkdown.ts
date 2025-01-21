@@ -13,7 +13,7 @@ const transformMarkdown = (markdown: string, callbacks: Callbacks): string => {
 	const nodes = parseMarkdown(markdown);
 	const transformedMarkdown = [];
 
-	const runnableExp = /^(ts|js|css),runnable(,console)?/;
+	const runnableExp = /^(ts|js|css|html),runnable(,console)?/;
 
 	for (const node of nodes) {
 		if (node.type === RegionType.Math) {

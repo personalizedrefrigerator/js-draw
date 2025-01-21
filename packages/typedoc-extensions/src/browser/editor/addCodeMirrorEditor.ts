@@ -3,6 +3,7 @@ import { indentUnit, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 import { javascript as jsLanguageSupport } from '@codemirror/lang-javascript';
 import { css as cssLanguageSupport } from '@codemirror/lang-css';
+import { html as htmlLanguageSupport } from '@codemirror/lang-html';
 import { HighlightStyle } from '@codemirror/language';
 
 // See https://codemirror.net/examples/styling/
@@ -66,12 +67,14 @@ const codeMirrorHighlightStyle = HighlightStyle.define([
 	{ tag: tags.number, color: 'var(--cm-number-color)' },
 	{ tag: tags.integer, color: 'var(--cm-number-color)' },
 	{ tag: tags.float, color: 'var(--cm-number-color)' },
+	{ tag: tags.tagName, color: 'var(--cm-tag-color)' },
 ]);
 
 export enum EditorLanguage {
 	JavaScript,
 	TypeScript,
 	CSS,
+	HTML,
 }
 
 const addCodeMirrorEditor = (
@@ -83,6 +86,8 @@ const addCodeMirrorEditor = (
 
 	if (language === EditorLanguage.CSS) {
 		languagePlugin = cssLanguageSupport();
+	} else if (language === EditorLanguage.HTML) {
+		languagePlugin = htmlLanguageSupport();
 	} else {
 		languagePlugin = jsLanguageSupport({
 			typescript: language === EditorLanguage.TypeScript,

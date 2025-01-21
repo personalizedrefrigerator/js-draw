@@ -1,6 +1,5 @@
 ---
 title: Positioning an element above the editor
-category: Guides
 ---
 
 # Positioning an element above the editor

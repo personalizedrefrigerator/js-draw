@@ -1,3 +1,5 @@
+# Guides
+
 This folder contains additional documention for `js-draw`, including like migration guides and examples that describe how to use specific features.
 
 Before reading these guides, it may be helpful to review the examples in `js-draw`'s [`README`](../).
