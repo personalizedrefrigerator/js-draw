@@ -27,7 +27,7 @@ describe('Editor.toSVG', () => {
 			Mat33.identity,
 			textStyle,
 		);
-		editor.dispatch(EditorImage.addElement(text));
+		editor.dispatch(EditorImage.addComponent(text));
 
 		const matches = editor.image.getElementsIntersectingRegion(new Rect2(4, -100, 100, 100));
 		expect(matches).toHaveLength(1);

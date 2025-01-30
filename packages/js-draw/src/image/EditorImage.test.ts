@@ -62,7 +62,7 @@ describe('EditorImage', () => {
 		},
 	]);
 	const testFill: RenderingStyle = { fill: Color4.black };
-	const addTestStrokeCommand = EditorImage.addElement(testStroke);
+	const addTestStrokeCommand = EditorImage.addComponent(testStroke);
 
 	beforeEach(() => {
 		EditorImage.setDebugMode(true);
@@ -110,7 +110,7 @@ describe('EditorImage', () => {
 
 		expect(!leftmostStroke.getBBox().intersects(rightmostStroke.getBBox()));
 
-		EditorImage.addElement(leftmostStroke).apply(editor);
+		EditorImage.addComponent(leftmostStroke).apply(editor);
 
 		// The first node should be at the image's root.
 		let firstParent = image.findParent(leftmostStroke);
@@ -118,7 +118,7 @@ describe('EditorImage', () => {
 		expect(firstParent?.getParent()).toBe(null);
 		expect(firstParent?.getBBox()?.corners).toMatchObject(leftmostStroke.getBBox()?.corners);
 
-		EditorImage.addElement(rightmostStroke).apply(editor);
+		EditorImage.addComponent(rightmostStroke).apply(editor);
 
 		firstParent = image.findParent(leftmostStroke);
 		const secondParent = image.findParent(rightmostStroke);
@@ -223,7 +223,7 @@ describe('EditorImage', () => {
 		const stroke3 = new Stroke([
 			pathToRenderable(Path.fromRect(new Rect2(5, -11, 53, 53)), { fill: Color4.red }),
 		]);
-		await editor.dispatch(EditorImage.addElement(stroke3));
+		await editor.dispatch(EditorImage.addComponent(stroke3));
 
 		// After adding multiple new strokes, should have correct top-left corner
 		// (tests non-zero case).
@@ -232,7 +232,7 @@ describe('EditorImage', () => {
 				const stroke = new Stroke([
 					pathToRenderable(Path.fromString(`m${x},${y} l1,0 l0,1`), { fill: Color4.red }),
 				]);
-				await editor.dispatch(EditorImage.addElement(stroke));
+				await editor.dispatch(EditorImage.addComponent(stroke));
 			}
 		}
 

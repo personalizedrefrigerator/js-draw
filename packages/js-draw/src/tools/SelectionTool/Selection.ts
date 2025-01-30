@@ -538,7 +538,7 @@ export default class Selection {
 			// If we're making things visible and the selected object wasn't previously
 			// visible,
 			else if (!parent && this.removedFromImage[elem.getId()]) {
-				EditorImage.addElement(elem).apply(this.editor);
+				EditorImage.addComponent(elem).apply(this.editor);
 
 				this.removedFromImage[elem.getId()] = false;
 				delete this.removedFromImage[elem.getId()];
@@ -734,7 +734,7 @@ export default class Selection {
 			// With the transformation applied, create the duplicates
 			command = uniteCommands(
 				this.selectedElems.map((elem) => {
-					return EditorImage.addElement(elem.clone());
+					return EditorImage.addComponent(elem.clone());
 				}),
 			);
 

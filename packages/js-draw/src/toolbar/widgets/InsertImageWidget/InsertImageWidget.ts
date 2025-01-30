@@ -366,7 +366,7 @@ export default class InsertImageWidget extends BaseWidget {
 					const commands: Command[] = [];
 					for (const component of newComponents) {
 						commands.push(
-							EditorImage.addElement(component),
+							EditorImage.addComponent(component),
 							component.transformBy(originalTransform.rightMul(widthAdjustTransform)),
 							component.setZIndex(editingImage.getZIndex()),
 						);

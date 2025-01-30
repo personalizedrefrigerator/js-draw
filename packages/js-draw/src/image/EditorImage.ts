@@ -47,7 +47,7 @@ let debugMode = false;
  * - **Get all components in a {@link @js-draw/math!Rect2 | Rect2}**:
  *    {@link EditorImage.getElementsIntersectingRegion}.
  * - **Draw an `EditorImage` onto a canvas/SVG**: {@link EditorImage.render}.
- * - **Adding a new component**: {@link EditorImage.addElement}.
+ * - **Adding a new component**: {@link EditorImage.addComponent}.
  *
  * **Example**:
  * [[include:doc-pages/inline-examples/image-add-and-lookup.md]]
@@ -280,20 +280,33 @@ export default class EditorImage {
 	 *
 	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
 	 */
+	public static addComponent(
+		elem: AbstractComponent,
+		applyByFlattening: boolean = false,
+	): SerializableCommand {
+		return new EditorImage.AddComponentCommand(elem, applyByFlattening);
+	}
+
+	/** @see EditorImage.addComponent */
+	public addComponent(component: AbstractComponent, applyByFlattening?: boolean) {
+		return EditorImage.addComponent(component, applyByFlattening);
+	}
+
+	/** Alias for {@link addComponent}. @deprecated Prefer `.addComponent` */
+	public addElement(elem: AbstractComponent, applyByFlattening?: boolean) {
+		return this.addComponent(elem, applyByFlattening);
+	}
+
+	/** Alias for {@link addComponent}. @deprecated Prefer `.addComponent`. */
 	public static addElement(
 		elem: AbstractComponent,
 		applyByFlattening: boolean = false,
 	): SerializableCommand {
-		return new EditorImage.AddElementCommand(elem, applyByFlattening);
-	}
-
-	/** @see EditorImage.addElement */
-	public addElement(elem: AbstractComponent, applyByFlattening?: boolean) {
-		return EditorImage.addElement(elem, applyByFlattening);
+		return this.addComponent(elem, applyByFlattening);
 	}
 
 	// A Command that can access private [EditorImage] functionality
-	private static AddElementCommand = class extends SerializableCommand {
+	private static AddComponentCommand = class extends SerializableCommand {
 		private serializedElem: any = null;
 
 		// If [applyByFlattening], then the rendered content of this element
@@ -348,7 +361,7 @@ export default class EditorImage {
 				const id = json.elemData.id;
 				const foundElem = editor.image.lookupElement(id);
 				const elem = foundElem ?? AbstractComponent.deserialize(json.elemData);
-				const result = new EditorImage.AddElementCommand(elem);
+				const result = new EditorImage.AddComponentCommand(elem);
 				result.serializedElem = json.elemData;
 				return result;
 			});

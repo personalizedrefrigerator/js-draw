@@ -1513,7 +1513,7 @@ export class Editor {
 		const commands: Command[] = [];
 		for (const component of components) {
 			// To allow deserialization, we need to add first, then transform.
-			commands.push(EditorImage.addElement(component));
+			commands.push(EditorImage.addComponent(component));
 			commands.push(component.transformBy(transfm));
 		}
 
@@ -1635,7 +1635,7 @@ export class Editor {
 
 		await loader.start(
 			async (component) => {
-				await this.dispatchNoAnnounce(EditorImage.addElement(component));
+				await this.dispatchNoAnnounce(EditorImage.addComponent(component));
 			},
 			(countProcessed: number, totalToProcess: number) => {
 				if (countProcessed % 500 === 0) {
@@ -1728,7 +1728,7 @@ export class Editor {
 
 		if (backgroundType !== BackgroundType.None) {
 			const newBackground = new BackgroundComponent(backgroundType, backgroundColor);
-			commands.push(EditorImage.addElement(newBackground));
+			commands.push(EditorImage.addComponent(newBackground));
 		}
 		if (fillsScreen !== originalFillsScreen) {
 			commands.push(this.image.setAutoresizeEnabled(fillsScreen));

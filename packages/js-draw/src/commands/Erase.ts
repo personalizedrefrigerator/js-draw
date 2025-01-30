@@ -74,7 +74,7 @@ export default class Erase extends SerializableCommand {
 	public unapply(editor: Editor) {
 		for (const part of this.toRemove) {
 			if (!editor.image.findParent(part)) {
-				EditorImage.addElement(part).apply(editor);
+				EditorImage.addComponent(part).apply(editor);
 			}
 		}
 

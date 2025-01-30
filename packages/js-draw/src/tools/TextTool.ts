@@ -143,7 +143,7 @@ export default class TextTool extends BaseTool {
 				this.textStyle,
 			);
 
-			const action = EditorImage.addElement(textComponent);
+			const action = EditorImage.addComponent(textComponent);
 			if (this.removeExistingCommand) {
 				// Unapply so that `removeExistingCommand` can be added to the undo stack.
 				this.removeExistingCommand.unapply(this.editor);

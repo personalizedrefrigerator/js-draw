@@ -11,7 +11,7 @@ describe('UndoRedoShortcut', () => {
 	const testStroke = new Stroke([
 		pathToRenderable(Path.fromString('M0,0L10,10'), { fill: Color4.red }),
 	]);
-	const addTestStrokeCommand = EditorImage.addElement(testStroke);
+	const addTestStrokeCommand = EditorImage.addComponent(testStroke);
 
 	it('ctrl+z should undo', () => {
 		const editor = createEditor();

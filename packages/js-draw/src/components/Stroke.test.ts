@@ -109,7 +109,7 @@ describe('Stroke', () => {
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#0f0'));
 
 		const editor = createEditor();
-		EditorImage.addElement(stroke).apply(editor);
+		EditorImage.addComponent(stroke).apply(editor);
 
 		// Re-rendering should render with the new color
 		const renderer = new DummyRenderer(editor.viewport);

@@ -60,7 +60,7 @@ describe('TextComponent', () => {
 
 		// Should queue a re-render after restyling.
 		const editor = createEditor();
-		EditorImage.addElement(text).apply(editor);
+		EditorImage.addComponent(text).apply(editor);
 
 		editor.rerender();
 		expect(editor.isRerenderQueued()).toBe(false);
