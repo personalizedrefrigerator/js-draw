@@ -115,7 +115,7 @@ export default class EditorImage {
 
 		if (parent) {
 			parent.remove();
-			this.addElementDirectly(elem);
+			this.addComponentDirectly(elem);
 		}
 	}
 
@@ -244,7 +244,7 @@ export default class EditorImage {
 		return this.componentsById[id] ?? null;
 	}
 
-	private addElementDirectly(elem: AbstractComponent): ImageNode {
+	private addComponentDirectly(elem: AbstractComponent): ImageNode {
 		// Because onAddToImage can affect the element's bounding box,
 		// this needs to be called before parentTree.addLeaf.
 		elem.onAddToImage(this);
@@ -331,7 +331,7 @@ export default class EditorImage {
 		}
 
 		public apply(editor: Editor) {
-			editor.image.addElementDirectly(this.element);
+			editor.image.addComponentDirectly(this.element);
 
 			if (!this.applyByFlattening) {
 				editor.queueRerender();
@@ -347,7 +347,7 @@ export default class EditorImage {
 		}
 
 		public description(_editor: Editor, localization: EditorLocalization) {
-			return localization.addElementAction(this.element.description(localization));
+			return localization.addComponentAction(this.element.description(localization));
 		}
 
 		protected serializeToJSON() {

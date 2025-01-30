@@ -168,7 +168,7 @@ describe('EditorImage', () => {
 
 		const originalRect = getScreenRect();
 
-		await editor.dispatch(image.addElement(testStroke));
+		await editor.dispatch(image.addComponent(testStroke));
 
 		expect(image.getAutoresizeEnabled()).toBe(false);
 
@@ -196,7 +196,7 @@ describe('EditorImage', () => {
 		const testStroke2 = testStroke.clone();
 		await editor.dispatch(
 			uniteCommands([
-				editor.image.addElement(testStroke2),
+				editor.image.addComponent(testStroke2),
 				testStroke2.transformBy(Mat33.translation(Vec2.of(100, -10))),
 			]),
 		);
@@ -332,7 +332,7 @@ describe('EditorImage', () => {
 
 				const editor = createEditor();
 				const image = editor.image;
-				const addElementCommand = image.addElement(testComponent);
+				const addElementCommand = image.addComponent(testComponent);
 
 				expect(renderMock).not.toHaveBeenCalled();
 				expect(addToImageMock).not.toHaveBeenCalled();

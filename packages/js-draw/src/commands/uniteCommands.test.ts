@@ -36,7 +36,7 @@ describe('uniteCommands', () => {
 
 		const commands = [];
 		for (let i = 0; i < 1000; i++) {
-			commands.push(editor.image.addElement(new StrokeComponent([])));
+			commands.push(editor.image.addComponent(new StrokeComponent([])));
 		}
 
 		// Should generate a short description

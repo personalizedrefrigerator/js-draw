@@ -15,7 +15,7 @@ function addStroke(path: Path, style: RenderingStyle) {
 
 	// Create a command that adds the stroke to the image
 	// (but don't apply it yet).
-	const command = editor.image.addElement(stroke);
+	const command = editor.image.addComponent(stroke);
 	// Actually apply the command.
 	editor.dispatch(command);
 }

@@ -60,7 +60,7 @@ const defaultTextStyle: TextRenderingStyle = {
  * };
  *
  * editor.dispatch(
- *     editor.image.addElement(new TextComponent(['Hello, world'], positioning1, style)),
+ *     editor.image.addComponent(new TextComponent(['Hello, world'], positioning1, style)),
  * );
  *
  *
@@ -71,7 +71,7 @@ const defaultTextStyle: TextRenderingStyle = {
  * // is placed directly after 'Test'.
  * const positioning2 = Mat33.translation(Vec2.of(10, 50));
  * editor.dispatch(
- *     editor.image.addElement(
+ *     editor.image.addComponent(
  *         new TextComponent([ new TextComponent(['Test'], positioning1, style), '[Test]' ], positioning2, style)
  *     ),
  * );

@@ -233,10 +233,10 @@ export class Editor {
 	 * const stroke = new Stroke([
 	 *   pathToRenderable(Path.fromString('M0,0 L100,100 L300,30 z'), { fill: Color4.red }),
 	 * ]);
-	 * const addElementCommand = editor.image.addElement(stroke);
+	 * const addComponentCommand = editor.image.addComponent(stroke);
 	 *
 	 * // Add the stroke to the editor
-	 * editor.dispatch(addElementCommand);
+	 * editor.dispatch(addComponentCommand);
 	 * ```
 	 */
 	public readonly image: EditorImage;
@@ -1761,7 +1761,7 @@ export class Editor {
 				? BackgroundType.None
 				: BackgroundType.SolidColor;
 			background = new BackgroundComponent(backgroundType, color);
-			return this.image.addElement(background);
+			return this.image.addComponent(background);
 		} else {
 			return background.updateStyle({ color });
 		}

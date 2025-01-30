@@ -85,7 +85,7 @@ const localization: EditorLocalization = {
 	transformedElements: (elemCount) =>
 		`${elemCount} Element${1 === elemCount ? '' : 'e'} transformiert`,
 	resizeOutputCommand: (newSize) => `Bildgröße auf ${newSize.w}x${newSize.h} geändert`,
-	addElementAction: (componentDescription) => `${componentDescription} hinzugefügt`,
+	addComponentAction: (componentDescription) => `${componentDescription} hinzugefügt`,
 	eraseAction: (elemDescription, countErased) => `${countErased} ${elemDescription} gelöscht`,
 	duplicateAction: (elemDescription, countErased) => `${countErased} ${elemDescription} dupliziert`,
 	inverseOf: (actionDescription) => `${actionDescription} umgekehrt`,

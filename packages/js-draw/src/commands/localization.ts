@@ -16,7 +16,7 @@ export interface CommandLocalization {
 	resizeOutputCommand: (newSize: Rect2) => string;
 	enabledAutoresizeOutputCommand: string;
 	disabledAutoresizeOutputCommand: string;
-	addElementAction: (elemDescription: string) => string;
+	addComponentAction: (elemDescription: string) => string;
 	eraseAction: (elemDescription: string, numElems: number) => string;
 	duplicateAction: (elemDescription: string, count: number) => string;
 	inverseOf: (actionDescription: string) => string;
@@ -33,7 +33,7 @@ export const defaultCommandLocalization: CommandLocalization = {
 	resizeOutputCommand: (newSize: Rect2) => `Resized image to ${newSize.w}x${newSize.h}`,
 	enabledAutoresizeOutputCommand: 'Enabled output autoresize',
 	disabledAutoresizeOutputCommand: 'Disabled output autoresize',
-	addElementAction: (componentDescription: string) => `Added ${componentDescription}`,
+	addComponentAction: (componentDescription: string) => `Added ${componentDescription}`,
 	eraseAction: (componentDescription: string, numElems: number) =>
 		`Erased ${numElems} ${componentDescription}`,
 	duplicateAction: (componentDescription: string, numElems: number) =>
