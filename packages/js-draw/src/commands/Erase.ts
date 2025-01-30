@@ -34,7 +34,7 @@ import SerializableCommand from './SerializableCommand';
  *
  * // Find all elements intersecting the rectangle with top left (-10,-30) and
  * // (width,height)=(50,100).
- * const elems = editor.image.getElementsIntersectingRegion(
+ * const elems = editor.image.getComponentsIntersecting(
  * 	new Rect2(-10, -30, 50, 100)
  * );
  *

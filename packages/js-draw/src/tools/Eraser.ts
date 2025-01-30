@@ -191,7 +191,7 @@ export default class Eraser extends BaseTool {
 		const region = Rect2.union(line.bbox, eraserRect);
 
 		const intersectingElems = this.editor.image
-			.getElementsIntersectingRegion(region)
+			.getComponentsIntersecting(region)
 			.filter((component) => {
 				return component.intersects(line) || component.intersectsRect(eraserRect);
 			});

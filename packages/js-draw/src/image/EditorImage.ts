@@ -45,7 +45,7 @@ let debugMode = false;
  *
  * Here's how to do a few common operations:
  * - **Get all components in a {@link @js-draw/math!Rect2 | Rect2}**:
- *    {@link EditorImage.getElementsIntersectingRegion}.
+ *    {@link EditorImage.getComponentsIntersecting}.
  * - **Draw an `EditorImage` onto a canvas/SVG**: {@link EditorImage.render}.
  * - **Adding a new component**: {@link EditorImage.addComponent}.
  *
@@ -184,7 +184,7 @@ export default class EditorImage {
 	 * @returns all elements in the image, sorted by z-index (low to high).
 	 *
 	 * This can be slow for large images. If you only need all elemenst in part of the image,
-	 * consider using {@link getElementsIntersectingRegion} instead.
+	 * consider using {@link getComponentsIntersecting} instead.
 	 *
 	 * **Note**: The result does not include background elements. See {@link getBackgroundComponents}.
 	 */
@@ -200,12 +200,17 @@ export default class EditorImage {
 		return this.componentCount;
 	}
 
+	/** @deprecated @see getComponentsIntersecting */
+	public getElementsIntersectingRegion(region: Rect2, includeBackground: boolean = false) {
+		return this.getComponentsIntersecting(region, includeBackground);
+	}
+
 	/**
 	 * @returns a list of `AbstractComponent`s intersecting `region`, sorted by increasing z-index.
 	 *
 	 * Components in the background layer are only included if `includeBackground` is `true`.
 	 */
-	public getElementsIntersectingRegion(
+	public getComponentsIntersecting(
 		region: Rect2,
 		includeBackground: boolean = false,
 	): AbstractComponent[] {

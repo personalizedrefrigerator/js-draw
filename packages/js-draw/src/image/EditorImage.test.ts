@@ -349,14 +349,12 @@ describe('EditorImage', () => {
 				// should return the element.
 				if (positioning === ComponentSizingMode.FillScreen) {
 					expect(
-						image
-							.getElementsIntersectingRegion(new Rect2(50, 50, 1, 1), true)
-							.includes(testComponent),
+						image.getComponentsIntersecting(new Rect2(50, 50, 1, 1), true).includes(testComponent),
 					).toBe(true);
 				}
 
 				// Querying the component's own bounding box should also return results.
-				const elements = image.getElementsIntersectingRegion(
+				const elements = image.getComponentsIntersecting(
 					// Grow the check region if an empty bbox
 					bbox.maxDimension === 0 ? bbox.grownBy(1) : bbox,
 

@@ -208,7 +208,7 @@ export default class SoundUITool extends BaseTool {
 
 		const pointerMotionLine = new LineSegment2(this.lastPointerPos, current.canvasPos);
 		const collisions = this.editor.image
-			.getElementsIntersectingRegion(pointerMotionLine.bbox)
+			.getComponentsIntersecting(pointerMotionLine.bbox)
 			.filter((component) => component.intersects(pointerMotionLine));
 		this.lastPointerPos = current.canvasPos;
 

@@ -50,7 +50,7 @@ addBoxAt(Vec2.of(20, 0), Color4.orange);
 addBoxAt(Vec2.of(20, 20), Color4.blue);
 
 // Get the components in a small rectangle near (0, 0)
-const components = editor.image.getElementsIntersectingRegion(
+const components = editor.image.getComponentsIntersecting(
 	new Rect2(0, 0, 5, 5), // a 5x5 square with top left (0, 0)
 );
 

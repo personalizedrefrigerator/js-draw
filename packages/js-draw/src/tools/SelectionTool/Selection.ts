@@ -228,7 +228,7 @@ export default class Selection {
 
 		const selectedBottommostZIndex = this.selectedElems[0].getZIndex();
 
-		const visibleObjects = this.editor.image.getElementsIntersectingRegion(this.region);
+		const visibleObjects = this.editor.image.getComponentsIntersecting(this.region);
 		const topMostVisibleZIndex =
 			visibleObjects[visibleObjects.length - 1]?.getZIndex() ?? selectedBottommostZIndex;
 		const deltaZIndex = topMostVisibleZIndex + 1 - selectedBottommostZIndex;
@@ -264,7 +264,7 @@ export default class Selection {
 
 	/** Sends all selected elements to the bottom of the visible image. */
 	public sendToBack() {
-		const visibleObjects = this.editor.image.getElementsIntersectingRegion(
+		const visibleObjects = this.editor.image.getComponentsIntersecting(
 			this.editor.viewport.visibleRect,
 		);
 
