@@ -23,40 +23,38 @@ import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 
 const componentId = 'image-info';
 export default class ImageInfoComponent extends AbstractComponent {
-	// The bounding box of the component
+	// The bounding box of the component -- REQUIRED
 	protected contentBBox: Rect2;
+
 
 	public constructor() {
 		super(componentId);
-		this.contentBBox = new Rect2(
-			0, // x
-			0, // y
-			50, // w
-			50, // h
-		);
+
+		// For now, create a 50x50 bounding box centered at (0,0).
+		// We'll update this later:
+		this.contentBBox = new Rect2(0, 0, 50, 50);
 	}
 
 	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+		// Be sure that everything drawn between .startObject and .endObject is within contentBBox.
+		// Content outside contentBBox may not be drawn in all cases.
 		canvas.startObject(this.contentBBox);
 
-		// Be sure that everything drawn here is within contentBBox. Content outside
-		// contentBBox may not be drawn in all cases.
+		// _visibleRect is the part of the image that's currently visible. We can
+		// ignore it for now.
+
 		canvas.drawRect(this.contentBBox, 3, { fill: Color4.red });
 
-		const textTransform = Mat33.translation(this.contentBBox.center);
-		canvas.drawText('test', textTransform, {
-			size: 12,
-			fontFamily: 'Serif',
-			renderingStyle: { fill: Color4.red },
-		});
-
+		// Ends the object and attaches any additional metadata attached by an image loader
+		// (e.g. if this object was created by SVGLoader).
 		canvas.endObject(this.getLoadSaveData());
 	}
 
-	// Must be implemented by all components
+	// Must be implemented by all components, used for things like erasing and selection.
 	protected intersects(line: LineSegment2) {
 		// For now, return true if the line intersects the bounding box.
-		return this.contentBBox.intersectsLineSegment(line).length > 0;
+		const intersectionCount = this.contentBBox.intersectsLineSegment(line).length;
+		return intersectionCount > 0;
 	}
 
 	protected applyTransformation(transformation: Mat33): void {
