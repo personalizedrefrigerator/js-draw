@@ -64,7 +64,11 @@ export default class ImageInfoComponent extends AbstractComponent {
 	}
 
 	protected createClone(): AbstractComponent {
-		return new ImageInfoComponent();
+		const clone = new ImageInfoComponent();
+		// Set the clone's initial position to the same place as this.
+		// For now, we use contentBBox for position information.
+		clone.contentBBox = this.contentBBox;
+		return clone;
 	}
 
 	public description(): string {
