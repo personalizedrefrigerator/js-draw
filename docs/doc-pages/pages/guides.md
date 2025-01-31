@@ -5,6 +5,7 @@ children:
   - ./guides/setup.md
   - ./guides/writing-a-theme.md
   - ./guides/strokes.md
+  - ./guides/custom-components.md
   - ./guides/updating-the-view.md
   - ./guides/customizing-tools.md
   - ./guides/positioning-an-element-above-the-editor.md
