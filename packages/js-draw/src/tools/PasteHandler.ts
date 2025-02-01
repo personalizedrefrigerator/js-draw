@@ -86,7 +86,10 @@ export default class PasteHandler extends BaseTool {
 	private async doSVGPaste(data: string) {
 		this.editor.showLoadingWarning(0);
 		try {
-			const loader = SVGLoader.fromString(data, true);
+			const loader = SVGLoader.fromString(data, {
+				sanitize: true,
+				plugins: this.editor.getCurrentSettings().svg?.loaderPlugins ?? [],
+			});
 
 			const components: AbstractComponent[] = [];
 			await loader.start(

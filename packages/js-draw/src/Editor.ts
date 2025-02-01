@@ -16,7 +16,7 @@ import Viewport from './Viewport';
 import EventDispatcher from './EventDispatcher';
 import { Point2, Vec2, Vec3, Color4, Mat33, Rect2 } from '@js-draw/math';
 import Display, { RenderingMode } from './rendering/Display';
-import SVGLoader from './SVGLoader/SVGLoader';
+import SVGLoader, { SVGLoaderPlugin } from './SVGLoader/SVGLoader';
 import Pointer from './Pointer';
 import { EditorLocalization } from './localization';
 import getLocalizationTable from './localizations/getLocalizationTable';
@@ -174,6 +174,11 @@ export interface EditorSettings {
 		read(): Promise<Map<string, Blob | string>>;
 		/** Called to write data to the clipboard. Keys in `data` are MIME types. Values are the data associated with that type. */
 		write(data: Map<string, Blob | Promise<Blob> | string>): void | Promise<void>;
+	} | null;
+
+	svg: {
+		/** Plugins that create custom components while loading with {@link Editor.loadFromSVG}. */
+		loaderPlugins?: SVGLoaderPlugin[];
 	} | null;
 }
 
@@ -369,8 +374,11 @@ export class Editor {
 			image: {
 				showImagePicker: settings.image?.showImagePicker ?? undefined,
 			},
+			svg: {
+				loaderPlugins: settings.svg?.loaderPlugins ?? [],
+			},
 			clipboardApi: settings.clipboardApi ?? null,
-		};
+		} satisfies EditorSettings;
 
 		// Validate settings
 		if (this.settings.minZoom > this.settings.maxZoom) {
@@ -1815,7 +1823,10 @@ export class Editor {
 	 * ```
 	 */
 	public async loadFromSVG(svgData: string, sanitize: boolean = false) {
-		const loader = SVGLoader.fromString(svgData, sanitize);
+		const loader = SVGLoader.fromString(svgData, {
+			sanitize,
+			plugins: this.getCurrentSettings().svg?.loaderPlugins,
+		});
 		await this.loadFrom(loader);
 	}
 
