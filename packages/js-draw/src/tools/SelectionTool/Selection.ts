@@ -20,6 +20,7 @@ import { ResizeMode, SelectionBoxChild } from './types';
 import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
 import SelectionMenuShortcut from './SelectionMenuShortcut';
+import { assertIsNumberArray, assertIsStringArray } from '../../util/assertions';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -287,9 +288,14 @@ export default class Selection {
 
 	static {
 		SerializableCommand.register('selection-tool-transform', (json: any, _editor) => {
+			const rawTransformArray: unknown = json.transform;
+			const rawElementIds: unknown = json.elems ?? [];
+			assertIsNumberArray(rawTransformArray);
+			assertIsStringArray(rawElementIds);
+
 			// The selection box is lost when serializing/deserializing. No need to store box rotation
-			const fullTransform: Mat33 = new Mat33(...(json.transform as Mat33Array));
-			const elemIds: string[] = (json.elems as any[]) ?? [];
+			const fullTransform: Mat33 = new Mat33(...(rawTransformArray as Mat33Array));
+			const elemIds: string[] = rawElementIds;
 			const deltaZIndex = parseInt(json.deltaZIndex ?? 0);
 
 			return new this.ApplyTransformationCommand(null, elemIds, fullTransform, deltaZIndex);
