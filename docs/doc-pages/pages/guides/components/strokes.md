@@ -173,4 +173,7 @@ const eraseCommand = new Erase(components);
 editor.dispatch(eraseCommand);
 ```
 
-Try replacing {@link js-draw!Editor.dispatch | editor.dispatch(eraseCommand)} with `eraseCommand.apply(editor)`. What's the effect on the undo/redo behavior?
+Things to try:
+
+- Try replacing {@link js-draw!Editor.dispatch | editor.dispatch(eraseCommand)} with `eraseCommand.apply(editor)`. What's the effect on the undo/redo behavior?
+- Try replacing the `Erase` command with a {@link js-draw!Duplicate | Duplicate} command, then repositioning the original strokes.
