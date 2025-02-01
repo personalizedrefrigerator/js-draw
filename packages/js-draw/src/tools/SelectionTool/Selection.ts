@@ -21,6 +21,7 @@ import EditorImage from '../../image/EditorImage';
 import uniteCommands from '../../commands/uniteCommands';
 import SelectionMenuShortcut from './SelectionMenuShortcut';
 import { assertIsNumberArray, assertIsStringArray } from '../../util/assertions';
+import describeTransformation from '../../util/describeTransformation';
 
 const updateChunkSize = 100;
 const maxPreviewElemCount = 500;
@@ -256,7 +257,13 @@ export default class Selection {
 		if (this.selectedElems.length > 0) {
 			const deltaZIndex = this.getDeltaZIndexToMoveSelectionToTop();
 			transformPromise = this.editor.dispatch(
-				new Selection.ApplyTransformationCommand(this, selectedElems, fullTransform, deltaZIndex),
+				new Selection.ApplyTransformationCommand(
+					this,
+					selectedElems,
+					this.originalRegion.center,
+					fullTransform,
+					deltaZIndex,
+				),
 			);
 		}
 
@@ -289,16 +296,19 @@ export default class Selection {
 	static {
 		SerializableCommand.register('selection-tool-transform', (json: any, _editor) => {
 			const rawTransformArray: unknown = json.transform;
+			const rawCenterArray: unknown = json.selectionCenter ?? [0, 0];
 			const rawElementIds: unknown = json.elems ?? [];
 			assertIsNumberArray(rawTransformArray);
+			assertIsNumberArray(rawCenterArray);
 			assertIsStringArray(rawElementIds);
 
 			// The selection box is lost when serializing/deserializing. No need to store box rotation
 			const fullTransform: Mat33 = new Mat33(...(rawTransformArray as Mat33Array));
 			const elemIds: string[] = rawElementIds;
 			const deltaZIndex = parseInt(json.deltaZIndex ?? 0);
+			const center = Vec2.of(rawCenterArray[0] ?? 0, rawCenterArray[1] ?? 0);
 
-			return new this.ApplyTransformationCommand(null, elemIds, fullTransform, deltaZIndex);
+			return new this.ApplyTransformationCommand(null, elemIds, center, fullTransform, deltaZIndex);
 		});
 	}
 
@@ -311,6 +321,9 @@ export default class Selection {
 
 			// If a `string[]`, selectedElems is a list of element IDs.
 			selectedElems: AbstractComponent[] | string[],
+
+			// Information used to describe the transformation
+			private selectionCenter: Point2,
 
 			// Full transformation used to transform elements.
 			private fullTransform: Mat33,
@@ -396,11 +409,15 @@ export default class Selection {
 				elems: this.selectedElemIds,
 				transform: this.fullTransform.toArray(),
 				deltaZIndex: this.deltaZIndex,
+				selectionCenter: this.selectionCenter.asArray(),
 			};
 		}
 
 		public description(_editor: Editor, localizationTable: EditorLocalization) {
-			return localizationTable.transformedElements(this.selectedElemIds.length);
+			return localizationTable.transformedElements(
+				this.selectedElemIds.length,
+				describeTransformation(this.selectionCenter, this.fullTransform, false, localizationTable),
+			);
 		}
 	};
 
@@ -727,6 +744,7 @@ export default class Selection {
 			tmpApplyCommand = new Selection.ApplyTransformationCommand(
 				selectionToUpdate,
 				this.selectedElems,
+				this.region.center,
 				this.transform,
 				deltaZIndex,
 			);

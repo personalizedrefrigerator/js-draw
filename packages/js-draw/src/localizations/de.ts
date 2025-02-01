@@ -82,8 +82,8 @@ const localization: EditorLocalization = {
 	toolEnabledAnnouncement: (toolName) => `${toolName} aktiviert`,
 	toolDisabledAnnouncement: (toolName) => `${toolName} deaktiviert`,
 	updatedViewport: 'Transformierte Ansicht',
-	transformedElements: (elemCount) =>
-		`${elemCount} Element${1 === elemCount ? '' : 'e'} transformiert`,
+	transformedElements: (elemCount, action) =>
+		`${elemCount} Element${1 === elemCount ? '' : 'e'} transformiert (${action})`,
 	resizeOutputCommand: (newSize) => `Bildgröße auf ${newSize.w}x${newSize.h} geändert`,
 	addElementAction: (componentDescription) => `${componentDescription} hinzugefügt`,
 	eraseAction: (elemDescription, countErased) => `${countErased} ${elemDescription} gelöscht`,

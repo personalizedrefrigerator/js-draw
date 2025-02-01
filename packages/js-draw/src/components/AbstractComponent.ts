@@ -1,13 +1,14 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import EditorImage from '../image/EditorImage';
-import { LineSegment2, Mat33, Mat33Array, Path, Rect2 } from '@js-draw/math';
+import { LineSegment2, Mat33, Mat33Array, Path, Rect2, Vec2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Viewport from '../Viewport';
 import { Point2 } from '@js-draw/math';
+import describeTransformation from '../util/describeTransformation';
 
 export type LoadSaveData = string[] | Record<symbol, string | number>;
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
@@ -367,7 +368,10 @@ export default abstract class AbstractComponent {
 		}
 
 		public description(_editor: Editor, localizationTable: EditorLocalization) {
-			return localizationTable.transformedElements(1);
+			return localizationTable.transformedElements(
+				1,
+				describeTransformation(Vec2.zero, this.affineTransfm, false, localizationTable),
+			);
 		}
 
 		static {
