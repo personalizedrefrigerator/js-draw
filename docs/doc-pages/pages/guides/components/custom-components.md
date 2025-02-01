@@ -256,3 +256,29 @@ AbstractComponent.registerComponent(componentId, data => {
 const initialTransform = Mat33.identity;
 editor.dispatch(editor.image.addComponent(new ImageInfoComponent(initialTransform)));
 ```
+
+> [!NOTE]
+>
+> Above, `intersects` is implemented using `this.contentBBox.intersectsLineSegment`. This is incorrect if the component has been rotated. In this case, the bounding box is **not** the same as the rectangle that's drawn onscreen:
+>
+> <figure>
+> <svg viewBox="0 -2 35.6 16.24" height="200" style="max-width: 100%; background: #111;" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"><text style="transform: matrix(0.0511596, 0, 0, 0.0511596, 17.49, 1.27); font-family: monospace; font-size: 32px; fill: rgb(255, 255, 255);">Bounding box</text><path d="M2.75,12.87L3.5,12.13L15.25,12.13L15.25,.37L3.5,.37L3.5,12.13L2.75,12.87L2.75,-.37L16,-.37L16,12.87L2.75,12.87" fill="#ffffff"/><path d="M2.76,7.2L3.72,7.29L7.38,11.63L14.82,5.36L11.16,1.02L3.72,7.29L2.76,7.2L11.24,.06L15.78,5.45L7.3,12.59L2.76,7.2" fill="#ff0000"/><text style="transform: matrix(0.0464052, 0.00393329, -0.00393329, 0.0464052, 16.49, 6.02); font-family: monospace; font-size: 32px; fill: rgb(255, 0, 0);">What's drawn onscreen</text></svg>
+> <figcaption>A rotated red box ("what's drawn onscreen") is inside a white box labeled "bounding box"</figcaption>
+> </figure>
+>
+> A more correct implementation might be:
+>
+> ```ts
+> line = line.transformedBy(this.transform.inverse());
+> return this.initialBBox.intersectsLineSegment(line).length > 0;
+> ```
+>
+> This "untransforms" the line so that `initialBBox` represents our object, relative to the updated line.
+
+## 4. Loading and saving
+
+**To-do**
+
+## 5. Changing what it renders
+
+**To-do**
