@@ -204,6 +204,9 @@ export default abstract class AbstractRenderer {
 	}
 
 	public pushTransform(transform: Mat33) {
+		// Draw all pending paths that used the previous transform (if any).
+		this.flushPath();
+
 		this.transformStack.push(this.selfTransform);
 		this.setTransform(this.getCanvasToScreenTransform().rightMul(transform));
 	}
@@ -212,6 +215,9 @@ export default abstract class AbstractRenderer {
 		if (this.transformStack.length === 0) {
 			throw new Error('Unable to pop more transforms than have been pushed!');
 		}
+
+		// Draw all pending paths that used the old transform (if any):
+		this.flushPath();
 
 		this.setTransform(this.transformStack.pop() ?? null);
 	}
