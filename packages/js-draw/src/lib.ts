@@ -25,7 +25,7 @@ export {
 } from './localizations/getLocalizationTable';
 export * from './localization';
 
-export { default as SVGLoader } from './SVGLoader/SVGLoader';
+export { default as SVGLoader, SVGLoaderPlugin } from './SVGLoader/SVGLoader';
 export { default as Viewport } from './Viewport';
 export * from '@js-draw/math';
 export * from './components/lib';
