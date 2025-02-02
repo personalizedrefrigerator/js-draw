@@ -27,6 +27,13 @@ export function assertIsNumber(value: unknown, allowNaN: boolean = false): asser
 	}
 }
 
+/** Throws an `Error` if the given `value` is not a `string`. */
+export function assertIsString(value: unknown): asserts value is string {
+	if (typeof value !== 'string') {
+		throw new Error('Given value is not a string');
+	}
+}
+
 export function assertIsArray(values: unknown): asserts values is unknown[] {
 	if (!Array.isArray(values)) {
 		throw new Error('Asserting isArray: Given entity is not an array');
@@ -45,6 +52,18 @@ export function assertIsNumberArray(
 
 	for (const value of values) {
 		assertIsNumber(value, allowNaN);
+	}
+}
+
+/**
+ * Throws if any of `values` is not of type `string`.
+ */
+export function assertIsStringArray(values: unknown): asserts values is string[] {
+	assertIsArray(values);
+	assertIsNumber(values.length);
+
+	for (const value of values) {
+		assertIsString(value);
 	}
 }
 

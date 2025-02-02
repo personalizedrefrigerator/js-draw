@@ -12,7 +12,7 @@ export interface CommandLocalization {
 	duplicatedNoElements: string;
 	elements: string;
 	updatedViewport: string;
-	transformedElements: (elemCount: number) => string;
+	transformedElements: (elemCount: number, transformDescription: string) => string;
 	resizeOutputCommand: (newSize: Rect2) => string;
 	enabledAutoresizeOutputCommand: string;
 	disabledAutoresizeOutputCommand: string;
@@ -28,8 +28,8 @@ export interface CommandLocalization {
 
 export const defaultCommandLocalization: CommandLocalization = {
 	updatedViewport: 'Transformed Viewport',
-	transformedElements: (elemCount) =>
-		`Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`,
+	transformedElements: (elemCount, action) =>
+		`Transformed ${elemCount} element${elemCount === 1 ? '' : 's'} (${action})`,
 	resizeOutputCommand: (newSize: Rect2) => `Resized image to ${newSize.w}x${newSize.h}`,
 	enabledAutoresizeOutputCommand: 'Enabled output autoresize',
 	disabledAutoresizeOutputCommand: 'Disabled output autoresize',

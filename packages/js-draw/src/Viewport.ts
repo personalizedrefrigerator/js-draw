@@ -3,6 +3,7 @@ import { CommandLocalization } from './commands/localization';
 import Editor from './Editor';
 import { Mat33, Rect2, Point2, Vec2, Vec3 } from '@js-draw/math';
 import { StrokeDataPoint } from './types';
+import describeTransformation from './util/describeTransformation';
 
 // Returns the base type of some type of point/number
 type PointDataType<T extends Point2 | StrokeDataPoint | number> = T extends Point2
@@ -38,42 +39,12 @@ export class Viewport {
 		}
 
 		public description(editor: Editor, localizationTable: CommandLocalization): string {
-			const result: string[] = [];
-
-			// Describe the transformation's affect on the viewport (note that transformation transforms
-			// the **elements** within the viewport). Assumes the transformation only does rotation/scale/translation.
-			const origVec = editor.viewport.visibleRect.center;
-			const linearTransformedVec = this.transform.transformVec3(Vec2.unitX);
-			const affineTransformedVec = this.transform.transformVec2(origVec);
-
-			const scale = linearTransformedVec.magnitude();
-			const rotation = (180 / Math.PI) * linearTransformedVec.angle();
-			const translation = affineTransformedVec.minus(origVec);
-
-			if (scale > 1.2) {
-				result.push(localizationTable.zoomedIn);
-			} else if (scale < 0.8) {
-				result.push(localizationTable.zoomedOut);
-			}
-
-			if (Math.floor(Math.abs(rotation)) > 0) {
-				result.push(localizationTable.rotatedBy(Math.round(rotation)));
-			}
-
-			const minTranslation = 1e-4;
-			if (translation.x > minTranslation) {
-				result.push(localizationTable.movedLeft);
-			} else if (translation.x < -minTranslation) {
-				result.push(localizationTable.movedRight);
-			}
-
-			if (translation.y < -minTranslation) {
-				result.push(localizationTable.movedDown);
-			} else if (translation.y > minTranslation) {
-				result.push(localizationTable.movedUp);
-			}
-
-			return result.join('; ');
+			return describeTransformation(
+				editor.viewport.visibleRect.center,
+				this.transform,
+				true,
+				localizationTable,
+			);
 		}
 	};
 
