@@ -200,13 +200,13 @@ const createHelpPage = (
 
 	const onItemChange = () => {
 		const helpTextElement = document.createElement('div');
-		helpTextElement.innerText = currentItem?.helpText ?? '';
+		helpTextElement.textContent = currentItem?.helpText ?? '';
 
 		// For tests
 		helpTextElement.classList.add('current-item-help');
 
 		const navigationHelpElement = document.createElement('div');
-		navigationHelpElement.innerText = context.localization.helpScreenNavigationHelp;
+		navigationHelpElement.textContent = context.localization.helpScreenNavigationHelp;
 		navigationHelpElement.classList.add('navigation-help');
 
 		textLabel.replaceChildren(
@@ -352,8 +352,8 @@ export default class HelpDisplay {
 			const nextButton = document.createElement('button');
 			const previousButton = document.createElement('button');
 
-			nextButton.innerText = this.context.localization.next;
-			previousButton.innerText = this.context.localization.previous;
+			nextButton.textContent = this.context.localization.next;
+			previousButton.textContent = this.context.localization.previous;
 
 			nextButton.classList.add('next');
 			previousButton.classList.add('previous');
