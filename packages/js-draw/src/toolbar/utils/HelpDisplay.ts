@@ -173,6 +173,8 @@ const createHelpPage = (
 
 				const clonedElementContainer = document.createElement('div');
 				clonedElementContainer.classList.add('cloned-element-container');
+				clonedElementContainer.role = 'group';
+				clonedElementContainer.ariaLabel = context.localization.helpControlsAccessibilityLabel;
 				clonedElementContainer.style.position = 'absolute';
 				clonedElementContainer.style.left = `${targetBBox.topLeft.x}px`;
 				clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
