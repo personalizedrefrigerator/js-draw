@@ -291,8 +291,14 @@
 		&.-highlight-next > .next,
 		&.-highlight-previous > .previous {
 			font-weight: bold;
-			background-color: rgba(200, 200, 200, 0.1);
 			font-size: 1.4em;
+		}
+
+		&.-highlight-next > .next,
+		&.-highlight-previous > .previous,
+		.next:hover,
+		.previous:hover {
+			background-color: rgba(200, 200, 200, 0.1);
 		}
 	}
 
