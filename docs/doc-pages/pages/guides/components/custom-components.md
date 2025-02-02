@@ -277,7 +277,191 @@ editor.dispatch(editor.image.addComponent(new ImageInfoComponent(initialTransfor
 
 ## 4. Loading and saving
 
-**To-do**
+Currently, copy-pasting the `ImageInfoComponent` pastes a `StrokeComponent`. Let's fix that.
+
+`js-draw` copies components as SVG. As a result, to paste our components correctly, we need to add logic to load from SVG. This can be done by creating a {@link js-draw!SVGLoaderPlugin | SVGLoaderPlugin} and including it in the {@link js-draw!EditorSettings | EditorSettings} for a new editor.
+
+A `SVGLoaderPlugin` should contain a single `visit` method that will be called with each node in the image. A simple such plugin might look like this
+
+```ts,runnable
+import { Editor, SVGLoaderPlugin, Stroke } from 'js-draw';
+import { Color4 } from '@js-draw/math';
+
+let nextX = 0;
+const testPlugin: SVGLoaderPlugin = {
+	async visit(node, loader) {
+		if (node.tagName.toLowerCase() === 'text') {
+			const testComponent = Stroke.fromFilled(
+				`m${nextX},0 l50,0 l0,50 z`, Color4.red,
+			);
+			nextX += 100;
+			loader.addComponent(testComponent);
+			return true;
+		}
+		// Return false to do the default image loading
+		return false;
+	}
+};
+
+const editor = new Editor(document.body, {
+	svg: {
+		loaderPlugins: [ testPlugin ],
+	}
+});
+editor.addToolbar();
+
+// With the loader plugin, text objects are converted to red triangles.
+editor.loadFromSVG(`
+	<svg>
+		<text>test</text>
+		<text y="50">test 2</text>
+		<text y="100">test 3</text>
+	</svg>
+`);
+```
+
+The above example loads the `text` objects as triangles.
+
+Let's create a version that loads our custom component:
+
+```ts
+const plugin: SVGLoaderPlugin = {
+	async visit(node, loader) {
+		if (node.classList.contains('comp--image-info-component')) {
+			const transform = // TODO: Get transform from the `node`.
+			const infoComponent = new ImageInfoComponent(transform);
+			loader.addComponent(infoComponent);
+			return true;
+		}
+		// Return false to do the default image loading
+		return false;
+	},
+};
+```
+
+...and update our custom component to attach the correct information while saving:
+
+```ts
+class ImageInfoComponent extends AbstractComponent {
+	// ...
+
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+		canvas.startObject(this.contentBBox);
+
+		canvas.pushTransform(this.transform);
+		canvas.fillRect(this.initialBBox, Color4.red);
+		canvas.popTransform();
+
+		// The containerClassNames argument, when rendering to an SVG, wraps our component
+		// in a <g class="..."> with the provided class names.
+		const containerClassNames = ['comp--image-info-component'];
+		canvas.endObject(this.getLoadSaveData(), containerClassNames);
+	}
+
+	// ...
+}
+```
+
+All together,
+
+```ts,runnable
+import { Editor } from 'js-draw';
+import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
+import { AbstractRenderer, AbstractComponent } from 'js-draw';
+
+const componentId = 'image-info';
+class ImageInfoComponent extends AbstractComponent {
+	protected contentBBox: Rect2;
+
+	private transform: Mat33;
+	private initialBBox: Rect2;
+
+	public constructor(transform: Mat33) {
+		super(componentId);
+
+		this.transform = transform;
+		this.initialBBox = new Rect2(0, 0, 50, 50);
+		this.updateBoundingBox();
+	}
+
+	private updateBoundingBox() {
+		this.contentBBox = this.initialBBox.transformedBoundingBox(
+			this.transform,
+		);
+	}
+
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+		canvas.startObject(this.contentBBox);
+
+		canvas.pushTransform(this.transform);
+		canvas.fillRect(this.initialBBox, Color4.red);
+		canvas.popTransform();
+
+		const containerClassNames = ['comp--image-info-component'];
+		canvas.endObject(this.getLoadSaveData(), containerClassNames);
+	}
+
+	protected intersects(line: LineSegment2) {
+		// Our component is currently just a rectangle. As such (for some values of this.transform),
+		// we can use the Rect2.intersectsLineSegment method here:
+		const intersectionCount = this.contentBBox.intersectsLineSegment(line).length;
+		return intersectionCount > 0; // What happpens if you always return `true` here?
+	}
+
+	protected applyTransformation(transformUpdate: Mat33): void {
+		// `.rightMul`, "right matrix multiplication" combines two transformations.
+		// The transformation on the left is applied **after** the transformation on the right.
+		// As such, `transformUpdate.rightMul(this.transform)` means that `this.transform`
+		// will be applied **before** the `transformUpdate`.
+		this.transform = transformUpdate.rightMul(this.transform);
+		this.updateBoundingBox();
+	}
+
+	protected createClone(): AbstractComponent {
+		const clone = new ImageInfoComponent(this.transform);
+		return clone;
+	}
+
+	public description(): string {
+		return 'a red box';
+	}
+
+	protected serializeToJSON() {
+		return JSON.stringify({
+			// TODO: Some data to save (for collaborative editing)
+		});
+	}
+}
+
+AbstractComponent.registerComponent(componentId, data => {
+	// TODO:
+	return new ImageInfoComponent(Mat33.identity);
+});
+
+const plugin: SVGLoaderPlugin = {
+	async visit(node, loader) {
+		if (node.classList.contains('comp--image-info-component')) {
+			// TODO: Set the transformation matrix correctly
+			const infoComponent = new ImageInfoComponent(Mat33.identity);
+			loader.addComponent(infoComponent);
+			return true;
+		}
+		// Return false to do the default image loading
+		return false;
+	},
+};
+
+const editor = new Editor(document.body, {
+	svg: {
+		loaderPlugins: [ plugin ],
+	},
+});
+editor.addToolbar();
+
+// Add the component
+const initialTransform = Mat33.identity;
+editor.dispatch(editor.image.addComponent(new ImageInfoComponent(initialTransform)));
+```
 
 ## 5. Changing what it renders
 
