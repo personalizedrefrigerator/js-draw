@@ -614,10 +614,8 @@ export default class SelectionTool extends BaseTool {
 
 		if (enabled) {
 			this.handleOverlay.tabIndex = 0;
-			this.handleOverlay.setAttribute(
-				'aria-label',
-				this.editor.localization.selectionToolKeyboardShortcuts,
-			);
+			this.handleOverlay.role = 'group';
+			this.handleOverlay.ariaLabel = this.editor.localization.selectionToolKeyboardShortcuts;
 		} else {
 			this.handleOverlay.tabIndex = -1;
 		}
