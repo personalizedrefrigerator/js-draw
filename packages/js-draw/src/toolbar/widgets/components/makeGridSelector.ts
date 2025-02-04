@@ -51,7 +51,7 @@ const makeGridSelector = <ChoiceIdType>(
 	const selectedValue = MutableReactiveValue.fromInitialValue(defaultId);
 
 	const menuContainer = document.createElement('div');
-	menuContainer.setAttribute('role', 'menu');
+	menuContainer.role = 'group';
 	menuContainer.id = `${toolbarCSSPrefix}-grid-select-id-${idCounter++}`;
 
 	stopPropagationOfScrollingWheelEvents(menuContainer);
