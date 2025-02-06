@@ -1,3 +1,16 @@
+# 1.28.0
+
+- API changes:
+  - New API for loading custom components from SVG (`SVGLoaderPlugin`).
+  - For consistency, renamed `Elements` -> `Components` in several `EditorImage` methods. For example, `getAllElements` was renamed to `getAllComponents`.
+    - The old spellings can still be used, but are deprecated.
+  - New APIs for creating `StrokeComponent`s (static `Stroke.fromStroked`, `Stroke.fromFilled`).
+- Bug fixes
+  - **Collaborative editing**: Fixed an issue where `Duplicate` commands caused editors to become out of sync (commit bee645186e00a30c3536cf62f41e1b82ef6eb9d1).
+    - **Note**: This change adjusts how `Duplicate` commands are serialized. Although new editors can still deserialize old `Duplicate` commands, old editors will be unable to deserialize `Duplicate` commands created by new editors.
+  - Fixed two incorrect uses of `aria` (commits ffa1ca7876960ca7393343c6fc6661d95e6250c4, 56975a103944e3347a848eadf5b7b576e18bc7de).
+  - **AbstractRenderer API**: Fixed `.pushTransform` and `.popTransform` were not applied to paths in some cases (commit 370a5b14aea35e6541a93f1858d84b3552cd1b3c).
+
 # 1.27.2
 
 - Changes
