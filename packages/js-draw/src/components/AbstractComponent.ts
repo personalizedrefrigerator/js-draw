@@ -9,6 +9,7 @@ import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Viewport from '../Viewport';
 import { Point2 } from '@js-draw/math';
 import describeTransformation from '../util/describeTransformation';
+import { assertIsString } from '../util/assertions';
 
 export type LoadSaveData = string[] | Record<symbol, string | number>;
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
@@ -427,6 +428,18 @@ export default abstract class AbstractComponent {
 	}
 
 	/**
+	 * Creates a copy of this component with a particular `id`.
+	 * This is used internally by {@link Duplicate} when deserializing.
+	 *
+	 * @internal -- users of the library shouldn't need this.
+	 */
+	public cloneWithId(cloneId: string) {
+		const clone = this.clone();
+		clone.id = cloneId;
+		return clone;
+	}
+
+	/**
 	 * **Optional method**: Divides this component into sections roughly along the given path,
 	 * removing parts that are roughly within `shape`.
 	 *
@@ -493,6 +506,8 @@ export default abstract class AbstractComponent {
 		if (AbstractComponent.isNotDeserializable(json)) {
 			throw new Error(`Element with data ${json} cannot be deserialized.`);
 		}
+
+		assertIsString(json.id);
 
 		const instance = this.deserializationCallbacks[json.name]!(json.data);
 		instance.id = json.id;
