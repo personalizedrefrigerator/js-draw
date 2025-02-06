@@ -34,7 +34,7 @@ import SerializableCommand from './SerializableCommand';
  *
  * // Find all elements intersecting the rectangle with top left (-10,-30) and
  * // (width,height)=(50,100).
- * const elems = editor.image.getElementsIntersectingRegion(
+ * const elems = editor.image.getComponentsIntersecting(
  * 	new Rect2(-10, -30, 50, 100)
  * );
  *
@@ -74,7 +74,7 @@ export default class Erase extends SerializableCommand {
 	public unapply(editor: Editor) {
 		for (const part of this.toRemove) {
 			if (!editor.image.findParent(part)) {
-				EditorImage.addElement(part).apply(editor);
+				EditorImage.addComponent(part).apply(editor);
 			}
 		}
 

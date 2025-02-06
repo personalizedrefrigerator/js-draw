@@ -82,7 +82,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 	private setBackgroundType(backgroundType: BackgroundType): SerializableCommand {
 		const prevBackgroundColor = this.editor.estimateBackgroundColor();
 		const newBackground = new BackgroundComponent(backgroundType, prevBackgroundColor);
-		const addBackgroundCommand = this.editor.image.addElement(newBackground);
+		const addBackgroundCommand = this.editor.image.addComponent(newBackground);
 
 		return uniteCommands([this.removeBackgroundComponents(), addBackgroundCommand]);
 	}

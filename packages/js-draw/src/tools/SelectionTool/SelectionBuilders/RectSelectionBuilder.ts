@@ -23,7 +23,7 @@ export default class RectSelectionBuilder extends SelectionBuilder {
 	}
 
 	public resolveInternal(image: EditorImage) {
-		return image.getElementsIntersectingRegion(this.rect).filter((element) => {
+		return image.getComponentsIntersecting(this.rect).filter((element) => {
 			// Filter out the case where the selection rectangle is completely contained
 			// within the element (and does not intersect it).
 			// This is useful, for example, if a very large stroke is used as the background

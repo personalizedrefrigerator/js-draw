@@ -350,7 +350,7 @@ export default abstract class AbstractComponent {
 
 			// Add the element back to the document.
 			if (hadParent) {
-				EditorImage.addElement(this.component).apply(editor);
+				EditorImage.addComponent(this.component).apply(editor);
 			}
 		}
 

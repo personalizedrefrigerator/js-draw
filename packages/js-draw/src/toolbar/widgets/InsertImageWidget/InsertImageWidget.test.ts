@@ -28,7 +28,7 @@ describe('InsertImageWidget/index', () => {
 			image: imageElem,
 			base64Url: '',
 		});
-		editor.dispatch(editor.image.addElement(imageComponent));
+		editor.dispatch(editor.image.addComponent(imageComponent));
 
 		const selectionTool = editor.toolController.getMatchingTools(SelectionTool)[0];
 		selectionTool.setSelection([imageComponent]);

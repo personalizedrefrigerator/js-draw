@@ -23,7 +23,7 @@ const createSquareStroke = (size: number = 1) => {
 			fill: Color4.blue,
 		}),
 	]);
-	const addTestStrokeCommand = EditorImage.addElement(testStroke);
+	const addTestStrokeCommand = EditorImage.addComponent(testStroke);
 
 	return { testStroke, addTestStrokeCommand };
 };

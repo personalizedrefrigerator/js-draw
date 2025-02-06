@@ -47,7 +47,7 @@ export default class LassoSelectionBuilder extends SelectionBuilder {
 	public resolveInternal(image: EditorImage) {
 		const path = this.previewPath();
 		const lines = path.polylineApproximation();
-		const candidates = image.getElementsIntersectingRegion(path.bbox);
+		const candidates = image.getComponentsIntersecting(path.bbox);
 
 		const componentIsInSelection = (component: AbstractComponent) => {
 			if (path.closedContainsRect(component.getExactBBox())) {

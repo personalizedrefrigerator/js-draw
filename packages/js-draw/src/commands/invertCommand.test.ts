@@ -34,7 +34,7 @@ describe('invertCommand', () => {
 		const testComponent = new Stroke([
 			pathToRenderable(Path.fromString('m0,0 l10,10'), { fill: Color4.red }),
 		]);
-		editor.image.addElement(testComponent).apply(editor);
+		editor.image.addComponent(testComponent).apply(editor);
 
 		const testCommand = new Erase([testComponent]);
 		const inverted = invertCommand(testCommand);

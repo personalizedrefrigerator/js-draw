@@ -27,9 +27,9 @@ describe('Editor.toSVG', () => {
 			Mat33.identity,
 			textStyle,
 		);
-		editor.dispatch(EditorImage.addElement(text));
+		editor.dispatch(EditorImage.addComponent(text));
 
-		const matches = editor.image.getElementsIntersectingRegion(new Rect2(4, -100, 100, 100));
+		const matches = editor.image.getComponentsIntersecting(new Rect2(4, -100, 100, 100));
 		expect(matches).toHaveLength(1);
 		expect(text).not.toBeNull();
 
@@ -169,7 +169,7 @@ describe('Editor.toSVG', () => {
 		// Both paths should exist.
 		expect(
 			editor.image
-				.getElementsIntersectingRegion(new Rect2(-10, -10, 100, 100))
+				.getComponentsIntersecting(new Rect2(-10, -10, 100, 100))
 				.filter((elem) => elem instanceof StrokeComponent),
 		).toHaveLength(2);
 
@@ -227,7 +227,7 @@ describe('Editor.toSVG', () => {
 			// All paths should exist.
 			expect(
 				editor.image
-					.getElementsIntersectingRegion(new Rect2(-10, -10, 100, 100))
+					.getComponentsIntersecting(new Rect2(-10, -10, 100, 100))
 					.filter((elem) => elem instanceof StrokeComponent),
 			).toHaveLength(3);
 
@@ -293,7 +293,7 @@ describe('Editor.toSVG', () => {
 			expectGroupParentsToBeOriginal();
 
 			const nudgePathNear = async (pos: Vec2) => {
-				const targetElems = editor.image.getElementsIntersectingRegion(Rect2.bboxOf([pos], 5));
+				const targetElems = editor.image.getComponentsIntersecting(Rect2.bboxOf([pos], 5));
 
 				expect(targetElems).toHaveLength(1);
 

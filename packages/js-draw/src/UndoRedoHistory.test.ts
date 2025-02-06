@@ -8,7 +8,7 @@ describe('UndoRedoHistory', () => {
 		const stroke = new Stroke([
 			pathToRenderable(Path.fromString('m0,0 10,10'), { fill: Color4.red }),
 		]);
-		editor.dispatch(EditorImage.addElement(stroke));
+		editor.dispatch(EditorImage.addComponent(stroke));
 
 		for (let i = 0; i < editor.history['maxUndoRedoStackSize'] + 10; i++) {
 			editor.dispatch(stroke.transformBy(Mat33.translation(Vec2.of(1, 1))));

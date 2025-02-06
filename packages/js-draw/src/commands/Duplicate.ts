@@ -16,7 +16,7 @@ import SerializableCommand from './SerializableCommand';
  *
  * // Find all elements intersecting the rectangle with top left (0,0) and
  * // (width,height)=(100,100).
- * const elems = editor.image.getElementsIntersectingRegion(
+ * const elems = editor.image.getComponentsIntersecting(
  * 	new Rect2(0, 0, 100, 100)
  * );
  *
@@ -27,7 +27,7 @@ import SerializableCommand from './SerializableCommand';
  * editor.dispatch(duplicateElems);
  * ```
  *
- * @see {@link Editor.dispatch} {@link EditorImage.getElementsIntersectingRegion}
+ * @see {@link Editor.dispatch} {@link EditorImage.getComponentsIntersecting}
  */
 export default class Duplicate extends SerializableCommand {
 	private duplicates: AbstractComponent[];

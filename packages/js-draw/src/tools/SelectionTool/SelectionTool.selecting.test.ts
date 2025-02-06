@@ -765,7 +765,7 @@ describe('SelectionTool.selecting', () => {
 			}),
 		]);
 
-		await editor.dispatch(editor.image.addElement(testStroke));
+		await editor.dispatch(editor.image.addComponent(testStroke));
 
 		const selectionTool = editor.toolController.getMatchingTools(SelectionTool)[0];
 		selectionTool.setEnabled(true);

@@ -10,7 +10,7 @@ describe('ImageBackground', () => {
 	it('should render to fill exported SVG', () => {
 		const editor = createEditor();
 		const background = new BackgroundComponent(BackgroundType.SolidColor, Color4.green);
-		editor.image.addElement(background).apply(editor);
+		editor.image.addComponent(background).apply(editor);
 
 		const expectedImportExportRect = new Rect2(-10, 10, 15, 20);
 		editor.setImportExportRect(expectedImportExportRect).apply(editor);
@@ -56,7 +56,7 @@ describe('ImageBackground', () => {
 
 		// Add a background
 		const background = new BackgroundComponent(BackgroundType.SolidColor, Color4.green);
-		editor.dispatch(editor.image.addElement(background));
+		editor.dispatch(editor.image.addComponent(background));
 
 		// Render to SVG and increase the output size
 		const asSVG = editor.toSVG({ minDimension: 50 });

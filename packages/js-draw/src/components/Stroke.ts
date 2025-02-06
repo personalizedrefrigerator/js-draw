@@ -9,10 +9,15 @@ import {
 	PathIntersectionResult,
 	comparePathIndices,
 	stepPathIndexBy,
+	Color4,
 } from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
+import RenderingStyle, {
+	StrokeStyle,
+	styleFromJSON,
+	styleToJSON,
+} from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
 import RestyleableComponent, {
@@ -111,6 +116,39 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			this.approximateRenderingTime += path.parts.length;
 		}
 		this.contentBBox ??= Rect2.empty;
+	}
+
+	/**
+	 * Creates a new `Stroke` from a {@link Path} and `style`. Strokes created
+	 * with this method have transparent fill.
+	 *
+	 * Example:
+	 * ```ts,runnable
+	 * import { Editor, Stroke, Color4 } from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 * ---visible---
+	 * const stroke = Stroke.fromStroked('m0,0 l10,10', { width: 10, color: Color4.red });
+	 * editor.dispatch(editor.image.addComponent(stroke));
+	 * ```
+	 * Notice that `path` can be a string that specifies an SVG path
+	 *
+	 * @see fromFilled
+	 */
+	public static fromStroked(path: Path | string, style: StrokeStyle) {
+		if (typeof path === 'string') {
+			path = Path.fromString(path);
+		}
+
+		return new Stroke([pathToRenderable(path, { fill: Color4.transparent, stroke: style })]);
+	}
+
+	/** @see fromStroked */
+	public static fromFilled(path: Path | string, fill: Color4) {
+		if (typeof path === 'string') {
+			path = Path.fromString(path);
+		}
+
+		return new Stroke([pathToRenderable(path, { fill })]);
 	}
 
 	public getStyle(): ComponentStyle {

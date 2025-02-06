@@ -62,7 +62,7 @@ describe('EditorImage', () => {
 		},
 	]);
 	const testFill: RenderingStyle = { fill: Color4.black };
-	const addTestStrokeCommand = EditorImage.addElement(testStroke);
+	const addTestStrokeCommand = EditorImage.addComponent(testStroke);
 
 	beforeEach(() => {
 		EditorImage.setDebugMode(true);
@@ -110,7 +110,7 @@ describe('EditorImage', () => {
 
 		expect(!leftmostStroke.getBBox().intersects(rightmostStroke.getBBox()));
 
-		EditorImage.addElement(leftmostStroke).apply(editor);
+		EditorImage.addComponent(leftmostStroke).apply(editor);
 
 		// The first node should be at the image's root.
 		let firstParent = image.findParent(leftmostStroke);
@@ -118,7 +118,7 @@ describe('EditorImage', () => {
 		expect(firstParent?.getParent()).toBe(null);
 		expect(firstParent?.getBBox()?.corners).toMatchObject(leftmostStroke.getBBox()?.corners);
 
-		EditorImage.addElement(rightmostStroke).apply(editor);
+		EditorImage.addComponent(rightmostStroke).apply(editor);
 
 		firstParent = image.findParent(leftmostStroke);
 		const secondParent = image.findParent(rightmostStroke);
@@ -168,7 +168,7 @@ describe('EditorImage', () => {
 
 		const originalRect = getScreenRect();
 
-		await editor.dispatch(image.addElement(testStroke));
+		await editor.dispatch(image.addComponent(testStroke));
 
 		expect(image.getAutoresizeEnabled()).toBe(false);
 
@@ -196,7 +196,7 @@ describe('EditorImage', () => {
 		const testStroke2 = testStroke.clone();
 		await editor.dispatch(
 			uniteCommands([
-				editor.image.addElement(testStroke2),
+				editor.image.addComponent(testStroke2),
 				testStroke2.transformBy(Mat33.translation(Vec2.of(100, -10))),
 			]),
 		);
@@ -223,7 +223,7 @@ describe('EditorImage', () => {
 		const stroke3 = new Stroke([
 			pathToRenderable(Path.fromRect(new Rect2(5, -11, 53, 53)), { fill: Color4.red }),
 		]);
-		await editor.dispatch(EditorImage.addElement(stroke3));
+		await editor.dispatch(EditorImage.addComponent(stroke3));
 
 		// After adding multiple new strokes, should have correct top-left corner
 		// (tests non-zero case).
@@ -232,7 +232,7 @@ describe('EditorImage', () => {
 				const stroke = new Stroke([
 					pathToRenderable(Path.fromString(`m${x},${y} l1,0 l0,1`), { fill: Color4.red }),
 				]);
-				await editor.dispatch(EditorImage.addElement(stroke));
+				await editor.dispatch(EditorImage.addComponent(stroke));
 			}
 		}
 
@@ -332,7 +332,7 @@ describe('EditorImage', () => {
 
 				const editor = createEditor();
 				const image = editor.image;
-				const addElementCommand = image.addElement(testComponent);
+				const addElementCommand = image.addComponent(testComponent);
 
 				expect(renderMock).not.toHaveBeenCalled();
 				expect(addToImageMock).not.toHaveBeenCalled();
@@ -349,14 +349,12 @@ describe('EditorImage', () => {
 				// should return the element.
 				if (positioning === ComponentSizingMode.FillScreen) {
 					expect(
-						image
-							.getElementsIntersectingRegion(new Rect2(50, 50, 1, 1), true)
-							.includes(testComponent),
+						image.getComponentsIntersecting(new Rect2(50, 50, 1, 1), true).includes(testComponent),
 					).toBe(true);
 				}
 
 				// Querying the component's own bounding box should also return results.
-				const elements = image.getElementsIntersectingRegion(
+				const elements = image.getComponentsIntersecting(
 					// Grow the check region if an empty bbox
 					bbox.maxDimension === 0 ? bbox.grownBy(1) : bbox,
 

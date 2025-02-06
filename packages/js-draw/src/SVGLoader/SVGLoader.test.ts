@@ -26,7 +26,7 @@ describe('SVGLoader', () => {
 					),
 				);
 				const elems = editor.image
-					.getElementsIntersectingRegion(new Rect2(-1000, -1000, 10000, 10000))
+					.getComponentsIntersecting(new Rect2(-1000, -1000, 10000, 10000))
 					.filter((elem) => elem instanceof TextComponent);
 				expect(elems).toHaveLength(5);
 				const topLefts = elems.map((elem) => elem.getBBox().topLeft);

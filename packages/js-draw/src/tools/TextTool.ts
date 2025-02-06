@@ -143,7 +143,7 @@ export default class TextTool extends BaseTool {
 				this.textStyle,
 			);
 
-			const action = EditorImage.addElement(textComponent);
+			const action = EditorImage.addComponent(textComponent);
 			if (this.removeExistingCommand) {
 				// Unapply so that `removeExistingCommand` can be added to the undo stack.
 				this.removeExistingCommand.unapply(this.editor);
@@ -278,7 +278,7 @@ export default class TextTool extends BaseTool {
 				canvasPos.minus(halfTestRegionSize),
 				canvasPos.plus(halfTestRegionSize),
 			);
-			const targetNodes = this.editor.image.getElementsIntersectingRegion(testRegion);
+			const targetNodes = this.editor.image.getComponentsIntersecting(testRegion);
 			let targetTextNodes = targetNodes.filter((node) => node instanceof TextComponent);
 
 			// Don't try to edit text nodes that contain the viewport (this allows us

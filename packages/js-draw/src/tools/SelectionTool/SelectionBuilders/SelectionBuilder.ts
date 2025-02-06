@@ -37,7 +37,7 @@ export default abstract class SelectionBuilder {
 			const searchRegionSize = viewport.visibleRect.maxDimension / 200;
 			const minSizeBox = path.bbox.grownBy(searchRegionSize);
 
-			components = image.getElementsIntersectingRegion(minSizeBox).filter((component) => {
+			components = image.getComponentsIntersecting(minSizeBox).filter((component) => {
 				return minSizeBox.containsRect(component.getBBox()) || component.intersectsRect(minSizeBox);
 			});
 			components = filterComponents(components);

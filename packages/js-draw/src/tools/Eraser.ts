@@ -191,7 +191,7 @@ export default class Eraser extends BaseTool {
 		const region = Rect2.union(line.bbox, eraserRect);
 
 		const intersectingElems = this.editor.image
-			.getElementsIntersectingRegion(region)
+			.getComponentsIntersecting(region)
 			.filter((component) => {
 				return component.intersects(line) || component.intersectsRect(eraserRect);
 			});
@@ -239,7 +239,7 @@ export default class Eraser extends BaseTool {
 			}
 
 			const eraseCommand = new Erase(toErase);
-			const newAddCommands = toAdd.map((elem) => EditorImage.addElement(elem));
+			const newAddCommands = toAdd.map((elem) => EditorImage.addComponent(elem));
 
 			eraseCommand.apply(this.editor);
 			newAddCommands.forEach((command) => command.apply(this.editor));
@@ -309,7 +309,7 @@ export default class Eraser extends BaseTool {
 				}
 			}
 
-			commands.push(...[...this.toAdd].map((a) => EditorImage.addElement(a)));
+			commands.push(...[...this.toAdd].map((a) => EditorImage.addComponent(a)));
 
 			this.addCommands = [];
 		}

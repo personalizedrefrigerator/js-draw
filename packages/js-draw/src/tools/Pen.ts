@@ -274,7 +274,7 @@ export default class Pen extends BaseTool {
 				}
 
 				const canFlatten = true;
-				const action = EditorImage.addElement(stroke, canFlatten);
+				const action = EditorImage.addComponent(stroke, canFlatten);
 				this.editor.dispatch(action);
 			} else {
 				console.warn('Pen: Not adding empty stroke', stroke, 'to the canvas.');

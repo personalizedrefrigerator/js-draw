@@ -38,7 +38,7 @@ describe('FindTool', () => {
 		// Add some text to the image
 		const style = { size: 12, fontFamily: 'serif', renderingStyle: { fill: Color4.red } };
 		const text = TextComponent.fromLines(['test'], Mat33.scaling2D(0.01), style);
-		void editor.image.addElement(text).apply(editor);
+		void editor.image.addComponent(text).apply(editor);
 
 		// Should focus the search input
 		const searchInput = document.querySelector(':focus')!;

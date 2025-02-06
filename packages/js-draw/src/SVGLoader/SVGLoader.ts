@@ -49,6 +49,27 @@ export type SVGLoaderUnknownAttribute = [string, string];
 // [key, value, priority]
 export type SVGLoaderUnknownStyleAttribute = { key: string; value: string; priority?: string };
 
+export interface SVGLoaderControl {
+	/** Call this to add a component to the editor. */
+	addComponent: ComponentAddedListener;
+}
+
+/**
+ * Loads custom components from an SVG image.
+ * @see SVGLoader.fromString
+ */
+export interface SVGLoaderPlugin {
+	/**
+	 * Called when the {@link SVGLoader} encounters a `node`.
+	 *
+	 * Call `loader.addComponent` to add new components to the image.
+	 *
+	 * Returning `true` prevents the {@link SVGLoader} from doing further
+	 * processing on the node.
+	 */
+	visit(node: Element, loader: SVGLoaderControl): Promise<boolean>;
+}
+
 // @internal
 export enum SVGLoaderLoadMethod {
 	IFrame = 'iframe',
@@ -56,8 +77,12 @@ export enum SVGLoaderLoadMethod {
 }
 
 export interface SVGLoaderOptions {
+	// Note: Although `sanitize` is intended to prevent unknown object types
+	// from being stored in the image, it's possible for such objects to be
+	// added through {@link SVGLoaderOptions.plugins}.
 	sanitize?: boolean;
 	disableUnknownObjectWarnings?: boolean;
+	plugins?: SVGLoaderPlugin[];
 
 	// @internal
 	loadMethod?: SVGLoaderLoadMethod;
@@ -78,12 +103,14 @@ export default class SVGLoader implements ImageLoader {
 	// Options
 	private readonly storeUnknown: boolean;
 	private readonly disableUnknownObjectWarnings: boolean;
+	private readonly plugins: SVGLoaderPlugin[];
 
 	private constructor(
 		private source: Element,
 		private onFinish: OnFinishListener | null,
 		options: SVGLoaderOptions,
 	) {
+		this.plugins = options.plugins ?? [];
 		this.storeUnknown = !(options.sanitize ?? false);
 		this.disableUnknownObjectWarnings = !!options.disableUnknownObjectWarnings;
 	}
@@ -577,61 +604,85 @@ export default class SVGLoader implements ImageLoader {
 		this.totalToProcess += node.childElementCount;
 		let visitChildren = true;
 
-		switch (node.tagName.toLowerCase()) {
-			case 'g':
-				if (node.classList.contains(imageBackgroundCSSClassName)) {
-					await this.addBackground(node as SVGElement);
+		const visitPlugin = async () => {
+			for (const plugin of this.plugins) {
+				const processed = await plugin.visit(node, {
+					addComponent: (component) => {
+						return this.onAddComponent?.(component);
+					},
+				});
+
+				if (processed) {
 					visitChildren = false;
-				} else {
-					await this.startGroup(node as SVGGElement);
+					return true;
 				}
-				// Otherwise, continue -- visit the node's children.
-				break;
-			case 'path':
-				if (node.classList.contains(imageBackgroundCSSClassName)) {
-					await this.addBackground(node as SVGElement);
-				} else {
-					await this.addPath(node as SVGPathElement);
-				}
-				break;
-			case 'text':
-				await this.addText(node as SVGTextElement);
-				visitChildren = false;
-				break;
-			case 'image':
-				await this.addImage(node as SVGImageElement);
+			}
+			return false;
+		};
 
-				// Images should not have children.
-				visitChildren = false;
-				break;
-			case 'svg':
-				this.updateViewBox(node as SVGSVGElement);
-				this.updateSVGAttrs(node as SVGSVGElement);
-				break;
-			case 'style':
-				// Keeping unnecessary style sheets can cause the browser to keep all
-				// SVG elements *referenced* by the style sheet in some browsers.
-				//
-				// Only keep the style sheet if it won't be discarded on save.
-				if (node.getAttribute('id') !== renderedStylesheetId) {
-					await this.addUnknownNode(node as SVGStyleElement);
-				}
-				break;
-			default:
-				if (!this.disableUnknownObjectWarnings) {
-					console.warn('Unknown SVG element,', node, node.tagName);
-					if (!(node instanceof SVGElement)) {
-						console.warn(
-							'Element',
-							node,
-							'is not an SVGElement!',
-							this.storeUnknown ? 'Continuing anyway.' : 'Skipping.',
-						);
+		const visitBuiltIn = async () => {
+			switch (node.tagName.toLowerCase()) {
+				case 'g':
+					if (node.classList.contains(imageBackgroundCSSClassName)) {
+						await this.addBackground(node as SVGElement);
+						visitChildren = false;
+					} else {
+						await this.startGroup(node as SVGGElement);
 					}
-				}
+					// Otherwise, continue -- visit the node's children.
+					break;
+				case 'path':
+					if (node.classList.contains(imageBackgroundCSSClassName)) {
+						await this.addBackground(node as SVGElement);
+					} else {
+						await this.addPath(node as SVGPathElement);
+					}
+					break;
+				case 'text':
+					await this.addText(node as SVGTextElement);
+					visitChildren = false;
+					break;
+				case 'image':
+					await this.addImage(node as SVGImageElement);
 
-				await this.addUnknownNode(node as SVGElement);
-				return;
+					// Images should not have children.
+					visitChildren = false;
+					break;
+				case 'svg':
+					this.updateViewBox(node as SVGSVGElement);
+					this.updateSVGAttrs(node as SVGSVGElement);
+					break;
+				case 'style':
+					// Keeping unnecessary style sheets can cause the browser to keep all
+					// SVG elements *referenced* by the style sheet in some browsers.
+					//
+					// Only keep the style sheet if it won't be discarded on save.
+					if (node.getAttribute('id') !== renderedStylesheetId) {
+						await this.addUnknownNode(node as SVGStyleElement);
+					}
+					break;
+				default:
+					if (!this.disableUnknownObjectWarnings) {
+						console.warn('Unknown SVG element,', node, node.tagName);
+						if (!(node instanceof SVGElement)) {
+							console.warn(
+								'Element',
+								node,
+								'is not an SVGElement!',
+								this.storeUnknown ? 'Continuing anyway.' : 'Skipping.',
+							);
+						}
+					}
+
+					await this.addUnknownNode(node as SVGElement);
+					return;
+			}
+		};
+
+		if (await visitPlugin()) {
+			visitChildren = false;
+		} else {
+			await visitBuiltIn();
 		}
 
 		if (visitChildren) {
@@ -788,18 +839,22 @@ export default class SVGLoader implements ImageLoader {
 		// Handle options
 		let sanitize;
 		let disableUnknownObjectWarnings;
+		let plugins;
 
 		if (typeof options === 'boolean') {
 			sanitize = options;
 			disableUnknownObjectWarnings = false;
+			plugins = [];
 		} else {
 			sanitize = options.sanitize ?? false;
 			disableUnknownObjectWarnings = options.disableUnknownObjectWarnings ?? false;
+			plugins = options.plugins;
 		}
 
 		return new SVGLoader(svgElem, cleanUp, {
 			sanitize,
 			disableUnknownObjectWarnings,
+			plugins,
 		});
 	}
 }

@@ -109,7 +109,7 @@ describe('Stroke', () => {
 		expect(stroke.getStyle().color).objEq(Color4.fromHex('#0f0'));
 
 		const editor = createEditor();
-		EditorImage.addElement(stroke).apply(editor);
+		EditorImage.addComponent(stroke).apply(editor);
 
 		// Re-rendering should render with the new color
 		const renderer = new DummyRenderer(editor.viewport);
@@ -186,4 +186,35 @@ describe('Stroke', () => {
 		expect(stroke.getExactBBox()).objEq(new Rect2(-1, -1, 2, 2));
 		expect(stroke.getBBox()).objEq(new Rect2(-1, -1, 2, 2));
 	});
+
+	it.each(['m0,0 l11,10', Path.fromString('m3,2 l3,4 l5,6 m4,2')])(
+		'.fromStroked should create strokes with transparent fill (path %s)',
+		(path) => {
+			expect(Stroke.fromStroked(path, { width: 4, color: Color4.red }).serialize()).toMatchObject({
+				data: [
+					{
+						style: {
+							fill: Color4.transparent.toString(),
+							stroke: { width: 4, color: Color4.red.toString() },
+						},
+						path: path.toString(),
+					},
+				],
+			});
+		},
+	);
+
+	it.each(['m0,0 l11,10', Path.fromString('m3,2 l3,4 l5,6 m4,2')])(
+		'.fromFilled should create strokes with no stroke (path %s)',
+		(path) => {
+			expect(Stroke.fromFilled(path, Color4.blue).serialize()).toMatchObject({
+				data: [
+					{
+						style: { fill: Color4.blue.toString(), stroke: undefined },
+						path: path.toString(),
+					},
+				],
+			});
+		},
+	);
 });

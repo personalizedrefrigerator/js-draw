@@ -9,7 +9,7 @@ describe('AbstractComponent.transformBy', () => {
 		const component = new Stroke([
 			pathToRenderable(Path.fromRect(Rect2.unitSquare), { fill: Color4.red }),
 		]);
-		EditorImage.addElement(component).apply(editor);
+		EditorImage.addComponent(component).apply(editor);
 
 		const origZIndex = component.getZIndex();
 

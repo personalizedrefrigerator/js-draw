@@ -95,7 +95,7 @@ describe('Eraser', () => {
 
 		// Add to the image
 		expect(editor.image.getAllElements()).toHaveLength(0);
-		editor.dispatch(EditorImage.addElement(unerasableObj));
+		editor.dispatch(EditorImage.addComponent(unerasableObj));
 		expect(editor.image.getAllElements()).toHaveLength(1);
 
 		const eraser = selectEraser(editor);

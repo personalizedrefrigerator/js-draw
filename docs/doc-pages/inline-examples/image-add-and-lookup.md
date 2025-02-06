@@ -15,7 +15,7 @@ function addStroke(path: Path, style: RenderingStyle) {
 
 	// Create a command that adds the stroke to the image
 	// (but don't apply it yet).
-	const command = editor.image.addElement(stroke);
+	const command = editor.image.addComponent(stroke);
 	// Actually apply the command.
 	editor.dispatch(command);
 }
@@ -50,7 +50,7 @@ addBoxAt(Vec2.of(20, 0), Color4.orange);
 addBoxAt(Vec2.of(20, 20), Color4.blue);
 
 // Get the components in a small rectangle near (0, 0)
-const components = editor.image.getElementsIntersectingRegion(
+const components = editor.image.getComponentsIntersecting(
 	new Rect2(0, 0, 5, 5), // a 5x5 square with top left (0, 0)
 );
 

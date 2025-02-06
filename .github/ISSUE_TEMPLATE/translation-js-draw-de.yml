@@ -305,6 +305,7 @@ body:
       label: 'deleteSelection'
       description: 'Translate `Delete selection`.'
       placeholder: 'Delete selection'
+      value: 'Auswahl löschen'
       render: 'shell'
     validations:
       required: false
@@ -314,6 +315,7 @@ body:
       label: 'duplicateSelection'
       description: 'Translate `Duplicate selection`.'
       placeholder: 'Duplicate selection'
+      value: 'Auswahl duplizieren'
       render: 'shell'
     validations:
       required: false

@@ -45,9 +45,9 @@ let debugMode = false;
  *
  * Here's how to do a few common operations:
  * - **Get all components in a {@link @js-draw/math!Rect2 | Rect2}**:
- *    {@link EditorImage.getElementsIntersectingRegion}.
+ *    {@link EditorImage.getComponentsIntersecting}.
  * - **Draw an `EditorImage` onto a canvas/SVG**: {@link EditorImage.render}.
- * - **Adding a new component**: {@link EditorImage.addElement}.
+ * - **Adding a new component**: {@link EditorImage.addComponent}.
  *
  * **Example**:
  * [[include:doc-pages/inline-examples/image-add-and-lookup.md]]
@@ -115,7 +115,7 @@ export default class EditorImage {
 
 		if (parent) {
 			parent.remove();
-			this.addElementDirectly(elem);
+			this.addComponentDirectly(elem);
 		}
 	}
 
@@ -184,7 +184,7 @@ export default class EditorImage {
 	 * @returns all elements in the image, sorted by z-index (low to high).
 	 *
 	 * This can be slow for large images. If you only need all elemenst in part of the image,
-	 * consider using {@link getElementsIntersectingRegion} instead.
+	 * consider using {@link getComponentsIntersecting} instead.
 	 *
 	 * **Note**: The result does not include background elements. See {@link getBackgroundComponents}.
 	 */
@@ -200,12 +200,17 @@ export default class EditorImage {
 		return this.componentCount;
 	}
 
+	/** @deprecated @see getComponentsIntersecting */
+	public getElementsIntersectingRegion(region: Rect2, includeBackground: boolean = false) {
+		return this.getComponentsIntersecting(region, includeBackground);
+	}
+
 	/**
 	 * @returns a list of `AbstractComponent`s intersecting `region`, sorted by increasing z-index.
 	 *
 	 * Components in the background layer are only included if `includeBackground` is `true`.
 	 */
-	public getElementsIntersectingRegion(
+	public getComponentsIntersecting(
 		region: Rect2,
 		includeBackground: boolean = false,
 	): AbstractComponent[] {
@@ -244,7 +249,7 @@ export default class EditorImage {
 		return this.componentsById[id] ?? null;
 	}
 
-	private addElementDirectly(elem: AbstractComponent): ImageNode {
+	private addComponentDirectly(elem: AbstractComponent): ImageNode {
 		// Because onAddToImage can affect the element's bounding box,
 		// this needs to be called before parentTree.addLeaf.
 		elem.onAddToImage(this);
@@ -280,20 +285,33 @@ export default class EditorImage {
 	 *
 	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
 	 */
+	public static addComponent(
+		elem: AbstractComponent,
+		applyByFlattening: boolean = false,
+	): SerializableCommand {
+		return new EditorImage.AddComponentCommand(elem, applyByFlattening);
+	}
+
+	/** @see EditorImage.addComponent */
+	public addComponent(component: AbstractComponent, applyByFlattening?: boolean) {
+		return EditorImage.addComponent(component, applyByFlattening);
+	}
+
+	/** Alias for {@link addComponent}. @deprecated Prefer `.addComponent` */
+	public addElement(elem: AbstractComponent, applyByFlattening?: boolean) {
+		return this.addComponent(elem, applyByFlattening);
+	}
+
+	/** Alias for {@link addComponent}. @deprecated Prefer `.addComponent`. */
 	public static addElement(
 		elem: AbstractComponent,
 		applyByFlattening: boolean = false,
 	): SerializableCommand {
-		return new EditorImage.AddElementCommand(elem, applyByFlattening);
-	}
-
-	/** @see EditorImage.addElement */
-	public addElement(elem: AbstractComponent, applyByFlattening?: boolean) {
-		return EditorImage.addElement(elem, applyByFlattening);
+		return this.addComponent(elem, applyByFlattening);
 	}
 
 	// A Command that can access private [EditorImage] functionality
-	private static AddElementCommand = class extends SerializableCommand {
+	private static AddComponentCommand = class extends SerializableCommand {
 		private serializedElem: any = null;
 
 		// If [applyByFlattening], then the rendered content of this element
@@ -318,7 +336,7 @@ export default class EditorImage {
 		}
 
 		public apply(editor: Editor) {
-			editor.image.addElementDirectly(this.element);
+			editor.image.addComponentDirectly(this.element);
 
 			if (!this.applyByFlattening) {
 				editor.queueRerender();
@@ -334,7 +352,7 @@ export default class EditorImage {
 		}
 
 		public description(_editor: Editor, localization: EditorLocalization) {
-			return localization.addElementAction(this.element.description(localization));
+			return localization.addComponentAction(this.element.description(localization));
 		}
 
 		protected serializeToJSON() {
@@ -348,7 +366,7 @@ export default class EditorImage {
 				const id = json.elemData.id;
 				const foundElem = editor.image.lookupElement(id);
 				const elem = foundElem ?? AbstractComponent.deserialize(json.elemData);
-				const result = new EditorImage.AddElementCommand(elem);
+				const result = new EditorImage.AddComponentCommand(elem);
 				result.serializedElem = json.elemData;
 				return result;
 			});

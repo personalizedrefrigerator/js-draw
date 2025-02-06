@@ -34,6 +34,10 @@ type FromViewportOptions = {
 	useViewBoxForPositioning?: boolean;
 };
 
+type DrawWithSVGParentContext = {
+	sanitize: boolean;
+};
+
 /**
  * Renders onto an `SVGElement`.
  *
@@ -432,7 +436,12 @@ export default class SVGRenderer extends AbstractRenderer {
 		});
 	}
 
-	// Renders a **copy** of the given element.
+	/**
+	 * Adds a **copy** of the given element directly to the container
+	 * SVG element, **without applying transforms**.
+	 *
+	 * If `sanitize` is enabled, this does nothing.
+	 */
 	public drawSVGElem(elem: SVGElement) {
 		if (this.sanitize) {
 			return;
@@ -449,6 +458,24 @@ export default class SVGRenderer extends AbstractRenderer {
 		const elemToDraw = elem.cloneNode(true) as SVGElement;
 		this.elem.appendChild(elemToDraw);
 		this.objectElems?.push(elemToDraw);
+	}
+
+	/**
+	 * Allows rendering directly to the underlying SVG element. Rendered
+	 * content is added to a `<g>` element that's passed as `parent` to `callback`.
+	 *
+	 * **Note**: Unlike {@link drawSVGElem}, this method can be used even if `sanitize` is `true`.
+	 * In this case, it's the responsibility of `callback` to ensure that everything added
+	 * to `parent` is safe to render.
+	 */
+	public drawWithSVGParent(
+		callback: (parent: SVGGElement, context: DrawWithSVGParentContext) => void,
+	) {
+		const parent = document.createElementNS(svgNameSpace, 'g');
+		this.transformFrom(Mat33.identity, parent, true);
+		callback(parent, { sanitize: this.sanitize });
+		this.elem.appendChild(parent);
+		this.objectElems?.push(parent);
 	}
 
 	public isTooSmallToRender(_rect: Rect2): boolean {
