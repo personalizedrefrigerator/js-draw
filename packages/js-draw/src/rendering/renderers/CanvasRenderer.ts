@@ -277,8 +277,11 @@ export default class CanvasRenderer extends AbstractRenderer {
 	 *
 	 * Use with caution.
 	 */
-	public getCanvasRenderingContext() {
-		return this.ctx;
+	public drawWithRawRenderingContext(callback: (ctx: CanvasRenderingContext2D) => void) {
+		this.ctx.save();
+		this.transformBy(this.getCanvasToScreenTransform());
+		callback(this.ctx);
+		this.ctx.restore();
 	}
 
 	// @internal

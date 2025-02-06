@@ -15,7 +15,7 @@ There are several steps to creating a custom component:
 4. (Optional) Make it possible to serialize/deserialize the component.
    - Component serialization and deserialization is used for collaborative editing.
 
-This guide shows how to create a custom `ImageStatus` component that shows information about the current content of the image.
+This guide shows how to create a simple custom component.
 
 ## Setup
 
@@ -30,7 +30,7 @@ editor.addToolbar();
 We'll start by subclassing `AbstractComponent`. There are a few methods we'll implement:
 
 ```ts
-const componentId = 'image-info';
+const componentId = 'example';
 class ImageStatusComponent extends AbstractComponent {
 	// The bounding box of the component -- REQUIRED
 	// The bounding box should be a rectangle that completely contains the
@@ -46,7 +46,7 @@ class ImageStatusComponent extends AbstractComponent {
 		// TODO: Render the component
 	}
 
-	protected intersects(line: LineSegment2): boolean {
+	public intersects(line: LineSegment2): boolean {
 		// TODO: Return true if the component intersects a line
 	}
 
@@ -86,8 +86,8 @@ Let's get started by making the component render something.
 import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
 import { AbstractRenderer, AbstractComponent } from 'js-draw';
 
-const componentId = 'image-info';
-class ImageInfoComponent extends AbstractComponent {
+const componentId = 'example';
+class ExampleComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	public constructor() {
@@ -114,7 +114,7 @@ class ImageInfoComponent extends AbstractComponent {
 	}
 
 	// Must be implemented by all components, used for things like erasing and selection.
-	protected intersects(line: LineSegment2) {
+	public intersects(line: LineSegment2) {
 		// TODO: For now, our component won't work correctly if the user tries to select it.
 		// We'll implement this later.
 		return false;
@@ -125,7 +125,7 @@ class ImageInfoComponent extends AbstractComponent {
 	}
 
 	protected createClone(): AbstractComponent {
-		return new ImageInfoComponent();
+		return new ExampleComponent();
 	}
 
 	public description(): string {
@@ -145,18 +145,18 @@ class ImageInfoComponent extends AbstractComponent {
 AbstractComponent.registerComponent(componentId, data => {
 	// TODO: Deserialize the component from [data]. This is used if collaborative
 	// editing is enabled.
-	return new ImageInfoComponent();
+	return new ExampleComponent();
 });
 
 // Add the component
-editor.dispatch(editor.image.addComponent(new ImageInfoComponent()));
+editor.dispatch(editor.image.addComponent(new ExampleComponent()));
 ```
 
 Try clicking "run"! Notice that we now have a red box. Since `applyTransformation` and `intersects` aren't implemented, it doesn't work with the selection or eraser tools. We'll implement those methods next.
 
 ## 3. Making it selectable
 
-To make it possible for a user to move and resize our `ImageInfoComponent`, we'll need a bit more state. In particular, we'll add:
+To make it possible for a user to move and resize our `ExampleComponent`, we'll need a bit more state. In particular, we'll add:
 
 - A {@link @js-draw/math!Mat33 | Mat33} that stores the position/rotation of the component.
   - See the {@link @js-draw/math!Mat33 | Mat33} documentation for more information.
@@ -170,8 +170,8 @@ editor.addToolbar();
 import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
 import { AbstractRenderer, AbstractComponent } from 'js-draw';
 
-const componentId = 'image-info';
-class ImageInfoComponent extends AbstractComponent {
+const componentId = 'example';
+class ExampleComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	// NEW: Stores the scale/rotation/position. "Transform" is short for "transformation".
@@ -213,7 +213,7 @@ class ImageInfoComponent extends AbstractComponent {
 		canvas.endObject(this.getLoadSaveData());
 	}
 
-	protected intersects(line: LineSegment2) {
+	public intersects(line: LineSegment2) {
 		// Our component is currently just a rectangle. As such (for some values of this.transform),
 		// we can use the Rect2.intersectsLineSegment method here:
 		const intersectionCount = this.contentBBox.intersectsLineSegment(line).length;
@@ -230,7 +230,7 @@ class ImageInfoComponent extends AbstractComponent {
 	}
 
 	protected createClone(): AbstractComponent {
-		const clone = new ImageInfoComponent(this.transform);
+		const clone = new ExampleComponent(this.transform);
 		return clone;
 	}
 
@@ -249,12 +249,12 @@ class ImageInfoComponent extends AbstractComponent {
 AbstractComponent.registerComponent(componentId, data => {
 	// TODO: Deserialize the component from [data]. This is used if collaborative
 	// editing is enabled.
-	return new ImageInfoComponent(Mat33.identity);
+	return new ExampleComponent(Mat33.identity);
 });
 
 // Add the component
 const initialTransform = Mat33.identity;
-editor.dispatch(editor.image.addComponent(new ImageInfoComponent(initialTransform)));
+editor.dispatch(editor.image.addComponent(new ExampleComponent(initialTransform)));
 ```
 
 > [!NOTE]
@@ -277,7 +277,7 @@ editor.dispatch(editor.image.addComponent(new ImageInfoComponent(initialTransfor
 
 ## 4. Loading and saving
 
-Currently, copy-pasting the `ImageInfoComponent` pastes a `StrokeComponent`. Let's fix that.
+Currently, copy-pasting the `ExampleComponent` pastes a `StrokeComponent`. Let's fix that.
 
 `js-draw` copies components as SVG. As a result, to paste our components correctly, we need to add logic to load from SVG. This can be done by creating a {@link js-draw!SVGLoaderPlugin | SVGLoaderPlugin} and including it in the {@link js-draw!EditorSettings | EditorSettings} for a new editor.
 
@@ -327,10 +327,10 @@ Let's create a version that loads our custom component:
 ```ts
 const plugin: SVGLoaderPlugin = {
 	async visit(node, loader) {
-		if (node.classList.contains('comp--image-info-component')) {
+		if (node.classList.contains('comp--example-component')) {
 			const transform = // TODO: Get transform from the `node`.
-			const infoComponent = new ImageInfoComponent(transform);
-			loader.addComponent(infoComponent);
+			const customComponent = new ExampleComponent(transform);
+			loader.addComponent(customComponent);
 			return true;
 		}
 		// Return false to do the default image loading
@@ -342,7 +342,7 @@ const plugin: SVGLoaderPlugin = {
 ...and update our custom component to attach the correct information while saving:
 
 ```ts
-class ImageInfoComponent extends AbstractComponent {
+class ExampleComponent extends AbstractComponent {
 	// ...
 
 	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
@@ -354,7 +354,7 @@ class ImageInfoComponent extends AbstractComponent {
 
 		// The containerClassNames argument, when rendering to an SVG, wraps our component
 		// in a <g class="..."> with the provided class names.
-		const containerClassNames = ['comp--image-info-component'];
+		const containerClassNames = ['comp--example-component'];
 		canvas.endObject(this.getLoadSaveData(), containerClassNames);
 	}
 
@@ -369,8 +369,8 @@ import { Editor } from 'js-draw';
 import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
 import { AbstractRenderer, AbstractComponent } from 'js-draw';
 
-const componentId = 'image-info';
-class ImageInfoComponent extends AbstractComponent {
+const componentId = 'example';
+class ExampleComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	private transform: Mat33;
@@ -397,11 +397,11 @@ class ImageInfoComponent extends AbstractComponent {
 		canvas.fillRect(this.initialBBox, Color4.red);
 		canvas.popTransform();
 
-		const containerClassNames = ['comp--image-info-component'];
+		const containerClassNames = ['comp--example-component'];
 		canvas.endObject(this.getLoadSaveData(), containerClassNames);
 	}
 
-	protected intersects(line: LineSegment2) {
+	public intersects(line: LineSegment2) {
 		// Our component is currently just a rectangle. As such (for some values of this.transform),
 		// we can use the Rect2.intersectsLineSegment method here:
 		const intersectionCount = this.contentBBox.intersectsLineSegment(line).length;
@@ -418,7 +418,7 @@ class ImageInfoComponent extends AbstractComponent {
 	}
 
 	protected createClone(): AbstractComponent {
-		const clone = new ImageInfoComponent(this.transform);
+		const clone = new ExampleComponent(this.transform);
 		return clone;
 	}
 
@@ -435,16 +435,16 @@ class ImageInfoComponent extends AbstractComponent {
 
 AbstractComponent.registerComponent(componentId, data => {
 	// TODO:
-	return new ImageInfoComponent(Mat33.identity);
+	return new ExampleComponent(Mat33.identity);
 });
 
 const plugin: SVGLoaderPlugin = {
 	async visit(node, loader) {
-		if (node.classList.contains('comp--image-info-component')) {
+		if (node.classList.contains('comp--example-component')) {
 			// TODO: Set the transformation matrix correctly -- get this information
 			// from the `node`. This isn't too important for copy/paste support.
-			const infoComponent = new ImageInfoComponent(Mat33.identity);
-			loader.addComponent(infoComponent);
+			const customComponent = new ExampleComponent(Mat33.identity);
+			loader.addComponent(customComponent);
 			return true;
 		}
 		// Return false to do the default image loading
@@ -461,10 +461,14 @@ editor.addToolbar();
 
 // Add the component
 const initialTransform = Mat33.identity;
-editor.dispatch(editor.image.addComponent(new ImageInfoComponent(initialTransform)));
+editor.dispatch(editor.image.addComponent(new ExampleComponent(initialTransform)));
 ```
 
 ## 5. Make it possible to serialize/deserialize for collaborative editing
+
+> [!NOTE]
+>
+> If you find collaborative editing bugs, please [report them](https://github.com/personalizedrefrigerator/js-draw/issues).
 
 Let's start by setting up two editors that sync commands:
 
@@ -523,8 +527,8 @@ import { Editor } from 'js-draw';
 import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
 import { AbstractRenderer, AbstractComponent } from 'js-draw';
 
-const componentId = 'image-info';
-class ImageInfoComponent extends AbstractComponent {
+const componentId = 'example';
+class ExampleComponent extends AbstractComponent {
 	protected contentBBox: Rect2;
 
 	private transform: Mat33;
@@ -551,11 +555,11 @@ class ImageInfoComponent extends AbstractComponent {
 		canvas.fillRect(this.initialBBox, Color4.red);
 		canvas.popTransform();
 
-		const containerClassNames = ['comp--image-info-component'];
+		const containerClassNames = ['comp--example-component'];
 		canvas.endObject(this.getLoadSaveData(), containerClassNames);
 	}
 
-	protected intersects(line: LineSegment2) {
+	public intersects(line: LineSegment2) {
 		// Our component is currently just a rectangle. As such (for some values of this.transform),
 		// we can use the Rect2.intersectsLineSegment method here:
 		const intersectionCount = this.contentBBox.intersectsLineSegment(line).length;
@@ -572,7 +576,7 @@ class ImageInfoComponent extends AbstractComponent {
 	}
 
 	protected createClone(): AbstractComponent {
-		const clone = new ImageInfoComponent(this.transform);
+		const clone = new ExampleComponent(this.transform);
 		return clone;
 	}
 
@@ -606,7 +610,7 @@ AbstractComponent.registerComponent(componentId, data => {
 
 	// NEW: Create and return the component from the data
 	const transform = new Mat33(...transformArray);
-	return new ImageInfoComponent(transform);
+	return new ExampleComponent(transform);
 });
 
 // Make a button that adds the component
@@ -621,7 +625,7 @@ toolbar.addActionButton({
 	label: 'Add test component',
 }, () => {
 	const initialTransform = Mat33.identity;
-	const component = new ImageInfoComponent(initialTransform);
+	const component = new ExampleComponent(initialTransform);
 
 	// The addAndCenterComponents method automatically selects,
 	// centers, and adds the provided components to the editor.
@@ -638,8 +642,118 @@ Above, clicking the "+" button should add the component to both editors.
 
 ## More advanced rendering
 
-If you find that the {@link js-draw!AbstractRenderer | AbstractRenderer}'s built-in methods are insufficient, it's possible to directly access the `RenderingContext2D` or `SVGElement` used by the renderer. See {@link js-draw!CanvasRenderer.getCanvasRenderingContext | getCanvasRenderingContext} and {@link js-draw!SVGRenderer.drawSVGElem | drawSVGElem} for details.
+If you find that the {@link js-draw!AbstractRenderer | AbstractRenderer}'s built-in methods are insufficient, it's possible to directly access the [`RenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) or [`SVGElement`](https://developer.mozilla.org/en-US/docs/Web/API/SVGElement) used by the renderer. See {@link js-draw!CanvasRenderer.drawWithRawRenderingContext | drawWithRawRenderingContext} and {@link js-draw!SVGRenderer.drawWithSVGParent | drawWithSVGParent} for details.
 
 > [!NOTE]
 >
 > Where possible, try to use the `AbstractRenderer`-provided methods. Doing so can help keep your logic compatible with future renderer types.
+
+Let's see an example that has SVG-specific and Canvas-specific rendering logic:
+
+```ts,runnable
+import { Editor, CanvasRenderer, SVGRenderer } from 'js-draw';
+import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
+import { AbstractRenderer, AbstractComponent } from 'js-draw';
+
+const componentId = 'example';
+class ExampleComponent extends AbstractComponent {
+	protected contentBBox: Rect2;
+
+	private transform: Mat33;
+	private initialBBox: Rect2;
+
+	public constructor(transform: Mat33) {
+		super(componentId);
+
+		this.transform = transform;
+		this.initialBBox = new Rect2(0, 0, 50, 50);
+		this.updateBoundingBox();
+	}
+
+	private updateBoundingBox() {
+		this.contentBBox = this.initialBBox.transformedBoundingBox(
+			this.transform,
+		);
+	}
+
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+		canvas.startObject(this.contentBBox);
+
+		canvas.pushTransform(this.transform);
+		if (canvas instanceof CanvasRenderer) {
+			canvas.drawWithRawRenderingContext(ctx => {
+				ctx.strokeStyle = 'green';
+
+				// Draw a large number of rectangles
+				const rectSize = 20;
+				const maximumX = this.initialBBox.width - rectSize;
+				for (let x = 0; x < maximumX; x += 2) {
+					ctx.strokeRect(x, 0, rectSize, rectSize);
+				}
+			});
+		} else if (canvas instanceof SVGRenderer) {
+			canvas.drawWithSVGParent(parent => {
+				// Draw some text. Note that this can also
+				// be done with canvas.drawText
+				const text = document.createElementNS(
+					'http://www.w3.org/2000/svg', 'text',
+				);
+
+				text.textContent = 'Test!';
+				text.setAttribute('x', '50');
+				text.setAttribute('y', '25');
+				text.style.fill = 'red';
+
+				parent.appendChild(text);
+			});
+		} else {
+			// Fallback for other renderers
+			canvas.fillRect(this.initialBBox, Color4.red);
+		}
+		canvas.popTransform();
+
+		const containerClassNames = ['comp--example-component'];
+		canvas.endObject(this.getLoadSaveData(), containerClassNames);
+	}
+
+	public intersects(line: LineSegment2) {
+		return false; // TODO (see above sections for implementation)
+	}
+
+	protected applyTransformation(transformUpdate: Mat33): void {
+		this.transform = transformUpdate.rightMul(this.transform);
+		this.updateBoundingBox();
+	}
+
+	protected createClone(): AbstractComponent {
+		const clone = new ExampleComponent(this.transform);
+		return clone;
+	}
+
+	public description(): string {
+		return 'a red box'; // TODO (see examples above)
+	}
+
+	protected serializeToJSON() {
+		return JSON.stringify({
+			// TODO: Some data to save (for collaborative editing)
+		});
+	}
+}
+
+AbstractComponent.registerComponent(componentId, data => {
+	// TODO: See above examples for how to implement this
+	// Needed for collaborative editing
+	throw new Error('Not implemented');
+});
+
+const editor = new Editor(document.body);
+editor.addToolbar();
+
+// Add the component
+const initialTransform = Mat33.identity;
+editor.dispatch(editor.image.addComponent(new ExampleComponent(initialTransform)));
+
+// Preview the SVG output
+document.body.appendChild(editor.toSVG());
+```
