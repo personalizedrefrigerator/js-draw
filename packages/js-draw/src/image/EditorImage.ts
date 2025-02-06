@@ -188,11 +188,16 @@ export default class EditorImage {
 	 *
 	 * **Note**: The result does not include background elements. See {@link getBackgroundComponents}.
 	 */
-	public getAllElements() {
+	public getAllComponents() {
 		const leaves = this.root.getLeaves();
 		sortLeavesByZIndex(leaves);
 
 		return leaves.map((leaf) => leaf.getContent()!);
+	}
+
+	/** @deprecated in favor of {@link getAllComponents} */
+	public getAllElements() {
+		return this.getAllComponents();
 	}
 
 	/** Returns the number of elements added to this image. @internal */

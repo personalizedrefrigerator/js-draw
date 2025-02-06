@@ -19,7 +19,7 @@ const getTextEditor = (editor: Editor): HTMLTextAreaElement | null => {
 
 const getEditorText = (editor: Editor) => {
 	const textComponents = editor.image
-		.getAllElements()
+		.getAllComponents()
 		.filter((element) => element instanceof TextComponent);
 	return textComponents.map((c) => c.getText()).join('\n');
 };
@@ -66,7 +66,7 @@ describe('TextTool', () => {
 		sendKeyPressRelease(textArea, 'Enter');
 
 		const textComponents = editor.image
-			.getAllElements()
+			.getAllComponents()
 			.filter((element) => element instanceof TextComponent);
 		expect(textComponents).toHaveLength(1);
 

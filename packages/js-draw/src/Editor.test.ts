@@ -154,7 +154,7 @@ describe('Editor', () => {
 	it('should be read-only when in read-only mode', () => {
 		const editor = createEditor();
 
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		const drawStroke = () => {
 			// Before setting read only, should be possible to draw.
@@ -164,7 +164,7 @@ describe('Editor', () => {
 		};
 
 		drawStroke();
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		editor.setReadOnly(true);
 
@@ -177,7 +177,7 @@ describe('Editor', () => {
 		undoWithKeyboard();
 
 		// Should have no effect
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// Try to draw
 		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-100, 0));
@@ -185,7 +185,7 @@ describe('Editor', () => {
 		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(30, 300));
 
 		// Should have no effect
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// Try to select and delete everything
 		const selectAndDeleteAll = () => {
@@ -205,7 +205,7 @@ describe('Editor', () => {
 		selectAndDeleteAll();
 
 		// Should have no effect
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		editor.setReadOnly(false);
 
@@ -220,21 +220,21 @@ describe('Editor', () => {
 		selectAndDeleteAll();
 
 		// Should work
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		// Undoing with keyboard shortcuts should also work
 		undoWithKeyboard();
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// And so should drawing
 		selectFirstTool();
 		drawStroke();
-		expect(editor.image.getAllElements()).toHaveLength(2);
+		expect(editor.image.getAllComponents()).toHaveLength(2);
 	});
 
 	it('handlePointerEventsExceptClicksFrom should not consider a large circle a click', async () => {
 		const editor = createEditor();
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		const testElement = document.createElement('div');
 		const eventHandler = editor.handlePointerEventsExceptClicksFrom(testElement);
@@ -265,7 +265,7 @@ describe('Editor', () => {
 		await jest.advanceTimersByTimeAsync(10);
 
 		// Should not have handled a click
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		// Should allow drawing a circle
 		const circleRadius = 200;
@@ -284,7 +284,7 @@ describe('Editor', () => {
 		dispatchEventAt('pointerup', Vec2.of(circleRadius, 0));
 		await jest.advanceTimersByTimeAsync(10);
 
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		eventHandler.remove();
 	});

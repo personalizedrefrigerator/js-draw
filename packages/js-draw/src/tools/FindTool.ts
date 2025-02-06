@@ -35,7 +35,7 @@ export default class FindTool extends BaseTool {
 	private getMatches(searchFor: string): Rect2[] {
 		const lowerSearchFor = searchFor.toLocaleLowerCase();
 
-		const matchingComponents = this.editor.image.getAllElements().filter((component) => {
+		const matchingComponents = this.editor.image.getAllComponents().filter((component) => {
 			let text = '';
 			if (component instanceof TextComponent) {
 				text = component.getText();

@@ -112,7 +112,7 @@ describe('SVGLoader', () => {
 					),
 				);
 				const elem = editor.image
-					.getAllElements()
+					.getAllComponents()
 					.filter((elem) => elem instanceof TextComponent)[0];
 				expect(elem).toBeTruthy();
 

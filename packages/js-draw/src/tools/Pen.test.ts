@@ -10,7 +10,7 @@ import Pointer, { PointerDevice } from '../Pointer';
 import EditorImage from '../image/EditorImage';
 
 const getAllStrokes = (image: EditorImage) => {
-	return image.getAllElements().filter((elem) => elem instanceof StrokeComponent);
+	return image.getAllComponents().filter((elem) => elem instanceof StrokeComponent);
 };
 
 describe('Pen', () => {
@@ -325,7 +325,7 @@ describe('Pen', () => {
 		sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(10.1, 10.1));
 		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(10.1, 10.1));
 
-		const allElems = editor.image.getAllElements();
+		const allElems = editor.image.getAllComponents();
 		expect(allElems).toHaveLength(1);
 
 		const firstStroke = allElems[0] as StrokeComponent;
@@ -370,7 +370,7 @@ describe('Pen', () => {
 		await drawLineWithBump(false);
 		await drawLineWithBump(true);
 
-		const allElems = editor.image.getAllElements();
+		const allElems = editor.image.getAllComponents();
 		expect(allElems).toHaveLength(2);
 
 		// Should roughly have a bump (roughly because stroke smoothing will adjust this)
@@ -384,6 +384,6 @@ describe('Pen', () => {
 
 		// Should still be able to draw
 		await drawLineWithBump(false);
-		expect(editor.image.getAllElements()).toHaveLength(3);
+		expect(editor.image.getAllComponents()).toHaveLength(3);
 	});
 });

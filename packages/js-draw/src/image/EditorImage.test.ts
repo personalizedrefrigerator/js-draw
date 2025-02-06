@@ -371,12 +371,12 @@ describe('EditorImage', () => {
 
 				expect(image.estimateNumElements()).toBe(1);
 
-				// getAllElements does not include backgrounds
+				// getAllComponents does not include backgrounds
 				const expectToBeOnlyElement = () => {
 					if (!isBackground) {
 						// Regardless of type, should be present in allElements
-						expect(image.getAllElements()).toHaveLength(1);
-						expect(image.getAllElements()[0]).toBe(testComponent);
+						expect(image.getAllComponents()).toHaveLength(1);
+						expect(image.getAllComponents()[0]).toBe(testComponent);
 					} else {
 						expect(image.getBackgroundComponents()).toHaveLength(1);
 						expect(image.getBackgroundComponents()[0]).toBe(testComponent);
@@ -421,7 +421,7 @@ describe('EditorImage', () => {
 				image.renderAll(renderer);
 				expect(renderMock).toHaveBeenCalledTimes(0);
 
-				expect(image.getAllElements()).toHaveLength(0);
+				expect(image.getAllComponents()).toHaveLength(0);
 				expect(image.getBackgroundComponents()).toHaveLength(0);
 
 				// Add the element back

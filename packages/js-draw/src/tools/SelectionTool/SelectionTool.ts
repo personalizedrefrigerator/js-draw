@@ -363,7 +363,7 @@ export default class SelectionTool extends BaseTool {
 			// many times.
 			return true;
 		} else if (shortcucts.matchesShortcut(selectAllKeyboardShortcut, event)) {
-			this.setSelection(this.editor.image.getAllElements());
+			this.setSelection(this.editor.image.getAllComponents());
 			return true;
 		} else if (event.ctrlKey) {
 			// Don't transform the selection with, for example, ctrl+i.

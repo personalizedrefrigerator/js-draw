@@ -20,12 +20,12 @@ describe('ToolController', () => {
 		const toolController = editor.toolController;
 
 		// Should initially have no elements
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		tryToDraw(editor);
 
 		// Drawing should add an element
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// Remove all pen tools
 		const penTools = toolController.getMatchingTools(PenTool);
@@ -52,7 +52,7 @@ describe('ToolController', () => {
 		tryToDraw(editor);
 
 		// Drawing should not add an element.
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 	});
 
 	it('should support inserting new tools', () => {

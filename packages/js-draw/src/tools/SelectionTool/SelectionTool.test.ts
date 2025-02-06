@@ -163,11 +163,11 @@ describe('SelectionTool', () => {
 		jest.advanceTimersByTime(100);
 
 		// Expect the selection to not be in the image while dragging
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		selection.onDragEnd();
 
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 	});
 
 	it('should drag objects horizontally', () => {
@@ -233,7 +233,7 @@ describe('SelectionTool', () => {
 
 		expect(selectionTool.getSelectedObjects()).toHaveLength(0);
 
-		const imageStrokes = editor.image.getAllElements();
+		const imageStrokes = editor.image.getAllComponents();
 		expect(imageStrokes).toHaveLength(1);
 
 		const transformedStroke = imageStrokes[0] as Stroke;
@@ -283,7 +283,7 @@ describe('SelectionTool', () => {
 		// The duplicate stroke should be added to the document, but the original should not.
 		expect(editor.image.findParent(testStroke)).toBeNull();
 
-		const allObjectsInImage = editor.image.getAllElements();
+		const allObjectsInImage = editor.image.getAllComponents();
 		expect(allObjectsInImage).toHaveLength(1);
 
 		const duplicateObject = allObjectsInImage[0];

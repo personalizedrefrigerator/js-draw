@@ -4,7 +4,7 @@ import { EditorImage, pathToRenderable, SerializableCommand, Stroke } from '../l
 import createEditor from '../testing/createEditor';
 
 const getAllStrokeIds = (editorImage: EditorImage) => {
-	const strokes = editorImage.getAllElements().filter((elem) => elem instanceof Stroke);
+	const strokes = editorImage.getAllComponents().filter((elem) => elem instanceof Stroke);
 	return strokes.map((stroke) => stroke.getId());
 };
 

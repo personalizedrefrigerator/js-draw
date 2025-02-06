@@ -61,7 +61,7 @@ describe('Editor.toSVG', () => {
 		);
 
 		const textNodesInImage = editor.image
-			.getAllElements()
+			.getAllComponents()
 			.filter((elem) => elem instanceof TextComponent);
 		expect(textNodesInImage).toHaveLength(1);
 
@@ -100,7 +100,7 @@ describe('Editor.toSVG', () => {
 		);
 
 		expect(
-			editor.image.getAllElements().filter((elem) => elem instanceof TextComponent),
+			editor.image.getAllComponents().filter((elem) => elem instanceof TextComponent),
 		).toHaveLength(1);
 
 		const asSVG = editor.toSVG();
@@ -282,7 +282,7 @@ describe('Editor.toSVG', () => {
 			// .expects that all paths have their original parent groups.
 			const expectGroupParentsToBeOriginal = () => {
 				expect(
-					editor.image.getAllElements().filter((elem) => elem instanceof StrokeComponent),
+					editor.image.getAllComponents().filter((elem) => elem instanceof StrokeComponent),
 				).toHaveLength(5);
 
 				const output = editor.toSVG();

@@ -24,7 +24,7 @@ const createTestEditor = (settigs?: Partial<EditorSettings>) => {
 
 const textFromImage = (image: EditorImage) => {
 	return image
-		.getAllElements()
+		.getAllComponents()
 		.filter((elem) => elem instanceof TextComponent)
 		.map((elem) => elem.getText());
 };
@@ -79,6 +79,8 @@ describe('PasteHandler', () => {
 		const allText = textFromImage(editor.image);
 		// Should have added all components as strokes instead of text.
 		expect(allText).toEqual([]);
-		expect(editor.image.getAllElements().filter((comp) => comp instanceof Stroke)).toHaveLength(1);
+		expect(editor.image.getAllComponents().filter((comp) => comp instanceof Stroke)).toHaveLength(
+			1,
+		);
 	});
 });

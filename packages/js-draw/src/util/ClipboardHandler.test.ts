@@ -57,7 +57,9 @@ const setClipboardApiSupported = (supported: boolean) => {
 };
 
 const getAllTextInImage = (editor: Editor) => {
-	const textObjects = editor.image.getAllElements().filter((elem) => elem instanceof TextComponent);
+	const textObjects = editor.image
+		.getAllComponents()
+		.filter((elem) => elem instanceof TextComponent);
 	return textObjects.map((o) => o.getText()).join('\n');
 };
 

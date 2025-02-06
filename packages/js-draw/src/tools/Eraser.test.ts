@@ -21,7 +21,7 @@ const sendEraserEvent = (editor: Editor, eventType: PointerEvtType, point: Point
 };
 
 const getAllStrokes = (editor: Editor) => {
-	return editor.image.getAllElements().filter((elem) => elem instanceof StrokeComponent);
+	return editor.image.getAllComponents().filter((elem) => elem instanceof StrokeComponent);
 };
 
 describe('Eraser', () => {
@@ -94,9 +94,9 @@ describe('Eraser', () => {
 		);
 
 		// Add to the image
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 		editor.dispatch(EditorImage.addComponent(unerasableObj));
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		const eraser = selectEraser(editor);
 		eraser.setThickness(100);
@@ -107,7 +107,7 @@ describe('Eraser', () => {
 		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(3, 0));
 
 		// Should not have been erased
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 	});
 
 	it.each([

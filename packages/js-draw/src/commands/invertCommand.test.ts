@@ -41,13 +41,13 @@ describe('invertCommand', () => {
 		const unserialized = SerializableCommand.deserialize(inverted.serialize(), editor);
 
 		testCommand.apply(editor);
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		// The unserialized command should unapply testCommand
 		unserialized.apply(editor);
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 		// ...then reapply it
 		unserialized.unapply(editor);
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 	});
 });

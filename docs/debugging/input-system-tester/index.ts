@@ -136,7 +136,7 @@ const makeEditor = (label: string) => {
 			editor.viewport.resetTransform();
 			await waitForNextAnimationFrame();
 
-			const allTrueStrokes = editor.image.getAllElements();
+			const allTrueStrokes = editor.image.getAllComponents();
 
 			// Smoothed stroke
 			penTool.setEnabled(true);
