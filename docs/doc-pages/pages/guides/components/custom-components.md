@@ -441,7 +441,8 @@ AbstractComponent.registerComponent(componentId, data => {
 const plugin: SVGLoaderPlugin = {
 	async visit(node, loader) {
 		if (node.classList.contains('comp--image-info-component')) {
-			// TODO: Set the transformation matrix correctly
+			// TODO: Set the transformation matrix correctly -- get this information
+			// from the `node`. This isn't too important for copy/paste support.
 			const infoComponent = new ImageInfoComponent(Mat33.identity);
 			loader.addComponent(infoComponent);
 			return true;
@@ -463,6 +464,182 @@ const initialTransform = Mat33.identity;
 editor.dispatch(editor.image.addComponent(new ImageInfoComponent(initialTransform)));
 ```
 
-## 5. Changing what it renders
+## 5. Make it possible to serialize/deserialize for collaborative editing
 
-**To-do**
+Let's start by setting up two editors that sync commands:
+
+```ts,runnable
+import { Editor, invertCommand, SerializableCommand, EditorEventType } from 'js-draw';
+
+const editor1 = new Editor(document.body);
+// Store the toolbar in a variable -- we'll use it later
+const toolbar = editor1.addToolbar();
+
+const editor2 = new Editor(document.body);
+
+const applySerializedCommand = (serializedCommand: any, editor: Editor) => {
+	const command = SerializableCommand.deserialize(serializedCommand, editor);
+	command.apply(editor);
+};
+
+const applyCommandsToOtherEditor = (sourceEditor: Editor, otherEditor: Editor) => {
+	sourceEditor.notifier.on(EditorEventType.CommandDone, (evt) => {
+		// Type assertion.
+		if (evt.kind !== EditorEventType.CommandDone) {
+			throw new Error('Incorrect event type');
+		}
+
+		if (evt.command instanceof SerializableCommand) {
+			const serializedCommand = evt.command.serialize();
+			applySerializedCommand(serializedCommand, otherEditor);
+		} else {
+			console.log('Nonserializable command');
+		}
+	});
+	sourceEditor.notifier.on(EditorEventType.CommandUndone, (evt) => {
+		// Type assertion.
+		if (evt.kind !== EditorEventType.CommandUndone) {
+			throw new Error('Incorrect event type');
+		}
+
+		if (evt.command instanceof SerializableCommand) {
+			const serializedCommand = invertCommand(evt.command).serialize();
+			applySerializedCommand(serializedCommand, otherEditor);
+		} else {
+			console.log('Nonserializable command');
+		}
+	});
+};
+
+applyCommandsToOtherEditor(editor1, editor2);
+applyCommandsToOtherEditor(editor2, editor1);
+```
+
+Next, we'll take our component from before, except implement `serializeToJSON` and the deserialize callback in `registerComponent`:
+
+```ts,runnable
+---use-previous---
+import { Editor } from 'js-draw';
+import { LineSegment2, Mat33, Rect2, Color4 } from '@js-draw/math';
+import { AbstractRenderer, AbstractComponent } from 'js-draw';
+
+const componentId = 'image-info';
+class ImageInfoComponent extends AbstractComponent {
+	protected contentBBox: Rect2;
+
+	private transform: Mat33;
+	private initialBBox: Rect2;
+
+	public constructor(transform: Mat33) {
+		super(componentId);
+
+		this.transform = transform;
+		this.initialBBox = new Rect2(0, 0, 50, 50);
+		this.updateBoundingBox();
+	}
+
+	private updateBoundingBox() {
+		this.contentBBox = this.initialBBox.transformedBoundingBox(
+			this.transform,
+		);
+	}
+
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2): void {
+		canvas.startObject(this.contentBBox);
+
+		canvas.pushTransform(this.transform);
+		canvas.fillRect(this.initialBBox, Color4.red);
+		canvas.popTransform();
+
+		const containerClassNames = ['comp--image-info-component'];
+		canvas.endObject(this.getLoadSaveData(), containerClassNames);
+	}
+
+	protected intersects(line: LineSegment2) {
+		// Our component is currently just a rectangle. As such (for some values of this.transform),
+		// we can use the Rect2.intersectsLineSegment method here:
+		const intersectionCount = this.contentBBox.intersectsLineSegment(line).length;
+		return intersectionCount > 0; // What happpens if you always return `true` here?
+	}
+
+	protected applyTransformation(transformUpdate: Mat33): void {
+		// `.rightMul`, "right matrix multiplication" combines two transformations.
+		// The transformation on the left is applied **after** the transformation on the right.
+		// As such, `transformUpdate.rightMul(this.transform)` means that `this.transform`
+		// will be applied **before** the `transformUpdate`.
+		this.transform = transformUpdate.rightMul(this.transform);
+		this.updateBoundingBox();
+	}
+
+	protected createClone(): AbstractComponent {
+		const clone = new ImageInfoComponent(this.transform);
+		return clone;
+	}
+
+	public description(): string {
+		return 'a red box';
+	}
+
+---visible---
+	// ...other component logic...
+
+	protected serializeToJSON() {
+		return JSON.stringify({
+			// NEW: Save the transform matrix:
+			transform: this.transform.toArray(),
+		});
+	}
+}
+
+AbstractComponent.registerComponent(componentId, data => {
+	const transformArray = JSON.parse(data).transform;
+
+	// NEW: Validation
+	if (!Array.isArray(transformArray)) {
+		throw new Error('data.transform must be an array');
+	}
+	for (const entry of transformArray) {
+		if (!isFinite(entry)) {
+			throw new Error(`Non-finite entry in transform: ${entry}`);
+		}
+	}
+
+	// NEW: Create and return the component from the data
+	const transform = new Mat33(...transformArray);
+	return new ImageInfoComponent(transform);
+});
+
+// Make a button that adds the component
+function makeAddIcon() {
+	const container = document.createElement('div');
+	container.textContent = '+';
+	return container;
+}
+
+toolbar.addActionButton({
+	icon: makeAddIcon(),
+	label: 'Add test component',
+}, () => {
+	const initialTransform = Mat33.identity;
+	const component = new ImageInfoComponent(initialTransform);
+
+	// The addAndCenterComponents method automatically selects,
+	// centers, and adds the provided components to the editor.
+	//
+	// We could also add the component using
+	// editor.dispatch(editor.image.addComponent(component));
+	editor1.addAndCenterComponents([
+		component
+	]);
+});
+```
+
+Above, clicking the "+" button should add the component to both editors.
+
+## More advanced rendering
+
+If you find that the {@link js-draw!AbstractRenderer | AbstractRenderer}'s built-in methods are insufficient, it's possible to directly access the `RenderingContext2D` or `SVGElement` used by the renderer. See {@link js-draw!CanvasRenderer.getCanvasRenderingContext | getCanvasRenderingContext} and {@link js-draw!SVGRenderer.drawSVGElem | drawSVGElem} for details.
+
+> [!NOTE]
+>
+> Where possible, try to use the `AbstractRenderer`-provided methods. Doing so can help keep your logic compatible with future renderer types.

@@ -269,6 +269,18 @@ export default class CanvasRenderer extends AbstractRenderer {
 		}
 	}
 
+	/**
+	 * Returns a reference to the underlying `CanvasRenderingContext2D`.
+	 * This can be used to render custom content not supported by {@link AbstractRenderer}.
+	 * However, such content won't support {@link SVGRenderer} or {@link TextOnlyRenderer}
+	 * by default.
+	 *
+	 * Use with caution.
+	 */
+	public getCanvasRenderingContext() {
+		return this.ctx;
+	}
+
 	// @internal
 	public drawPoints(...points: Point2[]) {
 		const pointRadius = 10;

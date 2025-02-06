@@ -432,7 +432,10 @@ export default class SVGRenderer extends AbstractRenderer {
 		});
 	}
 
-	// Renders a **copy** of the given element.
+	/**
+	 * Adds a **copy** of the given element directly to the container
+	 * SVG element, **without applying transforms**.
+	 */
 	public drawSVGElem(elem: SVGElement) {
 		if (this.sanitize) {
 			return;
