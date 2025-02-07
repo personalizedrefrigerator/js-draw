@@ -108,6 +108,7 @@ const addCodeMirrorEditor = (
 			codeMirrorTheme,
 			syntaxHighlighting(codeMirrorHighlightStyle),
 			indentUnit.of(indentation),
+			EditorView.lineWrapping,
 		],
 		parent,
 	});
