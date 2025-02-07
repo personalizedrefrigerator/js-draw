@@ -160,7 +160,9 @@ To make it possible for a user to move and resize our `ExampleComponent`, we'll 
 
 - A {@link @js-draw/math!Mat33 | Mat33} that stores the position/rotation of the component.
   - See the {@link @js-draw/math!Mat33 | Mat33} documentation for more information.
-- Logic to update `contentBBox` when the component is changed. As a performance optimization, `js-draw` avoids drawing components that are completely offscreen. `js-draw` determines whether a component is onscreen using `contentBBox`.
+- Logic to update `contentBBox` when the component is changed.
+  - `contentBBox` is the bounding box of the component. In other words, the component should be entirely within `contentBBox`.
+  - As a performance optimization, `js-draw` avoids drawing components that are completely offscreen. `js-draw` determines whether a component is onscreen using `contentBBox`. In incorrect bounding box can result in the component not being drawn.
 
 ```ts,runnable
 import { Editor } from 'js-draw';
@@ -257,6 +259,8 @@ const initialTransform = Mat33.identity;
 editor.dispatch(editor.image.addComponent(new ExampleComponent(initialTransform)));
 ```
 
+After clicking "run", it should be possible to select and move the custom component.
+
 > [!NOTE]
 >
 > Above, `intersects` is implemented using `this.contentBBox.intersectsLineSegment`. This is incorrect if the component has been rotated. In this case, the bounding box is **not** the same as the rectangle that's drawn onscreen:
@@ -279,7 +283,7 @@ editor.dispatch(editor.image.addComponent(new ExampleComponent(initialTransform)
 
 Currently, copy-pasting the `ExampleComponent` pastes a `StrokeComponent`. Let's fix that.
 
-`js-draw` copies components as SVG. As a result, to paste our components correctly, we need to add logic to load from SVG. This can be done by creating a {@link js-draw!SVGLoaderPlugin | SVGLoaderPlugin} and including it in the {@link js-draw!EditorSettings | EditorSettings} for a new editor.
+**Why does this happen?** `js-draw` copies components as SVG. As a result, to paste our components correctly, we need to add logic to load from SVG. This can be done by creating a {@link js-draw!SVGLoaderPlugin | SVGLoaderPlugin} and including it in the {@link js-draw!EditorSettings | EditorSettings} for a new editor.
 
 A `SVGLoaderPlugin` should contain a single `visit` method that will be called with each node in the image. A simple such plugin might look like this
 
@@ -464,6 +468,8 @@ const initialTransform = Mat33.identity;
 editor.dispatch(editor.image.addComponent(new ExampleComponent(initialTransform)));
 ```
 
+It should now be possible to copy/paste the custom component, without it becoming a `Stroke`.
+
 ## 5. Make it possible to serialize/deserialize for collaborative editing
 
 > [!NOTE]
@@ -480,6 +486,7 @@ const editor1 = new Editor(document.body);
 const toolbar = editor1.addToolbar();
 
 const editor2 = new Editor(document.body);
+editor2.addToolbar();
 
 const applySerializedCommand = (serializedCommand: any, editor: Editor) => {
 	const command = SerializableCommand.deserialize(serializedCommand, editor);
@@ -699,7 +706,7 @@ class ExampleComponent extends AbstractComponent {
 					'http://www.w3.org/2000/svg', 'text',
 				);
 
-				text.textContent = 'Test!';
+				text.textContent = 'Text in an SVG element!';
 				text.setAttribute('x', '50');
 				text.setAttribute('y', '25');
 				text.style.fill = 'red';
