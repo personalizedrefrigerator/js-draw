@@ -22,8 +22,11 @@ textarea.runnable-code {
 	--cm-string-color: var(--hl-3, brown);
 	--cm-paren-color: var(--hl-1, gray);
 	--cm-varname-color: var(--hl-2, black);
-	--cm-number-color: var(--hl-16, black);
 	--cm-tag-color: var(--hl-9, #500);
+	--cm-number-color: var(--hl-16, black);
+	--cm-integer-color: var(--hl-14, var(--cm-number-color));
+	--cm-typename-color: var(--hl-13, currentColor);
+	--cm-call-function-color: var(--hl-6, currentColor);
 
 	--cm-secondary-background-color: #ddd;
 	--cm-secondary-text-color: #300;

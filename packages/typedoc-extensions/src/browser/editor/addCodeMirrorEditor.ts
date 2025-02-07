@@ -64,8 +64,11 @@ const codeMirrorHighlightStyle = HighlightStyle.define([
 	{ tag: tags.string, color: 'var(--cm-string-color)' },
 	{ tag: tags.paren, color: 'var(--cm-paren-color)' },
 	{ tag: tags.variableName, color: 'var(--cm-varname-color)' },
+	{ tag: tags.typeName, color: 'var(--cm-typename-color)' },
+	{ tag: tags.className, color: 'var(--cm-typename-color)' },
+	{ tag: tags.function(tags.propertyName), color: 'var(--cm-call-function-color)' },
 	{ tag: tags.number, color: 'var(--cm-number-color)' },
-	{ tag: tags.integer, color: 'var(--cm-number-color)' },
+	{ tag: tags.integer, color: 'var(--cm-integer-color)' },
 	{ tag: tags.float, color: 'var(--cm-number-color)' },
 	{ tag: tags.tagName, color: 'var(--cm-tag-color)' },
 ]);
