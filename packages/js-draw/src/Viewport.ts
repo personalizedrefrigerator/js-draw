@@ -319,9 +319,11 @@ export class Viewport {
 		return transform;
 	}
 
-	// Returns a Command that transforms the view such that [rect] is visible, and perhaps
+	// Returns a Command that transforms the view such that `toMakeVisible` is visible, and perhaps
 	// centered in the viewport.
-	// Returns null if no transformation is necessary
+	//
+	// If the content is already roughly centered in the screen and at a reasonable zoom level,
+	// the resultant command does nothing.
 	//
 	// @see {@link computeZoomToTransform}
 	public zoomTo(
