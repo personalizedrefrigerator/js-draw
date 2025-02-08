@@ -93,7 +93,19 @@ export class Viewport {
 		return this.transform.transformVec2(canvasPoint);
 	}
 
-	/** @returns a command that transforms the canvas by `transform`. */
+	/**
+	 * @returns a command that transforms the canvas by `transform`.
+	 *
+	 * For example, `Viewport.transformBy(moveRight).apply(editor)` would move the canvas to the right
+	 * (and thus the viewport to the left):
+	 * ```ts,runnable
+	 * import { Editor, Viewport, Mat33, Vec2 } from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 * const moveRight = Mat33.translation(Vec2.unitX.times(500));
+	 * // Move the **canvas** right by 500 units:
+	 * Viewport.transformBy(moveRight).apply(editor);
+	 * ```
+	 */
 	public static transformBy(transform: Mat33): ViewportTransform {
 		return new Viewport.ViewportTransform(transform);
 	}
