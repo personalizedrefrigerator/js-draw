@@ -8,7 +8,7 @@ This guide demonstrates changing which part of an image is visible in an {@link 
 
 Related APIs:
 
-- {@link js-draw!Viewport.transformBy | Viewport.transformBy}: Creates a `Command` that moves/zooms/rotates the viewport.
+- {@link js-draw!Viewport.transformBy | Viewport.transformBy}: Creates a `Command` that moves/zooms/rotates the canvas.
 - {@link js-draw!Editor.dispatch | Editor.dispatch}: Applies a `Command`.
 - {@link @js-draw/math!Mat33 | Mat33}: Can be used to tell `Viewport.transformBy` **how** to move/scale/rotate.
   - For example, `Mat33.scaling2D(2)` zooms in by a factor of 2.
@@ -90,7 +90,7 @@ editor.dispatch(
 
 ### Update loop: First try
 
-Next, let's move the viewport in a loop:
+Next, let's change the position of the canvas in a loop:
 
 ```ts,runnable
 ---use-previous---
@@ -99,7 +99,8 @@ import { Viewport } from 'js-draw';
 import { Mat33, Vec2 } from '@js-draw/math';
 
 // When moveLeftUpdate is applied to the viewport, it moves the
-// viewport to the left by 1 unit.
+// canvas to the left by 1 unit. This is the same as moving the viewport
+// to the right by one unit.
 const moveLeftUpdate = Mat33.translation(Vec2.of(-1, 0));
 
 function update() {
@@ -111,7 +112,7 @@ function update() {
 update();
 ```
 
-Above, the `Vec2.of(-1, 0)` gives the direction to move the viewport.
+Above, the `Vec2.of(-1, 0)` gives the direction to move the canvas.
 
 **Things to try**:
 
