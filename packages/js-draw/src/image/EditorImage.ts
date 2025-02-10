@@ -16,11 +16,31 @@ export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 };
 
 export enum EditorImageEventType {
+	// @internal
 	ExportViewportChanged,
+	// @internal
 	AutoresizeModeChanged,
+
+	// Type for events fired whenever components are added to the image
+	ComponentAdded,
+	// Type for events fired whenever components are removed from the image
+	ComponentRemoved,
 }
 
-export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image: EditorImage }>;
+interface StateChangeEvent {
+	kind: EditorImageEventType.ExportViewportChanged | EditorImageEventType.AutoresizeModeChanged;
+	image: EditorImage;
+}
+
+interface ComponentAddRemoveEvent {
+	kind: EditorImageEventType.ComponentAdded | EditorImageEventType.ComponentRemoved;
+	image: EditorImage;
+	componentId: string;
+}
+
+export type EditorImageEvent = StateChangeEvent | ComponentAddRemoveEvent;
+
+export type EditorImageNotifier = EventDispatcher<EditorImageEventType, EditorImageEvent>;
 
 /**
  * A callback used to
@@ -55,7 +75,7 @@ let debugMode = false;
 export default class EditorImage {
 	private root: ImageNode;
 	private background: ImageNode;
-	private componentsById: Record<string, AbstractComponent>;
+	private componentsById: Map<string, AbstractComponent>;
 	private componentCount: number = 0;
 
 	/** Viewport for the exported/imported image. */
@@ -64,14 +84,14 @@ export default class EditorImage {
 	// Whether the viewport should be autoresized on item add/remove.
 	private shouldAutoresizeExportViewport: boolean;
 
-	// @internal
+	// Event handler
 	public readonly notifier: EditorImageNotifier;
 
 	// @internal
 	public constructor() {
 		this.root = new RootImageNode();
 		this.background = new RootImageNode();
-		this.componentsById = Object.create(null);
+		this.componentsById = new Map();
 
 		this.notifier = new EventDispatcher();
 		this.importExportViewport = new Viewport(() => {
@@ -232,7 +252,14 @@ export default class EditorImage {
 	/** Called whenever (just after) an element is completely removed. @internal */
 	public onDestroyElement(elem: AbstractComponent) {
 		this.componentCount--;
-		delete this.componentsById[elem.getId()];
+		const componentId = elem.getId();
+		this.componentsById.delete(componentId);
+
+		this.notifier.dispatch(EditorImageEventType.ComponentRemoved, {
+			kind: EditorImageEventType.ComponentRemoved,
+			image: this,
+			componentId: componentId,
+		});
 
 		this.autoresizeExportViewport();
 	}
@@ -240,7 +267,13 @@ export default class EditorImage {
 	/** Called just after an element is added. @internal */
 	private onElementAdded(elem: AbstractComponent) {
 		this.componentCount++;
-		this.componentsById[elem.getId()] = elem;
+		const elementId = elem.getId();
+		this.componentsById.set(elem.getId(), elem);
+		this.notifier.dispatch(EditorImageEventType.ComponentAdded, {
+			kind: EditorImageEventType.ComponentAdded,
+			image: this,
+			componentId: elementId,
+		});
 
 		this.autoresizeExportViewport();
 	}
@@ -251,7 +284,7 @@ export default class EditorImage {
 	 * @see {@link AbstractComponent.getId}
 	 */
 	public lookupElement(id: string): AbstractComponent | null {
-		return this.componentsById[id] ?? null;
+		return this.componentsById.get(id) ?? null;
 	}
 
 	private addComponentDirectly(elem: AbstractComponent): ImageNode {
@@ -450,6 +483,7 @@ export default class EditorImage {
 			this.shouldAutoresizeExportViewport = shouldAutoresize;
 
 			this.notifier.dispatch(EditorImageEventType.AutoresizeModeChanged, {
+				kind: EditorImageEventType.AutoresizeModeChanged,
 				image: this,
 			});
 		}
@@ -503,6 +537,7 @@ export default class EditorImage {
 		// called.
 		if (!this.settingExportRect) {
 			this.notifier.dispatch(EditorImageEventType.ExportViewportChanged, {
+				kind: EditorImageEventType.ExportViewportChanged,
 				image: this,
 			});
 		}

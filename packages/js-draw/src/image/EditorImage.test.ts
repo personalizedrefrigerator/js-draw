@@ -1,4 +1,4 @@
-import EditorImage from './EditorImage';
+import EditorImage, { EditorImageEventType } from './EditorImage';
 import Stroke from '../components/Stroke';
 import {
 	Vec2,
@@ -280,7 +280,27 @@ describe('EditorImage', () => {
 		expect(editor.image.getImportExportRect()).objEq(originalScreenRect);
 	});
 
-	describe('should correctly adding/remove a single component', () => {
+	it('should dispatch an event when a component is removed/added', () => {
+		const editor = createEditor();
+		const addListener = jest.fn();
+		const removeListener = jest.fn();
+		editor.image.notifier.on(EditorImageEventType.ComponentAdded, addListener);
+		editor.image.notifier.on(EditorImageEventType.ComponentRemoved, removeListener);
+
+		const stroke = Stroke.fromFilled('m0,0l10,100', Color4.red);
+		editor.dispatch(editor.image.addComponent(stroke));
+		expect(addListener).toHaveBeenCalledTimes(1);
+		expect(removeListener).toHaveBeenCalledTimes(0);
+
+		editor.dispatch(new Erase([stroke]));
+		expect(addListener).toHaveBeenCalledTimes(1);
+		expect(removeListener).toHaveBeenCalledTimes(1);
+
+		editor.history.undo();
+		expect(addListener).toHaveBeenCalledTimes(2);
+	});
+
+	describe('should correctly add/remove a single component', () => {
 		const runTest = async (positioning: ComponentSizingMode, isBackground: boolean) => {
 			const renderMock = jest.fn();
 			const addToImageMock = jest.fn();
