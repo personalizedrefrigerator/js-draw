@@ -62,6 +62,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	about: string;
 	inputStabilization: string;
 	strokeAutocorrect: string;
+	pressureSensitivity: string;
 
 	errorImageHasZeroSize: string;
 	describeTheImage: string;
@@ -76,6 +77,7 @@ export interface ToolbarLocalization extends ToolbarUtilsLocalization {
 	penDropdown__penTypeHelpText: string;
 	penDropdown__autocorrectHelpText: string;
 	penDropdown__stabilizationHelpText: string;
+	penDropdown__pressureSensitivityHelpText: string;
 	handDropdown__baseHelpText: string;
 	handDropdown__zoomDisplayHelpText: string;
 	handDropdown__zoomInHelpText: string;
@@ -162,6 +164,7 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 	about: 'About',
 	inputStabilization: 'Stabilization',
 	strokeAutocorrect: 'Autocorrect',
+	pressureSensitivity: 'Pressure',
 
 	touchPanning: 'Scroll with touch',
 
@@ -193,6 +196,8 @@ export const defaultToolbarLocalization: ToolbarLocalization = {
 		'Converts approximate freehand lines and rectangles to perfect ones.\n\nThe pen must be held stationary at the end of a stroke to trigger a correction.',
 	penDropdown__stabilizationHelpText:
 		'Draws smoother strokes.\n\nThis also adds a short delay between the mouse/stylus and the stroke.',
+	penDropdown__pressureSensitivityHelpText:
+		'Changes the thickness of strokes according to how hard you press, when using a compatible device like a stylus.',
 	handDropdown__baseHelpText:
 		'This tool is responsible for scrolling, rotating, and zooming the editor.',
 	handDropdown__zoomInHelpText: 'Zooms in.',
