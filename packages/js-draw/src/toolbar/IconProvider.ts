@@ -289,17 +289,17 @@ export default class IconProvider {
 			V 17.2
 			L 16.25,5.46
 			Z
-	
+
 			m 33.75,0
 			L 50,17
 			V 5.5
 			Z
-	
+
 			M 5,40.7
 			v 11.7
 			h 11.25
 			z
-	
+
 			M 26,19
 			C 19.8,19.4 17.65,30.4 21.9,34.8
 			L 50,70
@@ -329,13 +329,13 @@ export default class IconProvider {
 				17.5 5
 				5 5
 			z
-	
+
 			M 42.5 5
 			L 55 17.5
 				55 5
 				42.5 5
 			z
-	
+
 			M 70 10
 			L 70 21
 				61 15
@@ -356,7 +356,7 @@ export default class IconProvider {
 				80 10
 				70 10
 			z
-	
+
 			M 27.5 26.25
 			L 27.5 91.25
 			L 43.75 83.125
@@ -366,7 +366,7 @@ export default class IconProvider {
 			L 76.25 66.875
 			L 27.5 26.25
 			z
-	
+
 			M 5 42.5
 			L 5 55
 			L 17.5 55
@@ -405,41 +405,41 @@ export default class IconProvider {
 
 	public makeRotationLockIcon(): IconElemType {
 		const icon = this.makeIconFromPath(`
-			M 40.1 25.1 
-			C 32.5 25 27.9 34.1 27.9 34.1 
-			L 25.7 30 
-			L 28 44.7 
-			L 36.6 40.3 
-			L 32.3 38.3 
-			C 33.6 28 38.1 25.2 45.1 31.8 
-			L 49.4 29.6 
-			C 45.9 26.3 42.8 25.1 40.1 25.1 
+			M 40.1 25.1
+			C 32.5 25 27.9 34.1 27.9 34.1
+			L 25.7 30
+			L 28 44.7
+			L 36.6 40.3
+			L 32.3 38.3
+			C 33.6 28 38.1 25.2 45.1 31.8
+			L 49.4 29.6
+			C 45.9 26.3 42.8 25.1 40.1 25.1
 			z
 
-			M 51.7 34.2 
-			L 43.5 39.1 
-			L 48 40.8 
-			C 47.4 51.1 43.1 54.3 35.7 48.2 
-			L 31.6 50.7 
-			C 45.5 62.1 52.6 44.6 52.6 44.6 
-			L 55.1 48.6 
-			L 51.7 34.2 
+			M 51.7 34.2
+			L 43.5 39.1
+			L 48 40.8
+			C 47.4 51.1 43.1 54.3 35.7 48.2
+			L 31.6 50.7
+			C 45.5 62.1 52.6 44.6 52.6 44.6
+			L 55.1 48.6
+			L 51.7 34.2
 			z
 
-			M 56.9 49.9 
-			C 49.8 49.9 49.2 57.3 49.3 60.9 
-			L 47.6 60.9 
-			L 47.6 73.7 
-			L 66.1 73.7 
-			L 66.1 60.9 
-			L 64.4 60.9 
-			C 64.5 57.3 63.9 49.9 56.9 49.9 
+			M 56.9 49.9
+			C 49.8 49.9 49.2 57.3 49.3 60.9
+			L 47.6 60.9
+			L 47.6 73.7
+			L 66.1 73.7
+			L 66.1 60.9
+			L 64.4 60.9
+			C 64.5 57.3 63.9 49.9 56.9 49.9
 			z
 
-			M 56.9 53.5 
-			C 60.8 53.5 61 58.2 60.8 60.9 
-			L 52.9 60.9 
-			C 52.7 58.2 52.9 53.5 56.9 53.5 
+			M 56.9 53.5
+			C 60.8 53.5 61 58.2 60.8 60.9
+			L 52.9 60.9
+			C 52.7 58.2 52.9 53.5 56.9 53.5
 			z
 		`);
 
@@ -452,7 +452,7 @@ export default class IconProvider {
 		return this.makeIconFromPath(`
 			M 5 10 L 5 90 L 95 90 L 95 10 L 5 10 z
 			M 10 15 L 90 15 L 90 50 L 70 75 L 40 50 L 10 75 L 10 15 z
-			M 22.5 25 A 7.5 7.5 0 0 0 15 32.5 A 7.5 7.5 0 0 0 22.5 40 A 7.5 7.5 0 0 0 30 32.5 A 7.5 7.5 0 0 0 22.5 25 z 
+			M 22.5 25 A 7.5 7.5 0 0 0 15 32.5 A 7.5 7.5 0 0 0 22.5 40 A 7.5 7.5 0 0 0 30 32.5 A 7.5 7.5 0 0 0 22.5 25 z
 		`);
 	}
 
@@ -461,7 +461,7 @@ export default class IconProvider {
 			M 48,10 32,34 43,33 42,68
 			H 54
 			L 53,33 64,34 Z
-	
+
 			M 8,66 V 86 H 88 V 66 H 78 V 76 H 18 V 66 Z
 		`);
 	}
@@ -765,6 +765,19 @@ export default class IconProvider {
 		);
 	}
 
+	public makePressureSensitivityIcon(): IconElemType {
+		const fill = 'var(--icon-color)';
+		const strokeColor = '';
+		return this.makeIconFromPath(
+			`
+    		M12.5 83.33 v-4.17 h75 v4.17 H12.5 Z m0 -12.5 v-8.33 h75 v8.33 H12.5 Z m0 -16.67 v-12.5 h75 v12.5 H12.5 Z m0 -20.83 v-16.67 h75 v16.67 H12.5 Z
+    	`,
+			fill,
+			strokeColor,
+			'7px',
+		);
+	}
+
 	/** Unused. @deprecated */
 	public makeFormatSelectionIcon(): IconElemType {
 		return this.makeIconFromPath(`
@@ -773,7 +786,7 @@ export default class IconProvider {
 			M 90 10 C 90 10 86.5 13.8 86 14 C 86 14 76.2 24.8 76 25 L 60 25 L 60 65 C 75 70 85 70 90 65 L 90 25 L 80 25 L 76.7 25 L 90 10 z
 			M 60 25 L 55 25 L 50 30 L 60 25 z
 			M 10 55 L 10 90 L 41 90 L 41 86 L 45 86 L 45 55 L 10 55 z
-			M 42 87 L 42 93 L 48 93 L 48 87 L 42 87 z 
+			M 42 87 L 42 93 L 48 93 L 48 87 L 42 87 z
 		`);
 	}
 
@@ -798,14 +811,14 @@ export default class IconProvider {
 	public makeDuplicateSelectionIcon(): IconElemType {
 		return this.makeIconFromPath(`
 			M 45,10 45,55 90,55 90,10 45,10 z
-			M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z 
+			M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z
 		`);
 	}
 
 	public makeCopyIcon(): IconElemType {
 		return this.makeIconFromPath(`
 			M 45,10 45,55 90,55 90,10 45,10 z
-			M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z 
+			M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z
 		`);
 	}
 
@@ -816,7 +829,7 @@ export default class IconProvider {
 			M 25 35 L 90 35 L 90 40 L 25 40 L 25 35 z
 			M 25 45 L 90 45 L 90 50 L 25 50 L 25 45 z
 			M 25 55 L 85 55 L 85 60 L 25 60 L 25 55 z
-			M 25 65 L 90 65 L 90 70 L 25 70 L 25 65 z 
+			M 25 65 L 90 65 L 90 70 L 25 70 L 25 65 z
 		`);
 		icon.setAttribute('viewBox', '0 0 120 120');
 		return icon;
@@ -898,14 +911,14 @@ export default class IconProvider {
 			A 12.5 12.5 0 0 0 27.5 52.5
 			A 12.5 12.5 0 0 0 15 40
 			z
-	
+
 			M 50 40
 			A 12.5 12.5 0 0 0 37.5 52.5
 			A 12.5 12.5 0 0 0 50 65
 			A 12.5 12.5 0 0 0 62.5 52.5
 			A 12.5 12.5 0 0 0 50 40
 			z
-			
+
 			M 85 40
 			A 12.5 12.5 0 0 0 72.5 52.5
 			A 12.5 12.5 0 0 0 85 65

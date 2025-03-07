@@ -20,12 +20,13 @@
 		}
 	}
 
-	& > :nth-child(1) {
-		direction: ltr;
+	& > :nth-child(2) {
+		margin-left: 0;
+		margin-right: 0;
 	}
 
 	& > :last-child {
-		// Reverse the last (show icon on the right)
-		direction: rtl;
+		margin-left: 5px;
+		margin-right: 0;
 	}
 }
