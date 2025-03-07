@@ -766,13 +766,12 @@ export default class IconProvider {
 	}
 
 	public makePressureSensitivityIcon(): IconElemType {
-		const fill = 'none';
-		const strokeColor = 'var(--icon-color)';
+		const fill = 'var(--icon-color)';
+		const strokeColor = '';
 		return this.makeIconFromPath(
 			`
-    	m 31,83.2 c -50,0 30,-65 -20,-65
-			M 75,17.3 40,59.7 38.2,77.6 55.5,72.4 90.5,30 Z
-    `,
+    		M12.5 83.33 v-4.17 h75 v4.17 H12.5 Z m0 -12.5 v-8.33 h75 v8.33 H12.5 Z m0 -16.67 v-12.5 h75 v12.5 H12.5 Z m0 -20.83 v-16.67 h75 v16.67 H12.5 Z
+    	`,
 			fill,
 			strokeColor,
 			'7px',

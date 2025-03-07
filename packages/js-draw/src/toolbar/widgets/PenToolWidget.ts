@@ -326,7 +326,9 @@ export default class PenToolWidget extends BaseToolWidget {
 		// Help text
 		autocorrectOption.addHelpText(this.localizationTable.penDropdown__autocorrectHelpText);
 		stabilizationOption.addHelpText(this.localizationTable.penDropdown__stabilizationHelpText);
-		pressureSensitivityOption.addHelpText(this.localizationTable.penDropdown__pressureSensitivityHelpText);
+		pressureSensitivityOption.addHelpText(
+			this.localizationTable.penDropdown__pressureSensitivityHelpText,
+		);
 
 		return {
 			update: () => {
