@@ -21,6 +21,6 @@ jobs:
       - name: Lint
         run: yarn run lint-ci
       - name: Check formatting
-        run: yarn run format-ci
+        run: bash scripts/check-formatting-ci.sh
       - name: Build example app
         run: cd docs/demo && yarn run build
