@@ -9,6 +9,7 @@ interface ElementToPropertiesMap {
 		d: string;
 		fill: string;
 		stroke: string;
+		'stroke-width': string;
 		transform: string;
 	};
 	rect: {

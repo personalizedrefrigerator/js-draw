@@ -765,6 +765,33 @@ export default class IconProvider {
 		);
 	}
 
+	public makePressureSensitivityIcon(): IconElemType {
+		const icon = document.createElementNS(svgNamespace, 'svg');
+		icon.setAttribute('viewBox', '4 -10 100 100');
+		icon.replaceChildren(
+			...createSvgPaths(
+				{
+					d: `
+					M 39.7,77.7
+					C 39.7,77.7 3.4,78.1 4.2,60 4.7,45.2 33.2,30.5 40,25 55.9,12.1 7.4,4.8 7.4,4.8
+					c 0,0 40.2,5.5 40.2,15.4
+					C 47.6,29.1 21.2,35.1 23.9,60 25,70 39.7,77.7 39.7,77.7
+					Z`,
+					fill: 'var(--icon-color)',
+					stroke: 'var(--icon-color)',
+					'stroke-width': '2px',
+				},
+				{
+					d: 'M 86.4,15.6 101.4,28.8 65,70 47.5,74.6 50,56.7Z',
+					fill: 'transparent',
+					stroke: 'var(--icon-color)',
+					'stroke-width': '6px',
+				},
+			),
+		);
+		return icon;
+	}
+
 	/** Unused. @deprecated */
 	public makeFormatSelectionIcon(): IconElemType {
 		return this.makeIconFromPath(`
