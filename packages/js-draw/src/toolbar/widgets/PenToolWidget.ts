@@ -315,14 +315,26 @@ export default class PenToolWidget extends BaseToolWidget {
 			this.tool.setStrokeAutocorrectEnabled(enabled);
 		});
 
+		const pressureSensitivityOption = addToggleButton(
+			this.localizationTable.pressureSensitivity,
+			this.editor.icons.makePressureSensitivityIcon(),
+		);
+		pressureSensitivityOption.setOnInputListener((enabled) => {
+			this.tool.setPressureSensitivityEnabled(enabled);
+		});
+
 		// Help text
 		autocorrectOption.addHelpText(this.localizationTable.penDropdown__autocorrectHelpText);
 		stabilizationOption.addHelpText(this.localizationTable.penDropdown__stabilizationHelpText);
+		pressureSensitivityOption.addHelpText(
+			this.localizationTable.penDropdown__pressureSensitivityHelpText,
+		);
 
 		return {
 			update: () => {
 				stabilizationOption.setChecked(!!this.tool.getInputMapper());
 				autocorrectOption.setChecked(this.tool.getStrokeAutocorrectionEnabled());
+				pressureSensitivityOption.setChecked(this.tool.getPressureSensitivityEnabled());
 			},
 
 			addTo: (parent: HTMLElement) => {
@@ -441,6 +453,7 @@ export default class PenToolWidget extends BaseToolWidget {
 			strokeFactoryId: this.getCurrentPenType()?.id,
 			inputStabilization: !!this.tool.getInputMapper(),
 			strokeAutocorrect: this.tool.getStrokeAutocorrectionEnabled(),
+			pressureSensitivity: this.tool.getPressureSensitivityEnabled(),
 		};
 	}
 
@@ -488,6 +501,10 @@ export default class PenToolWidget extends BaseToolWidget {
 
 		if (state.strokeAutocorrect !== undefined) {
 			this.tool.setStrokeAutocorrectEnabled(!!state.strokeAutocorrect);
+		}
+
+		if (state.pressureSensitivity !== undefined) {
+			this.tool.setPressureSensitivityEnabled(!!state.pressureSensitivity);
 		}
 	}
 }
