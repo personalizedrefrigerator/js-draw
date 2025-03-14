@@ -1,3 +1,10 @@
+# 1.29.0
+
+- Features:
+  - New "Pressure" toggle for enabling/disabling pressure sensitivity (https://github.com/personalizedrefrigerator/js-draw/pull/109).
+- API changes:
+  - New event listeners for added/removed components (added in [commit be429feb](https://github.com/personalizedrefrigerator/js-draw/commit/be429feb16d5cbdb20ced18cfb65a2297bc3400e).
+
 # 1.28.0
 
 - API changes:
