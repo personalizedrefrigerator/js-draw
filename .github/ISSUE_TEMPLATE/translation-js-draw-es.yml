@@ -81,6 +81,15 @@ body:
     validations:
       required: false
   - type: textarea
+    id: translation-helpControlsAccessibilityLabel
+    attributes:
+      label: 'helpControlsAccessibilityLabel'
+      description: 'Translate `Controls: Activate a control to show help.`.'
+      placeholder: 'Controls: Activate a control to show help.'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
     id: translation-pen
     attributes:
       label: 'pen'
@@ -539,6 +548,15 @@ body:
     validations:
       required: false
   - type: textarea
+    id: translation-pressureSensitivity
+    attributes:
+      label: 'pressureSensitivity'
+      description: 'Translate `Pressure`.'
+      placeholder: 'Pressure'
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
     id: translation-touchPanning
     attributes:
       label: 'touchPanning'
@@ -751,6 +769,15 @@ body:
         Draws smoother strokes.
 
         This also adds a short delay between the mouse/stylus and the stroke.
+      render: 'shell'
+    validations:
+      required: false
+  - type: textarea
+    id: translation-penDropdown__pressureSensitivityHelpText
+    attributes:
+      label: 'penDropdown__pressureSensitivityHelpText'
+      description: 'Translate `Changes the thickness of strokes according to how hard you press, when using a compatible device like a stylus.`.'
+      placeholder: 'Changes the thickness of strokes according to how hard you press, when using a compatible device like a stylus.'
       render: 'shell'
     validations:
       required: false
@@ -1463,9 +1490,9 @@ body:
     id: translation-transformedElements
     attributes:
       label: 'transformedElements'
-      description: "Translate ``(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}` ``."
-      placeholder: "(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`"
-      value: "(elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`"
+      description: "Translate ``(elemCount, action) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'} (${action})` ``."
+      placeholder: "(elemCount, action) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'} (${action})`"
+      value: "(elemCount, action) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'} (${action})`"
       render: 'shell'
     validations:
       required: false
@@ -1498,9 +1525,9 @@ body:
     validations:
       required: false
   - type: textarea
-    id: translation-addElementAction
+    id: translation-addComponentAction
     attributes:
-      label: 'addElementAction'
+      label: 'addComponentAction'
       description: 'Translate ``(componentDescription) => `Added ${componentDescription}` ``.'
       placeholder: '(componentDescription) => `Added ${componentDescription}`'
       value: '(componentDescription) => `Added ${componentDescription}`'
