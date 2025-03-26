@@ -234,16 +234,18 @@ export default class InputStabilizer extends InputMapper {
 	public override onEvent(event: InputEvt): boolean {
 		if (isPointerEvt(event) || event.kind === InputEvtType.GestureCancelEvt) {
 			if (event.kind === InputEvtType.PointerDownEvt) {
-				if (this.stabilizer === null) {
+				if (event.allPointers.length > 1) {
+					// Do not attempt to stabilize multiple pointers.
+					this.stabilizer?.cancel();
+					this.stabilizer = null;
+				} else {
+					// Create a new stabilizer for the new stroke.
+					this.stabilizer?.cancel();
 					this.stabilizer = new StylusInputStabilizer(
 						event.current.screenPos,
 						(screenPoint, timeStamp) => this.emitPointerMove(screenPoint, timeStamp),
 						this.options,
 					);
-				} else if (event.allPointers.length > 1) {
-					// Do not attempt to stabilize multiple pointers.
-					this.stabilizer.cancel();
-					this.stabilizer = null;
 				}
 			}
 
