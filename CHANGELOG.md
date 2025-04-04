@@ -1,3 +1,8 @@
+# 1.29.1
+
+- Bug fixes:
+  - Fix input stabilizer jumps when using an eraser button to switch to/from the eraser tool ([issue](https://github.com/personalizedrefrigerator/joplin-plugin-freehand-drawing/issues/19)).
+
 # 1.29.0
 
 - Features:
