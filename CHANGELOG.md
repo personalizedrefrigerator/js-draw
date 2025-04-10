@@ -1,3 +1,8 @@
+# 1.29.2
+
+- Bug fixes:
+  - Fix backwards compatibility issue with `AbstractComponent.deserialize` (see [commit](https://github.com/personalizedrefrigerator/js-draw/commit/8eb7a6f6e29f7cefd5b27f1644c0d97f222d7950)).
+
 # 1.29.1
 
 - Bug fixes:

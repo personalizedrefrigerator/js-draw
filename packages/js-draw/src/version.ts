@@ -5,5 +5,5 @@
  */
 export default {
 	// Note: Auto-updated by prebuild.js:
-	number: '1.29.1',
+	number: '1.29.2',
 };
