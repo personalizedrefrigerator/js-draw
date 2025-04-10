@@ -507,10 +507,13 @@ export default abstract class AbstractComponent {
 			throw new Error(`Element with data ${json} cannot be deserialized.`);
 		}
 
-		assertIsString(json.id);
-
 		const instance = this.deserializationCallbacks[json.name]!(json.data);
-		instance.id = json.id;
+
+		// If json.id is not provided, a default, auto-generated ID will be used.
+		if (json.id) {
+			assertIsString(json.id);
+			instance.id = json.id;
+		}
 
 		if (isFinite(json.zIndex)) {
 			instance.zIndex = json.zIndex;
