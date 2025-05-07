@@ -2,11 +2,13 @@ import { defaultEditorLocalization, EditorLocalization } from '../localization';
 import de from './de';
 import en from './en';
 import es from './es';
+import sk from './sk';
 
 export const allLocales: Record<string, EditorLocalization> = {
 	de,
 	en,
 	es,
+	sk,
 };
 
 // [locale]: A string in the format languageCode_Region or just languageCode. For example, en_US.
