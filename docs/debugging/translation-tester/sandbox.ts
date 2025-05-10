@@ -46,6 +46,16 @@ const generateTranslationScript = (input: string) => {
 	const lang = data.get('Language');
 	data.delete('Language');
 
+	// Remove entries matching the defaults
+	for (const [key, value] of Object.entries(defaultEditorLocalization)) {
+		if (!data.has(key)) continue;
+		const stringValue = `${value}`;
+		const stringValueDifferentQuotes = stringValue.replace(/"/g, "'");
+		if (data.get(key) === stringValue || data.get(key) === stringValueDifferentQuotes) {
+			data.delete(key);
+		}
+	}
+
 	const translationLines: string[] = [];
 	for (let [key, value] of data) {
 		key = key.replace(/[^0-9a-zA-Z_]/g, '_');
