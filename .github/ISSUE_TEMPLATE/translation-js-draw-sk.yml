@@ -335,6 +335,7 @@ body:
       label: 'duplicateSelection'
       description: 'Translate `Duplicate selection`.'
       placeholder: 'Duplicate selection'
+      value: 'Duplikovať výber'
       render: 'shell'
     validations:
       required: false
@@ -444,6 +445,7 @@ body:
       label: 'selectionTool__lassoSelect'
       description: 'Translate `Freeform selection`.'
       placeholder: 'Freeform selection'
+      value: 'Výber voľného tvaru'
       render: 'shell'
     validations:
       required: false
@@ -453,6 +455,7 @@ body:
       label: 'selectionTool__lassoSelect__help'
       description: 'Translate `When enabled, dragging creates a freeform (lasso) selection.`.'
       placeholder: 'When enabled, dragging creates a freeform (lasso) selection.'
+      value: 'Ak je táto funkcia zapnutá, ťahanie vytvorí voľný tvar (laso) výberu.'
       render: 'shell'
     validations:
       required: false
@@ -462,6 +465,7 @@ body:
       label: 'selectionToolKeyboardShortcuts'
       description: 'Translate `Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.`.'
       placeholder: 'Selection tool: Use arrow keys to move selected items, lowercase/uppercase ‘i’ and ‘o’ to resize.'
+      value: 'Nástroj na výber: Pomocou klávesov so šípkami môžete presunúť vybrané položky, malými/veľkými písmenami „i“ a „o“ môžete zmeniť veľkosť.'
       render: 'shell'
     validations:
       required: false
@@ -671,6 +675,7 @@ body:
       label: 'lockRotation'
       description: 'Translate `Lock rotation`.'
       placeholder: 'Lock rotation'
+      value: 'Zamknúť otáčanie'
       render: 'shell'
     validations:
       required: false
@@ -690,6 +695,7 @@ body:
       label: 'errorImageHasZeroSize'
       description: 'Translate `Error: Image has zero size`.'
       placeholder: 'Error: Image has zero size'
+      value: 'Chyba: Obrázok má nulovú veľkosť'
       render: 'shell'
     validations:
       required: false
@@ -699,6 +705,7 @@ body:
       label: 'describeTheImage'
       description: 'Translate `Image description`.'
       placeholder: 'Image description'
+      value: 'Popis obrázku'
       render: 'shell'
     validations:
       required: false
@@ -718,7 +725,7 @@ body:
       label: 'fileInput__andNMoreFiles'
       description: 'Translate ``(n) => `(...${n} more)` ``.'
       placeholder: '(n) => `(...${n} more)`'
-      value: '(n) => `(...${n} more)`'
+      value: '(n) => `(...${n} ďalších)`'
       render: 'shell'
     validations:
       required: false
@@ -728,6 +735,7 @@ body:
       label: 'penDropdown__baseHelpText'
       description: 'Translate `This tool draws shapes or freehand lines.`.'
       placeholder: 'This tool draws shapes or freehand lines.'
+      value: 'Tento nástroj kreslí tvary alebo voľné čiary.'
       render: 'shell'
     validations:
       required: false
@@ -737,6 +745,7 @@ body:
       label: 'penDropdown__colorHelpText'
       description: "Translate `Changes the pen's color`."
       placeholder: "Changes the pen's color"
+      value: 'Zmení farbu pera'
       render: 'shell'
     validations:
       required: false
@@ -746,6 +755,7 @@ body:
       label: 'penDropdown__thicknessHelpText'
       description: 'Translate `Changes the thickness of strokes drawn by the pen.`.'
       placeholder: 'Changes the thickness of strokes drawn by the pen.'
+      value: 'Mení hrúbku ťahov nakreslených perom.'
       render: 'shell'
     validations:
       required: false
@@ -761,6 +771,10 @@ body:
         Changes the pen style.
 
         Either a “pen” style or “shape” can be chosen. Choosing a “pen” style draws freehand lines. Choosing a “shape” draws shapes.
+      value: |
+        Zmení štýl pera.
+
+        Môžete si vybrať buď štýl „pero“, alebo „tvar“. Výberom štýlu „pero“ sa kreslia voľné čiary. Výberom štýlu „tvar“ sa kreslia tvary.
       render: 'shell'
     validations:
       required: false
@@ -776,6 +790,10 @@ body:
         Converts approximate freehand lines and rectangles to perfect ones.
 
         The pen must be held stationary at the end of a stroke to trigger a correction.
+      value: |
+        Prevedie približné voľné čiary a obdĺžniky na dokonalé.
+
+        Pero musí byť držané nehybne na konci ťahu, aby sa spustila oprava.
       render: 'shell'
     validations:
       required: false
@@ -791,6 +809,10 @@ body:
         Draws smoother strokes.
 
         This also adds a short delay between the mouse/stylus and the stroke.
+      value: |
+        Kreslí hladšie ťahy.
+
+        Pridáva tiež krátke oneskorenie medzi pohybom myši/stylusu a ťahom.
       render: 'shell'
     validations:
       required: false
@@ -800,6 +822,7 @@ body:
       label: 'penDropdown__pressureSensitivityHelpText'
       description: 'Translate `Changes the thickness of strokes according to how hard you press, when using a compatible device like a stylus.`.'
       placeholder: 'Changes the thickness of strokes according to how hard you press, when using a compatible device like a stylus.'
+      value: 'Pri použití kompatibilného zariadenia, napríklad stylusu, mení hrúbku ťahov podľa sily stlačenia.'
       render: 'shell'
     validations:
       required: false
@@ -809,6 +832,7 @@ body:
       label: 'handDropdown__baseHelpText'
       description: 'Translate `This tool is responsible for scrolling, rotating, and zooming the editor.`.'
       placeholder: 'This tool is responsible for scrolling, rotating, and zooming the editor.'
+      value: 'Tento nástroj je zodpovedný za posúvanie, otáčanie a zväčšovanie editora.'
       render: 'shell'
     validations:
       required: false
@@ -838,6 +862,7 @@ body:
       label: 'handDropdown__resetViewHelpText'
       description: 'Translate `Resets the zoom level to 100% and resets scroll.`.'
       placeholder: 'Resets the zoom level to 100% and resets scroll.'
+      value: 'Obnoví úroveň priblíženia na 100 % a vynuluje posúvanie.'
       render: 'shell'
     validations:
       required: false
@@ -847,6 +872,7 @@ body:
       label: 'handDropdown__zoomDisplayHelpText'
       description: 'Translate `Shows the current zoom level. 100% shows the image at its actual size.`.'
       placeholder: 'Shows the current zoom level. 100% shows the image at its actual size.'
+      value: 'Zobrazí aktuálnu úroveň priblíženia. 100 % zobrazuje obrázok v jeho skutočnej veľkosti.'
       render: 'shell'
     validations:
       required: false
@@ -856,6 +882,7 @@ body:
       label: 'handDropdown__touchPanningHelpText'
       description: 'Translate `When enabled, touchscreen gestures move the image rather than select or draw.`.'
       placeholder: 'When enabled, touchscreen gestures move the image rather than select or draw.'
+      value: 'Keď je táto funkcia zapnutá, gestá dotykovej obrazovky posúvajú obrázok, a nevyberajú ho ani nekreslia.'
       render: 'shell'
     validations:
       required: false
@@ -865,6 +892,7 @@ body:
       label: 'handDropdown__lockRotationHelpText'
       description: 'Translate `When enabled, prevents touch gestures from rotating the screen.`.'
       placeholder: 'When enabled, prevents touch gestures from rotating the screen.'
+      value: 'Ak je táto funkcia zapnutá, zabraňuje dotykovým gestám otáčať obrazovku.'
       render: 'shell'
     validations:
       required: false
@@ -874,6 +902,7 @@ body:
       label: 'eraserDropdown__baseHelpText'
       description: 'Translate `This tool removes strokes, images, and text under the cursor.`.'
       placeholder: 'This tool removes strokes, images, and text under the cursor.'
+      value: 'Tento nástroj odstraňuje ťahy, obrázky a text pod kurzorom.'
       render: 'shell'
     validations:
       required: false
@@ -883,6 +912,7 @@ body:
       label: 'eraserDropdown__thicknessHelpText'
       description: 'Translate `Changes the size of the eraser.`.'
       placeholder: 'Changes the size of the eraser.'
+      value: 'Zmení veľkosť gumy.'
       render: 'shell'
     validations:
       required: false
@@ -898,6 +928,10 @@ body:
         When in full-stroke mode, entire shapes are erased.
 
         When not in full-stroke mode, shapes can be partially erased.
+      value: |
+        `V režime plného ťahu sa vymažú celé tvary.
+
+        Keď nie je v režime plného ťahu, tvary sa môžu byť čiastočne vymazané.`
       render: 'shell'
     validations:
       required: false
@@ -907,6 +941,7 @@ body:
       label: 'selectionDropdown__baseHelpText'
       description: 'Translate `Selects content and manipulates the selection`.'
       placeholder: 'Selects content and manipulates the selection'
+      value: 'Vyberá obsah a manipuluje s výberom'
       render: 'shell'
     validations:
       required: false
@@ -922,6 +957,10 @@ body:
         Crops the drawing to the size of what's currently selected.
 
         If auto-resize is enabled, it will be disabled.
+      value: |
+        Oreže kresbu na veľkosť toho, čo je aktuálne vybrané.
+
+        Ak je zapnutá automatická zmena veľkosti, bude táto funkcia vypnutá.
       render: 'shell'
     validations:
       required: false
@@ -931,6 +970,7 @@ body:
       label: 'selectionDropdown__deleteHelpText'
       description: 'Translate `Erases selected items.`.'
       placeholder: 'Erases selected items.'
+      value: 'Vymaže vybrané položky.'
       render: 'shell'
     validations:
       required: false
@@ -940,6 +980,7 @@ body:
       label: 'selectionDropdown__duplicateHelpText'
       description: 'Translate `Makes a copy of selected items.`.'
       placeholder: 'Makes a copy of selected items.'
+      value: 'Vytvorí kópiu vybraných položiek.'
       render: 'shell'
     validations:
       required: false
@@ -949,6 +990,7 @@ body:
       label: 'selectionDropdown__changeColorHelpText'
       description: 'Translate `Changes the color of selected items.`.'
       placeholder: 'Changes the color of selected items.'
+      value: 'Zmení farbu vybraných položiek.'
       render: 'shell'
     validations:
       required: false
@@ -958,6 +1000,7 @@ body:
       label: 'pageDropdown__baseHelpText'
       description: "Translate `Controls the drawing canvas' background color, pattern, and size.`."
       placeholder: "Controls the drawing canvas' background color, pattern, and size."
+      value: 'Ovláda farbu, vzor a veľkosť pozadia kresliaceho plátna.'
       render: 'shell'
     validations:
       required: false
@@ -967,6 +1010,7 @@ body:
       label: 'pageDropdown__backgroundColorHelpText'
       description: 'Translate `Changes the background color of the drawing canvas.`.'
       placeholder: 'Changes the background color of the drawing canvas.'
+      value: 'Zmení farbu pozadia kresliaceho plátna.'
       render: 'shell'
     validations:
       required: false
@@ -976,6 +1020,7 @@ body:
       label: 'pageDropdown__gridCheckboxHelpText'
       description: 'Translate `Enables/disables a background grid pattern.`.'
       placeholder: 'Enables/disables a background grid pattern.'
+      value: 'Zapne/vypne vzor mriežky na pozadí.'
       render: 'shell'
     validations:
       required: false
@@ -991,6 +1036,10 @@ body:
         When checked, the page grows to fit the drawing.
 
         When unchecked, the page is visible and its size can be set manually.
+      value: |
+        Pokiaľ je označené, stránka sa zväčší tak, aby sa prispôsobila kresbe.
+
+        Keď nie je označené, stránka je viditeľná a jej veľkosť sa dá nastaviť ručne.
       render: 'shell'
     validations:
       required: false
@@ -1000,6 +1049,7 @@ body:
       label: 'pageDropdown__aboutButtonHelpText'
       description: 'Translate `Shows version, debug, and other information.`.'
       placeholder: 'Shows version, debug, and other information.'
+      value: 'Zobrazí verziu, ladenie a ďalšie informácie.'
       render: 'shell'
     validations:
       required: false
@@ -1009,6 +1059,7 @@ body:
       label: 'colorPickerPipetteHelpText'
       description: 'Translate `Picks a color from the screen.`.'
       placeholder: 'Picks a color from the screen.'
+      value: 'Vyberie farbu z obrazovky.'
       render: 'shell'
     validations:
       required: false
@@ -1018,6 +1069,7 @@ body:
       label: 'colorPickerToggleHelpText'
       description: 'Translate `Opens/closes the color picker.`.'
       placeholder: 'Opens/closes the color picker.'
+      value: 'Otvorí/zatvorí výber farieb.'
       render: 'shell'
     validations:
       required: false
@@ -1031,7 +1083,7 @@ body:
         > **Note**
         > Currently used as an accessibilty label
       placeholder: '(toolName) => `Close sidebar for ${toolName}`'
-      value: '(toolName) => `Close sidebar for ${toolName}`'
+      value: '(toolName) => `Zatvoriť bočný panel pre ${toolName}`'
       render: 'shell'
     validations:
       required: false
@@ -1041,7 +1093,7 @@ body:
       label: 'dropdownShown'
       description: 'Translate ``(toolName) => `Menu for ${toolName} shown` ``.'
       placeholder: '(toolName) => `Menu for ${toolName} shown`'
-      value: '(toolName) => `Menu for ${toolName} shown`'
+      value: '(toolName) => `Ponuka pre ${toolName} zobrazená`'
       render: 'shell'
     validations:
       required: false
@@ -1051,7 +1103,7 @@ body:
       label: 'dropdownHidden'
       description: 'Translate ``(toolName) => `Menu for ${toolName} hidden` ``.'
       placeholder: '(toolName) => `Menu for ${toolName} hidden`'
-      value: '(toolName) => `Menu for ${toolName} hidden`'
+      value: '(toolName) => `Ponuka pre ${toolName} skrytá`'
       render: 'shell'
     validations:
       required: false
@@ -1061,7 +1113,7 @@ body:
       label: 'zoomLevel'
       description: 'Translate ``(zoomPercent) => `Zoom: ${zoomPercent}%` ``.'
       placeholder: '(zoomPercent) => `Zoom: ${zoomPercent}%`'
-      value: '(zoomPercent) => `Zoom: ${zoomPercent}%`'
+      value: '(zoomPercent) => `Priblíženie: ${zoomPercent}%`'
       render: 'shell'
     validations:
       required: false
@@ -1071,7 +1123,7 @@ body:
       label: 'colorChangedAnnouncement'
       description: 'Translate ``(color) => `Color changed to ${color}` ``.'
       placeholder: '(color) => `Color changed to ${color}`'
-      value: '(color) => `Color changed to ${color}`'
+      value: '(color) => `Farba zmenená na ${color}`'
       render: 'shell'
     validations:
       required: false
@@ -1081,7 +1133,7 @@ body:
       label: 'imageSize'
       description: 'Translate ``(size, units) => `Image size: ${size} ${units}` ``.'
       placeholder: '(size, units) => `Image size: ${size} ${units}`'
-      value: '(size, units) => `Image size: ${size} ${units}`'
+      value: '(size, units) => `Veľkosť obrázka: ${size} ${units}`'
       render: 'shell'
     validations:
       required: false
@@ -1091,7 +1143,7 @@ body:
       label: 'imageLoadError'
       description: 'Translate ``(message) => `Error loading image: ${message}` ``.'
       placeholder: '(message) => `Error loading image: ${message}`'
-      value: '(message) => `Error loading image: ${message}`'
+      value: '(message) => `Chyba pri načítavaní obrázka: ${message}`'
       render: 'shell'
     validations:
       required: false
@@ -1101,7 +1153,7 @@ body:
       label: 'penTool'
       description: 'Translate ``(penId) => `Pen ${penId}` ``.'
       placeholder: '(penId) => `Pen ${penId}`'
-      value: '(penId) => `Pen ${penId}`'
+      value: '(penId) => `Pero ${penId}`'
       render: 'shell'
     validations:
       required: false
@@ -1121,6 +1173,7 @@ body:
       label: 'selectAllTool'
       description: 'Translate `Select all shortcut`.'
       placeholder: 'Select all shortcut'
+      value: 'Skratka pre výber všetkých'
       render: 'shell'
     validations:
       required: false
@@ -1140,6 +1193,7 @@ body:
       label: 'touchPanTool'
       description: 'Translate `Touch panning`.'
       placeholder: 'Touch panning'
+      value: 'Posúvanie dotykom'
       render: 'shell'
     validations:
       required: false
@@ -1169,6 +1223,7 @@ body:
       label: 'rightClickDragPanTool'
       description: 'Translate `Right-click drag`.'
       placeholder: 'Right-click drag'
+      value: 'Ťahanie pravým tlačidlom myši'
       render: 'shell'
     validations:
       required: false
@@ -1178,6 +1233,7 @@ body:
       label: 'pipetteTool'
       description: 'Translate `Pick color from screen`.'
       placeholder: 'Pick color from screen'
+      value: 'Vybrať farbu z obrazovky'
       render: 'shell'
     validations:
       required: false
@@ -1187,6 +1243,7 @@ body:
       label: 'keyboardPanZoom'
       description: 'Translate `Keyboard pan/zoom shortcuts`.'
       placeholder: 'Keyboard pan/zoom shortcuts'
+      value: 'Klávesové skratky pre posúvanie/priblíženie'
       render: 'shell'
     validations:
       required: false
@@ -1196,6 +1253,7 @@ body:
       label: 'selectionMenu__show'
       description: 'Translate `Show selection menu`.'
       placeholder: 'Show selection menu'
+      value: 'Zobraziť ponuku výberu'
       render: 'shell'
     validations:
       required: false
@@ -1205,6 +1263,7 @@ body:
       label: 'selectionMenu__copyToClipboard'
       description: 'Translate `Copy to clipboard`.'
       placeholder: 'Copy to clipboard'
+      value: 'Kopírovať do schránky'
       render: 'shell'
     validations:
       required: false
@@ -1214,6 +1273,7 @@ body:
       label: 'selectionMenu__duplicate'
       description: 'Translate `Duplicate`.'
       placeholder: 'Duplicate'
+      value: 'Duplikovať'
       render: 'shell'
     validations:
       required: false
@@ -1253,6 +1313,7 @@ body:
       label: 'copyPasteError__description'
       description: 'Translate `Something went wrong — this tool may not have clipboard access.`.'
       placeholder: 'Something went wrong — this tool may not have clipboard access.'
+      value: 'Niečo sa pokazilo - tento nástroj nemusí mať prístup k schránke.'
       render: 'shell'
     validations:
       required: false
@@ -1262,6 +1323,7 @@ body:
       label: 'copyPasteError__errorDetails'
       description: 'Translate `Show error`.'
       placeholder: 'Show error'
+      value: 'Zobraziť chybu'
       render: 'shell'
     validations:
       required: false
@@ -1271,6 +1333,7 @@ body:
       label: 'copyPasteError__pasteRetry'
       description: 'Translate `To retry, please paste into the input box below:`.'
       placeholder: 'To retry, please paste into the input box below:'
+      value: 'Ak chcete opakovať pokus, vložte ho do nižšie uvedeného vstupného poľa:'
       render: 'shell'
     validations:
       required: false
@@ -1280,6 +1343,7 @@ body:
       label: 'copyPasteError__copyRetry'
       description: 'Translate `To retry, please copy the text in the input box below:`.'
       placeholder: 'To retry, please copy the text in the input box below:'
+      value: 'Ak chcete opakovať pokus, skopírujte text do vstupného poľa nižšie:'
       render: 'shell'
     validations:
       required: false
@@ -1289,6 +1353,7 @@ body:
       label: 'copyPasteError__copyMe'
       description: 'Translate `Copy me!`.'
       placeholder: 'Copy me!'
+      value: 'Skopíruj ma!'
       render: 'shell'
     validations:
       required: false
@@ -1298,7 +1363,7 @@ body:
       label: 'autocorrectedTo'
       description: 'Translate ``(strokeDescription) => `Autocorrected to ${strokeDescription}` ``.'
       placeholder: '(strokeDescription) => `Autocorrected to ${strokeDescription}`'
-      value: '(strokeDescription) => `Autocorrected to ${strokeDescription}`'
+      value: '(strokeDescription) => `Automaticky opravené na ${strokeDescription}`'
       render: 'shell'
     validations:
       required: false
@@ -1308,6 +1373,7 @@ body:
       label: 'autocorrectionCanceled'
       description: 'Translate `Autocorrect cancelled`.'
       placeholder: 'Autocorrect cancelled'
+      value: 'Automatická oprava zrušená'
       render: 'shell'
     validations:
       required: false
@@ -1326,6 +1392,7 @@ body:
       label: 'enterTextToInsert'
       description: 'Translate `Text to insert`.'
       placeholder: 'Text to insert'
+      value: 'Text, ktorý sa má vložiť'
       render: 'shell'
     validations:
       required: false
@@ -1335,6 +1402,7 @@ body:
       label: 'changeTool'
       description: 'Translate `Change tool`.'
       placeholder: 'Change tool'
+      value: 'Zmeniť nástroj'
       render: 'shell'
     validations:
       required: false
@@ -1389,6 +1457,7 @@ body:
       label: 'findLabel'
       description: 'Translate `Find`.'
       placeholder: 'Find'
+      value: 'Hľadať'
       render: 'shell'
     validations:
       required: false
@@ -1398,6 +1467,7 @@ body:
       label: 'toNextMatch'
       description: 'Translate `Next`.'
       placeholder: 'Next'
+      value: 'Ďalšie'
       render: 'shell'
     validations:
       required: false
@@ -1417,6 +1487,7 @@ body:
       label: 'findDialogShown'
       description: 'Translate `Find dialog shown`.'
       placeholder: 'Find dialog shown'
+      value: 'Dialógové okno vyhľadávania zobrazené'
       render: 'shell'
     validations:
       required: false
@@ -1426,6 +1497,7 @@ body:
       label: 'findDialogHidden'
       description: 'Translate `Find dialog hidden`.'
       placeholder: 'Find dialog hidden'
+      value: 'Dialógové okno vyhľadávania je skryté'
       render: 'shell'
     validations:
       required: false
@@ -1454,7 +1526,7 @@ body:
       label: 'copied'
       description: 'Translate ``(count) => `Copied ${count} item(s)` ``.'
       placeholder: '(count) => `Copied ${count} item(s)`'
-      value: '(count) => `Copied ${count} item(s)`'
+      value: '(count) => `Skopírovaných ${count} položiek`'
       render: 'shell'
     validations:
       required: false
@@ -1464,7 +1536,7 @@ body:
       label: 'pasted'
       description: 'Translate ``(count) => `Pasted ${count} item(s)` ``.'
       placeholder: '(count) => `Pasted ${count} item(s)`'
-      value: '(count) => `Pasted ${count} item(s)`'
+      value: '(count) => `Vložených ${count} položiek`'
       render: 'shell'
     validations:
       required: false
@@ -1474,7 +1546,7 @@ body:
       label: 'toolEnabledAnnouncement'
       description: 'Translate ``(toolName) => `${toolName} enabled` ``.'
       placeholder: '(toolName) => `${toolName} enabled`'
-      value: '(toolName) => `${toolName} enabled`'
+      value: '(toolName) => `${toolName} zapnuté`'
       render: 'shell'
     validations:
       required: false
@@ -1484,7 +1556,7 @@ body:
       label: 'toolDisabledAnnouncement'
       description: 'Translate ``(toolName) => `${toolName} disabled` ``.'
       placeholder: '(toolName) => `${toolName} disabled`'
-      value: '(toolName) => `${toolName} disabled`'
+      value: '(toolName) => `${toolName} vypnuté`'
       render: 'shell'
     validations:
       required: false
@@ -1513,7 +1585,7 @@ body:
       label: 'resizeOutputCommand'
       description: 'Translate ``(newSize) => `Resized image to ${newSize.w}x${newSize.h}` ``.'
       placeholder: '(newSize) => `Resized image to ${newSize.w}x${newSize.h}`'
-      value: '(newSize) => `Resized image to ${newSize.w}x${newSize.h}`'
+      value: '(newSize) => `Zmenená veľkosť obrázka na ${newSize.w}x${newSize.h}`'
       render: 'shell'
     validations:
       required: false
@@ -1523,6 +1595,7 @@ body:
       label: 'enabledAutoresizeOutputCommand'
       description: 'Translate `Enabled output autoresize`.'
       placeholder: 'Enabled output autoresize'
+      value: 'Automatická zmena veľkosti výstupu je povolená'
       render: 'shell'
     validations:
       required: false
@@ -1532,6 +1605,7 @@ body:
       label: 'disabledAutoresizeOutputCommand'
       description: 'Translate `Disabled output autoresize`.'
       placeholder: 'Disabled output autoresize'
+      value: 'Automatická zmena veľkosti výstupu je zakázaná'
       render: 'shell'
     validations:
       required: false
@@ -1541,7 +1615,7 @@ body:
       label: 'addComponentAction'
       description: 'Translate ``(componentDescription) => `Added ${componentDescription}` ``.'
       placeholder: '(componentDescription) => `Added ${componentDescription}`'
-      value: '(componentDescription) => `Added ${componentDescription}`'
+      value: '(componentDescription) => `Pridané ${componentDescription}`'
       render: 'shell'
     validations:
       required: false
@@ -1551,7 +1625,7 @@ body:
       label: 'eraseAction'
       description: 'Translate ``(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}` ``.'
       placeholder: '(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`'
-      value: '(componentDescription, numElems) => `Erased ${numElems} ${componentDescription}`'
+      value: '(componentDescription, numElems) => `Vymazané ${numElems} ${componentDescription}`'
       render: 'shell'
     validations:
       required: false
@@ -1561,7 +1635,7 @@ body:
       label: 'duplicateAction'
       description: 'Translate ``(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}` ``.'
       placeholder: '(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}`'
-      value: '(componentDescription, numElems) => `Duplicated ${numElems} ${componentDescription}`'
+      value: '(componentDescription, numElems) => `Duplikované ${numElems} ${componentDescription}`'
       render: 'shell'
     validations:
       required: false
@@ -1591,6 +1665,7 @@ body:
       label: 'elements'
       description: 'Translate `Elements`.'
       placeholder: 'Elements'
+      value: 'Prvky'
       render: 'shell'
     validations:
       required: false
@@ -1600,6 +1675,7 @@ body:
       label: 'erasedNoElements'
       description: 'Translate `Erased nothing`.'
       placeholder: 'Erased nothing'
+      value: 'Nič sa nevymazalo.'
       render: 'shell'
     validations:
       required: false
@@ -1609,6 +1685,7 @@ body:
       label: 'duplicatedNoElements'
       description: 'Translate `Duplicated nothing`.'
       placeholder: 'Duplicated nothing'
+      value: 'Nič sa neduplikovalo.'
       render: 'shell'
     validations:
       required: false
@@ -1618,7 +1695,7 @@ body:
       label: 'rotatedBy'
       description: "Translate ``(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}` ``."
       placeholder: "(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`"
-      value: "(degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`"
+      value: "(degrees) => `Otočené o ${Math.abs(degrees)} stupňov ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`"
       render: 'shell'
     validations:
       required: false
@@ -1628,6 +1705,7 @@ body:
       label: 'movedLeft'
       description: 'Translate `Moved left`.'
       placeholder: 'Moved left'
+      value: 'Presunuté doľava'
       render: 'shell'
     validations:
       required: false
@@ -1637,6 +1715,7 @@ body:
       label: 'movedUp'
       description: 'Translate `Moved up`.'
       placeholder: 'Moved up'
+      value: 'Presunuté hore'
       render: 'shell'
     validations:
       required: false
@@ -1646,6 +1725,7 @@ body:
       label: 'movedDown'
       description: 'Translate `Moved down`.'
       placeholder: 'Moved down'
+      value: 'Presunuté dole'
       render: 'shell'
     validations:
       required: false
@@ -1655,6 +1735,7 @@ body:
       label: 'movedRight'
       description: 'Translate `Moved right`.'
       placeholder: 'Moved right'
+      value: 'Presunuté doprava'
       render: 'shell'
     validations:
       required: false
@@ -1664,6 +1745,7 @@ body:
       label: 'zoomedOut'
       description: 'Translate `Zoomed out`.'
       placeholder: 'Zoomed out'
+      value: 'Oddialené'
       render: 'shell'
     validations:
       required: false
@@ -1673,6 +1755,7 @@ body:
       label: 'zoomedIn'
       description: 'Translate `Zoomed in`.'
       placeholder: 'Zoomed in'
+      value: 'Priblížené'
       render: 'shell'
     validations:
       required: false
@@ -1682,7 +1765,7 @@ body:
       label: 'andNMoreCommands'
       description: 'Translate ``(count) => `And ${count} more commands.` ``.'
       placeholder: '(count) => `And ${count} more commands.`'
-      value: '(count) => `And ${count} more commands.`'
+      value: '(count) => `A ${count} ďalších príkazov.`'
       render: 'shell'
     validations:
       required: false
@@ -1702,6 +1785,7 @@ body:
       label: 'unlabeledImageNode'
       description: 'Translate `Unlabeled image`.'
       placeholder: 'Unlabeled image'
+      value: 'Obrázok bez označenia'
       render: 'shell'
     validations:
       required: false
@@ -1711,6 +1795,7 @@ body:
       label: 'stroke'
       description: 'Translate `Stroke`.'
       placeholder: 'Stroke'
+      value: 'Ťah'
       render: 'shell'
     validations:
       required: false
@@ -1720,6 +1805,7 @@ body:
       label: 'svgObject'
       description: 'Translate `SVG Object`.'
       placeholder: 'SVG Object'
+      value: 'Objekt SVG'
       render: 'shell'
     validations:
       required: false
@@ -1729,6 +1815,7 @@ body:
       label: 'emptyBackground'
       description: 'Translate `Empty background`.'
       placeholder: 'Empty background'
+      value: 'Prázdne pozadie'
       render: 'shell'
     validations:
       required: false
@@ -1738,6 +1825,7 @@ body:
       label: 'gridBackground'
       description: 'Translate `Grid background`.'
       placeholder: 'Grid background'
+      value: 'Pozadie s mriežkou'
       render: 'shell'
     validations:
       required: false
@@ -1747,7 +1835,7 @@ body:
       label: 'filledBackgroundWithColor'
       description: 'Translate ``(color) => `Filled background (${color})` ``.'
       placeholder: '(color) => `Filled background (${color})`'
-      value: '(color) => `Filled background (${color})`'
+      value: '(color) => `Vyplnené pozadie (${color})`'
       render: 'shell'
     validations:
       required: false
@@ -1757,7 +1845,7 @@ body:
       label: 'text'
       description: 'Translate ``(text) => `Text object: ${text}` ``.'
       placeholder: '(text) => `Text object: ${text}`'
-      value: '(text) => `Text object: ${text}`'
+      value: '(text) => `Textový objekt: ${text}`'
       render: 'shell'
     validations:
       required: false
@@ -1767,7 +1855,7 @@ body:
       label: 'imageNode'
       description: 'Translate ``(label) => `Image: ${label}` ``.'
       placeholder: '(label) => `Image: ${label}`'
-      value: '(label) => `Image: ${label}`'
+      value: '(label) => `Obrázok: ${label}`'
       render: 'shell'
     validations:
       required: false
@@ -1787,7 +1875,7 @@ body:
       label: 'pathNodeCount'
       description: 'Translate ``(count) => `There are ${count} visible path objects.` ``.'
       placeholder: '(count) => `There are ${count} visible path objects.`'
-      value: '(count) => `There are ${count} visible path objects.`'
+      value: '(count) => `Viditeľných je ${count} objektov ciest.`'
       render: 'shell'
     validations:
       required: false
@@ -1797,7 +1885,7 @@ body:
       label: 'textNodeCount'
       description: 'Translate ``(count) => `There are ${count} visible text nodes.` ``.'
       placeholder: '(count) => `There are ${count} visible text nodes.`'
-      value: '(count) => `There are ${count} visible text nodes.`'
+      value: '(count) => `Viditeľných je ${count} textových uzlov.`'
       render: 'shell'
     validations:
       required: false
@@ -1807,7 +1895,7 @@ body:
       label: 'imageNodeCount'
       description: 'Translate ``(nodeCount) => `There are ${nodeCount} visible image nodes.` ``.'
       placeholder: '(nodeCount) => `There are ${nodeCount} visible image nodes.`'
-      value: '(nodeCount) => `There are ${nodeCount} visible image nodes.`'
+      value: '(nodeCount) => `Viditeľných je ${nodeCount} obrazových uzlov.`'
       render: 'shell'
     validations:
       required: false
@@ -1827,6 +1915,7 @@ body:
       label: 'rerenderAsText'
       description: 'Translate `Re-render as text`.'
       placeholder: 'Re-render as text'
+      value: 'Opätovne vykresliť ako text.'
       render: 'shell'
     validations:
       required: false
@@ -1836,6 +1925,7 @@ body:
       label: 'accessibilityInputInstructions'
       description: 'Translate `Press "t" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press "w" to zoom in and "s" to zoom out.`.'
       placeholder: 'Press "t" to read the contents of the viewport as text. Use the arrow keys to move the viewport, click and drag to draw strokes. Press "w" to zoom in and "s" to zoom out.'
+      value: 'Pomocou tlačidla „t“ prečítate obsah zobrazovacieho okna ako text. Pomocou klávesov so šípkami pohybujte zobrazovacím oknom, kliknutím a ťahaním kreslite ťahy. Stlačením tlačidla „w“ priblížite a stlačením tlačidla „s“ oddialite pohľad.'
       render: 'shell'
     validations:
       required: false
@@ -1845,7 +1935,7 @@ body:
       label: 'loading'
       description: 'Translate ``(percentage) => `Loading ${percentage}%...` ``.'
       placeholder: '(percentage) => `Loading ${percentage}%...`'
-      value: '(percentage) => `Loading ${percentage}%...`'
+      value: '(percentage) => `Načítava sa ${percentage}%...`'
       render: 'shell'
     validations:
       required: false
@@ -1855,6 +1945,7 @@ body:
       label: 'imageEditor'
       description: 'Translate `Image Editor`.'
       placeholder: 'Image Editor'
+      value: 'Editor obrázkov'
       render: 'shell'
     validations:
       required: false
@@ -1864,6 +1955,7 @@ body:
       label: 'doneLoading'
       description: 'Translate `Done loading`.'
       placeholder: 'Done loading'
+      value: 'Načítanie dokončené'
       render: 'shell'
     validations:
       required: false
@@ -1893,6 +1985,7 @@ body:
       label: 'softwareLibraries'
       description: 'Translate `Libraries`.'
       placeholder: 'Libraries'
+      value: 'Knižnice'
       render: 'shell'
     validations:
       required: false
@@ -1902,6 +1995,7 @@ body:
       label: 'developerInformation'
       description: 'Translate `Developer information`.'
       placeholder: 'Developer information'
+      value: 'Informácie pre vývojárov'
       render: 'shell'
     validations:
       required: false
