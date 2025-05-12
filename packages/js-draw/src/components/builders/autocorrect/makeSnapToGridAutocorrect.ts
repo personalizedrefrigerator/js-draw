@@ -4,6 +4,7 @@ import { StrokeDataPoint } from '../../../types';
 import AbstractComponent from '../../AbstractComponent';
 import { ComponentBuilder, ComponentBuilderFactory } from '../types';
 import AbstractRenderer from '../../../rendering/renderers/AbstractRenderer';
+import { StrokeStyle } from '../../../rendering/RenderingStyle';
 
 const makeSnapToGridAutocorrect = (
 	sourceFactory: ComponentBuilderFactory,
@@ -18,6 +19,7 @@ export default makeSnapToGridAutocorrect;
 class SnapToGridAutocompleteBuilder implements ComponentBuilder {
 	private builder: ComponentBuilder;
 	private points: StrokeDataPoint[];
+	public inkTrailStyle?: () => StrokeStyle;
 
 	public constructor(
 		private sourceFactory: ComponentBuilderFactory,
@@ -26,6 +28,10 @@ class SnapToGridAutocompleteBuilder implements ComponentBuilder {
 	) {
 		this.builder = sourceFactory(startPoint, viewport);
 		this.points = [startPoint];
+
+		if (this.builder.inkTrailStyle) {
+			this.inkTrailStyle = this.builder.inkTrailStyle.bind(this.builder);
+		}
 	}
 
 	public getBBox(): Rect2 {

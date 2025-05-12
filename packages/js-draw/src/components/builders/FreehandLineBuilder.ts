@@ -63,10 +63,14 @@ export default class FreehandLineBuilder implements ComponentBuilder {
 	protected getRenderingStyle(): RenderingStyle {
 		return {
 			fill: Color4.transparent,
-			stroke: {
-				color: this.startPoint.color,
-				width: this.roundDistance(this.averageWidth),
-			},
+			stroke: this.inkTrailStyle(),
+		};
+	}
+
+	public inkTrailStyle() {
+		return {
+			color: this.startPoint.color,
+			width: this.roundDistance(this.averageWidth),
 		};
 	}
 

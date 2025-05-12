@@ -109,6 +109,13 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		};
 	}
 
+	public inkTrailStyle() {
+		return {
+			color: this.startPoint.color,
+			width: this.getCurrentRadius() * 2,
+		};
+	}
+
 	private previewCurrentPath(extendWithLatest: boolean = true): RenderablePathSpec | null {
 		const upperPath = this.upperSegments.slice();
 		const lowerPath = this.lowerSegments.slice();
@@ -278,6 +285,13 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		return false;
 	}
 
+	private getCurrentRadius() {
+		return Viewport.roundPoint(
+			this.startPoint.width / 2.2,
+			Math.min(this.minFitAllowed, this.startPoint.width / 4),
+		);
+	}
+
 	private addCurve(curve: Curve | null) {
 		// Case where no points have been added
 		if (!curve) {
@@ -286,45 +300,42 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 				return;
 			}
 
-			const width = Viewport.roundPoint(
-				this.startPoint.width / 2.2,
-				Math.min(this.minFitAllowed, this.startPoint.width / 4),
-			);
+			const radius = this.getCurrentRadius();
 			const center = this.roundPoint(this.startPoint.pos);
 
 			// Start on the right, cycle clockwise:
 			//    |
 			//  ----- ←
 			//    |
-			const startPoint = this.startPoint.pos.plus(Vec2.of(width, 0));
+			const startPoint = this.startPoint.pos.plus(Vec2.of(radius, 0));
 
 			// Draw a circle-ish shape around the start point
 			this.lowerSegments.push(
 				{
 					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(width, width)),
+					controlPoint: center.plus(Vec2.of(radius, radius)),
 
 					// Bottom of the circle
 					//    |
 					//  -----
 					//    |
 					//    ↑
-					endPoint: center.plus(Vec2.of(0, width)),
+					endPoint: center.plus(Vec2.of(0, radius)),
 				},
 				{
 					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(-width, width)),
-					endPoint: center.plus(Vec2.of(-width, 0)),
+					controlPoint: center.plus(Vec2.of(-radius, radius)),
+					endPoint: center.plus(Vec2.of(-radius, 0)),
 				},
 				{
 					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(-width, -width)),
-					endPoint: center.plus(Vec2.of(0, -width)),
+					controlPoint: center.plus(Vec2.of(-radius, -radius)),
+					endPoint: center.plus(Vec2.of(0, -radius)),
 				},
 				{
 					kind: PathCommandType.QuadraticBezierTo,
-					controlPoint: center.plus(Vec2.of(width, -width)),
-					endPoint: center.plus(Vec2.of(width, 0)),
+					controlPoint: center.plus(Vec2.of(radius, -radius)),
+					endPoint: center.plus(Vec2.of(radius, 0)),
 				},
 			);
 			const connector: PathCommand = {

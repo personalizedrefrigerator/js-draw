@@ -15,6 +15,7 @@ import StationaryPenDetector, {
 	defaultStationaryDetectionConfig,
 } from './util/StationaryPenDetector';
 import AbstractComponent from '../components/AbstractComponent';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 
 export interface PenStyle {
 	readonly color: Color4;
@@ -35,6 +36,7 @@ export default class Pen extends BaseTool {
 	private currentDeviceType: PointerDevice | null = null;
 	private currentPointerId: number | null = null;
 	private styleValue: MutableReactiveValue<PenStyle>;
+	private wetInkRenderer: AbstractRenderer;
 	private style: PenStyle;
 
 	private shapeAutocompletionEnabled: boolean = false;
@@ -62,6 +64,8 @@ export default class Pen extends BaseTool {
 			this.style = newValue;
 			this.noteUpdated();
 		});
+
+		this.wetInkRenderer = this.editor.display.getWetInkRenderer();
 	}
 
 	private getPressureMultiplier() {
@@ -100,13 +104,17 @@ export default class Pen extends BaseTool {
 	// Displays the stroke that is currently being built with the display's `wetInkRenderer`.
 	protected previewStroke() {
 		this.editor.clearWetInk();
-		const wetInkRenderer = this.editor.display.getWetInkRenderer();
-
 		if (this.autocorrectedShape) {
 			const visibleRect = this.editor.viewport.visibleRect;
-			this.autocorrectedShape.render(wetInkRenderer, visibleRect);
-		} else {
-			this.builder?.preview(wetInkRenderer);
+			this.autocorrectedShape.render(this.wetInkRenderer, visibleRect);
+		} else if (this.builder) {
+			this.builder.preview(this.wetInkRenderer);
+
+			if (this.builder.inkTrailStyle) {
+				const trailStyle = this.builder.inkTrailStyle();
+				const draftInkPresenter = this.wetInkRenderer.getDraftInkPresenter();
+				draftInkPresenter.updateStyle(trailStyle);
+			}
 		}
 	}
 
@@ -150,6 +158,10 @@ export default class Pen extends BaseTool {
 			}
 			this.lastAutocorrectedShape = null;
 			this.removedAutocorrectedShapeTime = 0;
+			if (this.builder.inkTrailStyle) {
+				// Accelerate inking
+				this.wetInkRenderer.getDraftInkPresenter().setEnabled(current.id, true);
+			}
 			return true;
 		}
 
@@ -221,11 +233,23 @@ export default class Pen extends BaseTool {
 		return false;
 	}
 
-	public override onGestureCancel() {
+	private postGestureCleanup() {
+		if (this.currentPointerId !== null) {
+			this.wetInkRenderer.getDraftInkPresenter().setEnabled(this.currentPointerId, false);
+		}
+
 		this.builder = null;
+		this.lastPoint = null;
+		this.autocorrectedShape = null;
+		this.lastAutocorrectedShape = null;
 		this.editor.clearWetInk();
+
 		this.stationaryDetector?.destroy();
 		this.stationaryDetector = null;
+	}
+
+	public override onGestureCancel() {
+		this.postGestureCleanup();
 	}
 
 	private removedAutocorrectedShapeRecently() {
@@ -286,14 +310,7 @@ export default class Pen extends BaseTool {
 				console.warn('Pen: Not adding empty stroke', stroke, 'to the canvas.');
 			}
 		}
-		this.builder = null;
-		this.lastPoint = null;
-		this.autocorrectedShape = null;
-		this.lastAutocorrectedShape = null;
-		this.editor.clearWetInk();
-
-		this.stationaryDetector?.destroy();
-		this.stationaryDetector = null;
+		this.postGestureCleanup();
 	}
 
 	private noteUpdated() {

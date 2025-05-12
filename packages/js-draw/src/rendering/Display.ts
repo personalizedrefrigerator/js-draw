@@ -6,6 +6,7 @@ import DummyRenderer from './renderers/DummyRenderer';
 import { Point2, Vec2, Color4 } from '@js-draw/math';
 import RenderingCache from './caching/RenderingCache';
 import TextOnlyRenderer from './renderers/TextOnlyRenderer';
+import AcceleratedInkingCanvasRenderer from './renderers/AcceleratedInkingCanvasRenderer';
 
 export enum RenderingMode {
 	DummyRenderer,
@@ -132,7 +133,7 @@ export default class Display {
 		const wetInkCtx = wetInkCanvas.getContext('2d')!;
 
 		this.dryInkRenderer = new CanvasRenderer(dryInkCtx, this.editor.viewport);
-		this.wetInkRenderer = new CanvasRenderer(wetInkCtx, this.editor.viewport);
+		this.wetInkRenderer = new AcceleratedInkingCanvasRenderer(wetInkCtx, this.editor.viewport);
 
 		dryInkCanvas.className = 'dryInkCanvas';
 		wetInkCanvas.className = 'wetInkCanvas';
@@ -250,6 +251,13 @@ export default class Display {
 	/** @internal */
 	public getDevicePixelRatio() {
 		return this.devicePixelRatio;
+	}
+
+	/** @internal -- used for internal performance improvements. */
+	public onPointerEvent(event: PointerEvent) {
+		if (this.wetInkRenderer instanceof AcceleratedInkingCanvasRenderer) {
+			this.wetInkRenderer.onEvent(event);
+		}
 	}
 
 	/**

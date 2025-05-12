@@ -3,11 +3,18 @@ import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import { StrokeDataPoint } from '../../types';
 import Viewport from '../../Viewport';
 import AbstractComponent from '../AbstractComponent';
+import { StrokeStyle } from '../../rendering/RenderingStyle';
 
 export interface ComponentBuilder {
 	getBBox(): Rect2;
 	build(): AbstractComponent;
 	preview(renderer: AbstractRenderer): void;
+
+	/**
+	 * (Optional) If provided, allows js-draw to efficiently render
+	 * an ink trail with the given style on some devices.
+	 */
+	inkTrailStyle?: () => StrokeStyle;
 
 	/**
 	 * Called when the pen is stationary (or the user otherwise
