@@ -737,6 +737,7 @@ export class Editor {
 	): boolean {
 		const eventsRelativeTo = this.renderingRegion;
 		const eventTarget = (evt.target as HTMLElement | null) ?? this.renderingRegion;
+		this.display.onPointerEvent(evt);
 
 		if (eventType === 'pointerdown') {
 			const pointer = Pointer.ofEvent(evt, true, this.viewport, eventsRelativeTo);

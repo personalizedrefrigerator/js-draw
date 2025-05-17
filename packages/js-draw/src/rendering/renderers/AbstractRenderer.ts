@@ -1,7 +1,7 @@
 import { Color4, Mat33, Point2, Vec2, Rect2, Path, PathCommandType } from '@js-draw/math';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Viewport from '../../Viewport';
-import RenderingStyle, { stylesEqual } from '../RenderingStyle';
+import RenderingStyle, { StrokeStyle, stylesEqual } from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
 import RenderablePathSpec, { pathToRenderable } from '../RenderablePathSpec';
 
@@ -22,6 +22,24 @@ export interface RenderableImage {
 
 	label?: string;
 }
+
+/**
+ * An interface that allows renderers to provide accelerated inking.
+ *
+ * This API is intended to reduce latency by rendering a draft preview of the
+ * last, trailing part of a stroke.
+ *
+ * This may be implemented with, for example, [the web `Ink` API](https://developer.mozilla.org/en-US/docs/Web/API/Ink),
+ * or do nothing at all, depending on the renderer and platform.
+ */
+export interface DraftInkPresenter {
+	/** Enables the ink presenter, if available on the current platform. */
+	setEnabled(pointerId: number, enabled: boolean): void;
+	/** Sets the color and width of the stroke trail. */
+	updateStyle(style: StrokeStyle): void;
+}
+
+const defaultDraftInkPresenter: DraftInkPresenter = { setEnabled: () => {}, updateStyle: () => {} };
 
 /**
  * Abstract base class for renderers.
@@ -63,6 +81,13 @@ export default abstract class AbstractRenderer {
 	public abstract isTooSmallToRender(rect: Rect2): boolean;
 
 	public setDraftMode(_draftMode: boolean) {}
+
+	/**
+	 * Returns an API that can be used to accelerate inking.
+	 */
+	public getDraftInkPresenter(): DraftInkPresenter {
+		return defaultDraftInkPresenter;
+	}
 
 	protected objectLevel: number = 0;
 	private currentPaths: RenderablePathSpec[] | null = null;
