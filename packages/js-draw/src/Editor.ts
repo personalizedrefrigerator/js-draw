@@ -704,18 +704,24 @@ export class Editor {
 	 * A protected method that can override setPointerCapture in environments where it may fail
 	 * (e.g. with synthetic events). @internal
 	 */
-	protected setPointerCapture(target: HTMLElement, pointerId: number) {
+	protected setPointerCapture(target: HTMLElement, pointer: PointerEvent) {
+		// Prevent synthetic events from attempting to capture the pointer.
+		// Such events are sometimes created during debug/testing.
+		if ('__mockEvent' in pointer) return;
+
 		try {
-			target.setPointerCapture(pointerId);
+			target.setPointerCapture(pointer.pointerId);
 		} catch (error) {
 			console.warn('Failed to setPointerCapture', error);
 		}
 	}
 
 	/** Can be overridden in a testing environment to handle synthetic events. @internal */
-	protected releasePointerCapture(target: HTMLElement, pointerId: number) {
+	protected releasePointerCapture(target: HTMLElement, pointer: PointerEvent) {
+		if ('__mockEvent' in pointer) return;
+
 		try {
-			target.releasePointerCapture(pointerId);
+			target.releasePointerCapture(pointer.pointerId);
 		} catch (error) {
 			console.warn('Failed to releasePointerCapture', error);
 		}
@@ -737,7 +743,7 @@ export class Editor {
 			const pointer = Pointer.ofEvent(evt, true, this.viewport, eventsRelativeTo);
 			this.pointers[pointer.id] = pointer;
 
-			this.setPointerCapture(eventTarget, pointer.id);
+			this.setPointerCapture(eventTarget, evt);
 			const event: PointerEvt = {
 				kind: InputEvtType.PointerDownEvt,
 				current: pointer,
@@ -784,7 +790,7 @@ export class Editor {
 			}
 
 			this.pointers[pointer.id] = pointer;
-			this.releasePointerCapture(eventTarget, pointer.id);
+			this.releasePointerCapture(eventTarget, evt);
 			if (
 				this.toolController.dispatchInputEvent({
 					kind: InputEvtType.PointerUpEvt,
@@ -969,7 +975,7 @@ export class Editor {
 					};
 
 					// Capture the pointer so we receive future events even if the overlay is hidden.
-					this.setPointerCapture(elem, event.pointerId);
+					this.setPointerCapture(elem, event);
 
 					// Don't send to the editor.
 					sendToEditor = false;
@@ -1007,7 +1013,7 @@ export class Editor {
 					gestureData[pointerId] &&
 					gestureData[pointerId].eventBuffer.length > 0
 				) {
-					this.releasePointerCapture(elem, event.pointerId);
+					this.releasePointerCapture(elem, event);
 
 					// Don't send to the editor.
 					sendToEditor = false;

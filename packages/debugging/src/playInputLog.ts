@@ -1,17 +1,104 @@
-import { Editor } from 'js-draw';
+import { Editor, Rect2, Vec2 } from 'js-draw';
+
+interface BaseLogRecord {
+	currentTime: number; // ms
+	timeStamp: number; // seconds (fractional)
+
+	ctrlKey: boolean;
+	altKey: boolean;
+	metaKey: boolean;
+	shiftKey: boolean;
+}
+
+interface PointerEventLogRecord extends BaseLogRecord {
+	eventType: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel';
+	pointerType: string;
+	pointerId: number;
+	buttons: number;
+	pressure: number;
+	isPrimary: boolean;
+	x: number;
+	y: number;
+}
+
+interface KeyboardEventLogRecord extends BaseLogRecord {
+	eventType: 'keydown' | 'keyup';
+	key: string;
+	code: string;
+}
+
+interface WheelEventLogRecord extends BaseLogRecord {
+	eventType: 'wheel';
+	deltaX: number;
+	deltaY: number;
+	deltaZ: number;
+	deltaMode: number;
+
+	clientX: number;
+	clientY: number;
+}
+
+export type LogEventRecord = PointerEventLogRecord | KeyboardEventLogRecord | WheelEventLogRecord;
+
+const isPointerEventRecord = (event: LogEventRecord): event is PointerEventLogRecord => {
+	return ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].includes(event.eventType);
+};
+
+class ExtendedPointerEvent extends PointerEvent {
+	private timeStamp_: number;
+	public readonly __mockEvent = true;
+
+	public constructor(type: string, init: PointerEventInit, timeStamp: number) {
+		super(type, init);
+		this.timeStamp_ = timeStamp;
+	}
+
+	// This needs to be a getter method to avoid a
+	// "TypeError: setting getter-only property" error.
+	public override get timeStamp() {
+		return this.timeStamp_;
+	}
+}
+
+export interface InputLogOptions {
+	rate?: number | undefined;
+	offset?: Vec2;
+}
 
 //
 // See /docs/debugging/stroke-logging
 //
-const playInputLog = async (editor: Editor, data: any[], rate: number | undefined) => {
+const playInputLog = async (
+	editor: Editor,
+	data: LogEventRecord[],
+	{ rate, offset = Vec2.zero }: InputLogOptions = {},
+) => {
 	let lastEventTimestamp: number | null = null;
 	let encounteredSignificantEvent = false;
 
+	const perfData = {
+		timeDeltas: [] as number[],
+		totalTime: 0,
+		avgTimePerEvent: 0,
+	};
+	const trackPerf = (callback: () => void) => {
+		const startTime = performance.now();
+		callback();
+		const deltaTime = performance.now() - startTime;
+
+		perfData.timeDeltas.push(deltaTime);
+		perfData.totalTime += deltaTime;
+		perfData.avgTimePerEvent = perfData.totalTime / perfData.timeDeltas.length;
+	};
+
+	const getEditorTopLeft = () => Rect2.of(editor.getRootElement().getBoundingClientRect()).topLeft;
+
+	const initialEditorLocation = getEditorTopLeft();
 	for (const event of data) {
 		if (!event.timeStamp) continue;
 
 		lastEventTimestamp ??= event.timeStamp;
-		const deltaTime = event.timeStamp - lastEventTimestamp!;
+		const deltaTime = event.timeStamp - lastEventTimestamp;
 
 		// Ignore any mouse movement/extraneous events that the
 		// user probably doesn't care about.
@@ -25,44 +112,61 @@ const playInputLog = async (editor: Editor, data: any[], rate: number | undefine
 
 		lastEventTimestamp = event.timeStamp;
 
-		if (['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].includes(event.eventType)) {
-			const ptrEvent = new PointerEvent(event.eventType, {
-				clientX: event.x,
-				clientY: event.y,
-				x: event.x,
-				y: event.y,
+		const modifiers = {
+			metaKey: event.metaKey,
+			shiftKey: event.shiftKey,
+			altKey: event.altKey,
+			ctrlKey: event.ctrlKey,
+		};
+
+		// Handle the case where the editor moves while playing back the
+		// input log. Adjust the input (x,y) for any change in editor location.
+		const locationAdjust = initialEditorLocation.minus(getEditorTopLeft()).plus(offset);
+		const adjustX = (x: number | undefined) => {
+			return typeof x === 'number' ? x - locationAdjust.x : x;
+		};
+		const adjustY = (y: number | undefined) => {
+			return typeof y === 'number' ? y - locationAdjust.y : y;
+		};
+
+		if (isPointerEventRecord(event)) {
+			const options = {
+				clientX: adjustX(event.x),
+				clientY: adjustY(event.y),
+				x: adjustX(event.x),
+				y: adjustY(event.y),
 				isPrimary: event.isPrimary,
 				pointerType: event.pointerType,
 				pointerId: event.pointerId,
 				buttons: event.buttons,
 				pressure: event.pressure,
-			} as any);
-			(ptrEvent as any).setP = event.timeStamp;
+				...modifiers,
+			};
+			const ptrEvent = new ExtendedPointerEvent(event.eventType, options, event.timeStamp);
 
-			editor.handleHTMLPointerEvent(event.eventType, ptrEvent);
+			trackPerf(() => {
+				editor.handleHTMLPointerEvent(event.eventType, ptrEvent);
+			});
 		} else if (event.eventType === 'keydown' || event.eventType === 'keyup') {
 			lastEventTimestamp ??= event.timeStamp;
 			const keyEvent = new KeyboardEvent(event.eventType, {
 				key: event.key,
 				code: event.code,
 
-				ctrlKey: event.ctrlKey,
-				altKey: event.altKey,
-				metaKey: event.metaKey,
-				shiftKey: event.shiftKey,
+				...modifiers,
 			});
 			(keyEvent as any).timeStamp = event.timeStamp;
 
 			if (event.eventType === 'keydown') {
-				editor.handleHTMLKeyDownEvent(keyEvent);
+				trackPerf(() => editor.handleHTMLKeyDownEvent(keyEvent));
 			} else {
-				editor.handleHTMLKeyUpEvent(keyEvent);
+				trackPerf(() => editor.handleHTMLKeyUpEvent(keyEvent));
 			}
 		} else if (event.eventType === 'wheel') {
 			lastEventTimestamp ??= event.timeStamp;
 			const wheelEvent = new WheelEvent(event.eventType, {
-				clientX: event.clientX,
-				clientY: event.clientY,
+				clientX: adjustX(event.clientX),
+				clientY: adjustY(event.clientY),
 				deltaX: event.deltaX,
 				deltaY: event.deltaY,
 				deltaZ: event.deltaZ,
@@ -72,13 +176,17 @@ const playInputLog = async (editor: Editor, data: any[], rate: number | undefine
 			});
 			(wheelEvent as any).timeStamp = event.timeStamp;
 
-			editor.handleHTMLWheelEvent(wheelEvent);
+			trackPerf(() => editor.handleHTMLWheelEvent(wheelEvent));
 		}
 
 		if (['wheel', 'keydown', 'pointerdown'].includes(event.eventType)) {
 			encounteredSignificantEvent = true;
 		}
 	}
+
+	return {
+		perfData,
+	};
 };
 
 export default playInputLog;
