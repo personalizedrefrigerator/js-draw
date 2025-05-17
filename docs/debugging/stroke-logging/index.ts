@@ -67,24 +67,6 @@ class LoggingEditor extends jsdraw.Editor {
 		return result;
 	}
 
-	protected override setPointerCapture(target: HTMLElement, pointer: number) {
-		try {
-			target.setPointerCapture(pointer);
-		} catch (error) {
-			// release/setPointerCapture can fail on event playback (when `pointer`
-			// isn't actually down anymore)
-			console.warn(error);
-		}
-	}
-
-	protected override releasePointerCapture(target: HTMLElement, pointer: number) {
-		try {
-			target.releasePointerCapture(pointer);
-		} catch (error) {
-			console.warn(error);
-		}
-	}
-
 	private logKeyEvent(htmlEvent: KeyboardEvent, type: string) {
 		const data = {
 			eventType: type,
@@ -216,7 +198,7 @@ const playBackLog = async (rate: number) => {
 	const data = JSON.parse('[' + log.value + ']');
 	data.reverse();
 
-	await playInputLog(editor, data, rate);
+	await playInputLog(editor, data, { rate });
 };
 playbackButton.onclick = () => playBackLog(1);
 
