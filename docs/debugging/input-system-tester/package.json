@@ -1,6 +1,6 @@
 {
 	"name": "@js-draw/input-system-tester",
-	"version": "1.29.2",
+	"version": "1.30.0",
 	"description": "Allows comparing different stroke smoothing implementations",
 	"license": "MIT",
 	"private": true,
@@ -11,11 +11,11 @@
 		"watch": "build-tool watch"
 	},
 	"dependencies": {
-		"@js-draw/debugging": "^1.29.2",
-		"@js-draw/material-icons": "^1.29.2",
-		"js-draw": "^1.29.2"
+		"@js-draw/debugging": "^1.30.0",
+		"@js-draw/material-icons": "^1.30.0",
+		"js-draw": "^1.30.0"
 	},
 	"devDependencies": {
-		"@js-draw/build-tool": "^1.29.2"
+		"@js-draw/build-tool": "^1.30.0"
 	}
 }

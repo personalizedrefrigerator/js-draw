@@ -1,3 +1,12 @@
+# 1.30.0
+
+- Features:
+  - Accelerate inking on certain devices using the [web ink API](https://developer.mozilla.org/en-US/docs/Web/API/Ink_API) (see 24395b009ff082b8b5039b5a3027ae2901b3bc0f).
+    - At present, this browser API only seems to be available in Chromium-based browsers on Linux, Windows, and probably MacOS.
+  - Added Slovak translation (by @dodog in https://github.com/personalizedrefrigerator/js-draw/issues/114).
+- Other changes
+  - `@js-draw/material-icons`: Use the material "Line thickness" icon for pressure sensitivity.
+
 # 1.29.2
 
 - Bug fixes:
