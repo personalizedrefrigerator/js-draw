@@ -109,13 +109,6 @@ export default class PressureSensitiveFreehandLineBuilder implements ComponentBu
 		};
 	}
 
-	public inkTrailStyle() {
-		return {
-			color: this.startPoint.color,
-			width: this.getCurrentRadius() * 2,
-		};
-	}
-
 	private previewCurrentPath(extendWithLatest: boolean = true): RenderablePathSpec | null {
 		const upperPath = this.upperSegments.slice();
 		const lowerPath = this.lowerSegments.slice();
