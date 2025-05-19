@@ -35,6 +35,7 @@ import InkPen from './icons/InkPen';
 import ContentPaste from './icons/ContentPaste';
 import { OpaqueIconType } from './types';
 import LassoSelect from './icons/LassoSelect';
+import LineWeight from './icons/LineWeight';
 
 /**
  * Parts of the js-draw library required by this package.
@@ -176,6 +177,9 @@ const makeMaterialIconProviderClass = ({
 		}
 		public override makeStrokeSmoothingIcon(): IconElemType {
 			return icon(Draw);
+		}
+		public override makePressureSensitivityIcon(): IconElemType {
+			return icon(LineWeight);
 		}
 		public override makeResizeImageToSelectionIcon(): IconElemType {
 			return icon(Resize);
