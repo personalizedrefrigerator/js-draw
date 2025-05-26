@@ -464,7 +464,6 @@ export class Editor {
 					);
 					const imageRectEdgePoint = imageRect.getClosestPointOnBoundaryTo(visibleRectEdgePoint);
 					const canvasDelta = visibleRectEdgePoint.minus(imageRectEdgePoint);
-					console.log(canvasDelta, canvasDelta.length());
 
 					if (canvasDelta.length() > 1e-10) {
 						this.viewport.resetTransform(evt.newTransform.rightMul(Mat33.translation(canvasDelta)));
