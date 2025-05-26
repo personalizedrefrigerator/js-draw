@@ -7,6 +7,7 @@ import { Point2, Vec2, Color4 } from '@js-draw/math';
 import RenderingCache from './caching/RenderingCache';
 import TextOnlyRenderer from './renderers/TextOnlyRenderer';
 import AcceleratedInkingCanvasRenderer from './renderers/AcceleratedInkingCanvasRenderer';
+import createButton from '../util/dom/createButton';
 
 export enum RenderingMode {
 	DummyRenderer,
@@ -213,9 +214,10 @@ export default class Display {
 		const textRendererOutputContainer = document.createElement('div');
 		textRendererOutputContainer.classList.add('textRendererOutputContainer');
 
-		const rerenderButton = document.createElement('button');
-		rerenderButton.classList.add('rerenderButton');
-		rerenderButton.innerText = this.editor.localization.rerenderAsText;
+		const rerenderButton = createButton({
+			classList: ['rerenderButton'],
+			text: this.editor.localization.rerenderAsText,
+		});
 
 		this.textRerenderOutput = document.createElement('div');
 		this.textRerenderOutput.setAttribute('aria-live', 'polite');

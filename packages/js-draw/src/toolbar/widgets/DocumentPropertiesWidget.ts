@@ -11,6 +11,7 @@ import { ToolbarLocalization } from '../localization';
 import makeColorInput from './components/makeColorInput';
 import BaseWidget from './BaseWidget';
 import HelpDisplay from '../utils/HelpDisplay';
+import createButton from '../../util/dom/createButton';
 
 export default class DocumentPropertiesWidget extends BaseWidget {
 	private updateDropdownContent: () => void = () => {};
@@ -311,9 +312,10 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		);
 
 		// The "About..." button
-		const aboutButton = document.createElement('button');
-		aboutButton.classList.add('about-button');
-		aboutButton.innerText = this.localizationTable.about;
+		const aboutButton = createButton({
+			classList: ['about-button'],
+			text: this.localizationTable.about,
+		});
 
 		aboutButton.onclick = () => {
 			this.editor.showAboutDialog();

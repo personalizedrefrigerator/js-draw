@@ -5,8 +5,9 @@ import { toolbarCSSPrefix } from './constants';
 import EdgeToolbarLayoutManager from './widgets/layout/EdgeToolbarLayoutManager';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
-import stopPropagationOfScrollingWheelEvents from '../util/stopPropagationOfScrollingWheelEvents';
+import stopPropagationOfScrollingWheelEvents from '../util/dom/stopPropagationOfScrollingWheelEvents';
 import makeDraggable from './utils/makeDraggable';
+import createButton from '../util/dom/createButton';
 
 /**
  * Creates an `EdgeToolbar`.
@@ -123,7 +124,7 @@ export default class EdgeToolbar extends AbstractToolbar {
 			}
 		});
 
-		this.closeButton = document.createElement('button');
+		this.closeButton = createButton();
 		this.closeButton.classList.add('drag-elem');
 
 		// The close button has default focus -- forward its events to the main editor so that keyboard

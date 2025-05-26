@@ -24,6 +24,7 @@ import makeGridSelector from './components/makeGridSelector';
 import { IconElemType } from '../IconProvider';
 import HelpDisplay from '../utils/HelpDisplay';
 import { makePolylineBuilder } from '../../components/builders/PolylineBuilder';
+import createElement from '../../util/dom/createElement';
 
 /** Represents a style that can be applied to a pen tool. */
 export interface PenTypeRecord {
@@ -262,7 +263,7 @@ export default class PenToolWidget extends BaseToolWidget {
 		container.classList.add('action-button-row', `${toolbarCSSPrefix}-pen-tool-toggle-buttons`);
 
 		const addToggleButton = (labelText: string, icon: IconElemType) => {
-			const button = document.createElement('button');
+			const button = createElement('button', { type: 'button' });
 			button.classList.add(`${toolbarCSSPrefix}-toggle-button`);
 
 			const iconElement = icon.cloneNode(true) as IconElemType;

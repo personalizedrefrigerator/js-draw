@@ -10,6 +10,7 @@ import BaseToolWidget from './BaseToolWidget';
 import BaseWidget, { SavedToolbuttonState } from './BaseWidget';
 import makeSeparator from './components/makeSeparator';
 import HelpDisplay from '../utils/HelpDisplay';
+import createButton from '../../util/dom/createButton';
 
 const makeZoomControl = (
 	localizationTable: ToolbarLocalization,
@@ -18,9 +19,9 @@ const makeZoomControl = (
 ) => {
 	const zoomLevelRow = document.createElement('div');
 
-	const increaseButton = document.createElement('button');
-	const decreaseButton = document.createElement('button');
-	const resetViewButton = document.createElement('button');
+	const increaseButton = createButton();
+	const decreaseButton = createButton();
+	const resetViewButton = createButton();
 	const zoomLevelDisplay = document.createElement('span');
 	increaseButton.innerText = '+';
 	decreaseButton.innerText = '-';

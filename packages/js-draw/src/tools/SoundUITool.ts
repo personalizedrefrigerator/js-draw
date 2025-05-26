@@ -2,6 +2,7 @@ import Editor from '../Editor';
 import { LineSegment2, Color4, Point2 } from '@js-draw/math';
 import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
+import createButton from '../util/dom/createButton';
 
 class SoundFeedback {
 	private ctx: AudioContext;
@@ -135,10 +136,11 @@ export default class SoundUITool extends BaseTool {
 		this.toggleButtonContainer = document.createElement('div');
 		this.toggleButtonContainer.classList.add('js-draw-sound-ui-toggle');
 
-		this.toggleButton = document.createElement('button');
-		this.toggleButton.onclick = () => {
-			this.setEnabled(!this.isEnabled());
-		};
+		this.toggleButton = createButton({
+			onClick: () => {
+				this.setEnabled(!this.isEnabled());
+			},
+		});
 		this.toggleButtonContainer.appendChild(this.toggleButton);
 		this.updateToggleButtonText();
 

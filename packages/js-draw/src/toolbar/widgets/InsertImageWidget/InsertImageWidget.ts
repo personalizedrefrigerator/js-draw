@@ -21,6 +21,7 @@ import { Command } from '../../../commands/lib';
 import AbstractComponent from '../../../components/AbstractComponent';
 import { RenderableImage } from '../../../rendering/renderers/AbstractRenderer';
 import fileToImages from './fileToImages';
+import createButton from '../../../util/dom/createButton';
 
 type ImageListItem = SnappedListItem<ImageWrapper | null>;
 
@@ -119,7 +120,7 @@ export default class InsertImageWidget extends BaseWidget {
 		actionButtonRow.classList.add('action-button-row');
 		this.statusView.classList.add('insert-image-image-status-view');
 
-		this.submitButton = document.createElement('button');
+		this.submitButton = createButton();
 		this.selectedFiles = selectedFiles;
 		this.imageAltTextInput = document.createElement('input');
 
@@ -240,17 +241,19 @@ export default class InsertImageWidget extends BaseWidget {
 		sizeText.innerText = this.localizationTable.imageSize(Math.round(size), units);
 
 		// Add a button to allow decreasing the size of large images.
-		const decreaseSizeButton = document.createElement('button');
-		decreaseSizeButton.innerText = this.localizationTable.decreaseImageSize;
-		decreaseSizeButton.onclick = () => {
-			currentImage?.decreaseSize();
-		};
+		const decreaseSizeButton = createButton({
+			text: this.localizationTable.decreaseImageSize,
+			onClick: () => {
+				currentImage?.decreaseSize();
+			},
+		});
 
-		const resetSizeButton = document.createElement('button');
-		resetSizeButton.innerText = this.localizationTable.resetImage;
-		resetSizeButton.onclick = () => {
-			currentImage?.reset();
-		};
+		const resetSizeButton = createButton({
+			text: this.localizationTable.resetImage,
+			onClick: () => {
+				currentImage?.reset();
+			},
+		});
 
 		this.statusView.replaceChildren(sizeText);
 

@@ -3,6 +3,7 @@ import Editor from '../../Editor';
 import { IconElemType } from '../../toolbar/IconProvider';
 import { Point2 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
+import createButton from '../../util/dom/createButton';
 
 interface MenuOption<KeyType> {
 	key: KeyType;
@@ -129,16 +130,17 @@ const createMenuOverlay = async <KeyType>(
 		});
 
 		for (const option of options) {
-			const optionElement = document.createElement('button');
+			const optionElement = createButton({
+				classList: ['option', 'editor-popup-menu-option'],
+				onClick: (event) => {
+					if (event.defaultPrevented) return;
+
+					onOptionSelected(option.key);
+				},
+			});
 			optionElement.id = `menu-overlay-option-${idCounter++}`;
 			optionElement.role = 'menuitem';
-			optionElement.classList.add('option', 'editor-popup-menu-option');
 			optionElement.replaceChildren(option.icon(), document.createTextNode(option.text));
-			optionElement.onclick = (event) => {
-				if (event.defaultPrevented) return;
-
-				onOptionSelected(option.key);
-			};
 			contentElement.appendChild(optionElement);
 
 			if (optionElements.length === 0) {

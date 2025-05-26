@@ -9,7 +9,7 @@ import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import DropdownLayoutManager from './layout/DropdownLayoutManager';
 import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
-import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
+import addLongPressOrHoverCssClasses from '../../util/dom/addLongPressOrHoverCssClasses';
 import HelpDisplay from '../utils/HelpDisplay';
 import { assertIsObject } from '../../util/assertions';
 

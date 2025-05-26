@@ -3,7 +3,7 @@ import AbstractRenderer, { RenderableImage } from '../rendering/renderers/Abstra
 import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
-import waitForImageLoaded from '../util/waitForImageLoaded';
+import waitForImageLoaded from '../util/dom/waitForImageLoaded';
 
 /**
  * Represents a raster image.

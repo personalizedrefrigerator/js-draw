@@ -7,7 +7,7 @@ import Viewport from '../Viewport';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import { makePolylineBuilder } from '../components/builders/PolylineBuilder';
 import { EraserMode } from '../tools/Eraser';
-import { createSvgElement, createSvgElements, createSvgPaths } from '../util/createElement';
+import { createSvgElement, createSvgElements, createSvgPaths } from '../util/dom/createElement';
 import { SelectionMode } from '../tools/SelectionTool/types';
 
 export type IconElemType = HTMLImageElement | SVGElement;

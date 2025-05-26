@@ -51,4 +51,16 @@ describe('EdgeToolbar', () => {
 		// The edge menu should be fading out.
 		expect(getComputedStyle(edgemenuContainer).opacity).toBe('0');
 	});
+
+	// See js-draw/issues/118 -- Including type="button" on all buttons allows js-draw
+	// to be used in forms.
+	it('all buttons should have type="button"', () => {
+		const editor = createEditor();
+		const toolbar = makeEdgeToolbar(editor);
+		toolbar.addDefaultToolWidgets();
+
+		expect([
+			...editor.getRootElement().querySelectorAll('button:not([type="button"])'),
+		]).toHaveLength(0);
+	});
 });

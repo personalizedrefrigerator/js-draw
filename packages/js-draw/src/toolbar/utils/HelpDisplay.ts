@@ -2,8 +2,9 @@ import { Rect2, Vec2 } from '@js-draw/math';
 import { ToolbarContext } from '../types';
 import makeDraggable from './makeDraggable';
 import { MutableReactiveValue } from '../../util/ReactiveValue';
-import cloneElementWithStyles from '../../util/cloneElementWithStyles';
-import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
+import cloneElementWithStyles from '../../util/dom/cloneElementWithStyles';
+import addLongPressOrHoverCssClasses from '../../util/dom/addLongPressOrHoverCssClasses';
+import createButton from '../../util/dom/createButton';
 
 export interface HelpRecord {
 	readonly helpText: string;
@@ -274,7 +275,7 @@ export default class HelpDisplay {
 		};
 
 		const makeCloseButton = () => {
-			const closeButton = document.createElement('button');
+			const closeButton = createButton();
 			closeButton.classList.add('close-button');
 			closeButton.appendChild(this.context.icons.makeCloseIcon());
 
@@ -349,8 +350,8 @@ export default class HelpDisplay {
 			const navigationButtonContainer = document.createElement('div');
 			navigationButtonContainer.classList.add('navigation-buttons');
 
-			const nextButton = document.createElement('button');
-			const previousButton = document.createElement('button');
+			const nextButton = createButton();
+			const previousButton = createButton();
 
 			nextButton.textContent = this.context.localization.next;
 			previousButton.textContent = this.context.localization.previous;
@@ -528,7 +529,7 @@ export default class HelpDisplay {
 		const buttonContainer = document.createElement('div');
 		buttonContainer.classList.add('toolbar-help-overlay-button');
 
-		const helpButton = document.createElement('button');
+		const helpButton = createButton();
 		helpButton.classList.add('button');
 
 		const icon = this.context.icons.makeHelpIcon();

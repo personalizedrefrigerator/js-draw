@@ -9,6 +9,7 @@ import { Rect2 } from '@js-draw/math';
 import { KeyPressEvent } from '../inputEvents';
 import BaseTool from './BaseTool';
 import { toggleFindVisibleShortcutId } from './keybindings';
+import createButton from '../util/dom/createButton';
 
 const cssPrefix = 'find-tool';
 
@@ -87,8 +88,8 @@ export default class FindTool extends BaseTool {
 	private fillOverlay() {
 		const label = document.createElement('label');
 		this.searchInput = document.createElement('input');
-		const nextBtn = document.createElement('button');
-		const closeBtn = document.createElement('button');
+		const nextBtn = createButton();
+		const closeBtn = createButton();
 
 		// Math.random() ensures that the ID is unique (to allow us to refer to it
 		// with an htmlFor).

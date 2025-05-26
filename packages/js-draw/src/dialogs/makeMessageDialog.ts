@@ -1,4 +1,5 @@
 import type Editor from '../Editor';
+import createButton from '../util/dom/createButton';
 import waitForTimeout from '../util/waitForTimeout';
 
 export interface MessageDialogOptions {
@@ -24,9 +25,10 @@ const makeAboutDialog = (editor: Editor, options: MessageDialogOptions) => {
 	heading.textContent = options.title;
 	heading.setAttribute('autofocus', 'true');
 
-	const closeButton = document.createElement('button');
-	closeButton.innerText = editor.localization.closeDialog;
-	closeButton.classList.add('close');
+	const closeButton = createButton({
+		text: editor.localization.closeDialog,
+		classList: ['close'],
+	});
 
 	const scrollRegion = document.createElement('div');
 	scrollRegion.classList.add('scroll');

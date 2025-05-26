@@ -1,4 +1,5 @@
-import addLongPressOrHoverCssClasses from '../../../util/addLongPressOrHoverCssClasses';
+import addLongPressOrHoverCssClasses from '../../../util/dom/addLongPressOrHoverCssClasses';
+import createButton from '../../../util/dom/createButton';
 import { ReactiveValue } from '../../../util/ReactiveValue';
 import { IconElemType } from '../../IconProvider';
 
@@ -21,7 +22,7 @@ const makeButtonGrid = (buttonSpecs: Button[], columnCount: number) => {
 	container.style.setProperty('--column-count', `${columnCount}`);
 
 	const makeButton = (buttonSpec: Button) => {
-		const buttonElement = document.createElement('button');
+		const buttonElement = createButton();
 		buttonElement.classList.add('button');
 
 		const iconElement = buttonSpec.icon();

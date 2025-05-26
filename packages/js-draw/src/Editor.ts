@@ -40,7 +40,7 @@ import makeAboutDialog, { AboutDialogEntry } from './dialogs/makeAboutDialog';
 import version from './version';
 import { editorImageToSVGSync, editorImageToSVGAsync } from './image/export/editorImageToSVG';
 import ReactiveValue, { MutableReactiveValue } from './util/ReactiveValue';
-import listenForKeyboardEventsFrom from './util/listenForKeyboardEventsFrom';
+import listenForKeyboardEventsFrom from './util/dom/listenForKeyboardEventsFrom';
 import mitLicenseAttribution from './util/mitLicenseAttribution';
 import { PenTypeRecord } from './toolbar/widgets/PenToolWidget';
 import ClipboardHandler from './util/ClipboardHandler';

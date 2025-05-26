@@ -5,6 +5,7 @@ import Pointer from '../../Pointer';
 import Viewport from '../../Viewport';
 import { SelectionBoxChild } from './types';
 import { ToolLocalization } from '../localization';
+import createButton from '../../util/dom/createButton';
 
 const verticalOffset = 40;
 
@@ -42,8 +43,9 @@ export default class SelectionMenuShortcut implements SelectionBoxChild {
 	}
 
 	private initUI() {
-		const button = document.createElement('button');
-		this.icon.classList.add('icon');
+		const button = createButton({
+			classList: ['icon'],
+		});
 		button.replaceChildren(this.icon);
 		button.ariaLabel = this.localization.selectionMenu__show;
 		button.title = button.ariaLabel;

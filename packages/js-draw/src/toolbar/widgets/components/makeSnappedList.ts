@@ -1,4 +1,4 @@
-import stopPropagationOfScrollingWheelEvents from '../../../util/stopPropagationOfScrollingWheelEvents';
+import stopPropagationOfScrollingWheelEvents from '../../../util/dom/stopPropagationOfScrollingWheelEvents';
 import { MutableReactiveValue, ReactiveValue } from '../../../util/ReactiveValue';
 
 export interface SnappedListItem<DataType> {

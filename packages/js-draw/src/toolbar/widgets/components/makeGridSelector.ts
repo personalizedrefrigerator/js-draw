@@ -1,6 +1,6 @@
 import { MutableReactiveValue } from '../../../util/ReactiveValue';
-import stopPropagationOfScrollingWheelEvents from '../../../util/stopPropagationOfScrollingWheelEvents';
-import addLongPressOrHoverCssClasses from '../../../util/addLongPressOrHoverCssClasses';
+import stopPropagationOfScrollingWheelEvents from '../../../util/dom/stopPropagationOfScrollingWheelEvents';
+import addLongPressOrHoverCssClasses from '../../../util/dom/addLongPressOrHoverCssClasses';
 import { IconElemType } from '../../IconProvider';
 import { toolbarCSSPrefix } from '../../constants';
 

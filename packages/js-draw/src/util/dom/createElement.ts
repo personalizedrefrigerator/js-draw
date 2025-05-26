@@ -12,6 +12,9 @@ interface ElementToPropertiesMap {
 		'stroke-width': string;
 		transform: string;
 	};
+	button: {
+		type: 'button';
+	};
 	rect: {
 		stroke: string;
 		fill: string;

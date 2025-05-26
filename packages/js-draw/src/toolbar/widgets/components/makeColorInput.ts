@@ -3,6 +3,7 @@ import Editor from '../../../Editor';
 import PipetteTool from '../../../tools/PipetteTool';
 import { EditorEventType } from '../../../types';
 import type HelpDisplay from '../../utils/HelpDisplay';
+import createButton from '../../../util/dom/createButton';
 
 type OnColorChangeListener = (color: Color4) => void;
 
@@ -127,7 +128,7 @@ const addPipetteTool = (
 	container: HTMLElement,
 	onColorChange: OnColorChangeListener,
 ) => {
-	const pipetteButton = document.createElement('button');
+	const pipetteButton = createButton();
 	pipetteButton.classList.add('pipetteButton');
 	pipetteButton.title = editor.localization.pickColorFromScreen;
 	pipetteButton.setAttribute('alt', pipetteButton.title);
