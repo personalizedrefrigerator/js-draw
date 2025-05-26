@@ -1,7 +1,12 @@
-import Editor, { Color4, InputEvtType, Vec2, makeOutlinedCircleBuilder, sendPenEvent } from '../lib';
+import Editor, {
+	Color4,
+	InputEvtType,
+	Vec2,
+	makeOutlinedCircleBuilder,
+	sendPenEvent,
+} from '../lib';
 import createEditor from '../testing/createEditor';
 import { EraserTool, PenStyle, PenTool, TextTool } from './lib';
-
 
 const tryToDraw = (editor: Editor) => {
 	sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.zero);
@@ -15,13 +20,12 @@ describe('ToolController', () => {
 		const toolController = editor.toolController;
 
 		// Should initially have no elements
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		tryToDraw(editor);
 
 		// Drawing should add an element
-		expect(editor.image.getAllElements()).toHaveLength(1);
-
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// Remove all pen tools
 		const penTools = toolController.getMatchingTools(PenTool);
@@ -48,7 +52,7 @@ describe('ToolController', () => {
 		tryToDraw(editor);
 
 		// Drawing should not add an element.
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 	});
 
 	it('should support inserting new tools', () => {
@@ -79,7 +83,9 @@ describe('ToolController', () => {
 		toolController.addPrimaryTool(newPen);
 
 		// Should only be included once
-		expect(toolController.getMatchingTools(PenTool).filter(pen => pen === newPen)).toHaveLength(1);
+		expect(toolController.getMatchingTools(PenTool).filter((pen) => pen === newPen)).toHaveLength(
+			1,
+		);
 
 		// Drawing should trigger the pen
 		expect(penStyle.factory).not.toHaveBeenCalled();

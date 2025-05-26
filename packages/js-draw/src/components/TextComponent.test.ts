@@ -5,7 +5,6 @@ import createEditor from '../testing/createEditor';
 import AbstractComponent from './AbstractComponent';
 import TextComponent, { TextTransformMode } from './TextComponent';
 
-
 describe('TextComponent', () => {
 	it('should be serializable', () => {
 		const style: TextRenderingStyle = {
@@ -13,7 +12,7 @@ describe('TextComponent', () => {
 			fontFamily: 'serif',
 			renderingStyle: { fill: Color4.black },
 		};
-		const text = new TextComponent([ 'Foo' ], Mat33.identity, style);
+		const text = new TextComponent(['Foo'], Mat33.identity, style);
 		const serialized = text.serialize();
 		const deserialized = AbstractComponent.deserialize(serialized) as TextComponent;
 		expect(deserialized.getBBox()).objEq(text.getBBox());
@@ -43,12 +42,15 @@ describe('TextComponent', () => {
 			fontFamily: 'sans',
 			renderingStyle: { fill: Color4.red },
 		};
-		const text = new TextComponent([ 'Foo' ], Mat33.identity, style);
+		const text = new TextComponent(['Foo'], Mat33.identity, style);
 
 		expect(text.getStyle().color).objEq(Color4.red);
-		text.forceStyle({
-			color: Color4.green,
-		}, null);
+		text.forceStyle(
+			{
+				color: Color4.green,
+			},
+			null,
+		);
 		expect(text.getStyle().color).objEq(Color4.green);
 		expect(text.getTextStyle().renderingStyle.fill).objEq(Color4.green);
 
@@ -58,7 +60,7 @@ describe('TextComponent', () => {
 
 		// Should queue a re-render after restyling.
 		const editor = createEditor();
-		EditorImage.addElement(text).apply(editor);
+		EditorImage.addComponent(text).apply(editor);
 
 		editor.rerender();
 		expect(editor.isRerenderQueued()).toBe(false);
@@ -71,26 +73,32 @@ describe('TextComponent', () => {
 		expect(text.getStyle().color).objEq(Color4.green);
 	});
 
-	it('calling forceStyle on the duplicate of a TextComponent should preserve the original\'s style', () => {
+	it("calling forceStyle on the duplicate of a TextComponent should preserve the original's style", () => {
 		const originalStyle: TextRenderingStyle = {
 			size: 11,
 			fontFamily: 'sans-serif',
-			renderingStyle: { fill: Color4.purple, },
+			renderingStyle: { fill: Color4.purple },
 		};
 
-		const text1 = new TextComponent([ 'Test' ], Mat33.identity, originalStyle);
+		const text1 = new TextComponent(['Test'], Mat33.identity, originalStyle);
 		const text2 = text1.clone() as TextComponent;
 
-		text1.forceStyle({
-			color: Color4.red,
-		}, null);
+		text1.forceStyle(
+			{
+				color: Color4.red,
+			},
+			null,
+		);
 
 		expect(text2.getStyle().color).objEq(Color4.purple);
 		expect(text1.getStyle().color).objEq(Color4.red);
 
-		text2.forceStyle({
-			textStyle: originalStyle,
-		}, null);
+		text2.forceStyle(
+			{
+				textStyle: originalStyle,
+			},
+			null,
+		);
 
 		expect(text1.getStyle().color).objEq(Color4.red);
 		expect(text2.getTextStyle()).toMatchObject(originalStyle);
@@ -107,11 +115,11 @@ describe('TextComponent', () => {
 			const str1 = 'test';
 			const str2 = 'test2';
 
-			const container = new TextComponent([ str1, str2 ], Mat33.identity, baseStyle);
+			const container = new TextComponent([str1, str2], Mat33.identity, baseStyle);
 
 			// Create separate components for str1 and str2 so we can check their individual bounding boxes
-			const str1Component = new TextComponent([ str1 ], Mat33.identity, baseStyle);
-			const str2Component = new TextComponent([ str2 ], Mat33.identity, baseStyle);
+			const str1Component = new TextComponent([str1], Mat33.identity, baseStyle);
+			const str2Component = new TextComponent([str2], Mat33.identity, baseStyle);
 
 			const widthSum = str1Component.getBBox().width + str2Component.getBBox().width;
 			const maxHeight = Math.max(str1Component.getBBox().height, str2Component.getBBox().height);
@@ -119,35 +127,40 @@ describe('TextComponent', () => {
 		});
 
 		it('RELATIVE_X_ABSOLUTE_Y should work (relatively positioned along x, absolutely along y)', () => {
-			const component1 = new TextComponent([ 'test' ], Mat33.identity, baseStyle);
+			const component1 = new TextComponent(['test'], Mat33.identity, baseStyle);
 
 			const componentTranslation = Vec2.of(10, 10);
 			const component2 = new TextComponent(
-				[ 'relatively' ],
+				['relatively'],
 				Mat33.translation(componentTranslation),
 				baseStyle,
-				TextTransformMode.RELATIVE_X_ABSOLUTE_Y
+				TextTransformMode.RELATIVE_X_ABSOLUTE_Y,
 			);
 
 			const component3 = new TextComponent(
-				[ 'more of a test...' ],
+				['more of a test...'],
 				Mat33.translation(componentTranslation),
 				baseStyle,
-				TextTransformMode.RELATIVE_X_ABSOLUTE_Y
+				TextTransformMode.RELATIVE_X_ABSOLUTE_Y,
 			);
 
-
-			const container = new TextComponent([ component1, component2, component3 ], Mat33.identity, baseStyle);
+			const container = new TextComponent(
+				[component1, component2, component3],
+				Mat33.identity,
+				baseStyle,
+			);
 			const expectedWidth =
-				component1.getBBox().width
+				component1.getBBox().width +
 				// x should take the translation from each component into account.
-				+ componentTranslation.x + component2.getBBox().width
-				+ componentTranslation.x + component3.getBBox().width;
+				componentTranslation.x +
+				component2.getBBox().width +
+				componentTranslation.x +
+				component3.getBBox().width;
 			const expectedHeight = Math.max(
 				component1.getBBox().height,
 
 				// Absolute y: Should *not* take into account both components' y translations
-				componentTranslation.y + component3.getBBox().height
+				componentTranslation.y + component3.getBBox().height,
 			);
 			expect(container.getBBox().size).objEq(Vec2.of(expectedWidth, expectedHeight));
 		});
@@ -155,35 +168,39 @@ describe('TextComponent', () => {
 		it('RELATIVE_Y_ABSOLUTE_X should work (relatively positioned along y, absolutely along x)', () => {
 			const firstComponentTranslation = Vec2.of(1000, 1000);
 			const component1 = new TextComponent(
-				[ '...' ],
+				['...'],
 
 				// The translation of the first component shouldn't affect the Y size of the bounding box.
 				Mat33.translation(firstComponentTranslation),
 
-				baseStyle);
+				baseStyle,
+			);
 
 			const componentTranslation = Vec2.of(10, 20);
 			const component2 = new TextComponent(
-				[ 'Test!' ],
+				['Test!'],
 				Mat33.translation(componentTranslation),
 				baseStyle,
-				TextTransformMode.RELATIVE_Y_ABSOLUTE_X
+				TextTransformMode.RELATIVE_Y_ABSOLUTE_X,
 			);
 
 			const component3 = new TextComponent(
-				[ 'Even more of a test.' ],
+				['Even more of a test.'],
 				Mat33.translation(componentTranslation),
 				baseStyle,
-				TextTransformMode.RELATIVE_Y_ABSOLUTE_X
+				TextTransformMode.RELATIVE_Y_ABSOLUTE_X,
 			);
 
-
-			const container = new TextComponent([ component1, component2, component3 ], Mat33.identity, baseStyle);
+			const container = new TextComponent(
+				[component1, component2, component3],
+				Mat33.identity,
+				baseStyle,
+			);
 			const expectedWidth =
-				component1.getBBox().width
-
+				component1.getBBox().width +
 				// Space between the start of components 2 and 3 and the start of component 1
-				+ firstComponentTranslation.x - componentTranslation.x;
+				firstComponentTranslation.x -
+				componentTranslation.x;
 
 			const expectedHeight =
 				// Don't include component1.bbox.height: component1 overlaps with component 2 completely in y
@@ -192,9 +209,7 @@ describe('TextComponent', () => {
 				// Note that while relative positioning is relative to the right edge of the baseline of the previous
 				// item (when in left-to-right mode). Thus, x is adjusted automatically by the text width, while
 				// y remains the same (if there is no additional translation).
-				+ componentTranslation.y
-				+ componentTranslation.y
-				+ component3.getBBox().height;
+				+componentTranslation.y + componentTranslation.y + component3.getBBox().height;
 
 			expect(container.getBBox().size).objEq(Vec2.of(expectedWidth, expectedHeight));
 		});

@@ -1,4 +1,3 @@
-
 textarea.runnable-code {
 	width: 100%;
 	min-height: 400px;
@@ -23,8 +22,11 @@ textarea.runnable-code {
 	--cm-string-color: var(--hl-3, brown);
 	--cm-paren-color: var(--hl-1, gray);
 	--cm-varname-color: var(--hl-2, black);
+	--cm-tag-color: var(--hl-9, #500);
 	--cm-number-color: var(--hl-16, black);
-
+	--cm-integer-color: var(--hl-14, var(--cm-number-color));
+	--cm-typename-color: var(--hl-13, currentColor);
+	--cm-call-function-color: var(--hl-6, currentColor);
 
 	--cm-secondary-background-color: #ddd;
 	--cm-secondary-text-color: #300;
@@ -35,7 +37,7 @@ textarea.runnable-code {
 	--cm-shadow-color: rgba(0, 0, 0, 0.5);
 }
 
-@media screen and (prefers-color-scheme: dark) {	
+@media screen and (prefers-color-scheme: dark) {
 	:root {
 		--cm-secondary-background-color: #222;
 		--cm-secondary-text-color: #eee;
@@ -47,13 +49,17 @@ textarea.runnable-code {
 }
 
 // Correct code block size within headers
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
 	code {
 		font-size: inherit;
 	}
 }
 
 // Fix video size
-video[controls]  {
+video[controls] {
 	max-width: 100%;
 }

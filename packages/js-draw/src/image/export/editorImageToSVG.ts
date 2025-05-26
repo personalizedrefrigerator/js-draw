@@ -1,7 +1,7 @@
 import EditorImage, { PreRenderComponentCallback } from '../EditorImage';
 import { Rect2 } from '@js-draw/math';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
-import { svgLoaderAutoresizeClassName } from '../../SVGLoader';
+import { svgLoaderAutoresizeClassName } from '../../SVGLoader/SVGLoader';
 import adjustExportedSVGSize, { SVGSizingOptions } from './adjustExportedSVGSize';
 
 export interface SVGExportOptions extends SVGSizingOptions {
@@ -13,10 +13,12 @@ export interface SVGExportOptions extends SVGSizingOptions {
 }
 
 // onComplete should return the same SVGElement returned by toSVGInternal
-type RenderCallback = (renderer: SVGRenderer, onComplete: ()=>SVGElement)=>void;
+type RenderCallback = (renderer: SVGRenderer, onComplete: () => SVGElement) => void;
 
 const toSVGInternal = (
-	image: EditorImage, renderFunction: RenderCallback, options: SVGExportOptions
+	image: EditorImage,
+	renderFunction: RenderCallback,
+	options: SVGExportOptions,
 ) => {
 	const importExportViewport = image.getImportExportViewport().getTemporaryClone();
 
@@ -39,13 +41,10 @@ const toSVGInternal = (
 		}
 	}
 
-	const { element: result, renderer } = SVGRenderer.fromViewport(
-		importExportViewport,
-		{
-			sanitize: options.sanitize ?? false,
-			useViewBoxForPositioning: true,
-		},
-	);
+	const { element: result, renderer } = SVGRenderer.fromViewport(importExportViewport, {
+		sanitize: options.sanitize ?? false,
+		useViewBoxForPositioning: true,
+	});
 
 	// Use a callback rather than async/await to allow this function to create
 	// both sync and async render functions
@@ -56,13 +55,11 @@ const toSVGInternal = (
 			result.classList.remove(svgLoaderAutoresizeClassName);
 		}
 
-
 		const exportRect = importExportViewport.visibleRect;
 		adjustExportedSVGSize(result, exportRect, options);
 
 		return result;
 	});
-
 
 	return result;
 };
@@ -79,9 +76,11 @@ export const editorImageToSVGSync = (image: EditorImage, options: SVGExportOptio
 };
 
 export const editorImageToSVGAsync = (
-	image: EditorImage, preRenderComponent: PreRenderComponentCallback, options: SVGExportOptions
+	image: EditorImage,
+	preRenderComponent: PreRenderComponentCallback,
+	options: SVGExportOptions,
 ) => {
-	return new Promise<SVGElement>(resolve => {
+	return new Promise<SVGElement>((resolve) => {
 		toSVGInternal(
 			image,
 			async (renderer, onComplete) => {
@@ -93,4 +92,3 @@ export const editorImageToSVGAsync = (
 		);
 	});
 };
-

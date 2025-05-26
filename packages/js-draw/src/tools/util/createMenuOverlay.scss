@@ -1,0 +1,75 @@
+@keyframes show-popup-menu-animation {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.editor-popup-menu {
+	width: 100%;
+	height: 100%;
+	background-color: transparent;
+	border: none;
+
+	animation: var(--hide-menu-animation-timeout) ease show-popup-menu-animation;
+	opacity: 1;
+	transition: var(--hide-menu-animation-timeout) ease opacity;
+	overflow: hidden;
+
+	&.-hide {
+		opacity: 0;
+	}
+
+	& > .content {
+		position: absolute;
+		left: var(--anchor-x);
+		top: var(--anchor-y);
+		display: flex;
+		flex-direction: column;
+
+		overflow: clip;
+		border-radius: 6px;
+		box-shadow: 0px 0px 2px var(--shadow-color);
+		background-color: var(--background-color-1);
+	}
+
+	&::backdrop {
+		background: transparent;
+	}
+}
+
+.editor-popup-menu-option {
+	display: flex;
+	justify-content: start;
+	cursor: pointer;
+	padding: 5px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+
+	background-color: transparent;
+	color: var(--foreground-color-1);
+	--icon-color: currentColor;
+
+	border: none;
+	font-size: 1em;
+
+	&:hover,
+	&:focus-visible {
+		background-color: var(--background-color-2);
+		color: var(--foreground-color-2);
+	}
+
+	// icon
+	> :first-child {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+		align-self: center;
+
+		// RTL support:
+		margin-inline-start: 0em;
+		margin-inline-end: 0.32em;
+	}
+}

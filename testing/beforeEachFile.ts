@@ -1,9 +1,9 @@
+// This file contains polyfills and must assume that built-in types are incorrect.
+/* eslint @typescript-eslint/no-unnecessary-condition: "off" */
+
 import loadExpectExtensions from './loadExpectExtensions';
 loadExpectExtensions();
 jest.useFakeTimers();
-
-// This file contains polyfills and must assume that built-in types are incorrect.
-// eslint-disable @typescript-eslint/no-unnecessary-condition
 
 // jsdom hides several node APIs that should be present in the browser.
 import { TextEncoder, TextDecoder } from 'node:util';
@@ -19,13 +19,11 @@ HTMLCanvasElement.prototype.getContext = () => null;
 
 // jsdom also doesn't support ResizeObserver. Mock it.
 window.ResizeObserver ??= class {
-	public constructor(_callback: ResizeObserverCallback) { }
+	public disconnect() {}
 
-	public disconnect() { }
+	public observe() {}
 
-	public observe() { }
-
-	public unobserve() { }
+	public unobserve() {}
 };
 
 // jsdom doesn't support PointerEvent.
@@ -41,7 +39,8 @@ window.PointerEvent ??= class extends MouseEvent {
 	public twist: number;
 
 	public constructor(
-		type: 'pointerdown'|'pointermove'|'pointerup', initDict: PointerEventInit = {},
+		type: 'pointerdown' | 'pointermove' | 'pointerup',
+		initDict: PointerEventInit = {},
 	) {
 		super(type, initDict);
 
@@ -53,46 +52,48 @@ window.PointerEvent ??= class extends MouseEvent {
 		this.tiltY = initDict.tiltY ?? 0;
 		this.twist = initDict.twist ?? 0;
 	}
-} as any;
+} as typeof PointerEvent;
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.setPointerCapture ??= () => {};
 // eslint-disable-next-line @typescript-eslint/unbound-method
 HTMLElement.prototype.releasePointerCapture ??= () => {};
+// eslint-disable-next-line @typescript-eslint/unbound-method
+HTMLElement.prototype.scrollIntoView ??= () => {};
 
 // Mock support for .innerText
 // See https://github.com/jsdom/jsdom/issues/1245
 Object.defineProperty(HTMLElement.prototype, 'innerText', {
-	get() {
+	get(this: HTMLElement) {
 		// Not exactly equivalent to .innerText. See
 		// https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent#differences_from_innertext
 		return this.textContent;
 	},
-	set(value: string) {
+	set(this: HTMLElement, value: string) {
 		this.replaceChildren(document.createTextNode(value));
 	},
 });
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
-HTMLDialogElement.prototype.showModal ??= function() {
+HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
 	this.style.display = 'block';
 };
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
-HTMLDialogElement.prototype.close ??= function() {
+HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
 	this.style.display = 'none';
 	this.dispatchEvent(new Event('close'));
 };
 
-
 // jsdom doesn't support the clipboard API or ClipboardEvents.
 // For now, these are mocked here:
 
-(Navigator.prototype as any).clipboard ??= {};
+// @ts-expect-error -- assigning to property that is not actually read-only
+Navigator.prototype.clipboard ??= {};
 
 let clipboardData: ClipboardItems = [];
-Navigator.prototype.clipboard.read = async (): Promise<ClipboardItems> => {
-	return [...clipboardData];
+Navigator.prototype.clipboard.read = (): Promise<ClipboardItems> => {
+	return Promise.resolve([...clipboardData]);
 };
 Navigator.prototype.clipboard.readText = async (): Promise<string> => {
 	for (const item of clipboardData) {
@@ -106,18 +107,25 @@ Navigator.prototype.clipboard.readText = async (): Promise<string> => {
 	return '';
 };
 
-Navigator.prototype.clipboard.write = async (data: ClipboardItems): Promise<void> => {
+Navigator.prototype.clipboard.write = (data: ClipboardItems): Promise<void> => {
 	clipboardData = [...data];
+	return Promise.resolve();
+};
+
+Navigator.prototype.clipboard.writeText = (text: string): Promise<void> => {
+	clipboardData = [new ClipboardItem({ 'text/plain': text })];
+	return Promise.resolve();
 };
 
 window.ClipboardItem ??= class {
 	public readonly types: string[];
+	public readonly presentationStyle = 'unspecified';
 
 	public constructor(
-		public readonly items: Record<string, string|Blob|PromiseLike<string|Blob>>,
-		public readonly options?: ClipboardItemOptions
+		public readonly items: Record<string, string | Blob | PromiseLike<string | Blob>>,
+		public readonly options?: ClipboardItemOptions,
 	) {
-		this.types = Object.keys(items).map(key => key.toLowerCase());
+		this.types = Object.keys(items).map((key) => key.toLowerCase());
 	}
 
 	public async getType(type: string) {
@@ -128,10 +136,14 @@ window.ClipboardItem ??= class {
 			return value;
 		}
 	}
+
+	public static supports(type: string) {
+		return type === 'text/plain' || type === 'text/html' || type.startsWith('image/');
+	}
 };
 
 window.ClipboardEvent ??= class extends Event {
-	public clipboardData: DataTransfer|null;
+	public clipboardData: DataTransfer | null;
 
 	public constructor(type: string, options?: ClipboardEventInit) {
 		super(type, options);
@@ -151,7 +163,7 @@ window.DataTransfer ??= class {
 		for (const file of this.files) {
 			types.add(file.type);
 		}
-		return [ ...types.values() ];
+		return [...types.values()];
 	}
 
 	public get items() {
@@ -170,5 +182,6 @@ window.DataTransfer ??= class {
 		this.#data.clear();
 	}
 
-	public setDragImage() { }
-} as any;
+	public setDragImage() {}
+	// This mock doesn't need to completely implement DataTransfer. Cast:
+} as unknown as typeof DataTransfer;

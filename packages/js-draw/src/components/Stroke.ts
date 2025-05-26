@@ -1,12 +1,35 @@
 import SerializableCommand from '../commands/SerializableCommand';
-import { Mat33, Path, Rect2, LineSegment2, PathCommandType, Point2, PathIntersectionResult, comparePathIndices, stepPathIndexBy } from '@js-draw/math';
+import {
+	Mat33,
+	Path,
+	Rect2,
+	LineSegment2,
+	PathCommandType,
+	Point2,
+	PathIntersectionResult,
+	comparePathIndices,
+	stepPathIndexBy,
+	Color4,
+} from '@js-draw/math';
 import Editor from '../Editor';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
-import RenderingStyle, { styleFromJSON, styleToJSON } from '../rendering/RenderingStyle';
+import RenderingStyle, {
+	StrokeStyle,
+	styleFromJSON,
+	styleToJSON,
+} from '../rendering/RenderingStyle';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
-import RestyleableComponent, { ComponentStyle, createRestyleComponentCommand } from './RestylableComponent';
-import RenderablePathSpec, { RenderablePathSpecWithPath, pathFromRenderable, pathToRenderable, simplifyPathToFullScreenOrEmpty } from '../rendering/RenderablePathSpec';
+import RestyleableComponent, {
+	ComponentStyle,
+	createRestyleComponentCommand,
+} from './RestylableComponent';
+import RenderablePathSpec, {
+	RenderablePathSpecWithPath,
+	pathFromRenderable,
+	pathToRenderable,
+	simplifyPathToFullScreenOrEmpty,
+} from '../rendering/RenderablePathSpec';
 import Viewport from '../Viewport';
 
 interface StrokePart extends RenderablePathSpec {
@@ -95,16 +118,46 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		this.contentBBox ??= Rect2.empty;
 	}
 
+	/**
+	 * Creates a new `Stroke` from a {@link Path} and `style`. Strokes created
+	 * with this method have transparent fill.
+	 *
+	 * Example:
+	 * ```ts,runnable
+	 * import { Editor, Stroke, Color4 } from 'js-draw';
+	 * const editor = new Editor(document.body);
+	 * ---visible---
+	 * const stroke = Stroke.fromStroked('m0,0 l10,10', { width: 10, color: Color4.red });
+	 * editor.dispatch(editor.image.addComponent(stroke));
+	 * ```
+	 * Notice that `path` can be a string that specifies an SVG path
+	 *
+	 * @see fromFilled
+	 */
+	public static fromStroked(path: Path | string, style: StrokeStyle) {
+		if (typeof path === 'string') {
+			path = Path.fromString(path);
+		}
+
+		return new Stroke([pathToRenderable(path, { fill: Color4.transparent, stroke: style })]);
+	}
+
+	/** @see fromStroked */
+	public static fromFilled(path: Path | string, fill: Color4) {
+		if (typeof path === 'string') {
+			path = Path.fromString(path);
+		}
+
+		return new Stroke([pathToRenderable(path, { fill })]);
+	}
+
 	public getStyle(): ComponentStyle {
 		if (this.parts.length === 0) {
-			return { };
+			return {};
 		}
 		const firstPart = this.parts[0];
 
-		if (
-			firstPart.style.stroke === undefined
-			|| firstPart.style.stroke.width === 0
-		) {
+		if (firstPart.style.stroke === undefined || firstPart.style.stroke.width === 0) {
 			return {
 				color: firstPart.style.fill,
 			};
@@ -119,7 +172,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		return createRestyleComponentCommand(this.getStyle(), style, this);
 	}
 
-	public forceStyle(style: ComponentStyle, editor: Editor|null): void {
+	public forceStyle(style: ComponentStyle, editor: Editor | null): void {
 		if (!style.color) {
 			return;
 		}
@@ -127,9 +180,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		this.parts = this.parts.map((part) => {
 			const newStyle = {
 				...part.style,
-				stroke: part.style.stroke ? {
-					...part.style.stroke,
-				} : undefined,
+				stroke: part.style.stroke
+					? {
+							...part.style.stroke,
+						}
+					: undefined,
 			};
 
 			// Change the stroke color if a stroked shape. Else,
@@ -167,10 +222,13 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 		for (const part of this.parts) {
 			const path = part.path;
 
-			const makeStroke = (path: Path): Stroke|null => {
+			const makeStroke = (path: Path): Stroke | null => {
 				if (part.style.fill.a > 0) {
 					// Remove visually empty paths.
-					if (path.parts.length < 1 || (path.parts.length === 1 && path.parts[0].kind === PathCommandType.LineTo)) {
+					if (
+						path.parts.length < 1 ||
+						(path.parts.length === 1 && path.parts[0].kind === PathCommandType.LineTo)
+					) {
 						// TODO: If this isn't present, a very large number of strokes are created while erasing.
 						return null;
 					} else {
@@ -183,7 +241,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 					failedAssertions = true;
 					return null;
 				}
-				return new Stroke([ pathToRenderable(path, part.style) ], this.getZIndex());
+				return new Stroke([pathToRenderable(path, part.style)], this.getZIndex());
 			};
 
 			const intersectionPoints: PathIntersectionResult[] = [];
@@ -206,10 +264,10 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			//    part of the stroke.
 			let isErasingFromEdge = false;
 			if (
-				intersectionPoints.length === 0
-				&& part.style.stroke
-				&& part.style.stroke.width > eraserPath.bbox.minDimension * 0.3
-				&& part.style.stroke.width < eraserPath.bbox.maxDimension * 30
+				intersectionPoints.length === 0 &&
+				part.style.stroke &&
+				part.style.stroke.width > eraserPath.bbox.minDimension * 0.3 &&
+				part.style.stroke.width < eraserPath.bbox.maxDimension * 30
 			) {
 				for (const segment of polyline) {
 					intersectionPoints.push(...path.intersection(segment, part.style.stroke.width / 2));
@@ -227,7 +285,9 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 				// The eraser may not be near the center of the curve -- approximate.
 				if (isErasingFromEdge) {
-					return intersectionPoints[0].curveIndex === 0 && intersectionPoints[0].parameterValue <= 0;
+					return (
+						intersectionPoints[0].curveIndex === 0 && intersectionPoints[0].parameterValue <= 0
+					);
 				}
 
 				const justBeforeFirstIntersection = stepPathIndexBy(intersectionPoints[0], -1e-10);
@@ -239,7 +299,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				const component = makeStroke(path);
 
 				let isInside = intersectionCount % 2 === 1;
-				intersectionCount ++;
+				intersectionCount++;
 
 				if (knownToBeInside !== undefined) {
 					isInside = knownToBeInside;
@@ -249,7 +309,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				// (including https://github.com/Pomax/bezierjs/issues/179).
 				// Even if not all intersections are returned correctly, we still want
 				// isInside to be roughly correct.
-				if (knownToBeInside === undefined && !isInside && eraserPath.closedContainsPoint(path.getExactBBox().center)) {
+				if (
+					knownToBeInside === undefined &&
+					!isInside &&
+					eraserPath.closedContainsPoint(path.getExactBBox().center)
+				) {
 					isInside = !isInside;
 				}
 
@@ -258,19 +322,24 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				}
 
 				// Assertion: Avoid deleting sections that are much larger than the eraser.
-				failedAssertions ||= isInside && path.getExactBBox().maxDimension > eraserPath.getExactBBox().maxDimension * 2;
+				failedAssertions ||=
+					isInside && path.getExactBBox().maxDimension > eraserPath.getExactBBox().maxDimension * 2;
 
 				if (!isInside) {
 					newStrokes.push(component);
 				}
 			};
 
-			if (part.style.fill.a === 0) { // Not filled?
+			if (part.style.fill.a === 0) {
+				// Not filled?
 				// An additional case where we erase completely -- without the padding of the stroke,
 				// the path is smaller than the eraser (allows us to erase dots completely).
-				const shouldEraseCompletely = eraserPath.getExactBBox().maxDimension / 10 > path.getExactBBox().maxDimension;
+				const shouldEraseCompletely =
+					eraserPath.getExactBBox().maxDimension / 10 > path.getExactBBox().maxDimension;
 				if (!shouldEraseCompletely) {
-					const split = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+					const split = path.splitAt(intersectionPoints, {
+						mapNewPoint: (p) => viewport.roundPoint(p),
+					});
 					for (const splitPart of split) {
 						addNewPath(splitPart);
 					}
@@ -311,7 +380,9 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 				//
 				// The difficulty here is correctly pairing edges to create the the output
 				// strokes, particularly because we don't know the order of intersection points.
-				const parts = path.splitAt(intersectionPoints, { mapNewPoint: p => viewport.roundPoint(p) });
+				const parts = path.splitAt(intersectionPoints, {
+					mapNewPoint: (p) => viewport.roundPoint(p),
+				});
 				for (let i = 0; i < Math.floor(parts.length / 2); i++) {
 					addNewPath(parts[i].union(parts[parts.length - i - 1]).asClosed());
 				}
@@ -340,6 +411,14 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			}
 		}
 		return false;
+	}
+
+	public override keyPoints() {
+		return this.parts
+			.map((part) => {
+				return part.startPoint;
+			})
+			.flat();
 	}
 
 	public override intersectsRect(rect: Rect2): boolean {
@@ -393,7 +472,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 	// A simplification of the path for a given visibleRect. Intended
 	// to help check for occlusion.
-	private simplifiedPath: SimplificationRecord|null = null;
+	private simplifiedPath: SimplificationRecord | null = null;
 	private computeSimplifiedPathFor(visibleRect: Rect2): SimplificationRecord {
 		const simplifiedParts: StrokePart[] = [];
 		let occludes = false;
@@ -401,14 +480,12 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 
 		for (const part of this.parts) {
 			if (
-				skipSimplification
-
+				skipSimplification ||
 				// Simplification currently only works for stroked paths
-				|| !part.style.stroke
-
+				!part.style.stroke ||
 				// One of the main purposes of this is to check for occlusion.
 				// We can't occlude things if the stroke is partially transparent.
-				|| part.style.stroke.color.a < 0.99
+				part.style.stroke.color.a < 0.99
 			) {
 				simplifiedParts.push(part);
 				continue;
@@ -467,8 +544,12 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 					continue;
 				}
 
-				const muchBiggerThanVisible = bbox.size.x > visibleRect.size.x * 3 || bbox.size.y > visibleRect.size.y * 3;
-				if (muchBiggerThanVisible && !part.path.roughlyIntersects(visibleRect, part.style.stroke?.width ?? 0)) {
+				const muchBiggerThanVisible =
+					bbox.size.x > visibleRect.size.x * 3 || bbox.size.y > visibleRect.size.y * 3;
+				if (
+					muchBiggerThanVisible &&
+					!part.path.roughlyIntersects(visibleRect, part.style.stroke?.width ?? 0)
+				) {
 					continue;
 				}
 			}
@@ -492,7 +573,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	}
 
 	public override getExactBBox(): Rect2 {
-		let bbox: Rect2|null = null;
+		let bbox: Rect2 | null = null;
 
 		for (const { path, style } of this.parts) {
 			// Paths' default .bbox can be
@@ -514,9 +595,11 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 			const newPath = part.path.transformedBy(affineTransfm);
 			const newStyle = {
 				...part.style,
-				stroke: part.style.stroke ? {
-					...part.style.stroke,
-				} : undefined,
+				stroke: part.style.stroke
+					? {
+							...part.style.stroke,
+						}
+					: undefined,
 			};
 
 			// Approximate the scale factor.
@@ -561,7 +644,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	 * @returns the {@link Path.union} of all paths that make up this stroke.
 	 */
 	public getPath() {
-		let result: Path|null = null;
+		let result: Path | null = null;
 		for (const part of this.parts) {
 			if (result) {
 				result = result.union(part.path);
@@ -581,7 +664,7 @@ export default class Stroke extends AbstractComponent implements RestyleableComp
 	}
 
 	protected override serializeToJSON() {
-		return this.parts.map(part => {
+		return this.parts.map((part) => {
 			return {
 				style: styleToJSON(part.style),
 				path: part.path.serialize(),

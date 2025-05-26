@@ -1,4 +1,7 @@
 /**
+ * This package contains general math utilities used by `js-draw`.
+ * These include 2D and 3D vectors, 2D paths, and 3x3 matrices.
+ *
  * ```ts,runnable,console
  * import { Vec2, Mat33, Rect2 } from '@js-draw/math';
  *
@@ -20,7 +23,6 @@
 export { LineSegment2 } from './shapes/LineSegment2';
 export {
 	Path,
-
 	IntersectionResult as PathIntersectionResult,
 	CurveIndexRecord as PathCurveIndex,
 	stepCurveIndexBy as stepPathIndexBy,
@@ -42,7 +44,6 @@ export { Point2, Vec2 } from './Vec2';
 export { Vec3 } from './Vec3';
 export { Color4 } from './Color4';
 export * from './rounding/lib';
-
 
 // Note: All above exports cannot use `export { default as ... } from "..."` because this
 // breaks TypeDoc -- TypeDoc otherwise labels any imports of these classes as `default`.

@@ -1,6 +1,14 @@
 import AbstractRenderer from '../../rendering/renderers/AbstractRenderer';
 import RenderablePathSpec from '../../rendering/RenderablePathSpec';
-import { Point2, Rect2, Color4, PathCommand, PathCommandType, Vec2, LineSegment2 } from '@js-draw/math';
+import {
+	Point2,
+	Rect2,
+	Color4,
+	PathCommand,
+	PathCommandType,
+	Vec2,
+	LineSegment2,
+} from '@js-draw/math';
 import Stroke from '../Stroke';
 import Viewport from '../../Viewport';
 import { StrokeDataPoint } from '../../types';
@@ -9,14 +17,19 @@ import RenderingStyle from '../../rendering/RenderingStyle';
 import makeShapeFitAutocorrect from './autocorrect/makeShapeFitAutocorrect';
 
 /**
- * Creates strokes from line segments rather than Bézier curves.
+ * Creates a freehand line builder that creates strokes from line segments
+ * rather than Bézier curves.
  *
+ * Example:
+ * [[include:doc-pages/inline-examples/changing-pen-types.md]]
  */
 export const makePolylineBuilder: ComponentBuilderFactory = makeShapeFitAutocorrect(
 	(initialPoint: StrokeDataPoint, viewport: Viewport) => {
-		const minFit = viewport.getSizeOfPixelOnCanvas();
+		// Fit to a value slightly smaller than the pixel size. A larger value can
+		// cause the stroke to appear jagged at some zoom levels.
+		const minFit = viewport.getSizeOfPixelOnCanvas() * 0.65;
 		return new PolylineBuilder(initialPoint, minFit, viewport);
-	}
+	},
 );
 
 export default class PolylineBuilder implements ComponentBuilder {
@@ -28,7 +41,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 
 	private lastPoint: Point2;
 	private startPoint: StrokeDataPoint;
-	private lastLineSegment: LineSegment2|null = null;
+	private lastLineSegment: LineSegment2 | null = null;
 
 	public constructor(
 		startPoint: StrokeDataPoint,
@@ -58,16 +71,20 @@ export default class PolylineBuilder implements ComponentBuilder {
 	protected getRenderingStyle(): RenderingStyle {
 		return {
 			fill: Color4.transparent,
-			stroke: {
-				color: this.startPoint.color,
-				width: this.roundDistance(this.averageWidth),
-			}
+			stroke: this.inkTrailStyle(),
+		};
+	}
+
+	public inkTrailStyle() {
+		return {
+			color: this.startPoint.color,
+			width: this.roundDistance(this.averageWidth),
 		};
 	}
 
 	protected previewCurrentPath(): RenderablePathSpec {
 		const startPoint = this.startPoint.pos;
-		const commands = [ ...this.parts ];
+		const commands = [...this.parts];
 
 		// TODO: For now, this is necesary for the path to be visible.
 		if (commands.length <= 1) {
@@ -86,7 +103,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 	}
 
 	protected previewFullPath(): RenderablePathSpec[] {
-		return [ this.previewCurrentPath() ];
+		return [this.previewCurrentPath()];
 	}
 
 	public preview(renderer: AbstractRenderer) {
@@ -106,7 +123,7 @@ export default class PolylineBuilder implements ComponentBuilder {
 	}
 
 	private getMinFit(): number {
-		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 3);
+		let minFit = Math.min(this.minFitAllowed, this.averageWidth / 4);
 
 		if (minFit < 1e-10) {
 			minFit = this.minFitAllowed;
@@ -126,17 +143,19 @@ export default class PolylineBuilder implements ComponentBuilder {
 	}
 
 	public addPoint(newPoint: StrokeDataPoint) {
-		this.widthAverageNumSamples ++;
+		this.widthAverageNumSamples++;
 		this.averageWidth =
-			this.averageWidth * (this.widthAverageNumSamples - 1) / this.widthAverageNumSamples
-				+ newPoint.width / this.widthAverageNumSamples;
-
+			(this.averageWidth * (this.widthAverageNumSamples - 1)) / this.widthAverageNumSamples +
+			newPoint.width / this.widthAverageNumSamples;
 
 		const roundedPoint = this.roundPoint(newPoint.pos);
 
 		if (!roundedPoint.eq(this.lastPoint)) {
 			// If almost exactly in the same line as the previous
-			if (this.lastLineSegment && this.lastLineSegment.direction.dot(roundedPoint.minus(this.lastPoint).normalized()) > 0.997) {
+			if (
+				this.lastLineSegment &&
+				this.lastLineSegment.direction.dot(roundedPoint.minus(this.lastPoint).normalized()) > 0.997
+			) {
 				this.parts.pop();
 				this.lastPoint = this.lastLineSegment.p1;
 			}

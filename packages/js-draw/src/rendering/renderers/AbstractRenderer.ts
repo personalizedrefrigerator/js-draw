@@ -1,7 +1,7 @@
 import { Color4, Mat33, Point2, Vec2, Rect2, Path, PathCommandType } from '@js-draw/math';
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import Viewport from '../../Viewport';
-import RenderingStyle, { stylesEqual } from '../RenderingStyle';
+import RenderingStyle, { StrokeStyle, stylesEqual } from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
 import RenderablePathSpec, { pathToRenderable } from '../RenderablePathSpec';
 
@@ -13,7 +13,7 @@ export interface RenderableImage {
 	//
 	// **Note:** In the future, `image` may also have type `ImageBitmap`, which **does not** support
 	// `.getAttribute` as it is not an `HTMLElement`.
-	image: HTMLImageElement|HTMLCanvasElement;
+	image: HTMLImageElement | HTMLCanvasElement;
 
 	// All images that can be drawn **must** have a base64 URL in the form
 	// data:image/[format];base64,[data here]
@@ -24,23 +24,43 @@ export interface RenderableImage {
 }
 
 /**
+ * An interface that allows renderers to provide accelerated inking.
+ *
+ * This API is intended to reduce latency by rendering a draft preview of the
+ * last, trailing part of a stroke.
+ *
+ * This may be implemented with, for example, [the web `Ink` API](https://developer.mozilla.org/en-US/docs/Web/API/Ink),
+ * or do nothing at all, depending on the renderer and platform.
+ */
+export interface DraftInkPresenter {
+	/** Enables the ink presenter, if available on the current platform. */
+	setEnabled(pointerId: number, enabled: boolean): void;
+	/** Sets the color and width of the stroke trail. */
+	updateStyle(style: StrokeStyle): void;
+}
+
+const defaultDraftInkPresenter: DraftInkPresenter = { setEnabled: () => {}, updateStyle: () => {} };
+
+/**
  * Abstract base class for renderers.
  *
  * @see {@link EditorImage.render}
  */
 export default abstract class AbstractRenderer {
 	// If null, this' transformation is linked to the Viewport
-	private selfTransform: Mat33|null = null;
-	private transformStack: Array<Mat33|null> = [];
+	private selfTransform: Mat33 | null = null;
+	private transformStack: Array<Mat33 | null> = [];
 
-	protected constructor(private viewport: Viewport) { }
+	protected constructor(private viewport: Viewport) {}
 
 	/**
 	 * this.canvasToScreen, etc. should be used instead of the corresponding
 	 * methods on `Viewport`, because the viewport may not accurately reflect
 	 * what is rendered.
 	 */
-	protected getViewport(): Viewport { return this.viewport; }
+	protected getViewport(): Viewport {
+		return this.viewport;
+	}
 
 	// Returns the size of the rendered region of this on
 	// the display (in pixels).
@@ -51,12 +71,8 @@ export default abstract class AbstractRenderer {
 	protected abstract endPath(style: RenderingStyle): void;
 	protected abstract lineTo(point: Point2): void;
 	protected abstract moveTo(point: Point2): void;
-	protected abstract traceCubicBezierCurve(
-		p1: Point2, p2: Point2, p3: Point2,
-	): void;
-	protected abstract traceQuadraticBezierCurve(
-		controlPoint: Point2, endPoint: Point2,
-	): void;
+	protected abstract traceCubicBezierCurve(p1: Point2, p2: Point2, p3: Point2): void;
+	protected abstract traceQuadraticBezierCurve(controlPoint: Point2, endPoint: Point2): void;
 	public abstract drawText(text: string, transform: Mat33, style: TextRenderingStyle): void;
 	public abstract drawImage(image: RenderableImage): void;
 
@@ -64,16 +80,23 @@ export default abstract class AbstractRenderer {
 	// it has no effect on the image.
 	public abstract isTooSmallToRender(rect: Rect2): boolean;
 
-	public setDraftMode(_draftMode: boolean) { }
+	public setDraftMode(_draftMode: boolean) {}
+
+	/**
+	 * Returns an API that can be used to accelerate inking.
+	 */
+	public getDraftInkPresenter(): DraftInkPresenter {
+		return defaultDraftInkPresenter;
+	}
 
 	protected objectLevel: number = 0;
-	private currentPaths: RenderablePathSpec[]|null = null;
+	private currentPaths: RenderablePathSpec[] | null = null;
 	private flushPath() {
 		if (!this.currentPaths) {
 			return;
 		}
 
-		let lastStyle: RenderingStyle|null = null;
+		let lastStyle: RenderingStyle | null = null;
 		for (const path of this.currentPaths) {
 			const { startPoint, commands, style } = path;
 
@@ -95,12 +118,12 @@ export default abstract class AbstractRenderer {
 					this.moveTo(command.point);
 				} else if (command.kind === PathCommandType.CubicBezierTo) {
 					this.traceCubicBezierCurve(
-						command.controlPoint1, command.controlPoint2, command.endPoint
+						command.controlPoint1,
+						command.controlPoint2,
+						command.endPoint,
 					);
 				} else if (command.kind === PathCommandType.QuadraticBezierTo) {
-					this.traceQuadraticBezierCurve(
-						command.controlPoint, command.endPoint
-					);
+					this.traceQuadraticBezierCurve(command.controlPoint, command.endPoint);
 				}
 			}
 		}
@@ -156,7 +179,7 @@ export default abstract class AbstractRenderer {
 		}
 
 		this.currentPaths = [];
-		this.objectLevel ++;
+		this.objectLevel++;
 	}
 
 	/**
@@ -173,11 +196,11 @@ export default abstract class AbstractRenderer {
 		// Render the paths all at once
 		this.flushPath();
 		this.currentPaths = null;
-		this.objectLevel --;
+		this.objectLevel--;
 
 		if (this.objectLevel < 0) {
 			throw new Error(
-				'More objects have ended than have been started (negative object nesting level)!'
+				'More objects have ended than have been started (negative object nesting level)!',
 			);
 		}
 	}
@@ -188,7 +211,6 @@ export default abstract class AbstractRenderer {
 
 	// Draw a representation of [points]. Intended for debugging.
 	public abstract drawPoints(...points: Point2[]): void;
-
 
 	// Returns true iff other can be rendered onto this without data loss.
 	public canRenderFromWithoutDataLoss(_other: AbstractRenderer): boolean {
@@ -202,11 +224,14 @@ export default abstract class AbstractRenderer {
 
 	// Set a transformation to apply to things before rendering,
 	// replacing the viewport's transform.
-	public setTransform(transform: Mat33|null) {
+	public setTransform(transform: Mat33 | null) {
 		this.selfTransform = transform;
 	}
 
 	public pushTransform(transform: Mat33) {
+		// Draw all pending paths that used the previous transform (if any).
+		this.flushPath();
+
 		this.transformStack.push(this.selfTransform);
 		this.setTransform(this.getCanvasToScreenTransform().rightMul(transform));
 	}
@@ -215,6 +240,9 @@ export default abstract class AbstractRenderer {
 		if (this.transformStack.length === 0) {
 			throw new Error('Unable to pop more transforms than have been pushed!');
 		}
+
+		// Draw all pending paths that used the old transform (if any):
+		this.flushPath();
 
 		this.setTransform(this.transformStack.pop() ?? null);
 	}
@@ -236,12 +264,12 @@ export default abstract class AbstractRenderer {
 		return this.getCanvasToScreenTransform().transformVec3(Vec2.unitX).length();
 	}
 
-	private visibleRectOverride: Rect2|null;
+	private visibleRectOverride: Rect2 | null;
 
 	/**
 	 * @internal
 	 */
-	public overrideVisibleRect(rect: Rect2|null) {
+	public overrideVisibleRect(rect: Rect2 | null) {
 		this.visibleRectOverride = rect;
 	}
 

@@ -1,38 +1,88 @@
 import AbstractComponent from '../../components/AbstractComponent';
 import Editor from '../../Editor';
-import { Mat33, Rect2, Point2, Vec2 } from '@js-draw/math';
+import { Mat33, Rect2, Point2, Vec2, Color4 } from '@js-draw/math';
 import { EditorEventType } from '../../types';
-import { CopyEvent, KeyPressEvent, KeyUpEvent, PointerEvt } from '../../inputEvents';
+import {
+	ContextMenuEvt,
+	CopyEvent,
+	KeyPressEvent,
+	KeyUpEvent,
+	PointerEvt,
+} from '../../inputEvents';
 import Viewport from '../../Viewport';
 import BaseTool from '../BaseTool';
 import CanvasRenderer from '../../rendering/renderers/CanvasRenderer';
 import SVGRenderer from '../../rendering/renderers/SVGRenderer';
 import Selection from './Selection';
 import TextComponent from '../../components/TextComponent';
-import { duplicateSelectionShortcut, selectAllKeyboardShortcut, sendToBackSelectionShortcut, snapToGridKeyboardShortcutId } from '../keybindings';
+import {
+	duplicateSelectionShortcut,
+	translateLeftSelectionShortcutId,
+	translateRightSelectionShortcutId,
+	selectAllKeyboardShortcut,
+	sendToBackSelectionShortcut,
+	snapToGridKeyboardShortcutId,
+	translateDownSelectionShortcutId,
+	translateUpSelectionShortcutId,
+	rotateClockwiseSelectionShortcutId,
+	rotateCounterClockwiseSelectionShortcutId,
+	stretchXSelectionShortcutId,
+	shrinkXSelectionShortcutId,
+	shrinkYSelectionShortcutId,
+	stretchYSelectionShortcutId,
+	stretchXYSelectionShortcutId,
+	shrinkXYSelectionShortcutId,
+} from '../keybindings';
 import ToPointerAutoscroller from './ToPointerAutoscroller';
 import Pointer from '../../Pointer';
+import showSelectionContextMenu from './util/showSelectionContextMenu';
+import { MutableReactiveValue } from '../../util/ReactiveValue';
+import SelectionBuilder from './SelectionBuilders/SelectionBuilder';
+import { SelectionMode } from './types';
+import LassoSelectionBuilder from './SelectionBuilders/LassoSelectionBuilder';
+import RectSelectionBuilder from './SelectionBuilders/RectSelectionBuilder';
 
 export const cssPrefix = 'selection-tool-';
+
+export { SelectionMode };
 
 // Allows users to select/transform portions of the `EditorImage`.
 // With respect to `extend`ing, `SelectionTool` is not stable.
 export default class SelectionTool extends BaseTool {
+	public readonly modeValue: MutableReactiveValue<SelectionMode>;
+	private selectionBuilder: SelectionBuilder | null;
+
 	private handleOverlay: HTMLElement;
 	private prevSelectionBox: Selection | null;
 	private selectionBox: Selection | null;
+
+	// True if clearing and recreating the selectionBox has been deferred. This is used to prevent the selection
+	// from vanishing on pointerdown events that are intended to form other gestures (e.g. long press) that would
+	// ultimately restore the selection.
+	private removeSelectionScheduled = false;
 
 	private startPoint: Vec2 | null = null; // canvas position
 	private expandingSelectionBox: boolean = false;
 	private shiftKeyPressed: boolean = false;
 	private snapToGrid: boolean = false;
 
-	private lastPointer: Pointer|null = null;
+	private lastPointer: Pointer | null = null;
 
 	private autoscroller: ToPointerAutoscroller;
 
-	public constructor(private editor: Editor, description: string) {
+	public constructor(
+		private editor: Editor,
+		description: string,
+	) {
 		super(editor.notifier, description);
+
+		this.modeValue = MutableReactiveValue.fromInitialValue(SelectionMode.Rectangle);
+		this.modeValue.onUpdate(() => {
+			this.editor.notifier.dispatch(EditorEventType.ToolUpdated, {
+				kind: EditorEventType.ToolUpdated,
+				tool: this,
+			});
+		});
 
 		this.autoscroller = new ToPointerAutoscroller(editor.viewport, (scrollBy: Vec2) => {
 			editor.dispatch(Viewport.transformBy(Mat33.translation(scrollBy)), false);
@@ -42,7 +92,8 @@ export default class SelectionTool extends BaseTool {
 				// The viewport has changed -- ensure that the screen and canvas positions
 				// of the pointer are both correct
 				const updatedPointer = this.lastPointer.withScreenPosition(
-					this.lastPointer.screenPos, editor.viewport
+					this.lastPointer.screenPos,
+					editor.viewport,
 				);
 				this.onMainPointerUpdated(updatedPointer);
 			}
@@ -54,7 +105,7 @@ export default class SelectionTool extends BaseTool {
 		this.handleOverlay.style.display = 'none';
 		this.handleOverlay.classList.add('handleOverlay');
 
-		editor.notifier.on(EditorEventType.ViewportChanged, _data => {
+		editor.notifier.on(EditorEventType.ViewportChanged, (_data) => {
 			// The selection box could be using the wet ink display if its transformation
 			// hasn't been finalized yet. Clear before updating the UI.
 			this.editor.clearWetInk();
@@ -71,11 +122,16 @@ export default class SelectionTool extends BaseTool {
 		this.editor.handlePointerEventsFrom(this.handleOverlay);
 	}
 
-	private makeSelectionBox(selectionStartPos: Point2) {
-		this.prevSelectionBox = this.selectionBox;
-		this.selectionBox = new Selection(
-			selectionStartPos, this.editor
+	private getSelectionColor() {
+		const colorString = getComputedStyle(this.handleOverlay).getPropertyValue(
+			'--selection-background-color',
 		);
+		return Color4.fromString(colorString).withAlpha(0.5);
+	}
+
+	private makeSelectionBox(selectedObjects: AbstractComponent[]) {
+		this.prevSelectionBox = this.selectionBox;
+		this.selectionBox = new Selection(selectedObjects, this.editor, this.showContextMenu);
 
 		if (!this.expandingSelectionBox) {
 			// Remove any previous selection rects
@@ -84,17 +140,22 @@ export default class SelectionTool extends BaseTool {
 		this.selectionBox.addTo(this.handleOverlay);
 	}
 
-	private snapSelectionToGrid() {
-		if (!this.selectionBox) throw new Error('No selection to snap!');
+	private showContextMenu = async (canvasAnchor: Point2, preferSelectionMenu = true) => {
+		await showSelectionContextMenu(
+			this.selectionBox,
+			this.editor,
+			canvasAnchor,
+			preferSelectionMenu,
+			() => this.clearSelection(),
+		);
+	};
 
-		// Snap the top left corner of what we have selected.
-		const topLeftOfBBox = this.selectionBox.computeTightBoundingBox().topLeft;
-		const snappedTopLeft = this.editor.viewport.snapToGrid(topLeftOfBBox);
-		const snapDelta = snappedTopLeft.minus(topLeftOfBBox);
-
-		const oldTransform = this.selectionBox.getTransform();
-		this.selectionBox.setTransform(oldTransform.rightMul(Mat33.translation(snapDelta)));
-		this.selectionBox.finalizeTransform();
+	public override onContextMenu(event: ContextMenuEvt): boolean {
+		const canShowSelectionMenu = this.selectionBox
+			?.getScreenRegion()
+			?.containsPoint(event.screenPos);
+		void this.showContextMenu(event.canvasPos, canShowSelectionMenu);
+		return true;
 	}
 
 	private selectionBoxHandlingEvt: boolean = false;
@@ -104,14 +165,15 @@ export default class SelectionTool extends BaseTool {
 			current = current.snappedToGrid(this.editor.viewport);
 		}
 
-		if (allPointers.length === 1 && current.isPrimary) {
+		// Don't rely on .isPrimary -- it's buggy in Firefox. See https://github.com/personalizedrefrigerator/js-draw/issues/71
+		if (allPointers.length === 1) {
 			this.startPoint = current.canvasPos;
 
 			let transforming = false;
 
 			if (this.selectionBox) {
 				if (snapToGrid) {
-					this.snapSelectionToGrid();
+					this.selectionBox.snapSelectedObjectsToGrid();
 				}
 
 				const dragStartResult = this.selectionBox.onDragStart(current);
@@ -127,9 +189,17 @@ export default class SelectionTool extends BaseTool {
 			if (!transforming) {
 				// Shift key: Combine the new and old selection boxes at the end of the gesture.
 				this.expandingSelectionBox = this.shiftKeyPressed;
-				this.makeSelectionBox(current.canvasPos);
-			}
-			else {
+				this.removeSelectionScheduled = !this.expandingSelectionBox;
+
+				if (this.modeValue.get() === SelectionMode.Lasso) {
+					this.selectionBuilder = new LassoSelectionBuilder(
+						current.canvasPos,
+						this.editor.viewport,
+					);
+				} else {
+					this.selectionBuilder = new RectSelectionBuilder(current.canvasPos);
+				}
+			} else {
 				// Only autoscroll if we're transforming an existing selection
 				this.autoscroller.start();
 			}
@@ -146,7 +216,13 @@ export default class SelectionTool extends BaseTool {
 	private onMainPointerUpdated(currentPointer: Pointer) {
 		this.lastPointer = currentPointer;
 
-		if (!this.selectionBox) return;
+		if (this.removeSelectionScheduled) {
+			this.removeSelectionScheduled = false;
+
+			this.handleOverlay.replaceChildren();
+			this.prevSelectionBox = this.selectionBox;
+			this.selectionBox = null;
+		}
 
 		this.autoscroller.onPointerMove(currentPointer.screenPos);
 
@@ -160,52 +236,51 @@ export default class SelectionTool extends BaseTool {
 		}
 
 		if (this.selectionBoxHandlingEvt) {
-			this.selectionBox.onDragUpdate(currentPointer);
+			this.selectionBox?.onDragUpdate(currentPointer);
 		} else {
-			this.selectionBox.setToPoint(currentPointer.canvasPos);
+			this.selectionBuilder?.onPointerMove(currentPointer.canvasPos);
+			this.editor.clearWetInk();
+			this.selectionBuilder?.render(
+				this.editor.display.getWetInkRenderer(),
+				this.getSelectionColor(),
+			);
 		}
 	}
 
 	public override onPointerUp(event: PointerEvt): void {
+		this.onMainPointerUpdated(event.current);
 		this.autoscroller.stop();
 
-		if (!this.selectionBox) return;
+		if (this.selectionBoxHandlingEvt) {
+			this.selectionBox?.onDragEnd();
+		} else if (this.selectionBuilder) {
+			const newSelection = this.selectionBuilder.resolve(this.editor.image, this.editor.viewport);
+			this.selectionBuilder = null;
+			this.editor.clearWetInk();
 
-		let currentPointer = event.current;
-		if (this.snapToGrid) {
-			currentPointer = currentPointer.snappedToGrid(this.editor.viewport);
-		}
-
-		this.selectionBox.setToPoint(currentPointer.canvasPos);
-
-		// Were we expanding the previous selection?
-		if (this.expandingSelectionBox && this.prevSelectionBox) {
-			// If so, finish expanding.
-			this.expandingSelectionBox = false;
-			this.selectionBox.resolveToObjects();
-			this.setSelection([
-				...this.selectionBox.getSelectedObjects(),
-				...this.prevSelectionBox.getSelectedObjects(),
-			]);
-		} else {
-			if (!this.selectionBoxHandlingEvt) {
-				// Expand/shrink the selection rectangle, if applicable
-				this.selectionBox.resolveToObjects();
-				this.onSelectionUpdated();
+			if (this.expandingSelectionBox && this.selectionBox) {
+				this.setSelection([...this.selectionBox.getSelectedObjects(), ...newSelection]);
 			} else {
-				this.selectionBox.onDragEnd();
+				this.setSelection(newSelection);
 			}
-
-			this.selectionBoxHandlingEvt = false;
-			this.lastPointer = null;
 		}
+
+		this.expandingSelectionBox = false;
+		this.removeSelectionScheduled = false;
+		this.selectionBoxHandlingEvt = false;
+		this.lastPointer = null;
 	}
 
 	public override onGestureCancel(): void {
+		if (this.selectionBuilder) {
+			this.selectionBuilder = null;
+			this.editor.clearWetInk();
+		}
+
 		this.autoscroller.stop();
 		if (this.selectionBoxHandlingEvt) {
 			this.selectionBox?.onDragCancel();
-		} else {
+		} else if (!this.removeSelectionScheduled) {
 			// Revert to the previous selection, if any.
 			this.selectionBox?.cancelSelection();
 			this.selectionBox = this.prevSelectionBox;
@@ -214,6 +289,7 @@ export default class SelectionTool extends BaseTool {
 			this.prevSelectionBox = null;
 		}
 
+		this.removeSelectionScheduled = false;
 		this.expandingSelectionBox = false;
 		this.lastPointer = null;
 		this.selectionBoxHandlingEvt = false;
@@ -225,8 +301,8 @@ export default class SelectionTool extends BaseTool {
 		const selectedItemCount = this.selectionBox?.getSelectedItemCount() ?? 0;
 		const selectedObjects = this.selectionBox?.getSelectedObjects() ?? [];
 		const hasDifferentSelection =
-			this.lastSelectedObjects.length !== selectedItemCount
-			|| selectedObjects.some((obj, i) => this.lastSelectedObjects[i] !== obj);
+			this.lastSelectedObjects.length !== selectedItemCount ||
+			selectedObjects.some((obj, i) => this.lastSelectedObjects[i] !== obj);
 
 		if (hasDifferentSelection) {
 			this.lastSelectedObjects = selectedObjects;
@@ -246,7 +322,7 @@ export default class SelectionTool extends BaseTool {
 
 			if (selectedItemCount > 0) {
 				this.editor.announceForAccessibility(
-					this.editor.localization.selectedElements(selectedItemCount)
+					this.editor.localization.selectedElements(selectedItemCount),
 				);
 				this.zoomToSelection();
 			}
@@ -266,15 +342,6 @@ export default class SelectionTool extends BaseTool {
 		}
 	}
 
-	private static handleableKeys = [
-		'a', 'h', 'ArrowLeft',
-		'd', 'l', 'ArrowRight',
-		'q', 'k', 'ArrowUp',
-		'e', 'j', 'ArrowDown',
-		'r', 'R',
-		'i', 'I', 'o', 'O',
-		'Control', 'Meta',
-	];
 	// Whether the last keypress corresponded to an action that didn't transform the
 	// selection (and thus does not need to be finalized on onKeyUp).
 	private hasUnfinalizedTransformFromKeyPress: boolean = false;
@@ -287,24 +354,22 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
-		if (this.selectionBox && (
-			shortcucts.matchesShortcut(duplicateSelectionShortcut, event)
-				|| shortcucts.matchesShortcut(sendToBackSelectionShortcut, event)
-		)) {
+		if (
+			this.selectionBox &&
+			(shortcucts.matchesShortcut(duplicateSelectionShortcut, event) ||
+				shortcucts.matchesShortcut(sendToBackSelectionShortcut, event))
+		) {
 			// Handle duplication on key up — we don't want to accidentally duplicate
 			// many times.
 			return true;
-		}
-		else if (shortcucts.matchesShortcut(selectAllKeyboardShortcut, event)) {
-			this.setSelection(this.editor.image.getAllElements());
+		} else if (shortcucts.matchesShortcut(selectAllKeyboardShortcut, event)) {
+			this.setSelection(this.editor.image.getAllComponents());
 			return true;
-		}
-		else if (event.ctrlKey) {
+		} else if (event.ctrlKey) {
 			// Don't transform the selection with, for example, ctrl+i.
 			// Pass it to another tool, if apliccable.
 			return false;
-		}
-		else if (event.shiftKey || event.key === 'Shift') {
+		} else if (event.shiftKey || event.key === 'Shift') {
 			this.shiftKeyPressed = true;
 
 			if (event.key === 'Shift') {
@@ -318,52 +383,40 @@ export default class SelectionTool extends BaseTool {
 		let xScaleSteps = 0;
 		let yScaleSteps = 0;
 
-		switch (event.key) {
-		case 'a':
-		case 'h':
-		case 'ArrowLeft':
+		if (shortcucts.matchesShortcut(translateLeftSelectionShortcutId, event)) {
 			xTranslateSteps -= 1;
-			break;
-		case 'd':
-		case 'l':
-		case 'ArrowRight':
+		} else if (shortcucts.matchesShortcut(translateRightSelectionShortcutId, event)) {
 			xTranslateSteps += 1;
-			break;
-		case 'q':
-		case 'k':
-		case 'ArrowUp':
+		} else if (shortcucts.matchesShortcut(translateUpSelectionShortcutId, event)) {
 			yTranslateSteps -= 1;
-			break;
-		case 'e':
-		case 'j':
-		case 'ArrowDown':
+		} else if (shortcucts.matchesShortcut(translateDownSelectionShortcutId, event)) {
 			yTranslateSteps += 1;
-			break;
-		case 'r':
+		} else if (shortcucts.matchesShortcut(rotateClockwiseSelectionShortcutId, event)) {
 			rotationSteps += 1;
-			break;
-		case 'R':
+		} else if (shortcucts.matchesShortcut(rotateCounterClockwiseSelectionShortcutId, event)) {
 			rotationSteps -= 1;
-			break;
-		case 'i':
+		} else if (shortcucts.matchesShortcut(shrinkXSelectionShortcutId, event)) {
 			xScaleSteps -= 1;
-			break;
-		case 'I':
+		} else if (shortcucts.matchesShortcut(stretchXSelectionShortcutId, event)) {
 			xScaleSteps += 1;
-			break;
-		case 'o':
+		} else if (shortcucts.matchesShortcut(shrinkYSelectionShortcutId, event)) {
 			yScaleSteps -= 1;
-			break;
-		case 'O':
+		} else if (shortcucts.matchesShortcut(stretchYSelectionShortcutId, event)) {
 			yScaleSteps += 1;
-			break;
+		} else if (shortcucts.matchesShortcut(shrinkXYSelectionShortcutId, event)) {
+			xScaleSteps -= 1;
+			yScaleSteps -= 1;
+		} else if (shortcucts.matchesShortcut(stretchXYSelectionShortcutId, event)) {
+			xScaleSteps += 1;
+			yScaleSteps += 1;
 		}
 
-		let handled = xTranslateSteps !== 0
-			|| yTranslateSteps !== 0
-			|| rotationSteps !== 0
-			|| xScaleSteps !== 0
-			|| yScaleSteps !== 0;
+		let handled =
+			xTranslateSteps !== 0 ||
+			yTranslateSteps !== 0 ||
+			rotationSteps !== 0 ||
+			xScaleSteps !== 0 ||
+			yScaleSteps !== 0;
 
 		if (!this.selectionBox) {
 			handled = false;
@@ -375,24 +428,28 @@ export default class SelectionTool extends BaseTool {
 			const region = this.selectionBox.region;
 			const scaleFactor = Vec2.of(scaleStepSize ** xScaleSteps, scaleStepSize ** yScaleSteps);
 
-			const rotationMat = Mat33.zRotation(
-				rotationSteps * rotateStepSize
+			const rotationMat = Mat33.zRotation(rotationSteps * rotateStepSize);
+			const roundedRotationMatrix = rotationMat.mapEntries((component) =>
+				Viewport.roundScaleRatio(component),
 			);
-			const roundedRotationMatrix = rotationMat.mapEntries(component => Viewport.roundScaleRatio(component));
 			const regionCenter = this.editor.viewport.roundPoint(region.center);
 
 			const transform = Mat33.scaling2D(
 				scaleFactor,
-				this.editor.viewport.roundPoint(region.topLeft)
-			).rightMul(
-				Mat33.translation(regionCenter).rightMul(
-					roundedRotationMatrix
-				).rightMul(
-					Mat33.translation(regionCenter.times(-1))
+				this.editor.viewport.roundPoint(region.topLeft),
+			)
+				.rightMul(
+					Mat33.translation(regionCenter)
+						.rightMul(roundedRotationMatrix)
+						.rightMul(Mat33.translation(regionCenter.times(-1))),
 				)
-			).rightMul(Mat33.translation(
-				this.editor.viewport.roundPoint(Vec2.of(xTranslateSteps, yTranslateSteps).times(translateStepSize))
-			));
+				.rightMul(
+					Mat33.translation(
+						this.editor.viewport.roundPoint(
+							Vec2.of(xTranslateSteps, yTranslateSteps).times(translateStepSize),
+						),
+					),
+				);
 			const oldTransform = this.selectionBox.getTransform();
 			this.selectionBox.setTransform(oldTransform.rightMul(transform));
 
@@ -425,7 +482,7 @@ export default class SelectionTool extends BaseTool {
 
 		if (this.selectionBox && shortcucts.matchesShortcut(duplicateSelectionShortcut, evt)) {
 			// Finalize duplicating the selection
-			this.selectionBox.duplicateSelectedObjects().then(command => {
+			this.selectionBox.duplicateSelectedObjects().then((command) => {
 				this.editor.dispatch(command);
 			});
 			return true;
@@ -453,13 +510,12 @@ export default class SelectionTool extends BaseTool {
 			return true;
 		}
 
-
 		// If we don't need to finalize the transform
 		if (!this.hasUnfinalizedTransformFromKeyPress) {
 			return true;
 		}
 
-		if (this.selectionBox && SelectionTool.handleableKeys.some(key => key === evt.key)) {
+		if (this.selectionBox) {
 			this.selectionBox.finalizeTransform();
 			this.hasUnfinalizedTransformFromKeyPress = false;
 			return true;
@@ -478,11 +534,14 @@ export default class SelectionTool extends BaseTool {
 			return false;
 		}
 
-		const exportViewport = new Viewport(() => { });
-		const selectionScreenSize = this.selectionBox.getScreenRegion().size.times(this.editor.display.getDevicePixelRatio());
+		const exportViewport = new Viewport(() => {});
+		const selectionScreenSize = this.selectionBox
+			.getScreenRegion()
+			.size.times(this.editor.display.getDevicePixelRatio());
 
 		// Update the viewport to have screen size roughly equal to the size of the selection box
-		let scaleFactor = selectionScreenSize.maximumEntryMagnitude() / (bbox.size.maximumEntryMagnitude() || 1);
+		let scaleFactor =
+			selectionScreenSize.maximumEntryMagnitude() / (bbox.size.maximumEntryMagnitude() || 1);
 
 		// Round to a nearby power of two
 		scaleFactor = Math.pow(2, Math.ceil(Math.log2(scaleFactor)));
@@ -491,11 +550,17 @@ export default class SelectionTool extends BaseTool {
 		exportViewport.resetTransform(
 			Mat33.scaling2D(scaleFactor)
 				// Move the selection onto the screen
-				.rightMul(Mat33.translation(bbox.topLeft.times(-1)))
+				.rightMul(Mat33.translation(bbox.topLeft.times(-1))),
 		);
 
-		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(exportViewport, { sanitize: true, useViewBoxForPositioning: true });
-		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(exportViewport, { maxCanvasDimen: 4096 });
+		const { element: svgExportElem, renderer: svgRenderer } = SVGRenderer.fromViewport(
+			exportViewport,
+			{ sanitize: true, useViewBoxForPositioning: true },
+		);
+		const { element: canvas, renderer: canvasRenderer } = CanvasRenderer.fromViewport(
+			exportViewport,
+			{ maxCanvasDimen: 4096 },
+		);
 
 		const text: string[] = [];
 		for (const elem of selectedElems) {
@@ -509,15 +574,18 @@ export default class SelectionTool extends BaseTool {
 
 		event.setData('image/svg+xml', svgExportElem.outerHTML);
 		event.setData('text/html', svgExportElem.outerHTML);
-		event.setData('image/png', new Promise<Blob>((resolve, reject) => {
-			canvas.toBlob((blob) => {
-				if (blob) {
-					resolve(blob);
-				} else {
-					reject(new Error('Failed to convert canvas to blob.'));
-				}
-			}, 'image/png');
-		}));
+		event.setData(
+			'image/png',
+			new Promise<Blob>((resolve, reject) => {
+				canvas.toBlob((blob) => {
+					if (blob) {
+						resolve(blob);
+					} else {
+						reject(new Error('Failed to convert canvas to blob.'));
+					}
+				}, 'image/png');
+			}),
+		);
 		if (text.length > 0) {
 			event.setData('text/plain', text.join('\n'));
 		}
@@ -546,7 +614,8 @@ export default class SelectionTool extends BaseTool {
 
 		if (enabled) {
 			this.handleOverlay.tabIndex = 0;
-			this.handleOverlay.setAttribute('aria-label', this.editor.localization.selectionToolKeyboardShortcuts);
+			this.handleOverlay.role = 'group';
+			this.handleOverlay.ariaLabel = this.editor.localization.selectionToolKeyboardShortcuts;
 		} else {
 			this.handleOverlay.tabIndex = -1;
 		}
@@ -558,6 +627,11 @@ export default class SelectionTool extends BaseTool {
 		return this.selectionBox;
 	}
 
+	/** @returns true if the selection is currently being created by the user. */
+	public isSelecting() {
+		return !!this.selectionBuilder;
+	}
+
 	public getSelectedObjects(): AbstractComponent[] {
 		return this.selectionBox?.getSelectedObjects() ?? [];
 	}
@@ -565,7 +639,7 @@ export default class SelectionTool extends BaseTool {
 	// Select the given `objects`. Any non-selectable objects in `objects` are ignored.
 	public setSelection(objects: AbstractComponent[]) {
 		// Only select selectable objects.
-		objects = objects.filter(obj => obj.isSelectable());
+		objects = objects.filter((obj) => obj.isSelectable());
 
 		// Sort by z-index
 		objects.sort((a, b) => a.getZIndex() - b.getZIndex());
@@ -588,24 +662,22 @@ export default class SelectionTool extends BaseTool {
 			}
 		}
 
-		if (!bbox) {
-			return;
+		this.clearSelectionNoUpdateEvent();
+		if (bbox) {
+			this.makeSelectionBox(objects);
 		}
-
-		this.clearSelection();
-		if (!this.selectionBox) {
-			this.makeSelectionBox(bbox.topLeft);
-		}
-
-		this.selectionBox!.setSelectedObjects(objects, bbox);
 		this.onSelectionUpdated();
 	}
 
-	public clearSelection() {
+	// Equivalent to .clearSelection, but does not dispatch an update event
+	private clearSelectionNoUpdateEvent() {
 		this.handleOverlay.replaceChildren();
 		this.prevSelectionBox = this.selectionBox;
 		this.selectionBox = null;
+	}
 
+	public clearSelection() {
+		this.clearSelectionNoUpdateEvent();
 		this.onSelectionUpdated();
 	}
 }

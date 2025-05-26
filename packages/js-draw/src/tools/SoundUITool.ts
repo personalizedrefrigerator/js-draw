@@ -2,6 +2,7 @@ import Editor from '../Editor';
 import { LineSegment2, Color4, Point2 } from '@js-draw/math';
 import { KeyPressEvent, PointerEvt } from '../inputEvents';
 import BaseTool from './BaseTool';
+import createButton from '../util/dom/createButton';
 
 class SoundFeedback {
 	private ctx: AudioContext;
@@ -81,13 +82,13 @@ class SoundFeedback {
 		const hsv = color.asHSV();
 
 		// Choose frequencies that roughly correspond to hue, saturation, and value.
-		const hueFrequency = (-Math.cos(hsv.x / 2)) * 220 + 440;
+		const hueFrequency = -Math.cos(hsv.x / 2) * 220 + 440;
 		const saturationFrequency = hsv.y * 440 + 220;
 		const valueFrequency = (hsv.z + 0.1) * 440;
 
 		// Sigmoid with maximum 0.25 * alpha.
 		// Louder for greater value.
-		const gain = 0.25 * Math.min(1, color.a) / (1 + Math.exp(-(hsv.z - 0.5) * 3));
+		const gain = (0.25 * Math.min(1, color.a)) / (1 + Math.exp(-(hsv.z - 0.5) * 3));
 
 		this.colorOscHue.frequency.setValueAtTime(hueFrequency, this.ctx.currentTime);
 		this.colorOscSaturation.frequency.setValueAtTime(saturationFrequency, this.ctx.currentTime);
@@ -100,12 +101,15 @@ class SoundFeedback {
 		this.boundaryGain.gain.cancelScheduledValues(this.ctx.currentTime);
 		this.boundaryGain.gain.setValueAtTime(0, this.ctx.currentTime);
 		this.boundaryGain.gain.linearRampToValueAtTime(0.018, this.ctx.currentTime + 0.1);
-		this.boundaryOsc.frequency.setValueAtTime(440 + Math.atan(boundaryCrossCount / 2) * 100, this.ctx.currentTime);
+		this.boundaryOsc.frequency.setValueAtTime(
+			440 + Math.atan(boundaryCrossCount / 2) * 100,
+			this.ctx.currentTime,
+		);
 		this.boundaryGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
 	}
 
 	public close() {
-		this.ctx.close();
+		void this.ctx.close();
 		this.closed = true;
 	}
 }
@@ -118,7 +122,7 @@ class SoundFeedback {
  * This allows the user to explore the content of the display without a working screen.
  */
 export default class SoundUITool extends BaseTool {
-	private soundFeedback: SoundFeedback|null = null;
+	private soundFeedback: SoundFeedback | null = null;
 	private toggleButton: HTMLElement;
 	private toggleButtonContainer: HTMLElement;
 
@@ -128,15 +132,15 @@ export default class SoundUITool extends BaseTool {
 	) {
 		super(editor.notifier, description);
 
-
 		// Create a screen-reader-usable method of toggling the tool:
 		this.toggleButtonContainer = document.createElement('div');
 		this.toggleButtonContainer.classList.add('js-draw-sound-ui-toggle');
 
-		this.toggleButton = document.createElement('button');
-		this.toggleButton.onclick = () => {
-			this.setEnabled(!this.isEnabled());
-		};
+		this.toggleButton = createButton({
+			onClick: () => {
+				this.setEnabled(!this.isEnabled());
+			},
+		});
 		this.toggleButtonContainer.appendChild(this.toggleButton);
 		this.updateToggleButtonText();
 
@@ -205,9 +209,9 @@ export default class SoundUITool extends BaseTool {
 		this.soundFeedback?.setColor(this.editor.display.getColorAt(current.screenPos) ?? Color4.black);
 
 		const pointerMotionLine = new LineSegment2(this.lastPointerPos, current.canvasPos);
-		const collisions = this.editor.image.getElementsIntersectingRegion(pointerMotionLine.bbox).filter(
-			component => component.intersects(pointerMotionLine)
-		);
+		const collisions = this.editor.image
+			.getComponentsIntersecting(pointerMotionLine.bbox)
+			.filter((component) => component.intersects(pointerMotionLine));
 		this.lastPointerPos = current.canvasPos;
 
 		if (collisions.length > 0) {

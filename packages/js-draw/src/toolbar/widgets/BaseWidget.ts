@@ -1,12 +1,17 @@
 import Editor from '../../Editor';
 import ToolbarShortcutHandler from '../../tools/ToolbarShortcutHandler';
-import { KeyPressEvent, keyPressEventFromHTMLEvent, keyUpEventFromHTMLEvent } from '../../inputEvents';
+import {
+	KeyPressEvent,
+	keyPressEventFromHTMLEvent,
+	keyUpEventFromHTMLEvent,
+} from '../../inputEvents';
 import { toolbarCSSPrefix } from '../constants';
 import { ToolbarLocalization } from '../localization';
 import DropdownLayoutManager from './layout/DropdownLayoutManager';
 import { ToolMenu, WidgetContentLayoutManager } from './layout/types';
-import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
+import addLongPressOrHoverCssClasses from '../../util/dom/addLongPressOrHoverCssClasses';
 import HelpDisplay from '../utils/HelpDisplay';
+import { assertIsObject } from '../../util/assertions';
 
 export type SavedToolbuttonState = Record<string, any>;
 
@@ -20,12 +25,20 @@ export enum ToolbarWidgetTag {
 	Redo = 'redo',
 }
 
+/**
+ * The `abstract` base class for items that can be shown in a `js-draw` toolbar. See also {@link AbstractToolbar.addWidget}.
+ *
+ * See [the custom tool example](https://github.com/personalizedrefrigerator/js-draw/blob/main/docs/examples/example-custom-tools/example.ts)
+ * for how to create a custom toolbar widget for a tool.
+ *
+ * For custom action buttons, {@link AbstractToolbar.addActionButton} may be sufficient for most use cases.
+ */
 export default abstract class BaseWidget {
 	protected readonly container: HTMLElement;
 	private button: HTMLElement;
-	private icon: Element|null;
+	private icon: Element | null;
 	private layoutManager: WidgetContentLayoutManager;
-	private dropdown: ToolMenu|null = null;
+	private dropdown: ToolMenu | null = null;
 	private dropdownContent: HTMLElement;
 	private dropdownIcon: Element;
 	private label: HTMLLabelElement;
@@ -37,7 +50,7 @@ export default abstract class BaseWidget {
 	// True iff this widget is currently disabled because the editor is read only
 	#disabledDueToReadOnlyEditor: boolean = false;
 
-	#tags: (ToolbarWidgetTag|string)[] = [];
+	#tags: (ToolbarWidgetTag | string)[] = [];
 
 	// Maps subWidget IDs to subWidgets.
 	private subWidgets: Record<string, BaseWidget> = {};
@@ -45,19 +58,19 @@ export default abstract class BaseWidget {
 	private toplevel: boolean = true;
 	protected readonly localizationTable: ToolbarLocalization;
 
-	#removeEditorListeners: (()=>void)|null = null;
+	#removeEditorListeners: (() => void) | null = null;
 
 	public constructor(
 		protected editor: Editor,
 		protected id: string,
-		localizationTable?: ToolbarLocalization
+		localizationTable?: ToolbarLocalization,
 	) {
 		this.localizationTable = localizationTable ?? editor.localization;
 
 		// Default layout manager
 		const defaultLayoutManager = new DropdownLayoutManager(
 			(text) => this.editor.announceForAccessibility(text),
-			this.localizationTable
+			this.localizationTable,
 		);
 		defaultLayoutManager.connectToEditorNotifier(editor.notifier);
 		this.layoutManager = defaultLayoutManager;
@@ -65,7 +78,8 @@ export default abstract class BaseWidget {
 		this.icon = null;
 		this.container = document.createElement('div');
 		this.container.classList.add(
-			`${toolbarCSSPrefix}toolContainer`, `${toolbarCSSPrefix}toolButtonContainer`,
+			`${toolbarCSSPrefix}toolContainer`,
+			`${toolbarCSSPrefix}toolButtonContainer`,
 			`${toolbarCSSPrefix}internalWidgetId--${id.replace(/[^a-zA-Z0-9_]/g, '-')}`,
 		);
 		this.dropdownContent = document.createElement('div');
@@ -79,7 +93,7 @@ export default abstract class BaseWidget {
 
 		// Disable the context menu. This allows long-press gestures to trigger the button's
 		// tooltip instead.
-		this.button.oncontextmenu = event => {
+		this.button.oncontextmenu = (event) => {
 			event.preventDefault();
 		};
 		addLongPressOrHoverCssClasses(this.button);
@@ -88,8 +102,9 @@ export default abstract class BaseWidget {
 	#addEditorListeners() {
 		this.#removeEditorListeners?.();
 
-		const toolbarShortcutHandlers = this.editor.toolController.getMatchingTools(ToolbarShortcutHandler);
-		let removeKeyPressListener: (()=>void)|null = null;
+		const toolbarShortcutHandlers =
+			this.editor.toolController.getMatchingTools(ToolbarShortcutHandler);
+		let removeKeyPressListener: (() => void) | null = null;
 
 		// If the onKeyPress function has been extended and the editor is configured to send keypress events to
 		// toolbar widgets,
@@ -102,7 +117,7 @@ export default abstract class BaseWidget {
 			};
 		}
 
-		const readOnlyListener = this.editor.isReadOnlyReactiveValue().onUpdateAndNow(readOnly => {
+		const readOnlyListener = this.editor.isReadOnlyReactiveValue().onUpdateAndNow((readOnly) => {
 			if (readOnly && this.shouldAutoDisableInReadOnlyEditor() && !this.disabled) {
 				this.setDisabled(true);
 				this.#disabledDueToReadOnlyEditor = true;
@@ -110,8 +125,7 @@ export default abstract class BaseWidget {
 				if (this.#hasDropdown) {
 					this.dropdown?.requestHide();
 				}
-			}
-			else if (!readOnly && this.#disabledDueToReadOnlyEditor) {
+			} else if (!readOnly && this.#disabledDueToReadOnlyEditor) {
 				this.#disabledDueToReadOnlyEditor = false;
 				this.setDisabled(false);
 			}
@@ -152,7 +166,7 @@ export default abstract class BaseWidget {
 	 * being added to the button's container's class list.
 	 *
 	 */
-	public setTags(tags: (string|ToolbarWidgetTag)[]) {
+	public setTags(tags: (string | ToolbarWidgetTag)[]) {
 		const toClassName = (tag: string) => {
 			return `toolwidget-tag--${tag}`;
 		};
@@ -171,7 +185,7 @@ export default abstract class BaseWidget {
 	}
 
 	public getTags() {
-		return [ ...this.#tags ];
+		return [...this.#tags];
 	}
 
 	/**
@@ -191,14 +205,14 @@ export default abstract class BaseWidget {
 
 		while (id in container && container[id] !== this) {
 			id = this.getId() + '-' + idCounter.toString();
-			idCounter ++;
+			idCounter++;
 		}
 
 		return id;
 	}
 
 	protected abstract getTitle(): string;
-	protected abstract createIcon(): Element|null;
+	protected abstract createIcon(): Element | null;
 
 	// Add content to the widget's associated dropdown menu.
 	// Returns true if such a menu should be created, false otherwise.
@@ -216,9 +230,7 @@ export default abstract class BaseWidget {
 			// Add help information
 			const helpText = widget.getHelpText();
 			if (helpText) {
-				helpDisplay?.registerTextHelpForElement(
-					widgetElement, helpText,
-				);
+				helpDisplay?.registerTextHelpForElement(widgetElement, helpText);
 			}
 		}
 		return true;
@@ -229,7 +241,7 @@ export default abstract class BaseWidget {
 	 *
 	 * At present, this is only used if this widget has an associated dropdown.
 	 */
-	protected getHelpText(): undefined|string {
+	protected getHelpText(): undefined | string {
 		return undefined;
 	}
 
@@ -239,7 +251,7 @@ export default abstract class BaseWidget {
 	}
 
 	protected setUpButtonEventListeners(button: HTMLElement) {
-		const clickTriggers = { Enter: true, ' ': true, };
+		const clickTriggers = { Enter: true, ' ': true };
 		button.onkeydown = (evt) => {
 			let handled = false;
 
@@ -261,7 +273,7 @@ export default abstract class BaseWidget {
 			}
 		};
 
-		button.onkeyup = htmlEvent => {
+		button.onkeyup = (htmlEvent) => {
 			if (htmlEvent.key in clickTriggers) {
 				return;
 			}
@@ -281,7 +293,7 @@ export default abstract class BaseWidget {
 		};
 
 		// Prevent double-click zoom on some devices.
-		button.ondblclick = event => {
+		button.ondblclick = (event) => {
 			event.preventDefault();
 		};
 	}
@@ -319,7 +331,6 @@ export default abstract class BaseWidget {
 		}
 	}
 
-
 	/**
 	 * Adds this to `parent`.
 	 * Returns the element that was just added to `parent`.
@@ -348,14 +359,14 @@ export default abstract class BaseWidget {
 		this.container.appendChild(this.button);
 
 		const helpDisplay = new HelpDisplay(
-			content => this.editor.createHTMLOverlay(content),
+			(content) => this.editor.createHTMLOverlay(content),
 			this.editor,
 		);
 		const helpText = this.getHelpText();
 		if (helpText) {
 			helpDisplay.registerTextHelpForElement(
 				this.dropdownContent,
-				[ this.getTitle(), helpText ].join('\n\n'),
+				[this.getTitle(), helpText].join('\n\n'),
 			);
 		}
 
@@ -379,7 +390,7 @@ export default abstract class BaseWidget {
 				isToplevel: () => this.toplevel,
 			});
 
-			this.dropdown.visible.onUpdate(visible => {
+			this.dropdown.visible.onUpdate((visible) => {
 				if (visible) {
 					this.container.classList.add('dropdownVisible');
 				} else {
@@ -414,7 +425,7 @@ export default abstract class BaseWidget {
 
 	/**
 	 * Remove this. This allows the widget to be added to a toolbar again
-	 * in the future using {@link addTo}.
+	 * in the future using `addTo`.
 	 */
 	public remove() {
 		this.container.remove();
@@ -436,7 +447,6 @@ export default abstract class BaseWidget {
 	public removeCSSClassFromContainer(className: string) {
 		this.container.classList.remove(className);
 	}
-
 
 	protected updateIcon() {
 		let newIcon = this.createIcon();
@@ -486,7 +496,6 @@ export default abstract class BaseWidget {
 			this.button.setAttribute('aria-checked', 'false');
 		}
 	}
-
 
 	protected setDropdownVisible(visible: boolean) {
 		if (visible) {
@@ -585,10 +594,15 @@ export default abstract class BaseWidget {
 	 */
 	public deserializeFrom(state: SavedToolbuttonState): void {
 		if (state.subwidgetState) {
+			assertIsObject(state.subwidgetState);
 			// Deserialize all subwidgets.
 			for (const subwidgetId in state.subwidgetState) {
 				if (subwidgetId in this.subWidgets) {
-					this.subWidgets[subwidgetId].deserializeFrom(state.subwidgetState[subwidgetId]);
+					const serializedSubwidgetState = state.subwidgetState[subwidgetId];
+
+					if (serializedSubwidgetState) {
+						this.subWidgets[subwidgetId].deserializeFrom(serializedSubwidgetState);
+					}
 				}
 			}
 		}

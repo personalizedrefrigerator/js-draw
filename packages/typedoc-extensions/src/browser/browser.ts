@@ -5,9 +5,10 @@ import { join } from 'path';
 import replaceElementWithRunnableCode from './editor/replaceElementWithRunnableCode';
 import { imagesPath, basePath } from './constants';
 
-
 const initRunnableElements = () => {
-	const runnableElements = [...document.querySelectorAll('pre.runnable-code')] as HTMLTextAreaElement[];
+	const runnableElements = [
+		...document.querySelectorAll('pre.runnable-code'),
+	] as HTMLTextAreaElement[];
 
 	for (const runnable of runnableElements) {
 		replaceElementWithRunnableCode(runnable);
@@ -50,15 +51,22 @@ const replaceInternalPackageToPackageLinks = () => {
 
 // Used indirectly by replaceInternalPackageToPackageLinks
 const navigateBasedOnURL = () => {
-	const urlMatch = window.location.href.match(/[?]find-name=([a-zA-Z_0-9=@]+)/i);
+	const urlMatch = window.location.href.match(/[?]find-name=([a-zA-Z_0-9-]+)/i);
 	if (urlMatch) {
 		const target = urlMatch[1];
+		const targetParts = target.split('_');
 
-		const candidateLinks = document.querySelectorAll<HTMLAnchorElement>('a.tsd-index-link');
+		const candidateLinks = document.querySelectorAll<HTMLAnchorElement>(
+			'.tsd-member-summary-name a[href]',
+		);
 		for (const link of candidateLinks) {
-			const label = link.querySelector('span');
-			if (label && label.innerText === target) {
-				link.click();
+			const labelText = link.textContent?.trim();
+			if (labelText === target || labelText === targetParts[0]) {
+				let href = link.href;
+				if (targetParts.length > 1) {
+					href += `#${targetParts[1]}`;
+				}
+				location.replace(href);
 				return;
 			}
 		}

@@ -15,16 +15,23 @@ interface Config {
 	maxRadius: number;
 }
 
-type OnStationaryCallback = (lastPointer: Pointer)=>void;
+export const defaultStationaryDetectionConfig: Config = {
+	maxSpeed: 8.5, // screenPx/s
+	maxRadius: 11, // screenPx
+	minTimeSeconds: 0.5, // s
+};
+
+type OnStationaryCallback = (lastPointer: Pointer) => void;
 
 export default class StationaryPenDetector {
 	// Stores the pointer of the last event or, if the pen hasn't moved
 	// significantly, the first pointer event, away from which the pen hasn't moved.
-	private stationaryStartPointer: Pointer|null;
+	private stationaryStartPointer: Pointer | null;
 	private lastPointer: Pointer;
 	private averageVelocity: Vec2;
+	private hasMovedOutOfRadius: boolean;
 
-	private timeout: ReturnType<typeof setTimeout>|null = null;
+	private timeout: ReturnType<typeof setTimeout> | null = null;
 
 	// Only handles one pen. As such, `startPointer` should be the same device/finger
 	// as `updatedPointer` in `onPointerMove`.
@@ -38,6 +45,8 @@ export default class StationaryPenDetector {
 		this.stationaryStartPointer = startPointer;
 		this.lastPointer = startPointer;
 		this.averageVelocity = Vec2.zero;
+
+		this.setStationaryTimeout(this.config.minTimeSeconds * 1000);
 	}
 
 	// Returns true if stationary
@@ -53,7 +62,9 @@ export default class StationaryPenDetector {
 
 		// dx: "Δx" Displacement from last.
 		const dxFromLast = currentPointer.screenPos.minus(this.lastPointer.screenPos);
-		const dxFromStationaryStart = currentPointer.screenPos.minus(this.stationaryStartPointer.screenPos);
+		const dxFromStationaryStart = currentPointer.screenPos.minus(
+			this.stationaryStartPointer.screenPos,
+		);
 
 		// dt: Delta time:
 		// /1000: Convert to s.
@@ -64,19 +75,22 @@ export default class StationaryPenDetector {
 			dtFromLast = 1;
 		}
 
-		const currentVelocity = dxFromLast.times(1/dtFromLast); // px/s
+		const currentVelocity = dxFromLast.times(1 / dtFromLast); // px/s
 
 		// Slight smoothing of the velocity to prevent input jitter from affecting the
 		// velocity too significantly.
 		this.averageVelocity = this.averageVelocity.lerp(currentVelocity, 0.5); // px/s
 
 		const dtFromStart = currentPointer.timeStamp - this.stationaryStartPointer.timeStamp; // ms
+		const movedOutOfRadius = dxFromStationaryStart.length() > this.config.maxRadius;
+
+		this.hasMovedOutOfRadius ||= movedOutOfRadius;
 
 		// If not stationary
 		if (
-			dxFromStationaryStart.length() > this.config.maxRadius
-			|| this.averageVelocity.length() > this.config.maxSpeed
-			|| dtFromStart < this.config.minTimeSeconds
+			movedOutOfRadius ||
+			this.averageVelocity.length() > this.config.maxSpeed ||
+			dtFromStart < this.config.minTimeSeconds
 		) {
 			this.stationaryStartPointer = currentPointer;
 			this.lastPointer = currentPointer;
@@ -101,6 +115,10 @@ export default class StationaryPenDetector {
 	public destroy() {
 		this.cancelStationaryTimeout();
 		this.stationaryStartPointer = null;
+	}
+
+	public getHasMovedOutOfRadius() {
+		return this.hasMovedOutOfRadius;
 	}
 
 	private cancelStationaryTimeout() {

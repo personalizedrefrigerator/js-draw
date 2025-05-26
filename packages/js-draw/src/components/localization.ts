@@ -1,12 +1,12 @@
 export interface ImageComponentLocalization {
 	unlabeledImageNode: string;
-	text: (text: string)=> string;
-	imageNode: (description: string)=> string;
+	text: (text: string) => string;
+	imageNode: (description: string) => string;
 	stroke: string;
 	svgObject: string;
 	emptyBackground: string;
 	gridBackground: string;
-	filledBackgroundWithColor: (color: string)=> string;
+	filledBackgroundWithColor: (color: string) => string;
 
 	restyledElement: (elementDescription: string) => string;
 }

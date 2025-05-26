@@ -2,9 +2,9 @@ import ReactiveValue, { MutableReactiveValue } from '../../../util/ReactiveValue
 import { ToolbarContext } from '../../types';
 
 export interface CustomFilePickerProps {
-	setOnCancelCallback(onCancel: ()=>void): void;
+	setOnCancelCallback(onCancel: () => void): void;
 }
-export type ShowCustomFilePickerCallback = (props: CustomFilePickerProps)=>Promise<File[]|null>;
+export type ShowCustomFilePickerCallback = (props: CustomFilePickerProps) => Promise<File[] | null>;
 
 export interface FileInputOptions {
 	readonly accepts?: string;
@@ -41,7 +41,7 @@ const makeFileInput = (
 	input.multiple = allowMultiSelect;
 
 	// Associate the label with the input
-	const inputId = `js-draw-file-input-${idCounter ++}`;
+	const inputId = `js-draw-file-input-${idCounter++}`;
 	input.setAttribute('id', inputId);
 	label.htmlFor = inputId;
 
@@ -55,7 +55,7 @@ const makeFileInput = (
 	const selectedFiles: MutableReactiveValue<File[]> = ReactiveValue.fromInitialValue([]);
 
 	let loading = false;
-	let cancelLoading: (()=>void)|null = null;
+	let cancelLoading: (() => void) | null = null;
 	const updateStatusText = () => {
 		const files = selectedFiles.get();
 		if (loading) {
@@ -68,7 +68,7 @@ const makeFileInput = (
 			}
 			icon.style.display = 'none';
 		} else if (files.length > 0) {
-			const fileNames = files.map(file => file.name);
+			const fileNames = files.map((file) => file.name);
 			const maxNames = 5;
 			if (fileNames.length <= maxNames) {
 				descriptionText.textContent = fileNames.join('\n');
@@ -112,15 +112,15 @@ const makeFileInput = (
 
 	const addFileEventListeners = () => {
 		// Support dropping files
-		label.addEventListener('dragover', event => {
+		label.addEventListener('dragover', (event) => {
 			event.preventDefault();
 			label.classList.add('drag-target');
 		});
-		label.addEventListener('dragenter', event => {
+		label.addEventListener('dragenter', (event) => {
 			event.preventDefault();
 			label.classList.add('drag-target');
 		});
-		label.addEventListener('dragleave', event => {
+		label.addEventListener('dragleave', (event) => {
 			event.preventDefault();
 
 			// Ensure the event wasn't targeting a child.
@@ -133,7 +133,7 @@ const makeFileInput = (
 		});
 
 		// See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop#process_the_drop
-		label.addEventListener('drop', event => {
+		label.addEventListener('drop', (event) => {
 			event.preventDefault();
 			label.classList.remove('drag-target');
 
@@ -168,7 +168,7 @@ const makeFileInput = (
 				const data = await customPickerAction({
 					setOnCancelCallback: (onCancel) => {
 						if (!loading) {
-							throw new Error('Task already completed. Can\'t register cancel handler.');
+							throw new Error("Task already completed. Can't register cancel handler.");
 						}
 
 						cancelLoading = () => {
@@ -191,7 +191,7 @@ const makeFileInput = (
 		input.onclick = promptForFiles;
 	}
 
-	selectedFiles.onUpdate(files => {
+	selectedFiles.onUpdate((files) => {
 		if (files.length === 0 && input.files && input.files.length > 0) {
 			input.value = '';
 		}

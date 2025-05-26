@@ -13,22 +13,30 @@ import TextRenderingStyle from '../rendering/TextRenderingStyle';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
 
 const overlayCSSClass = 'textEditorOverlay';
+
+type AnchorControl = { remove(): void };
+
+/** A tool that allows users to enter and edit text. */
 export default class TextTool extends BaseTool {
 	private textStyleValue: MutableReactiveValue<TextRenderingStyle>;
 
 	// A reference to the current value of `textStyleValue`.
 	private textStyle: TextRenderingStyle;
 
+	private anchorControl: AnchorControl;
+	private contentTransform: MutableReactiveValue<Mat33>;
+
 	private textEditOverlay: HTMLElement;
-	private textInputElem: HTMLTextAreaElement|null = null;
-	private textTargetPosition: Vec2|null = null;
-	private textMeasuringCtx: CanvasRenderingContext2D|null = null;
-	private textRotation: number;
-	private textScale: Vec2 = Vec2.of(1, 1);
+	private textInputElem: HTMLTextAreaElement | null = null;
+	private textMeasuringCtx: CanvasRenderingContext2D | null = null;
 
-	private removeExistingCommand: Erase|null = null;
+	private removeExistingCommand: Erase | null = null;
 
-	public constructor(private editor: Editor, description: string, private localizationTable: ToolLocalization) {
+	public constructor(
+		private editor: Editor,
+		description: string,
+		private localizationTable: ToolLocalization,
+	) {
 		super(editor.notifier, description);
 		const editorFonts = editor.getCurrentSettings().text?.fonts ?? [];
 		this.textStyleValue = ReactiveValue.fromInitialValue({
@@ -48,18 +56,11 @@ export default class TextTool extends BaseTool {
 			});
 		});
 
+		this.contentTransform = ReactiveValue.fromInitialValue(Mat33.identity);
+
 		this.textEditOverlay = document.createElement('div');
 		this.textEditOverlay.classList.add(overlayCSSClass);
 		this.editor.addStyleSheet(`
-			.${overlayCSSClass} {
-				height: 0;
-				overflow: visible;
-
-				/* Allows absolutely-positioned textareas to scroll with
-				   the containing overlay. */
-				position: relative;
-			}
-
 			.${overlayCSSClass} textarea {
 				background-color: rgba(0, 0, 0, 0);
 
@@ -75,8 +76,10 @@ export default class TextTool extends BaseTool {
 				min-height: 1.1em;
 			}
 		`);
-		this.editor.createHTMLOverlay(this.textEditOverlay);
-		this.editor.notifier.on(EditorEventType.ViewportChanged, () => this.updateTextInput());
+		this.anchorControl = this.editor.anchorElementToCanvas(
+			this.textEditOverlay,
+			this.contentTransform,
+		);
 	}
 
 	private initTextMeasuringCanvas() {
@@ -93,48 +96,59 @@ export default class TextTool extends BaseTool {
 		}
 
 		// Estimate
-		return style.size * 2 / 3;
+		return (style.size * 2) / 3;
 	}
 
 	// Take input from this' textInputElem and add it to the EditorImage.
 	// If [removeInput], the HTML input element is removed. Otherwise, its value
 	// is cleared.
 	private flushInput(removeInput: boolean = true) {
-		if (this.textInputElem && this.textTargetPosition) {
-			const content = this.textInputElem.value.trimEnd();
+		if (!this.textInputElem) return;
 
-			this.textInputElem.value = '';
+		// Determine the scroll first -- removing the input (and other DOM changes)
+		// also change the scroll.
+		const scrollingRegion = this.textEditOverlay.parentElement;
+		const containerScroll = Vec2.of(
+			scrollingRegion?.scrollLeft ?? 0,
+			scrollingRegion?.scrollTop ?? 0,
+		);
 
-			if (removeInput) {
-				// In some browsers, .remove() triggers a .blur event (synchronously).
-				// Clear this.textInputElem before removal
-				const input = this.textInputElem;
-				this.textInputElem = null;
-				input.remove();
-			}
+		const content = this.textInputElem.value.trimEnd();
 
-			if (content === '') {
-				return;
-			}
+		this.textInputElem.value = '';
 
-			const textTransform = Mat33.translation(
-				this.textTargetPosition
-			).rightMul(
-				this.getTextScaleMatrix()
-			).rightMul(
-				Mat33.scaling2D(this.editor.viewport.getSizeOfPixelOnCanvas())
-			).rightMul(
-				Mat33.zRotation(this.textRotation)
+		if (removeInput) {
+			// In some browsers, .remove() triggers a .blur event (synchronously).
+			// Clear this.textInputElem before removal
+			const input = this.textInputElem;
+			this.textInputElem = null;
+			input.remove();
+		}
+
+		if (content !== '') {
+			// When the text is long, it can cause its container to scroll so that the
+			// editing caret is in view.
+			// So that the text added to the document is in the same position as the text
+			// shown in the editor, account for this scroll when computing the transform:
+			const scrollCorrectionScreen = containerScroll.times(-1);
+			// Uses .transformVec3 to avoid also translating the scroll correction (treating
+			// it as a point):
+			const scrollCorrectionCanvas =
+				this.editor.viewport.screenToCanvasTransform.transformVec3(scrollCorrectionScreen);
+			const scrollTransform = Mat33.translation(scrollCorrectionCanvas);
+
+			const textComponent = TextComponent.fromLines(
+				content.split('\n'),
+				scrollTransform.rightMul(this.contentTransform.get()),
+				this.textStyle,
 			);
 
-			const textComponent = TextComponent.fromLines(content.split('\n'), textTransform, this.textStyle);
-
-			const action = EditorImage.addElement(textComponent);
+			const action = EditorImage.addComponent(textComponent);
 			if (this.removeExistingCommand) {
 				// Unapply so that `removeExistingCommand` can be added to the undo stack.
 				this.removeExistingCommand.unapply(this.editor);
 
-				this.editor.dispatch(uniteCommands([ this.removeExistingCommand, action ]));
+				this.editor.dispatch(uniteCommands([this.removeExistingCommand, action]));
 				this.removeExistingCommand = null;
 			} else {
 				this.editor.dispatch(action);
@@ -142,18 +156,11 @@ export default class TextTool extends BaseTool {
 		}
 	}
 
-	private getTextScaleMatrix() {
-		return Mat33.scaling2D(this.textScale.times(1/this.editor.viewport.getSizeOfPixelOnCanvas()));
-	}
-
 	private updateTextInput() {
-		if (!this.textInputElem || !this.textTargetPosition) {
-			this.textInputElem?.remove();
+		if (!this.textInputElem) {
 			return;
 		}
 
-		const viewport = this.editor.viewport;
-		const textScreenPos = viewport.canvasToScreen(this.textTargetPosition);
 		this.textInputElem.placeholder = this.localizationTable.enterTextToInsert;
 		this.textInputElem.style.fontFamily = this.textStyle.fontFamily;
 		this.textInputElem.style.fontStyle = this.textStyle.fontStyle ?? '';
@@ -162,9 +169,6 @@ export default class TextTool extends BaseTool {
 		this.textInputElem.style.fontSize = `${this.textStyle.size}px`;
 		this.textInputElem.style.color = this.textStyle.renderingStyle.fill.toHexString();
 
-		this.textInputElem.style.position = 'absolute';
-		this.textInputElem.style.left = `${textScreenPos.x}px`;
-		this.textInputElem.style.top = `${textScreenPos.y}px`;
 		this.textInputElem.style.margin = '0';
 
 		this.textInputElem.style.width = `${this.textInputElem.scrollWidth}px`;
@@ -176,10 +180,7 @@ export default class TextTool extends BaseTool {
 		const ascent = this.getTextAscent(tallText, this.textStyle);
 		const vertAdjust = ascent;
 
-		const rotation = this.textRotation + viewport.getRotationAngle();
-		const scale: Mat33 = this.getTextScaleMatrix();
-		this.textInputElem.style.transform =
-			`${scale.toCSSMatrix()} rotate(${rotation * 180 / Math.PI}deg) translate(0, ${-vertAdjust}px)`;
+		this.textInputElem.style.transform = `translate(0, ${-vertAdjust}px)`;
 		this.textInputElem.style.transformOrigin = 'top left';
 
 		// Match the line height of default rendered text.
@@ -193,9 +194,15 @@ export default class TextTool extends BaseTool {
 		this.textInputElem = document.createElement('textarea');
 		this.textInputElem.value = initialText;
 		this.textInputElem.style.display = 'inline-block';
-		this.textTargetPosition = this.editor.viewport.roundPoint(textCanvasPos);
-		this.textRotation = -this.editor.viewport.getRotationAngle();
-		this.textScale = Vec2.of(1, 1).times(this.editor.viewport.getSizeOfPixelOnCanvas());
+		const textTargetPosition = this.editor.viewport.roundPoint(textCanvasPos);
+		const textRotation = -this.editor.viewport.getRotationAngle();
+		const textScale = Vec2.of(1, 1).times(this.editor.viewport.getSizeOfPixelOnCanvas());
+		this.contentTransform.set(
+			// Scale, then rotate, then translate:
+			Mat33.translation(textTargetPosition)
+				.rightMul(Mat33.zRotation(textRotation))
+				.rightMul(Mat33.scaling2D(textScale)),
+		);
 		this.updateTextInput();
 
 		// Update the input size/position/etc. after the placeHolder has had time to appear.
@@ -208,18 +215,28 @@ export default class TextTool extends BaseTool {
 			}
 		};
 		this.textInputElem.onblur = () => {
+			const input = this.textInputElem;
+
 			// Delay removing the input -- flushInput may be called within a blur()
 			// event handler
 			const removeInput = false;
-			const input = this.textInputElem;
-
 			this.flushInput(removeInput);
+
 			this.textInputElem = null;
+
+			if (input) {
+				input.classList.add('-hiding');
+			}
+
 			setTimeout(() => {
 				input?.remove();
 			}, 0);
 		};
 		this.textInputElem.onkeyup = (evt) => {
+			// In certain input modes, the <enter> key is used to select characters.
+			// When in this mode, prevent <enter> from submitting:
+			if (evt.isComposing) return;
+
 			if (evt.key === 'Enter' && !evt.shiftKey) {
 				this.flushInput();
 				this.editor.focus();
@@ -254,18 +271,20 @@ export default class TextTool extends BaseTool {
 		}
 
 		if (allPointers.length === 1) {
-
 			// Are we clicking on a text node?
 			const canvasPos = current.canvasPos;
-			const halfTestRegionSize = Vec2.of(2.5, 2.5).times(this.editor.viewport.getSizeOfPixelOnCanvas());
-			const testRegion = Rect2.fromCorners(canvasPos.minus(halfTestRegionSize), canvasPos.plus(halfTestRegionSize));
-			const targetNodes = this.editor.image.getElementsIntersectingRegion(testRegion);
-			let targetTextNodes = targetNodes.filter(node => node instanceof TextComponent) as TextComponent[];
+			const halfTestRegionSize = Vec2.of(4, 4).times(this.editor.viewport.getSizeOfPixelOnCanvas());
+			const testRegion = Rect2.fromCorners(
+				canvasPos.minus(halfTestRegionSize),
+				canvasPos.plus(halfTestRegionSize),
+			);
+			const targetNodes = this.editor.image.getComponentsIntersecting(testRegion);
+			let targetTextNodes = targetNodes.filter((node) => node instanceof TextComponent);
 
 			// Don't try to edit text nodes that contain the viewport (this allows us
 			// to zoom in on text nodes and add text on top of them.)
 			const visibleRect = this.editor.viewport.visibleRect;
-			targetTextNodes = targetTextNodes.filter(node => !node.getBBox().containsRect(visibleRect));
+			targetTextNodes = targetTextNodes.filter((node) => !node.getBBox().containsRect(visibleRect));
 
 			// End any TextNodes we're currently editing.
 			this.flushInput();
@@ -275,15 +294,12 @@ export default class TextTool extends BaseTool {
 				this.setTextStyle(targetNode.getTextStyle());
 
 				// Create and temporarily apply removeExistingCommand.
-				this.removeExistingCommand = new Erase([ targetNode ]);
+				this.removeExistingCommand = new Erase([targetNode]);
 				this.removeExistingCommand.apply(this.editor);
 
 				this.startTextInput(targetNode.getBaselinePos(), targetNode.getText());
 
-				const transform = targetNode.getTransform();
-				this.textRotation = transform.transformVec3(Vec2.unitX).angle();
-				const scaleFactor = transform.transformVec3(Vec2.unitX).magnitude();
-				this.textScale = Vec2.of(1, 1).times(scaleFactor);
+				this.contentTransform.set(targetNode.getTransform());
 				this.updateTextInput();
 			} else {
 				this.removeExistingCommand = null;
@@ -340,5 +356,11 @@ export default class TextTool extends BaseTool {
 
 	private setTextStyle(style: TextRenderingStyle) {
 		this.textStyleValue.set(style);
+	}
+
+	// @internal
+	public override onDestroy() {
+		super.onDestroy();
+		this.anchorControl.remove();
 	}
 }

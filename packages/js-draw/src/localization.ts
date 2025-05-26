@@ -1,16 +1,26 @@
 import { CommandLocalization, defaultCommandLocalization } from './commands/localization';
-import { defaultComponentLocalization, ImageComponentLocalization } from './components/localization';
-import { defaultTextRendererLocalization, TextRendererLocalization } from './rendering/localization';
+import {
+	defaultComponentLocalization,
+	ImageComponentLocalization,
+} from './components/localization';
+import {
+	defaultTextRendererLocalization,
+	TextRendererLocalization,
+} from './rendering/localization';
 import { defaultToolbarLocalization, ToolbarLocalization } from './toolbar/localization';
 import { defaultToolLocalization, ToolLocalization } from './tools/localization';
 
-
-export interface EditorLocalization extends ToolbarLocalization, ToolLocalization, CommandLocalization, ImageComponentLocalization, TextRendererLocalization {
+export interface EditorLocalization
+	extends ToolbarLocalization,
+		ToolLocalization,
+		CommandLocalization,
+		ImageComponentLocalization,
+		TextRendererLocalization {
 	accessibilityInputInstructions: string;
-	undoAnnouncement: (actionDescription: string)=> string;
-	redoAnnouncement: (actionDescription: string)=> string;
+	undoAnnouncement: (actionDescription: string) => string;
+	redoAnnouncement: (actionDescription: string) => string;
 	doneLoading: string;
-	loading: (percentage: number)=>string;
+	loading: (percentage: number) => string;
 	imageEditor: string;
 
 	// About dialog localization

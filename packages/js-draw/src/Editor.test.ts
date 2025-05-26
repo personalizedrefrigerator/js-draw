@@ -1,8 +1,16 @@
-import { BackgroundComponent, BaseTool, InputEvtType, RenderingMode, SelectionTool, sendPenEvent } from './lib';
+import {
+	BackgroundComponent,
+	BaseTool,
+	InputEvtType,
+	RenderingMode,
+	SelectionTool,
+	sendPenEvent,
+} from './lib';
 import { Color4, Point2, Vec2 } from '@js-draw/math';
 import Editor from './Editor';
 import createEditor from './testing/createEditor';
 import { BackgroundType } from './components/BackgroundComponent';
+import findNodeWithText from './testing/findNodeWithText';
 
 describe('Editor', () => {
 	it('should fire keyup events when the editor loses focus', () => {
@@ -22,13 +30,13 @@ describe('Editor', () => {
 
 				public override onKeyPress = keyPressMock;
 				public override onKeyUp = keyReleaseMock;
-			})()
+			})(),
 		]);
 
 		inputArea.focus();
 
 		// Sends a keyboard event to the editor
-		const dispatchKeyEvent = (kind: 'keydown'|'keyup', code: string, key: string) => {
+		const dispatchKeyEvent = (kind: 'keydown' | 'keyup', code: string, key: string) => {
 			const event = new KeyboardEvent(kind, {
 				bubbles: true,
 				key,
@@ -79,7 +87,7 @@ describe('Editor', () => {
 		expect(keyReleaseMock).toHaveBeenCalledTimes(1);
 		expect(keyReleaseMock).toHaveBeenLastCalledWith({
 			...keyAEvent,
-			kind: InputEvtType.KeyUpEvent
+			kind: InputEvtType.KeyUpEvent,
 		});
 
 		// Defocus the input --- this should fire a key up event for the keys still down
@@ -96,16 +104,20 @@ describe('Editor', () => {
 		const secondToLastCall = keyReleaseMock.mock.calls[keyReleaseMock.mock.calls.length - 2];
 		const lastCall = keyReleaseMock.mock.lastCall;
 
-		expect(secondToLastCall).toMatchObject([{
-			kind: InputEvtType.KeyUpEvent,
-			key: 'b',
-			code: 'KeyB',
-		}]);
-		expect(lastCall).toMatchObject([{
-			kind: InputEvtType.KeyUpEvent,
-			key: 'f',
-			code: 'KeyF',
-		}]);
+		expect(secondToLastCall).toMatchObject([
+			{
+				kind: InputEvtType.KeyUpEvent,
+				key: 'b',
+				code: 'KeyB',
+			},
+		]);
+		expect(lastCall).toMatchObject([
+			{
+				kind: InputEvtType.KeyUpEvent,
+				key: 'f',
+				code: 'KeyF',
+			},
+		]);
 	});
 
 	it('should throw if given minimum zoom greater than maximum zoom', () => {
@@ -142,7 +154,7 @@ describe('Editor', () => {
 	it('should be read-only when in read-only mode', () => {
 		const editor = createEditor();
 
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		const drawStroke = () => {
 			// Before setting read only, should be possible to draw.
@@ -152,7 +164,7 @@ describe('Editor', () => {
 		};
 
 		drawStroke();
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		editor.setReadOnly(true);
 
@@ -165,7 +177,7 @@ describe('Editor', () => {
 		undoWithKeyboard();
 
 		// Should have no effect
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// Try to draw
 		sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-100, 0));
@@ -173,7 +185,7 @@ describe('Editor', () => {
 		sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(30, 300));
 
 		// Should have no effect
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// Try to select and delete everything
 		const selectAndDeleteAll = () => {
@@ -193,7 +205,7 @@ describe('Editor', () => {
 		selectAndDeleteAll();
 
 		// Should have no effect
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		editor.setReadOnly(false);
 
@@ -208,35 +220,40 @@ describe('Editor', () => {
 		selectAndDeleteAll();
 
 		// Should work
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		// Undoing with keyboard shortcuts should also work
 		undoWithKeyboard();
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		// And so should drawing
 		selectFirstTool();
 		drawStroke();
-		expect(editor.image.getAllElements()).toHaveLength(2);
+		expect(editor.image.getAllComponents()).toHaveLength(2);
 	});
 
 	it('handlePointerEventsExceptClicksFrom should not consider a large circle a click', async () => {
 		const editor = createEditor();
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		const testElement = document.createElement('div');
 		const eventHandler = editor.handlePointerEventsExceptClicksFrom(testElement);
 
-		const dispatchEventAt = (eventName: 'pointerdown'|'pointermove'|'pointerup', pos: Point2) => {
-			testElement.dispatchEvent(new PointerEvent(eventName, {
-				clientX: pos.x,
-				clientY: pos.y,
-				screenX: pos.x,
-				screenY: pos.y,
-				pointerId: 0,
-				pointerType: 'mouse',
-				isPrimary: true,
-			}));
+		const dispatchEventAt = (
+			eventName: 'pointerdown' | 'pointermove' | 'pointerup',
+			pos: Point2,
+		) => {
+			testElement.dispatchEvent(
+				new PointerEvent(eventName, {
+					clientX: pos.x,
+					clientY: pos.y,
+					screenX: pos.x,
+					screenY: pos.y,
+					pointerId: 0,
+					pointerType: 'mouse',
+					isPrimary: true,
+				}),
+			);
 		};
 
 		// An actual click
@@ -248,7 +265,7 @@ describe('Editor', () => {
 		await jest.advanceTimersByTimeAsync(10);
 
 		// Should not have handled a click
-		expect(editor.image.getAllElements()).toHaveLength(0);
+		expect(editor.image.getAllComponents()).toHaveLength(0);
 
 		// Should allow drawing a circle
 		const circleRadius = 200;
@@ -258,7 +275,7 @@ describe('Editor', () => {
 		for (let i = 0; i <= maxSteps; i += 1) {
 			await jest.advanceTimersByTimeAsync(10);
 
-			const angle = i / maxSteps * Math.PI * 2;
+			const angle = (i / maxSteps) * Math.PI * 2;
 			const circlePoint = Vec2.of(Math.cos(angle) * circleRadius, Math.sin(angle) * circleRadius);
 			dispatchEventAt('pointermove', circlePoint);
 		}
@@ -267,7 +284,7 @@ describe('Editor', () => {
 		dispatchEventAt('pointerup', Vec2.of(circleRadius, 0));
 		await jest.advanceTimersByTimeAsync(10);
 
-		expect(editor.image.getAllElements()).toHaveLength(1);
+		expect(editor.image.getAllComponents()).toHaveLength(1);
 
 		eventHandler.remove();
 	});
@@ -294,8 +311,9 @@ describe('Editor', () => {
 				expectedStyle: { color: Color4.transparent, type: BackgroundType.Grid, autoresize: true },
 				expectedBackgroundCount: 1,
 			},
-		])('should support setting the background style of an image with no default background (style: %j)',
-			async ({ style, expectedBackgroundCount, expectedStyle }) => {
+		])(
+			'should support setting the background style of an image with no default background (style: %j)',
+			({ style, expectedBackgroundCount, expectedStyle }) => {
 				const editor = createEditor();
 				expect(editor.estimateBackgroundColor()).objEq(Color4.transparent);
 
@@ -313,7 +331,7 @@ describe('Editor', () => {
 				// Should also be possible to remove a background with .setBackgroundStyle
 				editor.dispatch(editor.setBackgroundStyle({ type: BackgroundType.None }));
 				expect(editor.image.getBackgroundComponents()).toHaveLength(0);
-			}
+			},
 		);
 
 		it('setting autoresize: false on an empty image should not result in a 0x0 background', async () => {
@@ -328,5 +346,25 @@ describe('Editor', () => {
 			expect(editor.image.getImportExportRect().minDimension).toBeGreaterThan(10);
 			expect(editor.image.getImportExportRect().minDimension).toBeLessThan(1000);
 		});
+	});
+
+	test('.showAboutDialog should show an about dialog', () => {
+		const editor = createEditor({
+			appInfo: {
+				name: 'This should be shown in the dialog.',
+			},
+		});
+		editor.showAboutDialog();
+
+		const dialog = editor.getRootElement().querySelector('dialog:has(.about-dialog-content)');
+		if (!dialog) throw new Error('Did not open about dialog');
+
+		expect(findNodeWithText('This should be shown in the dialog.', dialog)).toBeTruthy();
+
+		const closeButton = findNodeWithText('Close', dialog, {
+			tag: 'button',
+		}) as HTMLButtonElement | null;
+		if (!closeButton) throw new Error('Did not find close button.');
+		closeButton.click();
 	});
 });

@@ -11,9 +11,10 @@ import { ToolbarLocalization } from '../localization';
 import makeColorInput from './components/makeColorInput';
 import BaseWidget from './BaseWidget';
 import HelpDisplay from '../utils/HelpDisplay';
+import createButton from '../../util/dom/createButton';
 
 export default class DocumentPropertiesWidget extends BaseWidget {
-	private updateDropdownContent: ()=>void = () => {};
+	private updateDropdownContent: () => void = () => {};
 
 	public constructor(editor: Editor, localizationTable?: ToolbarLocalization) {
 		super(editor, 'document-properties-widget', localizationTable);
@@ -82,9 +83,9 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 	private setBackgroundType(backgroundType: BackgroundType): SerializableCommand {
 		const prevBackgroundColor = this.editor.estimateBackgroundColor();
 		const newBackground = new BackgroundComponent(backgroundType, prevBackgroundColor);
-		const addBackgroundCommand = this.editor.image.addElement(newBackground);
+		const addBackgroundCommand = this.editor.image.addComponent(newBackground);
 
-		return uniteCommands([ this.removeBackgroundComponents(), addBackgroundCommand ]);
+		return uniteCommands([this.removeBackgroundComponents(), addBackgroundCommand]);
 	}
 
 	/** Returns the type of the topmost background component */
@@ -100,8 +101,8 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		return BackgroundType.None;
 	}
 
-	private updateImportExportRectSize(size: { width?: number, height?: number }) {
-		const filterDimension = (dim: number|undefined) => {
+	private updateImportExportRectSize(size: { width?: number; height?: number }) {
+		const filterDimension = (dim: number | undefined) => {
 			if (dim !== undefined && (!isFinite(dim) || dim <= 0)) {
 				dim = 100;
 			}
@@ -114,8 +115,10 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 
 		const currentRect = this.editor.getImportExportRect();
 		const newRect = new Rect2(
-			currentRect.x, currentRect.y,
-			width ?? currentRect.w, height ?? currentRect.h
+			currentRect.x,
+			currentRect.y,
+			width ?? currentRect.w,
+			height ?? currentRect.h,
 		);
 
 		this.editor.dispatch(this.editor.image.setImportExportRect(newRect));
@@ -133,7 +136,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		container.classList.add(
 			`${toolbarCSSPrefix}spacedList`,
 			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
-			`${toolbarCSSPrefix}document-properties-widget`
+			`${toolbarCSSPrefix}document-properties-widget`,
 		);
 
 		// Background color input
@@ -148,7 +151,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 				container: backgroundColorInputContainer,
 				setValue: setBgColorInputValue,
 				registerWithHelpTextDisplay: registerHelpForInputs,
-			} = makeColorInput(this.editor, color => {
+			} = makeColorInput(this.editor, (color) => {
 				if (!color.eq(this.getBackgroundColor())) {
 					this.setBackgroundColor(color);
 				}
@@ -165,13 +168,14 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 				}
 
 				helpDisplay?.registerTextHelpForElement(
-					backgroundColorRow, this.localizationTable.pageDropdown__backgroundColorHelpText,
+					backgroundColorRow,
+					this.localizationTable.pageDropdown__backgroundColorHelpText,
 				);
 
 				registerHelpForInputs(helpDisplay);
 			};
 
-			return { setBgColorInputValue, backgroundColorRow, registerWithHelp, };
+			return { setBgColorInputValue, backgroundColorRow, registerWithHelp };
 		};
 		const {
 			backgroundColorRow,
@@ -179,7 +183,7 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			registerWithHelp: registerBackgroundRowWithHelp,
 		} = makeBackgroundColorInput();
 
-		const makeCheckboxRow = (labelText: string, onChange: (newValue: boolean)=>void) => {
+		const makeCheckboxRow = (labelText: string, onChange: (newValue: boolean) => void) => {
 			const rowContainer = document.createElement('div');
 			const labelElement = document.createElement('label');
 			const checkboxElement = document.createElement('input');
@@ -217,12 +221,11 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 				}
 
 				this.editor.dispatch(this.setBackgroundType(newBackgroundType));
-			}
+			},
 		);
 
-
 		// Adds a width/height input
-		const addDimensionRow = (labelContent: string, onChange: (value: number)=>void) => {
+		const addDimensionRow = (labelContent: string, onChange: (value: number) => void) => {
 			const row = document.createElement('div');
 			const label = document.createElement('label');
 			const input = document.createElement('input');
@@ -286,12 +289,18 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 			};
 		};
 
-		const imageWidthRow = addDimensionRow(this.localizationTable.imageWidthOption, (value: number) => {
-			this.updateImportExportRectSize({ width: value });
-		});
-		const imageHeightRow = addDimensionRow(this.localizationTable.imageHeightOption, (value: number) => {
-			this.updateImportExportRectSize({ height: value });
-		});
+		const imageWidthRow = addDimensionRow(
+			this.localizationTable.imageWidthOption,
+			(value: number) => {
+				this.updateImportExportRectSize({ width: value });
+			},
+		);
+		const imageHeightRow = addDimensionRow(
+			this.localizationTable.imageHeightOption,
+			(value: number) => {
+				this.updateImportExportRectSize({ height: value });
+			},
+		);
 
 		// The autoresize checkbox
 		const { container: auroresizeRow, checkbox: autoresizeCheckbox } = makeCheckboxRow(
@@ -303,9 +312,10 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		);
 
 		// The "About..." button
-		const aboutButton = document.createElement('button');
-		aboutButton.classList.add('about-button');
-		aboutButton.innerText = this.localizationTable.about;
+		const aboutButton = createButton({
+			classList: ['about-button'],
+			text: this.localizationTable.about,
+		});
 
 		aboutButton.onclick = () => {
 			this.editor.showAboutDialog();
@@ -314,13 +324,16 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		// Add help text
 		registerBackgroundRowWithHelp(helpDisplay);
 		helpDisplay?.registerTextHelpForElement(
-			useGridRow, this.localizationTable.pageDropdown__gridCheckboxHelpText,
+			useGridRow,
+			this.localizationTable.pageDropdown__gridCheckboxHelpText,
 		);
 		helpDisplay?.registerTextHelpForElement(
-			auroresizeRow, this.localizationTable.pageDropdown__autoresizeCheckboxHelpText,
+			auroresizeRow,
+			this.localizationTable.pageDropdown__autoresizeCheckboxHelpText,
 		);
 		helpDisplay?.registerTextHelpForElement(
-			aboutButton, this.localizationTable.pageDropdown__aboutButtonHelpText,
+			aboutButton,
+			this.localizationTable.pageDropdown__aboutButtonHelpText,
 		);
 
 		this.updateDropdownContent = () => {
@@ -340,9 +353,13 @@ export default class DocumentPropertiesWidget extends BaseWidget {
 		};
 		this.updateDropdownContent();
 
-
 		container.replaceChildren(
-			backgroundColorRow, useGridRow, imageWidthRow.element, imageHeightRow.element, auroresizeRow, aboutButton,
+			backgroundColorRow,
+			useGridRow,
+			imageWidthRow.element,
+			imageHeightRow.element,
+			auroresizeRow,
+			aboutButton,
 		);
 		dropdown.replaceChildren(container);
 

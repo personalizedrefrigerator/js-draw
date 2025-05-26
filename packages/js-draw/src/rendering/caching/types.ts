@@ -2,10 +2,8 @@ import type { Vec2 } from '@js-draw/math';
 import type AbstractRenderer from '../renderers/AbstractRenderer';
 import type { CacheRecordManager } from './CacheRecordManager';
 
-
 export type CacheAddress = number;
-export type BeforeDeallocCallback = ()=>void;
-
+export type BeforeDeallocCallback = () => void;
 
 export interface CacheProps {
 	createRenderer(): AbstractRenderer;

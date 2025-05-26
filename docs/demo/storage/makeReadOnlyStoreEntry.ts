@@ -2,7 +2,7 @@ import { makeIconFromText } from '../icons';
 import { StoreEntry } from './AbstractStore';
 
 /** Returns a `StoreEntry` that returns the given content, but cannot be updated/saved. */
-const makeReadOnlyStoreEntry = (content: string, onIllegalOperation?: ()=>void): StoreEntry => {
+const makeReadOnlyStoreEntry = (content: string, onIllegalOperation?: () => void): StoreEntry => {
 	return {
 		title: 'Read-only store entry',
 		getIcon() {

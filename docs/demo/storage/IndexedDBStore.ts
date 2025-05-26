@@ -19,20 +19,20 @@ interface ImageMetadataRecord {
  *
  * Returns `null` on success. Else, returns an error message.
  */
-const validateImageMetadataRecord = (record: ImageMetadataRecord): string|null => {
+const validateImageMetadataRecord = (record: ImageMetadataRecord): string | null => {
 	if (!record) {
 		return 'Not given a record!';
 	}
 
-	if (typeof (record.id) !== 'number') {
+	if (typeof record.id !== 'number') {
 		return 'Given record has non-number ID';
 	}
 
-	if (typeof (record.name) !== 'string') {
+	if (typeof record.name !== 'string') {
 		return 'Given record has non-string name';
 	}
 
-	if (typeof (record.previewData) !== 'string' && record.previewData) {
+	if (typeof record.previewData !== 'string' && record.previewData) {
 		return 'Given record has non-string (and non-undefined) previewData';
 	}
 
@@ -42,9 +42,8 @@ const validateImageMetadataRecord = (record: ImageMetadataRecord): string|null =
 export class IndexedDBStore implements AbstractStore {
 	private constructor(
 		private db: IDBDatabase,
-		private localization: Localization) {
-
-	}
+		private localization: Localization,
+	) {}
 
 	/** Constructs a new IndexedDBStore. */
 	public static create(localization: Localization): Promise<IndexedDBStore> {
@@ -60,7 +59,7 @@ export class IndexedDBStore implements AbstractStore {
 			};
 
 			dbFactory.onerror = () => {
-				console.log('reject: ' + dbFactory.error);
+				console.log(`reject: ${dbFactory.error}`);
 
 				// TODO: Use dbFactory.errorCode to provide a better error message.
 				reject(new Error(localization.databaseLoadError));
@@ -70,11 +69,17 @@ export class IndexedDBStore implements AbstractStore {
 				console.log('upgradeneeded');
 				const db = event.target.result as IDBDatabase;
 
-				const metadataStore = db.createObjectStore(imageMetadataStoreName, { keyPath: 'id', autoIncrement: true });
+				const metadataStore = db.createObjectStore(imageMetadataStoreName, {
+					keyPath: 'id',
+					autoIncrement: true,
+				});
 				metadataStore.createIndex('id', 'id', { unique: true });
 				metadataStore.createIndex('name', 'name', { unique: false });
 
-				const imageDataStore = db.createObjectStore(imageDataStoreName, { keyPath: 'id', autoIncrement: true });
+				const imageDataStore = db.createObjectStore(imageDataStoreName, {
+					keyPath: 'id',
+					autoIncrement: true,
+				});
 				imageDataStore.createIndex('id', 'id', { unique: true });
 
 				// TODO: Do we need imageStore.transaction.oncomplete before returning?
@@ -96,8 +101,10 @@ export class IndexedDBStore implements AbstractStore {
 				.objectStore('imageMetadata')
 				.delete(id);
 
-			deleteDataRequest.onerror = () => reject(new Error('Error deleting image data: ' + deleteDataRequest.error));
-			deleteMetadataRequest.onerror = () => reject(new Error('Error deleting image metadata: ' + deleteMetadataRequest.error));
+			deleteDataRequest.onerror = () =>
+				reject(new Error(`Error deleting image data: ${deleteDataRequest.error}`));
+			deleteMetadataRequest.onerror = () =>
+				reject(new Error(`Error deleting image metadata: ${deleteMetadataRequest.error}`));
 
 			let nextSuccessCallback = () => {
 				nextSuccessCallback = resolve;
@@ -109,15 +116,15 @@ export class IndexedDBStore implements AbstractStore {
 	}
 
 	/** Reads image metadata from the database, for the image with the given ID. */
-	private readImageMetadata(id: number): Promise<ImageMetadataRecord|null> {
-		return new Promise<ImageMetadataRecord|null>((resolve, reject) => {
+	private readImageMetadata(id: number): Promise<ImageMetadataRecord | null> {
+		return new Promise<ImageMetadataRecord | null>((resolve, reject) => {
 			const readRequest = this.db
 				.transaction([imageMetadataStoreName], 'readonly')
 				.objectStore(imageMetadataStoreName)
 				.get(id);
 
 			readRequest.onsuccess = (event: any) => {
-				const data = event.target.result as ImageMetadataRecord|undefined;
+				const data = event.target.result as ImageMetadataRecord | undefined;
 				console.log(`read metadata for ${id} with result ${data}`);
 
 				if (data) {
@@ -131,7 +138,7 @@ export class IndexedDBStore implements AbstractStore {
 				resolve(data ?? null);
 			};
 
-			readRequest.onerror = () => reject(new Error('Error reading image: ' + readRequest.error));
+			readRequest.onerror = () => reject(new Error(`Error reading image: ${readRequest.error}`));
 		});
 	}
 
@@ -146,7 +153,8 @@ export class IndexedDBStore implements AbstractStore {
 				.put(metadata);
 
 			writeDataRequest.onsuccess = () => resolve();
-			writeDataRequest.onerror = () => reject(new Error('Error saving metadata: ' + writeDataRequest.error));
+			writeDataRequest.onerror = () =>
+				reject(new Error('Error saving metadata: ' + String(writeDataRequest.error)));
 		});
 	}
 
@@ -154,8 +162,8 @@ export class IndexedDBStore implements AbstractStore {
 		return {
 			id,
 			name: title ?? this.localization.untitledImage,
-			lastUpdateTime: (new Date()).getTime(),
-			previewData
+			lastUpdateTime: new Date().getTime(),
+			previewData,
 		};
 	}
 
@@ -165,7 +173,7 @@ export class IndexedDBStore implements AbstractStore {
 	 * `previewData` currently must be a data URL.
 	 */
 	private async updateEntryPreview(id: number, previewData: string) {
-		const existingMetadata = await this.readImageMetadata(id) ?? this.makeMetadata(id);
+		const existingMetadata = (await this.readImageMetadata(id)) ?? this.makeMetadata(id);
 		existingMetadata.previewData = previewData;
 		existingMetadata.previewType = 'datauri';
 
@@ -174,28 +182,29 @@ export class IndexedDBStore implements AbstractStore {
 
 	/** Changes the title of the image with the given `id`. */
 	private async updateEntryTitle(id: number, newTitle: string) {
-		const metadata = await this.readImageMetadata(id) ?? this.makeMetadata(id);
+		const metadata = (await this.readImageMetadata(id)) ?? this.makeMetadata(id);
 		metadata.name = newTitle;
 		await this.updateEntryMetadata(metadata);
 	}
 
 	private async updateStoreEntryModifyTime(id: number) {
-		const metadata = await this.readImageMetadata(id) ?? this.makeMetadata(id);
-		metadata.lastUpdateTime = (new Date()).getTime();
+		const metadata = (await this.readImageMetadata(id)) ?? this.makeMetadata(id);
+		metadata.lastUpdateTime = new Date().getTime();
 		await this.updateEntryMetadata(metadata);
 	}
 
 	/** Writes an SVG image to the entry with the given ID. */
 	private async writeImage(id: number, svgData: string) {
-		await (new Promise<void>((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			const writeDataRequest = this.db
 				.transaction([imageDataStoreName], 'readwrite')
 				.objectStore(imageDataStoreName)
 				.put({ id, data: svgData });
 
 			writeDataRequest.onsuccess = () => resolve();
-			writeDataRequest.onerror = () => reject(new Error('Error saving data: ' + writeDataRequest.error));
-		}));
+			writeDataRequest.onerror = () =>
+				reject(new Error('Error saving data: ' + String(writeDataRequest.error)));
+		});
 
 		await this.updateStoreEntryModifyTime(id);
 	}
@@ -211,7 +220,7 @@ export class IndexedDBStore implements AbstractStore {
 			readDataRequest.onsuccess = (event: any) => {
 				const data = event.target.result.data as string;
 
-				if (typeof (data) !== 'string') {
+				if (typeof data !== 'string') {
 					reject(new Error('Reading image: Type of image data is not string'));
 					return;
 				}
@@ -219,7 +228,8 @@ export class IndexedDBStore implements AbstractStore {
 				resolve(data);
 			};
 
-			readDataRequest.onerror = () => reject(new Error('Error reading image: ' + readDataRequest.error));
+			readDataRequest.onerror = () =>
+				reject(new Error('Error reading image: ' + String(readDataRequest.error)));
 		});
 	}
 
@@ -281,9 +291,11 @@ export class IndexedDBStore implements AbstractStore {
 					}
 				});
 
-				resolve(imageMetadataList.map(metadata => {
-					return this.createStoreEntry(metadata);
-				}));
+				resolve(
+					imageMetadataList.map((metadata) => {
+						return this.createStoreEntry(metadata);
+					}),
+				);
 			};
 
 			keyRequest.onerror = (event) => {
@@ -296,17 +308,22 @@ export class IndexedDBStore implements AbstractStore {
 	public createNewEntry(): Promise<StoreEntry | null> {
 		const metadata = {
 			name: this.localization.untitledImage,
-			lastUpdateTime: (new Date()).getTime(),
+			lastUpdateTime: new Date().getTime(),
 		};
 
-		const transaction = this.db.transaction([ imageMetadataStoreName, imageDataStoreName ], 'readwrite');
+		const transaction = this.db.transaction(
+			[imageMetadataStoreName, imageDataStoreName],
+			'readwrite',
+		);
 
 		return new Promise<StoreEntry | null>((resolve, reject) => {
 			const addMetadataRequest = transaction.objectStore(imageMetadataStoreName).add(metadata);
 			const addImageRequest = transaction.objectStore(imageDataStoreName).add({ data: '' });
 
-			addMetadataRequest.onerror = () => reject(new Error('Error adding image metadata: ' + addMetadataRequest.error));
-			addImageRequest.onerror = () => reject(new Error('Error adding image data: ' + addImageRequest.error));
+			addMetadataRequest.onerror = () =>
+				reject(new Error(`Error adding image metadata: ${addMetadataRequest.error}`));
+			addImageRequest.onerror = () =>
+				reject(new Error(`Error adding image data: ${addImageRequest.error}`));
 
 			const eventToId = (event: any) => parseInt(event.target.result);
 
@@ -318,8 +335,10 @@ export class IndexedDBStore implements AbstractStore {
 					const otherId = eventToId(event);
 
 					if (eventToId(event) !== id) {
-						reject(new Error(`Error creating new image:
-								IDs assigned to image and metadata don't match (${id}, ${otherId})`));
+						reject(
+							new Error(`Error creating new image:
+								IDs assigned to image and metadata don't match (${id}, ${otherId})`),
+						);
 						return;
 					}
 

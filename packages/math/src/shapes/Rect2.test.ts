@@ -1,4 +1,3 @@
-
 import Rect2 from './Rect2';
 import { Vec2 } from '../Vec2';
 import Mat33 from '../Mat33';
@@ -7,42 +6,21 @@ describe('Rect2', () => {
 	it('width, height should always be positive', () => {
 		expect(new Rect2(-1, -2, -3, 4)).objEq(new Rect2(-4, -2, 3, 4));
 		expect(new Rect2(0, 0, 0, 0).size).objEq(Vec2.zero);
-		expect(Rect2.fromCorners(
-			Vec2.of(-3, -3),
-			Vec2.of(-1, -1)
-		)).objEq(new Rect2(
-			-3, -3,
-			2, 2
-		));
+		expect(Rect2.fromCorners(Vec2.of(-3, -3), Vec2.of(-1, -1))).objEq(new Rect2(-3, -3, 2, 2));
 	});
 
 	it('bounding boxes should be correctly computed', () => {
-		expect(Rect2.bboxOf([
-			Vec2.zero,
-		])).objEq(Rect2.empty);
+		expect(Rect2.bboxOf([Vec2.zero])).objEq(Rect2.empty);
 
-		expect(Rect2.bboxOf([
-			Vec2.of(-1, -1),
-			Vec2.of(1, 2),
-			Vec2.of(3, 4),
-			Vec2.of(1, -4),
-		])).objEq(new Rect2(
-			-1, -4,
-			4, 8
-		));
+		expect(Rect2.bboxOf([Vec2.of(-1, -1), Vec2.of(1, 2), Vec2.of(3, 4), Vec2.of(1, -4)])).objEq(
+			new Rect2(-1, -4, 4, 8),
+		);
 
-		expect(Rect2.bboxOf([
-			Vec2.zero,
-		], 10)).objEq(new Rect2(
-			-10, -10,
-			20, 20
-		));
+		expect(Rect2.bboxOf([Vec2.zero], 10)).objEq(new Rect2(-10, -10, 20, 20));
 	});
 
 	it('"union"s should contain both composite rectangles.', () => {
-		expect(new Rect2(0, 0, 1, 1).union(new Rect2(1, 1, 2, 2))).objEq(
-			new Rect2(0, 0, 3, 3)
-		);
+		expect(new Rect2(0, 0, 1, 1).union(new Rect2(1, 1, 2, 2))).objEq(new Rect2(0, 0, 3, 3));
 		expect(Rect2.empty.union(Rect2.empty)).objEq(Rect2.empty);
 	});
 
@@ -51,21 +29,15 @@ describe('Rect2', () => {
 	});
 
 	it('should correctly union multiple rectangles', () => {
-		expect(Rect2.union(new Rect2(0, 0, 1, 1), new Rect2(1, 1, 2, 2))).objEq(
-			new Rect2(0, 0, 3, 3)
-		);
+		expect(Rect2.union(new Rect2(0, 0, 1, 1), new Rect2(1, 1, 2, 2))).objEq(new Rect2(0, 0, 3, 3));
 
 		expect(
-			Rect2.union(new Rect2(-1, 0, 1, 1), new Rect2(1, 1, 2, 2), new Rect2(1, 10, 1, 0.1))
-		).objEq(
-			new Rect2(-1, 0, 4, 10.1)
-		);
+			Rect2.union(new Rect2(-1, 0, 1, 1), new Rect2(1, 1, 2, 2), new Rect2(1, 10, 1, 0.1)),
+		).objEq(new Rect2(-1, 0, 4, 10.1));
 
 		expect(
-			Rect2.union(new Rect2(-1, 0, 1, 1), new Rect2(1, -11.1, 2, 2), new Rect2(1, 10, 1, 0.1))
-		).objEq(
-			new Rect2(-1, -11.1, 4, 21.2)
-		);
+			Rect2.union(new Rect2(-1, 0, 1, 1), new Rect2(1, -11.1, 2, 2), new Rect2(1, 10, 1, 0.1)),
+		).objEq(new Rect2(-1, -11.1, 4, 21.2));
 	});
 
 	it('should contain points that are within a rectangle', () => {
@@ -112,17 +84,15 @@ describe('Rect2', () => {
 	});
 
 	it('should correctly compute the intersection of one rectangle and several others', () => {
-		const mainRect = new Rect2(334,156,333,179);
+		const mainRect = new Rect2(334, 156, 333, 179);
 		const shouldIntersect = [
 			new Rect2(400.8, 134.8, 8.4, 161.4),
-			new Rect2(324.8,93,164.4,75.2),
-			new Rect2(435.8,146.8,213.2,192.6),
-			new Rect2(550.8,211.8,3.4,3.4),
-			new Rect2(478.8,93.8,212.4,95.4),
+			new Rect2(324.8, 93, 164.4, 75.2),
+			new Rect2(435.8, 146.8, 213.2, 192.6),
+			new Rect2(550.8, 211.8, 3.4, 3.4),
+			new Rect2(478.8, 93.8, 212.4, 95.4),
 		];
-		const shouldNotIntersect = [
-			new Rect2(200, 200, 1, 1),
-		];
+		const shouldNotIntersect = [new Rect2(200, 200, 1, 1)];
 
 		for (const rect of shouldIntersect) {
 			expect(mainRect.intersects(rect)).toBe(true);
@@ -135,15 +105,19 @@ describe('Rect2', () => {
 	it('intersecting rectangles should have their intersections correctly computed', () => {
 		expect(new Rect2(-1, -1, 2, 2).intersection(Rect2.empty)).objEq(Rect2.empty);
 		expect(new Rect2(-1, -1, 2, 2).intersection(new Rect2(0, 0, 3, 3))).objEq(
-			new Rect2(0, 0, 1, 1)
+			new Rect2(0, 0, 1, 1),
 		);
 		expect(new Rect2(-2, 0, 1, 2).intersection(new Rect2(-3, 0, 2, 2))).objEq(
-			new Rect2(-2, 0, 1, 2)
+			new Rect2(-2, 0, 1, 2),
 		);
 		expect(new Rect2(-1, -1, 2, 2).intersection(new Rect2(3, 3, 10, 10))).toBe(null);
 	});
 
 	it('A transformed bounding box', () => {
+		expect(Rect2.unitSquare.transformedBoundingBox(Mat33.scaling2D(2))).objEq(
+			new Rect2(0, 0, 2, 2),
+		);
+
 		const rotationMat = Mat33.zRotation(Math.PI / 4);
 		const rect = Rect2.unitSquare.translatedBy(Vec2.of(-0.5, -0.5));
 		const transformedBBox = rect.transformedBoundingBox(rotationMat);
@@ -162,6 +136,14 @@ describe('Rect2', () => {
 		expect(new Rect2(1, 2, 1, 2).grownBy(-1)).objEq(new Rect2(1.5, 3, 0, 0));
 		expect(new Rect2(1, 2, 4, 4).grownBy(-1)).objEq(new Rect2(2, 3, 2, 2));
 		expect(new Rect2(1, 2, 2, 8).grownBy(-2)).objEq(new Rect2(2, 4, 0, 4));
+	});
+
+	it('.grownToSize should grow the rectangle to the given minimum size', () => {
+		expect(Rect2.empty.grownToSize(Vec2.of(10, 10))).objEq(new Rect2(-5, -5, 10, 10));
+		expect(Rect2.empty.grownToSize(Vec2.of(10, 4))).objEq(new Rect2(-5, -2, 10, 4));
+
+		expect(Rect2.unitSquare.grownToSize(Vec2.of(0.5, 0.5))).toBe(Rect2.unitSquare);
+		expect(new Rect2(0, 0, 2, 2).grownToSize(Vec2.of(4, 0.5))).objEq(new Rect2(-1, 0, 4, 2));
 	});
 
 	describe('should correctly expand to include a given point', () => {
@@ -192,39 +174,38 @@ describe('Rect2', () => {
 
 	describe('divideIntoGrid', () => {
 		it('division of unit square', () => {
-			expect(Rect2.unitSquare.divideIntoGrid(2, 2)).toMatchObject(
-				[
-					new Rect2(0, 0, 0.5, 0.5), new Rect2(0.5, 0, 0.5, 0.5),
-					new Rect2(0, 0.5, 0.5, 0.5), new Rect2(0.5, 0.5, 0.5, 0.5),
-				]
-			);
+			expect(Rect2.unitSquare.divideIntoGrid(2, 2)).toMatchObject([
+				new Rect2(0, 0, 0.5, 0.5),
+				new Rect2(0.5, 0, 0.5, 0.5),
+				new Rect2(0, 0.5, 0.5, 0.5),
+				new Rect2(0.5, 0.5, 0.5, 0.5),
+			]);
 			expect(Rect2.unitSquare.divideIntoGrid(0, 0).length).toBe(0);
 			expect(Rect2.unitSquare.divideIntoGrid(100, 0).length).toBe(0);
-			expect(Rect2.unitSquare.divideIntoGrid(4, 1)).toMatchObject(
-				[
-					new Rect2(0, 0, 0.25, 1), new Rect2(0.25, 0, 0.25, 1),
-					new Rect2(0.5, 0, 0.25, 1), new Rect2(0.75, 0, 0.25, 1),
-				]
-			);
+			expect(Rect2.unitSquare.divideIntoGrid(4, 1)).toMatchObject([
+				new Rect2(0, 0, 0.25, 1),
+				new Rect2(0.25, 0, 0.25, 1),
+				new Rect2(0.5, 0, 0.25, 1),
+				new Rect2(0.75, 0, 0.25, 1),
+			]);
 		});
 		it('division of translated square', () => {
-			expect(new Rect2(3, -3, 4, 4).divideIntoGrid(2, 1)).toMatchObject(
-				[
-					new Rect2(3, -3, 2, 4), new Rect2(5, -3, 2, 4),
-				]
-			);
+			expect(new Rect2(3, -3, 4, 4).divideIntoGrid(2, 1)).toMatchObject([
+				new Rect2(3, -3, 2, 4),
+				new Rect2(5, -3, 2, 4),
+			]);
 		});
 		it('division of empty square', () => {
 			expect(Rect2.empty.divideIntoGrid(1000, 10000).length).toBe(1);
 		});
 
 		it('division of rectangle', () => {
-			expect(new Rect2(0, 0, 2, 1).divideIntoGrid(2, 2)).toMatchObject(
-				[
-					new Rect2(0, 0, 1, 0.5), new Rect2(1, 0, 1, 0.5),
-					new Rect2(0, 0.5, 1, 0.5), new Rect2(1, 0.5, 1, 0.5),
-				]
-			);
+			expect(new Rect2(0, 0, 2, 1).divideIntoGrid(2, 2)).toMatchObject([
+				new Rect2(0, 0, 1, 0.5),
+				new Rect2(1, 0, 1, 0.5),
+				new Rect2(0, 0.5, 1, 0.5),
+				new Rect2(1, 0.5, 1, 0.5),
+			]);
 		});
 	});
 

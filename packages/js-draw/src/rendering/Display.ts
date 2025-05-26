@@ -6,6 +6,8 @@ import DummyRenderer from './renderers/DummyRenderer';
 import { Point2, Vec2, Color4 } from '@js-draw/math';
 import RenderingCache from './caching/RenderingCache';
 import TextOnlyRenderer from './renderers/TextOnlyRenderer';
+import AcceleratedInkingCanvasRenderer from './renderers/AcceleratedInkingCanvasRenderer';
+import createButton from '../util/dom/createButton';
 
 export enum RenderingMode {
 	DummyRenderer,
@@ -29,15 +31,17 @@ export default class Display {
 	private dryInkRenderer: AbstractRenderer;
 	private wetInkRenderer: AbstractRenderer;
 	private textRenderer: TextOnlyRenderer;
-	private textRerenderOutput: HTMLElement|null = null;
+	private textRerenderOutput: HTMLElement | null = null;
 	private cache: RenderingCache;
 	private devicePixelRatio: number = window.devicePixelRatio ?? 1;
-	private resizeSurfacesCallback?: ()=> void;
-	private flattenCallback?: ()=> void;
+	private resizeSurfacesCallback?: () => void;
+	private flattenCallback?: () => void;
 
 	/** @internal */
 	public constructor(
-		private editor: Editor, mode: RenderingMode, private parent: HTMLElement|null
+		private editor: Editor,
+		mode: RenderingMode,
+		private parent: HTMLElement | null,
 	) {
 		if (mode === RenderingMode.CanvasRenderer) {
 			this.initializeCanvasRendering();
@@ -87,7 +91,7 @@ export default class Display {
 			minProportionalRenderTimeToUseCache: 105 * 4,
 		});
 
-		this.editor.notifier.on(EditorEventType.DisplayResized, event => {
+		this.editor.notifier.on(EditorEventType.DisplayResized, (event) => {
 			if (event.kind !== EditorEventType.DisplayResized) {
 				throw new Error('Mismatched event.kinds!');
 			}
@@ -105,6 +109,7 @@ export default class Display {
 		return this.dryInkRenderer.displaySize().x;
 	}
 
+	/** @returns the visible height of the display. See {@link width}. */
 	public get height(): number {
 		return this.dryInkRenderer.displaySize().y;
 	}
@@ -118,7 +123,7 @@ export default class Display {
 	 * @returns the color at the given point on the dry ink renderer, or `null` if `screenPos`
 	 * 	is not on the display.
 	 */
-	public getColorAt = (_screenPos: Point2): Color4|null => {
+	public getColorAt = (_screenPos: Point2): Color4 | null => {
 		return null;
 	};
 
@@ -129,7 +134,7 @@ export default class Display {
 		const wetInkCtx = wetInkCanvas.getContext('2d')!;
 
 		this.dryInkRenderer = new CanvasRenderer(dryInkCtx, this.editor.viewport);
-		this.wetInkRenderer = new CanvasRenderer(wetInkCtx, this.editor.viewport);
+		this.wetInkRenderer = new AcceleratedInkingCanvasRenderer(wetInkCtx, this.editor.viewport);
 
 		dryInkCanvas.className = 'dryInkCanvas';
 		wetInkCanvas.className = 'wetInkCanvas';
@@ -141,10 +146,14 @@ export default class Display {
 
 		this.resizeSurfacesCallback = () => {
 			const expectedWidth = (canvas: HTMLCanvasElement): number => {
-				return Math.ceil(canvas.clientWidth * this.devicePixelRatio);
+				const widthInPixels = Math.ceil(canvas.clientWidth * this.devicePixelRatio);
+				// Avoid setting the canvas width to zero -- doing so can cause errors when attempting
+				// to use the canvas:
+				return widthInPixels || canvas.width;
 			};
 			const expectedHeight = (canvas: HTMLCanvasElement): number => {
-				return Math.ceil(canvas.clientHeight * this.devicePixelRatio);
+				const heightInPixels = Math.ceil(canvas.clientHeight * this.devicePixelRatio);
+				return heightInPixels || canvas.height; // Zero-size canvases can cause errors.
 			};
 
 			const hasSizeMismatch = (canvas: HTMLCanvasElement): boolean => {
@@ -172,10 +181,7 @@ export default class Display {
 
 				this.editor.notifier.dispatch(EditorEventType.DisplayResized, {
 					kind: EditorEventType.DisplayResized,
-					newSize: Vec2.of(
-						this.width,
-						this.height,
-					),
+					newSize: Vec2.of(this.width, this.height),
 				});
 			}
 		};
@@ -208,9 +214,10 @@ export default class Display {
 		const textRendererOutputContainer = document.createElement('div');
 		textRendererOutputContainer.classList.add('textRendererOutputContainer');
 
-		const rerenderButton = document.createElement('button');
-		rerenderButton.classList.add('rerenderButton');
-		rerenderButton.innerText = this.editor.localization.rerenderAsText;
+		const rerenderButton = createButton({
+			classList: ['rerenderButton'],
+			text: this.editor.localization.rerenderAsText,
+		});
 
 		this.textRerenderOutput = document.createElement('div');
 		this.textRerenderOutput.setAttribute('aria-live', 'polite');
@@ -246,6 +253,13 @@ export default class Display {
 	/** @internal */
 	public getDevicePixelRatio() {
 		return this.devicePixelRatio;
+	}
+
+	/** @internal -- used for internal performance improvements. */
+	public onPointerEvent(event: PointerEvent) {
+		if (this.wetInkRenderer instanceof AcceleratedInkingCanvasRenderer) {
+			this.wetInkRenderer.onEvent(event);
+		}
 	}
 
 	/**

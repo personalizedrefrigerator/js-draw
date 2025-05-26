@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import AbstractComponent from '../components/AbstractComponent';
 import TextComponent from '../components/TextComponent';
-import SVGLoader from '../SVGLoader';
+import SVGLoader from '../SVGLoader/SVGLoader';
 import { PasteEvent } from '../inputEvents';
 import { Mat33, Color4 } from '@js-draw/math';
 import BaseTool from './BaseTool';
@@ -26,12 +26,21 @@ export default class PasteHandler extends BaseTool {
 	}
 
 	// @internal
-	public override onPaste(event: PasteEvent): boolean {
+	public override onPaste(event: PasteEvent, onComplete?: () => void): boolean {
 		const mime = event.mime.toLowerCase();
 
 		const svgData = (() => {
 			if (mime === 'image/svg+xml') {
 				return event.data;
+			}
+
+			// In some environments, it isn't possible to write non-text data to the
+			// clipboard. To support these cases, auto-detect text/plain SVG data.
+			if (mime === 'text/plain') {
+				const trimmedData = event.data.trim();
+				if (trimmedData.startsWith('<svg') && trimmedData.endsWith('</svg>')) {
+					return trimmedData;
+				}
 			}
 
 			if (mime !== 'text/html') {
@@ -53,15 +62,13 @@ export default class PasteHandler extends BaseTool {
 		})();
 
 		if (svgData) {
-			void this.doSVGPaste(svgData);
+			void this.doSVGPaste(svgData).then(onComplete);
 			return true;
-		}
-		else if (mime === 'text/plain') {
-			void this.doTextPaste(event.data);
+		} else if (mime === 'text/plain') {
+			void this.doTextPaste(event.data).then(onComplete);
 			return true;
-		}
-		else if (mime === 'image/png' || mime === 'image/jpeg') {
-			void this.doImagePaste(event.data);
+		} else if (mime === 'image/png' || mime === 'image/jpeg') {
+			void this.doImagePaste(event.data).then(onComplete);
 			return true;
 		}
 
@@ -70,20 +77,27 @@ export default class PasteHandler extends BaseTool {
 
 	private async addComponentsFromPaste(components: AbstractComponent[]) {
 		await this.editor.addAndCenterComponents(
-			components, true, this.editor.localization.pasted(components.length),
+			components,
+			true,
+			this.editor.localization.pasted(components.length),
 		);
 	}
 
 	private async doSVGPaste(data: string) {
 		this.editor.showLoadingWarning(0);
 		try {
-			const loader = SVGLoader.fromString(data, true);
+			const loader = SVGLoader.fromString(data, {
+				sanitize: true,
+				plugins: this.editor.getCurrentSettings().svg?.loaderPlugins ?? [],
+			});
 
 			const components: AbstractComponent[] = [];
-			await loader.start((component) => {
-				components.push(component);
-			},
-			(_countProcessed: number, _totalToProcess: number) => null);
+			await loader.start(
+				(component) => {
+					components.push(component);
+				},
+				(_countProcessed: number, _totalToProcess: number) => null,
+			);
 
 			await this.addComponentsFromPaste(components);
 		} finally {
@@ -106,7 +120,11 @@ export default class PasteHandler extends BaseTool {
 			return 0;
 		});
 
-		const defaultTextStyle: TextRenderingStyle = { size: 12, fontFamily: 'sans', renderingStyle: { fill: Color4.red } };
+		const defaultTextStyle: TextRenderingStyle = {
+			size: 12,
+			fontFamily: 'sans',
+			renderingStyle: { fill: Color4.red },
+		};
 		const pastedTextStyle: TextRenderingStyle = textTools[0]?.getTextStyle() ?? defaultTextStyle;
 
 		// Don't paste text that would be invisible.
@@ -115,13 +133,15 @@ export default class PasteHandler extends BaseTool {
 		}
 
 		const lines = text.split('\n');
-		await this.addComponentsFromPaste([ TextComponent.fromLines(lines, Mat33.identity, pastedTextStyle) ]);
+		await this.addComponentsFromPaste([
+			TextComponent.fromLines(lines, Mat33.identity, pastedTextStyle),
+		]);
 	}
 
 	private async doImagePaste(dataURL: string) {
 		const image = new Image();
 		image.src = dataURL;
 		const component = await ImageComponent.fromImage(image, Mat33.identity);
-		await this.addComponentsFromPaste([ component ]);
+		await this.addComponentsFromPaste([component]);
 	}
 }

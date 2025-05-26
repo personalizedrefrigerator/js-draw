@@ -16,7 +16,7 @@ describe('TextOnlyRenderer', () => {
 			base64Url: '',
 			label: 'Testing...',
 		});
-		editor.dispatch(editor.image.addElement(image));
+		editor.dispatch(editor.image.addComponent(image));
 
 		const textRenderer = new TextOnlyRenderer(editor.viewport, editor.localization);
 		editor.image.render(textRenderer, editor.viewport);

@@ -12,10 +12,10 @@ export default class UndoRedoShortcut extends BaseTool {
 	// @internal
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		if (this.editor.shortcuts.matchesShortcut(undoKeyboardShortcutId, event)) {
-			this.editor.history.undo();
+			void this.editor.history.undo();
 			return true;
 		} else if (this.editor.shortcuts.matchesShortcut(redoKeyboardShortcutId, event)) {
-			this.editor.history.redo();
+			void this.editor.history.redo();
 			return true;
 		}
 

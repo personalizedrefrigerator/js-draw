@@ -20,7 +20,7 @@ const createTestHelpDisplay = (testHelpTexts: string[]) => {
 		elementCounter++;
 
 		const testElement = document.createElement('button');
-		testElement.innerText = `Test element ${elementCounter}`;
+		testElement.textContent = `Test element ${elementCounter}`;
 		testElement.classList.add(`test-element-${elementCounter}`);
 
 		display.registerTextHelpForElement(testElement, helpText);
@@ -33,10 +33,14 @@ const createTestHelpDisplay = (testHelpTexts: string[]) => {
 	expect(overlayElementMatches).toHaveLength(1);
 	const helpOverlay = overlayElementMatches[0];
 
-	const nextButton = helpOverlay.querySelector<HTMLButtonElement>('.navigation-buttons > button.next')!;
+	const nextButton = helpOverlay.querySelector<HTMLButtonElement>(
+		'.navigation-buttons > button.next',
+	)!;
 	expect(nextButton).not.toBeFalsy();
 
-	const previousButton = helpOverlay.querySelector<HTMLButtonElement>('.navigation-buttons > button.previous')!;
+	const previousButton = helpOverlay.querySelector<HTMLButtonElement>(
+		'.navigation-buttons > button.previous',
+	)!;
 	expect(previousButton).not.toBeFalsy();
 
 	const closeButton = helpOverlay.querySelector<HTMLButtonElement>('.close-button')!;
@@ -65,31 +69,30 @@ describe('HelpDisplay', () => {
 	});
 
 	test('should show help registered for just the current element', async () => {
-		const { helpOverlay, getLabel, closeButton, nextButton, previousButton } = createTestHelpDisplay(
-			[ 'Help text here...', 'Help text 2' ]
-		);
+		const { helpOverlay, getLabel, closeButton, nextButton, previousButton } =
+			createTestHelpDisplay(['Help text here...', 'Help text 2']);
 
 		// Should show the help text for the first item
-		expect(getLabel().innerText).toMatch('Help text here...');
+		expect(getLabel().textContent).toMatch('Help text here...');
 
 		// Clicking "next" should move to the next item
 		nextButton.click();
 
 		// Should now have the help text for the second element
-		expect(getLabel().innerText).toBe('Help text 2');
+		expect(getLabel().textContent).toBe('Help text 2');
 
 		nextButton.click();
 
 		// Should still just have the help text for the second element
-		expect(getLabel().innerText).toBe('Help text 2');
+		expect(getLabel().textContent).toBe('Help text 2');
 
 		// May have additional instructions (so just match the start)
 		previousButton.click();
-		expect(getLabel().innerText).toBe('Help text here...');
+		expect(getLabel().textContent).toBe('Help text here...');
 
 		// Should stay on the first
 		previousButton.click();
-		expect(getLabel().innerText).toBe('Help text here...');
+		expect(getLabel().textContent).toBe('Help text here...');
 
 		// Should still be in the document
 		expect(helpOverlay.parentElement).not.toBeFalsy();
@@ -103,41 +106,39 @@ describe('HelpDisplay', () => {
 	});
 
 	test('dragging the dialog background should transition between items', async () => {
-		const { helpOverlay, getLabel } = createTestHelpDisplay(
-			[ 'Item 1', 'Item 2', 'Item 3' ]
-		);
+		const { helpOverlay, getLabel } = createTestHelpDisplay(['Item 1', 'Item 2', 'Item 3']);
 
-		expect(getLabel().innerText).toBe('Item 1');
+		expect(getLabel().textContent).toBe('Item 1');
 
 		// Swipe from right to left
 		await sendHtmlSwipe(helpOverlay, Vec2.of(50, 50), Vec2.of(0, 50));
-		expect(getLabel().innerText).toBe('Item 2');
+		expect(getLabel().textContent).toBe('Item 2');
 
 		// Swipe to the first again
 		await sendHtmlSwipe(helpOverlay, Vec2.of(50, 50), Vec2.of(100, 60));
-		expect(getLabel().innerText).toBe('Item 1');
+		expect(getLabel().textContent).toBe('Item 1');
 
 		// Shouldn't be possible to swipe before the first item
 		await sendHtmlSwipe(helpOverlay, Vec2.of(50, 50), Vec2.of(1000, 60));
-		expect(getLabel().innerText).toBe('Item 1');
+		expect(getLabel().textContent).toBe('Item 1');
 
 		await sendHtmlSwipe(helpOverlay, Vec2.of(150, 50), Vec2.of(100, 30));
-		expect(getLabel().innerText).toBe('Item 2');
+		expect(getLabel().textContent).toBe('Item 2');
 
 		// Small swipes should do nothing
 		await sendHtmlSwipe(helpOverlay, Vec2.of(50, 50), Vec2.of(35, 50));
-		expect(getLabel().innerText).toBe('Item 2');
+		expect(getLabel().textContent).toBe('Item 2');
 
 		// Swipes should work even with a large vertical component
 		await sendHtmlSwipe(helpOverlay, Vec2.of(150, 50), Vec2.of(10, 0));
-		expect(getLabel().innerText).toBe('Item 3');
+		expect(getLabel().textContent).toBe('Item 3');
 
 		// Should not be possible to swipe past the last item.
 		await sendHtmlSwipe(helpOverlay, Vec2.of(150, 50), Vec2.of(10, 100));
-		expect(getLabel().innerText).toBe('Item 3');
+		expect(getLabel().textContent).toBe('Item 3');
 
 		// Should be possible to swipe back
 		await sendHtmlSwipe(helpOverlay, Vec2.of(50, 50), Vec2.of(100, 60));
-		expect(getLabel().innerText).toBe('Item 2');
+		expect(getLabel().textContent).toBe('Item 2');
 	});
 });

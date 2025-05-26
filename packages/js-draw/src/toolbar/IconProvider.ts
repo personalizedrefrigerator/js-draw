@@ -7,36 +7,38 @@ import Viewport from '../Viewport';
 import { makeFreehandLineBuilder } from '../components/builders/FreehandLineBuilder';
 import { makePolylineBuilder } from '../components/builders/PolylineBuilder';
 import { EraserMode } from '../tools/Eraser';
+import { createSvgElement, createSvgElements, createSvgPaths } from '../util/dom/createElement';
+import { SelectionMode } from '../tools/SelectionTool/types';
 
-export type IconElemType = HTMLImageElement|SVGElement;
+export type IconElemType = HTMLImageElement | SVGElement;
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
-const iconColorFill = `
-	style='fill: var(--icon-color);'
-`;
-const iconColorStrokeFill = `
-	style='fill: var(--icon-color); stroke: var(--icon-color);'
-`;
 
 let checkerboardIdCounter = 0;
 const makeCheckerboardPattern = () => {
 	const id = `checkerboard-${checkerboardIdCounter++}`;
-	const patternDef = `
-		<pattern
-			id='${id}'
-			viewBox='0,0,10,10'
-			width='20%'
-			height='20%'
-			patternUnits='userSpaceOnUse'
-		>
-			<rect x='0' y='0' width='10' height='10' fill='white'/>
-			<rect x='0' y='0' width='5' height='5' fill='gray'/>
-			<rect x='5' y='5' width='5' height='5' fill='gray'/>
-		</pattern>
-	`;
+	const patternElement = createSvgElement('pattern', {
+		id: id,
+		viewBox: '0,0,10,10',
+		width: '20%',
+		height: '20%',
+		patternUnits: 'userSpaceOnUse',
+		children: createSvgElements('rect', [
+			{ x: 0, y: 0, width: 10, height: 10, fill: 'white' },
+			{ x: 0, y: 0, width: 5, height: 5, fill: 'gray' },
+			{ x: 5, y: 5, width: 5, height: 5, fill: 'gray' },
+		]),
+	});
 	const patternRef = `url(#${id})`;
 
-	return { patternDef, patternRef };
+	return {
+		patternDefElement: patternElement as SVGElement,
+		// @deprecated use patternDefElement
+		get patternDef() {
+			return patternElement.innerHTML;
+		},
+		patternRef,
+	};
 };
 
 const makeRedoIcon = (mirror: boolean) => {
@@ -53,15 +55,19 @@ const makeRedoIcon = (mirror: boolean) => {
 				transform-origin: center;
 			}
 		</style>
-		<path
-			d='M20,20 A15,15 0 0 1 70,80 L80,90 L60,70 L65,90 L87,90 L65,80'
-			class='toolbar-svg-undo-redo-icon'
-			style='${mirror ? 'transform: scale(-1, 1);' : ''}'/>
 	`;
+
+	const path = document.createElementNS(svgNamespace, 'path');
+	path.setAttribute('d', 'M20,20 A15,15 0 0 1 70,80 L80,90 L60,70 L65,90 L87,90 L65,80');
+	path.classList.add('toolbar-svg-undo-redo-icon');
+	if (mirror) {
+		path.style.transform = 'scale(-1, 1)';
+	}
+	icon.appendChild(path);
+
 	icon.setAttribute('viewBox', '0 0 100 100');
 	return icon;
 };
-
 
 /**
  * Provides icons that can be used in the toolbar and other locations.
@@ -106,81 +112,86 @@ export default class IconProvider {
 	}
 
 	public makeDropdownIcon(): IconElemType {
-		const icon = document.createElementNS(svgNamespace, 'svg');
-		icon.innerHTML = `
-		<g>
-			<path
-				d='M5,10 L50,90 L95,10 Z'
-				${iconColorFill}
-			/>
-		</g>
-		`;
+		const icon = this.makeIconFromPath('M5,10 L50,90 L95,10 Z');
 		icon.setAttribute('viewBox', '-10 -10 110 110');
 		return icon;
 	}
 
 	public makeEraserIcon(eraserSize?: number, mode?: EraserMode): IconElemType {
-		const icon = document.createElementNS(svgNamespace, 'svg');
 		eraserSize ??= 10;
 
 		const scaledSize = eraserSize / 4;
 		const eraserColor = '#ff70af';
 
 		// Draw an eraser-like shape. Created with Inkscape
-		icon.innerHTML = `
-		<defs>
-			<linearGradient id="dash-pattern">
-				<stop offset="80%" stop-color="${eraserColor}"/>
-				<stop offset="85%" stop-color="white"/>
-				<stop offset="90%" stop-color="${eraserColor}"/>
-			</linearGradient>
-		</defs>
-		<g>
-			<path
-				style="fill:${mode === EraserMode.PartialStroke ? 'url(#dash-pattern)' : eraserColor}"
-				stroke="black"
-				transform="rotate(41.35)"
-				d="M 52.5 27
-					C 50 28.9 48.9 31.7 48.9 34.8
-					L 48.9 39.8
-					C 48.9 45.3 53.4 49.8 58.9 49.8
-					L 103.9 49.8
-					C 105.8 49.8 107.6 49.2 109.1 48.3
-					L 110.2 ${scaledSize + 49.5} L 159.7 ${scaledSize + 5}
-					L 157.7 ${-scaledSize + 5.2} L 112.4 ${49.5 - scaledSize}
-					C 113.4 43.5 113.9 41.7 113.9 39.8
-					L 113.9 34.8
-					C 113.9 29.3 109.4 24.8 103.9 24.8
-					L 58.9 24.8
-					C 56.5 24.8 54.3 25.7 52.5 27
-					z "
-				id="path438" />
-
-			<rect
-				stroke="#cc8077"
-				${iconColorFill}
-				id="rect218"
-				width="65"
-				height="75"
-				x="48.9"
-				y="-38.7"
-				transform="rotate(41.35)" />
-		</g>
-		`;
-		icon.setAttribute('viewBox', '0 0 120 120');
+		const icon = createSvgElement('svg', {
+			viewBox: '0 0 120 120',
+			children: [
+				createSvgElement('defs', {
+					children: [
+						createSvgElement('linearGradient', {
+							id: 'dash-pattern',
+							children: createSvgElements('stop', [
+								{ offset: '80%', 'stop-color': eraserColor },
+								{ offset: '85%', 'stop-color': 'white' },
+								{ offset: '90%', 'stop-color': eraserColor },
+							]),
+						}),
+					],
+				}),
+				createSvgElement('path', {
+					fill: mode === EraserMode.PartialStroke ? 'url(#dash-pattern)' : eraserColor,
+					stroke: 'black',
+					transform: 'rotate(41.35)',
+					d: `
+						M 52.5 27
+						C 50 28.9 48.9 31.7 48.9 34.8
+						L 48.9 39.8
+						C 48.9 45.3 53.4 49.8 58.9 49.8
+						L 103.9 49.8
+						C 105.8 49.8 107.6 49.2 109.1 48.3
+						L 110.2 ${scaledSize + 49.5} L 159.7 ${scaledSize + 5}
+						L 157.7 ${-scaledSize + 5.2} L 112.4 ${49.5 - scaledSize}
+						C 113.4 43.5 113.9 41.7 113.9 39.8
+						L 113.9 34.8
+						C 113.9 29.3 109.4 24.8 103.9 24.8
+						L 58.9 24.8
+						C 56.5 24.8 54.3 25.7 52.5 27
+						z
+					`,
+				}),
+				createSvgElement('rect', {
+					stroke: '#cc8077',
+					fill: 'var(--icon-color)',
+					width: 65,
+					height: 75,
+					x: 48.9,
+					y: -38.7,
+					transform: 'rotate(41.35)',
+				}),
+			],
+		});
 		return icon;
 	}
 
-	public makeSelectionIcon(): IconElemType {
+	public makeSelectionIcon(mode: SelectionMode = SelectionMode.Rectangle): IconElemType {
 		const icon = document.createElementNS(svgNamespace, 'svg');
 
-		// Draw a cursor-like shape
-		icon.innerHTML = `
-		<g>
-			<rect x=10 y=10 width=70 height=70 fill='pink' stroke='black'/>
-			<rect x=75 y=75 width=10 height=10 fill='white' stroke='black'/>
-		</g>
-		`;
+		if (mode === SelectionMode.Rectangle) {
+			icon.innerHTML = `
+			<g>
+				<rect x="10" y="10" width="70" height="70" fill="pink" stroke="black" stroke-dasharray="32 9"/>
+				<rect x="75" y="75" width="10" height="10" fill="white" stroke="black"/>
+			</g>
+			`;
+		} else {
+			icon.innerHTML = `
+			<g>
+				<rect x="10" y="10" width="76" height="76" rx="50" stroke-dasharray="32 9" fill="pink" stroke="black"/>
+				<rect x="71" y="71" width="10" height="10" fill="white" stroke="black"/>
+			</g>
+			`;
+		}
 		icon.setAttribute('viewBox', '0 0 100 100');
 
 		return icon;
@@ -239,7 +250,8 @@ export default class IconProvider {
 		const strokeWidth = '3';
 
 		// Draw a cursor-like shape
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			m 10,60
 				5,30
 			H 90
@@ -259,7 +271,11 @@ export default class IconProvider {
 			L 25,60
 			C 20,45 10,50 10,60
 			Z
-		`, fill, strokeColor, strokeWidth);
+		`,
+			fill,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	public makeTouchPanningIcon(): IconElemType {
@@ -267,7 +283,8 @@ export default class IconProvider {
 		const strokeColor = 'var(--icon-color)';
 		const strokeWidth = '3';
 
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			M 5,5.5
 			V 17.2
 			L 16.25,5.46
@@ -293,7 +310,11 @@ export default class IconProvider {
 			L 33.1,23
 			C 30.3125,20.128192 27.9,19 25.830078,19.119756
 			Z
-		`, fill, strokeColor, strokeWidth);
+		`,
+			fill,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	/** Unused by js-draw. @deprecated */
@@ -301,7 +322,8 @@ export default class IconProvider {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
 		const strokeWidth = '3';
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			M 5 5
 			L 5 17.5
 				17.5 5
@@ -350,7 +372,11 @@ export default class IconProvider {
 			L 17.5 55
 			L 5 42.5
 			z
-		`, fill, strokeColor, strokeWidth);
+		`,
+			fill,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	public makeZoomIcon(): IconElemType {
@@ -469,8 +495,6 @@ export default class IconProvider {
 		const color = penStyle.color;
 		const rounded = this.isRoundedTipPen(penStyle);
 
-		const icon = document.createElementNS(svgNamespace, 'svg');
-		icon.setAttribute('viewBox', '0 0 100 100');
 		const tipThickness = strokeSize / 2;
 
 		const inkTipPath = `
@@ -507,86 +531,62 @@ export default class IconProvider {
 		const penTipPath = `M 25,35 ${10 - tipThickness / 4},${70 - tipThickness / 2} 20,75 25,85 60,75 70,55 45,25 Z`;
 
 		const pencilTipColor = Color4.fromHex('#f4d7d7');
-		const tipColor = pencilTipColor.mix(
-			color, tipThickness / 40 - 0.1
-		).toHexString();
+		const tipColor = pencilTipColor.mix(color, tipThickness / 40 - 0.1).toHexString();
 
 		const checkerboardPattern = makeCheckerboardPattern();
 
-		const ink = `
-			<path
-				fill="${checkerboardPattern.patternRef}"
-				d="${inkTipPath}"
-			/>
-			<path
-				fill="${checkerboardPattern.patternRef}"
-				d="${inkTrailPath}"
-			/>
-			<path
-				fill="${color}"
-				d="${inkTipPath}"
-			/>
-			<path
-				fill="${color}"
-				d="${inkTrailPath}"
-			/>
-		`;
+		const colorString = color.toHexString();
+		const ink = createSvgPaths(
+			{
+				fill: checkerboardPattern.patternRef,
+				d: inkTipPath,
+			},
+			{
+				fill: checkerboardPattern.patternRef,
+				d: inkTrailPath,
+			},
+			{
+				fill: colorString,
+				d: inkTipPath,
+			},
+			{
+				fill: colorString,
+				d: inkTrailPath,
+			},
+		);
 
-		const penTip = `
-			<path
-				fill="${checkerboardPattern.patternRef}"
-				d="${penTipPath}"
-			/>
-			<path
-				fill="${tipColor}"
-				stroke="${color}"
-				d="${penTipPath}"
-			/>
-		`;
+		const penTip = createSvgPaths(
+			{ fill: checkerboardPattern.patternRef, d: penTipPath },
+			{ fill: tipColor, stroke: colorString, d: penTipPath },
+		);
 
-		const grip = `
-			<path
-				${iconColorStrokeFill}
-				d="${gripMainPath}"
-			/>
+		const grip = createSvgPaths(
+			{ fill: 'var(--icon-color)', stroke: 'var(--icon-color)', d: gripMainPath },
 
-			<!-- shadows -->
-			<path
-				fill="rgba(150, 150, 150, 0.3)"
-				d="${gripShadow1Path}"
-			/>
-			<path
-				fill="rgba(100, 100, 100, 0.2)"
-				d="${gripShadow2Path}"
-			/>
+			// Shadows
+			{ fill: 'rgba(150, 150, 150, 0.3)', d: gripShadow1Path },
+			{ fill: 'rgba(100, 100, 100, 0.2)', d: gripShadow2Path },
 
-			<!-- color bubble -->
-			<path
-				fill="${checkerboardPattern.patternRef}"
-				d="${colorBubblePath}"
-			/>
-			<path
-				fill="${color}"
-				d="${colorBubblePath}"
-			/>
-		`;
+			// Color bubble
+			{ fill: checkerboardPattern.patternRef, d: colorBubblePath },
+			{ fill: colorString, d: colorBubblePath },
+		);
 
-		icon.innerHTML = `
-		<defs>
-			${checkerboardPattern.patternDef}
-		</defs>
-		<g>
-			${ink}
-			${penTip}
-			${grip}
-		</g>
-		`;
+		const icon = document.createElementNS(svgNamespace, 'svg');
+		icon.setAttribute('viewBox', '0 0 100 100');
+
+		const iconMainContent = createSvgElement('g', {
+			children: [ink, penTip, grip].flat(),
+		});
+		const defs = createSvgElement('defs', {
+			children: [checkerboardPattern.patternDefElement],
+		});
+
+		icon.replaceChildren(defs, iconMainContent);
 		return icon;
 	}
 
-	public makeIconFromFactory(
-		penStyle: PenStyle,
-	): IconElemType {
+	public makeIconFromFactory(penStyle: PenStyle): IconElemType {
 		// Increase the thickness we use to generate the icon less with larger actual thicknesses.
 		// We want the icon to be recognisable with a large range of thicknesses.
 		const thickness = Math.sqrt(penStyle.thickness) * 3;
@@ -621,13 +621,13 @@ export default class IconProvider {
 			const checkerboardPattern = makeCheckerboardPattern();
 
 			const defs = document.createElementNS(svgNamespace, 'defs');
-			defs.innerHTML = checkerboardPattern.patternDef;
+			defs.appendChild(checkerboardPattern.patternDefElement);
 			icon.appendChild(defs);
 
 			const background = document.createElementNS(svgNamespace, 'g');
 			icon.appendChild(background);
 
-			renderer = new class extends SVGRenderer {
+			renderer = new (class extends SVGRenderer {
 				public constructor() {
 					super(icon, viewport);
 				}
@@ -654,7 +654,7 @@ export default class IconProvider {
 
 					return addedPath;
 				}
-			}();
+			})();
 		} else {
 			renderer = new SVGRenderer(icon, viewport);
 		}
@@ -662,7 +662,6 @@ export default class IconProvider {
 
 		// If only a single path was rendered, try to give it a checkerboard background to
 		// emphasize transparency. TODO: This is very fragile
-
 
 		const bbox = builder.getBBox();
 		icon.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.w} ${bbox.h}`);
@@ -710,7 +709,7 @@ export default class IconProvider {
 			const checkerboardPattern = makeCheckerboardPattern();
 
 			const defs = document.createElementNS(svgNamespace, 'defs');
-			defs.innerHTML = checkerboardPattern.patternDef;
+			defs.appendChild(checkerboardPattern.patternDefElement);
 			icon.appendChild(defs);
 
 			const fluidBackground = document.createElementNS(svgNamespace, 'path');
@@ -740,20 +739,57 @@ export default class IconProvider {
 	public makeShapeAutocorrectIcon(): IconElemType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			m 79.129476,33.847107 9.967823,-0.03218 v 55 h -55 l 0.03218,-9.96782
 			M 71.1,40.8 a 30,30 0 0 1 -30,30 30,30 0 0 1 -30,-30 30,30 0 0 1 30,-30 30,30 0 0 1 30,30 L 71.1,40.8
 			M 34.1,58.8 v -25 h 25 v 0
-		`, fill, strokeColor, '7px');
+		`,
+			fill,
+			strokeColor,
+			'7px',
+		);
 	}
 
 	public makeStrokeSmoothingIcon(): IconElemType {
 		const fill = 'none';
 		const strokeColor = 'var(--icon-color)';
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			m 31,83.2 c -50,0 30,-65 -20,-65
 			M 75,17.3 40,59.7 38.2,77.6 55.5,72.4 90.5,30 Z
-		`, fill, strokeColor, '7px');
+		`,
+			fill,
+			strokeColor,
+			'7px',
+		);
+	}
+
+	public makePressureSensitivityIcon(): IconElemType {
+		const icon = document.createElementNS(svgNamespace, 'svg');
+		icon.setAttribute('viewBox', '4 -10 100 100');
+		icon.replaceChildren(
+			...createSvgPaths(
+				{
+					d: `
+					M 39.7,77.7
+					C 39.7,77.7 3.4,78.1 4.2,60 4.7,45.2 33.2,30.5 40,25 55.9,12.1 7.4,4.8 7.4,4.8
+					c 0,0 40.2,5.5 40.2,15.4
+					C 47.6,29.1 21.2,35.1 23.9,60 25,70 39.7,77.7 39.7,77.7
+					Z`,
+					fill: 'var(--icon-color)',
+					stroke: 'var(--icon-color)',
+					'stroke-width': '2px',
+				},
+				{
+					d: 'M 86.4,15.6 101.4,28.8 65,70 47.5,74.6 50,56.7Z',
+					fill: 'transparent',
+					stroke: 'var(--icon-color)',
+					'stroke-width': '6px',
+				},
+			),
+		);
+		return icon;
 	}
 
 	/** Unused. @deprecated */
@@ -793,7 +829,13 @@ export default class IconProvider {
 		`);
 	}
 
-	/** Unused. @deprecated */
+	public makeCopyIcon(): IconElemType {
+		return this.makeIconFromPath(`
+			M 45,10 45,55 90,55 90,10 45,10 z
+			M 10,25 10,90 70,90 70,60 40,60 40,25 10,25 z 
+		`);
+	}
+
 	public makePasteIcon(): IconElemType {
 		const icon = this.makeIconFromPath(`
 			M 50 0 L 50 5 L 35 5 L 40 24.75 L 20 25 L 20 100 L 85 100 L 100 90 L 100 24 L 75.1 24.3 L 80 5 L 65 5 L 65 0 L 50 0 z
@@ -812,10 +854,15 @@ export default class IconProvider {
 		const strokeColor = 'var(--icon-color)';
 		const fillColor = 'none';
 
-		return this.makeIconFromPath(`
+		return this.makeIconFromPath(
+			`
 			M 15,15 85,85
 			M 15,85 85,15
-		`, fillColor, strokeColor, strokeWidth);
+		`,
+			fillColor,
+			strokeColor,
+			strokeWidth,
+		);
 	}
 
 	public makeDeleteSelectionIcon(): IconElemType {
@@ -949,6 +996,9 @@ export default class IconProvider {
 	 * @returns An object with both the definition of a checkerboard pattern and the syntax to
 	 * reference that pattern. The defs provided by this function should be wrapped within a
 	 * `<defs></defs>` element.
+	 *
+	 * **Note**: This function's return value includes both `patternDefElement` (which returns
+	 * an Element) and a (deprecated) `patternDef` string. Avoid using the `patternDef` result.
 	 */
 	protected makeCheckerboardPattern() {
 		return makeCheckerboardPattern();
@@ -966,5 +1016,7 @@ export default class IconProvider {
 	}
 
 	/** Must be overridden by icon packs that need attribution. */
-	public licenseInfo(): string|null { return null; }
+	public licenseInfo(): string | null {
+		return null;
+	}
 }

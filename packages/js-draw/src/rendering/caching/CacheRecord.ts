@@ -14,7 +14,7 @@ export default class CacheRecord {
 	public allocCount: number = 0;
 
 	public constructor(
-		private onBeforeDeallocCallback: BeforeDeallocCallback|null,
+		private onBeforeDeallocCallback: BeforeDeallocCallback | null,
 		private cacheState: CacheState,
 	) {
 		this.renderer = cacheState.props.createRenderer();
@@ -25,7 +25,7 @@ export default class CacheRecord {
 	public startRender(): AbstractRenderer {
 		this.lastUsedCycle = this.cacheState.currentRenderingCycle;
 		if (!this.allocd) {
-			throw new Error('Only alloc\'d canvases can be rendered to');
+			throw new Error("Only alloc'd canvases can be rendered to");
 		}
 		return this.renderer;
 	}
@@ -48,7 +48,7 @@ export default class CacheRecord {
 		this.allocd = true;
 		this.onBeforeDeallocCallback = newDeallocCallback;
 		this.lastUsedCycle = this.cacheState.currentRenderingCycle;
-		this.allocCount ++;
+		this.allocCount++;
 	}
 
 	public getLastUsedCycle(): number {
@@ -59,10 +59,8 @@ export default class CacheRecord {
 	// (i.e. a [cacheProps.blockResolution]-sized rectangle with top left at (0, 0))
 	public getTransform(drawTo: Rect2): Mat33 {
 		const transform = Mat33.scaling2D(
-			this.cacheState.props.blockResolution.x / drawTo.size.x
-		).rightMul(
-			Mat33.translation(drawTo.topLeft.times(-1))
-		);
+			this.cacheState.props.blockResolution.x / drawTo.size.x,
+		).rightMul(Mat33.translation(drawTo.topLeft.times(-1)));
 
 		return transform;
 	}
@@ -73,6 +71,6 @@ export default class CacheRecord {
 
 		// The visible region may be slightly larger than where we're actually drawing
 		// to (because of rounding).
-		this.renderer.overrideVisibleRect(drawTo.grownBy(1/transform.getScaleFactor()));
+		this.renderer.overrideVisibleRect(drawTo.grownBy(1 / transform.getScaleFactor()));
 	}
 }

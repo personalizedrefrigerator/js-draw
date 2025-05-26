@@ -17,11 +17,11 @@ describe('Vec2', () => {
 	});
 
 	it('More complicated expressions', () => {
-		expect((Vec2.of(1, 2).plus(Vec2.of(3, 4))).times(2)).objEq(Vec2.of(8, 12));
+		expect(Vec2.of(1, 2).plus(Vec2.of(3, 4)).times(2)).objEq(Vec2.of(8, 12));
 	});
 
 	it('Angle', () => {
-		expect(Vec2.of(-1, 1).angle()).toBeCloseTo(3 * Math.PI / 4);
+		expect(Vec2.of(-1, 1).angle()).toBeCloseTo((3 * Math.PI) / 4);
 	});
 
 	it('Perpindicular', () => {

@@ -3,7 +3,7 @@ import AbstractRenderer, { RenderableImage } from '../rendering/renderers/Abstra
 import { assertIsNumber, assertIsNumberArray } from '../util/assertions';
 import AbstractComponent from './AbstractComponent';
 import { ImageComponentLocalization } from './localization';
-import waitForImageLoaded from '../util/waitForImageLoaded';
+import waitForImageLoaded from '../util/dom/waitForImageLoaded';
 
 /**
  * Represents a raster image.
@@ -19,10 +19,16 @@ export default class ImageComponent extends AbstractComponent {
 		super('image-component');
 		this.image = {
 			...image,
-			label: image.label ?? image.image.getAttribute('alt') ?? image.image.getAttribute('aria-label') ?? undefined,
+			label:
+				image.label ??
+				image.image.getAttribute('alt') ??
+				image.image.getAttribute('aria-label') ??
+				undefined,
 		};
 
-		const isHTMLImageElem = (elem: HTMLCanvasElement|HTMLImageElement): elem is HTMLImageElement => {
+		const isHTMLImageElem = (
+			elem: HTMLCanvasElement | HTMLImageElement,
+		): elem is HTMLImageElement => {
 			return elem.getAttribute('src') !== undefined;
 		};
 		if (isHTMLImageElem(image.image) && !image.image.complete) {
@@ -52,8 +58,10 @@ export default class ImageComponent extends AbstractComponent {
 
 		let width, height;
 		if (
-			typeof elem.width === 'number' && typeof elem.height === 'number'
-			&& elem.width !== 0 && elem.height !== 0
+			typeof elem.width === 'number' &&
+			typeof elem.height === 'number' &&
+			elem.width !== 0 &&
+			elem.height !== 0
 		) {
 			width = elem.width;
 			height = elem.height;
@@ -105,7 +113,7 @@ export default class ImageComponent extends AbstractComponent {
 
 	public override intersects(lineSegment: LineSegment2): boolean {
 		const rect = this.getImageRect();
-		const edges = rect.getEdges().map(edge => edge.transformedBy(this.image.transform));
+		const edges = rect.getEdges().map((edge) => edge.transformedBy(this.image.transform));
 		for (const edge of edges) {
 			if (edge.intersects(lineSegment)) {
 				return true;
@@ -120,7 +128,9 @@ export default class ImageComponent extends AbstractComponent {
 	}
 
 	public override description(localizationTable: ImageComponentLocalization): string {
-		return this.image.label ? localizationTable.imageNode(this.image.label) : localizationTable.unlabeledImageNode;
+		return this.image.label
+			? localizationTable.imageNode(this.image.label)
+			: localizationTable.unlabeledImageNode;
 	}
 
 	public getAltText() {

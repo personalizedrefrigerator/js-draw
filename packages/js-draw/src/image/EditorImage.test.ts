@@ -1,6 +1,15 @@
-import EditorImage from './EditorImage';
+import EditorImage, { EditorImageEventType } from './EditorImage';
 import Stroke from '../components/Stroke';
-import { Vec2, Color4, Path, PathCommandType, Rect2, Mat33, LineSegment2, Vec3 } from '@js-draw/math';
+import {
+	Vec2,
+	Color4,
+	Path,
+	PathCommandType,
+	Rect2,
+	Mat33,
+	LineSegment2,
+	Vec3,
+} from '@js-draw/math';
 import DummyRenderer from '../rendering/renderers/DummyRenderer';
 import createEditor from '../testing/createEditor';
 import RenderingStyle from '../rendering/RenderingStyle';
@@ -19,7 +28,7 @@ abstract class BaseTestComponent extends AbstractComponent {
 		super(componentKind);
 		this.contentBBox = bbox;
 	}
-	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2 | undefined) {
+	public override render(canvas: AbstractRenderer, _visibleRect?: Rect2) {
 		canvas.startObject(this.contentBBox);
 		canvas.fillRect(this.contentBBox, Color4.red);
 		canvas.endObject();
@@ -29,7 +38,7 @@ abstract class BaseTestComponent extends AbstractComponent {
 	}
 	protected override serializeToJSON(): string | number | any[] | Record<string, any> | null {
 		return {
-			bbox: this.getBBox().corners.map(corner => corner.asArray()),
+			bbox: this.getBBox().corners.map((corner) => corner.asArray()),
 		};
 	}
 	public override description(_localizationTable: ImageComponentLocalization): string {
@@ -53,7 +62,11 @@ describe('EditorImage', () => {
 		},
 	]);
 	const testFill: RenderingStyle = { fill: Color4.black };
-	const addTestStrokeCommand = EditorImage.addElement(testStroke);
+	const addTestStrokeCommand = EditorImage.addComponent(testStroke);
+
+	beforeEach(() => {
+		EditorImage.setDebugMode(true);
+	});
 
 	it('elements added to the image should be findable', () => {
 		const editor = createEditor();
@@ -97,7 +110,7 @@ describe('EditorImage', () => {
 
 		expect(!leftmostStroke.getBBox().intersects(rightmostStroke.getBBox()));
 
-		(EditorImage.addElement(leftmostStroke)).apply(editor);
+		EditorImage.addComponent(leftmostStroke).apply(editor);
 
 		// The first node should be at the image's root.
 		let firstParent = image.findParent(leftmostStroke);
@@ -105,7 +118,7 @@ describe('EditorImage', () => {
 		expect(firstParent?.getParent()).toBe(null);
 		expect(firstParent?.getBBox()?.corners).toMatchObject(leftmostStroke.getBBox()?.corners);
 
-		(EditorImage.addElement(rightmostStroke)).apply(editor);
+		EditorImage.addComponent(rightmostStroke).apply(editor);
 
 		firstParent = image.findParent(leftmostStroke);
 		const secondParent = image.findParent(rightmostStroke);
@@ -155,7 +168,7 @@ describe('EditorImage', () => {
 
 		const originalRect = getScreenRect();
 
-		await editor.dispatch(image.addElement(testStroke));
+		await editor.dispatch(image.addComponent(testStroke));
 
 		expect(image.getAutoresizeEnabled()).toBe(false);
 
@@ -181,24 +194,20 @@ describe('EditorImage', () => {
 
 		// Adding another test stroke should update the screen rect size.
 		const testStroke2 = testStroke.clone();
-		await editor.dispatch(uniteCommands([
-			editor.image.addElement(testStroke2),
-			testStroke2.transformBy(Mat33.translation(Vec2.of(100, -10))),
-		]));
+		await editor.dispatch(
+			uniteCommands([
+				editor.image.addComponent(testStroke2),
+				testStroke2.transformBy(Mat33.translation(Vec2.of(100, -10))),
+			]),
+		);
 
 		// After adding, the viewport should update
-		expect(getScreenRect()).objEq(
-			testStroke.getBBox().union(testStroke2.getBBox())
-		);
+		expect(getScreenRect()).objEq(testStroke.getBBox().union(testStroke2.getBBox()));
 
 		// After deleting one of the strokes, the viewport should update
-		await editor.dispatch(new Erase([
-			testStroke
-		]));
+		await editor.dispatch(new Erase([testStroke]));
 
-		expect(getScreenRect()).objEq(
-			testStroke2.getBBox()
-		);
+		expect(getScreenRect()).objEq(testStroke2.getBBox());
 
 		//
 		// Regression test:
@@ -211,33 +220,33 @@ describe('EditorImage', () => {
 		// 5. Deleting node (1)
 		//
 
-		const stroke3 = new Stroke([ pathToRenderable(Path.fromRect(new Rect2(5, -11, 53, 53)), { fill: Color4.red })]);
-		await editor.dispatch(EditorImage.addElement(stroke3));
+		const stroke3 = new Stroke([
+			pathToRenderable(Path.fromRect(new Rect2(5, -11, 53, 53)), { fill: Color4.red }),
+		]);
+		await editor.dispatch(EditorImage.addComponent(stroke3));
 
 		// After adding multiple new strokes, should have correct top-left corner
 		// (tests non-zero case).
 		for (let x = 10; x <= 60; x += 1) {
 			for (let y = -10; y <= 40; y += 1) {
-				const stroke = new Stroke([ pathToRenderable(Path.fromString(`m${x},${y} l1,0 l0,1`), { fill: Color4.red })]);
-				await editor.dispatch(EditorImage.addElement(stroke));
+				const stroke = new Stroke([
+					pathToRenderable(Path.fromString(`m${x},${y} l1,0 l0,1`), { fill: Color4.red }),
+				]);
+				await editor.dispatch(EditorImage.addComponent(stroke));
 			}
 		}
 
 		expect(getScreenRect()).objEq(stroke3.getBBox().union(testStroke2.getBBox()));
 
-		await editor.dispatch(new Erase([
-			stroke3,
-		]));
-		await editor.dispatch(new Erase([
-			testStroke2,
-		]));
+		await editor.dispatch(new Erase([stroke3]));
+		await editor.dispatch(new Erase([testStroke2]));
 
 		expect(getScreenRect()).objEq(new Rect2(10, -10, 51, 51));
 	});
 
 	it('setAutoresizeEnabled should return a serializable command', async () => {
 		const editor = createEditor();
-		const originalScreenRect =  editor.image.getImportExportRect();
+		const originalScreenRect = editor.image.getImportExportRect();
 
 		const enableAutoresizeCommand = editor.image.setAutoresizeEnabled(true) as SerializableCommand;
 
@@ -247,7 +256,8 @@ describe('EditorImage', () => {
 		expect(disableAutoresizeCommand).toBe(Command.empty);
 
 		const deserializedEnableCommand = SerializableCommand.deserialize(
-			enableAutoresizeCommand.serialize(), editor
+			enableAutoresizeCommand.serialize(),
+			editor,
 		);
 
 		// Dispatching a deserialized version of the enableAutoresize command should work
@@ -270,7 +280,27 @@ describe('EditorImage', () => {
 		expect(editor.image.getImportExportRect()).objEq(originalScreenRect);
 	});
 
-	describe('should correctly adding/remove a single component', () => {
+	it('should dispatch an event when a component is removed/added', () => {
+		const editor = createEditor();
+		const addListener = jest.fn();
+		const removeListener = jest.fn();
+		editor.image.notifier.on(EditorImageEventType.ComponentAdded, addListener);
+		editor.image.notifier.on(EditorImageEventType.ComponentRemoved, removeListener);
+
+		const stroke = Stroke.fromFilled('m0,0l10,100', Color4.red);
+		editor.dispatch(editor.image.addComponent(stroke));
+		expect(addListener).toHaveBeenCalledTimes(1);
+		expect(removeListener).toHaveBeenCalledTimes(0);
+
+		editor.dispatch(new Erase([stroke]));
+		expect(addListener).toHaveBeenCalledTimes(1);
+		expect(removeListener).toHaveBeenCalledTimes(1);
+
+		editor.history.undo();
+		expect(addListener).toHaveBeenCalledTimes(2);
+	});
+
+	describe('should correctly add/remove a single component', () => {
 		const runTest = async (positioning: ComponentSizingMode, isBackground: boolean) => {
 			const renderMock = jest.fn();
 			const addToImageMock = jest.fn();
@@ -283,7 +313,7 @@ describe('EditorImage', () => {
 					super(bbox, 'test-component');
 					this.positioning = positioning;
 				}
-				public override render(canvas: AbstractRenderer, visibleRect?: Rect2 | undefined): void {
+				public override render(canvas: AbstractRenderer, visibleRect?: Rect2): void {
 					renderMock(canvas, visibleRect);
 					super.render(canvas, visibleRect);
 				}
@@ -307,18 +337,12 @@ describe('EditorImage', () => {
 			AbstractComponent.registerComponent('test-component', (data) => {
 				return new TestComponent(
 					Rect2.bboxOf(
-						JSON.parse(data).bbox.map(
-							(corner: [number, number, number]) =>
-								Vec3.of(...corner)
-						)
-					)
+						JSON.parse(data).bbox.map((corner: [number, number, number]) => Vec3.of(...corner)),
+					),
 				);
 			});
 
-			const testBBoxes = [
-				Rect2.unitSquare,
-				Rect2.empty,
-			];
+			const testBBoxes = [Rect2.unitSquare, Rect2.empty];
 
 			for (const bbox of testBBoxes) {
 				renderMock.mockClear();
@@ -328,7 +352,7 @@ describe('EditorImage', () => {
 
 				const editor = createEditor();
 				const image = editor.image;
-				const addElementCommand = image.addElement(testComponent);
+				const addElementCommand = image.addComponent(testComponent);
 
 				expect(renderMock).not.toHaveBeenCalled();
 				expect(addToImageMock).not.toHaveBeenCalled();
@@ -341,7 +365,16 @@ describe('EditorImage', () => {
 				// Should have a parent
 				expect(image.findParent(testComponent)).not.toBeNull();
 
-				const elements = image.getElementsIntersectingRegion(
+				// If set to fill the screen, even a query with a far-away bounding box
+				// should return the element.
+				if (positioning === ComponentSizingMode.FillScreen) {
+					expect(
+						image.getComponentsIntersecting(new Rect2(50, 50, 1, 1), true).includes(testComponent),
+					).toBe(true);
+				}
+
+				// Querying the component's own bounding box should also return results.
+				const elements = image.getComponentsIntersecting(
 					// Grow the check region if an empty bbox
 					bbox.maxDimension === 0 ? bbox.grownBy(1) : bbox,
 
@@ -351,21 +384,19 @@ describe('EditorImage', () => {
 
 				// If one of the intersectable positioning types,
 				if (positioning !== ComponentSizingMode.Anywhere) {
-					expect(elements).toMatchObject([
-						testComponent,
-					]);
+					expect(elements).toMatchObject([testComponent]);
 				} else {
 					expect(elements).toHaveLength(0);
 				}
 
 				expect(image.estimateNumElements()).toBe(1);
 
-				// getAllElements does not include backgrounds
+				// getAllComponents does not include backgrounds
 				const expectToBeOnlyElement = () => {
 					if (!isBackground) {
 						// Regardless of type, should be present in allElements
-						expect(image.getAllElements()).toHaveLength(1);
-						expect(image.getAllElements()[0]).toBe(testComponent);
+						expect(image.getAllComponents()).toHaveLength(1);
+						expect(image.getAllComponents()[0]).toBe(testComponent);
 					} else {
 						expect(image.getBackgroundComponents()).toHaveLength(1);
 						expect(image.getBackgroundComponents()[0]).toBe(testComponent);
@@ -390,7 +421,10 @@ describe('EditorImage', () => {
 
 				// Should not have rendered the Anywhere positioned element (should consider
 				// the element off-screen for performance reasons).
-				if (positioning === ComponentSizingMode.BoundingBox || positioning === ComponentSizingMode.FillScreen) {
+				if (
+					positioning === ComponentSizingMode.BoundingBox ||
+					positioning === ComponentSizingMode.FillScreen
+				) {
 					expect(renderMock).toHaveBeenCalledTimes(2);
 					expect(renderMock).toHaveBeenLastCalledWith(renderer, editor.viewport.visibleRect);
 				} else {
@@ -407,7 +441,7 @@ describe('EditorImage', () => {
 				image.renderAll(renderer);
 				expect(renderMock).toHaveBeenCalledTimes(0);
 
-				expect(image.getAllElements()).toHaveLength(0);
+				expect(image.getAllComponents()).toHaveLength(0);
 				expect(image.getBackgroundComponents()).toHaveLength(0);
 
 				// Add the element back
@@ -425,7 +459,7 @@ describe('EditorImage', () => {
 				expect(image.findParent(testComponent)).not.toBeNull();
 
 				// Remove the element -- should remove, even though positioning has changed.
-				await editor.dispatch(new Erase([ testComponent ]));
+				await editor.dispatch(new Erase([testComponent]));
 				expect(image.estimateNumElements()).toBe(0);
 				expect(image.getAllElements()).toHaveLength(0);
 			}

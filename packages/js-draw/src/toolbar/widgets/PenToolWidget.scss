@@ -1,11 +1,11 @@
-
-
 // Repeat selector for extra specificity
 :root .toolbar--pen-tool-toggle-buttons.toolbar--pen-tool-toggle-buttons {
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: stretch;
 	padding-top: 0;
 	padding-bottom: 5px;
+	gap: 5px;
 
 	// Some styles rely on left being start.
 	direction: ltr;
@@ -13,21 +13,19 @@
 	& > * {
 		flex-grow: 1;
 		text-align: start;
-		margin-inline-end: 5px;
+		width: min-content;
 
-		.icon {
-			margin: 0;
-			margin-inline-start: 4px;
+		> .icon {
+			margin-inline-start: 6px;
 			margin-inline-end: 10px;
 		}
 	}
 
-	& > :nth-child(1) {
-		direction: ltr;
+	& > :nth-child(2) {
+		text-align: center;
 	}
 
-	& > :last-child {
-		// Reverse the last (show icon on the right)
+	& > :nth-child(3) {
 		direction: rtl;
 	}
 }

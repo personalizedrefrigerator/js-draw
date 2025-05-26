@@ -1,4 +1,11 @@
-import { GestureCancelEvt, InputEvt, InputEvtType, PointerEvt, PointerMoveEvt, isPointerEvt } from '../../inputEvents';
+import {
+	GestureCancelEvt,
+	InputEvt,
+	InputEvtType,
+	PointerEvt,
+	PointerMoveEvt,
+	isPointerEvt,
+} from '../../inputEvents';
 import InputMapper from './InputMapper';
 import Viewport from '../../Viewport';
 import Editor from '../../Editor';
@@ -10,7 +17,7 @@ enum StabilizerType {
 }
 
 interface InputStabilizerOptions {
-	kind: StabilizerType.IntertialStabilizer,
+	kind: StabilizerType.IntertialStabilizer;
 
 	mass: number;
 	springConstant: number;
@@ -61,9 +68,9 @@ class StylusInputStabilizer {
 		start: Point2,
 
 		// Emits a pointer motion event, returns true if the event was handled.
-		private updatePointer: (screenPoint: Point2, timeStamp: number)=>boolean,
+		private updatePointer: (screenPoint: Point2, timeStamp: number) => boolean,
 
-		private readonly options: InputStabilizerOptions
+		private readonly options: InputStabilizerOptions,
 	) {
 		this.strokePoint = start;
 		this.targetPoint = start;
@@ -90,13 +97,15 @@ class StylusInputStabilizer {
 
 		const gravityAccel = 10;
 		const normalForceMagnitude = this.options.mass * gravityAccel;
-		const frictionForce = this.velocity.normalizedOrZero().times(
-			-this.options.frictionCoefficient * normalForceMagnitude
-		);
-		const acceleration = (springForce.plus(frictionForce)).times(1/this.options.mass);
+		const frictionForce = this.velocity
+			.normalizedOrZero()
+			.times(-this.options.frictionCoefficient * normalForceMagnitude);
+		const acceleration = springForce.plus(frictionForce).times(1 / this.options.mass);
 
 		const decayFactor = this.options.velocityDecayFactor;
-		const springVelocity = this.velocity.times(1 - decayFactor).plus(acceleration.times(deltaTimeMs / 1000));
+		const springVelocity = this.velocity
+			.times(1 - decayFactor)
+			.plus(acceleration.times(deltaTimeMs / 1000));
 
 		// An alternate velocity that goes directly towards the target.
 		const toTargetVelocity = toTarget.normalizedOrZero().times(springVelocity.length());
@@ -120,7 +129,7 @@ class StylusInputStabilizer {
 					velocity = this.getNextVelocity(deltaTime / parts);
 					deltaX = velocity.times(deltaTime / 1000);
 
-					parts ++;
+					parts++;
 				} while (deltaX.magnitude() > this.options.maxPointDist && parts < 10);
 
 				for (let i = 0; i < parts; i++) {
@@ -164,8 +173,8 @@ class StylusInputStabilizer {
 }
 
 export default class InputStabilizer extends InputMapper {
-	private stabilizer: StylusInputStabilizer|null = null;
-	private lastPointerEvent: PointerEvt|null = null;
+	private stabilizer: StylusInputStabilizer | null = null;
+	private lastPointerEvent: PointerEvt | null = null;
 
 	public constructor(
 		private viewport: Viewport,
@@ -174,7 +183,7 @@ export default class InputStabilizer extends InputMapper {
 		super();
 	}
 
-	private mapPointerEvent(event: PointerEvt|GestureCancelEvt) {
+	private mapPointerEvent(event: PointerEvt | GestureCancelEvt) {
 		// Don't store the last pointer event for use with pressure/button data --
 		// this information can be very different for a pointerup event.
 		if (isPointerEvt(event) && event.kind !== InputEvtType.PointerUpEvt) {
@@ -182,7 +191,11 @@ export default class InputStabilizer extends InputMapper {
 		}
 
 		// Only apply smoothing if there is a single pointer.
-		if (event.kind === InputEvtType.GestureCancelEvt || event.allPointers.length > 1 || this.stabilizer === null) {
+		if (
+			event.kind === InputEvtType.GestureCancelEvt ||
+			event.allPointers.length > 1 ||
+			this.stabilizer === null
+		) {
 			return this.emit(event);
 		}
 
@@ -211,7 +224,7 @@ export default class InputStabilizer extends InputMapper {
 		const event: PointerMoveEvt = {
 			kind: InputEvtType.PointerMoveEvt,
 			current: pointer,
-			allPointers: [ pointer ],
+			allPointers: [pointer],
 		};
 
 		const handled = this.emit(event);
@@ -219,25 +232,29 @@ export default class InputStabilizer extends InputMapper {
 	}
 
 	public override onEvent(event: InputEvt): boolean {
-		if (isPointerEvt(event) || event.kind === InputEvtType.GestureCancelEvt
-		) {
+		if (isPointerEvt(event) || event.kind === InputEvtType.GestureCancelEvt) {
 			if (event.kind === InputEvtType.PointerDownEvt) {
-				if (this.stabilizer === null) {
+				if (event.allPointers.length > 1) {
+					// Do not attempt to stabilize multiple pointers.
+					this.stabilizer?.cancel();
+					this.stabilizer = null;
+				} else {
+					// Create a new stabilizer for the new stroke.
+					this.stabilizer?.cancel();
 					this.stabilizer = new StylusInputStabilizer(
 						event.current.screenPos,
 						(screenPoint, timeStamp) => this.emitPointerMove(screenPoint, timeStamp),
 						this.options,
 					);
-				} else if (event.allPointers.length > 1) {
-					// Do not attempt to stabilize multiple pointers.
-					this.stabilizer.cancel();
-					this.stabilizer = null;
 				}
 			}
 
 			const handled = this.mapPointerEvent(event);
 
-			if (event.kind === InputEvtType.PointerUpEvt || event.kind === InputEvtType.GestureCancelEvt) {
+			if (
+				event.kind === InputEvtType.PointerUpEvt ||
+				event.kind === InputEvtType.GestureCancelEvt
+			) {
 				this.stabilizer?.cancel();
 				this.stabilizer = null;
 			}

@@ -11,8 +11,11 @@ import { undoKeyboardShortcutId } from './keybindings';
 import { decreaseSizeKeyboardShortcutId, increaseSizeKeyboardShortcutId } from './keybindings';
 import InputStabilizer from './InputFilter/InputStabilizer';
 import { MutableReactiveValue, ReactiveValue } from '../util/ReactiveValue';
-import StationaryPenDetector from './util/StationaryPenDetector';
+import StationaryPenDetector, {
+	defaultStationaryDetectionConfig,
+} from './util/StationaryPenDetector';
 import AbstractComponent from '../components/AbstractComponent';
+import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 
 export interface PenStyle {
 	readonly color: Color4;
@@ -20,19 +23,28 @@ export interface PenStyle {
 	readonly factory: ComponentBuilderFactory;
 }
 
+/**
+ * A tool that allows drawing shapes and freehand lines.
+ *
+ * To change the type of shape drawn by the pen (e.g. to switch to the rectangle
+ * pen type), see {@link setStrokeFactory}.
+ */
 export default class Pen extends BaseTool {
-	protected builder: ComponentBuilder|null = null;
-	private lastPoint: StrokeDataPoint|null = null;
-	private startPoint: StrokeDataPoint|null = null;
-	private currentDeviceType: PointerDevice|null = null;
+	protected builder: ComponentBuilder | null = null;
+	private lastPoint: StrokeDataPoint | null = null;
+	private startPoint: StrokeDataPoint | null = null;
+	private currentDeviceType: PointerDevice | null = null;
+	private currentPointerId: number | null = null;
 	private styleValue: MutableReactiveValue<PenStyle>;
+	private wetInkRenderer: AbstractRenderer;
 	private style: PenStyle;
 
 	private shapeAutocompletionEnabled: boolean = false;
-	private autocorrectedShape: AbstractComponent|null = null;
-	private lastAutocorrectedShape: AbstractComponent|null = null;
+	private pressureSensitivityEnabled: boolean = true;
+	private autocorrectedShape: AbstractComponent | null = null;
+	private lastAutocorrectedShape: AbstractComponent | null = null;
 	private removedAutocorrectedShapeTime: number = 0;
-	private stationaryDetector: StationaryPenDetector|null = null;
+	private stationaryDetector: StationaryPenDetector | null = null;
 
 	public constructor(
 		private editor: Editor,
@@ -48,20 +60,23 @@ export default class Pen extends BaseTool {
 			...style,
 		});
 
-		this.styleValue.onUpdateAndNow(newValue => {
+		this.styleValue.onUpdateAndNow((newValue) => {
 			this.style = newValue;
 			this.noteUpdated();
 		});
+
+		this.wetInkRenderer = this.editor.display.getWetInkRenderer();
 	}
 
 	private getPressureMultiplier() {
 		const thickness = this.style.thickness;
-		return 1 / this.editor.viewport.getScaleFactor() * thickness;
+		return (1 / this.editor.viewport.getScaleFactor()) * thickness;
 	}
 
 	// Converts a `pointer` to a `StrokeDataPoint`.
 	protected toStrokePoint(pointer: Pointer): StrokeDataPoint {
 		const minPressure = 0.3;
+		const defaultPressure = 0.5; // https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pressure#value
 		let pressure = Math.max(pointer.pressure ?? 1.0, minPressure);
 
 		if (!isFinite(pressure)) {
@@ -74,6 +89,10 @@ export default class Pen extends BaseTool {
 
 		const pos = pointer.canvasPos;
 
+		if (!this.getPressureSensitivityEnabled()) {
+			pressure = defaultPressure;
+		}
+
 		return {
 			pos,
 			width: pressure * this.getPressureMultiplier(),
@@ -85,13 +104,17 @@ export default class Pen extends BaseTool {
 	// Displays the stroke that is currently being built with the display's `wetInkRenderer`.
 	protected previewStroke() {
 		this.editor.clearWetInk();
-		const wetInkRenderer = this.editor.display.getWetInkRenderer();
-
 		if (this.autocorrectedShape) {
 			const visibleRect = this.editor.viewport.visibleRect;
-			this.autocorrectedShape.render(wetInkRenderer, visibleRect);
-		} else {
-			this.builder?.preview(wetInkRenderer);
+			this.autocorrectedShape.render(this.wetInkRenderer, visibleRect);
+		} else if (this.builder) {
+			this.builder.preview(this.wetInkRenderer);
+
+			if (this.builder.inkTrailStyle) {
+				const trailStyle = this.builder.inkTrailStyle();
+				const draftInkPresenter = this.wetInkRenderer.getDraftInkPresenter();
+				draftInkPresenter.updateStyle(trailStyle);
+			}
 		}
 	}
 
@@ -106,41 +129,39 @@ export default class Pen extends BaseTool {
 	}
 
 	public override onPointerDown(event: PointerEvt): boolean {
-		const { current, allPointers } = event;
-		const isEraser = current.device === PointerDevice.Eraser;
-
-		let anyDeviceIsStylus = false;
-		for (const pointer of allPointers) {
-			if (pointer.device === PointerDevice.Pen) {
-				anyDeviceIsStylus = true;
-				break;
-			}
-		}
-
 		// Avoid canceling an existing stroke
 		if (this.builder && !this.eventCanCancelStroke(event)) {
 			return true;
 		}
 
-		if ((allPointers.length === 1 && !isEraser) || anyDeviceIsStylus) {
+		const { current, allPointers } = event;
+		const isEraser = current.device === PointerDevice.Eraser;
+		const isPen = current.device === PointerDevice.Pen;
+
+		// Always start strokes if the current device is a pen. This is useful in the case
+		// where an accidental touch gesture from a user's hand is ongoing. This gesture
+		// should not prevent the user from drawing.
+		if ((allPointers.length === 1 && !isEraser) || isPen) {
 			this.startPoint = this.toStrokePoint(current);
 			this.builder = this.style.factory(this.startPoint, this.editor.viewport);
 			this.currentDeviceType = current.device;
+			this.currentPointerId = current.id;
 
 			if (this.shapeAutocompletionEnabled) {
-				const stationaryDetectionConfig = {
-					maxSpeed: 8.5, // screenPx/s
-					maxRadius: 11, // screenPx
-					minTimeSeconds: 0.5, // s
-				};
 				this.stationaryDetector = new StationaryPenDetector(
-					current, stationaryDetectionConfig, pointer => this.autocorrectShape(pointer),
+					current,
+					defaultStationaryDetectionConfig,
+					(pointer) => this.autocorrectShape(pointer),
 				);
 			} else {
 				this.stationaryDetector = null;
 			}
 			this.lastAutocorrectedShape = null;
 			this.removedAutocorrectedShapeTime = 0;
+			if (this.builder.inkTrailStyle) {
+				// Accelerate inking
+				this.wetInkRenderer.getDraftInkPresenter().setEnabled(current.id, true);
+			}
 			return true;
 		}
 
@@ -173,6 +194,7 @@ export default class Pen extends BaseTool {
 	public override onPointerMove({ current }: PointerEvt): void {
 		if (!this.builder) return;
 		if (current.device !== this.currentDeviceType) return;
+		if (current.id !== this.currentPointerId) return;
 
 		const isStationary = this.stationaryDetector?.onPointerMove(current);
 
@@ -190,7 +212,7 @@ export default class Pen extends BaseTool {
 
 	public override onPointerUp({ current }: PointerEvt) {
 		if (!this.builder) return false;
-		if (current.device !== this.currentDeviceType) {
+		if (current.id !== this.currentPointerId) {
 			// this.builder still exists, so we're handling events from another
 			// device type.
 			return true;
@@ -206,19 +228,28 @@ export default class Pen extends BaseTool {
 		};
 
 		this.addPointToStroke(strokePoint);
-
-		if (current.isPrimary) {
-			this.finalizeStroke();
-		}
+		this.finalizeStroke();
 
 		return false;
 	}
 
-	public override onGestureCancel() {
+	private postGestureCleanup() {
+		if (this.currentPointerId !== null) {
+			this.wetInkRenderer.getDraftInkPresenter().setEnabled(this.currentPointerId, false);
+		}
+
 		this.builder = null;
+		this.lastPoint = null;
+		this.autocorrectedShape = null;
+		this.lastAutocorrectedShape = null;
 		this.editor.clearWetInk();
+
 		this.stationaryDetector?.destroy();
 		this.stationaryDetector = null;
+	}
+
+	public override onGestureCancel() {
+		this.postGestureCleanup();
 	}
 
 	private removedAutocorrectedShapeRecently() {
@@ -246,7 +277,7 @@ export default class Pen extends BaseTool {
 
 		const shapeDescription = correctedShape.description(this.editor.localization);
 		this.editor.announceForAccessibility(
-			this.editor.localization.autocorrectedTo(shapeDescription)
+			this.editor.localization.autocorrectedTo(shapeDescription),
 		);
 
 		this.autocorrectedShape = correctedShape;
@@ -268,25 +299,18 @@ export default class Pen extends BaseTool {
 			if (stroke.getBBox().area > 0) {
 				if (stroke === this.autocorrectedShape) {
 					this.editor.announceForAccessibility(
-						this.editor.localization.autocorrectedTo(stroke.description(this.editor.localization))
+						this.editor.localization.autocorrectedTo(stroke.description(this.editor.localization)),
 					);
 				}
 
 				const canFlatten = true;
-				const action = EditorImage.addElement(stroke, canFlatten);
+				const action = EditorImage.addComponent(stroke, canFlatten);
 				this.editor.dispatch(action);
 			} else {
 				console.warn('Pen: Not adding empty stroke', stroke, 'to the canvas.');
 			}
 		}
-		this.builder = null;
-		this.lastPoint = null;
-		this.autocorrectedShape = null;
-		this.lastAutocorrectedShape = null;
-		this.editor.clearWetInk();
-
-		this.stationaryDetector?.destroy();
-		this.stationaryDetector = null;
+		this.postGestureCleanup();
 	}
 
 	private noteUpdated() {
@@ -314,6 +338,13 @@ export default class Pen extends BaseTool {
 		}
 	}
 
+	/**
+	 * Changes the type of stroke created by the pen. The given `factory` can be one of the built-in
+	 * stroke factories (e.g. {@link makeFreehandLineBuilder}) or a custom stroke factory.
+	 *
+	 * Example:
+	 * [[include:doc-pages/inline-examples/changing-pen-types.md]]
+	 */
 	public setStrokeFactory(factory: ComponentBuilderFactory) {
 		if (factory !== this.style.factory) {
 			this.styleValue.set({
@@ -350,10 +381,29 @@ export default class Pen extends BaseTool {
 		return this.shapeAutocompletionEnabled;
 	}
 
-	public getThickness() { return this.style.thickness; }
-	public getColor() { return this.style.color; }
-	public getStrokeFactory() { return this.style.factory; }
-	public getStyleValue() { return this.styleValue; }
+	public setPressureSensitivityEnabled(enabled: boolean) {
+		if (enabled !== this.pressureSensitivityEnabled) {
+			this.pressureSensitivityEnabled = enabled;
+			this.noteUpdated();
+		}
+	}
+
+	public getPressureSensitivityEnabled() {
+		return this.pressureSensitivityEnabled;
+	}
+
+	public getThickness() {
+		return this.style.thickness;
+	}
+	public getColor() {
+		return this.style.color;
+	}
+	public getStrokeFactory() {
+		return this.style.factory;
+	}
+	public getStyleValue() {
+		return this.styleValue;
+	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
 		const shortcuts = this.editor.shortcuts;
@@ -368,11 +418,11 @@ export default class Pen extends BaseTool {
 			return false;
 		}
 
-		let newThickness: number|undefined;
+		let newThickness: number | undefined;
 		if (shortcuts.matchesShortcut(decreaseSizeKeyboardShortcutId, event)) {
-			newThickness = this.getThickness() * 2/3;
+			newThickness = (this.getThickness() * 2) / 3;
 		} else if (shortcuts.matchesShortcut(increaseSizeKeyboardShortcutId, event)) {
-			newThickness = this.getThickness() * 3/2;
+			newThickness = (this.getThickness() * 3) / 2;
 		}
 
 		if (newThickness !== undefined) {

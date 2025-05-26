@@ -1,7 +1,7 @@
 import Editor from '../Editor';
 import { Point2 } from '@js-draw/math';
 import Pointer, { PointerDevice } from '../Pointer';
-import { InputEvtType } from '../inputEvents';
+import { InputEvtType, PointerEvtType } from '../inputEvents';
 import getUniquePointerId from './getUniquePointerId';
 
 /**
@@ -12,7 +12,7 @@ import getUniquePointerId from './getUniquePointerId';
  */
 const sendPenEvent = (
 	editor: Editor,
-	eventType: InputEvtType.PointerDownEvt|InputEvtType.PointerMoveEvt|InputEvtType.PointerUpEvt,
+	eventType: PointerEvtType,
 	point: Point2,
 
 	allPointers?: Pointer[],
@@ -22,14 +22,16 @@ const sendPenEvent = (
 	const id = getUniquePointerId(allPointers ?? []);
 
 	const mainPointer = Pointer.ofCanvasPoint(
-		point, eventType !== InputEvtType.PointerUpEvt, editor.viewport, id, deviceType,
+		point,
+		eventType !== InputEvtType.PointerUpEvt,
+		editor.viewport,
+		id,
+		deviceType,
 	);
 
 	editor.toolController.dispatchInputEvent({
 		kind: eventType,
-		allPointers: allPointers ?? [
-			mainPointer,
-		],
+		allPointers: allPointers ?? [mainPointer],
 		current: mainPointer,
 	});
 

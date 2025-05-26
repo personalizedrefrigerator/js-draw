@@ -35,10 +35,15 @@ describe('Path', () => {
 
 		// Make sure the control points (and start/end points) match what was set
 		expect(firstItem.getPoints()).toMatchObject([
-			{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: -1, y: -1 }, { x: 3, y: 3 }
+			{ x: 0, y: 0 },
+			{ x: 1, y: 1 },
+			{ x: -1, y: -1 },
+			{ x: 3, y: 3 },
 		]);
 		expect(secondItem.getPoints()).toMatchObject([
-			{ x: 3, y: 3 }, { x: 1, y: 1 }, { x: 0, y: 0 },
+			{ x: 3, y: 3 },
+			{ x: 1, y: 1 },
+			{ x: 0, y: 0 },
 		]);
 	});
 
@@ -55,23 +60,21 @@ describe('Path', () => {
 
 		expect(path.geometry.length).toBe(1);
 		expect(path.geometry[0]).toBeInstanceOf(LineSegment2);
-		expect(path.geometry[0]).toMatchObject(
-			new LineSegment2(lineStart, lineEnd)
-		);
+		expect(path.geometry[0]).toMatchObject(new LineSegment2(lineStart, lineEnd));
 	});
 
 	it.each([
-		[ 'm0,0 L1,1', 'M0,0 L1,1', true ],
-		[ 'm0,0 L1,1', 'M1,1 L0,0', false ],
-		[ 'm0,0 L1,1 Q2,3 4,5', 'M1,1 L0,0', false ],
-		[ 'm0,0 L1,1 Q2,3 4,5', 'M1,1 L0,0 Q2,3 4,5', false ],
-		[ 'm0,0 L1,1 Q2,3 4,5', 'M0,0 L1,1 Q2,3 4,5', true ],
-		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', true ],
-		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9Z', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', false ],
-		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9Z', false ],
-		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9.01', false ],
-		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7.01 8,9', false ],
-		[ 'm0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5.01 6,7 8,9', false ],
+		['m0,0 L1,1', 'M0,0 L1,1', true],
+		['m0,0 L1,1', 'M1,1 L0,0', false],
+		['m0,0 L1,1 Q2,3 4,5', 'M1,1 L0,0', false],
+		['m0,0 L1,1 Q2,3 4,5', 'M1,1 L0,0 Q2,3 4,5', false],
+		['m0,0 L1,1 Q2,3 4,5', 'M0,0 L1,1 Q2,3 4,5', true],
+		['m0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', true],
+		['m0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9Z', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', false],
+		['m0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9Z', false],
+		['m0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9.01', false],
+		['m0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5 6,7.01 8,9', false],
+		['m0,0 L1,1 Q2,3 4,5 C4,5 6,7 8,9', 'M0,0 L1,1 Q2,3 4,5 C4,5.01 6,7 8,9', false],
 	])('.eq should check equality', (path1Str, path2Str, shouldEqual) => {
 		expect(Path.fromString(path1Str)).objEq(Path.fromString(path1Str));
 		expect(Path.fromString(path2Str)).objEq(Path.fromString(path2Str));
@@ -97,7 +100,7 @@ describe('Path', () => {
 			]);
 
 			const intersections = path.intersection(
-				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200))
+				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200)),
 			);
 
 			// Should only have intersections in quadrants II and III.
@@ -143,7 +146,8 @@ describe('Path', () => {
 
 			const strokeWidth = 5;
 			let intersections = path.intersection(
-				new LineSegment2(Vec2.of(2000, 200), Vec2.of(2000, 400)), strokeWidth,
+				new LineSegment2(Vec2.of(2000, 200), Vec2.of(2000, 400)),
+				strokeWidth,
 			);
 			expect(intersections.length).toBe(0);
 
@@ -158,7 +162,8 @@ describe('Path', () => {
 			//   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
 			intersections = path.intersection(
-				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, 100)), strokeWidth,
+				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, 100)),
+				strokeWidth,
 			);
 			expect(intersections.length).toBe(1);
 			expect(intersections[0].point.xy).toMatchObject({
@@ -166,10 +171,10 @@ describe('Path', () => {
 				y: 105,
 			});
 
-
 			// Changing the order of the end points on the line should not change the result
 			intersections = path.intersection(
-				new LineSegment2(Vec2.of(-50, 100), Vec2.of(-50, 200)), strokeWidth,
+				new LineSegment2(Vec2.of(-50, 100), Vec2.of(-50, 200)),
+				strokeWidth,
 			);
 			expect(intersections.length).toBe(1);
 			expect(intersections[0].point.xy).toMatchObject({
@@ -181,7 +186,8 @@ describe('Path', () => {
 			// intersections — one entering and one leaving for each intersection with the
 			// centers.
 			intersections = path.intersection(
-				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200)), strokeWidth,
+				new LineSegment2(Vec2.of(-50, 200), Vec2.of(-50, -200)),
+				strokeWidth,
 			);
 			expect(intersections.length).toBe(4);
 
@@ -204,7 +210,7 @@ describe('Path', () => {
 					kind: PathCommandType.QuadraticBezierTo,
 					controlPoint: Vec2.unitX,
 					endPoint: Vec2.unitY,
-				}
+				},
 			]);
 
 			const strokeWidth = 5;
@@ -212,13 +218,15 @@ describe('Path', () => {
 			// Should be no intersections for a line contained entirely within the stroke
 			// (including stroke width).
 			let intersections = path.intersection(
-				new LineSegment2(Vec2.of(-1, 0.5), Vec2.of(2, 0.5)), strokeWidth,
+				new LineSegment2(Vec2.of(-1, 0.5), Vec2.of(2, 0.5)),
+				strokeWidth,
 			);
 			expect(intersections).toHaveLength(0);
 
 			// Should be an intersection when exiting/entering the edge of the stroke
 			intersections = path.intersection(
-				new LineSegment2(Vec2.of(0, 0.5), Vec2.of(8, 0.5)), strokeWidth,
+				new LineSegment2(Vec2.of(0, 0.5), Vec2.of(8, 0.5)),
+				strokeWidth,
 			);
 			expect(intersections).toHaveLength(1);
 		});
@@ -226,10 +234,7 @@ describe('Path', () => {
 		it('should correctly report intersections near the cap of a line-like Bézier', () => {
 			const path = Path.fromString('M0,0Q14,0 27,0');
 			expect(
-				path.intersection(
-					new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)),
-					10,
-				),
+				path.intersection(new LineSegment2(Vec2.of(0, -100), Vec2.of(0, 100)), 10),
 
 				// Should have intersections, despite being at the cap of the Bézier
 				// curve.
@@ -237,22 +242,31 @@ describe('Path', () => {
 		});
 
 		it.each([
-			[new LineSegment2(Vec2.of(43.5,-12.5), Vec2.of(40.5,24.5)), 0],
-			[new LineSegment2(Vec2.of(35.5,19.5), Vec2.of(38.5,-17.5)), 0],
-		])('should correctly report positive intersections with a line-like Bézier', (line, strokeRadius) => {
-			const bezier = Path.fromString('M0,0 Q50,0 100,0');
-			expect(bezier.intersection(line, strokeRadius).length).toBeGreaterThan(0);
-		});
+			[new LineSegment2(Vec2.of(43.5, -12.5), Vec2.of(40.5, 24.5)), 0],
+			[new LineSegment2(Vec2.of(35.5, 19.5), Vec2.of(38.5, -17.5)), 0],
+		])(
+			'should correctly report positive intersections with a line-like Bézier',
+			(line, strokeRadius) => {
+				const bezier = Path.fromString('M0,0 Q50,0 100,0');
+				expect(bezier.intersection(line, strokeRadius).length).toBeGreaterThan(0);
+			},
+		);
 
 		it('should handle near-vertical lines', () => {
-			const intersections = Path.fromString('M0,0 Q50,0 100,0').intersection(new LineSegment2(Vec2.of(44, -12), Vec2.of(39, 25)));
+			const intersections = Path.fromString('M0,0 Q50,0 100,0').intersection(
+				new LineSegment2(Vec2.of(44, -12), Vec2.of(39, 25)),
+			);
 			expect(intersections).toHaveLength(1);
 		});
 
 		it('should handle single-point strokes', () => {
 			const stroke = new Path(Vec2.zero, []);
-			expect(stroke.intersection(new LineSegment2(Vec2.of(-2, -20), Vec2.of(-2, -1)), 1)).toHaveLength(0);
-			expect(stroke.intersection(new LineSegment2(Vec2.of(-2, -2), Vec2.of(2, 2)), 1)).toHaveLength(2);
+			expect(
+				stroke.intersection(new LineSegment2(Vec2.of(-2, -20), Vec2.of(-2, -1)), 1),
+			).toHaveLength(0);
+			expect(stroke.intersection(new LineSegment2(Vec2.of(-2, -2), Vec2.of(2, 2)), 1)).toHaveLength(
+				2,
+			);
 		});
 	});
 
@@ -272,18 +286,12 @@ describe('Path', () => {
 	describe('roughlyIntersectsClosed', () => {
 		it('small, line-only path', () => {
 			const path = Path.fromString('m0,0 l10,10 L0,10 z');
-			expect(
-				path.closedRoughlyIntersects(Rect2.fromCorners(Vec2.zero, Vec2.of(20, 20)))
-			).toBe(true);
-			expect(
-				path.closedRoughlyIntersects(Rect2.fromCorners(Vec2.zero, Vec2.of(2, 2)))
-			).toBe(true);
-			expect(
-				path.closedRoughlyIntersects(new Rect2(10, 1, 1, 1))
-			).toBe(false);
-			expect(
-				path.closedRoughlyIntersects(new Rect2(1, 5, 1, 1))
-			).toBe(true);
+			expect(path.closedRoughlyIntersects(Rect2.fromCorners(Vec2.zero, Vec2.of(20, 20)))).toBe(
+				true,
+			);
+			expect(path.closedRoughlyIntersects(Rect2.fromCorners(Vec2.zero, Vec2.of(2, 2)))).toBe(true);
+			expect(path.closedRoughlyIntersects(new Rect2(10, 1, 1, 1))).toBe(false);
+			expect(path.closedRoughlyIntersects(new Rect2(1, 5, 1, 1))).toBe(true);
 		});
 
 		it('path with Bézier curves', () => {
@@ -296,15 +304,9 @@ describe('Path', () => {
 				Q670,470 960,980
 				Q1230,1370 1090,2560
 			`);
-			expect(
-				path.closedRoughlyIntersects(new Rect2(0, 0, 500, 500))
-			).toBe(true);
-			expect(
-				path.closedRoughlyIntersects(new Rect2(0, 0, 5, 5))
-			).toBe(true);
-			expect(
-				path.closedRoughlyIntersects(new Rect2(-10000, 0, 500, 500))
-			).toBe(false);
+			expect(path.closedRoughlyIntersects(new Rect2(0, 0, 500, 500))).toBe(true);
+			expect(path.closedRoughlyIntersects(new Rect2(0, 0, 5, 5))).toBe(true);
+			expect(path.closedRoughlyIntersects(new Rect2(-10000, 0, 500, 500))).toBe(false);
 		});
 	});
 
@@ -315,21 +317,11 @@ describe('Path', () => {
 				L20,20
 				L100,21
 			`);
-			expect(
-				path.roughlyIntersects(new Rect2(0, 0, 50, 50))
-			).toBe(true);
-			expect(
-				path.roughlyIntersects(new Rect2(0, 0, 5, 5))
-			).toBe(false);
-			expect(
-				path.roughlyIntersects(new Rect2(8, 22, 1, 1))
-			).toBe(false);
-			expect(
-				path.roughlyIntersects(new Rect2(21, 11, 1, 1))
-			).toBe(false);
-			expect(
-				path.roughlyIntersects(new Rect2(50, 19, 1, 2))
-			).toBe(true);
+			expect(path.roughlyIntersects(new Rect2(0, 0, 50, 50))).toBe(true);
+			expect(path.roughlyIntersects(new Rect2(0, 0, 5, 5))).toBe(false);
+			expect(path.roughlyIntersects(new Rect2(8, 22, 1, 1))).toBe(false);
+			expect(path.roughlyIntersects(new Rect2(21, 11, 1, 1))).toBe(false);
+			expect(path.roughlyIntersects(new Rect2(50, 19, 1, 2))).toBe(true);
 		});
 	});
 
@@ -358,9 +350,7 @@ describe('Path', () => {
 	});
 
 	describe('splitAt', () => {
-		it.each([
-			2, 3, 4, 5,
-		])('should split a line into %d sections', (numSections) => {
+		it.each([2, 3, 4, 5])('should split a line into %d sections', (numSections) => {
 			const path = Path.fromString('m0,0 l1,0');
 
 			const splitIndices: CurveIndexRecord[] = [];
@@ -371,7 +361,7 @@ describe('Path', () => {
 
 			expect(split).toHaveLength(numSections + 1);
 			expect(split[numSections].getEndPoint()).objEq(Vec2.unitX);
-			for (let i = 0; i < numSections; i ++) {
+			for (let i = 0; i < numSections; i++) {
 				expect(split[i].geometry).toHaveLength(1);
 				const geom = split[i].geometry[0] as LineSegment2;
 				expect(geom.p1.y).toBeCloseTo(0);
@@ -432,13 +422,13 @@ describe('Path', () => {
 				original: 'm0,0 Q4,0 8,0 Q8,4 8,8',
 				near: Vec2.of(8, 4),
 				map: (p: Point2) => p.plus(Vec2.of(1, 1)),
-				expected: [ 'M0,0Q4,0 8,0Q9,3 9,5', 'M9,5Q9,7 9,9' ],
+				expected: ['M0,0Q4,0 8,0Q9,3 9,5', 'M9,5Q9,7 9,9'],
 			},
 			{
 				original: 'm0,0 L0,10',
 				near: Vec2.of(0, 5),
 				map: (p: Point2) => p.plus(Vec2.of(100, 0)),
-				expected: [ 'M0,0L100,5', 'M100,5L0,10' ],
+				expected: ['M0,0L100,5', 'M100,5L0,10'],
 			},
 			{
 				// Tested using SVG data similar to:
@@ -448,13 +438,16 @@ describe('Path', () => {
 				original: 'm1,1 C1,2 2,10 4,4 C5,0 9,3 7,7',
 				near: Vec2.of(3, 5),
 				map: (p: Point2) => Vec2.of(Math.round(p.x), Math.round(p.y)),
-				expected: [ 'M1,1C1,2 1,6 2,6', 'M2,6C3,6 3,6 4,4C5,0 9,3 7,7' ],
+				expected: ['M1,1C1,2 1,6 2,6', 'M2,6C3,6 3,6 4,4C5,0 9,3 7,7'],
 			},
-		])('should support mapping newly-added points while splitting (case %j)', ({ original, near, map, expected }) => {
-			const path = Path.fromString(original);
-			const split = path.splitNear(near, { mapNewPoint: map });
-			expect(split.map(p => p.toString(false))).toMatchObject(expected);
-		});
+		])(
+			'should support mapping newly-added points while splitting (case %j)',
+			({ original, near, map, expected }) => {
+				const path = Path.fromString(original);
+				const split = path.splitNear(near, { mapNewPoint: map });
+				expect(split.map((p) => p.toString(false))).toMatchObject(expected);
+			},
+		);
 	});
 
 	describe('spliced', () => {
@@ -485,23 +478,26 @@ describe('Path', () => {
 				insert: 'M1,0 L1,1 L3,1 L3,0',
 				expected: 'M1,0 L3,0 L3,1 L1,1 L1,0',
 			},
-		])('.spliced should support inserting paths inbetween other paths (case %#)', ({ curve, from, to, insert, expected }) => {
-			const originalCurve = Path.fromString(curve);
-			expect(
-				originalCurve.spliced(
-					{ curveIndex: from.i, parameterValue: from.t },
-					{ curveIndex: to.i, parameterValue: to.t },
-					Path.fromString(insert),
-				)
-			).objEq(Path.fromString(expected));
-		});
+		])(
+			'.spliced should support inserting paths inbetween other paths (case %#)',
+			({ curve, from, to, insert, expected }) => {
+				const originalCurve = Path.fromString(curve);
+				expect(
+					originalCurve.spliced(
+						{ curveIndex: from.i, parameterValue: from.t },
+						{ curveIndex: to.i, parameterValue: to.t },
+						Path.fromString(insert),
+					),
+				).objEq(Path.fromString(expected));
+			},
+		);
 	});
 
 	it.each([
-		[ 'm0,0 L1,1', 'M1,1 L0,0' ],
-		[ 'm0,0 L1,1', 'M1,1 L0,0' ],
-		[ 'M0,0 L1,1 Q2,2 3,3', 'M3,3 Q2,2 1,1 L0,0' ],
-		[ 'M0,0 L1,1 Q4,2 5,3 C12,13 10,9 8,7', 'M8,7 C 10,9 12,13 5,3 Q 4,2 1,1 L 0,0' ],
+		['m0,0 L1,1', 'M1,1 L0,0'],
+		['m0,0 L1,1', 'M1,1 L0,0'],
+		['M0,0 L1,1 Q2,2 3,3', 'M3,3 Q2,2 1,1 L0,0'],
+		['M0,0 L1,1 Q4,2 5,3 C12,13 10,9 8,7', 'M8,7 C 10,9 12,13 5,3 Q 4,2 1,1 L 0,0'],
 	])('.reversed should reverse paths', (original, expected) => {
 		expect(Path.fromString(original).reversed()).objEq(Path.fromString(expected));
 		expect(Path.fromString(expected).reversed()).objEq(Path.fromString(original));
@@ -509,29 +505,52 @@ describe('Path', () => {
 	});
 
 	it.each([
-		[ 'm0,0 l1,0', Vec2.of(0, 0), Vec2.of(0, 0) ],
-		[ 'm0,0 l1,0', Vec2.of(0.5, 0), Vec2.of(0.5, 0) ],
-		[ 'm0,0 Q1,0 1,2', Vec2.of(1, 0), Vec2.of(0.6236, 0.299) ],
-	])('.nearestPointTo should return the closest point on a path to the given parameter (case %#)', (path, point, expectedClosest) => {
-		expect(Path.fromString(path).nearestPointTo(point).point).objEq(expectedClosest, 0.002);
-	});
+		['m0,0 l1,0', Vec2.of(0, 0), Vec2.of(0, 0)],
+		['m0,0 l1,0', Vec2.of(0.5, 0), Vec2.of(0.5, 0)],
+		['m0,0 Q1,0 1,2', Vec2.of(1, 0), Vec2.of(0.6236, 0.299)],
+	])(
+		'.nearestPointTo should return the closest point on a path to the given parameter (case %#)',
+		(path, point, expectedClosest) => {
+			expect(Path.fromString(path).nearestPointTo(point).point).objEq(expectedClosest, 0.002);
+		},
+	);
 
 	it.each([
 		// Polyline
-		[ 'm0,0 l1,0 l0,1', [ 0, 0.5 ], Vec2.of(1, 0) ],
-		[ 'm0,0 l1,0 l0,1', [ 0, 0.99 ], Vec2.of(1, 0) ],
-		[ 'm0,0 l1,0 l0,1', [ 1, 0 ], Vec2.of(0, 1) ],
-		[ 'm0,0 l1,0 l0,1', [ 1, 0.5 ], Vec2.of(0, 1) ],
-		[ 'm0,0 l1,0 l0,1', [ 1, 1 ], Vec2.of(0, 1) ],
+		['m0,0 l1,0 l0,1', [0, 0.5], Vec2.of(1, 0)],
+		['m0,0 l1,0 l0,1', [0, 0.99], Vec2.of(1, 0)],
+		['m0,0 l1,0 l0,1', [1, 0], Vec2.of(0, 1)],
+		['m0,0 l1,0 l0,1', [1, 0.5], Vec2.of(0, 1)],
+		['m0,0 l1,0 l0,1', [1, 1], Vec2.of(0, 1)],
 
 		// Shape with quadratic Bézier curves
-		[ 'M0,0 Q1,0 0,1', [ 0, 0 ], Vec2.of(1, 0) ],
-		[ 'M0,0 Q1,1 0,1', [ 0, 1 ], Vec2.of(-1, 0) ],
-		[ 'M0,0 Q1,0 1,1 Q0,1 0,2', [ 0, 1 ], Vec2.of(0, 1) ],
-		[ 'M0,0 Q1,0 1,1 Q0,1 0,2', [ 1, 1 ], Vec2.of(0, 1) ],
-	])('.tangentAt should point in the direction of increasing parameter values, for curve %s at %j', (pathString, evalAt, expected) => {
-		const at: CurveIndexRecord = { curveIndex: evalAt[0], parameterValue: evalAt[1] };
-		const path = Path.fromString(pathString);
-		expect(path.tangentAt(at)).objEq(expected);
-	});
+		['M0,0 Q1,0 0,1', [0, 0], Vec2.of(1, 0)],
+		['M0,0 Q1,1 0,1', [0, 1], Vec2.of(-1, 0)],
+		['M0,0 Q1,0 1,1 Q0,1 0,2', [0, 1], Vec2.of(0, 1)],
+		['M0,0 Q1,0 1,1 Q0,1 0,2', [1, 1], Vec2.of(0, 1)],
+	])(
+		'.tangentAt should point in the direction of increasing parameter values, for curve %s at %j',
+		(pathString, evalAt, expected) => {
+			const at: CurveIndexRecord = { curveIndex: evalAt[0], parameterValue: evalAt[1] };
+			const path = Path.fromString(pathString);
+			expect(path.tangentAt(at)).objEq(expected);
+		},
+	);
+
+	it.each([
+		// A rectangle completely contained
+		['m0,0 l10,0 l0,10 l-10,0', new Rect2(3, 3, 3, 3), true],
+		// A rectangle partially contained
+		['m0,0 l10,0 l0,10 l-10,0', new Rect2(3, 3, 33, 3), false],
+		// A rectangle not contained
+		['m0,0 l10,0 l0,10 l-10,0', new Rect2(13, 3, 1, 1), false],
+		// More complicated path containing a rectangle
+		['M0,0 Q10,15 10,5', new Rect2(5, 5, 1, 1), true],
+		['M0,0 Q10,15 10,5', new Rect2(15, 5, 1, 1), false],
+	])(
+		'.closedContainsRect should return whether a rectangle is contained within a path (case %#: path(%s), rect(%s))',
+		(pathString, rect, expected) => {
+			expect(Path.fromString(pathString).closedContainsRect(rect)).toBe(expected);
+		},
+	);
 });

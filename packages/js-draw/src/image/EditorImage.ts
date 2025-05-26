@@ -16,11 +16,31 @@ export const sortLeavesByZIndex = (leaves: Array<ImageNode>) => {
 };
 
 export enum EditorImageEventType {
+	// @internal
 	ExportViewportChanged,
+	// @internal
 	AutoresizeModeChanged,
+
+	// Type for events fired whenever components are added to the image
+	ComponentAdded,
+	// Type for events fired whenever components are removed from the image
+	ComponentRemoved,
 }
 
-export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image: EditorImage }>;
+interface StateChangeEvent {
+	kind: EditorImageEventType.ExportViewportChanged | EditorImageEventType.AutoresizeModeChanged;
+	image: EditorImage;
+}
+
+interface ComponentAddRemoveEvent {
+	kind: EditorImageEventType.ComponentAdded | EditorImageEventType.ComponentRemoved;
+	image: EditorImage;
+	componentId: string;
+}
+
+export type EditorImageEvent = StateChangeEvent | ComponentAddRemoveEvent;
+
+export type EditorImageNotifier = EventDispatcher<EditorImageEventType, EditorImageEvent>;
 
 /**
  * A callback used to
@@ -28,15 +48,34 @@ export type EditorImageNotifier = EventDispatcher<EditorImageEventType, { image:
  * 2. observe progress through `componentsProcessed` and `totalComponents`
  * 3. stop the render process early by returning `false`.
  */
-export type PreRenderComponentCallback = (component: AbstractComponent, componentsProcessed: number, totalComponents: number)=>Promise<boolean>;
+export type PreRenderComponentCallback = (
+	component: AbstractComponent,
+	componentsProcessed: number,
+	totalComponents: number,
+) => Promise<boolean>;
 
 let debugMode = false;
 
-// Handles lookup/storage of elements in the image
+/**
+ * Handles lookup/storage of elements in the image.
+ *
+ * `js-draw` images are made up of a collection of {@link AbstractComponent}s (which
+ * includes {@link Stroke}s, {@link TextComponent}s, etc.). An `EditorImage`
+ * is the data structure that stores these components.
+ *
+ * Here's how to do a few common operations:
+ * - **Get all components in a {@link @js-draw/math!Rect2 | Rect2}**:
+ *    {@link EditorImage.getComponentsIntersecting}.
+ * - **Draw an `EditorImage` onto a canvas/SVG**: {@link EditorImage.render}.
+ * - **Adding a new component**: {@link EditorImage.addComponent}.
+ *
+ * **Example**:
+ * [[include:doc-pages/inline-examples/image-add-and-lookup.md]]
+ */
 export default class EditorImage {
 	private root: ImageNode;
 	private background: ImageNode;
-	private componentsById: Record<string, AbstractComponent>;
+	private componentsById: Map<string, AbstractComponent>;
 	private componentCount: number = 0;
 
 	/** Viewport for the exported/imported image. */
@@ -45,14 +84,14 @@ export default class EditorImage {
 	// Whether the viewport should be autoresized on item add/remove.
 	private shouldAutoresizeExportViewport: boolean;
 
-	// @internal
+	// Event handler
 	public readonly notifier: EditorImageNotifier;
 
 	// @internal
 	public constructor() {
 		this.root = new RootImageNode();
 		this.background = new RootImageNode();
-		this.componentsById = Object.create(null);
+		this.componentsById = new Map();
 
 		this.notifier = new EventDispatcher();
 		this.importExportViewport = new Viewport(() => {
@@ -83,7 +122,7 @@ export default class EditorImage {
 	}
 
 	// Returns the parent of the given element, if it exists.
-	public findParent(elem: AbstractComponent): ImageNode|null {
+	public findParent(elem: AbstractComponent): ImageNode | null {
 		return this.background.getChildWithContent(elem) ?? this.root.getChildWithContent(elem);
 	}
 
@@ -96,12 +135,16 @@ export default class EditorImage {
 
 		if (parent) {
 			parent.remove();
-			this.addElementDirectly(elem);
+			this.addComponentDirectly(elem);
 		}
 	}
 
 	/** @internal */
-	public renderWithCache(screenRenderer: AbstractRenderer, cache: RenderingCache, viewport: Viewport) {
+	public renderWithCache(
+		screenRenderer: AbstractRenderer,
+		cache: RenderingCache,
+		viewport: Viewport,
+	) {
 		this.background.render(screenRenderer, viewport.visibleRect);
 
 		// If in debug mode, avoid rendering with cache to show additional debug information
@@ -113,12 +156,15 @@ export default class EditorImage {
 	}
 
 	/**
-	 * Renders all nodes visible from `viewport` (or all nodes if `viewport = null`).
+	 * Renders this image to the given `renderer`.
 	 *
-	 * `viewport` is used to improve rendering performance. If given, it must match
-	 * the viewport used by the `renderer` (if any).
+	 * If `viewport` is non-null, only components that can be seen from that viewport
+	 * will be rendered. If `viewport` is `null`, **all** components are rendered.
+	 *
+	 * **Example**:
+	 * [[include:doc-pages/inline-examples/canvas-renderer.md]]
 	 */
-	public render(renderer: AbstractRenderer, viewport: Viewport|null) {
+	public render(renderer: AbstractRenderer, viewport: Viewport | null) {
 		this.background.render(renderer, viewport?.visibleRect);
 		this.root.render(renderer, viewport?.visibleRect);
 	}
@@ -154,17 +200,24 @@ export default class EditorImage {
 		this.render(renderer, null);
 	}
 
-
 	/**
-	 * @returns all elements in the image, sorted by z-index. This can be slow for large images.
+	 * @returns all elements in the image, sorted by z-index (low to high).
 	 *
-	 * Does not include background elements. See {@link getBackgroundComponents}.
+	 * This can be slow for large images. If you only need all elemenst in part of the image,
+	 * consider using {@link getComponentsIntersecting} instead.
+	 *
+	 * **Note**: The result does not include background elements. See {@link getBackgroundComponents}.
 	 */
-	public getAllElements() {
+	public getAllComponents() {
 		const leaves = this.root.getLeaves();
 		sortLeavesByZIndex(leaves);
 
-		return leaves.map(leaf => leaf.getContent()!);
+		return leaves.map((leaf) => leaf.getContent()!);
+	}
+
+	/** @deprecated in favor of {@link getAllComponents} */
+	public getAllElements() {
+		return this.getAllComponents();
 	}
 
 	/** Returns the number of elements added to this image. @internal */
@@ -172,8 +225,20 @@ export default class EditorImage {
 		return this.componentCount;
 	}
 
-	/** @returns a list of `AbstractComponent`s intersecting `region`, sorted by z-index. */
-	public getElementsIntersectingRegion(region: Rect2, includeBackground: boolean = false): AbstractComponent[] {
+	/** @deprecated @see getComponentsIntersecting */
+	public getElementsIntersectingRegion(region: Rect2, includeBackground: boolean = false) {
+		return this.getComponentsIntersecting(region, includeBackground);
+	}
+
+	/**
+	 * @returns a list of `AbstractComponent`s intersecting `region`, sorted by increasing z-index.
+	 *
+	 * Components in the background layer are only included if `includeBackground` is `true`.
+	 */
+	public getComponentsIntersecting(
+		region: Rect2,
+		includeBackground: boolean = false,
+	): AbstractComponent[] {
 		let leaves = this.root.getLeavesIntersectingRegion(region);
 
 		if (includeBackground) {
@@ -181,21 +246,34 @@ export default class EditorImage {
 		}
 
 		sortLeavesByZIndex(leaves);
-		return leaves.map(leaf => leaf.getContent()!);
+		return leaves.map((leaf) => leaf.getContent()!);
 	}
 
 	/** Called whenever (just after) an element is completely removed. @internal */
 	public onDestroyElement(elem: AbstractComponent) {
-		this.componentCount --;
-		delete this.componentsById[elem.getId()];
+		this.componentCount--;
+		const componentId = elem.getId();
+		this.componentsById.delete(componentId);
+
+		this.notifier.dispatch(EditorImageEventType.ComponentRemoved, {
+			kind: EditorImageEventType.ComponentRemoved,
+			image: this,
+			componentId: componentId,
+		});
 
 		this.autoresizeExportViewport();
 	}
 
 	/** Called just after an element is added. @internal */
 	private onElementAdded(elem: AbstractComponent) {
-		this.componentCount ++;
-		this.componentsById[elem.getId()] = elem;
+		this.componentCount++;
+		const elementId = elem.getId();
+		this.componentsById.set(elem.getId(), elem);
+		this.notifier.dispatch(EditorImageEventType.ComponentAdded, {
+			kind: EditorImageEventType.ComponentAdded,
+			image: this,
+			componentId: elementId,
+		});
 
 		this.autoresizeExportViewport();
 	}
@@ -205,11 +283,11 @@ export default class EditorImage {
 	 *
 	 * @see {@link AbstractComponent.getId}
 	 */
-	public lookupElement(id: string): AbstractComponent|null {
-		return this.componentsById[id] ?? null;
+	public lookupElement(id: string): AbstractComponent | null {
+		return this.componentsById.get(id) ?? null;
 	}
 
-	private addElementDirectly(elem: AbstractComponent): ImageNode {
+	private addComponentDirectly(elem: AbstractComponent): ImageNode {
 		// Because onAddToImage can affect the element's bounding box,
 		// this needs to be called before parentTree.addLeaf.
 		elem.onAddToImage(this);
@@ -241,28 +319,45 @@ export default class EditorImage {
 	 *
 	 * @see {@link Display.flatten}
 	 *
-	 * @example
+	 * **Example**:
+	 *
 	 * [[include:doc-pages/inline-examples/adding-a-stroke.md]]
 	 */
-	public static addElement(elem: AbstractComponent, applyByFlattening: boolean = false): SerializableCommand {
-		return new EditorImage.AddElementCommand(elem, applyByFlattening);
+	public static addComponent(
+		elem: AbstractComponent,
+		applyByFlattening: boolean = false,
+	): SerializableCommand {
+		return new EditorImage.AddComponentCommand(elem, applyByFlattening);
 	}
 
-	/** @see EditorImage.addElement */
+	/** @see EditorImage.addComponent */
+	public addComponent(component: AbstractComponent, applyByFlattening?: boolean) {
+		return EditorImage.addComponent(component, applyByFlattening);
+	}
+
+	/** Alias for {@link addComponent}. @deprecated Prefer `.addComponent` */
 	public addElement(elem: AbstractComponent, applyByFlattening?: boolean) {
-		return EditorImage.addElement(elem, applyByFlattening);
+		return this.addComponent(elem, applyByFlattening);
+	}
+
+	/** Alias for {@link addComponent}. @deprecated Prefer `.addComponent`. */
+	public static addElement(
+		elem: AbstractComponent,
+		applyByFlattening: boolean = false,
+	): SerializableCommand {
+		return this.addComponent(elem, applyByFlattening);
 	}
 
 	// A Command that can access private [EditorImage] functionality
-	private static AddElementCommand = class extends SerializableCommand {
-		private serializedElem: any|null = null;
+	private static AddComponentCommand = class extends SerializableCommand {
+		private serializedElem: any = null;
 
 		// If [applyByFlattening], then the rendered content of this element
 		// is present on the display's wet ink canvas. As such, no re-render is necessary
 		// the first time this command is applied (the surfaces are joined instead).
 		public constructor(
 			private element: AbstractComponent,
-			private applyByFlattening: boolean = false
+			private applyByFlattening: boolean = false,
 		) {
 			super('add-element');
 
@@ -279,7 +374,7 @@ export default class EditorImage {
 		}
 
 		public apply(editor: Editor) {
-			editor.image.addElementDirectly(this.element);
+			editor.image.addComponentDirectly(this.element);
 
 			if (!this.applyByFlattening) {
 				editor.queueRerender();
@@ -295,7 +390,7 @@ export default class EditorImage {
 		}
 
 		public description(_editor: Editor, localization: EditorLocalization) {
-			return localization.addElementAction(this.element.description(localization));
+			return localization.addComponentAction(this.element.description(localization));
 		}
 
 		protected serializeToJSON() {
@@ -309,7 +404,7 @@ export default class EditorImage {
 				const id = json.elemData.id;
 				const foundElem = editor.image.lookupElement(id);
 				const elem = foundElem ?? AbstractComponent.deserialize(json.elemData);
-				const result = new EditorImage.AddElementCommand(elem);
+				const result = new EditorImage.AddComponentCommand(elem);
 				result.serializedElem = json.elemData;
 				return result;
 			});
@@ -338,9 +433,7 @@ export default class EditorImage {
 	 * {@link BackgroundComponent}s (and other components that auto-resize).
 	 */
 	public setImportExportRect(imageRect: Rect2): SerializableCommand {
-		return EditorImage.SetImportExportRectCommand.of(
-			this, imageRect, false,
-		);
+		return EditorImage.SetImportExportRectCommand.of(this, imageRect, false);
 	}
 
 	/** @see {@link setAutoresizeEnabled} */
@@ -382,9 +475,7 @@ export default class EditorImage {
 		}
 
 		const newBBox = this.root.getBBox();
-		return EditorImage.SetImportExportRectCommand.of(
-			this, newBBox, autoresize,
-		);
+		return EditorImage.SetImportExportRectCommand.of(this, newBBox, autoresize);
 	}
 
 	private setAutoresizeEnabledDirectly(shouldAutoresize: boolean) {
@@ -392,6 +483,7 @@ export default class EditorImage {
 			this.shouldAutoresizeExportViewport = shouldAutoresize;
 
 			this.notifier.dispatch(EditorImageEventType.AutoresizeModeChanged, {
+				kind: EditorImageEventType.AutoresizeModeChanged,
 				image: this,
 			});
 		}
@@ -405,7 +497,6 @@ export default class EditorImage {
 			this.setExportRectDirectly(this.root.getBBox());
 		}
 	}
-
 
 	private settingExportRect: boolean = false;
 
@@ -446,6 +537,7 @@ export default class EditorImage {
 		// called.
 		if (!this.settingExportRect) {
 			this.notifier.dispatch(EditorImageEventType.ExportViewportChanged, {
+				kind: EditorImageEventType.ExportViewportChanged,
 				image: this,
 			});
 		}
@@ -460,7 +552,7 @@ export default class EditorImage {
 	 *
 	 * @internal
 	 */
-	public setDebugMode(newDebugMode: boolean) {
+	public static setDebugMode(newDebugMode: boolean) {
 		debugMode = newDebugMode;
 	}
 
@@ -479,19 +571,18 @@ export default class EditorImage {
 		}
 
 		// Uses `image` to store the original size/transform
-		public static of(
-			image: EditorImage,
-			newExportRect: Rect2,
-			newAutoresize: boolean,
-		) {
+		public static of(image: EditorImage, newExportRect: Rect2, newAutoresize: boolean) {
 			const importExportViewport = image.getImportExportViewport();
 			const originalSize = importExportViewport.visibleRect.size;
 			const originalTransform = importExportViewport.canvasToScreenTransform;
 			const originalAutoresize = image.getAutoresizeEnabled();
 
 			return new EditorImage.SetImportExportRectCommand(
-				originalSize, originalTransform, originalAutoresize,
-				newExportRect, newAutoresize,
+				originalSize,
+				originalTransform,
+				originalAutoresize,
+				newExportRect,
+				newAutoresize,
 			);
 		}
 
@@ -553,13 +644,20 @@ export default class EditorImage {
 				const originalSize = Vec2.ofXY(json.originalSize);
 				const originalTransform = new Mat33(...(json.originalTransform as Mat33Array));
 				const finalRect = new Rect2(
-					json.newRegion.x, json.newRegion.y, json.newRegion.w, json.newRegion.h
+					json.newRegion.x,
+					json.newRegion.y,
+					json.newRegion.w,
+					json.newRegion.h,
 				);
 				const autoresize = json.autoresize ?? false;
 				const originalAutoresize = json.originalAutoresize ?? false;
 
 				return new EditorImage.SetImportExportRectCommand(
-					originalSize, originalTransform, originalAutoresize, finalRect, autoresize
+					originalSize,
+					originalTransform,
+					originalAutoresize,
+					finalRect,
+					autoresize,
 				);
 			});
 		}
@@ -582,8 +680,8 @@ export const computeFirstIndexToRender = (sortedLeaves: Array<ImageNode>, visibl
 		for (let i = sortedLeaves.length - 1; i >= 1; i--) {
 			if (
 				// Check for occlusion
-				sortedLeaves[i].getBBox().containsRect(visibleRect)
-				&& sortedLeaves[i].getContent()?.occludesEverythingBelowWhenRenderedInRect(visibleRect)
+				sortedLeaves[i].getBBox().containsRect(visibleRect) &&
+				sortedLeaves[i].getContent()?.occludesEverythingBelowWhenRenderedInRect(visibleRect)
 			) {
 				startIndex = i;
 				break;
@@ -594,14 +692,14 @@ export const computeFirstIndexToRender = (sortedLeaves: Array<ImageNode>, visibl
 	return startIndex;
 };
 
-type TooSmallToRenderCheck = (rect: Rect2)=> boolean;
+type TooSmallToRenderCheck = (rect: Rect2) => boolean;
 
 /**
  * Part of the Editor's image. Does not handle fullscreen/invisible components.
  * @internal
  */
 export class ImageNode {
-	private content: AbstractComponent|null;
+	private content: AbstractComponent | null;
 	private bbox: Rect2;
 	private children: ImageNode[];
 	private targetChildCount: number = 30;
@@ -609,9 +707,7 @@ export class ImageNode {
 	private id: number;
 	private static idCounter: number = 0;
 
-	public constructor(
-		private parent: ImageNode|null = null
-	) {
+	public constructor(private parent: ImageNode | null = null) {
 		this.children = [];
 		this.bbox = Rect2.empty;
 		this.content = null;
@@ -627,33 +723,49 @@ export class ImageNode {
 		this.id = ImageNode.idCounter++;
 	}
 
-	public getContent(): AbstractComponent|null {
+	public getContent(): AbstractComponent | null {
 		return this.content;
 	}
 
-	public getParent(): ImageNode|null {
+	public getParent(): ImageNode | null {
 		return this.parent;
 	}
 
 	// Override this to change how children are considered within a given region.
-	protected getChildrenIntersectingRegion(region: Rect2, isTooSmallFilter?: TooSmallToRenderCheck): ImageNode[] {
-		return this.children.filter(child => {
+	protected getChildrenIntersectingRegion(
+		region: Rect2,
+		isTooSmallFilter?: TooSmallToRenderCheck,
+	): ImageNode[] {
+		return this.children.filter((child) => {
 			const bbox = child.getBBox();
 			return !isTooSmallFilter?.(bbox) && bbox.intersects(region);
 		});
 	}
 
-	public getChildrenOrSelfIntersectingRegion(region: Rect2): ImageNode[] {
-		if (this.content) {
+	public getChildrenOrSelfIntersectingRegion(
+		region: Rect2,
+		isTooSmall?: TooSmallToRenderCheck,
+	): ImageNode[] {
+		if (this.content && this.bbox.intersects(region) && !isTooSmall?.(this.bbox)) {
 			return [this];
 		}
-		return this.getChildrenIntersectingRegion(region);
+		return this.getChildrenIntersectingRegion(region, isTooSmall);
 	}
 
-	// Returns a list of `ImageNode`s with content (and thus no children).
-	// Override getChildrenIntersectingRegion to customize how this method
-	// determines whether/which children are in `region`.
-	public getLeavesIntersectingRegion(region: Rect2, isTooSmall?: TooSmallToRenderCheck): ImageNode[] {
+	/**
+	 * Returns a list of `ImageNode`s with content (and thus no children).
+	 * Override getChildrenIntersectingRegion to customize how this method
+	 * determines whether/which children are in `region`.
+	 *
+	 * @paran region - All resultant `ImageNode`s must intersect `region`.
+	 * @param isTooSmall - If `isTooSmall` returns true for an image node, that node
+	 *                     is excluded from the output.
+	 *
+	 */
+	public getLeavesIntersectingRegion(
+		region: Rect2,
+		isTooSmall?: TooSmallToRenderCheck,
+	): ImageNode[] {
 		const result: ImageNode[] = [];
 		const workList: ImageNode[] = [];
 
@@ -661,13 +773,17 @@ export class ImageNode {
 
 		while (workList.length > 0) {
 			const current = workList.pop()!;
-			if (current.content !== null) {
-				result.push(current);
-			}
 
-			workList.push(
-				...current.getChildrenIntersectingRegion(region, isTooSmall)
-			);
+			// Split the children into leaves and non-leaves
+			const processed = current.getChildrenOrSelfIntersectingRegion(region, isTooSmall);
+			for (const item of processed) {
+				if (item.content) {
+					result.push(item);
+				} else {
+					// Non-leaves need to be processed
+					workList.push(item);
+				}
+			}
 		}
 
 		return result;
@@ -677,7 +793,7 @@ export class ImageNode {
 	// such child exists.
 	//
 	// Note: Relies on all children to have valid bounding boxes.
-	public getChildWithContent(target: AbstractComponent): ImageNode|null {
+	public getChildWithContent(target: AbstractComponent): ImageNode | null {
 		const candidates = this.getLeavesIntersectingRegion(target.getBBox());
 		for (const candidate of candidates) {
 			if (candidate.getContent() === target) {
@@ -736,15 +852,13 @@ export class ImageNode {
 
 				nodeForChildren.children = this.children;
 				this.children = [nodeForNewLeaf, nodeForChildren];
-				nodeForChildren.recomputeBBox(true);
 				nodeForChildren.updateParents();
+				nodeForChildren.recomputeBBox(true);
 			}
 			return nodeForNewLeaf.addLeaf(leaf);
 		}
 
-		const containingNodes = this.children.filter(
-			child => child.getBBox().containsRect(leafBBox)
-		);
+		const containingNodes = this.children.filter((child) => child.getBBox().containsRect(leafBBox));
 
 		// Does the leaf already fit within one of the children?
 		if (containingNodes.length > 0 && this.children.length >= this.targetChildCount) {
@@ -760,6 +874,11 @@ export class ImageNode {
 		const newNode = ImageNode.createLeafNode(this, leaf);
 		this.children.push(newNode);
 		newNode.recomputeBBox(true);
+
+		if (this.children.length >= this.targetChildCount) {
+			this.rebalance();
+		}
+
 		return newNode;
 	}
 
@@ -784,7 +903,7 @@ export class ImageNode {
 		if (this.content !== null) {
 			this.bbox = this.content.getBBox();
 		} else {
-			this.bbox = Rect2.union(...this.children.map(child => child.getBBox()));
+			this.bbox = Rect2.union(...this.children.map((child) => child.getBBox()));
 		}
 
 		if (bubbleUp && !oldBBox.eq(this.bbox)) {
@@ -794,6 +913,8 @@ export class ImageNode {
 				this.parent?.recomputeBBox(true);
 			}
 		}
+
+		this.checkRep();
 	}
 
 	// Grows this' bounding box to also include `other`.
@@ -822,10 +943,14 @@ export class ImageNode {
 			// Remove this' parent, if this' parent isn't the root.
 			const oldParent = this.parent;
 			if (oldParent.parent !== null) {
-				oldParent.children = [];
-				this.parent = oldParent.parent;
-				this.parent.children.push(this);
+				const newParent = oldParent.parent;
+
+				newParent.children = newParent.children.filter((c) => c !== oldParent);
 				oldParent.parent = null;
+				oldParent.children = [];
+
+				this.parent = newParent;
+				newParent.children.push(this);
 				this.parent.recomputeBBox(false);
 			} else if (this.content === null) {
 				// Remove this and transfer this' children to the parent.
@@ -834,26 +959,90 @@ export class ImageNode {
 				this.parent = null;
 			}
 		}
+
+		// Create virtual containers for children. Handles the case where there
+		// are many small, often non-overlapping children that we still want to be grouped.
+		if (this.children.length > this.targetChildCount * 10) {
+			const grid = this.getBBox().divideIntoGrid(4, 4);
+			const indexToCount = [];
+			while (indexToCount.length < grid.length) {
+				indexToCount.push(0);
+			}
+
+			for (const child of this.children) {
+				for (let i = 0; i < grid.length; i++) {
+					if (grid[i].containsRect(child.getBBox())) {
+						indexToCount[i]++;
+					}
+				}
+			}
+
+			let indexWithGreatest = 0;
+			let greatestCount = indexToCount[0];
+			for (let i = 1; i < indexToCount.length; i++) {
+				if (indexToCount[i] > greatestCount) {
+					indexWithGreatest = i;
+					greatestCount = indexToCount[i];
+				}
+			}
+			const targetGridSquare = grid[indexWithGreatest];
+
+			// Avoid clustering if just a few children would be grouped.
+			// Unnecessary clustering can lead to unnecessarily nested nodes.
+			if (greatestCount > 4) {
+				const newChildren = [];
+				const childNodeChildren = [];
+				for (const child of this.children) {
+					if (targetGridSquare.containsRect(child.getBBox())) {
+						childNodeChildren.push(child);
+					} else {
+						newChildren.push(child);
+					}
+				}
+
+				if (childNodeChildren.length < this.children.length) {
+					this.children = newChildren;
+
+					const child = new ImageNode(this);
+					this.children.push(child);
+					child.children = childNodeChildren;
+					child.updateParents(false);
+
+					child.recomputeBBox(false);
+					child.rebalance();
+				}
+			}
+		}
+
+		// Empty?
+		if (this.parent && this.children.length === 0 && this.content === null) {
+			this.remove();
+		}
 	}
 
 	// Removes the parent-to-child link.
 	// Called internally by `.remove`
 	protected removeChild(child: ImageNode) {
+		this.checkRep();
+
 		const oldChildCount = this.children.length;
-		this.children = this.children.filter(node => {
+		this.children = this.children.filter((node) => {
 			return node !== child;
 		});
 
 		console.assert(
 			this.children.length === oldChildCount - 1,
-			`${oldChildCount - 1} ≠ ${this.children.length} after removing all nodes equal to ${child}. Nodes should only be removed once.`
+			`${oldChildCount - 1} ≠ ${this.children.length} after removing all nodes equal to ${child}. Nodes should only be removed once.`,
 		);
 
-		this.children.forEach(child => {
+		this.children.forEach((child) => {
 			child.rebalance();
 		});
 
 		this.recomputeBBox(true);
+		this.rebalance();
+
+		this.checkRep();
 	}
 
 	// Remove this node and all of its children
@@ -866,13 +1055,14 @@ export class ImageNode {
 
 			return;
 		}
-
 		this.parent.removeChild(this);
 
 		// Remove the child-to-parent link and invalid this
 		this.parent = null;
 		this.content = null;
 		this.children = [];
+
+		this.checkRep();
 	}
 
 	// Creates a (potentially incomplete) async rendering of this image.
@@ -913,7 +1103,9 @@ export class ImageNode {
 	public render(renderer: AbstractRenderer, visibleRect?: Rect2) {
 		let leaves;
 		if (visibleRect) {
-			leaves = this.getLeavesIntersectingRegion(visibleRect, rect => renderer.isTooSmallToRender(rect));
+			leaves = this.getLeavesIntersectingRegion(visibleRect, (rect) =>
+				renderer.isTooSmallToRender(rect),
+			);
 		} else {
 			leaves = this.getLeaves();
 		}
@@ -924,7 +1116,7 @@ export class ImageNode {
 		// draw the non-hidden components:
 		const startIndex = computeFirstIndexToRender(leaves);
 
-		for (let i = startIndex; i < leaves.length; i ++) {
+		for (let i = startIndex; i < leaves.length; i++) {
 			const leaf = leaves[i];
 			// Leaves by definition have content
 			leaf.getContent()!.render(renderer, visibleRect);
@@ -941,7 +1133,11 @@ export class ImageNode {
 	}
 
 	// Debug only: Shows bounding boxes of this and all children.
-	public renderDebugBoundingBoxes(renderer: AbstractRenderer, visibleRect: Rect2, depth: number = 0) {
+	public renderDebugBoundingBoxes(
+		renderer: AbstractRenderer,
+		visibleRect: Rect2,
+		depth: number = 0,
+	) {
 		const bbox = this.getBBox();
 		const pixelSize = 1 / (renderer.getSizeOfCanvasPixelOnScreen() || 1);
 
@@ -960,9 +1156,51 @@ export class ImageNode {
 		renderer.drawRect(bbox.intersection(visibleRect)!, lineWidth, { fill });
 		renderer.endObject();
 
+		if (bbox.maxDimension > visibleRect.maxDimension / 3) {
+			const textStyle = {
+				fontFamily: 'monospace',
+				size: bbox.minDimension / 20,
+				renderingStyle: { fill: Color4.red },
+			};
+			renderer.drawText(`Depth: ${depth}`, Mat33.translation(bbox.bottomLeft), textStyle);
+		}
+
 		// Render debug information for children
 		for (const child of this.children) {
 			child.renderDebugBoundingBoxes(renderer, visibleRect, depth + 1);
+		}
+	}
+
+	private checkRep(depth: number = 0) {
+		// Slow -- disabld by default
+		if (debugMode) {
+			if (this.parent && !this.parent.children.includes(this)) {
+				throw new Error(`Parent does not have this node as a child. (depth: ${depth})`);
+			}
+
+			let expectedBBox = null;
+			const seenChildren: Set<ImageNode> = new Set();
+			for (const child of this.children) {
+				expectedBBox ??= child.getBBox();
+				expectedBBox = expectedBBox.union(child.getBBox());
+
+				if (child.parent !== this) {
+					throw new Error(
+						`Child with bbox ${child.getBBox()} and ${child.children.length} has wrong parent (was ${child.parent}).`,
+					);
+				}
+
+				// Children should only be present once
+				if (seenChildren.has(child)) {
+					throw new Error(`Child ${child} is present twice or more in its parent's child list`);
+				}
+				seenChildren.add(child);
+			}
+
+			const tolerance = this.bbox.minDimension / 100;
+			if (expectedBBox && !this.bbox.eq(expectedBBox, tolerance)) {
+				throw new Error(`Wrong bounding box ${expectedBBox} \\neq ${this.bbox} (depth: ${depth})`);
+			}
 		}
 	}
 }
@@ -975,7 +1213,10 @@ export class RootImageNode extends ImageNode {
 	// Nodes that will never be visible unless a full render is done.
 	private dataComponents: ImageNode[] = [];
 
-	protected override getChildrenIntersectingRegion(region: Rect2, _isTooSmall?: TooSmallToRenderCheck) {
+	protected override getChildrenIntersectingRegion(
+		region: Rect2,
+		_isTooSmall?: TooSmallToRenderCheck,
+	) {
 		const result = super.getChildrenIntersectingRegion(region);
 
 		for (const node of this.fullscreenChildren) {
@@ -983,6 +1224,19 @@ export class RootImageNode extends ImageNode {
 		}
 
 		return result;
+	}
+
+	public override getChildrenOrSelfIntersectingRegion(
+		region: Rect2,
+		_isTooSmall?: TooSmallToRenderCheck,
+	): ImageNode[] {
+		const content = this.getContent();
+		// Fullscreen components always intersect/contain
+		if (content && content.getSizingMode() === ComponentSizingMode.FillScreen) {
+			return [this];
+		}
+
+		return super.getChildrenOrSelfIntersectingRegion(region, _isTooSmall);
 	}
 
 	public override getLeaves(): ImageNode[] {
@@ -1004,17 +1258,15 @@ export class RootImageNode extends ImageNode {
 
 		// Check whether the child is stored in the data/fullscreen
 		// component arrays first.
-		this.dataComponents = this.dataComponents
-			.filter(checkTargetChild);
-		this.fullscreenChildren = this.fullscreenChildren
-			.filter(checkTargetChild);
+		this.dataComponents = this.dataComponents.filter(checkTargetChild);
+		this.fullscreenChildren = this.fullscreenChildren.filter(checkTargetChild);
 
 		if (!removed) {
 			super.removeChild(child);
 		}
 	}
 
-	public override getChildWithContent(target: AbstractComponent): ImageNode|null {
+	public override getChildWithContent(target: AbstractComponent): ImageNode | null {
 		const searchExtendedChildren = () => {
 			// Search through all extended children
 			const candidates = this.fullscreenChildren.concat(this.dataComponents);
@@ -1034,7 +1286,6 @@ export class RootImageNode extends ImageNode {
 		if (target.getSizingMode() === ComponentSizingMode.BoundingBox) {
 			return super.getChildWithContent(target) ?? searchExtendedChildren();
 		}
-
 
 		// Fall back to the superclass -- it's possible that the component has
 		// changed labels.

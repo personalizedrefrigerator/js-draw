@@ -19,10 +19,13 @@ import Editor, { EditorSettings } from './Editor';
 export * from './image/lib';
 export * from './types';
 export * from './inputEvents';
-export { default as getLocalizationTable, matchingLocalizationTable } from './localizations/getLocalizationTable';
+export {
+	default as getLocalizationTable,
+	matchingLocalizationTable,
+} from './localizations/getLocalizationTable';
 export * from './localization';
 
-export { default as SVGLoader } from './SVGLoader';
+export { default as SVGLoader, SVGLoaderPlugin } from './SVGLoader/SVGLoader';
 export { default as Viewport } from './Viewport';
 export * from '@js-draw/math';
 export * from './components/lib';
@@ -43,10 +46,7 @@ export { default as __js_draw__version } from './version';
 
 import AbstractToolbar from './toolbar/AbstractToolbar';
 
-export {
-	Editor, EditorSettings, AbstractToolbar,
-};
-
+export { Editor, EditorSettings, AbstractToolbar };
 
 /**
  * Using the HTMLToolbar alias is deprecated. Use

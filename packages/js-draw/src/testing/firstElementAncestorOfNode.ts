@@ -1,6 +1,5 @@
-
-/** Returns the first ancestor of the given node that is an HTMLElement */
-const firstElementAncestorOfNode = (node: Node|null): HTMLElement|null => {
+/** Returns the first ancestor of the given node (or the node itself) that is an HTMLElement */
+const firstElementAncestorOfNode = (node: Node | null): HTMLElement | null => {
 	if (node instanceof HTMLElement) {
 		return node;
 	} else if (node?.parentNode) {

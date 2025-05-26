@@ -1,4 +1,3 @@
-
 // This file contains code for creating icons specific to the example app.
 // js-draw has its own code for creating icons (e.g. toolbar icons).
 
@@ -14,12 +13,15 @@ export const makeIconFromText = (text: string) => {
 		textNode.appendChild(document.createTextNode(text));
 		textNode.setAttribute('x', '50');
 		textNode.setAttribute('y', '50');
-		textNode.setAttribute('style', `
+		textNode.setAttribute(
+			'style',
+			`
 			text-anchor: middle;
 			dominant-baseline: middle;
 			font-size: 100px;
 			${styles}
-		`);
+		`,
+		);
 
 		icon.appendChild(textNode);
 	};
@@ -39,11 +41,16 @@ export const makeIconFromText = (text: string) => {
 
 export const makeLocalStorageIcon = () => {
 	const elem = document.createElementNS(svgNamespace, 'svg');
-	const iconFillSStyle = 'style="fill: var(--icon-color);"';
-	elem.innerHTML = `
-		<path d="M 50,10 V 60 H 35 L 55,85 75,60 H 60 V 10 Z" ${iconFillSStyle}/>
-		<path d="m 15,85 v 10 h 85 V 85 Z" ${iconFillSStyle}/>
-	`;
+
+	const makePath = (d: string) => {
+		const path = document.createElementNS(svgNamespace, 'path');
+		path.style.fill = 'var(--icon-color)';
+		path.setAttribute('d', d);
+		elem.appendChild(path);
+	};
+
+	makePath('M 50,10 V 60 H 35 L 55,85 75,60 H 60 V 10 Z');
+	makePath('m 15,85 v 10 h 85 V 85 Z');
 	elem.setAttribute('viewBox', '5 0 100 100');
 
 	return elem;

@@ -8,7 +8,7 @@ const sendHtmlSwipe = async (
 	timeMs: number = 300,
 ) => {
 	element.dispatchEvent(
-		new PointerEvent('pointerdown', { isPrimary: true, clientX: start.x, clientY: start.y, })
+		new PointerEvent('pointerdown', { isPrimary: true, clientX: start.x, clientY: start.y }),
 	);
 
 	const step = 0.1;
@@ -17,15 +17,16 @@ const sendHtmlSwipe = async (
 
 		const currentPoint = start.lerp(end, i);
 		element.dispatchEvent(
-			new PointerEvent(
-				'pointermove',
-				{ isPrimary: true, clientX: currentPoint.x, clientY: currentPoint.y, },
-			),
+			new PointerEvent('pointermove', {
+				isPrimary: true,
+				clientX: currentPoint.x,
+				clientY: currentPoint.y,
+			}),
 		);
 	}
 
 	element.dispatchEvent(
-		new PointerEvent('pointerup', { isPrimary: true, clientX: end.x, clientY: end.y, })
+		new PointerEvent('pointerup', { isPrimary: true, clientX: end.x, clientY: end.y }),
 	);
 };
 

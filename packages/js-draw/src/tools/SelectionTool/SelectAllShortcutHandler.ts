@@ -22,7 +22,7 @@ export default class SelectAllShortcutHandler extends BaseTool {
 			if (selectionTools.length > 0) {
 				const selectionTool = selectionTools[0];
 				selectionTool.setEnabled(true);
-				selectionTool.setSelection(this.editor.image.getAllElements());
+				selectionTool.setSelection(this.editor.image.getAllComponents());
 
 				return true;
 			}

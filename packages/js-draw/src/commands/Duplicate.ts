@@ -2,6 +2,7 @@ import AbstractComponent from '../components/AbstractComponent';
 import describeComponentList from '../components/util/describeComponentList';
 import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
+import { assertIsStringArray } from '../util/assertions';
 import Erase from './Erase';
 import SerializableCommand from './SerializableCommand';
 
@@ -15,7 +16,7 @@ import SerializableCommand from './SerializableCommand';
  *
  * // Find all elements intersecting the rectangle with top left (0,0) and
  * // (width,height)=(100,100).
- * const elems = editor.image.getElementsIntersectingRegion(
+ * const elems = editor.image.getComponentsIntersecting(
  * 	new Rect2(0, 0, 100, 100)
  * );
  *
@@ -26,16 +27,29 @@ import SerializableCommand from './SerializableCommand';
  * editor.dispatch(duplicateElems);
  * ```
  *
- * @see {@link Editor.dispatch} {@link EditorImage.getElementsIntersectingRegion}
+ * @see {@link Editor.dispatch} {@link EditorImage.getComponentsIntersecting}
  */
 export default class Duplicate extends SerializableCommand {
 	private duplicates: AbstractComponent[];
 	private reverse: Erase;
 
-	public constructor(private toDuplicate: AbstractComponent[]) {
+	public constructor(
+		private toDuplicate: AbstractComponent[],
+
+		// @internal -- IDs given to the duplicate elements
+		idsForDuplicates?: string[],
+	) {
 		super('duplicate');
 
-		this.duplicates = toDuplicate.map(elem => elem.clone());
+		this.duplicates = toDuplicate.map((elem, idx) => {
+			// For collaborative editing, it's important for the clones to have
+			// the same IDs as the originals
+			if (idsForDuplicates && idsForDuplicates[idx]) {
+				return elem.cloneWithId(idsForDuplicates[idx]);
+			} else {
+				return elem.clone();
+			}
+		});
 		this.reverse = new Erase(this.duplicates);
 	}
 
@@ -58,18 +72,47 @@ export default class Duplicate extends SerializableCommand {
 
 		return localizationTable.duplicateAction(
 			describeComponentList(localizationTable, this.duplicates) ?? localizationTable.elements,
-			this.duplicates.length
+			this.duplicates.length,
 		);
 	}
 
 	protected serializeToJSON() {
-		return this.toDuplicate.map(elem => elem.getId());
+		return {
+			originalIds: this.toDuplicate.map((elem) => elem.getId()),
+			cloneIds: this.duplicates.map((elem) => elem.getId()),
+		};
 	}
 
 	static {
 		SerializableCommand.register('duplicate', (json: any, editor: Editor) => {
-			const elems = json.map((id: string) => editor.image.lookupElement(id));
-			return new Duplicate(elems);
+			let originalIds;
+			let cloneIds;
+			// Compatibility with older editors
+			if (Array.isArray(json)) {
+				originalIds = json;
+				cloneIds = [];
+			} else {
+				originalIds = json.originalIds;
+				cloneIds = json.cloneIds;
+			}
+			assertIsStringArray(originalIds);
+			assertIsStringArray(cloneIds);
+
+			// Resolve to elements -- only keep the elements that can be found in the image.
+			const resolvedElements = [];
+			const filteredCloneIds = [];
+			for (let i = 0; i < originalIds.length; i++) {
+				const originalId = originalIds[i];
+				const foundElement = editor.image.lookupElement(originalId);
+				if (!foundElement) {
+					console.warn('Duplicate command: Could not find element with ID', originalId);
+				} else {
+					filteredCloneIds.push(cloneIds[i]);
+					resolvedElements.push(foundElement);
+				}
+			}
+
+			return new Duplicate(resolvedElements, filteredCloneIds);
 		});
 	}
 }

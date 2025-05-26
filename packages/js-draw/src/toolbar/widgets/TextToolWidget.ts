@@ -9,11 +9,15 @@ import BaseToolWidget from './BaseToolWidget';
 import { SavedToolbuttonState } from './BaseWidget';
 
 export default class TextToolWidget extends BaseToolWidget {
-	private updateDropdownInputs: (()=>void)|null = null;
-	public constructor(editor: Editor, private tool: TextTool, localization?: ToolbarLocalization) {
+	private updateDropdownInputs: (() => void) | null = null;
+	public constructor(
+		editor: Editor,
+		private tool: TextTool,
+		localization?: ToolbarLocalization,
+	) {
 		super(editor, tool, 'text-tool-widget', localization);
 
-		editor.notifier.on(EditorEventType.ToolUpdated, evt => {
+		editor.notifier.on(EditorEventType.ToolUpdated, (evt) => {
 			if (evt.kind === EditorEventType.ToolUpdated && evt.tool === tool) {
 				this.updateIcon();
 				this.updateDropdownInputs?.();
@@ -34,7 +38,8 @@ export default class TextToolWidget extends BaseToolWidget {
 	protected override fillDropdown(dropdown: HTMLElement): boolean {
 		const container = document.createElement('div');
 		container.classList.add(
-			`${toolbarCSSPrefix}spacedList`, `${toolbarCSSPrefix}nonbutton-controls-main-list`
+			`${toolbarCSSPrefix}spacedList`,
+			`${toolbarCSSPrefix}nonbutton-controls-main-list`,
 		);
 		const fontRow = document.createElement('div');
 		const colorRow = document.createElement('div');
@@ -47,8 +52,10 @@ export default class TextToolWidget extends BaseToolWidget {
 		const sizeLabel = document.createElement('label');
 
 		const {
-			input: colorInput, container: colorInputContainer, setValue: setColorInputValue
-		} = makeColorInput(this.editor, color => {
+			input: colorInput,
+			container: colorInputContainer,
+			setValue: setColorInputValue,
+		} = makeColorInput(this.editor, (color) => {
 			this.tool.setColor(color);
 		});
 		const colorLabel = document.createElement('label');
@@ -135,15 +142,15 @@ export default class TextToolWidget extends BaseToolWidget {
 	}
 
 	public override deserializeFrom(state: SavedToolbuttonState) {
-		if (state.fontFamily && typeof(state.fontFamily) === 'string') {
+		if (state.fontFamily && typeof state.fontFamily === 'string') {
 			this.tool.setFontFamily(state.fontFamily);
 		}
 
-		if (state.color && typeof(state.color) === 'string') {
+		if (state.color && typeof state.color === 'string') {
 			this.tool.setColor(Color4.fromHex(state.color));
 		}
 
-		if (state.textSize && typeof(state.textSize) === 'number') {
+		if (state.textSize && typeof state.textSize === 'number') {
 			this.tool.setFontSize(state.textSize);
 		}
 

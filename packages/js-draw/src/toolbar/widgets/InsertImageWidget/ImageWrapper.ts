@@ -1,4 +1,4 @@
-import { RenderableImage } from 'js-draw/src/rendering/renderers/AbstractRenderer';
+import { RenderableImage } from '../../../rendering/renderers/AbstractRenderer';
 
 /** Handles filtering and other operations on an image. */
 export class ImageWrapper {
@@ -8,7 +8,7 @@ export class ImageWrapper {
 	private constructor(
 		private imageBase64Url: string,
 		private preview: HTMLImageElement,
-		private onUrlUpdate: ()=>void,
+		private onUrlUpdate: () => void,
 	) {
 		this.originalSrc = imageBase64Url;
 		preview.src = imageBase64Url;
@@ -20,7 +20,7 @@ export class ImageWrapper {
 		this.onUrlUpdate();
 	}
 
-	public decreaseSize(resizeFactor: number = 3/4) {
+	public decreaseSize(resizeFactor: number = 3 / 4) {
 		const canvas = document.createElement('canvas');
 
 		canvas.width = this.preview.naturalWidth * resizeFactor;
@@ -31,8 +31,7 @@ export class ImageWrapper {
 
 		// JPEG can be much smaller than PNG for the same image size. Prefer it if
 		// the image is already a JPEG.
-		const format =
-			this.originalSrc?.startsWith('data:image/jpeg;') ? 'image/jpeg' : 'image/png';
+		const format = this.originalSrc?.startsWith('data:image/jpeg;') ? 'image/jpeg' : 'image/png';
 		this.updateImageData(canvas.toDataURL(format));
 	}
 
@@ -67,15 +66,12 @@ export class ImageWrapper {
 	public static fromSrcAndPreview(
 		initialBase64Src: string,
 		preview: HTMLImageElement,
-		onUrlUpdate: ()=>void,
+		onUrlUpdate: () => void,
 	) {
 		return new ImageWrapper(initialBase64Src, preview, onUrlUpdate);
 	}
 
-	public static fromRenderable(
-		renderable: RenderableImage,
-		onUrlUpdate: ()=>void,
-	) {
+	public static fromRenderable(renderable: RenderableImage, onUrlUpdate: () => void) {
 		const preview = new Image();
 		preview.src = renderable.base64Url;
 		const result = new ImageWrapper(renderable.base64Url, preview, onUrlUpdate);

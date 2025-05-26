@@ -31,8 +31,8 @@ describe('Editor.toSVGAsync', () => {
 		await loadTestImage(editor, numTotalPaths);
 
 		const svg = await editor.toSVGAsync({
-			onProgress: async (componentIndex) => {
-				return componentIndex <= 250;
+			onProgress: (componentIndex) => {
+				return Promise.resolve(componentIndex <= 250);
 			},
 		});
 
@@ -42,7 +42,6 @@ describe('Editor.toSVGAsync', () => {
 
 	it('should have same output as toSVG', async () => {
 		const editor = createEditor();
-
 
 		// Needed to evaluate requestAnimationFrame/setTimeout delays in toSVGAsync
 		jest.useRealTimers();
@@ -59,4 +58,3 @@ describe('Editor.toSVGAsync', () => {
 		expect(asyncSVG.outerHTML).toBe(syncSVG.outerHTML);
 	});
 });
-

@@ -9,7 +9,7 @@ import { CacheProps, CacheState } from './types';
 export default class RenderingCache {
 	private sharedState: CacheState;
 	private recordManager: CacheRecordManager;
-	private rootNode: RenderingCacheNode|null;
+	private rootNode: RenderingCacheNode | null;
 
 	public constructor(cacheProps: CacheProps) {
 		this.recordManager = new CacheRecordManager(cacheProps);
@@ -24,7 +24,7 @@ export default class RenderingCache {
 
 	public render(screenRenderer: AbstractRenderer, image: ImageNode, viewport: Viewport) {
 		const visibleRect = viewport.visibleRect;
-		this.sharedState.currentRenderingCycle ++;
+		this.sharedState.currentRenderingCycle++;
 
 		// If we can't use the cache,
 		if (!this.sharedState.props.isOfCorrectType(screenRenderer)) {
@@ -39,7 +39,7 @@ export default class RenderingCache {
 			const topLeft = visibleRect.topLeft;
 			this.rootNode = new RenderingCacheNode(
 				new Rect2(topLeft.x, topLeft.y, res.x, res.y),
-				this.sharedState
+				this.sharedState,
 			);
 		}
 
@@ -49,8 +49,8 @@ export default class RenderingCache {
 
 		this.rootNode = this.rootNode.smallestChildContaining(visibleRect) ?? this.rootNode;
 
-		const visibleLeaves = image.getLeavesIntersectingRegion(
-			viewport.visibleRect, rect => screenRenderer.isTooSmallToRender(rect)
+		const visibleLeaves = image.getLeavesIntersectingRegion(viewport.visibleRect, (rect) =>
+			screenRenderer.isTooSmallToRender(rect),
 		);
 
 		let approxVisibleRenderTime = 0;
@@ -59,7 +59,7 @@ export default class RenderingCache {
 		}
 
 		if (approxVisibleRenderTime > this.sharedState.props.minProportionalRenderTimeToUseCache) {
-			this.rootNode.renderItems(screenRenderer, [ image ], viewport);
+			this.rootNode.renderItems(screenRenderer, [image], viewport);
 		} else {
 			image.render(screenRenderer, visibleRect);
 		}

@@ -5,30 +5,27 @@ import 'js-draw/styles';
 (window as any).defaultEditorLocalization = defaultEditorLocalization;
 
 const generateTranslationScript = (input: string) => {
-	const data: Record<string, string> = {};
+	const data = new Map<string, string>();
 
 	const lines = input.split('\n');
 
-	let nextKey: string|null = null;
-	for (let i = 0; i < lines.length; i ++) {
+	let nextKey: string | null = null;
+	for (let i = 0; i < lines.length; i++) {
 		let line = lines[i];
-		if (!nextKey) {
+		if (line.startsWith('### ')) {
 			nextKey = line.replace(/^###\s*/, '');
 			continue;
-		} else if (line.trim() === '') {
-			continue;
 		}
+		if (!nextKey || !line.trim()) continue;
 
 		let value = line;
-		const currentKey = nextKey;
-		nextKey = null;
 
 		// Handle markdown-format line blocks
-		if (value === '```shell') {
+		if (line === '```shell') {
 			const valueLines = [];
 
 			i++;
-			for (; i < lines.length; i ++) {
+			for (; i < lines.length; i++) {
 				line = lines[i];
 				if (line === '```') {
 					break;
@@ -40,22 +37,32 @@ const generateTranslationScript = (input: string) => {
 			value = valueLines.join('\n');
 		}
 
-		if (value.replace(/^[_](.*)[_]$/, '$1') !== 'No response') {
-			data[currentKey] = value;
+		if (value && value.replace(/^[_](.*)[_]$/, '$1') !== 'No response') {
+			data.set(nextKey, value);
+			nextKey = null;
 		}
 	}
 
-	const lang = data.Language;
-	delete data.Language;
+	const lang = data.get('Language');
+	data.delete('Language');
+
+	// Remove entries matching the defaults
+	for (const [key, value] of Object.entries(defaultEditorLocalization)) {
+		if (!data.has(key)) continue;
+		const stringValue = `${value}`;
+		const stringValueDifferentQuotes = stringValue.replace(/"/g, "'");
+		if (data.get(key) === stringValue || data.get(key) === stringValueDifferentQuotes) {
+			data.delete(key);
+		}
+	}
 
 	const translationLines: string[] = [];
-	for (let key in data) {
-		key = key.replace(/[^0-9a-zA-Z_]/g, '?');
+	for (let [key, value] of data) {
+		key = key.replace(/[^0-9a-zA-Z_]/g, '_');
 		if (key.startsWith('_')) {
 			throw new Error('Invalid key, ' + key);
 		}
 
-		let value = data[key];
 		if (!value.match(/^(?:function|\(.*=>)/)) {
 			value = JSON.stringify(value);
 		}
@@ -63,10 +70,11 @@ const generateTranslationScript = (input: string) => {
 		translationLines.push(`\t${key}: ${value},`);
 	}
 
-	const warningLine = 'console.warn(\'This file needs to be manually verified -- translations can contain JavaScript\');';
+	const warningLine =
+		"console.warn('This file needs to be manually verified -- translations can contain JavaScript');";
 
 	const tsFileData = [
-		'import { defaultEditorLocalization, EditorLocalization } from \'../localization\';',
+		"import { defaultEditorLocalization, EditorLocalization } from '../localization';",
 		'',
 		warningLine,
 		`// ${lang} localization`,
@@ -78,17 +86,35 @@ const generateTranslationScript = (input: string) => {
 		'export default localization;',
 	];
 
-	const jsFileData = [
-		'({',
-		'\t...defaultEditorLocalization,',
-		...translationLines,
-		'})',
-	];
+	const jsFileData = ['({', '\t...defaultEditorLocalization,', ...translationLines, '})'];
 
 	return {
 		ts: tsFileData.join('\n'),
 		js: jsFileData.join('\n'),
 	};
+};
+
+const htmlToMarkdown = (html: string) => {
+	const dom = new DOMParser().parseFromString(
+		`<!DOCTYPE html><html><body>${html}</body></html>`,
+		'text/html',
+	);
+	const headers = dom.querySelectorAll('h1, h2, h3, h4, h5');
+
+	// Header markup
+	for (const header of headers) {
+		const headerLevel = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].indexOf(header.tagName) + 1;
+		header.prepend('\n', '#'.repeat(headerLevel) + ' ');
+		header.append('\n');
+	}
+
+	// Code markup
+	const codeBlocks = dom.querySelectorAll('pre');
+	for (const block of codeBlocks) {
+		block.prepend('```shell\n', document.createElement('br'));
+		block.append(document.createElement('br'), '\n```');
+	}
+	return dom.body.textContent ?? '';
 };
 
 const main = () => {
@@ -120,6 +146,24 @@ const main = () => {
 		updateTranslations();
 	};
 
+	const insertText = (text: string) => {
+		const sliceText = (from: number, to: number) => translationInput.value.substring(from, to);
+		translationInput.value =
+			sliceText(0, translationInput.selectionStart) +
+			text +
+			sliceText(translationInput.selectionEnd, translationInput.value.length);
+	};
+
+	translationInput.onpaste = (event) => {
+		// Convert HTML to Markdown
+		const htmlData = event.clipboardData?.getData('text/html');
+		if (htmlData) {
+			insertText(htmlToMarkdown(htmlData));
+			updateTranslations();
+			event.preventDefault();
+		}
+	};
+
 	submitButton.onclick = () => {
 		let translations: any = undefined;
 		try {
@@ -141,7 +185,6 @@ const main = () => {
 
 		editor.addToolbar();
 	};
-
 };
 
 main();

@@ -11,6 +11,7 @@ import Parameterized2DShape from './Parameterized2DShape';
 import BezierJSWrapper from './BezierJSWrapper';
 import convexHull2Of from '../utils/convexHull2Of';
 
+/** Identifiers for different path commands. These commands can make up a {@link Path}. */
 export enum PathCommandType {
 	LineTo,
 	MoveTo,
@@ -41,7 +42,11 @@ export interface MoveToPathCommand {
 	point: Point2;
 }
 
-export type PathCommand = CubicBezierPathCommand | QuadraticBezierPathCommand | MoveToPathCommand | LinePathCommand;
+export type PathCommand =
+	| CubicBezierPathCommand
+	| QuadraticBezierPathCommand
+	| MoveToPathCommand
+	| LinePathCommand;
 
 export interface IntersectionResult {
 	// @internal
@@ -62,7 +67,7 @@ export interface PathSplitOptions {
 	 * Allows mapping points on newly added segments. This is useful, for example,
 	 * to round points to prevent long decimals when later saving.
 	 */
-	mapNewPoint?: (point: Point2)=>Point2;
+	mapNewPoint?: (point: Point2) => Point2;
 }
 
 /**
@@ -182,7 +187,7 @@ export class Path {
 		return Rect2.union(...bboxes);
 	}
 
-	private cachedGeometry: Parameterized2DShape[]|null = null;
+	private cachedGeometry: Parameterized2DShape[] | null = null;
 
 	// Lazy-loads and returns this path's geometry
 	public get geometry(): Parameterized2DShape[] {
@@ -197,35 +202,27 @@ export class Path {
 			let exhaustivenessCheck: never;
 
 			switch (part.kind) {
-			case PathCommandType.CubicBezierTo:
-				geometry.push(
-					new CubicBezier(
-						startPoint, part.controlPoint1, part.controlPoint2, part.endPoint
-					)
-				);
-				startPoint = part.endPoint;
-				break;
-			case PathCommandType.QuadraticBezierTo:
-				geometry.push(
-					new QuadraticBezier(
-						startPoint, part.controlPoint, part.endPoint
-					)
-				);
-				startPoint = part.endPoint;
-				break;
-			case PathCommandType.LineTo:
-				geometry.push(
-					new LineSegment2(startPoint, part.point)
-				);
-				startPoint = part.point;
-				break;
-			case PathCommandType.MoveTo:
-				geometry.push(new PointShape2D(part.point));
-				startPoint = part.point;
-				break;
-			default:
-				exhaustivenessCheck = part;
-				return exhaustivenessCheck;
+				case PathCommandType.CubicBezierTo:
+					geometry.push(
+						new CubicBezier(startPoint, part.controlPoint1, part.controlPoint2, part.endPoint),
+					);
+					startPoint = part.endPoint;
+					break;
+				case PathCommandType.QuadraticBezierTo:
+					geometry.push(new QuadraticBezier(startPoint, part.controlPoint, part.endPoint));
+					startPoint = part.endPoint;
+					break;
+				case PathCommandType.LineTo:
+					geometry.push(new LineSegment2(startPoint, part.point));
+					startPoint = part.point;
+					break;
+				case PathCommandType.MoveTo:
+					geometry.push(new PointShape2D(part.point));
+					startPoint = part.point;
+					break;
+				default:
+					exhaustivenessCheck = part;
+					return exhaustivenessCheck;
 			}
 		}
 
@@ -246,26 +243,26 @@ export class Path {
 			let exhaustivenessCheck: never;
 
 			switch (part.kind) {
-			case PathCommandType.CubicBezierTo:
-				yield part.endPoint;
-				break;
-			case PathCommandType.QuadraticBezierTo:
-				yield part.endPoint;
-				break;
-			case PathCommandType.LineTo:
-				yield part.point;
-				break;
-			case PathCommandType.MoveTo:
-				yield part.point;
-				break;
-			default:
-				exhaustivenessCheck = part;
-				return exhaustivenessCheck;
+				case PathCommandType.CubicBezierTo:
+					yield part.endPoint;
+					break;
+				case PathCommandType.QuadraticBezierTo:
+					yield part.endPoint;
+					break;
+				case PathCommandType.LineTo:
+					yield part.point;
+					break;
+				case PathCommandType.MoveTo:
+					yield part.point;
+					break;
+				default:
+					exhaustivenessCheck = part;
+					return exhaustivenessCheck;
 			}
 		}
 	}
 
-	private cachedPolylineApproximation: LineSegment2[]|null = null;
+	private cachedPolylineApproximation: LineSegment2[] | null = null;
 
 	// Approximates this path with a group of line segments.
 	public polylineApproximation(): LineSegment2[] {
@@ -277,16 +274,16 @@ export class Path {
 
 		for (const part of this.parts) {
 			switch (part.kind) {
-			case PathCommandType.CubicBezierTo:
-				points.push(part.controlPoint1, part.controlPoint2, part.endPoint);
-				break;
-			case PathCommandType.QuadraticBezierTo:
-				points.push(part.controlPoint, part.endPoint);
-				break;
-			case PathCommandType.MoveTo:
-			case PathCommandType.LineTo:
-				points.push(part.point);
-				break;
+				case PathCommandType.CubicBezierTo:
+					points.push(part.controlPoint1, part.controlPoint2, part.endPoint);
+					break;
+				case PathCommandType.QuadraticBezierTo:
+					points.push(part.controlPoint, part.endPoint);
+					break;
+				case PathCommandType.MoveTo:
+				case PathCommandType.LineTo:
+					points.push(part.point);
+					break;
 			}
 		}
 
@@ -304,19 +301,19 @@ export class Path {
 		const points = [startPoint];
 		let exhaustivenessCheck: never;
 		switch (part.kind) {
-		case PathCommandType.MoveTo:
-		case PathCommandType.LineTo:
-			points.push(part.point);
-			break;
-		case PathCommandType.CubicBezierTo:
-			points.push(part.controlPoint1, part.controlPoint2, part.endPoint);
-			break;
-		case PathCommandType.QuadraticBezierTo:
-			points.push(part.controlPoint, part.endPoint);
-			break;
-		default:
-			exhaustivenessCheck = part;
-			return exhaustivenessCheck;
+			case PathCommandType.MoveTo:
+			case PathCommandType.LineTo:
+				points.push(part.point);
+				break;
+			case PathCommandType.CubicBezierTo:
+				points.push(part.controlPoint1, part.controlPoint2, part.endPoint);
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				points.push(part.controlPoint, part.endPoint);
+				break;
+			default:
+				exhaustivenessCheck = part;
+				return exhaustivenessCheck;
 		}
 
 		return Rect2.bboxOf(points);
@@ -356,7 +353,9 @@ export class Path {
 	 * 	        both end points of `line` and each point in `additionalRaymarchStartPoints`.
 	 */
 	private raymarchIntersectionWith(
-		line: LineSegment2, strokeRadius: number, additionalRaymarchStartPoints: Point2[] = []
+		line: LineSegment2,
+		strokeRadius: number,
+		additionalRaymarchStartPoints: Point2[] = [],
 	): IntersectionResult[] {
 		// No intersection between bounding boxes: No possible intersection
 		// of the interior.
@@ -368,9 +367,9 @@ export class Path {
 
 		type DistanceFunction = (point: Point2) => number;
 		type DistanceFunctionRecord = {
-			part: Parameterized2DShape,
-			bbox: Rect2,
-			distFn: DistanceFunction,
+			part: Parameterized2DShape;
+			bbox: Rect2;
+			distFn: DistanceFunction;
 		};
 		const partDistFunctionRecords: DistanceFunctionRecord[] = [];
 
@@ -407,9 +406,9 @@ export class Path {
 
 		// Returns the minimum distance to a part in this stroke, where only parts that the given
 		// line could intersect are considered.
-		const sdf = (point: Point2): [Parameterized2DShape|null, number] => {
+		const sdf = (point: Point2): [Parameterized2DShape | null, number] => {
 			let minDist = Infinity;
-			let minDistPart: Parameterized2DShape|null = null;
+			let minDistPart: Parameterized2DShape | null = null;
 
 			const uncheckedDistFunctions: DistanceFunctionRecord[] = [];
 
@@ -448,18 +447,15 @@ export class Path {
 				}
 			}
 
-			return [ minDistPart, minDist - strokeRadius ];
+			return [minDistPart, minDist - strokeRadius];
 		};
-
 
 		// Raymarch:
 		const maxRaymarchSteps = 8;
 
 		// Start raymarching from each of these points. This allows detection of multiple
 		// intersections.
-		const startPoints = [
-			line.p1, ...additionalRaymarchStartPoints, line.p2
-		];
+		const startPoints = [line.p1, ...additionalRaymarchStartPoints, line.p2];
 
 		// Converts a point ON THE LINE to a parameter
 		const pointToParameter = (point: Point2) => {
@@ -491,12 +487,12 @@ export class Path {
 			startPoint: Point2,
 
 			// Direction to march in (multiplies line.direction)
-			directionMultiplier: -1|1,
+			directionMultiplier: -1 | 1,
 
 			// Terminate if the current point corresponds to a parameter
 			// below this.
 			minimumLineParameter: number,
-		): number|null => {
+		): number | null => {
 			let currentPoint = startPoint;
 			let [lastPart, lastDist] = sdf(currentPoint);
 			let lastParameter = pointToParameter(currentPoint);
@@ -594,7 +590,9 @@ export class Path {
 		}
 
 		if (this.parts.length === 0) {
-			return new Path(this.startPoint, [{ kind: PathCommandType.MoveTo, point: this.startPoint }]).intersection(line, strokeRadius);
+			return new Path(this.startPoint, [
+				{ kind: PathCommandType.MoveTo, point: this.startPoint },
+			]).intersection(line, strokeRadius);
 		}
 
 		let index = 0;
@@ -610,7 +608,7 @@ export class Path {
 				});
 			}
 
-			index ++;
+			index++;
 		}
 
 		// If given a non-zero strokeWidth, attempt to raymarch.
@@ -619,7 +617,7 @@ export class Path {
 		const doRaymarching = strokeRadius && strokeRadius > 1e-8;
 		if (doRaymarching) {
 			// Starting points for raymarching (in addition to the end points of the line).
-			const startPoints = result.map(intersection => intersection.point);
+			const startPoints = result.map((intersection) => intersection.point);
 			result = this.raymarchIntersectionWith(line, strokeRadius, startPoints);
 		}
 
@@ -678,9 +676,17 @@ export class Path {
 	 *
 	 * This method is analogous to {@link Array.toSpliced}.
 	 */
-	public spliced(deleteFrom: CurveIndexRecord, deleteTo: CurveIndexRecord, insert: Path|undefined, options?: PathSplitOptions): Path {
+	public spliced(
+		deleteFrom: CurveIndexRecord,
+		deleteTo: CurveIndexRecord,
+		insert: Path | undefined,
+		options?: PathSplitOptions,
+	): Path {
 		const isBeforeOrEqual = (a: CurveIndexRecord, b: CurveIndexRecord) => {
-			return a.curveIndex < b.curveIndex || (a.curveIndex === b.curveIndex && a.parameterValue <= b.parameterValue);
+			return (
+				a.curveIndex < b.curveIndex ||
+				(a.curveIndex === b.curveIndex && a.parameterValue <= b.parameterValue)
+			);
 		};
 
 		if (isBeforeOrEqual(deleteFrom, deleteTo)) {
@@ -711,11 +717,14 @@ export class Path {
 		}
 	}
 
-	public splitAt(at: CurveIndexRecord, options?: PathSplitOptions): [Path]|[Path, Path];
+	public splitAt(at: CurveIndexRecord, options?: PathSplitOptions): [Path] | [Path, Path];
 	public splitAt(at: CurveIndexRecord[], options?: PathSplitOptions): Path[];
 
 	// @internal
-	public splitAt(splitAt: CurveIndexRecord[]|CurveIndexRecord, options?: PathSplitOptions): Path[] {
+	public splitAt(
+		splitAt: CurveIndexRecord[] | CurveIndexRecord,
+		options?: PathSplitOptions,
+	): Path[] {
 		if (!Array.isArray(splitAt)) {
 			splitAt = [splitAt];
 		}
@@ -728,9 +737,9 @@ export class Path {
 		//
 
 		while (
-			splitAt.length > 0
-			&& splitAt[splitAt.length - 1].curveIndex >= this.parts.length - 1
-			&& splitAt[splitAt.length - 1].parameterValue >= 1
+			splitAt.length > 0 &&
+			splitAt[splitAt.length - 1].curveIndex >= this.parts.length - 1 &&
+			splitAt[splitAt.length - 1].parameterValue >= 1
 		) {
 			splitAt.pop();
 		}
@@ -738,9 +747,9 @@ export class Path {
 		splitAt.reverse(); // .reverse() <-- We're `.pop`ing from the end
 
 		while (
-			splitAt.length > 0
-			&& splitAt[splitAt.length - 1].curveIndex <= 0
-			&& splitAt[splitAt.length - 1].parameterValue <= 0
+			splitAt.length > 0 &&
+			splitAt[splitAt.length - 1].curveIndex <= 0 &&
+			splitAt[splitAt.length - 1].parameterValue <= 0
 		) {
 			splitAt.pop();
 		}
@@ -750,7 +759,7 @@ export class Path {
 		}
 
 		const expectedSplitCount = splitAt.length + 1;
-		const mapNewPoint = options?.mapNewPoint ?? ((p: Point2)=>p);
+		const mapNewPoint = options?.mapNewPoint ?? ((p: Point2) => p);
 
 		const result: Path[] = [];
 		let currentStartPoint = this.startPoint;
@@ -762,7 +771,7 @@ export class Path {
 
 		let { curveIndex, parameterValue } = splitAt.pop()!;
 
-		for (let i = 0; i < this.parts.length; i ++) {
+		for (let i = 0; i < this.parts.length; i++) {
 			if (i !== curveIndex) {
 				currentPath.push(this.parts[i]);
 			} else {
@@ -773,71 +782,71 @@ export class Path {
 					const newPath: PathCommand[] = [];
 
 					switch (part.kind) {
-					case PathCommandType.MoveTo:
-						currentPath.push({
-							kind: part.kind,
-							point: part.point,
-						});
-						newPathStart = part.point;
-						break;
-					case PathCommandType.LineTo:
-						{
-							const split = (geom as LineSegment2).splitAt(parameterValue);
+						case PathCommandType.MoveTo:
 							currentPath.push({
 								kind: part.kind,
-								point: mapNewPoint(split[0].p2),
+								point: part.point,
 							});
-							newPathStart = split[0].p2;
-							if (split.length > 1) {
-								console.assert(split.length === 2);
-								newPath.push({
+							newPathStart = part.point;
+							break;
+						case PathCommandType.LineTo:
+							{
+								const split = (geom as LineSegment2).splitAt(parameterValue);
+								currentPath.push({
 									kind: part.kind,
-
-									// Don't map: For lines, the end point of the split is
-									// the same as the end point of the original:
-									point: split[1]!.p2,
+									point: mapNewPoint(split[0].p2),
 								});
-								geom = split[1]!;
-							}
-						}
-						break;
-					case PathCommandType.QuadraticBezierTo:
-					case PathCommandType.CubicBezierTo:
-						{
-							const split = (geom as BezierJSWrapper).splitAt(parameterValue);
-							let isFirstPart = split.length === 2;
-							for (const segment of split) {
-								geom = segment;
-								const targetArray = isFirstPart ? currentPath : newPath;
-								const controlPoints = segment.getPoints();
-								if (part.kind === PathCommandType.CubicBezierTo) {
-									targetArray.push({
+								newPathStart = split[0].p2;
+								if (split.length > 1) {
+									console.assert(split.length === 2);
+									newPath.push({
 										kind: part.kind,
-										controlPoint1: mapNewPoint(controlPoints[1]),
-										controlPoint2: mapNewPoint(controlPoints[2]),
-										endPoint: mapNewPoint(controlPoints[3]),
-									});
-								} else {
-									targetArray.push({
-										kind: part.kind,
-										controlPoint: mapNewPoint(controlPoints[1]),
-										endPoint: mapNewPoint(controlPoints[2]),
-									});
-								}
 
-								// We want the start of the new path to match the start of the
-								// FIRST Bézier in the NEW path.
-								if (!isFirstPart) {
-									newPathStart = controlPoints[0];
+										// Don't map: For lines, the end point of the split is
+										// the same as the end point of the original:
+										point: split[1]!.p2,
+									});
+									geom = split[1]!;
 								}
-								isFirstPart = false;
 							}
+							break;
+						case PathCommandType.QuadraticBezierTo:
+						case PathCommandType.CubicBezierTo:
+							{
+								const split = (geom as BezierJSWrapper).splitAt(parameterValue);
+								let isFirstPart = split.length === 2;
+								for (const segment of split) {
+									geom = segment;
+									const targetArray = isFirstPart ? currentPath : newPath;
+									const controlPoints = segment.getPoints();
+									if (part.kind === PathCommandType.CubicBezierTo) {
+										targetArray.push({
+											kind: part.kind,
+											controlPoint1: mapNewPoint(controlPoints[1]),
+											controlPoint2: mapNewPoint(controlPoints[2]),
+											endPoint: mapNewPoint(controlPoints[3]),
+										});
+									} else {
+										targetArray.push({
+											kind: part.kind,
+											controlPoint: mapNewPoint(controlPoints[1]),
+											endPoint: mapNewPoint(controlPoints[2]),
+										});
+									}
+
+									// We want the start of the new path to match the start of the
+									// FIRST Bézier in the NEW path.
+									if (!isFirstPart) {
+										newPathStart = controlPoints[0];
+									}
+									isFirstPart = false;
+								}
+							}
+							break;
+						default: {
+							const exhaustivenessCheck: never = part;
+							return exhaustivenessCheck;
 						}
-						break;
-					default: {
-						const exhaustivenessCheck: never = part;
-						return exhaustivenessCheck;
-					}
 					}
 
 					result.push(new Path(currentStartPoint, [...currentPath]));
@@ -867,7 +876,7 @@ export class Path {
 
 		console.assert(
 			result.length === expectedSplitCount,
-			`should split into splitAt.length + 1 splits (was ${result.length}, expected ${expectedSplitCount})`
+			`should split into splitAt.length + 1 splits (was ${result.length}, expected ${expectedSplitCount})`,
 		);
 		return result;
 	}
@@ -907,37 +916,40 @@ export class Path {
 		return result;
 	}
 
-	private static mapPathCommand(part: PathCommand, mapping: (point: Point2)=> Point2): PathCommand {
+	private static mapPathCommand(
+		part: PathCommand,
+		mapping: (point: Point2) => Point2,
+	): PathCommand {
 		switch (part.kind) {
-		case PathCommandType.MoveTo:
-		case PathCommandType.LineTo:
-			return {
-				kind: part.kind,
-				point: mapping(part.point),
-			};
-			break;
-		case PathCommandType.CubicBezierTo:
-			return {
-				kind: part.kind,
-				controlPoint1: mapping(part.controlPoint1),
-				controlPoint2: mapping(part.controlPoint2),
-				endPoint: mapping(part.endPoint),
-			};
-			break;
-		case PathCommandType.QuadraticBezierTo:
-			return {
-				kind: part.kind,
-				controlPoint: mapping(part.controlPoint),
-				endPoint: mapping(part.endPoint),
-			};
-			break;
+			case PathCommandType.MoveTo:
+			case PathCommandType.LineTo:
+				return {
+					kind: part.kind,
+					point: mapping(part.point),
+				};
+				break;
+			case PathCommandType.CubicBezierTo:
+				return {
+					kind: part.kind,
+					controlPoint1: mapping(part.controlPoint1),
+					controlPoint2: mapping(part.controlPoint2),
+					endPoint: mapping(part.endPoint),
+				};
+				break;
+			case PathCommandType.QuadraticBezierTo:
+				return {
+					kind: part.kind,
+					controlPoint: mapping(part.controlPoint),
+					endPoint: mapping(part.endPoint),
+				};
+				break;
 		}
 
 		const exhaustivenessCheck: never = part;
 		return exhaustivenessCheck;
 	}
 
-	public mapPoints(mapping: (point: Point2)=>Point2): Path {
+	public mapPoints(mapping: (point: Point2) => Point2): Path {
 		const startPoint = mapping(this.startPoint);
 		const newParts: PathCommand[] = [];
 
@@ -953,11 +965,11 @@ export class Path {
 			return this;
 		}
 
-		return this.mapPoints(point => affineTransfm.transformVec2(point));
+		return this.mapPoints((point) => affineTransfm.transformVec2(point));
 	}
 
 	/**
-	 * @internal
+	 * @internal -- TODO: This method may have incorrect output in some cases.
 	 */
 	public closedContainsPoint(point: Point2) {
 		const bbox = this.getExactBBox();
@@ -969,12 +981,37 @@ export class Path {
 		const asClosed = this.asClosed();
 
 		const lineToOutside = new LineSegment2(point, pointOutside);
-		return asClosed.intersection(lineToOutside).length % 2 === 1;
+
+		const intersections = asClosed.intersection(lineToOutside);
+		const filteredIntersections = intersections.filter((intersection, index) => {
+			if (index === 0) return true; // No previous
+			const previousIntersection = intersections[index - 1];
+			const isRepeatedIntersection =
+				previousIntersection.parameterValue >= 1 && intersection.parameterValue <= 0;
+			return !isRepeatedIntersection;
+		});
+		return filteredIntersections.length % 2 === 1;
+	}
+
+	/**
+	 * @returns `true` if this path (interpreted as a closed path) contains the given rectangle.
+	 */
+	public closedContainsRect(rect: Rect2) {
+		if (!this.bbox.containsRect(rect)) return false;
+		if (!rect.corners.every((corner) => this.closedContainsPoint(corner))) return false;
+
+		for (const edge of rect.getEdges()) {
+			if (this.intersection(edge).length) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	// Creates a new path by joining [other] to the end of this path
 	public union(
-		other: Path|PathCommand[]|null,
+		other: Path | PathCommand[] | null,
 
 		// allowReverse: true iff reversing other or this is permitted if it means
 		//               no moveTo command is necessary when unioning the paths.
@@ -1024,36 +1061,35 @@ export class Path {
 		let lastPoint: Point2 = this.startPoint;
 		for (const part of this.parts) {
 			switch (part.kind) {
-			case PathCommandType.LineTo:
-			case PathCommandType.MoveTo:
-				newParts.push({
-					kind: part.kind,
-					point: lastPoint,
-				});
-				lastPoint = part.point;
-				break;
-			case PathCommandType.CubicBezierTo:
-				newParts.push({
-					kind: part.kind,
-					controlPoint1: part.controlPoint2,
-					controlPoint2: part.controlPoint1,
-					endPoint: lastPoint,
-				});
-				lastPoint = part.endPoint;
-				break;
-			case PathCommandType.QuadraticBezierTo:
-				newParts.push({
-					kind: part.kind,
-					controlPoint: part.controlPoint,
-					endPoint: lastPoint,
-				});
-				lastPoint = part.endPoint;
-				break;
-			default:
-			{
-				const exhaustivenessCheck: never = part;
-				return exhaustivenessCheck;
-			}
+				case PathCommandType.LineTo:
+				case PathCommandType.MoveTo:
+					newParts.push({
+						kind: part.kind,
+						point: lastPoint,
+					});
+					lastPoint = part.point;
+					break;
+				case PathCommandType.CubicBezierTo:
+					newParts.push({
+						kind: part.kind,
+						controlPoint1: part.controlPoint2,
+						controlPoint2: part.controlPoint1,
+						endPoint: lastPoint,
+					});
+					lastPoint = part.endPoint;
+					break;
+				case PathCommandType.QuadraticBezierTo:
+					newParts.push({
+						kind: part.kind,
+						controlPoint: part.controlPoint,
+						endPoint: lastPoint,
+					});
+					lastPoint = part.endPoint;
+					break;
+				default: {
+					const exhaustivenessCheck: never = part;
+					return exhaustivenessCheck;
+				}
 			}
 		}
 		newParts.reverse();
@@ -1066,7 +1102,10 @@ export class Path {
 			return this.startPoint;
 		}
 		const lastPart = this.parts[this.parts.length - 1];
-		if (lastPart.kind === PathCommandType.QuadraticBezierTo || lastPart.kind === PathCommandType.CubicBezierTo) {
+		if (
+			lastPart.kind === PathCommandType.QuadraticBezierTo ||
+			lastPart.kind === PathCommandType.CubicBezierTo
+		) {
 			return lastPart.endPoint;
 		} else {
 			return lastPart.point;
@@ -1138,7 +1177,7 @@ export class Path {
 			let intersectionCount = 0;
 			for (const line of polygon) {
 				if (line.intersects(testLine)) {
-					intersectionCount ++;
+					intersectionCount++;
 				}
 			}
 
@@ -1178,40 +1217,39 @@ export class Path {
 			const part2 = other.parts[i];
 
 			switch (part1.kind) {
-			case PathCommandType.LineTo:
-			case PathCommandType.MoveTo:
-				if (part1.kind !== part2.kind) {
-					return false;
-				} else if(!part1.point.eq(part2.point, tolerance)) {
-					return false;
+				case PathCommandType.LineTo:
+				case PathCommandType.MoveTo:
+					if (part1.kind !== part2.kind) {
+						return false;
+					} else if (!part1.point.eq(part2.point, tolerance)) {
+						return false;
+					}
+					break;
+				case PathCommandType.CubicBezierTo:
+					if (part1.kind !== part2.kind) {
+						return false;
+					} else if (
+						!part1.controlPoint1.eq(part2.controlPoint1, tolerance) ||
+						!part1.controlPoint2.eq(part2.controlPoint2, tolerance) ||
+						!part1.endPoint.eq(part2.endPoint, tolerance)
+					) {
+						return false;
+					}
+					break;
+				case PathCommandType.QuadraticBezierTo:
+					if (part1.kind !== part2.kind) {
+						return false;
+					} else if (
+						!part1.controlPoint.eq(part2.controlPoint, tolerance) ||
+						!part1.endPoint.eq(part2.endPoint, tolerance)
+					) {
+						return false;
+					}
+					break;
+				default: {
+					const exhaustivenessCheck: never = part1;
+					return exhaustivenessCheck;
 				}
-				break;
-			case PathCommandType.CubicBezierTo:
-				if (part1.kind !== part2.kind) {
-					return false;
-				} else if (
-					!part1.controlPoint1.eq(part2.controlPoint1, tolerance)
-						|| !part1.controlPoint2.eq(part2.controlPoint2, tolerance)
-						|| !part1.endPoint.eq(part2.endPoint, tolerance)
-				) {
-					return false;
-				}
-				break;
-			case PathCommandType.QuadraticBezierTo:
-				if (part1.kind !== part2.kind) {
-					return false;
-				} else if (
-					!part1.controlPoint.eq(part2.controlPoint, tolerance)
-						|| !part1.endPoint.eq(part2.endPoint, tolerance)
-				) {
-					return false;
-				}
-				break;
-			default:
-			{
-				const exhaustivenessCheck: never = part1;
-				return exhaustivenessCheck;
-			}
 			}
 		}
 
@@ -1225,7 +1263,7 @@ export class Path {
 	 * border around `rect`. Otherwise, the resultant path is just the border
 	 * of `rect`.
 	 */
-	public static fromRect(rect: Rect2, lineWidth: number|null = null): Path {
+	public static fromRect(rect: Rect2, lineWidth: number | null = null): Path {
 		const commands: PathCommand[] = [];
 
 		let corners;
@@ -1237,18 +1275,14 @@ export class Path {
 			const cornerToEdge = Vec2.of(lineWidth, lineWidth).times(0.5);
 			const innerRect = Rect2.fromCorners(
 				rect.topLeft.plus(cornerToEdge),
-				rect.bottomRight.minus(cornerToEdge)
+				rect.bottomRight.minus(cornerToEdge),
 			);
 			const outerRect = Rect2.fromCorners(
 				rect.topLeft.minus(cornerToEdge),
-				rect.bottomRight.plus(cornerToEdge)
+				rect.bottomRight.plus(cornerToEdge),
 			);
 
-			corners = [
-				innerRect.corners[3],
-				...innerRect.corners,
-				...outerRect.corners.reverse(),
-			];
+			corners = [innerRect.corners[3], ...innerRect.corners, ...outerRect.corners.reverse()];
 			startPoint = outerRect.corners[3];
 		} else {
 			corners = rect.corners.slice(1);
@@ -1271,7 +1305,7 @@ export class Path {
 		return new Path(startPoint, commands);
 	}
 
-	private cachedStringVersion: string|null = null;
+	private cachedStringVersion: string | null = null;
 
 	/**
 	 * Convert to an [SVG path representation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths).
@@ -1302,10 +1336,14 @@ export class Path {
 
 	// @param onlyAbsCommands - True if we should avoid converting absolute coordinates to relative offsets -- such
 	//   conversions can lead to smaller output strings, but also take time.
-	public static toString(startPoint: Point2, parts: PathCommand[], onlyAbsCommands?: boolean): string {
+	public static toString(
+		startPoint: Point2,
+		parts: PathCommand[],
+		onlyAbsCommands?: boolean,
+	): string {
 		const result: string[] = [];
 
-		let prevPoint: Point2|undefined;
+		let prevPoint: Point2 | undefined;
 		const addCommand = (command: string, ...points: Point2[]) => {
 			const absoluteCommandParts: string[] = [];
 			const relativeCommandParts: string[] = [];
@@ -1319,8 +1357,18 @@ export class Path {
 
 				// Relative commands are often shorter as strings than absolute commands.
 				if (!makeAbsCommand) {
-					const xComponentRelative = toStringOfSamePrecision(point.x - prevPoint!.x, xComponent, roundedPrevX, roundedPrevY);
-					const yComponentRelative = toStringOfSamePrecision(point.y - prevPoint!.y, yComponent, roundedPrevX, roundedPrevY);
+					const xComponentRelative = toStringOfSamePrecision(
+						point.x - prevPoint!.x,
+						xComponent,
+						roundedPrevX,
+						roundedPrevY,
+					);
+					const yComponentRelative = toStringOfSamePrecision(
+						point.y - prevPoint!.y,
+						yComponent,
+						roundedPrevX,
+						roundedPrevY,
+					);
 
 					// No need for an additional separator if it starts with a '-'
 					if (yComponentRelative.charAt(0) === '-') {
@@ -1363,21 +1411,21 @@ export class Path {
 			const part = parts[i];
 
 			switch (part.kind) {
-			case PathCommandType.MoveTo:
-				addCommand('M', part.point);
-				break;
-			case PathCommandType.LineTo:
-				addCommand('L', part.point);
-				break;
-			case PathCommandType.CubicBezierTo:
-				addCommand('C', part.controlPoint1, part.controlPoint2, part.endPoint);
-				break;
-			case PathCommandType.QuadraticBezierTo:
-				addCommand('Q', part.controlPoint, part.endPoint);
-				break;
-			default:
-				exhaustivenessCheck = part;
-				return exhaustivenessCheck;
+				case PathCommandType.MoveTo:
+					addCommand('M', part.point);
+					break;
+				case PathCommandType.LineTo:
+					addCommand('L', part.point);
+					break;
+				case PathCommandType.CubicBezierTo:
+					addCommand('C', part.controlPoint1, part.controlPoint2, part.endPoint);
+					break;
+				case PathCommandType.QuadraticBezierTo:
+					addCommand('Q', part.controlPoint, part.endPoint);
+					break;
+				default:
+					exhaustivenessCheck = part;
+					return exhaustivenessCheck;
 			}
 		}
 
@@ -1410,11 +1458,10 @@ export class Path {
 		pathString = pathString.split('\n').join(' ');
 
 		let lastPos: Point2 = Vec2.zero;
-		let firstPos: Point2|null = null;
-		let startPos: Point2|null = null;
+		let firstPos: Point2 | null = null;
+		let startPos: Point2 | null = null;
 		let isFirstCommand: boolean = true;
 		const commands: PathCommand[] = [];
-
 
 		const moveTo = (point: Point2) => {
 			// The first moveTo/lineTo is already handled by the [startPoint] parameter of the Path constructor.
@@ -1455,36 +1502,38 @@ export class Path {
 			});
 		};
 		const commandArgCounts: Record<string, number> = {
-			'm': 1,
-			'l': 1,
-			'c': 3,
-			'q': 2,
-			'z': 0,
-			'h': 1,
-			'v': 1,
+			m: 1,
+			l: 1,
+			c: 3,
+			q: 2,
+			z: 0,
+			h: 1,
+			v: 1,
 		};
 
 		// Each command: Command character followed by anything that isn't a command character
-		const commandExp = /([MZLHVCSQTA])\s*([^MZLHVCSQTA]*)/ig;
+		const commandExp = /([MZLHVCSQTA])\s*([^MZLHVCSQTA]*)/gi;
 		let current;
 		while ((current = commandExp.exec(pathString)) !== null) {
-			const argParts = current[2].trim().split(/[^0-9Ee.-]/).filter(
-				part => part.length > 0
-			).reduce((accumualtor: string[], current: string): string[] => {
-				// As of 09/2022, iOS Safari doesn't support support lookbehind in regular
-				// expressions. As such, we need an alternative.
-				// Because '-' can be used as a path separator, unless preceeded by an 'e' (as in 1e-5),
-				// we need special cases:
-				current = current.replace(/([^eE])[-]/g, '$1 -');
-				const parts = current.split(' -');
-				if (parts[0] !== '') {
-					accumualtor.push(parts[0]);
-				}
-				accumualtor.push(...parts.slice(1).map(part => `-${part}`));
-				return accumualtor;
-			}, []);
+			const argParts = current[2]
+				.trim()
+				.split(/[^0-9Ee.-]/)
+				.filter((part) => part.length > 0)
+				.reduce((accumualtor: string[], current: string): string[] => {
+					// As of 09/2022, iOS Safari doesn't support support lookbehind in regular
+					// expressions. As such, we need an alternative.
+					// Because '-' can be used as a path separator, unless preceeded by an 'e' (as in 1e-5),
+					// we need special cases:
+					current = current.replace(/([^eE])[-]/g, '$1 -');
+					const parts = current.split(' -');
+					if (parts[0] !== '') {
+						accumualtor.push(parts[0]);
+					}
+					accumualtor.push(...parts.slice(1).map((part) => `-${part}`));
+					return accumualtor;
+				}, []);
 
-			let numericArgs = argParts.map(arg => parseFloat(arg));
+			let numericArgs = argParts.map((arg) => parseFloat(arg));
 
 			let commandChar = current[1].toLowerCase();
 			let uppercaseCommand = current[1] !== commandChar;
@@ -1501,7 +1550,7 @@ export class Path {
 				commandChar = 'l';
 			} else if (commandChar === 'z') {
 				if (firstPos) {
-					numericArgs = [ firstPos.x, firstPos.y ];
+					numericArgs = [firstPos.x, firstPos.y];
 					firstPos = lastPos;
 				} else {
 					continue;
@@ -1512,65 +1561,66 @@ export class Path {
 				commandChar = 'l';
 			}
 
-
 			const commandArgCount: number = commandArgCounts[commandChar] ?? 0;
-			const allArgs = numericArgs.reduce((
-				accumulator: Point2[], current, index, parts
-			): Point2[] => {
-				if (index % 2 !== 0) {
-					const currentAsFloat = current;
-					const prevAsFloat = parts[index - 1];
-					return accumulator.concat(Vec2.of(prevAsFloat, currentAsFloat));
-				} else {
-					return accumulator;
-				}
-			}, []).map((coordinate, index): Point2 => {
-				// Lowercase commands are relative, uppercase commands use absolute
-				// positioning
-				let newPos;
-				if (uppercaseCommand) {
-					newPos = coordinate;
-				} else {
-					newPos = lastPos.plus(coordinate);
-				}
+			const allArgs = numericArgs
+				.reduce((accumulator: Point2[], current, index, parts): Point2[] => {
+					if (index % 2 !== 0) {
+						const currentAsFloat = current;
+						const prevAsFloat = parts[index - 1];
+						return accumulator.concat(Vec2.of(prevAsFloat, currentAsFloat));
+					} else {
+						return accumulator;
+					}
+				}, [])
+				.map((coordinate, index): Point2 => {
+					// Lowercase commands are relative, uppercase commands use absolute
+					// positioning
+					let newPos;
+					if (uppercaseCommand) {
+						newPos = coordinate;
+					} else {
+						newPos = lastPos.plus(coordinate);
+					}
 
-				if ((index + 1) % commandArgCount === 0) {
-					lastPos = newPos;
-				}
+					if ((index + 1) % commandArgCount === 0) {
+						lastPos = newPos;
+					}
 
-				return newPos;
-			});
+					return newPos;
+				});
 
 			if (allArgs.length % commandArgCount !== 0) {
-				throw new Error([
-					`Incorrect number of arguments: got ${JSON.stringify(allArgs)} with a length of ${allArgs.length} ≠ ${commandArgCount}k, k ∈ ℤ.`,
-					`The number of arguments to ${commandChar} must be a multiple of ${commandArgCount}!`,
-					`Command: ${current[0]}`,
-				].join('\n'));
+				throw new Error(
+					[
+						`Incorrect number of arguments: got ${JSON.stringify(allArgs)} with a length of ${allArgs.length} ≠ ${commandArgCount}k, k ∈ ℤ.`,
+						`The number of arguments to ${commandChar} must be a multiple of ${commandArgCount}!`,
+						`Command: ${current[0]}`,
+					].join('\n'),
+				);
 			}
 
 			for (let argPos = 0; argPos < allArgs.length; argPos += commandArgCount) {
 				const args = allArgs.slice(argPos, argPos + commandArgCount);
 
 				switch (commandChar.toLowerCase()) {
-				case 'm':
-					if (argPos === 0) {
-						moveTo(args[0]);
-					} else {
+					case 'm':
+						if (argPos === 0) {
+							moveTo(args[0]);
+						} else {
+							lineTo(args[0]);
+						}
+						break;
+					case 'l':
 						lineTo(args[0]);
-					}
-					break;
-				case 'l':
-					lineTo(args[0]);
-					break;
-				case 'c':
-					cubicBezierTo(args[0], args[1], args[2]);
-					break;
-				case 'q':
-					quadraticBeierTo(args[0], args[1]);
-					break;
-				default:
-					throw new Error(`Unknown path command ${commandChar}`);
+						break;
+					case 'c':
+						cubicBezierTo(args[0], args[1], args[2]);
+						break;
+					case 'q':
+						quadraticBeierTo(args[0], args[1]);
+						break;
+					default:
+						throw new Error(`Unknown path command ${commandChar}`);
 				}
 
 				isFirstCommand = false;
@@ -1595,10 +1645,12 @@ export class Path {
 
 		const hull = convexHull2Of(points);
 
-		const commands = hull.slice(1).map((p): LinePathCommand => ({
-			kind: PathCommandType.LineTo,
-			point: p,
-		}));
+		const commands = hull.slice(1).map(
+			(p): LinePathCommand => ({
+				kind: PathCommandType.LineTo,
+				point: p,
+			}),
+		);
 		// Close -- connect back to the start
 		commands.push({
 			kind: PathCommandType.LineTo,

@@ -3,7 +3,7 @@ import addCodeMirrorEditor, { EditorLanguage } from './addCodeMirrorEditor';
 import typeScriptToJS from '../../typeScriptToJS';
 import loadIframePreviewScript from './loadIframePreviewScript';
 
-const editorContents: (()=>string)[] = [];
+const editorContents: (() => string)[] = [];
 
 /** Replaces the given `elementToReplace` with a runnable code area. */
 const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
@@ -12,7 +12,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	editorContainer.classList.add('runnable-code');
 
 	// Prevent TypeDoc from consuming the '/' key
-	editorContainer.onkeydown = event => {
+	editorContainer.onkeydown = (event) => {
 		if (event.key === '/') {
 			event.stopPropagation();
 		}
@@ -20,9 +20,10 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 	const languageCode = elementToReplace.getAttribute('data--lang') ?? 'ts';
 	const languageCodeToLanguage: Record<string, EditorLanguage> = {
-		'css': EditorLanguage.CSS,
-		'js': EditorLanguage.JavaScript,
-		'ts': EditorLanguage.TypeScript,
+		css: EditorLanguage.CSS,
+		js: EditorLanguage.JavaScript,
+		ts: EditorLanguage.TypeScript,
+		html: EditorLanguage.HTML,
 	};
 	const language = languageCodeToLanguage[languageCode] ?? EditorLanguage.TypeScript;
 
@@ -37,21 +38,20 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		// Beginning, capture, end
 		if (parts.length !== 3) {
-			throw new Error('Runnable CSS regions must contain exactly one ---html--- or ---js--- or ---ts--- separator (on its own line).');
+			throw new Error(
+				'Runnable CSS regions must contain exactly one ---html--- or ---js--- or ---ts--- separator (on its own line).',
+			);
 		}
 
 		initialEditorValue = parts[0];
 
 		if (parts[1] === 'html') {
 			bodyHTML = parts[2];
-		}
-		else if (parts[1] === 'js') {
+		} else if (parts[1] === 'js') {
 			defaultJS = parts[2];
-		}
-		else if (parts[1] === 'ts') {
+		} else if (parts[1] === 'ts') {
 			defaultJS = typeScriptToJS(parts[2]);
-		}
-		else {
+		} else {
 			throw new Error('Invalid state');
 		}
 	}
@@ -59,17 +59,13 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 	// Allow only part of the runnable content to be shown in the editor --
 	// the part after a ---visible--- line.
 	// The /s modifier allows . to match newlines. See https://stackoverflow.com/a/8303552
-	const hiddenContentMatch = /^(.*)[\n]---visible---[\n](.*)$/sg.exec(initialEditorValue);
+	const hiddenContentMatch = /^(.*)[\n]---visible---[\n](.*)$/gs.exec(initialEditorValue);
 
 	// invisibleContent won't be shown in the editor
 	const invisibleContent = hiddenContentMatch ? hiddenContentMatch[1] : '';
 	initialEditorValue = hiddenContentMatch ? hiddenContentMatch[2] : initialEditorValue;
 
-	const editor = addCodeMirrorEditor(
-		initialEditorValue,
-		editorContainer,
-		language,
-	);
+	const editor = addCodeMirrorEditor(initialEditorValue, editorContainer, language);
 
 	const controlsArea = document.createElement('div');
 	const runButton = document.createElement('button');
@@ -80,13 +76,15 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 	const editorIndex = editorContents.length;
 	const getPreprocessedEditorText = () => {
-		const preamble = (
+		const preamble =
 			// Support including the content of the previous editor (must be in the hidden editor
 			// content).
 			invisibleContent.includes('---use-previous---')
-				? invisibleContent.replace(/(?:[\n]|^)---use-previous---(?:[\n]|$)/g, editorContents[editorIndex - 1]())
-				: invisibleContent
-		);
+				? invisibleContent.replace(
+						/(?:[\n]|^)---use-previous---(?:[\n]|$)/g,
+						editorContents[editorIndex - 1](),
+					)
+				: invisibleContent;
 		return preamble + '\n' + editor.getText();
 	};
 	editorContents.push(getPreprocessedEditorText);
@@ -96,28 +94,27 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		let js = '';
 		let css = '';
+		let html = '';
 
 		if (language === EditorLanguage.TypeScript) {
 			js = typeScriptToJS(editorText);
-		}
-		else if (language === EditorLanguage.JavaScript) {
+		} else if (language === EditorLanguage.JavaScript) {
 			js = editorText;
-		}
-		else if (language === EditorLanguage.CSS) {
+		} else if (language === EditorLanguage.CSS) {
 			css = editorText;
 			js = defaultJS;
-		}
-		else {
+		} else if (language === EditorLanguage.HTML) {
+			html = editorText;
+		} else {
 			const exhaustivenessCheck: never = language;
 			return exhaustivenessCheck;
 		}
 
-		return { js, css };
+		return { js, css, html };
 	};
 
-
-	let removeMessageListener: (()=>void)|null = null;
-	let previewFrame: HTMLIFrameElement|null = null;
+	let removeMessageListener: (() => void) | null = null;
+	let previewFrame: HTMLIFrameElement | null = null;
 
 	const closeFrame = () => {
 		removeMessageListener?.();
@@ -138,7 +135,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		const iframePreviewSetup = await loadIframePreviewScript();
 
-		const { js, css } = getContentToRun();
+		const { js, css, html } = getContentToRun();
 
 		previewFrame = document.createElement('iframe');
 		previewFrame.src = 'about:blank';
@@ -149,7 +146,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 
 		// This *should* allow including </script> tags in strings in most cases.
 		// TODO: Find another way to do this.
-		const escapedJs = js.replace(/<[/]script>/ig, '<\\/script>');
+		const escapedJs = js.replace(/<[/]script>/gi, '<\\/script>');
 
 		const frameId = `frame-${Math.random()}`;
 		previewFrame.srcdoc = `
@@ -167,7 +164,7 @@ const replaceElementWithRunnableCode = (elementToReplace: HTMLElement) => {
 					</script>
 				</head>
 				<body>
-					${bodyHTML}
+					${bodyHTML}${html}
 				</body>
 				<script>
 					"use strict";

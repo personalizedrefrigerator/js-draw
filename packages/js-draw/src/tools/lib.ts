@@ -1,3 +1,4 @@
+export { default as InputMapper } from './InputFilter/InputMapper';
 
 export { default as BaseTool } from './BaseTool';
 export { default as ToolController } from './ToolController';
@@ -9,7 +10,7 @@ export { default as PanZoomTool, PanZoomMode } from './PanZoom';
 
 export { default as PenTool, PenStyle } from './Pen';
 export { default as TextTool } from './TextTool';
-export { default as SelectionTool } from './SelectionTool/SelectionTool';
+export { default as SelectionTool, SelectionMode } from './SelectionTool/SelectionTool';
 export { default as SelectAllShortcutHandler } from './SelectionTool/SelectAllShortcutHandler';
 export { default as EraserTool, EraserMode } from './Eraser';
 export { default as PasteHandler } from './PasteHandler';

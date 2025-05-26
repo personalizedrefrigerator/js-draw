@@ -10,14 +10,14 @@ import { pathToRenderable } from '../RenderablePathSpec';
 
 describe('RenderingCache', () => {
 	const testPath = Path.fromString('M0,0 l100,500 l-20,20 L-100,-100');
-	const testStroke = new Stroke([ pathToRenderable(testPath, { fill: Color4.purple }) ]);
+	const testStroke = new Stroke([pathToRenderable(testPath, { fill: Color4.purple })]);
 
 	it('should create a root node large enough to contain the viewport', () => {
-		let lastRenderer: DummyRenderer|null = null;
+		let lastRenderer: DummyRenderer | null = null;
 		let allocdRenderers: number = 0;
 
 		const { editor, cache } = createCache((renderer) => {
-			allocdRenderers ++;
+			allocdRenderers++;
 			lastRenderer = renderer;
 		});
 		const screenRenderer = editor.display.getDryInkRenderer() as DummyRenderer;
@@ -27,7 +27,7 @@ describe('RenderingCache', () => {
 		editor.image.renderWithCache(screenRenderer, cache, editor.viewport);
 		expect(lastRenderer).toBeNull();
 
-		editor.dispatch(EditorImage.addElement(testStroke));
+		editor.dispatch(EditorImage.addComponent(testStroke));
 		editor.image.renderWithCache(screenRenderer, cache, editor.viewport);
 
 		expect(allocdRenderers).toBeGreaterThanOrEqual(1);

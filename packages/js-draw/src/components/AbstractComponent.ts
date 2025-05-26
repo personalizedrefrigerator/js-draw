@@ -1,16 +1,19 @@
 import SerializableCommand from '../commands/SerializableCommand';
 import Editor from '../Editor';
 import EditorImage from '../image/EditorImage';
-import { LineSegment2, Mat33, Mat33Array, Path, Rect2 } from '@js-draw/math';
+import { LineSegment2, Mat33, Mat33Array, Path, Rect2, Vec2 } from '@js-draw/math';
 import { EditorLocalization } from '../localization';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 import { ImageComponentLocalization } from './localization';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Viewport from '../Viewport';
+import { Point2 } from '@js-draw/math';
+import describeTransformation from '../util/describeTransformation';
+import { assertIsString } from '../util/assertions';
 
-export type LoadSaveData = (string[]|Record<symbol, string|number>);
+export type LoadSaveData = string[] | Record<symbol, string | number>;
 export type LoadSaveDataTable = Record<string, Array<LoadSaveData>>;
-export type DeserializeCallback = (data: string)=>AbstractComponent;
+export type DeserializeCallback = (data: string) => AbstractComponent;
 type ComponentId = string;
 
 export enum ComponentSizingMode {
@@ -36,6 +39,12 @@ export enum ComponentSizingMode {
 
 /**
  * A base class for everything that can be added to an {@link EditorImage}.
+ *
+ * In addition to the `abstract` methods, there are a few methods that should be
+ * overridden when creating a selectable/erasable subclass:
+ * - {@link keyPoints}: Overriding this may improve how the component interacts with the selection tool.
+ * - {@link withRegionErased}: Override/implement this to allow the component to be partially erased
+ *    by the partial stroke eraser.
  */
 export default abstract class AbstractComponent {
 	// The timestamp (milliseconds) at which the component was
@@ -68,7 +77,7 @@ export default abstract class AbstractComponent {
 		private readonly componentKind: string,
 		initialZIndex?: number,
 	) {
-		this.lastChangedTime = (new Date()).getTime();
+		this.lastChangedTime = new Date().getTime();
 
 		if (initialZIndex !== undefined) {
 			this.zIndex = initialZIndex;
@@ -80,7 +89,9 @@ export default abstract class AbstractComponent {
 		this.id = `${new Date().getTime()}-${Math.random()}`;
 
 		if (AbstractComponent.deserializationCallbacks[componentKind] === undefined) {
-			throw new Error(`Component ${componentKind} has not been registered using AbstractComponent.registerComponent`);
+			throw new Error(
+				`Component ${componentKind} has not been registered using AbstractComponent.registerComponent`,
+			);
 		}
 	}
 
@@ -90,15 +101,12 @@ export default abstract class AbstractComponent {
 		return this.id;
 	}
 
-	private static deserializationCallbacks: Record<ComponentId, DeserializeCallback|null> = {};
+	private static deserializationCallbacks: Record<ComponentId, DeserializeCallback | null> = {};
 
 	// Store the deserialization callback (or lack of it) for [componentKind].
 	// If components are registered multiple times (as may be done in automated tests),
 	// the most recent deserialization callback is used.
-	public static registerComponent(
-		componentKind: string,
-		deserialize: DeserializeCallback|null,
-	) {
+	public static registerComponent(componentKind: string, deserialize: DeserializeCallback | null) {
 		this.deserializationCallbacks[componentKind] = deserialize ?? null;
 	}
 
@@ -166,8 +174,8 @@ export default abstract class AbstractComponent {
 	}
 
 	/** Called when this component is added to the given image. */
-	public onAddToImage(_image: EditorImage): void { }
-	public onRemoveFromImage(): void { }
+	public onAddToImage(_image: EditorImage): void {}
+	public onRemoveFromImage(): void {}
 
 	/**
 	 * Renders this component onto the given `canvas`.
@@ -204,7 +212,18 @@ export default abstract class AbstractComponent {
 
 		// Otherwise check if it intersects one of the rectangle's edges.
 		const testLines = rect.getEdges();
-		return testLines.some(edge => this.intersects(edge));
+		return testLines.some((edge) => this.intersects(edge));
+	}
+
+	/**
+	 * Returns a selection of points within this object. Each contiguous section
+	 * of this object should have a point in the returned array.
+	 *
+	 * Subclasses should override this method if the center of the bounding box is
+	 * not contained within the object.
+	 */
+	public keyPoints(): Point2[] {
+		return [this.getBBox().center];
 	}
 
 	// @returns true iff this component can be selected (e.g. by the selection tool.)
@@ -233,7 +252,7 @@ export default abstract class AbstractComponent {
 	 * updates the editor.
 	 *
 	 * The transformed component is also moved to the top (use
-	 * {@link AbstractComponent.setZIndexAndTransformBy} to avoid this behavior).
+	 * {@link AbstractComponent#setZIndexAndTransformBy} to avoid this behavior).
 	 */
 	public transformBy(affineTransfm: Mat33): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(affineTransfm, this.getId(), this);
@@ -241,7 +260,12 @@ export default abstract class AbstractComponent {
 
 	// Returns a command that updates this component's z-index.
 	public setZIndex(newZIndex: number): SerializableCommand {
-		return new AbstractComponent.TransformElementCommand(Mat33.identity, this.getId(), this, newZIndex);
+		return new AbstractComponent.TransformElementCommand(
+			Mat33.identity,
+			this.getId(),
+			this,
+			newZIndex,
+		);
 	}
 
 	/**
@@ -252,10 +276,16 @@ export default abstract class AbstractComponent {
 	 *                         this command.
 	 */
 	public setZIndexAndTransformBy(
-		affineTransfm: Mat33, newZIndex: number, originalZIndex?: number
+		affineTransfm: Mat33,
+		newZIndex: number,
+		originalZIndex?: number,
 	): SerializableCommand {
 		return new AbstractComponent.TransformElementCommand(
-			affineTransfm, this.getId(), this, newZIndex, originalZIndex,
+			affineTransfm,
+			this.getId(),
+			this,
+			newZIndex,
+			originalZIndex,
 		);
 	}
 
@@ -311,7 +341,7 @@ export default abstract class AbstractComponent {
 
 			this.component.applyTransformation(newTransfm);
 			this.component.zIndex = targetZIndex;
-			this.component.lastChangedTime = (new Date()).getTime();
+			this.component.lastChangedTime = new Date().getTime();
 
 			// Ensure that new components are automatically drawn above the current component.
 			if (targetZIndex >= AbstractComponent.zIndexCounter) {
@@ -320,7 +350,7 @@ export default abstract class AbstractComponent {
 
 			// Add the element back to the document.
 			if (hadParent) {
-				EditorImage.addElement(this.component).apply(editor);
+				EditorImage.addComponent(this.component).apply(editor);
 			}
 		}
 
@@ -339,24 +369,30 @@ export default abstract class AbstractComponent {
 		}
 
 		public description(_editor: Editor, localizationTable: EditorLocalization) {
-			return localizationTable.transformedElements(1);
+			return localizationTable.transformedElements(
+				1,
+				describeTransformation(Vec2.zero, this.affineTransfm, false, localizationTable),
+			);
 		}
 
 		static {
-			SerializableCommand.register(AbstractComponent.transformElementCommandId, (json: any, editor: Editor) => {
-				const elem = editor.image.lookupElement(json.id) ?? undefined;
-				const transform = new Mat33(...(json.transfm as Mat33Array));
-				const targetZIndex = json.targetZIndex;
-				const origZIndex = json.origZIndex ?? undefined;
+			SerializableCommand.register(
+				AbstractComponent.transformElementCommandId,
+				(json: any, editor: Editor) => {
+					const elem = editor.image.lookupElement(json.id) ?? undefined;
+					const transform = new Mat33(...(json.transfm as Mat33Array));
+					const targetZIndex = json.targetZIndex;
+					const origZIndex = json.origZIndex ?? undefined;
 
-				return new AbstractComponent.TransformElementCommand(
-					transform,
-					json.id,
-					elem,
-					targetZIndex,
-					origZIndex,
-				);
-			});
+					return new AbstractComponent.TransformElementCommand(
+						transform,
+						json.id,
+						elem,
+						targetZIndex,
+						origZIndex,
+					);
+				},
+			);
 		}
 
 		protected serializeToJSON() {
@@ -392,6 +428,18 @@ export default abstract class AbstractComponent {
 	}
 
 	/**
+	 * Creates a copy of this component with a particular `id`.
+	 * This is used internally by {@link Duplicate} when deserializing.
+	 *
+	 * @internal -- users of the library shouldn't need this.
+	 */
+	public cloneWithId(cloneId: string) {
+		const clone = this.clone();
+		clone.id = cloneId;
+		return clone;
+	}
+
+	/**
 	 * **Optional method**: Divides this component into sections roughly along the given path,
 	 * removing parts that are roughly within `shape`.
 	 *
@@ -404,7 +452,7 @@ export default abstract class AbstractComponent {
 	public withRegionErased?(shape: Path, viewport: Viewport): AbstractComponent[];
 
 	// Return null iff this object cannot be safely serialized/deserialized.
-	protected abstract serializeToJSON(): any[]|Record<string, any>|number|string|null;
+	protected abstract serializeToJSON(): any[] | Record<string, any> | number | string | null;
 
 	// Convert the component to an object that can be passed to
 	// `JSON.stringify`.
@@ -429,7 +477,7 @@ export default abstract class AbstractComponent {
 
 	// Returns true if `data` is not deserializable. May return false even if [data]
 	// is not deserializable.
-	private static isNotDeserializable(json: any|string) {
+	private static isNotDeserializable(json: any) {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}
@@ -450,7 +498,7 @@ export default abstract class AbstractComponent {
 	}
 
 	// Convert a string or an object produced by `JSON.parse` into an `AbstractComponent`.
-	public static deserialize(json: string|any): AbstractComponent {
+	public static deserialize(json: any): AbstractComponent {
 		if (typeof json === 'string') {
 			json = JSON.parse(json);
 		}
@@ -460,14 +508,20 @@ export default abstract class AbstractComponent {
 		}
 
 		const instance = this.deserializationCallbacks[json.name]!(json.data);
-		instance.id = json.id;
+
+		// If json.id is not provided, a default, auto-generated ID will be used.
+		if (json.id) {
+			assertIsString(json.id);
+			instance.id = json.id;
+		}
 
 		if (isFinite(json.zIndex)) {
 			instance.zIndex = json.zIndex;
 
 			// Ensure that new components will be added on top.
 			AbstractComponent.zIndexCounter = Math.max(
-				AbstractComponent.zIndexCounter, instance.zIndex + 1
+				AbstractComponent.zIndexCounter,
+				instance.zIndex + 1,
 			);
 		}
 

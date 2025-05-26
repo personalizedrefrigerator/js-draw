@@ -12,36 +12,41 @@ export interface CommandLocalization {
 	duplicatedNoElements: string;
 	elements: string;
 	updatedViewport: string;
-	transformedElements: (elemCount: number) => string;
+	transformedElements: (elemCount: number, transformDescription: string) => string;
 	resizeOutputCommand: (newSize: Rect2) => string;
 	enabledAutoresizeOutputCommand: string;
 	disabledAutoresizeOutputCommand: string;
-	addElementAction: (elemDescription: string) => string;
+	addComponentAction: (elemDescription: string) => string;
 	eraseAction: (elemDescription: string, numElems: number) => string;
-	duplicateAction: (elemDescription: string, count: number)=> string;
-	inverseOf: (actionDescription: string)=> string;
-	unionOf: (actionDescription: string, actionCount: number)=> string;
-	andNMoreCommands: (count: number)=>string;
+	duplicateAction: (elemDescription: string, count: number) => string;
+	inverseOf: (actionDescription: string) => string;
+	unionOf: (actionDescription: string, actionCount: number) => string;
+	andNMoreCommands: (count: number) => string;
 
-	selectedElements: (count: number)=>string;
+	selectedElements: (count: number) => string;
 }
 
 export const defaultCommandLocalization: CommandLocalization = {
 	updatedViewport: 'Transformed Viewport',
-	transformedElements: (elemCount) => `Transformed ${elemCount} element${elemCount === 1 ? '' : 's'}`,
+	transformedElements: (elemCount, action) =>
+		`Transformed ${elemCount} element${elemCount === 1 ? '' : 's'} (${action})`,
 	resizeOutputCommand: (newSize: Rect2) => `Resized image to ${newSize.w}x${newSize.h}`,
 	enabledAutoresizeOutputCommand: 'Enabled output autoresize',
 	disabledAutoresizeOutputCommand: 'Disabled output autoresize',
-	addElementAction: (componentDescription: string) => `Added ${componentDescription}`,
-	eraseAction: (componentDescription: string, numElems: number) => `Erased ${numElems} ${componentDescription}`,
-	duplicateAction: (componentDescription: string, numElems: number) => `Duplicated ${numElems} ${componentDescription}`,
-	unionOf: (actionDescription: string, actionCount: number) => `Union: ${actionCount} ${actionDescription}`,
+	addComponentAction: (componentDescription: string) => `Added ${componentDescription}`,
+	eraseAction: (componentDescription: string, numElems: number) =>
+		`Erased ${numElems} ${componentDescription}`,
+	duplicateAction: (componentDescription: string, numElems: number) =>
+		`Duplicated ${numElems} ${componentDescription}`,
+	unionOf: (actionDescription: string, actionCount: number) =>
+		`Union: ${actionCount} ${actionDescription}`,
 	inverseOf: (actionDescription: string) => `Inverse of ${actionDescription}`,
 	elements: 'Elements',
 	erasedNoElements: 'Erased nothing',
 	duplicatedNoElements: 'Duplicated nothing',
 
-	rotatedBy: (degrees) => `Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`,
+	rotatedBy: (degrees) =>
+		`Rotated by ${Math.abs(degrees)} degrees ${degrees < 0 ? 'clockwise' : 'counter-clockwise'}`,
 	movedLeft: 'Moved left',
 	movedUp: 'Moved up',
 	movedDown: 'Moved down',

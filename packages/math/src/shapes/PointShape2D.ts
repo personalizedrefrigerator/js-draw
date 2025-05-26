@@ -20,9 +20,9 @@ class PointShape2D extends Parameterized2DShape {
 
 	public override argIntersectsLineSegment(lineSegment: LineSegment2, epsilon?: number): number[] {
 		if (lineSegment.containsPoint(this.p, epsilon)) {
-			return [ 0 ];
+			return [0];
 		}
-		return [ ];
+		return [];
 	}
 
 	public override getTightBoundingBox(): Rect2 {

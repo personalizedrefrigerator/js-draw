@@ -1,4 +1,3 @@
-
 const htmlEscape = (text: string) => {
 	return text
 		.replace(/[&]/g, '&amp;')

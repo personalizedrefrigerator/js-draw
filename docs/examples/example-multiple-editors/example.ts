@@ -13,25 +13,20 @@ const defaultSettings: Partial<jsdraw.EditorSettings> = {
 	allowOverscroll: false,
 };
 
-
 const editor1 = new jsdraw.Editor(document.body, defaultSettings);
 jsdraw.makeEdgeToolbar(editor1).addDefaults();
 
-
 const editor2 = new jsdraw.Editor(document.body, defaultSettings);
 jsdraw.makeDropdownToolbar(editor2).addDefaults();
-
 
 // Set up the "add editor" buttons
 const addEditorButton1: HTMLButtonElement = document.querySelector('button#add-editor-1')!;
 const addEditorButton2: HTMLButtonElement = document.querySelector('button#add-editor-2')!;
 
-
 addEditorButton1.onclick = () => {
 	const editor = new jsdraw.Editor(document.body, defaultSettings);
 	jsdraw.makeEdgeToolbar(editor).addDefaults();
 };
-
 
 addEditorButton2.onclick = () => {
 	const editor = new jsdraw.Editor(document.body, {

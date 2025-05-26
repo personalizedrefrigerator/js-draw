@@ -1,0 +1,25 @@
+.toolbar-button-grid {
+	display: grid;
+	grid-template-columns: repeat(var(--column-count), 1fr);
+	justify-items: center;
+	--button-size: 30px;
+
+	> .button {
+		font-size: 1em;
+		width: min-content;
+
+		> .icon {
+			max-width: var(--button-size);
+			max-height: var(--button-size);
+
+			// Ensures that all icons have the same base size
+			width: 48px;
+			height: 48px;
+		}
+
+		> label {
+			display: block;
+			font-weight: normal;
+		}
+	}
+}

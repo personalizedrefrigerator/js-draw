@@ -5,7 +5,7 @@ import Abstract2DShape from './Abstract2DShape';
 import LineSegment2 from './LineSegment2';
 import Rect2 from './Rect2';
 
-type TriangleBoundary = [ LineSegment2, LineSegment2, LineSegment2 ];
+type TriangleBoundary = [LineSegment2, LineSegment2, LineSegment2];
 
 export default class Triangle extends Abstract2DShape {
 	/**
@@ -27,30 +27,26 @@ export default class Triangle extends Abstract2DShape {
 		return new Triangle(vertex1, vertex2, vertex3);
 	}
 
-	public get vertices(): [ Point2, Point2, Point2 ] {
-		return [ this.vertex1, this.vertex2, this.vertex3 ];
+	public get vertices(): [Point2, Point2, Point2] {
+		return [this.vertex1, this.vertex2, this.vertex3];
 	}
 
-	public map(mapping: (vertex: Vec3)=>Vec3): Triangle {
-		return new Triangle(
-			mapping(this.vertex1),
-			mapping(this.vertex2),
-			mapping(this.vertex3),
-		);
+	public map(mapping: (vertex: Vec3) => Vec3): Triangle {
+		return new Triangle(mapping(this.vertex1), mapping(this.vertex2), mapping(this.vertex3));
 	}
 
 	// Transform, treating this as composed of 2D points.
 	public transformed2DBy(affineTransform: Mat33) {
-		return this.map(vertex => affineTransform.transformVec2(vertex));
+		return this.map((vertex) => affineTransform.transformVec2(vertex));
 	}
 
 	// Transforms this by a linear transform --- verticies are treated as
 	// 3D points.
 	public transformedBy(linearTransform: Mat33) {
-		return this.map(vertex => linearTransform.transformVec3(vertex));
+		return this.map((vertex) => linearTransform.transformVec3(vertex));
 	}
 
-	#sides: TriangleBoundary|undefined = undefined;
+	#sides: TriangleBoundary | undefined = undefined;
 
 	/**
 	 * Returns the sides of this triangle, as an array of `LineSegment2`s.
@@ -67,7 +63,7 @@ export default class Triangle extends Abstract2DShape {
 		const side2 = new LineSegment2(this.vertex2, this.vertex3);
 		const side3 = new LineSegment2(this.vertex3, this.vertex1);
 
-		const sides: TriangleBoundary = [ side1, side2, side3 ];
+		const sides: TriangleBoundary = [side1, side2, side3];
 		this.#sides = sides;
 		return sides;
 	}
@@ -76,15 +72,17 @@ export default class Triangle extends Abstract2DShape {
 		const result: Point2[] = [];
 
 		for (const edge of this.getEdges()) {
-			edge.intersectsLineSegment(lineSegment)
-				.forEach(point => result.push(point));
+			edge.intersectsLineSegment(lineSegment).forEach((point) => result.push(point));
 		}
 
 		return result;
 	}
 
 	/** @inheritdoc */
-	public override containsPoint(point: Vec3, epsilon: number = Abstract2DShape.smallValue): boolean {
+	public override containsPoint(
+		point: Vec3,
+		epsilon: number = Abstract2DShape.smallValue,
+	): boolean {
 		// Project `point` onto normals to each of this' sides.
 		// Uses the Separating Axis Theorem (https://en.wikipedia.org/wiki/Hyperplane_separation_theorem#Use_in_collision_detection)
 		const sides = this.getEdges();
@@ -103,7 +101,8 @@ export default class Triangle extends Abstract2DShape {
 
 			const projPoint = orthog.dot(point);
 
-			const inProjection = projPoint >= minProjVertex - epsilon && projPoint <= maxProjVertex + epsilon;
+			const inProjection =
+				projPoint >= minProjVertex - epsilon && projPoint <= maxProjVertex + epsilon;
 			if (!inProjection) {
 				return false;
 			}
@@ -120,7 +119,7 @@ export default class Triangle extends Abstract2DShape {
 	 */
 	public override signedDistance(point: Vec3): number {
 		const sides = this.getEdges();
-		const distances = sides.map(side => side.distance(point));
+		const distances = sides.map((side) => side.distance(point));
 		const distance = Math.min(...distances);
 
 		// If the point is in this' interior, signedDistance must return a negative

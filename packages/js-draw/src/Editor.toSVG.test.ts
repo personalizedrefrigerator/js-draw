@@ -1,26 +1,40 @@
-import { Color4, Mat33, Rect2, TextComponent, EditorImage, Vec2, StrokeComponent, SelectionTool, sendPenEvent, InputEvtType } from './lib';
+import {
+	Color4,
+	Mat33,
+	Rect2,
+	TextComponent,
+	EditorImage,
+	Vec2,
+	StrokeComponent,
+	SelectionTool,
+	sendPenEvent,
+	InputEvtType,
+} from './lib';
 import TextRenderingStyle from './rendering/TextRenderingStyle';
-import SVGLoader from './SVGLoader';
+import SVGLoader from './SVGLoader/SVGLoader';
 import createEditor from './testing/createEditor';
 
 describe('Editor.toSVG', () => {
-	it('should correctly nest text objects', async () => {
+	it('should correctly nest text objects', () => {
 		const editor = createEditor();
 		const textStyle: TextRenderingStyle = {
-			fontFamily: 'sans', size: 12, renderingStyle: { fill: Color4.black }
+			fontFamily: 'sans',
+			size: 12,
+			renderingStyle: { fill: Color4.black },
 		};
-		const text = new TextComponent([
-			'Testing...',
-			new TextComponent([ 'Test 2' ], Mat33.translation(Vec2.of(0, 100)), textStyle),
-		], Mat33.identity, textStyle);
-		editor.dispatch(EditorImage.addElement(text));
+		const text = new TextComponent(
+			['Testing...', new TextComponent(['Test 2'], Mat33.translation(Vec2.of(0, 100)), textStyle)],
+			Mat33.identity,
+			textStyle,
+		);
+		editor.dispatch(EditorImage.addComponent(text));
 
-		const matches = editor.image.getElementsIntersectingRegion(new Rect2(4, -100, 100, 100));
+		const matches = editor.image.getComponentsIntersecting(new Rect2(4, -100, 100, 100));
 		expect(matches).toHaveLength(1);
 		expect(text).not.toBeNull();
 
 		const asSVG = editor.toSVG();
-		const allTSpans = [ ...asSVG.querySelectorAll('tspan') ];
+		const allTSpans = [...asSVG.querySelectorAll('tspan')];
 		expect(allTSpans).toHaveLength(1);
 		expect(allTSpans[0].getAttribute('x')).toBe('0');
 		expect(allTSpans[0].getAttribute('y')).toBe('100');
@@ -29,7 +43,9 @@ describe('Editor.toSVG', () => {
 
 	it('should preserve empty tspans', async () => {
 		const editor = createEditor();
-		await editor.loadFrom(SVGLoader.fromString(`
+		await editor.loadFrom(
+			SVGLoader.fromString(
+				`
 			<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
 				<style id="js-draw-style-sheet">
 					path {
@@ -39,12 +55,15 @@ describe('Editor.toSVG', () => {
 				</style>
 				<text style="transform: matrix(1, 0, 0, 1, 12, 35); font-family: sans-serif; font-size: 32px; fill: rgb(128, 51, 128);">Testing...<tspan x="3" y="40" style="font-family: sans-serif; font-size: 33px; fill: rgb(128, 51, 128);"></tspan><tspan x="3" y="70">Test 2. ☺</tspan></text>
 			</svg>
-		`, true));
+		`,
+				true,
+			),
+		);
 
-		const textNodesInImage = editor.image.getAllElements().filter(elem => elem instanceof TextComponent);
-		expect(
-			textNodesInImage
-		).toHaveLength(1);
+		const textNodesInImage = editor.image
+			.getAllComponents()
+			.filter((elem) => elem instanceof TextComponent);
+		expect(textNodesInImage).toHaveLength(1);
 
 		const asSVG = editor.toSVG();
 		const textObject = asSVG.querySelector('text');
@@ -58,11 +77,14 @@ describe('Editor.toSVG', () => {
 	});
 
 	it('should preserve text child size/placement while not saving additional properties', async () => {
-		const secondLineText = 'This is a test of a thing that has been known to break. Will this test catch the issue?';
+		const secondLineText =
+			'This is a test of a thing that has been known to break. Will this test catch the issue?';
 		const thirdLineText = 'This is a test of saving/loading multi-line text...';
 
 		const editor = createEditor();
-		await editor.loadFrom(SVGLoader.fromString(`
+		await editor.loadFrom(
+			SVGLoader.fromString(
+				`
 			<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
 				<style id="js-draw-style-sheet">
 					path {
@@ -72,10 +94,13 @@ describe('Editor.toSVG', () => {
 				</style>
 				<text style="transform: matrix(1, 0, 0, 1, 12, 35); font-family: sans-serif; font-size: 32px; fill: rgb(128, 51, 128);">Testing...<tspan x="3" y="40" style="font-family: sans-serif; font-size: 33px; fill: rgb(128, 51, 128);">${secondLineText}</tspan><tspan x="0" y="72" style="font-family: sans-serif; font-size: 32px; fill: rgb(128, 51, 128);">${thirdLineText}</tspan><tspan x="0" y="112" style="font-family: sans-serif; font-size: 32px; fill: rgb(128, 51, 128);">Will it pass or fail?</tspan></text>
 			</svg>
-		`, true));
+		`,
+				true,
+			),
+		);
 
 		expect(
-			editor.image.getAllElements().filter(elem => elem instanceof TextComponent)
+			editor.image.getAllComponents().filter((elem) => elem instanceof TextComponent),
 		).toHaveLength(1);
 
 		const asSVG = editor.toSVG();
@@ -111,7 +136,8 @@ describe('Editor.toSVG', () => {
 
 	it('should preserve group elements', async () => {
 		const editor = createEditor();
-		await editor.loadFrom(SVGLoader.fromString(`
+		await editor.loadFrom(
+			SVGLoader.fromString(`
 			<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
 				<style id="js-draw-style-sheet">
 					path {
@@ -137,13 +163,14 @@ describe('Editor.toSVG', () => {
 				<g id='empty-group-2'/>
 				<g id='empty-group-2'><g id='empty-group-2'/></g>
 			</svg>
-		`));
+		`),
+		);
 
 		// Both paths should exist.
 		expect(
 			editor.image
-				.getElementsIntersectingRegion(new Rect2(-10, -10, 100, 100))
-				.filter(elem => elem instanceof StrokeComponent)
+				.getComponentsIntersecting(new Rect2(-10, -10, 100, 100))
+				.filter((elem) => elem instanceof StrokeComponent),
 		).toHaveLength(2);
 
 		const outputSVG = editor.toSVG();
@@ -177,13 +204,16 @@ describe('Editor.toSVG', () => {
 		// Should preserve groups that had duplicate IDs
 		expect(outputSVG.querySelectorAll('svg > g#empty-group-2--1')).toHaveLength(1);
 		expect(outputSVG.querySelectorAll('svg > g#empty-group-2--2')).toHaveLength(1);
-		expect(outputSVG.querySelectorAll('svg > g#empty-group-2--2 > g#empty-group-2--3')).toHaveLength(1);
+		expect(
+			outputSVG.querySelectorAll('svg > g#empty-group-2--2 > g#empty-group-2--3'),
+		).toHaveLength(1);
 	});
 
 	describe('should not preserve group elements when doing so would change the z order', () => {
 		it('in an image with few items', async () => {
 			const editor = createEditor();
-			await editor.loadFrom(SVGLoader.fromString(`
+			await editor.loadFrom(
+				SVGLoader.fromString(`
 				<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
 					<g id='main-group-1'>
 						<path d='M0,0 L-10,10 0,10' fill='#f00'/>
@@ -191,13 +221,14 @@ describe('Editor.toSVG', () => {
 					</g>
 					<path d='M40,40 l10,10 0,10'/>
 				</svg>
-			`));
+			`),
+			);
 
 			// All paths should exist.
 			expect(
 				editor.image
-					.getElementsIntersectingRegion(new Rect2(-10, -10, 100, 100))
-					.filter(elem => elem instanceof StrokeComponent)
+					.getComponentsIntersecting(new Rect2(-10, -10, 100, 100))
+					.filter((elem) => elem instanceof StrokeComponent),
 			).toHaveLength(3);
 
 			// Before modifying, both paths should be within the main-group-1 group
@@ -213,16 +244,14 @@ describe('Editor.toSVG', () => {
 
 			// The stroke should be selected
 			expect(selectionTool.getSelectedObjects()).toHaveLength(1);
-			expect(selectionTool.getSelectedObjects()[0].getBBox())
-				.objEq(new Rect2(-10, 0, 10, 10));
+			expect(selectionTool.getSelectedObjects()[0].getBBox()).objEq(new Rect2(-10, 0, 10, 10));
 
 			// Drag the selection (moves the selected item to the top)
 			sendPenEvent(editor, InputEvtType.PointerDownEvt, Vec2.of(-11, 9));
 			sendPenEvent(editor, InputEvtType.PointerMoveEvt, Vec2.of(0, 0));
 			sendPenEvent(editor, InputEvtType.PointerUpEvt, Vec2.of(0, 0));
 
-			expect(selectionTool.getSelectedObjects()[0].getBBox())
-				.not.objEq(new Rect2(-10, 0, 10, 10));
+			expect(selectionTool.getSelectedObjects()[0].getBBox()).not.objEq(new Rect2(-10, 0, 10, 10));
 			selectionTool.setEnabled(false);
 
 			// One of the items should have been moved out of the main group
@@ -233,7 +262,8 @@ describe('Editor.toSVG', () => {
 
 		it('in an image with many items in nested groups', async () => {
 			const editor = createEditor();
-			await editor.loadFrom(SVGLoader.fromString(`
+			await editor.loadFrom(
+				SVGLoader.fromString(`
 				<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
 					<path d='M-100,-100 l 2,2 0,2'/>
 					<g id='group-1'>
@@ -246,29 +276,24 @@ describe('Editor.toSVG', () => {
 					</g>
 					<path d='M40,40 l10,10 0,10'/>
 				</svg>
-			`));
+			`),
+			);
 
 			// .expects that all paths have their original parent groups.
 			const expectGroupParentsToBeOriginal = () => {
 				expect(
-					editor.image
-						.getAllElements()
-						.filter(elem => elem instanceof StrokeComponent)
+					editor.image.getAllComponents().filter((elem) => elem instanceof StrokeComponent),
 				).toHaveLength(5);
 
 				const output = editor.toSVG();
-				expect(
-					output.querySelectorAll('svg > g#group-1 path')
-				).toHaveLength(3);
-				expect(
-					output.querySelectorAll('svg > g#group-1 > g > path')
-				).toHaveLength(1);
+				expect(output.querySelectorAll('svg > g#group-1 path')).toHaveLength(3);
+				expect(output.querySelectorAll('svg > g#group-1 > g > path')).toHaveLength(1);
 			};
 
 			expectGroupParentsToBeOriginal();
 
 			const nudgePathNear = async (pos: Vec2) => {
-				const targetElems = editor.image.getElementsIntersectingRegion(Rect2.bboxOf([ pos ], 5));
+				const targetElems = editor.image.getComponentsIntersecting(Rect2.bboxOf([pos], 5));
 
 				expect(targetElems).toHaveLength(1);
 
@@ -294,19 +319,24 @@ describe('Editor.toSVG', () => {
 
 	it('should preserve unknown SVG objects', async () => {
 		const editor = createEditor();
-		await editor.loadFrom(SVGLoader.fromString(`
+		await editor.loadFrom(
+			SVGLoader.fromString(
+				`
 			<svg viewBox="0 0 500 500" width="500" height="500" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
 				<path d='M10,10 L20,10 L10,40'/>
 				<some-elem some-attr='foo'/>
 				<path d='M40,40 l10,10 0,10'/>
 			</svg>
-		`, {
-			// Keep unknown elements
-			sanitize: false,
+		`,
+				{
+					// Keep unknown elements
+					sanitize: false,
 
-			// Don't warn on unknown elements
-			disableUnknownObjectWarnings: true,
-		}));
+					// Don't warn on unknown elements
+					disableUnknownObjectWarnings: true,
+				},
+			),
+		);
 
 		const asSVG = editor.toSVG();
 
@@ -319,7 +349,9 @@ describe('Editor.toSVG', () => {
 		const editor = createEditor();
 
 		// Load from an image with auto-resize enabled
-		await editor.loadFrom(SVGLoader.fromString(`
+		await editor.loadFrom(
+			SVGLoader.fromString(
+				`
 			<svg
 				viewBox="0 0 500 500"
 				width="500" height="500"
@@ -329,12 +361,15 @@ describe('Editor.toSVG', () => {
 				<path d="M325,127l0-146l-186,0l0,146l186,0" fill="#ffffff" class="js-draw-image-background"/>
 				<path d="M1,-1 l10,10 l-5,-6" fill="#ff0"/>
 			</svg>
-		`, {
-			// Preserve unknown elements and attributes (may include
-			// storing SVG metadata). This ensures that storing metadata doesn't
-			// conflict with changing the size of the image.
-			sanitize: false,
-		}));
+		`,
+				{
+					// Preserve unknown elements and attributes (may include
+					// storing SVG metadata). This ensures that storing metadata doesn't
+					// conflict with changing the size of the image.
+					sanitize: false,
+				},
+			),
+		);
 
 		expect(editor.image.getAutoresizeEnabled()).toBe(true);
 		expect(editor.image.getImportExportRect()).objEq(new Rect2(1, -1, 10, 10));

@@ -2,8 +2,9 @@ import { Rect2, Vec2 } from '@js-draw/math';
 import { ToolbarContext } from '../types';
 import makeDraggable from './makeDraggable';
 import { MutableReactiveValue } from '../../util/ReactiveValue';
-import cloneElementWithStyles from '../../util/cloneElementWithStyles';
-import addLongPressOrHoverCssClasses from '../../util/addLongPressOrHoverCssClasses';
+import cloneElementWithStyles from '../../util/dom/cloneElementWithStyles';
+import addLongPressOrHoverCssClasses from '../../util/dom/addLongPressOrHoverCssClasses';
+import createButton from '../../util/dom/createButton';
 
 export interface HelpRecord {
 	readonly helpText: string;
@@ -26,8 +27,8 @@ export interface HelpRecord {
  */
 const createHelpPage = (
 	helpItems: HelpRecord[],
-	onItemClick: (itemIndex: number)=>void,
-	onBackgroundClick: ()=>void,
+	onItemClick: (itemIndex: number) => void,
+	onBackgroundClick: () => void,
 	context: ToolbarContext,
 ) => {
 	const container = document.createElement('div');
@@ -40,7 +41,7 @@ const createHelpPage = (
 	// The current active item in helpItems.
 	// (Only one item is active at a time, but each item can have multiple HTMLElements).
 	let currentItemIndex = 0;
-	let currentItem: HelpRecord|null = helpItems[0] ?? null;
+	let currentItem: HelpRecord | null = helpItems[0] ?? null;
 
 	// Each help item can have multiple associated elements. We store clones of each
 	// of these elements in their own container.
@@ -55,11 +56,11 @@ const createHelpPage = (
 	//
 	// We also store the original bounding box -- the bounding box of the clones can change
 	// while dragging to switch pages.
-	let clonedElementContainers: { container: HTMLElement, bbox: Rect2 }[][] = [];
+	let clonedElementContainers: { container: HTMLElement; bbox: Rect2 }[][] = [];
 
 	// Clicking on the background of the help area should send an event (e.g. to allow the
 	// help container to be closed).
-	container.addEventListener('click', event => {
+	container.addEventListener('click', (event) => {
 		// If clicking directly on the container (and not on a child)
 		if (event.target === container) {
 			onBackgroundClick();
@@ -73,8 +74,8 @@ const createHelpPage = (
 			return Rect2.empty;
 		}
 
-		const itemBoundingBoxes = currentItem.targetElements.map(
-			element => Rect2.of(element.getBoundingClientRect())
+		const itemBoundingBoxes = currentItem.targetElements.map((element) =>
+			Rect2.of(element.getBoundingClientRect()),
 		);
 		return Rect2.union(...itemBoundingBoxes);
 	};
@@ -173,6 +174,8 @@ const createHelpPage = (
 
 				const clonedElementContainer = document.createElement('div');
 				clonedElementContainer.classList.add('cloned-element-container');
+				clonedElementContainer.role = 'group';
+				clonedElementContainer.ariaLabel = context.localization.helpControlsAccessibilityLabel;
 				clonedElementContainer.style.position = 'absolute';
 				clonedElementContainer.style.left = `${targetBBox.topLeft.x}px`;
 				clonedElementContainer.style.top = `${targetBBox.topLeft.y}px`;
@@ -198,18 +201,18 @@ const createHelpPage = (
 
 	const onItemChange = () => {
 		const helpTextElement = document.createElement('div');
-		helpTextElement.innerText = currentItem?.helpText ?? '';
+		helpTextElement.textContent = currentItem?.helpText ?? '';
 
 		// For tests
 		helpTextElement.classList.add('current-item-help');
 
 		const navigationHelpElement = document.createElement('div');
-		navigationHelpElement.innerText = context.localization.helpScreenNavigationHelp;
+		navigationHelpElement.textContent = context.localization.helpScreenNavigationHelp;
 		navigationHelpElement.classList.add('navigation-help');
 
 		textLabel.replaceChildren(
 			helpTextElement,
-			...(currentItemIndex === 0 ? [ navigationHelpElement ] : []),
+			...(currentItemIndex === 0 ? [navigationHelpElement] : []),
 		);
 
 		updateClonedElementStates();
@@ -242,10 +245,9 @@ export default class HelpDisplay {
 
 	/** Constructed internally by BaseWidget. @internal */
 	public constructor(
-		private createOverlay: (htmlElement: HTMLElement)=>void,
+		private createOverlay: (htmlElement: HTMLElement) => void,
 		private context: ToolbarContext,
-	) {
-	}
+	) {}
 
 	/** @internal */
 	public showHelpOverlay() {
@@ -273,7 +275,7 @@ export default class HelpDisplay {
 		};
 
 		const makeCloseButton = () => {
-			const closeButton = document.createElement('button');
+			const closeButton = createButton();
 			closeButton.classList.add('close-button');
 			closeButton.appendChild(this.context.icons.makeCloseIcon());
 
@@ -281,7 +283,9 @@ export default class HelpDisplay {
 			closeButton.setAttribute('aria-label', label);
 			closeButton.setAttribute('title', label);
 
-			closeButton.onclick = () => { closeOverlay(); };
+			closeButton.onclick = () => {
+				closeOverlay();
+			};
 
 			return closeButton;
 		};
@@ -295,7 +299,7 @@ export default class HelpDisplay {
 
 			const helpPage = createHelpPage(
 				this.#helpData,
-				newPageIndex => currentPage.set(newPageIndex),
+				(newPageIndex) => currentPage.set(newPageIndex),
 				onBackgroundClick,
 				this.context,
 			);
@@ -346,11 +350,11 @@ export default class HelpDisplay {
 			const navigationButtonContainer = document.createElement('div');
 			navigationButtonContainer.classList.add('navigation-buttons');
 
-			const nextButton = document.createElement('button');
-			const previousButton = document.createElement('button');
+			const nextButton = createButton();
+			const previousButton = createButton();
 
-			nextButton.innerText = this.context.localization.next;
-			previousButton.innerText = this.context.localization.previous;
+			nextButton.textContent = this.context.localization.next;
+			previousButton.textContent = this.context.localization.previous;
 
 			nextButton.classList.add('next');
 			previousButton.classList.add('previous');
@@ -392,15 +396,10 @@ export default class HelpDisplay {
 		const navigation = makeNavigationContent();
 		const navigationButtons = makeNavigationButtons(navigation);
 
-		overlay.replaceChildren(
-			makeCloseButton(),
-			navigationButtons,
-			navigation.content,
-		);
+		overlay.replaceChildren(makeCloseButton(), navigationButtons, navigation.content);
 
 		this.createOverlay(overlay);
 		overlay.showModal();
-
 
 		const minDragOffsetToTransition = 30;
 		const setDragOffset = (offset: number) => {
@@ -432,10 +431,9 @@ export default class HelpDisplay {
 			}
 		};
 
-
 		// Listeners
 		const dragListener = makeDraggable(overlay, {
-			draggableChildElements: [ navigation.content ],
+			draggableChildElements: [navigation.content],
 			onDrag: (_deltaX: number, _deltaY: number, totalDisplacement: Vec2) => {
 				overlay.classList.add('-dragging');
 				setDragOffset(totalDisplacement.x);
@@ -458,7 +456,7 @@ export default class HelpDisplay {
 			},
 		});
 
-		let resizeObserver: ResizeObserver|null;
+		let resizeObserver: ResizeObserver | null;
 		if (window.ResizeObserver) {
 			resizeObserver = new ResizeObserver(() => {
 				navigation.refreshCurrent();
@@ -478,23 +476,21 @@ export default class HelpDisplay {
 
 		// Close the overlay when clicking on the background (*directly* on any of the
 		// elements in closeOverlayTriggers).
-		const closeOverlayTriggers = [ navigation.content, navigationButtons, overlay ];
-		overlay.onclick = event => {
+		const closeOverlayTriggers = [navigation.content, navigationButtons, overlay];
+		overlay.onclick = (event) => {
 			if (closeOverlayTriggers.includes(event.target as any)) {
 				onBackgroundClick();
 			}
 		};
 
-		overlay.onkeyup = event => {
+		overlay.onkeyup = (event) => {
 			if (event.code === 'Escape') {
 				closeOverlay();
 				event.preventDefault();
-			}
-			else if (event.code === 'ArrowRight') {
+			} else if (event.code === 'ArrowRight') {
 				navigation.toNext();
 				event.preventDefault();
-			}
-			else if (event.code === 'ArrowLeft') {
+			} else if (event.code === 'ArrowLeft') {
 				navigation.toPrevious();
 				event.preventDefault();
 			}
@@ -513,12 +509,12 @@ export default class HelpDisplay {
 
 	/** Marks `helpText` as associated with a single `targetElement`. */
 	public registerTextHelpForElement(targetElement: HTMLElement, helpText: string) {
-		this.registerTextHelpForElements([ targetElement ], helpText);
+		this.registerTextHelpForElements([targetElement], helpText);
 	}
 
 	/** Marks `helpText` as associated with all elements in `targetElements`. */
 	public registerTextHelpForElements(targetElements: HTMLElement[], helpText: string) {
-		this.#helpData.push({ targetElements: [ ...targetElements ], helpText });
+		this.#helpData.push({ targetElements: [...targetElements], helpText });
 	}
 
 	/** Returns true if any help text has been registered. */
@@ -533,7 +529,7 @@ export default class HelpDisplay {
 		const buttonContainer = document.createElement('div');
 		buttonContainer.classList.add('toolbar-help-overlay-button');
 
-		const helpButton = document.createElement('button');
+		const helpButton = createButton();
 		helpButton.classList.add('button');
 
 		const icon = this.context.icons.makeHelpIcon();

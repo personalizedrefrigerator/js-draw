@@ -1,25 +1,37 @@
-
 import * as jsdraw from 'js-draw';
 import 'js-draw/styles';
 import * as jsdrawMath from '@js-draw/math';
 import * as jsdrawMaterialIcons from '@js-draw/material-icons';
 import './iframe.scss';
 
+interface ExtendedWindow extends Window {
+	module: { exports?: unknown };
+	exports: unknown;
+	require(path: string): unknown;
+	frameId: string;
+	mode: string;
+}
+
+declare const window: ExtendedWindow;
+
 window.addEventListener('load', () => {
 	// Update height immediately after loading
 	setTimeout(() => {
 		const height = (document.scrollingElement ?? document.body).scrollHeight;
-		parent.postMessage({
-			message: 'updateHeight',
-			height,
-			frameId: (window as any).frameId,
-		}, '*');
+		parent.postMessage(
+			{
+				message: 'updateHeight',
+				height,
+				frameId: window.frameId,
+			},
+			'*',
+		);
 	}, 0);
 });
 
 (() => {
 	/** Creates an HTML element that contains the content of `message`. */
-	const createLogElementFor = (message: any[]) => {
+	const createLogElementFor = (message: unknown[]) => {
 		const container = document.createElement('div');
 		container.classList.add('log-item');
 
@@ -29,20 +41,20 @@ window.addEventListener('load', () => {
 			if (typeof part === 'string') {
 				wrapper.classList.add('text');
 				wrapper.innerText = part;
-			}
-			else if (typeof part !== 'object' || part === null) {
+			} else if (typeof part !== 'object' || part === null) {
 				wrapper.innerText = JSON.stringify(part);
 				wrapper.classList.add(typeof part);
-			}
-			else if (part instanceof jsdrawMath.Color4) {
+			} else if (part instanceof jsdrawMath.Color4) {
 				const colorSquare = document.createElement('span');
 				colorSquare.classList.add('color-square');
 				colorSquare.style.backgroundColor = part.toHexString();
 
 				wrapper.appendChild(colorSquare);
 				wrapper.appendChild(document.createTextNode(part.toString()));
-			}
-			else {
+			} else if (part instanceof jsdrawMath.Mat33) {
+				wrapper.appendChild(document.createTextNode(part.toString()));
+				wrapper.classList.add('matrix-output');
+			} else {
 				const details = document.createElement('details');
 				details.style.display = 'inline-block';
 
@@ -54,7 +66,7 @@ window.addEventListener('load', () => {
 
 				const addProperty = (key: string) => {
 					const item = document.createElement('li');
-					item.innerText = `${JSON.stringify(key)}: ${part[key]}`;
+					item.innerText = `${JSON.stringify(key)}: ${part[key as keyof typeof part]}`;
 					propertyList.appendChild(item);
 				};
 
@@ -65,7 +77,7 @@ window.addEventListener('load', () => {
 				if (part instanceof Error) {
 					try {
 						addProperty('stack');
-					} catch (_err) {
+					} catch {
 						// May fail
 					}
 				}
@@ -79,7 +91,7 @@ window.addEventListener('load', () => {
 		return container;
 	};
 
-	const isConsoleMode = (window as any).mode === 'console';
+	const isConsoleMode = window.mode === 'console';
 
 	/** Adds a log element to the body. */
 	const addLogElement = (elem: HTMLElement) => {
@@ -120,34 +132,32 @@ window.addEventListener('load', () => {
 	}
 
 	// Allows libraries included after this to require/include content.
-	(window as any).require = (path: string) => {
+	window.require = (path: string) => {
 		if (path === 'js-draw') {
 			return jsdraw;
-		}
-		else if (path === '@js-draw/math') {
+		} else if (path === '@js-draw/math') {
 			return jsdrawMath;
-		}
-		else if (path === '@js-draw/material-icons') {
+		} else if (path === '@js-draw/material-icons') {
 			return jsdrawMaterialIcons;
 		}
 
 		return {};
 	};
 
-	(window as any).module = { exports: {} };
-	(window as any).exports = { };
+	window.module = { exports: {} };
+	window.exports = {};
 
-	const onError = (event: Event|Error|string) => {
+	const onError = (event: Event | Error | string) => {
 		const errorElement = createLogElementFor(['Error: ', event]);
 		errorElement.classList.add('error');
 		addLogElement(errorElement);
 	};
 
-	window.addEventListener('error', event => {
+	window.addEventListener('error', (event) => {
 		onError(event.error ?? event.message);
 	});
 
-	window.addEventListener('unhandledrejection', event => {
+	window.addEventListener('unhandledrejection', (event) => {
 		onError(event.reason ?? event);
 	});
 })();

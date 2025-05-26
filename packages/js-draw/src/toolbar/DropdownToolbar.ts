@@ -1,5 +1,5 @@
 import Editor from '../Editor';
-import { defaultToolbarLocalization, ToolbarLocalization } from './localization';
+import { ToolbarLocalization } from './localization';
 import BaseWidget from './widgets/BaseWidget';
 import OverflowWidget from './widgets/OverflowWidget';
 import AbstractToolbar, { SpacerOptions } from './AbstractToolbar';
@@ -32,7 +32,7 @@ import { toolbarCSSPrefix } from './constants';
  * - {@link AbstractToolbar.addExitButton}
  */
 export const makeDropdownToolbar = (editor: Editor): DropdownToolbar => {
-	return new DropdownToolbar(editor, editor.getRootElement());
+	return new DropdownToolbar(editor, editor.getRootElement(), editor.localization);
 };
 
 export default class DropdownToolbar extends AbstractToolbar {
@@ -43,13 +43,10 @@ export default class DropdownToolbar extends AbstractToolbar {
 	private widgetOrderCounter: number = 0;
 
 	// Widget to toggle overflow menu.
-	private overflowWidget: OverflowWidget|null = null;
+	private overflowWidget: OverflowWidget | null = null;
 
 	/** @internal */
-	public constructor(
-		editor: Editor, parent: HTMLElement,
-		localizationTable: ToolbarLocalization = defaultToolbarLocalization,
-	) {
+	public constructor(editor: Editor, parent: HTMLElement, localizationTable: ToolbarLocalization) {
 		super(editor, localizationTable);
 
 		this.container = document.createElement('div');
@@ -144,11 +141,7 @@ export default class DropdownToolbar extends AbstractToolbar {
 			// Move widgets to the overflow menu.
 
 			// Start with the rightmost widget, move to the leftmost
-			for (
-				let i = allWidgets.length - 1;
-				i >= 0 && shownWidgetWidth >= availableWidth;
-				i--
-			) {
+			for (let i = allWidgets.length - 1; i >= 0 && shownWidgetWidth >= availableWidth; i--) {
 				const child = allWidgets[i];
 
 				if (this.overflowWidget.hasAsChild(child)) {

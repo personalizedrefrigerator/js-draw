@@ -1,80 +1,82 @@
 import * as jsdraw from 'js-draw';
 import handwritingSamples from './handwriting-samples';
-import { playInputLog as playInputLogSlow } from '@js-draw/debugging';
+import { playInputLog as playInputLogSlow, InputLogEvent } from '@js-draw/debugging';
 import 'js-draw/styles';
 
 const slowPlayback = location.href.endsWith('?slow');
 
-const playInputLog = async (editor: jsdraw.Editor, log: any) => {
-	if (slowPlayback) {
-		await playInputLogSlow(editor, log, 1);
-		return;
+const playInputLog = async (
+	editor: jsdraw.Editor,
+	log: InputLogEvent[],
+	forceFastPlayback = false,
+) => {
+	const editorBBox = jsdraw.Rect2.of(editor.getRootElement().getBoundingClientRect());
+	const offset = editorBBox.topLeft.times(-1);
+
+	if (slowPlayback && !forceFastPlayback) {
+		return await playInputLogSlow(editor, log, { rate: 1, offset });
+	} else {
+		return await playInputLogSlow(editor, log, { offset });
 	}
+};
 
-	const pointersDown = new Map<number, jsdraw.Pointer>();
+const makePerformanceGraph = (eventDurations: number[]) => {
+	const createSvgElement = (elementName: string) => {
+		return document.createElementNS('http://www.w3.org/2000/svg', elementName);
+	};
+	const svg = createSvgElement('svg');
+	const path = createSvgElement('path');
 
-	for (const event of log) {
-		if (!event.timeStamp) continue;
-
-		if (['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].includes(event.eventType)) {
-			const device = event.pointerType === 'touch' ? jsdraw.PointerDevice.Touch : jsdraw.PointerDevice.Pen;
-			const pointerId: number = event.pointerId;
-			const isDown = event.eventType === 'pointerdown' || pointersDown.has(pointerId);
-			const screenPos = jsdraw.Vec2.of(event.x, event.y);
-
-			const pointer = jsdraw.Pointer.ofScreenPoint(
-				screenPos,
-				isDown,
-				editor.viewport,
-				pointerId,
-				device,
-				event.isPrimary,
-				event.pressure,
-				event.timeStamp,
-			);
-
-			if (event.eventType === 'pointerup') {
-				pointersDown.delete(pointerId);
-			} else if (isDown || event.eventType === 'pointerdown') {
-				pointersDown.set(pointerId, pointer);
-			}
-
-			const toolController = editor.toolController;
-			const allPointers = [...pointersDown.values()];
-
-			if (event.eventType === 'pointerdown') {
-				toolController.dispatchInputEvent({
-					kind: jsdraw.InputEvtType.PointerDownEvt,
-					allPointers,
-					current: pointer,
-				});
-			} else if (event.eventType === 'pointermove') {
-				toolController.dispatchInputEvent({
-					kind: jsdraw.InputEvtType.PointerMoveEvt,
-					allPointers,
-					current: pointer,
-				});
-			} else if (event.eventType === 'pointerup') {
-				toolController.dispatchInputEvent({
-					kind: jsdraw.InputEvtType.PointerUpEvt,
-					allPointers,
-					current: pointer,
-				});
-			} else if (event.eventType === 'pointercancel') {
-				toolController.dispatchInputEvent({
-					kind: jsdraw.InputEvtType.GestureCancelEvt,
-				});
-			}
-		}
+	let maximumDuration = 0;
+	for (const duration of eventDurations) {
+		maximumDuration = Math.max(duration, maximumDuration);
 	}
+	const outputHeight = eventDurations.length;
+	const scaleY = outputHeight / maximumDuration;
+
+	path.setAttribute(
+		'd',
+		eventDurations
+			.map((duration, index) => {
+				const roundingFactor = 1000;
+				const yValue = -Math.round(duration * scaleY * roundingFactor) / roundingFactor;
+				return `${index > 0 ? 'L' : 'M'}${index},${yValue}`;
+			})
+			.join(' '),
+	);
+	path.style.stroke = 'red';
+	path.style.strokeWidth = '1';
+	path.style.fill = 'none';
+
+	svg.setAttribute(
+		'viewBox',
+		[
+			0, // min-x
+			-outputHeight, // min-y
+			eventDurations.length, // width
+			outputHeight, // height
+		].join(' '),
+	);
+	svg.setAttribute('width', '300');
+	svg.setAttribute('height', '300');
+	svg.appendChild(path);
+
+	const graph = document.createElement('figure');
+	graph.appendChild(svg);
+	const caption = document.createElement('figcaption');
+	caption.textContent =
+		'The above graph shows the time recorded for each event. Time is on the y-axis, the event index is on the x-axis.';
+	graph.appendChild(caption);
+
+	return graph;
 };
 
 const makeEditor = (label: string) => {
 	const container = document.createElement('div');
 
-	const labelElem = document.createElement('h2');
-	labelElem.appendChild(document.createTextNode(label));
-	container.appendChild(labelElem);
+	const headerElem = document.createElement('h2');
+	headerElem.appendChild(document.createTextNode(label));
+	container.appendChild(headerElem);
 
 	const editor = new jsdraw.Editor(container, {
 		pens: {
@@ -94,10 +96,12 @@ const makeEditor = (label: string) => {
 	const penTool = new jsdraw.PenTool(editor, 'Debug tool', {});
 	const transformTool = new jsdraw.PanZoomTool(
 		editor,
-		jsdraw.PanZoomMode.Keyboard|jsdraw.PanZoomMode.SinglePointerGestures|jsdraw.PanZoomMode.TwoFingerTouchGestures,
-		'Pan zoom'
+		jsdraw.PanZoomMode.Keyboard |
+			jsdraw.PanZoomMode.SinglePointerGestures |
+			jsdraw.PanZoomMode.TwoFingerTouchGestures,
+		'Pan zoom',
 	);
-	editor.toolController.setTools([ ]);
+	editor.toolController.setTools([]);
 	editor.toolController.addPrimaryTool(penTool);
 
 	const scaleToImage = () => {
@@ -109,9 +113,17 @@ const makeEditor = (label: string) => {
 	};
 
 	const waitForNextAnimationFrame = () => {
-		return new Promise<void>(resolve => {
+		return new Promise<void>((resolve) => {
 			requestAnimationFrame(() => resolve());
 		});
+	};
+
+	const labelElem = document.createElement('ul');
+	container.appendChild(labelElem);
+	const logInfo = (info: string | Element) => {
+		const infoLine = document.createElement('li');
+		infoLine.appendChild(typeof info === 'string' ? document.createTextNode(info) : info);
+		labelElem.appendChild(infoLine);
 	};
 
 	return {
@@ -127,13 +139,13 @@ const makeEditor = (label: string) => {
 			penTool.setThickness(2);
 			penTool.setStrokeFactory(jsdraw.makePolylineBuilder);
 
-			await playInputLog(editor, logData);
+			await playInputLog(editor, logData, true);
 
 			await waitForNextAnimationFrame();
 			editor.viewport.resetTransform();
 			await waitForNextAnimationFrame();
 
-			const allTrueStrokes = editor.image.getAllElements();
+			const allTrueStrokes = editor.image.getAllComponents();
 
 			// Smoothed stroke
 			penTool.setEnabled(true);
@@ -141,7 +153,7 @@ const makeEditor = (label: string) => {
 			penTool.setThickness(2);
 			penTool.setStrokeFactory(jsdraw.makeFreehandLineBuilder);
 
-			await playInputLog(editor, logData);
+			const stats = await playInputLog(editor, logData);
 
 			// Zoom to
 			scaleToImage();
@@ -150,8 +162,11 @@ const makeEditor = (label: string) => {
 			transformTool.setEnabled(true);
 
 			editor.dispatch(new jsdraw.Erase(allTrueStrokes));
-			labelElem.innerText += ` (${editor.toSVG().outerHTML.length / 1024} KiB)`;
+			logInfo(`SVG size: ${editor.toSVG().outerHTML.length / 1024} KiB`);
 			editor.history.undo();
+			const averageTimePerEvent = stats.perfData.avgTimePerEvent;
+			logInfo(`Average time per event: ${Math.round(averageTimePerEvent * 100) / 100}ms`);
+			logInfo(makePerformanceGraph(stats.perfData.timeDeltas));
 		},
 	};
 };

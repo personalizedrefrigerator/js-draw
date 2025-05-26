@@ -7,8 +7,13 @@ import type AbstractComponent from './components/AbstractComponent';
 import type Command from './commands/Command';
 import type { WidgetContentLayoutManager } from './toolbar/widgets/layout/types';
 
+/**
+ * The type of the {@link Editor.notifier}, which provides notifications for
+ * various editor-related events.
+ */
 export type EditorNotifier = EventDispatcher<EditorEventType, EditorEventDataType>;
 
+/** @see {@link EditorNotifier} */
 export enum EditorEventType {
 	ToolEnabled,
 	ToolDisabled,
@@ -43,7 +48,8 @@ export enum UndoEventType {
 	CommandRedone,
 }
 
-type EditorToolEventType = EditorEventType.ToolEnabled
+type EditorToolEventType =
+	| EditorEventType.ToolEnabled
 	| EditorEventType.ToolDisabled
 	| EditorEventType.ToolUpdated;
 
@@ -119,22 +125,29 @@ export interface ToolbarDropdownShownEvent {
 	readonly layoutManager: WidgetContentLayoutManager;
 }
 
-export type EditorEventDataType = EditorToolEvent | EditorObjectEvent
-	| EditorViewportChangedEvent | DisplayResizedEvent
-	| EditorUndoStackUpdated | CommandDoneEvent | CommandUndoneEvent
-	| SelectionUpdated | ReadOnlyToggled
-	| ColorPickerToggled | ColorPickerColorSelected
+export type EditorEventDataType =
+	| EditorToolEvent
+	| EditorObjectEvent
+	| EditorViewportChangedEvent
+	| DisplayResizedEvent
+	| EditorUndoStackUpdated
+	| CommandDoneEvent
+	| CommandUndoneEvent
+	| SelectionUpdated
+	| ReadOnlyToggled
+	| ColorPickerToggled
+	| ColorPickerColorSelected
 	| ToolbarDropdownShownEvent;
-
 
 // Returns a Promise to indicate that the event source should pause until the Promise resolves.
 // Returns null to continue loading without pause.
 // [totalToProcess] can be an estimate and may change if a better estimate becomes available.
-export type OnProgressListener =
-	(amountProcessed: number, totalToProcess: number)=> Promise<void>|null|void;
+export type OnProgressListener = (
+	amountProcessed: number,
+	totalToProcess: number,
+) => Promise<void> | null | void;
 
-export type ComponentAddedListener = (component: AbstractComponent)=> Promise<void>|void;
-
+export type ComponentAddedListener = (component: AbstractComponent) => Promise<void> | void;
 
 // Called when a new estimate for the import/export rect has been generated. This can be called multiple times.
 // Only the last call to this listener must be accurate.
@@ -144,7 +157,7 @@ export type ComponentAddedListener = (component: AbstractComponent)=> Promise<vo
 export type OnDetermineExportRectListener = (
 	exportRect: Rect2,
 	options?: { autoresize: boolean },
-)=> void;
+) => void;
 
 export interface ImageLoader {
 	start(

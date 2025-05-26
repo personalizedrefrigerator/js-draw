@@ -1,9 +1,10 @@
 import tokenizeMarkdown, { MarkdownToken, MarkdownTokenType } from './tokenizeMarkdown';
 
 export enum RegionType {
-	Text='text',
-	Code='code',
-	Math='math',
+	Text = 'text',
+	Code = 'code',
+	Math = 'math',
+	Include = 'include',
 }
 
 interface LabeledRegion {
@@ -27,13 +28,8 @@ interface StartInformation {
 	readonly startToken: MarkdownToken;
 }
 
-const parseMarkdown = (markdown: string) => {
-	const tokens = tokenizeMarkdown(markdown);
-
-	if (tokens.length === 0) {
-		return [];
-	}
-
+/** Creates larger blocks of information from the given `tokens`. */
+const buildLabeledRegions = (tokens: MarkdownToken[]) => {
 	const labeledRegions: LabeledRegion[] = [];
 
 	const getSpaceInformationAt = (i: number) => {
@@ -43,8 +39,10 @@ const parseMarkdown = (markdown: string) => {
 		const nextIsNewline = i === tokens.length - 1 || tokens[i + 1].text.startsWith('\n');
 
 		return {
-			prevIsSpace, prevIsNewline,
-			nextIsSpace, nextIsNewline,
+			prevIsSpace,
+			prevIsNewline,
+			nextIsSpace,
+			nextIsNewline,
 		};
 	};
 
@@ -57,7 +55,7 @@ const parseMarkdown = (markdown: string) => {
 	let currentInformation = getSpaceInformationAt(0);
 
 	const bufferText = () => {
-		return buffer.map(token => token.text).join('');
+		return buffer.map((token) => token.text).join('');
 	};
 
 	const finalizeRegion = () => {
@@ -70,6 +68,15 @@ const parseMarkdown = (markdown: string) => {
 			return;
 		}
 
+		// Assuming that the current region starts and ends with a delimiter token,
+		// returns the text between the delimiters.
+		const contentWithoutDelimiters = () => {
+			return buffer
+				.slice(1, buffer.length - 1)
+				.map((token) => token.text)
+				.join('');
+		};
+
 		if (currentRegionType === RegionType.Text) {
 			labeledRegions.push({
 				type: RegionType.Text,
@@ -80,8 +87,7 @@ const parseMarkdown = (markdown: string) => {
 				start,
 				stop: start + text.length,
 			});
-		}
-		else if (currentRegionType === RegionType.Code || currentRegionType === RegionType.Math) {
+		} else if (currentRegionType === RegionType.Code || currentRegionType === RegionType.Math) {
 			const surroundedByNewlines =
 				currentInformation.nextIsNewline && currentStartInformation.prevIsNewline;
 
@@ -94,13 +100,22 @@ const parseMarkdown = (markdown: string) => {
 				type: currentRegionType,
 				block: surroundedByNewlines && hasBlockDelimiters,
 				fullText: text,
-				content: buffer.slice(1, buffer.length - 1).map(token => token.text).join(''),
+				content: contentWithoutDelimiters(),
 
 				start,
 				stop: start + text.length,
 			});
-		}
-		else {
+		} else if (currentRegionType === RegionType.Include) {
+			labeledRegions.push({
+				type: currentRegionType,
+				block: false,
+				fullText: text,
+				content: contentWithoutDelimiters(),
+
+				start,
+				stop: start + text.length,
+			});
+		} else {
 			const exhaustivenessCheck: never = currentRegionType;
 			return exhaustivenessCheck;
 		}
@@ -113,7 +128,7 @@ const parseMarkdown = (markdown: string) => {
 
 		currentStartInformation = startInformation;
 		currentRegionType = type;
-		buffer = [ ];
+		buffer = [];
 	};
 
 	for (let i = 0; i < tokens.length; i++) {
@@ -145,16 +160,17 @@ const parseMarkdown = (markdown: string) => {
 			}
 			// Text -> math
 			else if (
-				current.type === MarkdownTokenType.MathDelim
-				&& (
-					(prevIsSpace && !nextIsSpace && current.text === '$')
-					|| (prevIsNewline && current.text === '$$')
-				)
+				current.type === MarkdownTokenType.MathDelim &&
+				((prevIsSpace && !nextIsSpace && current.text === '$') ||
+					(prevIsNewline && current.text === '$$'))
 			) {
 				startNewRegion(RegionType.Math, startInformation);
 			}
-		}
-		else {
+			// Text -> Include
+			else if (current.type === MarkdownTokenType.IncludeStartDelim && !nextIsSpace) {
+				startNewRegion(RegionType.Include, startInformation);
+			}
+		} else {
 			const startInformation: StartInformation = {
 				...currentInformation,
 				startToken: nextToken ?? current,
@@ -165,34 +181,34 @@ const parseMarkdown = (markdown: string) => {
 
 			// Delimiter at the start of the code/math region
 			const enterDelim = currentStartInformation.startToken.text;
-			const inlineDelim = enterDelim.length === 1;
+			// Single-character enter delimiters mean that code or math is inline.
+			// Includes are always inline.
+			const inlineDelim = currentRegionType === RegionType.Include || enterDelim.length === 1;
 
 			if (
-				inlineDelim
-
-				&& (
-					// if we're at the end of the line
-					(current.type === MarkdownTokenType.Space && current.text.includes('\n'))
-
+				inlineDelim &&
+				// if we're at the end of the line
+				((current.type === MarkdownTokenType.Space && current.text.includes('\n')) ||
+					// if an include region has a newline
+					(currentRegionType === RegionType.Include && current.text.includes('\n')) ||
 					// or there was a space just before the delimiter and it's math
-					|| (prevIsSpace && current.type === MarkdownTokenType.MathDelim)
-				)
+					(prevIsSpace && current.type === MarkdownTokenType.MathDelim))
 			) {
 				// Switch the region to text and backtrack to the
 				// token just after the start of the region.
 				currentRegionType = RegionType.Text;
-				for (; i > startInformation.startToken.position; i --) {
+				for (; i > startInformation.startToken.position; i--) {
 					buffer.pop();
 				}
-			}
-			else if (currentRegionType === RegionType.Code) {
-
+			} else if (currentRegionType === RegionType.Code) {
 				// Code -> text
-				if (current.type === MarkdownTokenType.CodeDelim && current.text.length >= enterDelim.length) {
+				if (
+					current.type === MarkdownTokenType.CodeDelim &&
+					current.text.length >= enterDelim.length
+				) {
 					startNewRegion(RegionType.Text, startInformation);
 				}
-			}
-			else if (currentRegionType === RegionType.Math) {
+			} else if (currentRegionType === RegionType.Math) {
 				const enterDelim = currentStartInformation.startToken.text;
 
 				// Math -> text
@@ -200,6 +216,11 @@ const parseMarkdown = (markdown: string) => {
 					if ((current.text === '$$' && nextIsNewline) || current.text === '$') {
 						startNewRegion(RegionType.Text, startInformation);
 					}
+				}
+			} else if (currentRegionType === RegionType.Include) {
+				// Include -> text
+				if (current.type === MarkdownTokenType.IncludeEndDelim) {
+					startNewRegion(RegionType.Text, startInformation);
 				}
 			} else {
 				const exhaustivenessCheck: never = currentRegionType;
@@ -212,18 +233,26 @@ const parseMarkdown = (markdown: string) => {
 
 	finalizeRegion();
 
+	return labeledRegions;
+};
+
+/**
+ * Joins neighboring text regions in `labeledRegions` into larger text regions.
+ */
+const coalesceTextRegions = (labeledRegions: LabeledRegion[]) => {
 	// Coalesce -- join neighboring regions of the same type
 	// where appliccable.
 	const coalescedRegions: LabeledRegion[] = [];
 
-	for (let i = 0; i < labeledRegions.length; i ++) {
+	for (let i = 0; i < labeledRegions.length; i++) {
 		const current = labeledRegions[i];
 		const previous = i > 0 ? coalescedRegions[i - 1] : null;
 
 		// Join neighboring blocks of text.
 		if (
-			current.type === RegionType.Text && previous?.type === RegionType.Text
-			&& current.block === previous.block
+			current.type === RegionType.Text &&
+			previous?.type === RegionType.Text &&
+			current.block === previous.block
 		) {
 			const text = previous.fullText + current.fullText;
 
@@ -236,13 +265,22 @@ const parseMarkdown = (markdown: string) => {
 				fullText: text,
 				content: text,
 			});
-		}
-		else {
+		} else {
 			coalescedRegions.push(current);
 		}
 	}
 
 	return coalescedRegions;
+};
+
+const parseMarkdown = (markdown: string) => {
+	const tokens = tokenizeMarkdown(markdown);
+
+	if (tokens.length === 0) {
+		return [];
+	}
+
+	return coalesceTextRegions(buildLabeledRegions(tokens));
 };
 
 export default parseMarkdown;

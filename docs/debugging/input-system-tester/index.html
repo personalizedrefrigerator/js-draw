@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
-		<meta charset="utf-8"/>
-		<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 		<title>Input system testing | js-draw</title>
 		<style>
 			body {
@@ -12,19 +12,26 @@
 		</style>
 	</head>
 	<body>
-		<noscript>
-			JavaScript is required.
-		</noscript>
-		<header style="float: right;">[ <a href="./?slow">Real-time rendering</a> | <a href="./?fast">Fast rendering</a> ]</header>
+		<noscript> JavaScript is required. </noscript>
+		<header style="float: right">
+			[ <a href="./?slow">Real-time rendering</a> | <a href="./?fast">Fast rendering</a> ]
+		</header>
 		<div id="editor-container"></div>
 		<div>
 			<h1>Notes</h1>
 			<ul>
 				<li>Above, <b>orange</b> strokes are the strokes added by <code>js-draw</code>.</li>
-				<li>Above, <b>white</b> strokes represent the actual input data received by <code>js-draw</code>.</li>
 				<li>
-					The image size reflects the size of <b>orange</b> strokes and metadata added
-					by <code>js-draw</code> (excluding white strokes).
+					Above, <b>white</b> strokes more closely represent the actual input data received by
+					<code>js-draw</code>.
+				</li>
+				<li>
+					The image size reflects the size of <b>orange</b> strokes and metadata added by
+					<code>js-draw</code> (excluding white strokes).
+				</li>
+				<li>
+					Performance graphs are not averaged over multiple trials and are created using data from
+					<code>performance.now</code>, which has limited accuracy.
 				</li>
 			</ul>
 		</div>

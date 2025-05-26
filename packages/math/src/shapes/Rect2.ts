@@ -17,6 +17,18 @@ export interface RectTemplate {
 /**
  * Represents a rectangle in 2D space, parallel to the XY axes.
  *
+ * **Example**:
+ * ```ts,runnable,console
+ * import { Rect2, Vec2 } from '@js-draw/math';
+ *
+ * const rect = Rect2.fromCorners(
+ *   Vec2.of(0, 0),
+ *   Vec2.of(10, 10),
+ * );
+ * console.log('area', rect.area);
+ * console.log('topLeft', rect.topLeft);
+ * ```
+ *
  * `invariant: w ≥ 0, h ≥ 0, immutable`
  */
 export class Rect2 extends Abstract2DShape {
@@ -28,10 +40,14 @@ export class Rect2 extends Abstract2DShape {
 	public readonly area: number;
 
 	public constructor(
+		// Top left x coordinate
 		public readonly x: number,
+		// Top left y coordinate
 		public readonly y: number,
+		// Width
 		public readonly w: number,
-		public readonly h: number
+		// Height
+		public readonly h: number,
 	) {
 		super();
 
@@ -61,14 +77,22 @@ export class Rect2 extends Abstract2DShape {
 	}
 
 	public override containsPoint(other: Point2): boolean {
-		return this.x <= other.x && this.y <= other.y
-			&& this.x + this.w >= other.x && this.y + this.h >= other.y;
+		return (
+			this.x <= other.x &&
+			this.y <= other.y &&
+			this.x + this.w >= other.x &&
+			this.y + this.h >= other.y
+		);
 	}
 
+	/** @returns true iff `other` is completely within this `Rect2`. */
 	public containsRect(other: Rect2): boolean {
-		return this.x <= other.x && this.y <= other.y
-				&& this.x + this.w >= other.x + other.w
-				&& this.y + this.h >= other.y + other.h;
+		return (
+			this.x <= other.x &&
+			this.y <= other.y &&
+			this.x + this.w >= other.x + other.w &&
+			this.y + this.h >= other.y + other.h
+		);
 	}
 
 	/**
@@ -85,7 +109,6 @@ export class Rect2 extends Abstract2DShape {
 			return false;
 		}
 
-
 		const thisMinY = this.y;
 		const thisMaxY = thisMinY + this.h;
 		const otherMinY = other.y;
@@ -100,7 +123,7 @@ export class Rect2 extends Abstract2DShape {
 
 	// Returns the overlap of this and [other], or null, if no such
 	//          overlap exists
-	public intersection(other: Rect2): Rect2|null {
+	public intersection(other: Rect2): Rect2 | null {
 		if (!this.intersects(other)) {
 			return null;
 		}
@@ -151,10 +174,7 @@ export class Rect2 extends Abstract2DShape {
 	// [margin] is the minimum distance between the new point and the edge
 	// of the resultant rectangle.
 	public grownToPoint(point: Point2, margin: number = 0): Rect2 {
-		const otherRect = new Rect2(
-			point.x - margin, point.y - margin,
-			margin * 2, margin * 2
-		);
+		const otherRect = new Rect2(point.x - margin, point.y - margin, margin * 2, margin * 2);
 		return this.union(otherRect);
 	}
 
@@ -170,23 +190,45 @@ export class Rect2 extends Abstract2DShape {
 			const yMargin = -Math.min(-margin, this.h / 2);
 
 			return new Rect2(
-				this.x - xMargin, this.y - yMargin,
-				this.w + xMargin * 2, this.h + yMargin * 2,
+				this.x - xMargin,
+				this.y - yMargin,
+				this.w + xMargin * 2,
+				this.h + yMargin * 2,
 			);
 		}
 
+		return new Rect2(this.x - margin, this.y - margin, this.w + margin * 2, this.h + margin * 2);
+	}
+
+	/**
+	 * If this rectangle is smaller than `minSize`, returns a copy of this
+	 * with a larger width/height.
+	 *
+	 * If smaller than `minSize`, padding is applied on both sides.
+	 */
+	public grownToSize(minSize: Vec2) {
+		if (this.width >= minSize.x && this.height >= minSize.y) {
+			return this;
+		}
+
+		const deltaWidth = Math.max(0, minSize.x - this.width);
+		const deltaHeight = Math.max(0, minSize.y - this.height);
+
 		return new Rect2(
-			this.x - margin, this.y - margin, this.w + margin * 2, this.h + margin * 2
+			this.x - deltaWidth / 2,
+			this.y - deltaHeight / 2,
+			this.width + deltaWidth,
+			this.height + deltaHeight,
 		);
 	}
 
 	public getClosestPointOnBoundaryTo(target: Point2) {
-		const closestEdgePoints = this.getEdges().map(edge => {
+		const closestEdgePoints = this.getEdges().map((edge) => {
 			return edge.closestPointTo(target);
 		});
 
-		let closest: Point2|null = null;
-		let closestDist: number|null = null;
+		let closest: Point2 | null = null;
+		let closestDist: number | null = null;
 		for (const point of closestEdgePoints) {
 			const dist = point.distanceTo(target);
 			if (closestDist === null || dist < closestDist) {
@@ -211,16 +253,11 @@ export class Rect2 extends Abstract2DShape {
 		}
 
 		const squareRadius = radius * radius;
-		return this.corners.every(corner => corner.minus(point).magnitudeSquared() < squareRadius);
+		return this.corners.every((corner) => corner.minus(point).magnitudeSquared() < squareRadius);
 	}
 
 	public get corners(): Point2[] {
-		return [
-			this.bottomRight,
-			this.topRight,
-			this.topLeft,
-			this.bottomLeft,
-		];
+		return [this.bottomRight, this.topRight, this.topLeft, this.bottomLeft];
 	}
 
 	public get maxDimension() {
@@ -272,7 +309,7 @@ export class Rect2 extends Abstract2DShape {
 
 		for (const edge of this.getEdges()) {
 			const intersection = edge.intersectsLineSegment(lineSegment);
-			intersection.forEach(point => result.push(point));
+			intersection.forEach((point) => result.push(point));
 		}
 
 		return result;
@@ -295,7 +332,12 @@ export class Rect2 extends Abstract2DShape {
 	// [affineTransform] is a transformation matrix that both scales and **translates**.
 	// the bounding box of this' four corners after transformed by the given affine transformation.
 	public transformedBoundingBox(affineTransform: Mat33): Rect2 {
-		return Rect2.bboxOf(this.corners.map(corner => affineTransform.transformVec2(corner)));
+		// Optimize transforming by the identity matrix (a common case).
+		if (affineTransform === Mat33.identity) {
+			return this;
+		}
+
+		return Rect2.bboxOf(this.corners.map((corner) => affineTransform.transformVec2(corner)));
 	}
 
 	/** @return true iff this is equal to `other ± tolerance` */
@@ -307,13 +349,12 @@ export class Rect2 extends Abstract2DShape {
 		return `Rect(point(${this.x}, ${this.y}), size(${this.w}, ${this.h}))`;
 	}
 
-
 	public static fromCorners(corner1: Point2, corner2: Point2) {
 		return new Rect2(
 			Math.min(corner1.x, corner2.x),
 			Math.min(corner1.y, corner2.y),
 			Math.abs(corner1.x - corner2.x),
-			Math.abs(corner1.y - corner2.y)
+			Math.abs(corner1.y - corner2.y),
 		);
 	}
 
@@ -344,7 +385,7 @@ export class Rect2 extends Abstract2DShape {
 
 		return Rect2.fromCorners(
 			Vec2.of(minX - margin, minY - margin),
-			Vec2.of(maxX + margin, maxY + margin)
+			Vec2.of(maxX + margin, maxY + margin),
 		);
 	}
 
@@ -369,9 +410,7 @@ export class Rect2 extends Abstract2DShape {
 			maxY = Math.max(maxY, rect.y + rect.h);
 		}
 
-		return new Rect2(
-			minX, minY, maxX - minX, maxY - minY,
-		);
+		return new Rect2(minX, minY, maxX - minX, maxY - minY);
 	}
 
 	public static of(template: RectTemplate) {

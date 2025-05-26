@@ -1,6 +1,12 @@
 import { LoadSaveDataTable } from '../../components/AbstractComponent';
 import { Mat33, Rect2, Point2, Vec2, toRoundedString } from '@js-draw/math';
-import { svgAttributesDataKey, svgLoaderAttributeContainerID, SVGLoaderUnknownAttribute, SVGLoaderUnknownStyleAttribute, svgStyleAttributesDataKey } from '../../SVGLoader';
+import {
+	svgAttributesDataKey,
+	svgLoaderAttributeContainerID,
+	SVGLoaderUnknownAttribute,
+	SVGLoaderUnknownStyleAttribute,
+	svgStyleAttributesDataKey,
+} from '../../SVGLoader/SVGLoader';
 import Viewport from '../../Viewport';
 import RenderingStyle, { stylesEqual } from '../RenderingStyle';
 import TextRenderingStyle from '../TextRenderingStyle';
@@ -28,21 +34,25 @@ type FromViewportOptions = {
 	useViewBoxForPositioning?: boolean;
 };
 
+type DrawWithSVGParentContext = {
+	sanitize: boolean;
+};
+
 /**
  * Renders onto an `SVGElement`.
  *
  * @see {@link Editor.toSVG}
  */
 export default class SVGRenderer extends AbstractRenderer {
-	private lastPathStyle: RenderingStyle|null = null;
+	private lastPathStyle: RenderingStyle | null = null;
 	private lastPathString: string[] = [];
 	private lastContainerIDList: string[] = [];
 
 	// Elements that make up the current object (as created by startObject)
 	// if any.
-	private objectElems: SVGElement[]|null = null;
+	private objectElems: SVGElement[] | null = null;
 
-	private overwrittenAttrs: Record<string, string|null> = {};
+	private overwrittenAttrs: Record<string, string | null> = {};
 
 	/**
 	 * Creates a renderer that renders onto `elem`. If `sanitize`, don't render potentially untrusted data.
@@ -50,7 +60,11 @@ export default class SVGRenderer extends AbstractRenderer {
 	 * `viewport` is used to determine the translation/rotation/scaling/output size of the rendered
 	 * data.
 	 */
-	public constructor(private elem: SVGSVGElement, viewport: Viewport, private sanitize: boolean = false) {
+	public constructor(
+		private elem: SVGSVGElement,
+		viewport: Viewport,
+		private sanitize: boolean = false,
+	) {
 		super(viewport);
 		this.clear();
 
@@ -61,7 +75,9 @@ export default class SVGRenderer extends AbstractRenderer {
 		if (!this.elem.querySelector(`#${renderedStylesheetId}`)) {
 			// Default to rounded strokes.
 			const styleSheet = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-			styleSheet.innerHTML = `
+			styleSheet.appendChild(
+				document.createTextNode(
+					`
 				path {
 					stroke-linecap: round;
 					stroke-linejoin: round;
@@ -70,14 +86,16 @@ export default class SVGRenderer extends AbstractRenderer {
 				text {
 					white-space: pre;
 				}
-			`.replace(/\s+/g, '');
+			`.replace(/\s+/g, ''),
+				),
+			);
 			styleSheet.setAttribute('id', renderedStylesheetId);
 			this.elem.appendChild(styleSheet);
 		}
 	}
 
 	// Sets an attribute on the root SVG element.
-	public setRootSVGAttribute(name: string, value: string|null) {
+	public setRootSVGAttribute(name: string, value: string | null) {
 		if (this.sanitize) {
 			return;
 		}
@@ -136,7 +154,10 @@ export default class SVGRenderer extends AbstractRenderer {
 
 		if (style.stroke) {
 			pathElem.setAttribute('stroke', style.stroke.color.toHexString());
-			pathElem.setAttribute('stroke-width', toRoundedString(style.stroke.width * this.getSizeOfCanvasPixelOnScreen()));
+			pathElem.setAttribute(
+				'stroke-width',
+				toRoundedString(style.stroke.width * this.getSizeOfCanvasPixelOnScreen()),
+			);
 		}
 
 		this.elem.appendChild(pathElem);
@@ -151,7 +172,9 @@ export default class SVGRenderer extends AbstractRenderer {
 
 		// Try to extend the previous path, if possible
 		if (
-			this.lastPathString.length === 0 || !this.lastPathStyle || !stylesEqual(this.lastPathStyle, style)
+			this.lastPathString.length === 0 ||
+			!this.lastPathStyle ||
+			!stylesEqual(this.lastPathStyle, style)
 		) {
 			this.addPathToSVG();
 			this.lastPathStyle = style;
@@ -163,7 +186,9 @@ export default class SVGRenderer extends AbstractRenderer {
 	// Apply [elemTransform] to [elem]. Uses both a `matrix` and `.x`, `.y` properties if `setXY` is true.
 	// Otherwise, just uses a `matrix`.
 	private transformFrom(elemTransform: Mat33, elem: SVGElement, inCanvasSpace: boolean = false) {
-		const transform = !inCanvasSpace ? this.getCanvasToScreenTransform().rightMul(elemTransform) : elemTransform;
+		const transform = !inCanvasSpace
+			? this.getCanvasToScreenTransform().rightMul(elemTransform)
+			: elemTransform;
 
 		if (!transform.eq(Mat33.identity)) {
 			const matrixString = transform.toCSSMatrix();
@@ -177,11 +202,11 @@ export default class SVGRenderer extends AbstractRenderer {
 		}
 	}
 
-	private textContainer: SVGTextElement|null = null;
-	private textContainerTransform: Mat33|null = null;
-	private textParentStyle: Partial<TextRenderingStyle>|null = defaultTextStyle;
+	private textContainer: SVGTextElement | null = null;
+	private textContainerTransform: Mat33 | null = null;
+	private textParentStyle: Partial<TextRenderingStyle> | null = defaultTextStyle;
 	public drawText(text: string, transform: Mat33, style: TextRenderingStyle): void {
-		const applyTextStyles = (elem: SVGTextElement|SVGTSpanElement, style: TextRenderingStyle) => {
+		const applyTextStyles = (elem: SVGTextElement | SVGTSpanElement, style: TextRenderingStyle) => {
 			if (style.fontFamily !== this.textParentStyle?.fontFamily) {
 				elem.style.fontFamily = style.fontFamily;
 			}
@@ -287,11 +312,13 @@ export default class SVGRenderer extends AbstractRenderer {
 		if (loaderData && !this.sanitize) {
 			// Restore any attributes unsupported by the app.
 			for (const elem of this.objectElems) {
-				const attrs = loaderData[svgAttributesDataKey] as SVGLoaderUnknownAttribute[]|undefined;
-				const styleAttrs = loaderData[svgStyleAttributesDataKey] as SVGLoaderUnknownStyleAttribute[]|undefined;
+				const attrs = loaderData[svgAttributesDataKey] as SVGLoaderUnknownAttribute[] | undefined;
+				const styleAttrs = loaderData[svgStyleAttributesDataKey] as
+					| SVGLoaderUnknownStyleAttribute[]
+					| undefined;
 
 				if (attrs) {
-					for (const [ attr, value ] of attrs) {
+					for (const [attr, value] of attrs) {
 						elem.setAttribute(attr, value);
 					}
 				}
@@ -314,16 +341,15 @@ export default class SVGRenderer extends AbstractRenderer {
 			}
 
 			if (
-				containerIDList.length > 0
+				containerIDList.length > 0 &&
 				// containerIDList must share a prefix with the last ID list
 				// otherwise, the z order of elements may have been changed from
 				// the original image.
 				// In the case that the z order has been changed, keep the current
 				// element as a child of the root to preserve z order.
-				&& listPrefixMatch(this.lastContainerIDList, containerIDList)
-
+				listPrefixMatch(this.lastContainerIDList, containerIDList) &&
 				// The component can add at most one more parent than the previous item.
-				&& this.lastContainerIDList.length >= containerIDList.length - 1
+				this.lastContainerIDList.length >= containerIDList.length - 1
 			) {
 				// Select the last
 				const containerID = containerIDList[containerIDList.length - 1];
@@ -335,7 +361,10 @@ export default class SVGRenderer extends AbstractRenderer {
 					// If this is the first time we're entering the group, the
 					// group should be empty.
 					// Otherwise, this may be a case that would break z-ordering.
-					if (container.children.length === 0 || this.lastContainerIDList.length >= containerIDList.length) {
+					if (
+						container.children.length === 0 ||
+						this.lastContainerIDList.length >= containerIDList.length
+					) {
 						// Move all objectElems to the found container
 						for (const elem of this.objectElems) {
 							elem.remove();
@@ -371,18 +400,34 @@ export default class SVGRenderer extends AbstractRenderer {
 	}
 
 	// Not implemented -- use drawPath instead.
-	private unimplementedMessage() { throw new Error('Not implemenented!'); }
-	protected beginPath(_startPoint: Point2) { this.unimplementedMessage(); }
-	protected endPath(_style: RenderingStyle) { this.unimplementedMessage(); }
-	protected lineTo(_point: Point2) { this.unimplementedMessage(); }
-	protected moveTo(_point: Point2) { this.unimplementedMessage(); }
+	private unimplementedMessage() {
+		throw new Error('Not implemenented!');
+	}
+	protected beginPath(_startPoint: Point2) {
+		this.unimplementedMessage();
+	}
+	protected endPath(_style: RenderingStyle) {
+		this.unimplementedMessage();
+	}
+	protected lineTo(_point: Point2) {
+		this.unimplementedMessage();
+	}
+	protected moveTo(_point: Point2) {
+		this.unimplementedMessage();
+	}
 	protected traceCubicBezierCurve(
-		_controlPoint1: Point2, _controlPoint2: Point2, _endPoint: Point2
-	) { this.unimplementedMessage(); }
-	protected traceQuadraticBezierCurve(_controlPoint: Point2, _endPoint: Point2) { this.unimplementedMessage(); }
+		_controlPoint1: Point2,
+		_controlPoint2: Point2,
+		_endPoint: Point2,
+	) {
+		this.unimplementedMessage();
+	}
+	protected traceQuadraticBezierCurve(_controlPoint: Point2, _endPoint: Point2) {
+		this.unimplementedMessage();
+	}
 
 	public drawPoints(...points: Point2[]) {
-		points.map(point => {
+		points.map((point) => {
 			const elem = document.createElementNS(svgNameSpace, 'circle');
 			elem.setAttribute('cx', `${point.x}`);
 			elem.setAttribute('cy', `${point.y}`);
@@ -391,20 +436,46 @@ export default class SVGRenderer extends AbstractRenderer {
 		});
 	}
 
-	// Renders a **copy** of the given element.
+	/**
+	 * Adds a **copy** of the given element directly to the container
+	 * SVG element, **without applying transforms**.
+	 *
+	 * If `sanitize` is enabled, this does nothing.
+	 */
 	public drawSVGElem(elem: SVGElement) {
 		if (this.sanitize) {
 			return;
 		}
 
 		// Don't add multiple copies of the default stylesheet.
-		if (elem.tagName.toLowerCase() === 'style' && elem.getAttribute('id') === renderedStylesheetId) {
+		if (
+			elem.tagName.toLowerCase() === 'style' &&
+			elem.getAttribute('id') === renderedStylesheetId
+		) {
 			return;
 		}
 
 		const elemToDraw = elem.cloneNode(true) as SVGElement;
 		this.elem.appendChild(elemToDraw);
 		this.objectElems?.push(elemToDraw);
+	}
+
+	/**
+	 * Allows rendering directly to the underlying SVG element. Rendered
+	 * content is added to a `<g>` element that's passed as `parent` to `callback`.
+	 *
+	 * **Note**: Unlike {@link drawSVGElem}, this method can be used even if `sanitize` is `true`.
+	 * In this case, it's the responsibility of `callback` to ensure that everything added
+	 * to `parent` is safe to render.
+	 */
+	public drawWithSVGParent(
+		callback: (parent: SVGGElement, context: DrawWithSVGParentContext) => void,
+	) {
+		const parent = document.createElementNS(svgNameSpace, 'g');
+		this.transformFrom(Mat33.identity, parent, true);
+		callback(parent, { sanitize: this.sanitize });
+		this.elem.appendChild(parent);
+		this.objectElems?.push(parent);
 	}
 
 	public isTooSmallToRender(_rect: Rect2): boolean {
@@ -418,7 +489,7 @@ export default class SVGRenderer extends AbstractRenderer {
 	 * If `options` is a `boolean`, it is interpreted as whether to sanitize (not add unknown
 	 * SVG entities to) the output.
 	 */
-	public static fromViewport(viewport: Viewport, options: FromViewportOptions|boolean = true) {
+	public static fromViewport(viewport: Viewport, options: FromViewportOptions | boolean = true) {
 		let sanitize: boolean;
 		let useViewBoxForPositioning: boolean;
 		if (typeof options === 'boolean') {
@@ -438,9 +509,7 @@ export default class SVGRenderer extends AbstractRenderer {
 		let viewBoxComponents: number[];
 		if (useViewBoxForPositioning) {
 			const exportRect = viewport.visibleRect;
-			viewBoxComponents = [
-				exportRect.x, exportRect.y, exportRect.w, exportRect.h,
-			];
+			viewBoxComponents = [exportRect.x, exportRect.y, exportRect.w, exportRect.h];
 
 			// Replace the viewport with a copy that has a modified transform.
 			// (Avoids modifying the original viewport).
@@ -454,7 +523,10 @@ export default class SVGRenderer extends AbstractRenderer {
 		}
 
 		// rect.x -> size of rect in x direction, rect.y -> size of rect in y direction.
-		result.setAttribute('viewBox', viewBoxComponents.map(part => toRoundedString(part)).join(' '));
+		result.setAttribute(
+			'viewBox',
+			viewBoxComponents.map((part) => toRoundedString(part)).join(' '),
+		);
 		result.setAttribute('width', toRoundedString(screenRectSize.x));
 		result.setAttribute('height', toRoundedString(screenRectSize.y));
 

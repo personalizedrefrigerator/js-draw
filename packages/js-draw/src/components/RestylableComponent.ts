@@ -3,7 +3,10 @@ import SerializableCommand from '../commands/SerializableCommand';
 import UnresolvedSerializableCommand from '../commands/UnresolvedCommand';
 import Editor from '../Editor';
 import { EditorLocalization } from '../localization';
-import TextRenderingStyle, { textStyleFromJSON, textStyleToJSON } from '../rendering/TextRenderingStyle';
+import TextRenderingStyle, {
+	textStyleFromJSON,
+	textStyleToJSON,
+} from '../rendering/TextRenderingStyle';
 import AbstractComponent from './AbstractComponent';
 
 export interface ComponentStyle {
@@ -12,7 +15,7 @@ export interface ComponentStyle {
 }
 
 const serializeComponentStyle = (style: ComponentStyle) => {
-	const result: Record<string, any> = { };
+	const result: Record<string, any> = {};
 
 	if (style.color) {
 		result.color = style.color.toHexString();
@@ -25,7 +28,7 @@ const serializeComponentStyle = (style: ComponentStyle) => {
 	return result;
 };
 
-const deserializeComponentStyle = (json: Record<string, any>|any): ComponentStyle => {
+const deserializeComponentStyle = (json: Record<string, any>): ComponentStyle => {
 	const color = json.color ? Color4.fromHex(json.color) : undefined;
 	const textStyle = json.textStyle ? textStyleFromJSON(json.textStyle) : undefined;
 
@@ -41,15 +44,15 @@ export const createRestyleComponentCommand = (
 	newStyle: ComponentStyle,
 	component: RestyleableComponent,
 ): SerializableCommand => {
-	return new DefaultRestyleComponentCommand(
-		initialStyle, newStyle, component.getId(), component
-	);
+	return new DefaultRestyleComponentCommand(initialStyle, newStyle, component.getId(), component);
 };
 
-
 // Returns true if `component` is a `RestylableComponent`.
-export const isRestylableComponent = (component: AbstractComponent): component is RestyleableComponent => {
-	const hasMethods = 'getStyle' in component && 'updateStyle' in component && 'forceStyle' in component;
+export const isRestylableComponent = (
+	component: AbstractComponent,
+): component is RestyleableComponent => {
+	const hasMethods =
+		'getStyle' in component && 'updateStyle' in component && 'forceStyle' in component;
 	if (!hasMethods) {
 		return false;
 	}
@@ -91,13 +94,12 @@ export interface RestyleableComponent extends AbstractComponent {
 	 *
 	 * Prefer `updateStyle(style).apply(editor)`.
 	 */
-	forceStyle(style: ComponentStyle, editor: Editor|null): void;
+	forceStyle(style: ComponentStyle, editor: Editor | null): void;
 
 	isRestylableComponent: true;
 }
 
 export default RestyleableComponent;
-
 
 const defaultRestyleComponentCommandId = 'default-restyle-element';
 
@@ -131,7 +133,9 @@ class DefaultRestyleComponentCommand extends UnresolvedSerializableCommand {
 	}
 
 	public description(editor: Editor, localizationTable: EditorLocalization): string {
-		return localizationTable.restyledElement(this.getComponent(editor).description(localizationTable));
+		return localizationTable.restyledElement(
+			this.getComponent(editor).description(localizationTable),
+		);
 	}
 
 	protected serializeToJSON() {
@@ -148,14 +152,10 @@ class DefaultRestyleComponentCommand extends UnresolvedSerializableCommand {
 			const newStyle = deserializeComponentStyle(json.newStyle);
 			const id = json.id;
 			if (typeof json.id !== 'string') {
-				throw new Error(`json.id is of type ${(typeof json.id)}, not string.`);
+				throw new Error(`json.id is of type ${typeof json.id}, not string.`);
 			}
 
-			return new DefaultRestyleComponentCommand(
-				origStyle,
-				newStyle,
-				id,
-			);
+			return new DefaultRestyleComponentCommand(origStyle, newStyle, id);
 		});
 	}
 }

@@ -25,9 +25,8 @@ export class Color4 {
 		public readonly b: number,
 
 		/** Alpha/transparent component. ${\tt a} \in [0, 1]$. 0 = transparent */
-		public readonly a: number
-	) {
-	}
+		public readonly a: number,
+	) {}
 
 	/**
 	 * Create a color from red, green, blue components. The color is fully opaque (`a = 1.0`).
@@ -38,6 +37,10 @@ export class Color4 {
 		return Color4.ofRGBA(red, green, blue, 1.0);
 	}
 
+	/**
+	 * Creates a color from red, green, blue, and transparency components. Each component should
+	 * be in the range $[0, 1]$.
+	 */
 	public static ofRGBA(red: number, green: number, blue: number, alpha: number): Color4 {
 		red = Math.max(0, Math.min(red, 1));
 		green = Math.max(0, Math.min(green, 1));
@@ -47,6 +50,40 @@ export class Color4 {
 		return new Color4(red, green, blue, alpha);
 	}
 
+	/**
+	 * Creates a color from an RGB (or RGBA) array.
+	 *
+	 * This is similar to {@link ofRGB} and {@link ofRGBA}, but, by default, takes values
+	 * that range from 0 to 255.
+	 *
+	 * If the array values instead range from 0-1, pass `maxValue` as `1`.
+	 */
+	public static fromRGBArray(
+		array: Uint8Array | Uint8ClampedArray | number[],
+		maxValue: number = 255,
+	) {
+		const red = array[0];
+		const green = array[1] ?? red;
+		const blue = array[2] ?? red;
+
+		let alpha = 255;
+		if (3 < array.length) {
+			alpha = array[3];
+		}
+
+		return Color4.ofRGBA(red / maxValue, green / maxValue, blue / maxValue, alpha / maxValue);
+	}
+
+	/**
+	 * Creates a `Color4` from a three or four-component hexadecimal
+	 * [color string](https://en.wikipedia.org/wiki/Web_colors#Hex_triplet).
+	 *
+	 * Example:
+	 * ```ts,runnable,console
+	 * import { Color4 } from '@js-draw/math';
+	 * console.log(Color4.fromHex('#ff0'));
+	 * ```
+	 */
 	public static fromHex(hexString: string): Color4 {
 		// Remove starting '#' (if present)
 		hexString = (hexString.match(/^[#]?(.*)$/) ?? [])[1];
@@ -62,7 +99,7 @@ export class Color4 {
 			const components = hexString.split('');
 
 			// Convert to RRGGBBAA or RRGGBB format
-			hexString = components.map(component => `${component}0`).join('');
+			hexString = components.map((component) => `${component}0`).join('');
 		}
 
 		if (hexString.length === 6) {
@@ -83,7 +120,7 @@ export class Color4 {
 		return Color4.ofRGBA(components[0], components[1], components[2], components[3]);
 	}
 
-	/** Like fromHex, but can handle additional colors if an `HTMLCanvasElement` is available. */
+	/** Like {@link fromHex}, but can handle additional colors if an `HTMLCanvasElement` is available. */
 	public static fromString(text: string): Color4 {
 		if (text.startsWith('#')) {
 			return Color4.fromHex(text);
@@ -108,14 +145,21 @@ export class Color4 {
 
 			if (componentsList.length === 3) {
 				return Color4.ofRGB(
-					componentsList[0] / 255, componentsList[1] / 255, componentsList[2] / 255
+					componentsList[0] / 255,
+					componentsList[1] / 255,
+					componentsList[2] / 255,
 				);
 			} else if (componentsList.length === 4) {
 				return Color4.ofRGBA(
-					componentsList[0] / 255, componentsList[1] / 255, componentsList[2] / 255, componentsList[3]
+					componentsList[0] / 255,
+					componentsList[1] / 255,
+					componentsList[2] / 255,
+					componentsList[3],
 				);
 			} else {
-				throw new Error(`RGB string, ${text}, has wrong number of components: ${componentsList.length}`);
+				throw new Error(
+					`RGB string, ${text}, has wrong number of components: ${componentsList.length}`,
+				);
 			}
 		}
 
@@ -145,7 +189,7 @@ export class Color4 {
 	}
 
 	/** @returns true if `this` and `other` are approximately equal. */
-	public eq(other: Color4|null|undefined): boolean {
+	public eq(other: Color4 | null | undefined): boolean {
 		if (other == null) {
 			return false;
 		}
@@ -180,6 +224,11 @@ export class Color4 {
 		);
 	}
 
+	/** Returns a new color with a different opacity. */
+	public withAlpha(a: number) {
+		return new Color4(this.r, this.g, this.b, a);
+	}
+
 	/**
 	 * Ignoring this color's alpha component, returns a vector with components,
 	 * $$
@@ -202,7 +251,7 @@ export class Color4 {
 		// - https://stackoverflow.com/a/9733420
 
 		// Normalize the components, as per above
-		const components = [ this.r, this.g, this.b ].map(component => {
+		const components = [this.r, this.g, this.b].map((component) => {
 			if (component < 0.03928) {
 				return component / 12.92;
 			} else {
@@ -358,23 +407,22 @@ export class Color4 {
 
 		let rgb;
 		if (huePrime < 1) {
-			rgb = [ chroma, secondLargestComponent, 0 ];
+			rgb = [chroma, secondLargestComponent, 0];
 		} else if (huePrime < 2) {
-			rgb = [ secondLargestComponent, chroma, 0 ];
+			rgb = [secondLargestComponent, chroma, 0];
 		} else if (huePrime < 3) {
-			rgb = [ 0, chroma, secondLargestComponent ];
+			rgb = [0, chroma, secondLargestComponent];
 		} else if (huePrime < 4) {
-			rgb = [ 0, secondLargestComponent, chroma ];
+			rgb = [0, secondLargestComponent, chroma];
 		} else if (huePrime < 5) {
-			rgb = [ secondLargestComponent, 0, chroma ];
+			rgb = [secondLargestComponent, 0, chroma];
 		} else {
-			rgb = [ chroma, 0, secondLargestComponent ];
+			rgb = [chroma, 0, secondLargestComponent];
 		}
 
 		const adjustment = value - chroma;
 		return Color4.ofRGB(rgb[0] + adjustment, rgb[1] + adjustment, rgb[2] + adjustment);
 	}
-
 
 	/**
 	 * Equivalent to `ofRGB(rgb.x, rgb.y, rgb.z)`.
@@ -385,7 +433,7 @@ export class Color4 {
 		return Color4.ofRGBA(rgb.x, rgb.y, rgb.z, alpha ?? 1);
 	}
 
-	private hexString: string|null = null;
+	private hexString: string | null = null;
 
 	/**
 	 * @returns a hexadecimal color string representation of `this`, in the form `#rrggbbaa`.

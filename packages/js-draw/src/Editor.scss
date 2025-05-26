@@ -1,4 +1,3 @@
-
 @use './toolbar/toolbar.scss';
 @use './tools/tools.scss';
 @use './dialogs/dialogs.scss';
@@ -64,9 +63,12 @@
 
 .imageEditorContainer {
 	color: var(--foreground-color-1);
-	font-family: system-ui, -apple-system, sans-serif;
+	font-family:
+		system-ui,
+		-apple-system,
+		sans-serif;
 	background-color: var(--background-color-1);
-	
+
 	// Set the width/height to a value that's independent of its content -- avoids
 	// ResizeObserver errors: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
 	width: 100%;
@@ -99,7 +101,7 @@
 	min-height: 100px;
 	min-width: 0;
 	width: 100%;
-	height:	100%;
+	height: 100%;
 }
 
 .imageEditorContainer .imageEditorRenderArea canvas {
@@ -161,6 +163,37 @@
 .imageEditorContainer .textRendererOutputContainer:focus-within {
 	overflow: visible;
 	z-index: 5;
+}
+
+// See Editor.anchorElementToCanvas
+.imageEditorContainer .anchored-element-overlay {
+	overflow: visible;
+	height: 0;
+
+	> .content-wrapper {
+		width: var(--editor-current-display-width-px);
+		height: var(--editor-current-display-height-px);
+		overflow: hidden;
+		// Display 'position: absolute' children relative to this.
+		position: relative;
+
+		// Disable pointer events: If the parent (or the container) has
+		// captured pointers and the container is removed, this prevents
+		// us from receiving the following events (e.g. in Firefox).
+		pointer-events: none;
+
+		> .content {
+			position: absolute;
+			left: var(--position-x);
+			top: var(--position-y);
+			transform: scale(var(--scale)) rotate(var(--rotation));
+			transform-origin: left top;
+			margin: 0;
+
+			// We *do* want pointer events for the positioned content.
+			pointer-events: all;
+		}
+	}
 }
 
 // TODO: Apply this change during a future major release.

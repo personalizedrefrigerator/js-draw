@@ -1,5 +1,6 @@
-
-type Equalable = { eq: (other: unknown, ...args: any[])=>boolean };
+interface Equalable<Args extends unknown[]> {
+	eq: (other: unknown, ...args: Args) => boolean;
+}
 
 export const loadExpectExtensions = () => {
 	// Custom matchers. See
@@ -7,7 +8,11 @@ export const loadExpectExtensions = () => {
 	expect.extend({
 		// Determine whether expected = actual based on the objects'
 		// .eq methods
-		objEq(actual: Equalable, expected: Equalable|undefined|null, ...eqArgs: any[]) {
+		objEq<Args extends unknown[]>(
+			actual: Equalable<Args>,
+			expected: Equalable<Args> | undefined | null,
+			...eqArgs: Args
+		) {
 			let pass = false;
 			if (!expected) {
 				pass = actual.eq(expected, ...eqArgs);
@@ -18,7 +23,7 @@ export const loadExpectExtensions = () => {
 			return {
 				pass,
 				message: () => {
-					return `Expected ${pass ? '!' : ''}(${actual}).eq(${expected}). Options(${eqArgs})`;
+					return `Expected ${pass ? '!' : ''}(${String(actual)}).eq(${String(expected)}). Options(${String(eqArgs)})`;
 				},
 			};
 		},
@@ -27,7 +32,7 @@ export const loadExpectExtensions = () => {
 				return {
 					pass: false,
 					message: () => {
-						return `Wrong length (actual: ${actual.length}, expected: ${expected.length}) (${JSON.stringify({expected, actual})})`;
+						return `Wrong length (actual: ${actual.length}, expected: ${expected.length}) (${JSON.stringify({ expected, actual })})`;
 					},
 				};
 			}
@@ -37,12 +42,12 @@ export const loadExpectExtensions = () => {
 					return {
 						pass: false,
 						message: () =>
-							`Entry ${i}: ${expected[i]} and ${actual[i]} are not within ${tolerance}. (${JSON.stringify({expected, actual})})`,
+							`Entry ${i}: ${expected[i]} and ${actual[i]} are not within ${tolerance}. (${JSON.stringify({ expected, actual })})`,
 					};
 				}
 			}
 
-			return { pass: true, message: () => 'All entries are close', };
+			return { pass: true, message: () => 'All entries are close' };
 		},
 	});
 };

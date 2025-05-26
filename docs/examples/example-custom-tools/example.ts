@@ -8,7 +8,7 @@ const toolbar = editor.addToolbar(defaultLayout);
 // A very simple version of the full pen tool.
 // A better way to do this is to extend jsdraw.PenTool
 class CustomPenTool extends jsdraw.BaseTool {
-	private lineBuilder: jsdraw.ComponentBuilder|null;
+	private lineBuilder: jsdraw.ComponentBuilder | null;
 
 	public constructor(
 		private editor: jsdraw.Editor,
@@ -37,13 +37,12 @@ class CustomPenTool extends jsdraw.BaseTool {
 		this.previewStroke();
 	}
 
-
-
-
-
 	public override onPointerDown({ current, allPointers }: jsdraw.PointerEvt): boolean {
 		if (allPointers.length === 1) {
-			this.lineBuilder = jsdraw.makeFreehandLineBuilder(this.toStrokePoint(current), this.editor.viewport);
+			this.lineBuilder = jsdraw.makeFreehandLineBuilder(
+				this.toStrokePoint(current),
+				this.editor.viewport,
+			);
 
 			// Return true: We're handling the event.
 			return true;
@@ -95,9 +94,10 @@ class CustomPenTool extends jsdraw.BaseTool {
 		}
 	}
 
-	public getStyle() { return this.style; }
+	public getStyle() {
+		return this.style;
+	}
 }
-
 
 // TODO: Localize these!
 const strings = {
@@ -107,7 +107,10 @@ const strings = {
 };
 
 class CustomPenToolbarWidget extends jsdraw.BaseToolWidget {
-	public constructor(editor: jsdraw.Editor, private pen: CustomPenTool) {
+	public constructor(
+		editor: jsdraw.Editor,
+		private pen: CustomPenTool,
+	) {
 		super(editor, pen, 'custom-pen-widget');
 	}
 
@@ -151,16 +154,16 @@ class CustomPenToolbarWidget extends jsdraw.BaseToolWidget {
 const penStyle = {
 	thickness: 1,
 	color: jsdraw.Color4.red,
-	factory: jsdraw.makeFreehandLineBuilder
+	factory: jsdraw.makeFreehandLineBuilder,
 };
 
-const pen = new CustomPenTool(
-	editor,
-	strings.customPenDescription,
-	penStyle,
-);
+const pen = new CustomPenTool(editor, strings.customPenDescription, penStyle);
 const eraser = new jsdraw.EraserTool(editor, strings.eraser);
-const panZoom = new jsdraw.PanZoomTool(editor, jsdraw.PanZoomMode.TwoFingerTouchGestures | jsdraw.PanZoomMode.Keyboard, strings.panZoomDescription);
+const panZoom = new jsdraw.PanZoomTool(
+	editor,
+	jsdraw.PanZoomMode.TwoFingerTouchGestures | jsdraw.PanZoomMode.Keyboard,
+	strings.panZoomDescription,
+);
 
 editor.toolController.setTools([]);
 

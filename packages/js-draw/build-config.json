@@ -1,7 +1,7 @@
 {
 	"inDirectory": "./src",
 	"outDirectory": "./dist",
-	"scssFiles": [ "./src/Editor.scss" ],
+	"scssFiles": ["./src/Editor.scss"],
 	"bundledFiles": [
 		{
 			"name": "jsdraw",
@@ -20,5 +20,6 @@
 			"path": "./tools/allLocales.js",
 			"defaultLocale": "en"
 		}
-	]
+	],
+	"prebuild": { "scriptPath": "./tools/prebuild.js" }
 }

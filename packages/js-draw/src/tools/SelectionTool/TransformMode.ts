@@ -6,7 +6,10 @@ import { ResizeMode } from './types';
 
 export class DragTransformer {
 	private dragStartPoint: Point2;
-	public constructor(private readonly editor: Editor, private selection: Selection) { }
+	public constructor(
+		private readonly editor: Editor,
+		private selection: Selection,
+	) {}
 
 	public onDragStart(startPoint: Vec3) {
 		this.selection.setTransform(Mat33.identity);
@@ -14,9 +17,7 @@ export class DragTransformer {
 	}
 	public onDragUpdate(canvasPos: Vec3) {
 		const delta = this.editor.viewport.roundPoint(canvasPos.minus(this.dragStartPoint));
-		this.selection.setTransform(Mat33.translation(
-			delta
-		));
+		this.selection.setTransform(Mat33.translation(delta));
 	}
 	public onDragEnd() {
 		return this.selection.finalizeTransform();
@@ -30,7 +31,10 @@ export class ResizeTransformer {
 	private transformOrigin: Point2;
 	private scaleRate: Vec2;
 
-	public constructor(private readonly editor: Editor, private selection: Selection) { }
+	public constructor(
+		private readonly editor: Editor,
+		private selection: Selection,
+	) {}
 
 	public onDragStart(startPoint: Vec3, mode: ResizeMode) {
 		this.selection.setTransform(Mat33.identity);
@@ -47,7 +51,7 @@ export class ResizeTransformer {
 		const selectionBoxCorners = selectionRect.corners;
 		let largestDistSquared = 0;
 
-		for (let i = 0; i < selectionBoxCorners.length; i ++) {
+		for (let i = 0; i < selectionBoxCorners.length; i++) {
 			const currentCorner = selectionBoxCorners[i];
 			const distSquaredToCurrent = this.dragStartPoint.minus(currentCorner).magnitudeSquared();
 			if (distSquaredToCurrent > largestDistSquared) {
@@ -89,14 +93,15 @@ export class ResizeTransformer {
 		}
 
 		if (this.mode === ResizeMode.Both) {
-			const delta = Math.abs(canvasDelta.x) > Math.abs(canvasDelta.y) ? canvasDelta.x : canvasDelta.y;
+			const delta =
+				Math.abs(canvasDelta.x) > Math.abs(canvasDelta.y) ? canvasDelta.x : canvasDelta.y;
 			const newWidth = origWidth + delta;
 			scale = Vec2.of(newWidth / origWidth, newWidth / origWidth);
 		}
 
 		// Round: If this isn't done, scaling can create numbers with long decimal representations.
 		//    long decimal representations => large file sizes.
-		scale = scale.map(component => Viewport.roundScaleRatio(component, 2));
+		scale = scale.map((component) => Viewport.roundScaleRatio(component, 2));
 
 		if (scale.x !== 0 && scale.y !== 0) {
 			const origin = this.editor.viewport.roundPoint(this.transformOrigin);
@@ -115,7 +120,10 @@ export class RotateTransformer {
 	private startPoint: Point2;
 	private startTime: number;
 
-	public constructor(private readonly editor: Editor, private selection: Selection) { }
+	public constructor(
+		private readonly editor: Editor,
+		private selection: Selection,
+	) {}
 
 	private getAngle(canvasPoint: Point2) {
 		const selectionCenter = this.selection.preTransformRegion.center;
@@ -142,12 +150,15 @@ export class RotateTransformer {
 
 	private setRotationTo(angle: number) {
 		// Transform in canvas space
-		const canvasSelCenter = this.editor.viewport.roundPoint(this.selection.preTransformRegion.center);
+		const canvasSelCenter = this.editor.viewport.roundPoint(
+			this.selection.preTransformRegion.center,
+		);
 		const unrounded = Mat33.zRotation(angle);
-		const roundedRotationTransform = unrounded.mapEntries(entry => Viewport.roundScaleRatio(entry));
+		const roundedRotationTransform = unrounded.mapEntries((entry) =>
+			Viewport.roundScaleRatio(entry),
+		);
 
-		const fullRoundedTransform = Mat33
-			.translation(canvasSelCenter)
+		const fullRoundedTransform = Mat33.translation(canvasSelCenter)
 			.rightMul(roundedRotationTransform)
 			.rightMul(Mat33.translation(canvasSelCenter.times(-1)));
 
@@ -171,9 +182,11 @@ export class RotateTransformer {
 		const clickThresholdTime = 0.4; // s
 		const dragTimeSeconds = (performance.now() - this.startTime) / 1000;
 
-		if (dragTimeSeconds < clickThresholdTime
-			&& this.maximumDistFromStart < clickThresholdDist
-			&& this.targetRotation === 0) {
+		if (
+			dragTimeSeconds < clickThresholdTime &&
+			this.maximumDistFromStart < clickThresholdDist &&
+			this.targetRotation === 0
+		) {
 			this.setRotationTo(-Math.PI / 2);
 		}
 

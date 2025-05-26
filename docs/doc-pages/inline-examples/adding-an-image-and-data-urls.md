@@ -1,4 +1,3 @@
-
 ```ts,runnable
 import { Editor, ImageComponent, Mat33 } from 'js-draw';
 const editor = new Editor(document.body);
@@ -15,7 +14,7 @@ const scaledByFactorOf100 = Mat33.scaling2D(100);
 const transform = rotated45Degrees.rightMul(scaledByFactorOf100);
 
 const imageComponent = await ImageComponent.fromImage(myHtmlImage, transform);
-await editor.dispatch(editor.image.addElement(imageComponent));
+await editor.dispatch(editor.image.addComponent(imageComponent));
 
 //
 // Make a new image from the editor itself (with editor.toDataURL)

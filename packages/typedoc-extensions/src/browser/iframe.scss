@@ -1,11 +1,10 @@
-
 :root.console-view {
 	background-color: #222;
 	color: white;
 
 	body > div {
 		margin-bottom: 10px;
-	
+
 		font-family: monospace;
 		white-space: pre-wrap;
 
@@ -33,6 +32,11 @@
 
 			border: 1px solid white;
 		}
+
+		.matrix-output {
+			display: inline-block;
+			color: #ffecff;
+		}
 	}
 
 	details {
@@ -53,4 +57,7 @@
 		font-family: monospace;
 		color: red;
 	}
+
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
 }

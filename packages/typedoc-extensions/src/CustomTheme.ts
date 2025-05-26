@@ -7,9 +7,8 @@ class CustomTheme extends DefaultTheme {
 	public constructor(renderer: Renderer) {
 		super(renderer);
 
-		loadRendererHooks(renderer);
+		loadRendererHooks(renderer, this.application.options);
 	}
-
 
 	public override buildNavigation(project: ProjectReflection): NavigationElement[] {
 		const options = this.application.options;

@@ -1,0 +1,50 @@
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.message-dialog-container dialog {
+	display: flex;
+
+	&.-closing {
+		opacity: 0;
+
+		&::backdrop {
+			opacity: 0;
+		}
+	}
+
+	&,
+	&::backdrop {
+		transition: opacity 0.2s ease;
+		animation: fade-in 0.2s ease;
+	}
+}
+
+.message-dialog-content {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+
+	> .close {
+		// Center the close button
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	> .scroll {
+		flex-grow: 1;
+		flex-shrink: 1;
+		overflow-y: auto;
+
+		margin-left: 20px;
+		margin-right: 20px;
+
+		padding-bottom: 20px;
+	}
+}

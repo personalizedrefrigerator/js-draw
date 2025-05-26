@@ -1,43 +1,40 @@
 {
-	"entryPoints": [
-		"./packages/js-draw",
-		"./packages/math",
-		"./packages/material-icons",
-
-		"./docs/doc-pages/"
-	],
+	"entryPoints": ["./packages/js-draw", "./packages/math", "./packages/material-icons"],
 	"entryPointStrategy": "packages",
 	"name": "js-draw",
 	"out": "docs/typedoc/",
-	"plugin": [ "@js-draw/typedoc-extensions" ],
+	"plugin": ["@js-draw/typedoc-extensions"],
 
-	"exclude": [
-		"**/*.test.ts",
-		"node_modules/**",
-		"**/dist/**",
-		"**/dist-test/**",
-		"src/testing/"
-	],
+	"exclude": ["**/*.test.ts", "node_modules/**", "**/dist/**", "**/dist-test/**", "src/testing/"],
 
-	"includes": "docs/",
+	"includeBaseDirectory": "docs/",
 	"theme": "js-draw-theme",
 
 	"sidebarReplacements": {
-		"docs/doc-pages/typedoc": "More Documentation",
 		"packages/js-draw/src/lib": "js-draw - {{version}}",
 		"packages/math/src/lib": "@js-draw/math - {{version}}",
-		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}",
-		"MigratingToVersion1__": "Migrating to version 1",
-		"WritingATheme__": "Writing a theme",
-		"CustomizingTools__": "Customizing tools"
+		"packages/material-icons/src/lib": "@js-draw/material-icons - {{version}}"
 	},
+
+	"projectDocuments": ["./docs/doc-pages/pages/*.md"],
+
+	"redirects": {
+		"modules/Additional_Documentation.CustomizingTools__.html": "documents/Guides.Customizing_existing_tools.html",
+		"modules/Additional_Documentation.MigratingToVersion1__.html": "documents/Guides.Migrating_to_version_1.html",
+		"modules/Additional_Documentation.WritingATheme__.html": "documents/Guides.Writing_a_theme.html",
+		"modules/Guides.html": "documents/Guides.html",
+		"documents/Guides.Migrating_to_version_1.html": "documents/Migrations.Migrating_to_version_1.html",
+		"modules/js_draw.html": "modules/js-draw.html",
+		"modules/_js_draw_material_icons.html": "modules/_js-draw_material-icons.html"
+	},
+
+	"sort": ["source-order"],
 
 	"excludePrivate": true,
 	"excludeInternal": true,
 	"includeVersion": false,
 	"commentStyle": "all",
 
-	"readme": "README.md",
 	"tsconfig": "tsconfig-typedoc.json",
 
 	"validation": {
