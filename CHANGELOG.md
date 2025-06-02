@@ -1,3 +1,8 @@
+# 1.30.1
+
+- Bug fixes
+  - Fix buttons in the editor cause parent forms to sumbit (adds `type="button"` to buttons).
+
 # 1.30.0
 
 - Features:
