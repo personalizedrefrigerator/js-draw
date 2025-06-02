@@ -458,14 +458,14 @@ export class Editor {
 
 			if (!this.settings.allowOverscroll) {
 				const imageRect = this.getImportExportRect();
-				if (!this.viewport.visibleRect.intersects(imageRect)) {
-					const visibleRectEdgePoint = this.viewport.visibleRect.getClosestPointOnBoundaryTo(
-						imageRect.center,
-					);
+				const visibleRect = this.viewport.visibleRect;
+				if (!visibleRect.intersects(imageRect)) {
+					const visibleRectEdgePoint = visibleRect.getClosestPointOnBoundaryTo(imageRect.center);
 					const imageRectEdgePoint = imageRect.getClosestPointOnBoundaryTo(visibleRectEdgePoint);
 					const canvasDelta = visibleRectEdgePoint.minus(imageRectEdgePoint);
 
-					if (canvasDelta.length() > 1e-10) {
+					const smallValue = 1e-10;
+					if (canvasDelta.length() > smallValue) {
 						this.viewport.resetTransform(evt.newTransform.rightMul(Mat33.translation(canvasDelta)));
 					}
 				}
