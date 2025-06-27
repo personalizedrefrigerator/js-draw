@@ -239,8 +239,6 @@ export default class PanZoom extends BaseTool {
 			this.editor.display.setDraftMode(true);
 		}
 
-		this.editor.display.getWetInkRenderer().drawPoints(currentPointer.canvasPos);
-
 		return handlingGesture;
 	}
 
