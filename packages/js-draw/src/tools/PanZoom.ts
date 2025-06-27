@@ -194,10 +194,19 @@ export default class PanZoom extends BaseTool {
 
 		this.lastPointerDownTimestamp = currentPointer.timeStamp;
 
-		const allAreTouch = this.allPointersAreOfType(pointers, PointerDevice.Touch);
 		const isRightClick = this.allPointersAreOfType(pointers, PointerDevice.RightButtonMouse);
 
-		if (allAreTouch && pointers.length === 2 && this.mode & PanZoomMode.TwoFingerTouchGestures) {
+		// Work around a Chromium bug where touch events are reported to have unknown type.
+		// See https://issues.chromium.org/u/1/issues/428153664.
+		const allAreTouch = this.allPointersAreOfType(pointers, PointerDevice.Touch);
+		const allAreUnknown = this.allPointersAreOfType(pointers, PointerDevice.Other);
+		const allAreProbablyTouch = allAreTouch || allAreUnknown;
+
+		if (
+			allAreProbablyTouch &&
+			pointers.length === 2 &&
+			this.mode & PanZoomMode.TwoFingerTouchGestures
+		) {
 			const { screenCenter, angle, dist } = this.computePinchData(pointers[0], pointers[1]);
 			this.lastTouchDist = dist;
 			this.startTouchDist = dist;
@@ -229,6 +238,8 @@ export default class PanZoom extends BaseTool {
 			this.transform ??= Viewport.transformBy(Mat33.identity);
 			this.editor.display.setDraftMode(true);
 		}
+
+		this.editor.display.getWetInkRenderer().drawPoints(currentPointer.canvasPos);
 
 		return handlingGesture;
 	}
