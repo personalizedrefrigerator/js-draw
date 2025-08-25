@@ -141,7 +141,8 @@ const generateTranslationTemplate = (
 		{
 			label: 'Language',
 			description: 'The name of the language to translate to in English (e.g. Spanish)',
-			value: destLocale ? localeToLanguageName(destLocale) : '',
+			// This cannot be empty. See https://github.com/personalizedrefrigerator/js-draw/issues/121
+			value: destLocale ? localeToLanguageName(destLocale) : '<language here>',
 		},
 		true,
 	);
