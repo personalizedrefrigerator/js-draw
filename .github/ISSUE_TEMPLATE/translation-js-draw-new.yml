@@ -23,7 +23,7 @@ body:
     attributes:
       label: 'Language'
       description: 'The name of the language to translate to in English (e.g. Spanish)'
-      value: ''
+      value: '<language here>'
     validations:
       required: true
   - type: textarea
