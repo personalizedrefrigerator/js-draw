@@ -268,9 +268,9 @@ const editor = new Editor(document.body, {
 
 ### Localization
 
-If a user's language is available in [src/localizations/](packages/js-draw/src/localizations) (as determined by `navigator.languages`), that localization will be used.
+By default, `js-draw` will attempt to automatically select the display language: if a user's language is available in [src/localizations/](packages/js-draw/src/localizations) (as determined by `navigator.languages`), that localization will be used.
 
-To override the default language, use `getLocalizationTable([ 'custom locale here' ])`. For example,
+**Using a different UI language**: To change the language used by the editor, set the `localization` option to `getLocalizationTable([ 'custom locale here' ])` or a custom localization table. For example,
 
 ```ts
 const editor = new Editor(document.body, {
@@ -279,9 +279,11 @@ const editor = new Editor(document.body, {
 });
 ```
 
+**Contributing a new localization upstream**: To contribute a new localization to `js-draw`, use one of the "Translation" [issue templates](https://github.com/personalizedrefrigerator/js-draw/issues/new/choose) in the main `js-draw` repository.
+
 <details><summary>Creating a custom localization</summary>
 
-See [src/localization.ts](packages/js-draw/src/localization.ts) for a list of strings that can be translated.
+It's also possible to create a full custom localization table. See [src/localization.ts](packages/js-draw/src/localization.ts) and [the translation issue templates](https://js-draw.web.app/debugging/translation-tester/) for a list of strings that can be translated.
 
 Many of the default strings in the editor might be overridden like this:
 
