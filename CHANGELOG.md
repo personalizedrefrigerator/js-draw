@@ -1,3 +1,10 @@
+# 1.31.0
+
+- Features:
+  - **Localization**: Chinese localization (by @MassiveBox in https://github.com/personalizedrefrigerator/js-draw/pull/123)
+- Other changes:
+  - Allow pointers of type "Other" to pinch zoom (in f65ee048b3b273a2c12229ac9c8927b56605ba54)
+
 # 1.30.1
 
 - Bug fixes
