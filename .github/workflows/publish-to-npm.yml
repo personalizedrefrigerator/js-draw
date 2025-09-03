@@ -6,6 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: publishing
+    # See https://docs.npmjs.com/trusted-publishers#github-actions-configuration
     permissions:
       contents: read
       id-token: write
@@ -15,6 +16,8 @@ jobs:
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
+      # NPM 11.x is required for OIDC publishing
+      - run: npm install -g npm@latest
       - run: corepack enable
       - run: yarn install
       - name: Run tests
@@ -22,5 +25,4 @@ jobs:
       - name: Publish
         run: yarn run publish-ci
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
