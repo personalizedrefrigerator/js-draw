@@ -1,9 +1,15 @@
+# 1.31.1
+
+- Disable [OIDC publishing](https://github.blog/changelog/2025-07-31-npm-trusted-publishing-with-oidc-is-generally-available/) for now (in afcb012e8e6e58ae25152a36574e9e29ce449a0d)
+  - At present, OIDC publishing is [unsupported by some of `js-draw`'s build tools](https://github.com/lerna/lerna/issues/4219).
+
 # 1.31.0
 
 - Features:
   - **Localization**: Chinese localization (by @MassiveBox in https://github.com/personalizedrefrigerator/js-draw/pull/123)
 - Other changes:
   - Allow pointers of type "Other" to pinch zoom (in f65ee048b3b273a2c12229ac9c8927b56605ba54)
+  - Enable [OIDC publishing](https://github.blog/changelog/2025-07-31-npm-trusted-publishing-with-oidc-is-generally-available/) (in afcb012e8e6e58ae25152a36574e9e29ce449a0d)
 
 # 1.30.1
 
