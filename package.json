@@ -34,7 +34,7 @@
 		"jest": "30.0.5",
 		"jest-environment-jsdom": "30.0.5",
 		"jsdom": "26.1.0",
-		"lerna": "8.1.8",
+		"lerna": "9.0.3",
 		"lint-staged": "13.2.3",
 		"prettier": "3.3.3",
 		"ts-jest": "29.4.1",
