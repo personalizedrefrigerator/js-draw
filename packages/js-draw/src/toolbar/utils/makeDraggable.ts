@@ -44,9 +44,8 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 			return true;
 		}
 
-		// Some inputs handle dragging themselves. Don't also interpret such gestures
-		// as dragging the dropdown.
-		const undraggableElementTypes = ['INPUT', 'SELECT', 'IMG'];
+		// Some elements need to handle drag events to avoid breaking the UI:
+		const undraggableElementTypes = ['INPUT', 'SELECT'];
 
 		let hasSuitableAncestors = false;
 		let ancestor = element.parentElement;
@@ -72,10 +71,14 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		| 'pointerup'
 		| 'pointerleave'
 		| 'pointercancel';
-	type PointerEventListener = (event: PointerEvent) => void;
-	const addEventListener = (
-		listenerType: PointerListenerType,
-		listener: PointerEventListener,
+	type DragListenerType = 'dragstart';
+	type ListenerType = PointerListenerType | DragListenerType;
+	type EventType = {
+		[key in ListenerType]: key extends PointerListenerType ? PointerEvent : DragEvent;
+	};
+	const addEventListener = <T extends ListenerType>(
+		listenerType: T,
+		listener: (event: EventType[T]) => void,
 		options?: AddEventListenerOptions,
 	) => {
 		dragElement.addEventListener(listenerType, listener, options);
@@ -186,6 +189,13 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 
 	addEventListener('pointerup', onGestureEnd);
 	addEventListener('pointercancel', onGestureEnd);
+
+	// Prevent draggable elements from scrolling both the menu and having other drag behavior.
+	addEventListener('dragstart', (event) => {
+		if (event.target instanceof HTMLElement && isDraggableElement(event.target)) {
+			event.preventDefault();
+		}
+	});
 
 	return {
 		removeListeners: () => {
