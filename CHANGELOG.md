@@ -1,3 +1,8 @@
+# 1.33.0
+
+- Fix: Fix dragging the image preview in the "image" menu doesn't move the menu.
+- Changed: Decreased the maximum size of the preview in the "image" menu.
+
 # 1.32.0
 
 - Updated German translation (by [@Kachelkaiser](https://github.com/Kachelkaiser)).
