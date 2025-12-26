@@ -95,15 +95,10 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		| 'pointerup'
 		| 'pointerleave'
 		| 'pointercancel';
-	type DragListenerType = 'dragstart';
 	type TouchListenerType = 'touchstart' | 'touchmove';
-	type ListenerType = PointerListenerType | DragListenerType | TouchListenerType;
+	type ListenerType = PointerListenerType | TouchListenerType;
 	type EventType = {
-		[key in ListenerType]: key extends PointerListenerType
-			? PointerEvent
-			: key extends TouchListenerType
-				? TouchEvent
-				: DragEvent;
+		[key in ListenerType]: key extends PointerListenerType ? PointerEvent : TouchEvent;
 	};
 	const addEventListener = <T extends ListenerType>(
 		listenerType: T,
@@ -218,13 +213,6 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 
 	addEventListener('pointerup', onGestureEnd);
 	addEventListener('pointercancel', onGestureEnd);
-
-	// Prevent draggable elements from scrolling both the menu and having other drag behavior.
-	addEventListener('dragstart', (event) => {
-		if (event.target instanceof HTMLElement && isDraggableElement(event.target)) {
-			event.preventDefault();
-		}
-	});
 
 	// In Chrome (as of Dec 2025), .preventDefault needs to be called from ontouchmove
 	// to allow the drag event to continue to be handled.
