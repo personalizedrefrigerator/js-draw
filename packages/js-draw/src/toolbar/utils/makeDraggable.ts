@@ -72,9 +72,14 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		| 'pointerleave'
 		| 'pointercancel';
 	type DragListenerType = 'dragstart';
-	type ListenerType = PointerListenerType | DragListenerType;
+	type TouchListenerType = 'touchstart' | 'touchmove';
+	type ListenerType = PointerListenerType | DragListenerType | TouchListenerType;
 	type EventType = {
-		[key in ListenerType]: key extends PointerListenerType ? PointerEvent : DragEvent;
+		[key in ListenerType]: key extends PointerListenerType
+			? PointerEvent
+			: key extends TouchListenerType
+				? TouchEvent
+				: DragEvent;
 	};
 	const addEventListener = <T extends ListenerType>(
 		listenerType: T,
@@ -93,8 +98,8 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 	// Returns whether the current (or if no current, **the last**) gesture is roughly a click.
 	// Because this can be called **after** a gesture has just ended, it should not require
 	// the gesture to be in progress.
-	const isRoughlyClick = () => {
-		return Math.hypot(lastX - startX, lastY - startY) < clickThreshold;
+	const isRoughlyClick = (currentX: number, currentY: number) => {
+		return Math.hypot(currentX - startX, currentY - startY) < clickThreshold;
 	};
 
 	let startedDragging = false;
@@ -134,7 +139,7 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		}
 
 		options.onDragEnd({
-			roughlyClick: isRoughlyClick(),
+			roughlyClick: isRoughlyClick(lastX, lastY),
 			endTimestamp: performance.now(),
 			displacement: Vec2.of(lastX - startX, lastY - startY),
 		});
@@ -155,19 +160,17 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 			return undefined;
 		}
 
-		// Only capture after motion -- capturing early prevents click events in Chrome.
-		if (capturedPointerId === null && !isRoughlyClick()) {
-			dragElement.setPointerCapture(event.pointerId);
-			capturedPointerId = event.pointerId;
-		}
-
 		const x = event.clientX;
 		const y = event.clientY;
+		const isClick = isRoughlyClick(x, y);
 		const dx = x - lastX;
 		const dy = y - lastY;
 
-		const isClick =
-			Math.abs(x - startX) <= clickThreshold && Math.abs(y - startY) <= clickThreshold;
+		// Only capture after motion -- capturing early prevents click events in Chrome.
+		if (capturedPointerId === null && !isClick) {
+			dragElement.setPointerCapture(event.pointerId);
+			capturedPointerId = event.pointerId;
+		}
 
 		if (!isClick || startedDragging) {
 			options.onDrag(dx, dy, Vec2.of(x - startX, y - startY));
@@ -193,6 +196,14 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 	// Prevent draggable elements from scrolling both the menu and having other drag behavior.
 	addEventListener('dragstart', (event) => {
 		if (event.target instanceof HTMLElement && isDraggableElement(event.target)) {
+			event.preventDefault();
+		}
+	});
+
+	// In Chrome (as of Dec 2025), .preventDefault needs to be called from ontouchmove
+	// to allow the drag event to continue to be handled.
+	addEventListener('touchmove', (event) => {
+		if (startedDragging && event.touches.length > 0) {
 			event.preventDefault();
 		}
 	});
