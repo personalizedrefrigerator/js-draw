@@ -20,18 +20,17 @@ describe('Line2', () => {
 		expect(line2.intersection(line1)?.point).objEq(Vec2.of(0.5, 0));
 	});
 
-	it('line from (10, 10) to (-100, 10) should intersect with the y-axis at t = 10', () => {
-		const line1 = new LineSegment2(Vec2.of(10, 10), Vec2.of(-10, 10));
-		// y = 2x - 2
-		const line2 = new LineSegment2(Vec2.of(0, -2), Vec2.of(0, 200));
+	it('line from (10, 10) to (-10, 10) should intersect with the y-axis at t = 0.5 (halfway along the line)', () => {
+		const line1 = new LineSegment2(Vec2.of(10, 10), Vec2.of(-10, 10)); // Segment along y = 10
+		const line2 = new LineSegment2(Vec2.of(0, -2), Vec2.of(0, 200)); // Segment along x = 0
 
 		expect(line1.intersection(line2)?.point).objEq(Vec2.of(0, 10));
 
-		// t=10 implies 10 units along the line from (10, 10) to (-10, 10)
-		expect(line1.intersection(line2)?.t).toBe(10);
+		// t=0.5 corresponds with half way along the line from (10, 10) to (-10, 10)
+		expect(line1.intersection(line2)?.t).toBe(0.5);
 
-		// Similarly, t = 12 implies 12 units above (0, -2) in the direction of (0, 200)
-		expect(line2.intersection(line1)?.t).toBe(12);
+		// Similarly, t = 12 / 202 implies 12 units along line2 (which has length 202)
+		expect(line2.intersection(line1)?.t).toBe(12 / 202);
 	});
 
 	it('y=2 and y=0 should not intersect', () => {

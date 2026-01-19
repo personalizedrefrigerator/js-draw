@@ -137,15 +137,8 @@ export class LineSegment2 extends Parameterized2DShape {
 
 	/**
 	 * Returns the intersection of this with another line segment.
-	 *
-	 * **WARNING**: The parameter value returned by this method does not range from 0 to 1 and
-	 *              is currently a length.
-	 *              This will change in a future release.
-	 * @deprecated
 	 */
 	public intersection(other: LineSegment2): IntersectionResult | null {
-		// TODO(v2.0.0): Make this return a `t` value from `0` to `1`.
-
 		// We want x₁(t) = x₂(t) and y₁(t) = y₂(t)
 		// Observe that
 		// x = this.point1.x + this.direction.x · t₁
@@ -171,7 +164,7 @@ export class LineSegment2 extends Parameterized2DShape {
 		//     = (d₁ₓd₂ₓ)(o₁ᵧ - o₂ᵧ + (d₂ᵧ/d₂ₓ)(o₂ₓ) - (d₁ᵧ/d₁ₓ)(o₁ₓ))/(d₂ᵧd₁ₓ - d₁ᵧd₂ₓ)
 		//     = ((o₁ᵧ - o₂ᵧ)((d₁ₓd₂ₓ)) + (d₂ᵧd₁ₓ)(o₂ₓ) - (d₁ᵧd₂ₓ)(o₁ₓ))/(d₂ᵧd₁ₓ - d₁ᵧd₂ₓ)
 		// ⇒ y = o₁ᵧ + d₁ᵧ · (x - o₁ₓ) / d₁ₓ = ...
-		let resultPoint, resultT;
+		let resultPoint, resultDistance;
 
 		// Consider very-near-vertical lines to be vertical --- not doing so can lead to
 		// precision error when dividing by this.direction.x.
@@ -190,7 +183,7 @@ export class LineSegment2 extends Parameterized2DShape {
 			const yIntersect =
 				((this.point1.x - other.point1.x) * other.direction.y) / other.direction.x + other.point1.y;
 			resultPoint = Vec2.of(xIntersect, yIntersect);
-			resultT = (yIntersect - this.point1.y) / this.direction.y;
+			resultDistance = (yIntersect - this.point1.y) / this.direction.y;
 		} else {
 			// From above,
 			// x = ((o₁ᵧ - o₂ᵧ)(d₁ₓd₂ₓ) + (d₂ᵧd₁ₓ)(o₂ₓ) - (d₁ᵧd₂ₓ)(o₁ₓ))/(d₂ᵧd₁ₓ - d₁ᵧd₂ₓ)
@@ -210,7 +203,7 @@ export class LineSegment2 extends Parameterized2DShape {
 			const t1 = (xIntersect - this.point1.x) / this.direction.x;
 			const yIntersect = this.point1.y + this.direction.y * t1;
 			resultPoint = Vec2.of(xIntersect, yIntersect);
-			resultT = (xIntersect - this.point1.x) / this.direction.x;
+			resultDistance = (xIntersect - this.point1.x) / this.direction.x;
 		}
 
 		// Ensure the result is in this/the other segment.
@@ -230,7 +223,7 @@ export class LineSegment2 extends Parameterized2DShape {
 
 		return {
 			point: resultPoint,
-			t: resultT,
+			t: resultDistance / this.length,
 		};
 	}
 
@@ -242,7 +235,7 @@ export class LineSegment2 extends Parameterized2DShape {
 		const intersection = this.intersection(lineSegment);
 
 		if (intersection) {
-			return [intersection.t / this.length];
+			return [intersection.t];
 		}
 		return [];
 	}
