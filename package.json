@@ -42,9 +42,10 @@
 		"typescript": "5.7.2",
 		"typescript-eslint": "8.17.0"
 	},
-	"//": "jest-environment-jsdom currently uses jsdom v20. To prevent deprecation warnings in CI, use v25 instead.",
+	"// 1": "Force Lerna (and other packages) to use Tar v7.5.6 to avoid vulnerability warnings.",
+	"// 2": "Tar v7 has only a few breaking changes that *shouldn't* affect how it's used by Lerna. See https://github.com/lerna/lerna/issues/4254 and GHSA-8qq5-rm4j-mr97.",
 	"resolutions": {
-		"jsdom": "25.0.1"
+		"tar": "7.5.6"
 	},
 	"packageManager": "yarn@4.6.0"
 }
