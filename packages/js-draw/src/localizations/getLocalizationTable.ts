@@ -4,11 +4,13 @@ import de from './de';
 import en from './en';
 import es from './es';
 import sk from './sk';
+import hr from './hr';
 
 export const allLocales: Record<string, EditorLocalization> = {
 	de,
 	en,
 	es,
+	hr,
 	sk,
 	zh,
 };
