@@ -71,8 +71,7 @@ export default abstract class BaseTool implements InputEventListener {
 			case InputEvtType.PointerDownEvt:
 				return this.onPointerDown(event);
 			case InputEvtType.PointerMoveEvt:
-				this.onPointerMove(event);
-				break;
+				return this.onPointerMove(event) ?? true;
 			case InputEvtType.PointerUpEvt:
 				return this.onPointerUp(event) ?? false;
 			case InputEvtType.GestureCancelEvt:
@@ -112,7 +111,7 @@ export default abstract class BaseTool implements InputEventListener {
 	public onPointerDown(_event: PointerDownEvt): boolean {
 		return false;
 	}
-	public onPointerMove(_event: PointerMoveEvt) {}
+	public onPointerMove(_event: PointerMoveEvt): boolean | void {}
 
 	/**
 	 * Returns true iff there are additional pointers down and the tool should
