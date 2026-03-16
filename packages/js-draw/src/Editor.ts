@@ -1341,7 +1341,6 @@ export class Editor {
 	 * (e.g. a selection box).
 	 */
 	public createHTMLOverlay(overlay: HTMLElement) {
-		// TODO(v2): Fix conflict with toolbars that have been added to the editor.
 		overlay.classList.add('overlay', 'js-draw-editor-overlay');
 		this.container.appendChild(overlay);
 
