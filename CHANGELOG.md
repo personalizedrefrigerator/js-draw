@@ -1,3 +1,13 @@
+# 1.33.0
+
+- Fix: Fix dragging the image preview in the "image" menu doesn't move the menu.
+- Changed: Decreased the maximum size of the preview in the "image" menu.
+
+# 1.32.0
+
+- Updated German translation (by [@Kachelkaiser](https://github.com/Kachelkaiser)).
+- Enable [OIDC publishing](https://github.blog/changelog/2025-07-31-npm-trusted-publishing-with-oidc-is-generally-available/).
+
 # 1.31.1
 
 - Disable [OIDC publishing](https://github.blog/changelog/2025-07-31-npm-trusted-publishing-with-oidc-is-generally-available/) for now (in afcb012e8e6e58ae25152a36574e9e29ce449a0d)

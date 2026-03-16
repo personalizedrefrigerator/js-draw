@@ -1912,7 +1912,7 @@ export class Editor {
 				'',
 				'',
 				'== js-draw ==',
-				mitLicenseAttribution('2023-2025 Henry Heino'),
+				mitLicenseAttribution('2023-2026 Henry Heino'),
 				'',
 			].join('\n'),
 			minimized: true,

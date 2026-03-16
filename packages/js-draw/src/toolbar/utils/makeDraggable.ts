@@ -44,16 +44,13 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 			return true;
 		}
 
-		// Some inputs handle dragging themselves. Don't also interpret such gestures
-		// as dragging the dropdown.
-		const undraggableElementTypes = ['INPUT', 'SELECT', 'IMG'];
+		// Some elements need to handle drag events to avoid breaking the UI:
+		const undraggableElementTypes = ['INPUT', 'SELECT'];
 
 		let hasSuitableAncestors = false;
 		let ancestor = element.parentElement;
 		while (ancestor) {
-			if (undraggableElementTypes.includes(ancestor.tagName)) {
-				break;
-			}
+			if (undraggableElementTypes.includes(ancestor.tagName)) break;
 			if (dragElements.includes(ancestor)) {
 				hasSuitableAncestors = true;
 				break;
@@ -64,6 +61,32 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		return !undraggableElementTypes.includes(element.tagName) && hasSuitableAncestors;
 	};
 
+	const canScrollAncestorVertically = (element: EventTarget | null, direction: Vec2) => {
+		if (!(element instanceof HTMLElement)) return false;
+
+		let ancestor: HTMLElement | null = element;
+		// Only consider ancestors within the draggable element: This should not
+		// consider the main document scroll element:
+		while (ancestor && !dragElements.includes(ancestor)) {
+			// Workaround: Certain content can't scroll completely to the start/end
+			// (e.g. paged lists). To work around this, define a small, non-zero
+			// tolerance. Within this tolerance, the element is considered "completely
+			// scrolled":
+			const epsilon = 10;
+
+			if (ancestor.scrollHeight > ancestor.clientHeight + epsilon) {
+				const canScrollUp = ancestor.scrollTop > epsilon;
+				const canScrollDown =
+					ancestor.scrollTop + ancestor.clientHeight < ancestor.scrollHeight - epsilon;
+
+				if (direction.y < 0 && canScrollDown) return true;
+				if (direction.y > 0 && canScrollUp) return true;
+			}
+			ancestor = ancestor.parentElement;
+		}
+		return false;
+	};
+
 	const removeEventListenerCallbacks: Array<() => void> = [];
 
 	type PointerListenerType =
@@ -72,10 +95,14 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		| 'pointerup'
 		| 'pointerleave'
 		| 'pointercancel';
-	type PointerEventListener = (event: PointerEvent) => void;
-	const addEventListener = (
-		listenerType: PointerListenerType,
-		listener: PointerEventListener,
+	type TouchListenerType = 'touchstart' | 'touchmove';
+	type ListenerType = PointerListenerType | TouchListenerType;
+	type EventType = {
+		[key in ListenerType]: key extends PointerListenerType ? PointerEvent : TouchEvent;
+	};
+	const addEventListener = <T extends ListenerType>(
+		listenerType: T,
+		listener: (event: EventType[T]) => void,
 		options?: AddEventListenerOptions,
 	) => {
 		dragElement.addEventListener(listenerType, listener, options);
@@ -90,8 +117,8 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 	// Returns whether the current (or if no current, **the last**) gesture is roughly a click.
 	// Because this can be called **after** a gesture has just ended, it should not require
 	// the gesture to be in progress.
-	const isRoughlyClick = () => {
-		return Math.hypot(lastX - startX, lastY - startY) < clickThreshold;
+	const isRoughlyClick = (currentX: number, currentY: number) => {
+		return Math.hypot(currentX - startX, currentY - startY) < clickThreshold;
 	};
 
 	let startedDragging = false;
@@ -131,7 +158,7 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 		}
 
 		options.onDragEnd({
-			roughlyClick: isRoughlyClick(),
+			roughlyClick: isRoughlyClick(lastX, lastY),
 			endTimestamp: performance.now(),
 			displacement: Vec2.of(lastX - startX, lastY - startY),
 		});
@@ -152,22 +179,22 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 			return undefined;
 		}
 
-		// Only capture after motion -- capturing early prevents click events in Chrome.
-		if (capturedPointerId === null && !isRoughlyClick()) {
-			dragElement.setPointerCapture(event.pointerId);
-			capturedPointerId = event.pointerId;
-		}
-
 		const x = event.clientX;
 		const y = event.clientY;
+		const isClick = isRoughlyClick(x, y);
 		const dx = x - lastX;
 		const dy = y - lastY;
 
-		const isClick =
-			Math.abs(x - startX) <= clickThreshold && Math.abs(y - startY) <= clickThreshold;
+		const deltaToStart = Vec2.of(x - startX, y - startY);
+		const isScroll = () => canScrollAncestorVertically(event.target, deltaToStart);
 
-		if (!isClick || startedDragging) {
-			options.onDrag(dx, dy, Vec2.of(x - startX, y - startY));
+		if (startedDragging || (!isClick && !isScroll())) {
+			options.onDrag(dx, dy, deltaToStart);
+
+			if (capturedPointerId === null) {
+				dragElement.setPointerCapture(event.pointerId);
+				capturedPointerId = event.pointerId;
+			}
 
 			lastX = x;
 			lastY = y;
@@ -186,6 +213,14 @@ const makeDraggable = (dragElement: HTMLElement, options: DraggableOptions): Dra
 
 	addEventListener('pointerup', onGestureEnd);
 	addEventListener('pointercancel', onGestureEnd);
+
+	// In Chrome (as of Dec 2025), .preventDefault needs to be called from ontouchmove
+	// to allow the drag event to continue to be handled.
+	addEventListener('touchmove', (event) => {
+		if (startedDragging && event.touches.length > 0) {
+			event.preventDefault();
+		}
+	});
 
 	return {
 		removeListeners: () => {
