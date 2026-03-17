@@ -300,10 +300,6 @@ export default class EdgeToolbar extends AbstractToolbar {
 		// Unused for this toolbar.
 	}
 
-	public override addUndoRedoButtons(): void {
-		super.addUndoRedoButtons(false);
-	}
-
 	public override addDefaults(): void {
 		this.addDefaultActionButtons();
 		this.addDefaultToolWidgets();
