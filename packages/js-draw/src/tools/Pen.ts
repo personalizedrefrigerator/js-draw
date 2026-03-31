@@ -17,10 +17,17 @@ import StationaryPenDetector, {
 import AbstractComponent from '../components/AbstractComponent';
 import AbstractRenderer from '../rendering/renderers/AbstractRenderer';
 
+export enum ThicknessMode {
+	/** Relative to the viewport */
+	Relative = 'relative',
+	Absolute = 'absolute',
+}
+
 export interface PenStyle {
 	readonly color: Color4;
 	readonly thickness: number;
 	readonly factory: ComponentBuilderFactory;
+	readonly thicknessMode?: ThicknessMode;
 }
 
 /**
@@ -57,6 +64,7 @@ export default class Pen extends BaseTool {
 			factory: makeFreehandLineBuilder,
 			color: Color4.blue,
 			thickness: 4,
+			thicknessMode: ThicknessMode.Relative,
 			...style,
 		});
 
@@ -70,7 +78,11 @@ export default class Pen extends BaseTool {
 
 	private getPressureMultiplier() {
 		const thickness = this.style.thickness;
-		return (1 / this.editor.viewport.getScaleFactor()) * thickness;
+		if (this.style.thicknessMode === ThicknessMode.Absolute) {
+			return thickness;
+		} else {
+			return (1 / this.editor.viewport.getScaleFactor()) * thickness;
+		}
 	}
 
 	// Converts a `pointer` to a `StrokeDataPoint`.
