@@ -39,7 +39,8 @@ export enum PanZoomMode {
 	RotationLocked = 0x1 << 5,
 }
 
-type ScrollByCallback = (delta: Vec2) => void;
+// Returns true to cancel
+type ScrollByCallback = (delta: Vec2) => boolean;
 
 class InertialScroller {
 	private running: boolean = false;
@@ -73,7 +74,9 @@ class InertialScroller {
 			const dt = (nowTime - lastTime) / 1000;
 
 			this.currentVelocity = this.currentVelocity.times(Math.pow(1 / 8, dt));
-			this.scrollBy(this.currentVelocity.times(dt));
+			if (!this.scrollBy(this.currentVelocity.times(dt))) {
+				this.stop();
+			}
 
 			await untilNextAnimationFrame();
 			lastTime = nowTime;
@@ -388,14 +391,13 @@ export default class PanZoom extends BaseTool {
 	private handleOneFingerMove(pointer: Pointer) {
 		const delta = this.getCenterDelta(pointer.screenPos);
 		const transformUpdate = Mat33.translation(delta);
-		this.transform = Viewport.transformBy(this.transform!.transform.rightMul(transformUpdate));
 		this.updateVelocity(pointer.screenPos);
 		this.lastScreenCenter = pointer.screenPos;
 
 		return transformUpdate;
 	}
 
-	public override onPointerMove({ allPointers }: PointerEvt): void {
+	public override onPointerMove({ allPointers }: PointerEvt): boolean {
 		this.transform ??= Viewport.transformBy(Mat33.identity);
 
 		let transformUpdate = Mat33.identity;
@@ -404,9 +406,11 @@ export default class PanZoom extends BaseTool {
 		} else if (allPointers.length === 1) {
 			transformUpdate = this.handleOneFingerMove(allPointers[0]);
 		}
-		Viewport.transformBy(transformUpdate).apply(this.editor);
 
+		const result = this.updateTransform(transformUpdate);
 		this.lastTimestamp = performance.now();
+
+		return result;
 	}
 
 	public override onPointerUp(event: PointerEvt): void {
@@ -453,7 +457,7 @@ export default class PanZoom extends BaseTool {
 				this.velocity,
 				(scrollDelta: Vec2) => {
 					if (!this.transform) {
-						return;
+						return false;
 					}
 
 					const canvasDelta =
@@ -465,6 +469,8 @@ export default class PanZoom extends BaseTool {
 						this.transform.transform.rightMul(Mat33.translation(canvasDelta)),
 					);
 					this.transform.apply(this.editor);
+
+					return true;
 				},
 				onComplete,
 			);
@@ -483,21 +489,35 @@ export default class PanZoom extends BaseTool {
 
 	// Applies [transformUpdate] to the editor. This stacks on top of the
 	// current transformation, if it exists.
-	private updateTransform(transformUpdate: Mat33, announce: boolean = false) {
-		let newTransform = transformUpdate;
-		if (this.transform) {
-			newTransform = this.transform.transform.rightMul(transformUpdate);
+	//
+	// Returns true on success.
+	private updateTransform(
+		transformUpdate: Mat33,
+		{ announce = false }: { announce?: boolean } = {},
+	) {
+		if (!this.editor.getCurrentSettings().allowOverscroll) {
+			const newVisibleRect = this.editor.viewport.visibleRect.transformedBoundingBox(
+				transformUpdate.inverse(),
+			);
+			const imageRect = this.editor.getImportExportRect();
+
+			if (!newVisibleRect.intersects(imageRect)) {
+				return false;
+			}
 		}
 
-		this.transform?.unapply(this.editor);
-		this.transform = Viewport.transformBy(newTransform);
-		this.transform.apply(this.editor);
+		Viewport.transformBy(transformUpdate).apply(this.editor);
+		this.transform = Viewport.transformBy(
+			(this.transform?.transform ?? Mat33.identity).rightMul(transformUpdate),
+		);
 
 		if (announce) {
 			this.editor.announceForAccessibility(
 				this.transform.description(this.editor, this.editor.localization),
 			);
 		}
+
+		return true;
 	}
 
 	/**
@@ -506,8 +526,9 @@ export default class PanZoom extends BaseTool {
 	 * events, but not for `onpointer` events.
 	 */
 	private applyAndFinalizeTransform(transformUpdate: Mat33) {
-		this.updateTransform(transformUpdate, true);
+		const result = this.updateTransform(transformUpdate, { announce: true });
 		this.transform = null;
+		return result;
 	}
 
 	public override onWheel({ delta, screenPos }: WheelEvt): boolean {
@@ -533,9 +554,7 @@ export default class PanZoom extends BaseTool {
 			Math.max(0.4, Math.min(Math.pow(pinchZoomScaleFactor, -pinchAmount), 4)),
 			canvasPos,
 		).rightMul(Mat33.translation(translation));
-		this.applyAndFinalizeTransform(transformUpdate);
-
-		return true;
+		return this.applyAndFinalizeTransform(transformUpdate);
 	}
 
 	public override onKeyPress(event: KeyPressEvent): boolean {
@@ -606,7 +625,7 @@ export default class PanZoom extends BaseTool {
 			.rightMul(Mat33.translation(translation));
 		this.applyAndFinalizeTransform(transformUpdate);
 
-		return true;
+		return this.updateTransform(transformUpdate, { announce: true });
 	}
 
 	private isRotationLocked(): boolean {

@@ -74,6 +74,8 @@ export interface EditorSettings {
 	/** Maximum zoom fraction (e.g. 2 → 200% zoom). Defaults to $1 \cdot 10^{12}$. */
 	maxZoom: number;
 
+	allowOverscroll: boolean;
+
 	/**
 	 * Overrides for keyboard shortcuts. For example,
 	 * ```ts
@@ -329,6 +331,8 @@ export class Editor {
 	 *   // 2e-10 and 1e12 are the default values for minimum/maximum zoom.
 	 *   minZoom: 2e-10,
 	 *   maxZoom: 1e12,
+	 *
+	 *   allowOverscroll: false,
 	 * });
 	 *
 	 * // Add the default toolbar
@@ -360,6 +364,7 @@ export class Editor {
 			localization: this.localization,
 			minZoom: settings.minZoom ?? 2e-10,
 			maxZoom: settings.maxZoom ?? 1e12,
+			allowOverscroll: settings.allowOverscroll ?? true,
 			keyboardShortcutOverrides: settings.keyboardShortcutOverrides ?? {},
 			iconProvider: settings.iconProvider ?? new IconProvider(),
 			notices: settings.notices ?? [],
@@ -447,9 +452,24 @@ export class Editor {
 		this.queueRerender();
 		this.hideLoadingWarning();
 
-		// Enforce zoom limits.
+		// Enforce zoom limits and overscroll
 		this.notifier.on(EditorEventType.ViewportChanged, (evt) => {
 			if (evt.kind !== EditorEventType.ViewportChanged) return;
+
+			if (!this.settings.allowOverscroll) {
+				const imageRect = this.getImportExportRect();
+				const visibleRect = this.viewport.visibleRect;
+				if (!visibleRect.intersects(imageRect)) {
+					const visibleRectEdgePoint = visibleRect.getClosestPointOnBoundaryTo(imageRect.center);
+					const imageRectEdgePoint = imageRect.getClosestPointOnBoundaryTo(visibleRectEdgePoint);
+					const canvasDelta = visibleRectEdgePoint.minus(imageRectEdgePoint);
+
+					const smallValue = 1e-10;
+					if (canvasDelta.length() > smallValue) {
+						this.viewport.resetTransform(evt.newTransform.rightMul(Mat33.translation(canvasDelta)));
+					}
+				}
+			}
 
 			const getZoom = (mat: Mat33) => mat.transformVec3(Vec2.unitX).length();
 
@@ -780,6 +800,9 @@ export class Editor {
 					})
 				) {
 					evt.preventDefault();
+				} else {
+					this.releasePointerCapture(eventTarget, evt);
+					delete this.pointers[pointer.id];
 				}
 			}
 			return true;

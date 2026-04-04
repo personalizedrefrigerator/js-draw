@@ -280,8 +280,11 @@ export default class ToolController implements InputEventListener {
 			handled = true;
 		} else if (event.kind === InputEvtType.PointerMoveEvt) {
 			if (this.activeTool !== null) {
-				this.activeTool.onEvent(event);
-				handled = true;
+				if (this.activeTool.onEvent(event) !== false) {
+					handled = true;
+				} else {
+					this.activeTool?.onEvent({ ...event, kind: InputEvtType.PointerUpEvt });
+				}
 			}
 		} else if (event.kind === InputEvtType.GestureCancelEvt) {
 			if (this.activeTool !== null) {
